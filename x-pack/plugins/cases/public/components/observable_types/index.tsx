@@ -13,8 +13,10 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 
+import { MAX_CUSTOM_OBSERVABLE_TYPES } from '../../../common/constants';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { ObservableTypesConfiguration } from '../../../common/types/domain';
@@ -89,16 +91,24 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
         ) : null}
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              isLoading={isLoading}
-              isDisabled={disabled || error}
-              size="s"
-              onClick={onAddObservableType}
-              iconType="plusInCircle"
-              data-test-subj="add-observable-type"
-            >
-              {i18n.ADD_OBSERVABLE_TYPE}
-            </EuiButtonEmpty>
+            {observableTypes.length < MAX_CUSTOM_OBSERVABLE_TYPES ? (
+              <EuiButtonEmpty
+                isLoading={isLoading}
+                isDisabled={disabled || error}
+                size="s"
+                onClick={onAddObservableType}
+                iconType="plusInCircle"
+                data-test-subj="add-observable-type"
+              >
+                {i18n.ADD_OBSERVABLE_TYPE}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText>{i18n.MAX_OBSERVABLE_TYPES_LIMIT(MAX_CUSTOM_OBSERVABLE_TYPES)}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

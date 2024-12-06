@@ -13,6 +13,8 @@ import { createAppMockRenderer, noCasesPermissions } from '../../common/mock';
 import type { ObservableTypesProps } from '.';
 import { ObservableTypes } from '.';
 import { observableTypesMock } from '../../containers/mock';
+import * as i18n from './translations';
+import { MAX_CUSTOM_OBSERVABLE_TYPES } from '../../../common/constants';
 
 describe('ObservableTypes', () => {
   let appMock: AppMockRenderer;
@@ -42,6 +44,24 @@ describe('ObservableTypes', () => {
       appMock.render(<ObservableTypes {...{ ...props, observableTypes: observableTypesMock }} />);
       expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
       expect(await screen.findByTestId('observable-types-list')).toBeInTheDocument();
+    });
+
+    it('shows error when custom fields reaches the limit', async () => {
+      const generatedMockCustomFields = [];
+
+      for (let i = 0; i < 11; i++) {
+        generatedMockCustomFields.push({
+          key: `field_key_${i + 1}`,
+          label: `My custom label ${i + 1}`,
+        });
+      }
+
+      const observableTypes = [...generatedMockCustomFields];
+
+      appMock.render(<ObservableTypes {...{ ...props, observableTypes }} />);
+
+      expect(await screen.findByText(i18n.MAX_OBSERVABLE_TYPES_LIMIT(MAX_CUSTOM_OBSERVABLE_TYPES)));
+      expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
     });
   });
 

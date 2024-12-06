@@ -51,3 +51,9 @@ export const DELETE_OBSERVABLE_TYPE_DESCRIPTION = i18n.translate(
 export const DELETE = i18n.translate('xpack.cases.observableTypes.options.Delete', {
   defaultMessage: 'Delete',
 });
+
+export const MAX_OBSERVABLE_TYPES_LIMIT = (maxObservableTypesLimit: number) =>
+  i18n.translate('xpack.cases.observableTypes.maxObservableTypesLimit', {
+    values: { maxObservableTypesLimit },
+    defaultMessage: 'Maximum number of {maxObservableTypesLimit} observable types reached.',
+  });
