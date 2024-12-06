@@ -31,7 +31,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -86,18 +86,12 @@ export function LensEditConfigurationFlyout({
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
-  const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
-  const [query, setQuery] = useState<AggregateQuery | Query>(
-    queryWithVariables ? { esql: queryWithVariables } : attributes.state.query
-  );
+  // const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
+  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
 
-  const [esqlVariables, setEsqlVariables] = useState<
-    Array<{
-      key: string;
-      value: string;
-      type: EsqlControlType;
-    }>
-  >(esqlVariablesService.getVariables());
+  const [esqlVariables, setEsqlVariables] = useState<ESQLControlVariable[]>(
+    esqlVariablesService.getVariables()
+  );
 
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
@@ -377,6 +371,16 @@ export function LensEditConfigurationFlyout({
     ]
   );
 
+  useEffect(() => {
+    // runs the query from the variables service when the flyout is opened after the creation of the control
+    const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
+    if (queryWithVariables) {
+      setQuery({ esql: queryWithVariables });
+      runQuery({ esql: queryWithVariables });
+      esqlVariablesService.setEsqlQueryWithVariables('');
+    }
+  }, [runQuery]);
+
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
       return false;
@@ -541,7 +545,6 @@ export function LensEditConfigurationFlyout({
                     setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }
-                  esqlVariablesService.setEsqlQueryWithVariables('');
                 }}
                 isDisabled={false}
                 allowQueryCancellation
