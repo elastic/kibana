@@ -116,11 +116,11 @@ Compare the data in your panels side-by-side, organize panels by priority, resiz
 
 In the toolbar, click *Edit*, then use the following options:
 
-* To move, click and hold the panel header, then drag to the new location.
+* To move, hover over the panel, click and hold the move control, then drag to the new location.
 
 * To resize, click the resize control, then drag to the new dimensions.
 
-* To maximize to full screen, open the panel menu, then click *More > Maximize*.
+* To maximize to full screen, open the panel menu and click *Maximize*.
 +
 TIP: If you <<share-the-dashboard,share>> a dashboard while viewing a full screen panel, the generated link will directly open the same panel in full screen mode.
 
@@ -139,9 +139,6 @@ Duplicated panels appear next to the original panel, and move the other panels t
 . In the toolbar, click *Edit*.
 
 . Open the panel menu, then select *Duplicate*.
-+
-[role="screenshot"]
-image::images/duplicate-panels-8.15.0.png[Duplicate a panel, width=50%] 
 
 [float]
 [[copy-to-dashboard]]
@@ -149,12 +146,12 @@ image::images/duplicate-panels-8.15.0.png[Duplicate a panel, width=50%]
 
 Copy panels from one dashboard to another dashboard.
 
-. Open the panel menu, then select *More > Copy to dashboard*.
+. Open the panel menu and select *Copy to dashboard*.
 
 . On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
 +
 [role="screenshot"]
-image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt64206db263cf5514/66f49286833cffb09bebd18d/copy-to-dashboard-8.15.0.gif[Copy a panel to another dashboard, width 30%]
+image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt48304cb3cd1ee2e6/6753879eb7c4663812148d47/copy-to-dashboard-8.17.0.gif[Copy a panel to another dashboard, width 30%]
 
 [[duplicate-dashboards]]
 == Duplicate dashboards
