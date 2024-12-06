@@ -7,47 +7,46 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BASE_VS_TARGET = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.baseVsTargetLabel',
+export const BASE_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.baseVersionLabel',
   {
-    defaultMessage: 'Base vs Target',
+    defaultMessage: 'Original',
   }
 );
 
-export const BASE_VS_CURRENT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.baseVsCurrentLabel',
+export const CURRENT_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.currentVersionLabel',
   {
-    defaultMessage: 'Base vs Current',
+    defaultMessage: 'Current',
   }
 );
 
-export const BASE_VS_FINAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.baseVsFinalLabel',
+export const TARGET_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.targetVersionLabel',
   {
-    defaultMessage: 'Base vs Final',
+    defaultMessage: 'Elastic update',
   }
 );
 
-export const CURRENT_VS_TARGET = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.currentVsTargetLabel',
+export const FINAL_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.finalVersionLabel',
   {
-    defaultMessage: 'Current vs Target',
+    defaultMessage: 'Final',
   }
 );
 
-export const CURRENT_VS_FINAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.currentVsFinalLabel',
-  {
-    defaultMessage: 'Current vs Final',
-  }
-);
-
-export const TARGET_VS_FINAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.targetVsFinalLabel',
-  {
-    defaultMessage: 'Target vs Final',
-  }
-);
+export const VERSION1_VS_VERSION2 = (version1: string, version2: string): string => {
+  return i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.version1VsVersion2',
+    {
+      defaultMessage: '{version1} vs {version2}',
+      values: {
+        version1,
+        version2,
+      },
+    }
+  );
+};
 
 export const VERSION_PICKER_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versionsPicker.ariaLabel',
