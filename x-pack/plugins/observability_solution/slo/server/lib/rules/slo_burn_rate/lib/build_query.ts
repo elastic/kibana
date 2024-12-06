@@ -64,6 +64,9 @@ function buildWindowAgg(
   const isTimesliceBudgetingMethod = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod);
 
   const aggs = isTimesliceBudgetingMethod ? TIMESLICE_AGGS : OCCURRENCE_AGGS;
+
+  // For timeslice budgeting method, we always compute the burn rate based on the observed bad slices, e.g. total observed  - good observed = bad slices observed,
+  // And we compare this to the expected slices in the whole window duration
   const burnRateAgg = isTimesliceBudgetingMethod
     ? {
         bucket_script: {
