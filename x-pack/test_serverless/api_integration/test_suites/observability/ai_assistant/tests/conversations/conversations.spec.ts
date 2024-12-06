@@ -90,6 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let createResponse: Awaited<
         SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
+
       before(async () => {
         createResponse = await observabilityAIAssistantAPIClient
           .slsEditor({
@@ -126,6 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           })
           .expect(404);
       });
+
       it('returns the conversation', function () {
         // delete user from response to avoid comparing it as it will be different in MKI
         delete createResponse.body.user;
