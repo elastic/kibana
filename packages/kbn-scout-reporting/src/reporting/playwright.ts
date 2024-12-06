@@ -63,7 +63,8 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   printsToStdio(): boolean {
-    return true;
+    // Don't take over console output
+    return false;
   }
 
   onBegin(config: FullConfig, suite: Suite) {
