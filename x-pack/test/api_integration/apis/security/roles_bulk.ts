@@ -154,7 +154,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_discover_v2.all', 'feature_ml.all'],
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
                 resources: ['space:marketing', 'space:sales'],
               },
             ],
@@ -378,7 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_dev_tools.all'],
+                privileges: ['feature_dashboard_v2.read', 'feature_dev_tools.all'],
                 resources: ['*'],
               },
               {
@@ -403,7 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_dev_tools.all'],
+                privileges: ['feature_dashboard_v2.read', 'feature_dev_tools.all'],
                 resources: ['*'],
               },
               {

@@ -71,7 +71,7 @@ viewer:
         - feature_builtInAlerts.read
         - feature_osquery.read
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -151,7 +151,7 @@ editor:
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -202,7 +202,7 @@ t1_analyst:
         - feature_osquery.read
         - feature_osquery.run_saved_queries
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -258,7 +258,7 @@ t2_analyst:
         - feature_osquery.read
         - feature_osquery.run_saved_queries
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -328,7 +328,7 @@ t3_analyst:
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -386,7 +386,7 @@ threat_intelligence_analyst:
         - feature_builtInAlerts.read
         - feature_osquery.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -455,7 +455,7 @@ rule_author:
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -530,7 +530,7 @@ soc_manager:
         - feature_osquery.all
         - feature_indexPatterns.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -590,7 +590,7 @@ detections_admin:
         - feature_builtInAlerts.all
         - feature_dev_tools.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -653,7 +653,7 @@ platform_engineer:
         - feature_osquery.all
         - feature_indexPatterns.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -726,7 +726,7 @@ endpoint_operations_analyst:
         - feature_fleet.all
         - feature_fleetv2.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
@@ -794,7 +794,7 @@ endpoint_policy_manager:
         - feature_fleet.all
         - feature_fleetv2.all
         - feature_discover_v2.all
-        - feature_dashboard.all
+        - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
         - feature_maps.all
