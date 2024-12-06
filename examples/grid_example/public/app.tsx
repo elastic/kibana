@@ -27,10 +27,6 @@ import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
-import {
-  SearchApi,
-  SearchSerializedState,
-} from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
@@ -90,11 +86,11 @@ export const GridExample = ({
   }, []);
 
   const renderPanelContents = useCallback(
-    (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
+    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
       const currentPanels = mockDashboardApi.panels$.getValue();
 
       return (
-        <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+        <ReactEmbeddableRenderer
           key={id}
           maybeId={id}
           type={currentPanels[id].type}

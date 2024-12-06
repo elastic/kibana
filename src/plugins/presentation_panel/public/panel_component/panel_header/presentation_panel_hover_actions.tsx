@@ -446,7 +446,7 @@ export const PresentationPanelHoverActions = ({
   );
 
   const dragHandle = useMemo(
-    /** Memoize the drag handle to avoid calling `setDragHandle` unnecessarily */
+    // memoize the drag handle to avoid calling `setDragHandle` unnecessarily
     () => (
       <button
         ref={(ref) => {

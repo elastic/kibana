@@ -42,7 +42,6 @@ export const useMockDashboardApi = ({
         };
       },
       children$: new BehaviorSubject({}),
-
       timeRange$: new BehaviorSubject<TimeRange>({
         from: 'now-24h',
         to: 'now',
@@ -50,7 +49,6 @@ export const useMockDashboardApi = ({
       viewMode: new BehaviorSubject('edit'),
       panels$,
       rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
-
       expandedPanelId: expandedPanelId$,
       expandPanel: (id: string) => {
         if (expandedPanelId$.getValue()) {
@@ -59,18 +57,21 @@ export const useMockDashboardApi = ({
           expandedPanelId$.next(id);
         }
       },
-
       removePanel: (id: string) => {
         const panels = { ...mockDashboardApi.panels$.getValue() };
         delete panels[id]; // the grid layout component will handle compacting, if necessary
         mockDashboardApi.panels$.next(panels);
       },
-      replacePanel: (oldId: string, newId: string) => {
+      replacePanel: (id: string, newPanel: PanelPackage) => {
         const currentPanels = mockDashboardApi.panels$.getValue();
         const otherPanels = { ...currentPanels };
-        const oldPanel = currentPanels[oldId];
-        delete otherPanels[oldId];
-        otherPanels[newId] = { id: newId, gridData: { ...oldPanel.gridData, i: newId } };
+        const oldPanel = currentPanels[id];
+        delete otherPanels[id];
+        const newId = v4();
+        otherPanels[newId] = {
+          ...oldPanel,
+          explicitInput: { ...newPanel.initialState, id: newId },
+        };
         mockDashboardApi.panels$.next(otherPanels);
       },
       addNewPanel: async (panelPackage: PanelPackage) => {

@@ -48,8 +48,8 @@ export const PresentationPanelHeader = <
   );
 
   const memoizedSetDragHandle = useCallback(
+    // memoize the ref callback so that we don't call `setDragHandle` on every render
     (ref: HTMLHeadingElement | null) => {
-      // memoize the ref callback so that we don't call `setDragHandle` on every render
       setDragHandle('panelHeader', ref);
     },
     [setDragHandle]

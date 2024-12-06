@@ -244,7 +244,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           });
         }
       },
-      [gridLayoutStateManager, rowIndex, setInteractionEvent]
+      [gridLayoutStateManager, rowIndex, syncPanelIds, setInteractionEvent]
     );
 
     /**
