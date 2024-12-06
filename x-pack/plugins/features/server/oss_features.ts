@@ -489,7 +489,7 @@ const getBaseDiscoverFeature = ({
           },
         ],
       },
-      ...(includeReporting ? [reportingFeatures.discoverReporting] : []),
+      ...(includeReporting ? [reportingFeatures.getDiscoverReporting(version)] : []),
     ],
   };
 };
@@ -588,7 +588,7 @@ const getBaseVisualizeFeature = ({
           },
         ],
       },
-      ...(includeReporting ? [reportingFeatures.visualizeReporting] : []),
+      ...(includeReporting ? [reportingFeatures.getVisualizeReporting(version)] : []),
     ],
   };
 };
@@ -741,7 +741,7 @@ const getBaseDashboardFeature = ({
           },
         ],
       },
-      ...(includeReporting ? [reportingFeatures.dashboardReporting] : []),
+      ...(includeReporting ? [reportingFeatures.getDashboardReporting(version)] : []),
     ],
   };
 };
@@ -754,11 +754,11 @@ const reportingPrivilegeGroupName = i18n.translate(
 );
 
 const reportingFeatures: {
-  discoverReporting: SubFeatureConfig;
-  dashboardReporting: SubFeatureConfig;
-  visualizeReporting: SubFeatureConfig;
+  getDiscoverReporting: (version: 'v1' | 'v2') => SubFeatureConfig;
+  getDashboardReporting: (version: 'v1' | 'v2') => SubFeatureConfig;
+  getVisualizeReporting: (version: 'v1' | 'v2') => SubFeatureConfig;
 } = {
-  discoverReporting: {
+  getDiscoverReporting: (version) => ({
     name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
@@ -774,12 +774,15 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateCsv'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'discover_v2', privileges: ['generate_report'] }],
+            }),
           },
         ],
       },
     ],
-  },
-  dashboardReporting: {
+  }),
+  getDashboardReporting: (version) => ({
     name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
@@ -799,6 +802,9 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateScreenshot'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'dashboard_v2', privileges: ['generate_report'] }],
+            }),
           },
           {
             id: 'download_csv_report',
@@ -810,12 +816,15 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['downloadCsv'],
             ui: ['downloadCsv'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'dashboard_v2', privileges: ['download_csv_report'] }],
+            }),
           },
         ],
       },
     ],
-  },
-  visualizeReporting: {
+  }),
+  getVisualizeReporting: (version) => ({
     name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
@@ -835,9 +844,12 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateScreenshot'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'visualize_v2', privileges: ['generate_report'] }],
+            }),
           },
         ],
       },
     ],
-  },
+  }),
 };
