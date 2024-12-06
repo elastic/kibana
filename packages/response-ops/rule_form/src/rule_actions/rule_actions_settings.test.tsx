@@ -39,7 +39,7 @@ jest.mock('./rule_actions_notify_when', () => ({
           })
         }
       >
-        {frequency ? frequency.notifyWhen : `RuleActionsNotifyWhenOnChange`}
+        {frequency?.notifyWhen}
       </button>
       <button onClick={onUseDefaultMessage}>RuleActionsNotifyWhenOnUseDefaultMessage</button>
     </div>
