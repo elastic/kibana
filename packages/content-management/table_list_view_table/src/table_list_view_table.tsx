@@ -579,7 +579,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         appendRows: contentInsightsServices && (
           // have to "REWRAP" in the provider here because it will be rendered in a different context
           <ContentInsightsProvider {...contentInsightsServices}>
-            <ContentEditorActivityRow item={item} />
+            <ContentEditorActivityRow item={item} entityNamePlural={entityNamePlural} />
           </ContentInsightsProvider>
         ),
       });
@@ -592,6 +592,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableItemsRowActions,
       fetchItems,
       contentInsightsServices,
+      entityNamePlural,
     ]
   );
 

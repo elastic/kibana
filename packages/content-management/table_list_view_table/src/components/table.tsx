@@ -341,6 +341,7 @@ export function Table<T extends UserContentCommonSchema>({
       selectedUsers={tableFilter.createdBy}
       showNoUserOption={showNoUserOption}
       isKibanaVersioningEnabled={isKibanaVersioningEnabled}
+      entityNamePlural={entityNamePlural}
     >
       <TagFilterContextProvider
         isPopoverOpen={isPopoverOpen}

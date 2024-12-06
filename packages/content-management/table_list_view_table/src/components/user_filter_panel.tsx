@@ -22,6 +22,7 @@ interface Context {
   allUsers: string[];
   showNoUserOption: boolean;
   isKibanaVersioningEnabled: boolean;
+  entityNamePlural: string;
 }
 
 const UserFilterContext = React.createContext<Context | null>(null);
@@ -45,8 +46,13 @@ export const UserFilterPanel: FC<{}> = () => {
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
 
-  const { onSelectedUsersChange, selectedUsers, showNoUserOption, isKibanaVersioningEnabled } =
-    componentContext;
+  const {
+    onSelectedUsersChange,
+    selectedUsers,
+    showNoUserOption,
+    isKibanaVersioningEnabled,
+    entityNamePlural,
+  } = componentContext;
 
   const [isPopoverOpen, setPopoverOpen] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -128,7 +134,12 @@ export const UserFilterPanel: FC<{}> = () => {
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have creators"
               />
-              {<NoCreatorTip includeVersionTip={isKibanaVersioningEnabled} />}
+              {
+                <NoCreatorTip
+                  includeVersionTip={isKibanaVersioningEnabled}
+                  entityNamePlural={entityNamePlural}
+                />
+              }
             </p>
           ),
           nullOptionLabel: i18n.translate(
@@ -138,7 +149,12 @@ export const UserFilterPanel: FC<{}> = () => {
             }
           ),
           nullOptionProps: {
-            append: <NoCreatorTip includeVersionTip={isKibanaVersioningEnabled} />,
+            append: (
+              <NoCreatorTip
+                includeVersionTip={isKibanaVersioningEnabled}
+                entityNamePlural={entityNamePlural}
+              />
+            ),
           },
           clearButtonLabel: (
             <FormattedMessage
