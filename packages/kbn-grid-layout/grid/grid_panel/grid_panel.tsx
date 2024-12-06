@@ -207,7 +207,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
      * Memoize panel contents to prevent unnecessary re-renders
      */
     const panelContents = useMemo(() => {
-      return renderPanelContents(panelId, dragHandleApi?.setDragHandles);
+      if (!dragHandleApi) return <></>; // delays the rendering of the panel until after dragHandleApi is defined
+      return renderPanelContents(panelId, dragHandleApi.setDragHandles);
     }, [panelId, renderPanelContents, dragHandleApi]);
 
     return (
