@@ -78,7 +78,8 @@
     "@kbn/response-ops-rule-params",
     "@kbn/core-http-server-utils",
     "@kbn/core-deprecations-common",
-    "@kbn/core-deprecations-server"
+    "@kbn/core-deprecations-server",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*"
