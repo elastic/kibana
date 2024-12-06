@@ -169,7 +169,10 @@ export const mapVariableToColumn = (
       : null;
 
     if (lastCommand) {
-      usedVariablesInQuery = Walker.params(lastCommand).map((param) => param);
+      const params = Walker.params(lastCommand).map((param) => param);
+      if (params.length) {
+        usedVariablesInQuery = params;
+      }
     }
   }
 

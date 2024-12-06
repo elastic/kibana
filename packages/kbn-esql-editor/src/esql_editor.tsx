@@ -230,6 +230,14 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [code, query.esql]);
 
+  useEffect(() => {
+    if (supportsVariables) {
+      esqlService.enable();
+    } else {
+      esqlService.disable();
+    }
+  }, [esqlService, supportsVariables]);
+
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
   }, []);
@@ -456,7 +464,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         return esqlService.getVariablesByType(type);
       },
       canSuggestVariables: () => {
-        return supportsVariables ?? false;
+        return esqlService.isEnabled;
       },
     };
     return callbacks;
@@ -474,7 +482,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     esqlService,
-    supportsVariables,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {

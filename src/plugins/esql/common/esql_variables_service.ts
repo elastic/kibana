@@ -14,11 +14,13 @@ export class EsqlVariablesService {
   esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
   esqlQueryWithVariables: string;
   esqlVariables: ESQLControlVariable[] = [];
+  isEnabled: boolean;
 
   constructor() {
     this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
     this.esqlVariables = [];
     this.esqlQueryWithVariables = '';
+    this.isEnabled = false;
   }
 
   setEsqlQueryWithVariables(esqlQueryWithVariables: string) {
@@ -27,6 +29,14 @@ export class EsqlVariablesService {
 
   getEsqlQueryWithVariables(): string {
     return this.esqlQueryWithVariables;
+  }
+
+  enable() {
+    this.isEnabled = true;
+  }
+
+  disable() {
+    this.isEnabled = false;
   }
 
   addVariable(variable: ESQLControlVariable): void {

@@ -182,6 +182,7 @@ export async function suggest(
     resourceRetriever
   );
   const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+  // console.log(supportsVariables);
   const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
@@ -287,6 +288,7 @@ export function getFieldsByTypeRetriever(
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   const getVariablesByType = resourceRetriever?.getVariablesByType;
   const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+  // console.log(supportsVariables);
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
