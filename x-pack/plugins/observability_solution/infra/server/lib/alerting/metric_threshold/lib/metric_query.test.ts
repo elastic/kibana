@@ -30,6 +30,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      '@timestamp',
       100,
       true,
       void 0,
@@ -57,6 +58,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
+      '@timestamp',
       100,
       true,
       void 0,

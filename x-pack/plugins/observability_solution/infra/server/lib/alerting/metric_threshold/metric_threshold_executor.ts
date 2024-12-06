@@ -138,10 +138,9 @@ export const createMetricThresholdExecutor =
       executionId,
     });
 
-    const { alertsClient, getDataViews } = services;
+    const { alertsClient } = services;
 
     const searchSourceClient = await services.getSearchSourceClient();
-    const dataViews = await getDataViews();
 
     if (!alertsClient) {
       throw new AlertsClientError();
@@ -246,9 +245,8 @@ export const createMetricThresholdExecutor =
 
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
     const dataView = initialSearchSource.getField('index')!;
-    const { id: dataViewId, timeFieldName } = dataView;
+    const { timeFieldName } = dataView;
     const dataViewIndexPattern = dataView.getIndexPattern();
-    const dataViewName = dataView.getName();
 
     if (!dataViewIndexPattern) {
       throw new Error('No matched data view');

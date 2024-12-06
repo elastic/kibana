@@ -16,7 +16,7 @@ export type MetricsExplorerFields = Array<DataViewFieldBase & { aggregatable: bo
 interface Props {
   options: MetricsExplorerOptions;
   onChange: (groupBy: string | null | string[]) => void;
-  fields: MetricsExplorerFields;
+  fields?: MetricsExplorerFields;
 }
 
 export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
@@ -35,7 +35,7 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
     : [];
 
   const comboOptions = fields
-    .filter((f) => f.aggregatable && f.type === 'string')
+    ?.filter((f) => f.aggregatable && f.type === 'string')
     .map((f) => ({ label: f.name }));
 
   return (

@@ -60,6 +60,7 @@ describe('Expression', () => {
       groupBy: undefined,
       filterQueryText: '',
       sourceId: 'default',
+      searchConfiguration: {},
     };
     const wrapper = mountWithIntl(
       <Expressions
@@ -72,7 +73,9 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={{
           currentOptions,
+          adHocDataViewList: [],
         }}
+        onChangeMetaData={() => {}}
       />
     );
 
