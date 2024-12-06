@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { asKeyword } from './utils';
 import { EntitySourceDefinition, SortBy } from '../types';
 
 const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {
@@ -20,7 +22,7 @@ const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {
   return query;
 };
 
-const whereCommand = ({
+const dslFilter = ({
   source,
   start,
   end,
@@ -29,10 +31,7 @@ const whereCommand = ({
   start: string;
   end: string;
 }) => {
-  const filters = [
-    source.identity_fields.map((field) => `${field} IS NOT NULL`).join(' AND '),
-    ...source.filters,
-  ];
+  const filters = [...source.filters, ...source.identity_fields.map((field) => `${field}: *`)];
 
   if (source.timestamp_field) {
     filters.push(
@@ -40,13 +39,14 @@ const whereCommand = ({
     );
   }
 
-  return filters.map((filter) => `WHERE ${filter}`).join(' | ');
+  const kuery = filters.map((filter) => '(' + filter + ')').join(' AND ');
+  return toElasticsearchQuery(fromKueryExpression(kuery));
 };
 
 const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const aggs = source.metadata_fields
     .filter((field) => !source.identity_fields.some((idField) => idField === field))
-    .map((field) => `${field} = VALUES(${field})`);
+    .map((field) => `${field} = VALUES(${asKeyword(field)})`);
 
   if (source.timestamp_field) {
     aggs.push(`entity.last_seen_timestamp = MAX(${source.timestamp_field})`);
@@ -55,10 +55,15 @@ const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   if (source.display_name) {
     // ideally we want the latest value but there's no command yet
     // so we use MAX for now
-    aggs.push(`${source.display_name} = MAX(${source.display_name})`);
+    aggs.push(`${source.display_name} = MAX(${asKeyword(source.display_name)})`);
   }
 
-  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(', ')}`;
+  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.map(asKeyword).join(', ')}`;
+};
+
+const renameCommand = ({ source }: { source: EntitySourceDefinition }) => {
+  const operations = source.identity_fields.map((field) => `\`${asKeyword(field)}\` AS ${field}`);
+  return `RENAME ${operations.join(', ')}`;
 };
 
 const evalCommand = ({ source }: { source: EntitySourceDefinition }) => {
@@ -102,15 +107,16 @@ export function getEntityInstancesQuery({
   start: string;
   end: string;
   sort?: SortBy;
-}): string {
+}) {
   const commands = [
     sourceCommand({ source }),
-    whereCommand({ source, start, end }),
     statsCommand({ source }),
+    renameCommand({ source }),
     evalCommand({ source }),
     sortCommand({ source, sort }),
     `LIMIT ${limit}`,
   ];
+  const filter = dslFilter({ source, start, end });
 
-  return commands.join(' | ');
+  return { query: commands.join(' | '), filter };
 }
