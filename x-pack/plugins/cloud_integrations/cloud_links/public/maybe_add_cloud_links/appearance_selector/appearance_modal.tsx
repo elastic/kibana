@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -124,6 +125,32 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
           onChange={setColorMode}
         />
         <EuiSpacer />
+
+        {colorMode === 'space' && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultTitle',
+                {
+                  defaultMessage: 'Space default settings will be deprecated in 10.0',
+                }
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultDescr',
+                  {
+                    defaultMessage:
+                      'All users with the Space default color mode enabled will be automatically transitioned to the System color mode.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
 
         <ValuesGroup<Contrast>
           title={i18n.translate(
