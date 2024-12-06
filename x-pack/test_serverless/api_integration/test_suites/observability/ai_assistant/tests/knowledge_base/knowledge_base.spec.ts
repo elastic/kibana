@@ -13,39 +13,30 @@ import {
   deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-  const svlUserManager = getService('svlUserManager');
-  const svlCommonApi = getService('svlCommonApi');
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   // TODO: https://github.com/elastic/kibana/issues/192886
   describe.skip('Knowledge base', function () {
     this.tags(['skipMKI']);
-    let roleAuthc: RoleCredentials;
-    let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await createKnowledgeBaseModel(ml);
     });
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('returns 200 on knowledge base setup', async () => {
       const res = await observabilityAIAssistantAPIClient
-        .slsUser({
+        .slsEditor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          roleAuthc,
-          internalReqHeader,
         })
         .expect(200);
       expect(res.body).to.eql({});
@@ -56,16 +47,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         title: 'My title',
         text: 'My content',
       };
+
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
             params: { body: knowledgeBaseEntry },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
-        const res = await observabilityAIAssistantAPIClient.slsUser({
+
+        const res = await observabilityAIAssistantAPIClient.slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
           params: {
             query: {
@@ -74,8 +65,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               sortDirection: 'asc',
             },
           },
-          roleAuthc,
-          internalReqHeader,
         });
         const entry = res.body.entries[0];
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
@@ -84,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns 200 on get entries and entry exists', async () => {
         const res = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -93,8 +82,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 sortDirection: 'asc',
               },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
         const entry = res.body.entries[0];
@@ -105,18 +92,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns 200 on delete', async () => {
         const entryId = 'my-doc-id-1';
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
             params: {
               path: { entryId },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
         const res = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -125,8 +110,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 sortDirection: 'asc',
               },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
         expect(res.body.entries.filter((entry) => entry.id.startsWith('my-doc-id')).length).to.eql(
@@ -137,13 +120,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns 500 on delete not found', async () => {
         const entryId = 'my-doc-id-1';
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
             params: {
               path: { entryId },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(500);
       });
@@ -174,16 +155,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ];
       it('returns 200 on create', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
             params: { body: { entries: knowledgeBaseEntries } },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
         const res = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -192,8 +171,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 sortDirection: 'asc',
               },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
         expect(res.body.entries.filter((entry) => entry.id.startsWith('my_doc')).length).to.eql(3);
@@ -201,16 +178,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('allows sorting', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
             params: { body: { entries: knowledgeBaseEntries } },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
         const res = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -219,8 +194,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 sortDirection: 'desc',
               },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
@@ -231,7 +204,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         // asc
         const resAsc = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -240,8 +213,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 sortDirection: 'asc',
               },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
@@ -252,16 +223,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       it('allows searching', async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
             params: { body: { entries: knowledgeBaseEntries } },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
         const res = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
             params: {
               query: {
@@ -270,8 +239,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 sortDirection: 'asc',
               },
             },
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
