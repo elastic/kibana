@@ -214,6 +214,8 @@ export default function ({ getService }: FtrProviderContext) {
               'create_comment',
               'case_reopen',
             ],
+            securitySolutionTimeline: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],

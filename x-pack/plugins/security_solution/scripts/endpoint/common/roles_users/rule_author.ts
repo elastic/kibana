@@ -29,6 +29,8 @@ export const getRuleAuthor: () => Omit<Role, 'name'> = () => {
             'blocklist_all',
             'actions_log_management_read',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],

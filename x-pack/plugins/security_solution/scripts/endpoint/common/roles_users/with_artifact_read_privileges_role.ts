@@ -24,6 +24,8 @@ export const getWithArtifactReadPrivilegesRole: () => Omit<Role, 'name'> = () =>
             'host_isolation_exceptions_read',
             'event_filters_read',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],

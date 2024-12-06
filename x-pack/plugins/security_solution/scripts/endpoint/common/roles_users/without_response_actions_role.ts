@@ -57,6 +57,8 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
           'policy_management_all',
           'policy_management_read',
         ],
+        securitySolutionTimeline: ['all'],
+        securitySolutionNotes: ['all'],
         stackAlerts: ['all'],
       },
       spaces: ['*'],

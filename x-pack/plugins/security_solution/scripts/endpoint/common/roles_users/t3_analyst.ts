@@ -33,6 +33,8 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
             'file_operations_all',
             'scan_operations_all',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],

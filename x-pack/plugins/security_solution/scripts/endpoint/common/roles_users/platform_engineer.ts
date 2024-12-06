@@ -29,6 +29,8 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
 
             'actions_log_management_read',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],
