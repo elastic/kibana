@@ -77,34 +77,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           { username: 'john', isPublic: false },
         ].map(async ({ username, isPublic }) => {
           const visibility = isPublic ? 'Public' : 'Private';
+          const user = username === 'editor' ? 'slsEditor' : 'slsAdmin';
 
-          if (username === 'editor') {
-            await observabilityAIAssistantAPIClient
-              .slsEditor({
-                endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-                params: {
-                  body: {
-                    id: `${visibility.toLowerCase()}-doc-from-${username}`,
-                    text: `${visibility} user instruction from "${username}"`,
-                    public: isPublic,
-                  },
-                },
-              })
-              .expect(200);
-          } else {
-            await observabilityAIAssistantAPIClient
-              .slsAdmin({
-                endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
-                params: {
-                  body: {
-                    id: `${visibility.toLowerCase()}-doc-from-${username}`,
-                    text: `${visibility} user instruction from "${username}"`,
-                    public: isPublic,
-                  },
-                },
-              })
-              .expect(200);
-          }
+          await observabilityAIAssistantAPIClient[user]({
+            endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
+            params: {
+              body: {
+                id: `${visibility.toLowerCase()}-doc-from-${username}`,
+                text: `${visibility} user instruction from "${username}"`,
+                public: isPublic,
+              },
+            },
+          }).expect(200);
         });
 
         await Promise.all(promises);
