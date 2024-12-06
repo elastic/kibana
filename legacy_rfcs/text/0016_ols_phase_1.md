@@ -103,7 +103,7 @@ export interface SavedObject<T = unknown> {
 
 ### 3.1.3 Saved Objects Client: Security wrapper
 
-The [security wrapper](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts) authorizes and audits operations against saved objects.
+The [security wrapper](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/x-pack/platform/plugins/shared/security/server/saved_objects/secure_saved_objects_client_wrapper.ts) authorizes and audits operations against saved objects.
 
 There are two primary changes to this wrapper:
 

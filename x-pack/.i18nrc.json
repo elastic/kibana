@@ -139,8 +139,9 @@
     "xpack.searchAssistant": "plugins/search_assistant",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": [
-      "plugins/security",
-      "packages/security"
+      "platform/plugins/shared/security",
+      "platform/packages/shared/security",
+      "platform/packages/private/security"
     ],
     "xpack.server": "legacy/server",
     "xpack.serverless": "plugins/serverless",
@@ -155,7 +156,7 @@
     ],
     "xpack.slo": "plugins/observability_solution/slo",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
-    "xpack.spaces": "plugins/spaces",
+    "xpack.spaces": "platform/plugins/shared/spaces",
     "xpack.savedObjectsTagging": [
       "plugins/saved_objects_tagging"
     ],
