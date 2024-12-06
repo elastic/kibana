@@ -55,17 +55,20 @@ export {
 
 import type { CustomLangModuleType } from './types';
 
-const languageThemeDefinitions = new Map<string, CustomLangModuleType['languageThemeResolver']>();
+const languageThemeResolverDefinitions = new Map<
+  string,
+  CustomLangModuleType['languageThemeResolver']
+>();
 
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   export namespace editor {
     // augment monaco editor types
-    function registerLanguageThemeDefinition(
+    function registerLanguageThemeResolver(
       langId: string,
-      languageThemeDefinition: CustomLangModuleType['languageThemeResolver']
+      languageThemeResolver: CustomLangModuleType['languageThemeResolver']
     ): void;
-    function getLanguageThemeDefinition(
+    function getLanguageThemeResolver(
       langId: string
     ): CustomLangModuleType['languageThemeResolver'];
   }
@@ -76,12 +79,12 @@ Object.defineProperties(monaco.editor, {
   /**
    * @description Registers language theme definition for a language
    */
-  registerLanguageThemeDefinition: {
+  registerLanguageThemeResolver: {
     value: (
       langId: string,
       languageThemeDefinition: CustomLangModuleType['languageThemeResolver']
     ) => {
-      languageThemeDefinitions.set(langId, languageThemeDefinition);
+      languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
     },
     enumerable: true,
     configurable: false,
@@ -89,8 +92,8 @@ Object.defineProperties(monaco.editor, {
   /**
    * @description Returns language theme definition for a language
    */
-  getLanguageThemeDefinition: {
-    value: (langId: string) => languageThemeDefinitions.get(langId),
+  getLanguageThemeResolver: {
+    value: (langId: string) => languageThemeResolverDefinitions.get(langId),
     enumerable: true,
     configurable: false,
   },
