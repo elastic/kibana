@@ -9,7 +9,7 @@
 
 export { UserAvatarTip, NoUpdaterTip, NoCreatorTip, ManagedAvatarTip } from './src/components';
 
-export { useUserProfile, useUserProfiles } from './src/queries';
+export { useUserProfile, useUserProfiles, useSuggestUsers } from './src/queries';
 
 export {
   UserProfilesKibanaProvider,

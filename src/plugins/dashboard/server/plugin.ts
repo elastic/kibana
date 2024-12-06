@@ -16,6 +16,7 @@ import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collectio
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import { schema } from '@kbn/config-schema';
 
 import {
   initializeDashboardTelemetryTask,
@@ -31,6 +32,8 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -42,6 +45,8 @@ interface SetupDeps {
 interface StartDeps {
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
+  spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
 }
 
 export class DashboardPlugin
@@ -119,6 +124,38 @@ export class DashboardPlugin
       contentManagement: plugins.contentManagement,
       logger: this.logger,
     });
+
+    const router = core.http.createRouter();
+
+    router.post(
+      {
+        path: '/internal/dashboard/suggest_creators',
+        validate: {
+          body: schema.object({
+            name: schema.string(),
+          }),
+        },
+      },
+      // TODO: protected route
+      async (context, request, response) => {
+        const [coreStart, pluginDeps] = await core.getStartServices();
+
+        console.log('****', pluginDeps.security!.authz.actions.ui.get('dashboard', 'createNew'));
+
+        const profiles = await coreStart.userProfile.suggest({
+          name: request.body.name,
+          dataPath: 'avatar',
+          requiredPrivileges: {
+            spaceId: pluginDeps.spaces!.spacesService.getSpaceId(request),
+            privileges: {
+              kibana: [pluginDeps.security!.authz.actions.ui.get('dashboard', 'createNew')],
+            },
+          },
+        });
+
+        return response.ok({ body: profiles });
+      }
+    );
 
     return {};
   }

@@ -20,6 +20,7 @@ import {
   ManagedAvatarTip,
 } from '@kbn/content-management-user-profiles';
 import { getUserDisplayName } from '@kbn/user-profile-components';
+import { UserPickerPopover } from './pick_creator_popover';
 
 import { Item } from '../types';
 
@@ -29,6 +30,8 @@ export interface ActivityViewProps {
 
 export const ActivityView = ({ item }: ActivityViewProps) => {
   const showLastUpdated = Boolean(item.updatedAt && item.updatedAt !== item.createdAt);
+  const [newUser, setNewUser] = React.useState<string | null>(null);
+  const createdBy = item.createdBy ?? newUser;
 
   const UnknownUserLabel = (
     <FormattedMessage
@@ -55,14 +58,19 @@ export const ActivityView = ({ item }: ActivityViewProps) => {
             defaultMessage: 'Created by',
           })}
           who={
-            item.createdBy ? (
-              <UserLabel uid={item.createdBy} />
+            createdBy ? (
+              <UserLabel uid={createdBy} />
             ) : item.managed ? (
               <>{ManagedUserLabel}</>
             ) : (
               <>
                 {UnknownUserLabel}
                 <NoCreatorTip />
+                <UserPickerPopover
+                  onUserPicked={(user) => {
+                    setNewUser(user.uid);
+                  }}
+                />
               </>
             )
           }

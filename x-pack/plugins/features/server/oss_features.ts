@@ -221,6 +221,7 @@ export const buildOSSFeatures = ({
             'dashboardUsageStats',
             'savedQuery:manage',
             'savedQuery:read',
+            'suggestDashboardCreatorUserProfiles',
           ],
         },
         read: {

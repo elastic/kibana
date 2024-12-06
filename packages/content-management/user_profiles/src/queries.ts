@@ -13,6 +13,7 @@ import { useUserProfilesServices } from './services';
 export const userProfileKeys = {
   get: (uid: string) => ['user-profile', uid],
   bulkGet: (uids: string[]) => ['user-profile', { uids }],
+  suggest: (name: string) => ['user-profile-suggest', { name }],
 };
 
 export const useUserProfile = (uid: string) => {
@@ -32,6 +33,16 @@ export const useUserProfiles = (uids: string[], opts?: { enabled?: boolean }) =>
   const query = useQuery({
     queryKey: userProfileKeys.bulkGet(uids),
     queryFn: () => bulkGetUserProfiles(uids),
+    enabled: opts?.enabled ?? true,
+  });
+  return query;
+};
+
+export const useSuggestUsers = (name: string, opts?: { enabled?: boolean }) => {
+  const { suggestUsers } = useUserProfilesServices();
+  const query = useQuery({
+    queryKey: userProfileKeys.suggest(name),
+    queryFn: () => suggestUsers(name),
     enabled: opts?.enabled ?? true,
   });
   return query;
