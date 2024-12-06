@@ -55,7 +55,6 @@ export function sendTimeRangeMsg(
   timeRangeRelative?: TimeRange,
   query?: AggregateQuery | Query | undefined
 ) {
-  console.log('sendTimeRangeMsg', { timeRange });
   main$.next({ ...main$.getValue(), timeRange, timeRangeRelative, query });
 }
 
