@@ -41,19 +41,16 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
 }) => {
   const { permissions } = useCasesContext();
   const canAddObservableTypes = !disabled && permissions.settings;
-  const [error, setError] = useState<boolean>(false);
 
   const onAddObservableType = useCallback(() => {
     handleAddObservableType();
-    setError(false);
-  }, [handleAddObservableType, setError]);
+  }, [handleAddObservableType]);
 
   const onEditObservableType = useCallback(
     (key: string) => {
-      setError(false);
       handleEditObservableType(key);
     },
-    [setError, handleEditObservableType]
+    [handleEditObservableType]
   );
 
   return canAddObservableTypes ? (
@@ -94,7 +91,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
             {observableTypes.length < MAX_CUSTOM_OBSERVABLE_TYPES ? (
               <EuiButtonEmpty
                 isLoading={isLoading}
-                isDisabled={disabled || error}
+                isDisabled={disabled}
                 size="s"
                 onClick={onAddObservableType}
                 iconType="plusInCircle"
