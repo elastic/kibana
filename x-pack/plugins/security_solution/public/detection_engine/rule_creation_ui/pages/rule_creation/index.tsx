@@ -79,7 +79,7 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { ERROR_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/non_blocking_error_codes';
+import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
@@ -442,7 +442,10 @@ const CreateRulePageComponent: React.FC = () => {
   const submitRule = useCallback(
     async (enabled: boolean) => {
       const { valid, warnings } = await validateAllSteps();
-      const warningMessages = extractValidationMessages(warnings, ERROR_CODE_FIELD_NAME_MAP);
+      const warningMessages = extractValidationMessages(
+        warnings,
+        VALIDATION_WARNING_CODE_FIELD_NAME_MAP
+      );
 
       if (!valid || !(await confirmValidationErrors(warningMessages))) {
         return;

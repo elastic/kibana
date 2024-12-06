@@ -27,7 +27,7 @@ import {
 import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
 import { getSchema as getActionsRuleSchema } from '../../rule_creation/components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
-import { NON_BLOCKING_ERROR_CODES } from '../../rule_creation/constants/non_blocking_error_codes';
+import { VALIDATION_WARNING_CODES } from '../../rule_creation/constants/validation_warning_codes';
 
 export interface UseRuleFormsProps {
   defineStepDefault: DefineStepRule;
@@ -48,7 +48,7 @@ export const useRuleForms = ({
   // DEFINE STEP FORM
   const { form: defineStepForm } = useFormWithWarnings<DefineStepRule>({
     defaultValue: defineStepDefault,
-    options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
+    options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
     schema: defineRuleSchema,
   });
   const [defineStepFormData] = useFormData<DefineStepRule | {}>({
@@ -68,7 +68,7 @@ export const useRuleForms = ({
   );
   const { form: aboutStepForm } = useFormWithWarnings<AboutStepRule>({
     defaultValue: aboutStepDefault,
-    options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
+    options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
     schema: typeDependentAboutRuleSchema,
   });
   const [aboutStepFormData] = useFormData<AboutStepRule | {}>({
@@ -79,7 +79,7 @@ export const useRuleForms = ({
   // SCHEDULE STEP FORM
   const { form: scheduleStepForm } = useFormWithWarnings<ScheduleStepRule>({
     defaultValue: scheduleStepDefault,
-    options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
+    options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
     schema: scheduleRuleSchema,
   });
   const [scheduleStepFormData] = useFormData<ScheduleStepRule | {}>({
@@ -92,7 +92,7 @@ export const useRuleForms = ({
   const schema = useMemo(() => getActionsRuleSchema({ actionTypeRegistry }), [actionTypeRegistry]);
   const { form: actionsStepForm } = useFormWithWarnings<ActionsStepRule>({
     defaultValue: actionsStepDefault,
-    options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
+    options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
     schema,
   });
   const [actionsStepFormData] = useFormData<ActionsStepRule | {}>({

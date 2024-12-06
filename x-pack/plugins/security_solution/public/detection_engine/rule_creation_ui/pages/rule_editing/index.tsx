@@ -69,7 +69,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
-import { ERROR_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/non_blocking_error_codes';
+import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
@@ -448,7 +448,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         ...scheduleRuleWarnings,
         ...ruleActionsWarnings,
       ],
-      ERROR_CODE_FIELD_NAME_MAP
+      VALIDATION_WARNING_CODE_FIELD_NAME_MAP
     );
 
     if (!(await confirmValidationErrors(warnings))) {

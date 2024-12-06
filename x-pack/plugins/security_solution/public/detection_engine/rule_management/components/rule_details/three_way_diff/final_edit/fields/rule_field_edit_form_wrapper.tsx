@@ -22,9 +22,9 @@ import * as i18n from '../../translations';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
 import { useConfirmValidationErrorsModal } from '../../../../../../../common/hooks/use_confirm_validation_errors_modal';
 import {
-  ERROR_CODE_FIELD_NAME_MAP,
-  NON_BLOCKING_ERROR_CODES,
-} from '../../../../../../rule_creation/constants/non_blocking_error_codes';
+  VALIDATION_WARNING_CODE_FIELD_NAME_MAP,
+  VALIDATION_WARNING_CODES,
+} from '../../../../../../rule_creation/constants/validation_warning_codes';
 
 type RuleFieldEditComponent = React.ComponentType<RuleFieldEditComponentProps>;
 
@@ -68,7 +68,10 @@ export function RuleFieldEditFormWrapper({
 
   const handleSubmit = useCallback<FormWithWarningsSubmitHandler>(
     async (formData: FormData, isValid: boolean, { warnings }) => {
-      const warningMessages = extractValidationMessages(warnings, ERROR_CODE_FIELD_NAME_MAP);
+      const warningMessages = extractValidationMessages(
+        warnings,
+        VALIDATION_WARNING_CODE_FIELD_NAME_MAP
+      );
 
       if (!isValid || !(await confirmValidationErrors(warningMessages))) {
         return;
@@ -97,7 +100,7 @@ export function RuleFieldEditFormWrapper({
     serializer,
     onSubmit: handleSubmit,
     options: {
-      warningValidationCodes: NON_BLOCKING_ERROR_CODES,
+      warningValidationCodes: VALIDATION_WARNING_CODES,
     },
   });
 
