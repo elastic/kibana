@@ -12,19 +12,19 @@ import { BASE_OPTIONS, CURRENT_OPTIONS, TARGET_OPTIONS, SelectedVersions } from 
 import * as i18n from './translations';
 
 interface VersionsPickerProps {
-  hasBaseVersion: boolean;
+  shouldShowBaseVersion: boolean;
   selectedVersions: SelectedVersions;
   onChange: (pickedVersions: SelectedVersions) => void;
 }
 
 export function VersionsPicker({
-  hasBaseVersion,
+  shouldShowBaseVersion,
   selectedVersions = SelectedVersions.CurrentFinal,
   onChange,
 }: VersionsPickerProps) {
   const options: EuiSelectOption[] = useMemo(
-    () => [...CURRENT_OPTIONS, ...TARGET_OPTIONS, ...(hasBaseVersion ? BASE_OPTIONS : [])],
-    [hasBaseVersion]
+    () => [...CURRENT_OPTIONS, ...TARGET_OPTIONS, ...(shouldShowBaseVersion ? BASE_OPTIONS : [])],
+    [shouldShowBaseVersion]
   );
 
   const handleChange = useCallback(

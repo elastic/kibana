@@ -17,6 +17,8 @@ import {
   FINAL_VERSION,
   TARGET_VERSION,
 } from './versions_picker/translations';
+import { UPDATE_BUTTON_LABEL } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/translations';
+import { FINAL_UPDATE } from '../final_side/translations';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -27,7 +29,13 @@ import {
  */
 const POPOVER_WIDTH = 320;
 
-export function ComparisonSideHelpInfo(): JSX.Element {
+interface ComparisonSideHelpInfoProps {
+  shouldShowBaseVersion: boolean;
+}
+
+export function ComparisonSideHelpInfo({
+  shouldShowBaseVersion,
+}: ComparisonSideHelpInfoProps): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
   const button = (
@@ -43,16 +51,18 @@ export function ComparisonSideHelpInfo(): JSX.Element {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.comparisonSide.upgradeHelpText"
-          defaultMessage="{title} shows field's JSON diff between prebuilt rule field versions affecting the rule update process. {versions}"
+          defaultMessage="The {title} lets you compare the values of a field across different versions of a rule: {versions} The differences are shown as JSON, highlighting additions, deletions, and modifications. Use this view to review and understand changes across versions."
           values={{
             title: <strong>{TITLE}</strong>,
             versions: (
               <>
                 <br />
                 <ul>
-                  <li>
-                    <strong>{BASE_VERSION}</strong> {'-'} {BASE_VERSION_EXPLANATION}
-                  </li>
+                  {shouldShowBaseVersion && (
+                    <li>
+                      <strong>{BASE_VERSION}</strong> {'-'} {BASE_VERSION_EXPLANATION}
+                    </li>
+                  )}
                   <li>
                     <strong>{CURRENT_VERSION}</strong> {'-'} {CURRENT_VERSION_EXPLANATION}
                   </li>
@@ -75,31 +85,31 @@ export function ComparisonSideHelpInfo(): JSX.Element {
 const BASE_VERSION_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.baseVersionExplanation',
   {
-    defaultMessage: 'version originally installed from Elastic prebuilt rules package',
+    defaultMessage: 'the value the field had when the rule was first installed.',
   }
 );
 
 const CURRENT_VERSION_EXPLANATION = (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionExplanation"
-    defaultMessage="current version including modification made after prebuilt rule installation. With lack of modifications it matches with {base}."
-    values={{
-      base: <strong>{BASE_VERSION}</strong>,
-    }}
+    defaultMessage="field value in your currently installed rule."
   />
 );
 
 const TARGET_VERSION_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.targetVersionExplanation',
   {
-    defaultMessage: 'version coming from a new version of Elastic prebuilt rules package',
+    defaultMessage: 'field value in Elastic’s latest update.',
   }
 );
 
-const FINAL_VERSION_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.finalVersionExplanation',
-  {
-    defaultMessage:
-      'version used to the update the rule. Initial value is suggested by the diff algorithm.',
-  }
+const FINAL_VERSION_EXPLANATION = (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.finalVersionExplanation"
+    defaultMessage="field value that will be saved once you click {updateButtonLabel}. You can edit this value in the {finalUpdateSectionLabel} section."
+    values={{
+      updateButtonLabel: <i>{UPDATE_BUTTON_LABEL}</i>,
+      finalUpdateSectionLabel: <i>{FINAL_UPDATE}</i>,
+    }}
+  />
 );
