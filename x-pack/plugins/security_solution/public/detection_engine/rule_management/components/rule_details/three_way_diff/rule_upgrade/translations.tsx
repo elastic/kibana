@@ -11,11 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 
+export const TOTAL_NUM_OF_FIELDS = (count: number) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.fieldsWithUpdates"
+    defaultMessage="{countValue} {count, plural, one {field} other {fields}} for review"
+    values={{ countValue: <strong>{count}</strong>, count }}
+  />
+);
+
 export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.fieldsWithUpdates"
-    defaultMessage="Update has {count} {count, plural, one {field} other {fields}}"
-    values={{ count: <strong>{count}</strong> }}
+    defaultMessage="{countValue} {count, plural, one {field} other {fields}} in Elastic update"
+    values={{ countValue: <strong>{count}</strong>, count }}
   />
 );
 
