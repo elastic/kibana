@@ -147,9 +147,9 @@ export interface DiscoverCapabilities {
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.discover) return false;
+  if (!anonymousUserCapabilities.discover_v2) return false;
 
-  const discover = anonymousUserCapabilities.discover as unknown as DiscoverCapabilities;
+  const discover = anonymousUserCapabilities.discover_v2 as unknown as DiscoverCapabilities;
 
   return !!discover.show;
 };

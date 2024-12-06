@@ -155,7 +155,7 @@ export const getSearchEmbeddableFactory = ({
             }),
           canLinkToLibrary: async () => {
             return (
-              discoverServices.capabilities.discover.save && !Boolean(savedObjectId$.getValue())
+              discoverServices.capabilities.discover_v2.save && !Boolean(savedObjectId$.getValue())
             );
           },
           canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),

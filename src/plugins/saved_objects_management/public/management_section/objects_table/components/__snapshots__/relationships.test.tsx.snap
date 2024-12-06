@@ -293,7 +293,7 @@ exports[`Relationships should render index patterns normally 1`] = `
               "icon": "search",
               "inAppUrl": Object {
                 "path": "/app/discover#//1",
-                "uiCapabilitiesPath": "discover.show",
+                "uiCapabilitiesPath": "discover_v2.show",
               },
               "title": "My Search Title",
             },

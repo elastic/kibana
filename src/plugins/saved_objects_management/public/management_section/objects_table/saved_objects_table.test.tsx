@@ -181,7 +181,7 @@ describe('SavedObjectsTable', () => {
             icon: 'search',
             inAppUrl: {
               path: '/discover/2',
-              uiCapabilitiesPath: 'discover.show',
+              uiCapabilitiesPath: 'discover_v2.show',
             },
           },
         },
@@ -490,7 +490,7 @@ describe('SavedObjectsTable', () => {
           editUrl: '/management/kibana/objects/savedSearches/2',
           inAppUrl: {
             path: '/discover/2',
-            uiCapabilitiesPath: 'discover.show',
+            uiCapabilitiesPath: 'discover_v2.show',
           },
         },
       } as SavedObjectWithMetadata);
@@ -506,7 +506,7 @@ describe('SavedObjectsTable', () => {
           icon: 'search',
           inAppUrl: {
             path: '/discover/2',
-            uiCapabilitiesPath: 'discover.show',
+            uiCapabilitiesPath: 'discover_v2.show',
           },
         },
       });

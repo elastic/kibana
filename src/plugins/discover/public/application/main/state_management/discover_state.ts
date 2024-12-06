@@ -488,7 +488,7 @@ export function getDiscoverStateContainer({
       }),
       {
         isDisabled: () =>
-          services.capabilities.discover.storeSearchSession
+          services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,

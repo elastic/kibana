@@ -107,7 +107,7 @@ describe('Discover topnav component', () => {
   });
 
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
-    const props = getProps({ capabilities: { discover: { save: true } } });
+    const props = getProps({ capabilities: { discover_v2: { save: true } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNav {...props} />
@@ -119,7 +119,7 @@ describe('Discover topnav component', () => {
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
-    const props = getProps({ capabilities: { discover: { save: false } } });
+    const props = getProps({ capabilities: { discover_v2: { save: false } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNav {...props} />

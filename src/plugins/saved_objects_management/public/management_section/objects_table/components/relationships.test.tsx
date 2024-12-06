@@ -54,7 +54,7 @@ describe('Relationships', () => {
               icon: 'search',
               inAppUrl: {
                 path: '/app/discover#//1',
-                uiCapabilitiesPath: 'discover.show',
+                uiCapabilitiesPath: 'discover_v2.show',
               },
               title: 'My Search Title',
             },
@@ -155,7 +155,7 @@ describe('Relationships', () => {
           icon: 'search',
           inAppUrl: {
             path: '/discover/1',
-            uiCapabilitiesPath: 'discover.show',
+            uiCapabilitiesPath: 'discover_v2.show',
           },
         },
       },

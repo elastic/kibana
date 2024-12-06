@@ -65,7 +65,7 @@ function getViewUnderlyingDataArgs({
     canOpenVisualizations: boolean;
     canSaveDashboards: boolean;
     navLinks: Capabilities['navLinks'];
-    discover: Capabilities['discover'];
+    discover_v2: Capabilities['discover_v2'];
   };
   query: Array<Query | AggregateQuery>;
   filters: Filter[];
@@ -185,7 +185,7 @@ function loadViewUnderlyingDataArgs(
       canSaveVisualizations: Boolean(capabilities.visualize.save),
       canOpenVisualizations: Boolean(capabilities.visualize.show),
       navLinks: capabilities.navLinks,
-      discover: capabilities.discover,
+      discover_v2: capabilities.discover_v2,
     },
     query: mergedSearchContext.query,
     filters: mergedSearchContext.filters || [],

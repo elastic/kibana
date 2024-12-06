@@ -100,7 +100,7 @@ export const getShareAppMenuItem = ({
         services.share.toggleShareContextMenu({
           anchorElement,
           allowEmbed: false,
-          allowShortUrl: !!services.capabilities.discover.createShortUrl,
+          allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
           shareableUrl,
           shareableUrlForSavedObject,
           shareableUrlLocatorParams: { locator, params },
