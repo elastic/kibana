@@ -105,24 +105,22 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [end, isBlankTimeline, loadingSourcerer, start]
   );
 
-  const [
-    dataLoadingState,
-    { events, inspect, totalCount, loadNextBatch: loadPage, refreshedAt, refetch },
-  ] = useTimelineEvents({
-    dataViewId,
-    endDate: end,
-    eqlOptions: restEqlOption,
-    fields: timelineQueryFieldsFromColumns,
-    filterQuery: eqlQuery ?? '',
-    id: timelineId,
-    indexNames: selectedPatterns,
-    language: 'eql',
-    limit: sampleSize,
-    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
-    skip: !canQueryTimeline(),
-    startDate: start,
-    timerangeKind,
-  });
+  const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
+    useTimelineEvents({
+      dataViewId,
+      endDate: end,
+      eqlOptions: restEqlOption,
+      fields: timelineQueryFieldsFromColumns,
+      filterQuery: eqlQuery ?? '',
+      id: timelineId,
+      indexNames: selectedPatterns,
+      language: 'eql',
+      limit: sampleSize,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      skip: !canQueryTimeline(),
+      startDate: start,
+      timerangeKind,
+    });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
@@ -291,7 +289,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           refetch={refetch}
           dataLoadingState={dataLoadingState}
           totalCount={isBlankTimeline ? 0 : totalCount}
-          onFetchMoreRecords={loadPage}
+          onFetchMoreRecords={loadNextBatch}
           activeTab={activeTab}
           updatedAt={refreshedAt}
           isTextBasedQuery={false}
