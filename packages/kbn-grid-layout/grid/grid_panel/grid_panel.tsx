@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -26,7 +26,6 @@ export interface GridPanelProps {
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
   interactionStart: (
-    panelId: string,
     type: PanelInteractionEvent['type'] | 'drop',
     e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
@@ -40,19 +39,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
   ) => {
     const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
 
-    const startIneraction = useCallback(
-      (
-        type: PanelInteractionEvent['type'] | 'drop',
-        e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      ) => {
-        interactionStart(panelId, type, e);
-      },
-      [interactionStart, panelId]
-    );
-
     useEffect(() => {
-      const onDropEventHandler = (dropEvent: MouseEvent) =>
-        interactionStart(panelId, 'drop', dropEvent);
+      const onDropEventHandler = (dropEvent: MouseEvent) => interactionStart('drop', dropEvent);
       /**
        * Subscription to add a singular "drop" event handler whenever an interaction starts -
        * this is handled in a subscription so that it is not lost when the component gets remounted
@@ -235,10 +223,10 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
           <DragHandle
             ref={setDragHandleApi}
             gridLayoutStateManager={gridLayoutStateManager}
-            interactionStart={startIneraction}
+            interactionStart={interactionStart}
           />
           {panelContents}
-          <ResizeHandle interactionStart={startIneraction} />
+          <ResizeHandle interactionStart={interactionStart} />
         </div>
       </div>
     );

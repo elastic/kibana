@@ -57,12 +57,12 @@ export const GridLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    /**
-     * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
-     * so, we need to loop through each row and ensure it is compacted
-     */
     if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
       const newLayout = cloneDeep(layout);
+      /**
+       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
+       * so, we need to loop through each row and ensure it is compacted
+       */
       newLayout.forEach((row, rowIndex) => {
         newLayout[rowIndex] = resolveGridRow(row);
       });
