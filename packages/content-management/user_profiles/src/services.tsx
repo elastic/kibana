@@ -9,6 +9,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import React, { FC, PropsWithChildren, useCallback, useContext, useMemo } from 'react';
 import type { UserProfile } from '@kbn/user-profile-components';
 import { createBatcher } from './utils/batcher';
@@ -21,6 +22,10 @@ export interface UserProfilesKibanaDependencies {
   core: {
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];
+      suggest: UserProfileServiceStart['suggest'];
+    };
+    http: {
+      post: HttpStart['post'];
     };
   };
 }
@@ -28,6 +33,7 @@ export interface UserProfilesKibanaDependencies {
 export interface UserProfilesServices {
   bulkGetUserProfiles: (uids: string[]) => Promise<UserProfile[]>;
   getUserProfile: (uid: string) => Promise<UserProfile>;
+  suggestUsers: (name: string) => Promise<UserProfile[]>;
 }
 
 const UserProfilesContext = React.createContext<UserProfilesServices | null>(null);
@@ -63,8 +69,21 @@ export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibana
     }).fetch;
   }, [bulkGetUserProfiles]);
 
+  const suggestUsers = useCallback(
+    async (name: string) => {
+      return core.http.post<UserProfile[]>('/internal/dashboard/suggest_creators', {
+        body: JSON.stringify({ name }),
+      });
+    },
+    [core.http]
+  );
+
   return (
-    <UserProfilesProvider getUserProfile={getUserProfile} bulkGetUserProfiles={bulkGetUserProfiles}>
+    <UserProfilesProvider
+      getUserProfile={getUserProfile}
+      bulkGetUserProfiles={bulkGetUserProfiles}
+      suggestUsers={suggestUsers}
+    >
       {children}
     </UserProfilesProvider>
   );

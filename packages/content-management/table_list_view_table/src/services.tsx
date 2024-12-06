@@ -24,7 +24,8 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService, UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
@@ -126,12 +127,14 @@ export interface TableListViewKibanaDependencies {
       basePath: {
         prepend: (path: string) => string;
       };
+      post: HttpStart['post'];
     };
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];
+      suggest: UserProfileServiceStart['suggest'];
     };
   };
   /**
