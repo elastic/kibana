@@ -20,6 +20,7 @@ export async function installTemplate(
   logger.info(`Installing components for ${template.namespace} (${componentNames})`);
   for (const component of template.components) {
     await client.cluster
+      // @ts-expect-error TODO elasticsearch-js 9.0.0-alpha.1
       .putComponentTemplate({
         name: component.name,
         ...component.template,

@@ -357,7 +357,7 @@ describe('#update', () => {
           ...mockTimestampFieldsWithCreated,
         };
         expect(
-          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)!
         ).toEqual(expectedType);
       });
 
@@ -403,7 +403,7 @@ describe('#update', () => {
             references,
           });
           expect(
-            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)!
               .references
           ).toEqual([]);
           client.index.mockClear();
