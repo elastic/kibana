@@ -132,7 +132,7 @@ function calcFinalDiffableRule(ruleUpgradeState: RuleUpgradeState): DiffableRule
   const fieldsResolvedValues = Object.entries(ruleUpgradeState.fieldsUpgradeState).reduce<
     Record<string, unknown>
   >((result, [fieldName, fieldState]) => {
-    if (fieldState.state === FieldUpgradeState.Accepted && Boolean(fieldState.resolvedValue)) {
+    if (fieldState.state === FieldUpgradeState.Accepted) {
       result[fieldName] = fieldState.resolvedValue;
     }
 
