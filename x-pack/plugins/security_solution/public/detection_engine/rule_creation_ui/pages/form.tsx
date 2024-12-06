@@ -7,7 +7,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { useFormWithWarn } from '../../../common/hooks/use_form_with_warn';
+import { useFormWithWarnings } from '../../../common/hooks/use_form_with_warnings';
 import { isThreatMatchRule } from '../../../../common/detection_engine/utils';
 import type {
   AboutStepRule,
@@ -46,7 +46,7 @@ export const useRuleForms = ({
     triggersActionsUi: { actionTypeRegistry },
   } = useKibana().services;
   // DEFINE STEP FORM
-  const { form: defineStepForm } = useFormWithWarn<DefineStepRule>({
+  const { form: defineStepForm } = useFormWithWarnings<DefineStepRule>({
     defaultValue: defineStepDefault,
     options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
     schema: defineRuleSchema,
@@ -66,7 +66,7 @@ export const useRuleForms = ({
     () => (isThreatMatchRule(defineStepData.ruleType) ? threatMatchAboutSchema : aboutRuleSchema),
     [defineStepData.ruleType]
   );
-  const { form: aboutStepForm } = useFormWithWarn<AboutStepRule>({
+  const { form: aboutStepForm } = useFormWithWarnings<AboutStepRule>({
     defaultValue: aboutStepDefault,
     options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
     schema: typeDependentAboutRuleSchema,
@@ -77,7 +77,7 @@ export const useRuleForms = ({
   const aboutStepData = 'name' in aboutStepFormData ? aboutStepFormData : aboutStepDefault;
 
   // SCHEDULE STEP FORM
-  const { form: scheduleStepForm } = useFormWithWarn<ScheduleStepRule>({
+  const { form: scheduleStepForm } = useFormWithWarnings<ScheduleStepRule>({
     defaultValue: scheduleStepDefault,
     options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
     schema: scheduleRuleSchema,
@@ -90,7 +90,7 @@ export const useRuleForms = ({
 
   // ACTIONS STEP FORM
   const schema = useMemo(() => getActionsRuleSchema({ actionTypeRegistry }), [actionTypeRegistry]);
-  const { form: actionsStepForm } = useFormWithWarn<ActionsStepRule>({
+  const { form: actionsStepForm } = useFormWithWarnings<ActionsStepRule>({
     defaultValue: actionsStepDefault,
     options: { stripEmptyFields: false, warningValidationCodes: NON_BLOCKING_ERROR_CODES },
     schema,

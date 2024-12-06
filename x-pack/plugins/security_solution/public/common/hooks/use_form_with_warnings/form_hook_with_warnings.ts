@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type * from './form_hook_with_warn';
-export * from './use_form_with_warn';
+import type { FormHook, FormData, ValidationError } from '../../../shared_imports';
+
+export interface FormHookWithWarnings<T extends FormData = FormData, I extends FormData = T>
+  extends FormHook<T, I> {
+  getValidationWarnings(): ValidationError[];
+}

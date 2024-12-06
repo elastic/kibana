@@ -9,26 +9,26 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import type { FormHook } from '../../../shared_imports';
 import { useForm, type FormConfig, type FormData } from '../../../shared_imports';
-import type { FormHookWithWarn } from './form_hook_with_warn';
+import type { FormHookWithWarnings } from './form_hook_with_warnings';
 import { extractValidationResults } from './extract_validation_results';
 import type { ValidationResults } from './validation_results';
 
-export type FormWithWarnSubmitHandler<T extends FormData = FormData> = (
+export type FormWithWarningsSubmitHandler<T extends FormData = FormData> = (
   formData: T,
   isValid: boolean,
   validationResults: ValidationResults
 ) => Promise<void>;
 
-interface FormWithWarnConfig<T extends FormData = FormData, I extends FormData = T>
+interface FormWithWarningsConfig<T extends FormData = FormData, I extends FormData = T>
   extends Omit<FormConfig<T, I>, 'onSubmit'> {
-  onSubmit?: FormWithWarnSubmitHandler<T>;
+  onSubmit?: FormWithWarningsSubmitHandler<T>;
   options: FormConfig['options'] & {
     warningValidationCodes: Readonly<string[]>;
   };
 }
 
-interface UseFormWithWarnReturn<T extends FormData = FormData, I extends FormData = T> {
-  form: FormHookWithWarn<T, I>;
+interface UseFormWithWarningsReturn<T extends FormData = FormData, I extends FormData = T> {
+  form: FormHookWithWarnings<T, I>;
 }
 
 /**
@@ -49,7 +49,7 @@ interface UseFormWithWarnReturn<T extends FormData = FormData, I extends FormDat
  * `message` and `code` fields from a validator function. Attempts to reuse `__isBlocking__` internal
  * field lead to inconsistent behavior.
  *
- * `useFormWithWarn` implements warnings (non blocking errors) on top of `FormHook` using validation
+ * `useFormWithWarnings` implements warnings (non blocking errors) on top of `FormHook` using validation
  * error codes as a flexible way to determine whether an error is a blocking error or it's a warning.
  * It provides little interface extension to simplify errors and warnings consumption
  *
@@ -57,7 +57,7 @@ interface UseFormWithWarnReturn<T extends FormData = FormData, I extends FormDat
  * despite non-critical validation errors a.k.a. warnings. Usually it's also required to inform users
  * about warnings they got before proceeding for example via a modal.
  *
- * Since `FormHook` returned by `useForm` lacks of such functionality `useFormWithWarn` is here to
+ * Since `FormHook` returned by `useForm` lacks of such functionality `useFormWithWarnings` is here to
  * provide warnings functionality. It could be used and passed as `FormHook` when warnings functionality
  * isn't required making absolutely transparent.
  *
@@ -68,9 +68,9 @@ interface UseFormWithWarnReturn<T extends FormData = FormData, I extends FormDat
  *
  * There is a ticket to move this functionality to Form lib https://github.com/elastic/kibana/issues/203097.
  */
-export function useFormWithWarn<T extends FormData = FormData, I extends FormData = T>(
-  formConfig: FormWithWarnConfig<T, I>
-): UseFormWithWarnReturn<T, I> {
+export function useFormWithWarnings<T extends FormData = FormData, I extends FormData = T>(
+  formConfig: FormWithWarningsConfig<T, I>
+): UseFormWithWarningsReturn<T, I> {
   const {
     onSubmit,
     options: { warningValidationCodes },

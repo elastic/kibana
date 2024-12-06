@@ -10,8 +10,8 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { FieldConfig } from '../../../shared_imports';
 import { Form, UseField } from '../../../shared_imports';
-import type { FormWithWarnSubmitHandler } from './use_form_with_warn';
-import { useFormWithWarn } from './use_form_with_warn';
+import type { FormWithWarningsSubmitHandler } from './use_form_with_warnings';
+import { useFormWithWarnings } from './use_form_with_warnings';
 
 describe('useFormWithWarn', () => {
   describe('isValid', () => {
@@ -174,12 +174,12 @@ describe('useFormWithWarn', () => {
 });
 
 interface TestFormProps {
-  onSubmit?: FormWithWarnSubmitHandler;
+  onSubmit?: FormWithWarningsSubmitHandler;
   warningValidationCodes: string[];
 }
 
 function TestForm({ onSubmit, warningValidationCodes }: TestFormProps): JSX.Element {
-  const { form } = useFormWithWarn({
+  const { form } = useFormWithWarnings({
     onSubmit,
     options: {
       warningValidationCodes,
