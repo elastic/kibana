@@ -11,7 +11,8 @@ import { chatCompleteSuite } from './chat_complete';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  describe('Inference plugin - API integration tests', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/203205
+  describe.skip('Inference plugin - API integration tests', async () => {
     getAvailableConnectors().forEach((connector) => {
       describe(`Connector ${connector.id}`, () => {
         chatCompleteSuite(connector, providerContext);

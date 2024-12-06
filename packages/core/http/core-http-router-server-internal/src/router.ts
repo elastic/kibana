@@ -35,7 +35,7 @@ import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 import { RouteValidator } from './validator';
-import { ALLOWED_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
+import { BASE_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
@@ -339,7 +339,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       if (isPublicUnversionedRoute) {
         response.output.headers = {
           ...response.output.headers,
-          ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
+          ...getVersionHeader(BASE_PUBLIC_VERSION),
         };
       }
 
@@ -362,7 +362,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       if (isPublicUnversionedRoute) {
-        injectVersionHeader(ALLOWED_PUBLIC_VERSION, kibanaResponse);
+        injectVersionHeader(BASE_PUBLIC_VERSION, kibanaResponse);
       }
       if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({

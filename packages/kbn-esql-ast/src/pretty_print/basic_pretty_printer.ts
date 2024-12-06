@@ -223,6 +223,11 @@ export class BasicPrettyPrinter {
       return '<EXPRESSION>';
     })
 
+    .on('visitIdentifierExpression', (ctx) => {
+      const formatted = LeafPrinter.identifier(ctx.node);
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
     .on('visitSourceExpression', (ctx) => {
       const formatted = LeafPrinter.source(ctx.node);
       return this.decorateWithComments(ctx.node, formatted);
@@ -383,12 +388,16 @@ export class BasicPrettyPrinter {
       const argsFormatted = args ? `${separator}${args}` : '';
       const optionFormatted = `${option}${argsFormatted}`;
 
-      return optionFormatted;
+      return this.decorateWithComments(ctx.node, optionFormatted);
     })
 
     .on('visitCommand', (ctx) => {
       const opts = this.opts;
-      const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
+      const node = ctx.node;
+      const cmd = opts.lowercaseCommands ? node.name : node.name.toUpperCase();
+      const cmdType = !node.commandType
+        ? ''
+        : (opts.lowercaseCommands ? node.commandType : node.commandType.toUpperCase()) + ' ';
 
       let args = '';
       let options = '';
@@ -406,9 +415,9 @@ export class BasicPrettyPrinter {
 
       const argsFormatted = args ? ` ${args}` : '';
       const optionsFormatted = options ? ` ${options}` : '';
-      const cmdFormatted = `${cmd}${argsFormatted}${optionsFormatted}`;
+      const cmdFormatted = `${cmdType}${cmd}${argsFormatted}${optionsFormatted}`;
 
-      return cmdFormatted;
+      return this.decorateWithComments(ctx.node, cmdFormatted);
     })
 
     .on('visitQuery', (ctx) => {
