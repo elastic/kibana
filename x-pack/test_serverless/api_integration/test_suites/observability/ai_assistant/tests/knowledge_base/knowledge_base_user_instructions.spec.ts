@@ -34,9 +34,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
-  // TODO: https://github.com/elastic/kibana/issues/192711 cannot create custom users in serverless
-  // trying using built in users by using cookie auth
-  // TODO: https://github.com/elastic/kibana/issues/192757
   describe.skip('Knowledge base user instructions', function () {
     this.tags(['skipMKI']);
     let editorRoleAuthc: RoleCredentials;
