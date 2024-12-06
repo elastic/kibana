@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
-import { VersionsPicker } from '../versions_picker/versions_picker';
-import type { Version } from '../versions_picker/constants';
-import { SelectedVersions } from '../versions_picker/constants';
+import { VersionsPicker } from './versions_picker/versions_picker';
+import type { Version } from './versions_picker/constants';
+import { SelectedVersions } from './versions_picker/constants';
 import { pickFieldValueForVersion } from './utils';
 import type {
   DiffableAllFields,
