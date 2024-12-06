@@ -78,11 +78,11 @@ export const ACTIONS_FEATURE = {
         'Includes: Email, Server log, Slack, Slack API, Microsoft Teams, PagerDuty, xMatters, Opsgenie',
       privilegeGroups: [
         {
-          groupType: 'mutually_exclusive',
+          groupType: 'independent',
           privileges: [
             {
               api: [],
-              name: 'Run',
+              name: 'Execute',
               id: 'run-comm-notif',
               includeIn: 'read',
               savedObject: {
@@ -100,11 +100,11 @@ export const ACTIONS_FEATURE = {
       description: 'Includes: Swimlane, Torq, Tines, D3 Security, IBM Resilient, TheHive',
       privilegeGroups: [
         {
-          groupType: 'mutually_exclusive',
+          groupType: 'independent',
           privileges: [
             {
               api: [],
-              name: 'Run',
+              name: 'Execute',
               id: 'run-orch-i-resp',
               includeIn: 'read',
               savedObject: {
@@ -119,14 +119,14 @@ export const ACTIONS_FEATURE = {
     },
     {
       name: 'IT Service Management & Issue Tracking',
-      description: 'Includes: ServiceNow ITSM, ServiceNow SecOps, ServiceNow ITOM, JIRA',
+      description: 'Includes: ServiceNow ITSM, ServiceNow SecOps, ServiceNow ITOM, Jira',
       privilegeGroups: [
         {
-          groupType: 'mutually_exclusive',
+          groupType: 'independent',
           privileges: [
             {
               api: [],
-              name: 'Run',
+              name: 'Execute',
               id: 'run-im',
               includeIn: 'read',
               savedObject: {
@@ -144,11 +144,11 @@ export const ACTIONS_FEATURE = {
       description: 'Includes: OpenAI, Amazon Bedrock, Google Gemini',
       privilegeGroups: [
         {
-          groupType: 'mutually_exclusive',
+          groupType: 'independent',
           privileges: [
             {
               api: [],
-              name: 'Run',
+              name: 'Execute',
               id: 'run-ai',
               includeIn: 'read',
               savedObject: {
@@ -166,11 +166,11 @@ export const ACTIONS_FEATURE = {
       description: 'Includes: Sentinel One, CrowdStrike',
       privilegeGroups: [
         {
-          groupType: 'mutually_exclusive',
+          groupType: 'independent',
           privileges: [
             {
               api: [],
-              name: 'Run',
+              name: 'Execute',
               id: 'run-edr',
               includeIn: 'all',
               savedObject: {
@@ -184,15 +184,15 @@ export const ACTIONS_FEATURE = {
       ],
     },
     {
-      name: 'General Integration',
+      name: 'Custom Integration',
       description: 'Includes: Index, Webhook, Webhook - Case Management',
       privilegeGroups: [
         {
-          groupType: 'mutually_exclusive',
+          groupType: 'independent',
           privileges: [
             {
               api: [],
-              name: 'Run',
+              name: 'Execute',
               id: 'run-g',
               includeIn: 'read',
               savedObject: {
