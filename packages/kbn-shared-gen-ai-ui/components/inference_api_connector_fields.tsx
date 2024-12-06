@@ -50,7 +50,7 @@ import {
   getTaskTypeConfigHiddenField,
 } from './hidden_fields';
 
-const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+export const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
 }) => {
@@ -456,6 +456,3 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     </>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export { InferenceAPIConnectorFields as default };
