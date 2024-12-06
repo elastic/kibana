@@ -113,16 +113,7 @@ class AgentlessAgentService {
         labels,
       },
       method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'X-Request-ID': traceId,
-      },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: tlsConfig.rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
-      }),
+      ...this.getHeaders(tlsConfig, traceId),
     };
 
     const cloudSetup = appContextService.getCloud();
@@ -157,6 +148,7 @@ class AgentlessAgentService {
 
   public async deleteAgentlessAgent(agentlessPolicyId: string) {
     const logger = appContextService.getLogger();
+    const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const requestConfig = {
@@ -165,17 +157,9 @@ class AgentlessAgentService {
         `/deployments/${agentlessPolicyId}`
       ),
       method: 'DELETE',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: tlsConfig.rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
-      }),
+      ...this.getHeaders(tlsConfig, traceId),
     };
-    const traceId = apm.currentTransaction?.traceparent;
+
     const errorMetadata: LogMeta = {
       trace: {
         id: traceId,
@@ -218,6 +202,22 @@ class AgentlessAgentService {
     });
 
     return response;
+  }
+
+  private getHeaders(tlsConfig: SslConfig, traceId: string | undefined) {
+    return {
+      headers: {
+        'Content-type': 'application/json',
+        'X-Request-ID': traceId,
+        'x-elastic-internal-origin': 'Kibana',
+      },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: tlsConfig.rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+        ca: tlsConfig.certificateAuthorities,
+      }),
+    };
   }
 
   private getAgentlessTags(agentlessAgentPolicy: AgentPolicy) {
