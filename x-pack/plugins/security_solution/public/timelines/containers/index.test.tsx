@@ -349,6 +349,29 @@ describe('useTimelineEvents', () => {
   });
 
   describe('batching', () => {
+    test('should broadcast correct loading state based on the batch being fetched', async () => {
+      const { result } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loading);
+      });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+      });
+
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
+
+      expect(result.current[0]).toBe(DataLoadingState.loadingMore);
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+      });
+    });
     test('should request cumulative data of all the batches when next batch has been requested', async () => {
       const { result } = renderHook((args) => useTimelineEvents(args), {
         initialProps: { ...props },
