@@ -351,7 +351,6 @@ export function getDataStateContainer({
   const fetchQuery = async (resetQuery?: boolean) => {
     const query = appStateContainer.getState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
-    sendTimeRangeMsg(dataSubjects.main$, timefilter.getAbsoluteTime(), timefilter.getTime(), query);
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);

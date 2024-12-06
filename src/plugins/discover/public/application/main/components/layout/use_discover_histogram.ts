@@ -218,8 +218,8 @@ export const useDiscoverHistogram = ({
    */
   const { filters } = useQuerySubscriber({ data: services.data });
   const customFilters = useInternalStateSelector((state) => state.customFilters);
-  const relativeTimeRange = main$.getValue().timeRangeRelative;
   const query = main$.getValue().query;
+  const { timeRangeRelative, timeRange } = useObservable(main$, main$.getValue());
 
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
@@ -392,8 +392,8 @@ export const useDiscoverHistogram = ({
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
     filters: filtersMemoized,
-    timeRange: main$.getValue().timeRange,
-    relativeTimeRange,
+    timeRange,
+    relativeTimeRange: timeRangeRelative,
     columns: isEsqlMode ? esqlColumns : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
