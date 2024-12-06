@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
+require('../../../../../../src/setup_node_env');
 
 const { generateOAS } = require('./generate_oas');
 const express = require('express');
