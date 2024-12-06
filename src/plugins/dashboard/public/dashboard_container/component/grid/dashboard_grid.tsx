@@ -17,10 +17,7 @@ import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layo
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import {
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
@@ -40,11 +37,9 @@ export const DashboardGrid = ({
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
 
-  const animatePanelTransforms = useStateFromPublishingSubject(
-    dashboardInternalApi.animatePanelTransforms$
-  );
-  const [expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
+  const [animatePanelTransforms, expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
     useBatchedPublishingSubjects(
+      dashboardInternalApi.animatePanelTransforms$,
       dashboardApi.expandedPanelId,
       dashboardApi.focusedPanelId$,
       dashboardApi.panels$,
