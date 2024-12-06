@@ -5,41 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
-
+import React, { memo } from 'react';
 import { EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
-
 import * as i18n from './translations';
 
-interface SaveWithErrorsModalProps {
+interface ConfirmValidationErrorsModalProps {
   errors: string[];
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-const SaveWithErrorsModalComponent = ({
+export const ConfirmValidationErrorsModal = memo(function ConfirmValidationErrorsModal({
   errors,
   onCancel,
   onConfirm,
-}: SaveWithErrorsModalProps) => {
+}: ConfirmValidationErrorsModalProps): JSX.Element {
   return (
     <EuiConfirmModal
       data-test-subj="save-with-errors-confirmation-modal"
       title={i18n.SAVE_WITH_ERRORS_MODAL_TITLE}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      cancelButtonText={i18n.SAVE_WITH_ERRORS_CANCEL_BUTTON}
-      confirmButtonText={i18n.SAVE_WITH_ERRORS_CONFIRM_BUTTON}
+      cancelButtonText={i18n.CANCEL}
+      confirmButtonText={i18n.CONFIRM}
       defaultFocusedButton="confirm"
     >
       <>
-        {i18n.SAVE_WITH_ERRORS_MODAL_MESSAGE(errors.length)}
+        {i18n.SAVE_WITH_ERRORS_MESSAGE(errors.length)}
         <EuiSpacer size="s" />
         <ul>
-          {errors.map((validationError, idx) => {
+          {errors.map((error) => {
             return (
-              <li key={idx}>
-                <EuiText>{validationError}</EuiText>
+              <li key={error}>
+                <EuiText>{error}</EuiText>
               </li>
             );
           })}
@@ -47,7 +45,4 @@ const SaveWithErrorsModalComponent = ({
       </>
     </EuiConfirmModal>
   );
-};
-
-export const SaveWithErrorsModal = React.memo(SaveWithErrorsModalComponent);
-SaveWithErrorsModal.displayName = 'SaveWithErrorsModal';
+});
