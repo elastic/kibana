@@ -13,8 +13,8 @@ import {
   EuiText,
   type EuiThemeComputed,
   useEuiTheme,
+  EuiKeyPadMenuItem,
 } from '@elastic/eui';
-import classNames from 'classnames';
 
 import { css } from '@emotion/react';
 
@@ -22,6 +22,9 @@ export interface Value<T> {
   label: string;
   id: T;
   icon: string;
+  betaBadgeLabel?: string;
+  betaBadgeTooltipContent?: string;
+  betaBadgeIconType?: string;
 }
 
 const getStyles = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
@@ -68,32 +71,27 @@ export function ValuesGroup<T extends string = string>({
       <EuiText size="xs" css={styles.title}>
         {title}
       </EuiText>
+
       <EuiFlexGroup css={styles.group} gutterSize="s">
-        {values.map(({ id, label, icon }) => (
-          <button
-            onClick={() => {
-              onChange(id);
-            }}
-          >
-            <EuiFlexItem
-              key={id}
-              grow={false}
-              css={styles.item}
-              className={classNames('valueItem', styles.item, {
-                'valueItem--selected': selectedValue === id,
-              })}
-            >
-              <EuiFlexGroup direction="column" alignItems="center">
-                <EuiFlexItem>
-                  <EuiIcon type={icon} size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="xs">{label}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+        {values.map(
+          ({ id, label, icon, betaBadgeIconType, betaBadgeLabel, betaBadgeTooltipContent }) => (
+            <EuiFlexItem key={id} grow={false}>
+              <EuiKeyPadMenuItem
+                key={id}
+                label={label}
+                isSelected={selectedValue === id}
+                onClick={() => {
+                  onChange(id);
+                }}
+                betaBadgeLabel={betaBadgeLabel}
+                betaBadgeTooltipContent={betaBadgeTooltipContent}
+                betaBadgeIconType={betaBadgeIconType}
+              >
+                <EuiIcon type={icon} size="l" />
+              </EuiKeyPadMenuItem>
             </EuiFlexItem>
-          </button>
-        ))}
+          )
+        )}
       </EuiFlexGroup>
     </>
   );
