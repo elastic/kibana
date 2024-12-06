@@ -45,19 +45,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
-        .slsUser({
+        .slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/connectors',
-          roleAuthc,
-          internalReqHeader,
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
-      const res = await observabilityAIAssistantAPIClient.slsUser({
+      const res = await observabilityAIAssistantAPIClient.slsEditor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
-        roleAuthc,
-        internalReqHeader,
       });
 
       expect(res.body.length).to.be(0);
@@ -72,10 +68,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         roleAuthc,
       });
 
-      const res = await observabilityAIAssistantAPIClient.slsUser({
+      const res = await observabilityAIAssistantAPIClient.slsEditor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
-        internalReqHeader,
-        roleAuthc,
       });
 
       expect(res.body.length).to.be(1);

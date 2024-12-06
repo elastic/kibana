@@ -42,6 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     let editorRoleAuthc: RoleCredentials;
     let johnRoleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
       // Create API keys for 'editor' role, simulating different users
       johnRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -50,10 +51,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await createKnowledgeBaseModel(ml);
 
       await observabilityAIAssistantAPIClient
-        .slsUser({
+        .slsEditor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          roleAuthc: editorRoleAuthc,
-          internalReqHeader,
         })
         .expect(200);
     });
@@ -98,11 +97,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.slsUser({
+        const res = await observabilityAIAssistantAPIClient.slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-          roleAuthc: editorRoleAuthc,
-          internalReqHeader,
         });
+
         const instructions = res.body.userInstructions;
 
         const sortByDocId = (data: any) => sortBy(data, 'doc_id');

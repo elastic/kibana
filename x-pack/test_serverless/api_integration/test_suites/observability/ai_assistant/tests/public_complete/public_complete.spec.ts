@@ -158,8 +158,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     after(async () => {
       await deleteAllConversations({
         observabilityAIAssistantAPIClient,
-        internalReqHeader,
-        roleAuthc,
         log,
       });
       await deleteActionConnector({ supertest, connectorId, log, roleAuthc, internalReqHeader });
