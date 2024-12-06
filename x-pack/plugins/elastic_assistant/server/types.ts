@@ -121,7 +121,6 @@ export interface ElasticAssistantPluginStartDependencies {
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
-  security: SecurityServiceStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
 }
@@ -129,7 +128,7 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
-  auditLogger: AuditLogger;
+  auditLogger?: AuditLogger;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;

@@ -64,10 +64,8 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   manageGlobalKnowledgeBaseAIAssistant: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
-  auditLogger?: AuditLogger;
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
     super(options);
-    this.auditLogger = options.auditLogger;
   }
 
   public get isSetupInProgress() {
@@ -335,6 +333,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
+  // TODO make this function private
+  // no telemetry, no audit logs
   /**
    * Adds LangChain Documents to the knowledge base
    *
@@ -593,10 +593,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * @param global
    */
   public createKnowledgeBaseEntry = async ({
+    auditLogger,
     knowledgeBaseEntry,
     telemetry,
     global = false,
   }: {
+    auditLogger?: AuditLogger;
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
     global?: boolean;
     telemetry: AnalyticsServiceSetup;
@@ -619,6 +621,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
     const esClient = await this.options.elasticsearchClientPromise;
     return createKnowledgeBaseEntry({
+      auditLogger,
       esClient,
       knowledgeBaseIndex: this.indexTemplateAndPattern.alias,
       logger: this.options.logger,

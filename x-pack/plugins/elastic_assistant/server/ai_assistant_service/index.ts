@@ -7,7 +7,7 @@
 
 import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { AuthenticatedUser, Logger, ElasticsearchClient, AuditLogger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
@@ -65,7 +65,6 @@ export interface CreateAIAssistantClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser | null;
   licensing: Promise<LicensingApiRequestHandlerContext>;
-  auditLogger?: AuditLogger;
 }
 
 export type CreateDataStream = (params: {
@@ -399,7 +398,6 @@ export class AIAssistantService {
     }
 
     return new AIAssistantKnowledgeBaseDataClient({
-      auditLogger: opts.auditLogger,
       logger: this.options.logger.get('knowledgeBase'),
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
