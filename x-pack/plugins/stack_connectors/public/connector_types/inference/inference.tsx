@@ -45,6 +45,12 @@ export function getConnectorType(): InferenceConnector {
         query: [],
       };
 
+      if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
+        if (!subActionParams.messages?.length) {
+          errors.input.push(translations.getRequiredMessage('Messages'));
+        }
+      }
+
       if (
         subAction === SUB_ACTION.RERANK ||
         subAction === SUB_ACTION.COMPLETION ||

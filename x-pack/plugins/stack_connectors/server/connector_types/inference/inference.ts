@@ -21,6 +21,7 @@ import {
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
+  UnifiedChatCompleteParamsSchema,
 } from '../../../common/inference/schema';
 import {
   Config,
@@ -34,6 +35,8 @@ import {
   SparseEmbeddingResponse,
   TextEmbeddingParams,
   TextEmbeddingResponse,
+  UnifiedChatCompleteParams,
+  UnifiedChatCompleteResponse,
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 
@@ -67,6 +70,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     });
 
     this.registerSubAction({
+      name: SUB_ACTION.UNIFIED_COMPLETION,
+      method: 'performApiUnifiedCompletion',
+      schema: UnifiedChatCompleteParamsSchema,
+    });
+
+    this.registerSubAction({
       name: SUB_ACTION.RERANK,
       method: 'performApiRerank',
       schema: RerankParamsSchema,
@@ -97,15 +106,31 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @signal abort signal
    */
   public async performApiCompletion({
-    messages,
+    input,
     signal,
   }: ChatCompleteParams & { signal?: AbortSignal }): Promise<ChatCompleteResponse> {
     const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input: '', task_type: 'completion' },
+      { inference_id: this.inferenceId, input, task_type: 'completion' },
       false,
       signal
     );
     return response.completion!;
+  }
+
+  /**
+   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * @param input the text on which you want to perform the inference task.
+   * @signal abort signal
+   */
+  public async performApiUnifiedCompletion(
+    params: UnifiedChatCompleteParams & { signal?: AbortSignal }
+  ): Promise<UnifiedChatCompleteResponse> {
+    const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>({
+      method: 'POST',
+      path: `/_connector`,
+      body: params,
+    });
+    return response;
   }
 
   /**
@@ -199,11 +224,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private async streamAPI({
-    messages,
+    input,
     signal,
   }: ChatCompleteParams & { signal?: AbortSignal }): Promise<StreamingResponse> {
     const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input: '', task_type: this.taskType as InferenceTaskType },
+      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
       true,
       signal
     );
@@ -220,11 +245,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
    * @signal abort signal
    */
   public async performApiCompletionStream({
-    messages,
+    input,
     signal,
   }: ChatCompleteParams & { signal?: AbortSignal }): Promise<IncomingMessage> {
     const res = (await this.streamAPI({
-      messages,
+      input,
       signal,
     })) as unknown as IncomingMessage;
     return res;

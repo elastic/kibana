@@ -33,6 +33,7 @@ export enum ServiceProviderKeys {
 export const INFERENCE_CONNECTOR_ID = '.inference';
 export enum SUB_ACTION {
   COMPLETION = 'completion',
+  UNIFIED_COMPLETION = 'unified_completion',
   RERANK = 'rerank',
   TEXT_EMBEDDING = 'text_embedding',
   SPARSE_EMBEDDING = 'sparse_embedding',

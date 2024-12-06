@@ -17,6 +17,7 @@ import {
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
+  UnifiedChatCompleteParams,
 } from '../../../common/inference/types';
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
@@ -61,6 +62,16 @@ const InferenceServiceParamsFields: React.FunctionComponent<
         errors={errors}
         editSubActionParams={editSubActionParams}
         subActionParams={subActionParams as ChatCompleteParams}
+      />
+    );
+  }
+
+  if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
+    return (
+      <UnifiedCompletionParamsFields
+        errors={errors}
+        editSubActionParams={editSubActionParams}
+        subActionParams={subActionParams as UnifiedChatCompleteParams}
       />
     );
   }
@@ -119,16 +130,42 @@ const InferenceInput: React.FunctionComponent<{
   );
 };
 
+const UnifiedCompletionParamsFields: React.FunctionComponent<{
+  subActionParams: UnifiedChatCompleteParams;
+  errors: RuleFormParamsErrors;
+  editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
+}> = ({ subActionParams, editSubActionParams, errors }) => {
+  return (
+    <>
+      <JsonEditorWithMessageVariables
+        paramsProperty={'input'}
+        inputTargetValue={JSON.stringify(subActionParams)}
+        label={i18n.INPUT}
+        errors={errors.input as string[]}
+        onDocumentsChange={(json: string) => {
+          editSubActionParams({ input: json.trim() });
+        }}
+        onBlur={() => {
+          if (!subActionParams.messages) {
+            editSubActionParams({ input: [] });
+          }
+        }}
+        dataTestSubj="inference-inputJsonEditor"
+      />
+    </>
+  );
+};
+
 const CompletionParamsFields: React.FunctionComponent<{
   subActionParams: ChatCompleteParams;
   errors: RuleFormParamsErrors;
   editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
 }> = ({ subActionParams, editSubActionParams, errors }) => {
-  const { messages, n, tools, temperature, tool_choice, metadata, } = subActionParams;
+  const { input } = subActionParams;
 
   return (
     <InferenceInput
-      input={''}
+      input={input}
       editSubActionParams={editSubActionParams}
       inputError={errors.input as string}
     />

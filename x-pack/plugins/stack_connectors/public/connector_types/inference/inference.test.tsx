@@ -55,6 +55,10 @@ describe('OpenAI action params validation', () => {
       subAction: SUB_ACTION.SPARSE_EMBEDDING,
       subActionParams: { input: 'message test' },
     },
+    {
+      subAction: SUB_ACTION.UNIFIED_COMPLETION,
+      subActionParams: { input: 'message test' },
+    },
   ])(
     'validation succeeds when params are valid for subAction $subAction',
     async ({ subAction, subActionParams }) => {

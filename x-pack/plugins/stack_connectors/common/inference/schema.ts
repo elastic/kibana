@@ -19,6 +19,10 @@ export const SecretsSchema = schema.object({
   providerSecrets: schema.object({}, { unknowns: 'allow', defaultValue: {} }),
 });
 
+export const ChatCompleteParamsSchema = schema.object({
+  input: schema.string(),
+});
+
 // subset of OpenAI.ChatCompletionMessageParam https://github.com/openai/openai-node/blob/master/src/resources/chat/completions.ts
 const AIMessage = schema.object({
   role: schema.string(),
@@ -49,7 +53,7 @@ const AITool = schema.object({
 });
 
 // subset of OpenAI.ChatCompletionCreateParamsBase https://github.com/openai/openai-node/blob/master/src/resources/chat/completions.ts
-export const ChatCompleteParamsSchema = schema.object({
+export const UnifiedChatCompleteParamsSchema = schema.object({
   messages: schema.arrayOf(AIMessage),
   model: schema.maybe(schema.string()),
   /**
@@ -129,6 +133,48 @@ export const ChatCompleteParamsSchema = schema.object({
    * [Learn more](https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids).
    */
   user: schema.maybe(schema.string()),
+});
+
+export const UnifiedChatCompleteResponseSchema = schema.object({
+  id: schema.string(),
+  choices: schema.arrayOf(
+    schema.object({
+      finish_reason: schema.oneOf([
+        schema.literal('stop'),
+        schema.literal('length'),
+        schema.literal('tool_calls'),
+        schema.literal('content_filter'),
+        schema.literal('function_call'),
+      ]),
+      index: schema.number(),
+      message: schema.object({
+        content: schema.nullable(schema.string()),
+        refusal: schema.nullable(schema.string()),
+        role: schema.string(),
+        tool_calls: schema.arrayOf(
+          schema.object({
+            id: schema.string(),
+            function: schema.object({
+              arguments: schema.maybe(schema.string()),
+              name: schema.maybe(schema.string()),
+            }),
+            type: schema.string(),
+          })
+        ),
+      }),
+    }),
+    { defaultValue: [] }
+  ),
+  created: schema.maybe(schema.number()),
+  model: schema.maybe(schema.string()),
+  object: schema.maybe(schema.string()),
+  usage: schema.maybe(
+    schema.object({
+      completion_tokens: schema.maybe(schema.number()),
+      prompt_tokens: schema.maybe(schema.number()),
+      total_tokens: schema.maybe(schema.number()),
+    })
+  ),
 });
 
 export const ChatCompleteResponseSchema = schema.arrayOf(
