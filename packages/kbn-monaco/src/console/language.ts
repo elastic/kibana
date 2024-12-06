@@ -22,7 +22,7 @@ export const getParsedRequestsProvider = (model: monaco.editor.ITextModel | null
 
 // Theme id is the same as lang id, as we register only one theme resolver that's color mode aware
 export const CONSOLE_THEME_ID = CONSOLE_LANG_ID;
-monaco.editor.registerLanguageThemeDefinition(CONSOLE_THEME_ID, buildConsoleTheme);
+monaco.editor.registerLanguageThemeResolver(CONSOLE_THEME_ID, buildConsoleTheme);
 
 monaco.languages.onLanguage(CONSOLE_LANG_ID, async () => {
   workerProxyService.setup();
