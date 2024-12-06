@@ -14,7 +14,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../../../../typings/emotion.d.ts"
+    "../../../../../../typings/emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"
