@@ -358,7 +358,6 @@ packages/kbn-esql-utils @elastic/kibana-esql
 packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
 packages/kbn-event-annotation-common @elastic/kibana-visualizations
 packages/kbn-event-annotation-components @elastic/kibana-visualizations
-packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-field-types @elastic/kibana-data-discovery
@@ -846,7 +845,6 @@ x-pack/packages/observability/observability_utils/observability_utils_server @el
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
-x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
@@ -987,13 +985,15 @@ x-pack/plugins/streams @elastic/streams-program-team
 x-pack/plugins/streams_app @elastic/streams-program-team
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
-x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
-x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
+x-pack/solutions/security/packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
