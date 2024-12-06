@@ -452,7 +452,7 @@ export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], should
   }));
 }
 
-/** @deprecated — use getExpressionType instead (packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
+/** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
 export function extractTypeFromASTArg(
   arg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>

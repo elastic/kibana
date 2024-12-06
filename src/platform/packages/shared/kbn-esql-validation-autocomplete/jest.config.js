@@ -8,9 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-esql-validation-autocomplete'],
-  openHandlesTimeout: 0,
-  forceExit: true,
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-esql-validation-autocomplete'],
 };

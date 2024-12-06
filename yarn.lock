@@ -5560,7 +5560,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-validation-autocomplete@link:packages/kbn-esql-validation-autocomplete":
+"@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
 

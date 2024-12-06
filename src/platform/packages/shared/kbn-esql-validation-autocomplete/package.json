@@ -7,7 +7,7 @@
   "scripts": {
     "make:defs": "ts-node --transpileOnly ./scripts/generate_function_definitions.ts",
     "postmake:defs": "yarn run lint:fix:generated",
-    "lint:fix:generated": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-esql-validation-autocomplete/src/definitions/generated",
-    "test:validation": "cd ../.. && yarn test:jest ./packages/kbn-esql-validation-autocomplete/src/validation/validation.test.ts"
+    "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/generated",
+    "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.test.ts"
   }
 }

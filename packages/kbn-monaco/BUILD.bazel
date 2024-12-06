@@ -26,7 +26,7 @@ SRCS = glob(
 SHARED_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-ui-theme",
-  "//packages/kbn-esql-validation-autocomplete",
+  "//src/platform/packages/shared/kbn-esql-validation-autocomplete",
   "//src/platform/packages/shared/kbn-esql-ast",
   "@npm//antlr4",
   "@npm//monaco-editor",
