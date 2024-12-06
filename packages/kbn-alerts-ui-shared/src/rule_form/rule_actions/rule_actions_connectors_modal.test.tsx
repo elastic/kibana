@@ -195,6 +195,92 @@ describe('ruleActionsConnectorsModal', () => {
     expect(screen.queryByText('connector2')).not.toBeInTheDocument();
   });
 
+  test('should not render connector filter if hideInUi is true', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('1', {
+        id: 'actionType-1',
+        subtype: [
+          { id: 'actionType-1', name: 'connector-1' },
+          { id: 'actionType-2', name: 'connector-2' },
+        ],
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('2', {
+        id: 'actionType-2',
+        hideInUi: true,
+        subtype: [
+          { id: 'actionType-1', name: 'connector-1' },
+          { id: 'actionType-2', name: 'connector-2' },
+        ],
+      })
+    );
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
+    });
+
+    render(
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
+    );
+    const filterButtonGroup = screen.getByTestId('ruleActionsConnectorsModalFilterButtonGroup');
+    expect(within(filterButtonGroup).getByText('actionType: 1')).toBeInTheDocument();
+    expect(within(filterButtonGroup).queryByText('actionType: 2')).not.toBeInTheDocument();
+    expect(within(filterButtonGroup).getByText('All')).toBeInTheDocument();
+
+    expect(screen.getAllByTestId('ruleActionsConnectorsModalFilterButton').length).toEqual(2);
+  });
+
+  test('should display connectors if hideInUi is true and it has subtype', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('1', {
+        id: 'actionType-1',
+        subtype: [
+          { id: 'actionType-1', name: 'connector-1' },
+          { id: 'actionType-2', name: 'connector-2' },
+        ],
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('2', {
+        id: 'actionType-2',
+        hideInUi: true,
+        subtype: [
+          { id: 'actionType-1', name: 'connector-1' },
+          { id: 'actionType-2', name: 'connector-2' },
+        ],
+      })
+    );
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
+    });
+
+    render(
+      <RuleActionsConnectorsModal onClose={mockOnClose} onSelectConnector={mockOnSelectConnector} />
+    );
+    const filterButtonGroup = screen.getByTestId('ruleActionsConnectorsModalFilterButtonGroup');
+
+    await userEvent.click(within(filterButtonGroup).getByText('actionType: 1'));
+    expect(screen.getAllByTestId('ruleActionsConnectorsModalCard').length).toEqual(2);
+    expect(screen.getByText('connector-1')).toBeInTheDocument();
+    expect(screen.getByText('connector-2')).toBeInTheDocument();
+  });
+
   test('should not render connector if actionsParamsField doesnt exist', () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
