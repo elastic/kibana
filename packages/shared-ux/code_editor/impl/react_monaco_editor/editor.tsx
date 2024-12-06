@@ -182,11 +182,9 @@ export function MonacoEditor({
 
     // register theme configurations for supported languages
     monaco.languages.getLanguages().forEach(({ id: languageId }) => {
-      let languageThemeDefinition;
-      if (
-        Boolean((languageThemeDefinition = monaco.editor.getLanguageThemeDefinition(languageId)))
-      ) {
-        monaco.editor.defineTheme(languageId, languageThemeDefinition(euiTheme));
+      let languageThemeResolver;
+      if (Boolean((languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId)))) {
+        monaco.editor.defineTheme(languageId, languageThemeResolver(euiTheme));
       }
     });
   }, [euiTheme]);
