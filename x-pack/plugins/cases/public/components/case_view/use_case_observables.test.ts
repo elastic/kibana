@@ -22,6 +22,14 @@ const mockCaseData = {
       createdAt: '2024-12-02',
       updatedAt: '2024-12-02',
     },
+    {
+      typeKey: 'unknown-type',
+      value: '127.0.0.1',
+      description: null,
+      id: '6d44e478-3b35-4c48-929a-b22e98bfe178',
+      createdAt: '2024-12-02',
+      updatedAt: '2024-12-02',
+    },
   ],
 };
 
