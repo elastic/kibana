@@ -9,10 +9,9 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiHighlight, EuiSelectable } from '@elastic/eui';
+import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
@@ -34,6 +33,8 @@ export const OptionsListPopoverSuggestions = ({
     stateManager,
     displaySettings: { hideExists },
   } = useOptionsListContext();
+
+  const { euiTheme } = useEuiTheme();
 
   const [
     sort,
@@ -147,13 +148,13 @@ export const OptionsListPopoverSuggestions = ({
     if (!listbox) return;
 
     const { scrollTop, scrollHeight, clientHeight } = listbox;
-    if (scrollTop + clientHeight >= scrollHeight - parseInt(euiThemeVars.euiSizeXXL, 10)) {
+    if (scrollTop + clientHeight >= scrollHeight - parseInt(euiTheme.size.xxl, 10)) {
       // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
       // have to scroll **all the way** to the bottom in order to load more options
       stateManager.requestSize.next(totalCardinality ?? MAX_OPTIONS_LIST_REQUEST_SIZE);
       api.loadMoreSubject.next(null); // trigger refetch with loadMoreSubject
     }
-  }, [api.loadMoreSubject, stateManager.requestSize, totalCardinality]);
+  }, [api.loadMoreSubject, euiTheme.size.xxl, stateManager.requestSize, totalCardinality]);
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
