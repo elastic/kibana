@@ -22,5 +22,5 @@ export const dashboardsCardConfig: OnboardingCardConfig = {
         './dashboards_card'
       )
   ),
-  capabilitiesRequired: ['dashboard.show'],
+  capabilitiesRequired: ['dashboard_v2.show'],
 };

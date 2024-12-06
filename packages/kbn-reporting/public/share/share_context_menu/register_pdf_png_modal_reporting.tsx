@@ -64,7 +64,7 @@ export const reportingExportModalProvider = ({
     const licenseDisabled = !enableLinks;
 
     const capabilityHasDashboardScreenshotReporting =
-      application.capabilities.dashboard?.generateScreenshot === true;
+      application.capabilities.dashboard_v2?.generateScreenshot === true;
     const capabilityHasVisualizeScreenshotReporting =
       application.capabilities.visualize?.generateScreenshot === true;
 

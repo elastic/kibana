@@ -331,7 +331,7 @@ export class VisualizationsPlugin
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
           visualizeCapabilities: coreStart.application.capabilities.visualize,
-          dashboardCapabilities: coreStart.application.capabilities.dashboard,
+          dashboardCapabilities: coreStart.application.capabilities.dashboard_v2,
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,

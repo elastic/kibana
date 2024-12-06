@@ -192,7 +192,7 @@ describe('Relationships', () => {
               icon: 'dashboardApp',
               inAppUrl: {
                 path: '/app/kibana#/dashboard/1',
-                uiCapabilitiesPath: 'dashboard.show',
+                uiCapabilitiesPath: 'dashboard_v2.show',
               },
               title: 'My Dashboard 1',
             },
@@ -205,7 +205,7 @@ describe('Relationships', () => {
               icon: 'dashboardApp',
               inAppUrl: {
                 path: '/app/kibana#/dashboard/2',
-                uiCapabilitiesPath: 'dashboard.show',
+                uiCapabilitiesPath: 'dashboard_v2.show',
               },
               title: 'My Dashboard 2',
             },
@@ -291,7 +291,7 @@ describe('Relationships', () => {
           icon: 'dashboardApp',
           inAppUrl: {
             path: '/dashboard/1',
-            uiCapabilitiesPath: 'dashboard.show',
+            uiCapabilitiesPath: 'dashboard_v2.show',
           },
         },
       },
@@ -332,7 +332,7 @@ describe('Relationships', () => {
           icon: 'dashboardApp',
           inAppUrl: {
             path: '/dashboard/1',
-            uiCapabilitiesPath: 'dashboard.show',
+            uiCapabilitiesPath: 'dashboard_v2.show',
           },
         },
       },

@@ -154,7 +154,7 @@ export function initializeEditApi(
     return (
       Boolean(capabilities.visualize.save) ||
       (!getState().savedObjectId &&
-        Boolean(capabilities.dashboard?.showWriteControls) &&
+        Boolean(capabilities.dashboard_v2?.showWriteControls) &&
         Boolean(capabilities.visualize.show))
     );
   };

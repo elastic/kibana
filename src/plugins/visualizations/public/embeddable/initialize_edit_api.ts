@@ -77,7 +77,7 @@ export function initializeEditApi({
           const isByValue = !savedObjectId$.getValue();
           if (isByValue)
             return Boolean(
-              capabilities.dashboard?.showWriteControls && capabilities.visualize?.show
+              capabilities.dashboard_v2?.showWriteControls && capabilities.visualize?.show
             );
           else return Boolean(capabilities.visualize?.save);
         },

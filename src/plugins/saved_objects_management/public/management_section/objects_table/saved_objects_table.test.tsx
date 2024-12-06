@@ -193,7 +193,7 @@ describe('SavedObjectsTable', () => {
             icon: 'dashboardApp',
             inAppUrl: {
               path: '/dashboard/3',
-              uiCapabilitiesPath: 'dashboard.show',
+              uiCapabilitiesPath: 'dashboard_v2.show',
             },
           },
         },

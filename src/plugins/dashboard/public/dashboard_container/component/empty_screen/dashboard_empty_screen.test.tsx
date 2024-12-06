@@ -55,7 +55,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const component = mountComponent(ViewMode.VIEW);
     expect(component.render()).toMatchSnapshot();
@@ -70,7 +70,7 @@ describe('DashboardEmptyScreen', () => {
 
   // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
   test('renders correctly with readonly and edit mode', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const component = mountComponent(ViewMode.EDIT);
     expect(component.render()).toMatchSnapshot();

@@ -811,7 +811,7 @@ exports[`Relationships should render visualizations normally 1`] = `
               "icon": "dashboardApp",
               "inAppUrl": Object {
                 "path": "/app/kibana#/dashboard/1",
-                "uiCapabilitiesPath": "dashboard.show",
+                "uiCapabilitiesPath": "dashboard_v2.show",
               },
               "title": "My Dashboard 1",
             },
@@ -824,7 +824,7 @@ exports[`Relationships should render visualizations normally 1`] = `
               "icon": "dashboardApp",
               "inAppUrl": Object {
                 "path": "/app/kibana#/dashboard/2",
-                "uiCapabilitiesPath": "dashboard.show",
+                "uiCapabilitiesPath": "dashboard_v2.show",
               },
               "title": "My Dashboard 2",
             },

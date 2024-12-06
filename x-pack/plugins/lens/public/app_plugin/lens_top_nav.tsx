@@ -453,7 +453,7 @@ export const LensTopNavMenu = ({
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
   const savingToDashboardPermitted = Boolean(
-    isSaveable && application.capabilities.dashboard?.showWriteControls
+    isSaveable && application.capabilities.dashboard_v2?.showWriteControls
   );
 
   const defaultLensTitle = i18n.translate('xpack.lens.app.share.defaultDashboardTitle', {

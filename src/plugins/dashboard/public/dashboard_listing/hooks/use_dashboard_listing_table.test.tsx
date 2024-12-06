@@ -251,7 +251,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('deleteItems should be undefined when showWriteControls equals false', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const { result } = renderHook(() =>
       useDashboardListingTable({
@@ -264,7 +264,7 @@ describe('useDashboardListingTable', () => {
   });
 
   test('editItem should be undefined when showWriteControls equals false', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const { result } = renderHook(() =>
       useDashboardListingTable({
