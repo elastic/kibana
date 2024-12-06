@@ -19,4 +19,7 @@ export enum ServerlessRoleName {
   ENDPOINT_OPERATIONS_ANALYST = 'endpoint_operations_analyst',
   ENDPOINT_POLICY_MANAGER = 'endpoint_policy_manager',
   READER = 'reader', // custom role to test lack of permissions
+  ADMIN = 'admin', // default Cloud role
+  SUPERUSER = 'system_indices_superuser', // this role is used to clean up the environment only and should
+  // not be used in any tests
 }
