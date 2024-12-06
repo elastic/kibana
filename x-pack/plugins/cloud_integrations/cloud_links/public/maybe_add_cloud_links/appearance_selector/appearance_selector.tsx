@@ -49,14 +49,15 @@ function AppearanceSelectorUI({
       toMountPoint(
         <AppearanceModal closeModal={closeModal} uiSettingsClient={core.uiSettings} />,
         core
-      )
+      ),
+      { 'data-test-subj': 'appearanceModal', maxWidth: 600 }
     );
   };
 
   return (
     <>
       <EuiContextMenuItem
-        icon="broom"
+        icon="brush"
         size="s"
         onClick={() => {
           openModal();
