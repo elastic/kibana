@@ -14,7 +14,7 @@ import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-acti
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, RangeFilter } from '@kbn/es-query';
-import { getOverlays, getIndexPatterns } from '../services';
+import { getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../apply_filters';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
@@ -74,7 +74,7 @@ export function createFilterAction(
         );
 
         const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
-          const overlay = getOverlays().openModal(
+          const overlay = coreStart.overlays.openModal(
             toMountPoint(
               applyFiltersPopover(
                 filters,

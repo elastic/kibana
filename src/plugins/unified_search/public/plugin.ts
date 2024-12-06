@@ -14,14 +14,7 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createQueryStringInput } from './query_string_input/get_query_string_input';
 import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import type { ConfigSchema } from '../server/config';
-import {
-  setIndexPatterns,
-  setTheme,
-  setOverlays,
-  setAnalytics,
-  setI18n,
-  setUserProfile,
-} from './services';
+import { setCoreStart, setIndexPatterns } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -79,11 +72,7 @@ export class UnifiedSearchPublicPlugin
     core: CoreStart,
     { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
-    setAnalytics(core.analytics);
-    setI18n(core.i18n);
-    setTheme(core.theme);
-    setUserProfile(core.userProfile);
-    setOverlays(core.overlays);
+    setCoreStart(core);
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
 
