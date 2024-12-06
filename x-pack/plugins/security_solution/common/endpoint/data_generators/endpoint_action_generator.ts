@@ -147,6 +147,17 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (command === 'runscript') {
+      if (!output) {
+        output = {
+          type: 'json',
+          content: {
+            code: 'ra_runscript_success_done',
+          },
+        };
+      }
+    }
+
     if (command === 'execute') {
       if (!output) {
         output = this.generateExecuteActionResponseOutput();

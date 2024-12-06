@@ -316,7 +316,14 @@ describe('When using `getActionList()', () => {
               errors: undefined,
             },
           },
-          outputs: {},
+          outputs: {
+            'agent-a': {
+              content: {
+                code: 'ra_runscript_success_done',
+              },
+              type: 'json',
+            },
+          },
         },
       ],
       total: 1,

@@ -299,6 +299,13 @@ const CODES = Object.freeze({
     'xpack.securitySolution.endpointActionResponseCodes.scan.success',
     { defaultMessage: 'Scan complete' }
   ),
+
+  // Dev:
+  // runscript success/competed
+  ra_runscript_success_done: i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.runscript.success',
+    { defaultMessage: 'Runscript complete' }
+  ),
 });
 
 /**
