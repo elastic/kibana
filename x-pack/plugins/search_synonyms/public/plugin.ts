@@ -8,7 +8,6 @@
 import type {
   CoreSetup,
   Plugin,
-  CoreStart,
   PluginInitializerContext,
   AppMountParameters,
 } from '@kbn/core/public';
@@ -17,19 +16,27 @@ import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
+  SearchSynonymsConfigType,
   SearchSynonymsPluginSetup,
   SearchSynonymsPluginStart,
 } from './types';
+import { SYNONYMS_UI_FLAG } from '.';
 
 export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart>
 {
-  constructor(_: PluginInitializerContext) {}
+  private config: SearchSynonymsConfigType;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<SearchSynonymsConfigType>();
+  }
 
   public setup(
     core: CoreSetup<AppPluginStartDependencies, SearchSynonymsPluginStart>,
-    deps: AppPluginSetupDependencies
+    _: AppPluginSetupDependencies
   ): SearchSynonymsPluginSetup {
+    if (!this.config.ui?.enabled && !core.uiSettings.get<boolean>(SYNONYMS_UI_FLAG, false)) {
+      return {};
+    }
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/elasticsearch/synonyms',
@@ -61,7 +68,7 @@ export class SearchSynonymsPlugin
     return {};
   }
 
-  public start(core: CoreStart, deps: AppPluginStartDependencies): SearchSynonymsPluginStart {
+  public start(): SearchSynonymsPluginStart {
     return {};
   }
 

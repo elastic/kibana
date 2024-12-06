@@ -12,3 +12,5 @@ import { SearchSynonymsPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SearchSynonymsPlugin(initializerContext);
 }
+
+export const SYNONYMS_UI_FLAG = 'searchSynonyms:synonymsEnabled';
