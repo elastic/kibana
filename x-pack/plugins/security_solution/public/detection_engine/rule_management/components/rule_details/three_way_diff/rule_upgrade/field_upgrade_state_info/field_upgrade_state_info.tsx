@@ -21,6 +21,13 @@ interface FieldUpgradeStateInfoProps {
 export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JSX.Element {
   const { color, badge, title, description } = useMemo(() => {
     switch (state) {
+      case FieldUpgradeState.NoUpdate:
+        return {
+          color: 'success',
+          title: i18n.NO_UPDATE,
+          description: i18n.NO_UPDATE_DESCRIPTION,
+        };
+
       case FieldUpgradeState.NoConflict:
         return {
           color: 'success',

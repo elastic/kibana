@@ -15,17 +15,24 @@ import {
 import * as i18n from './translations';
 
 interface RuleUpgradeInfoBarProps {
+  totalNumOfFields: number;
   numOfFieldsWithUpdates: number;
   numOfConflicts: number;
 }
 
 export function RuleUpgradeInfoBar({
+  totalNumOfFields,
   numOfFieldsWithUpdates,
   numOfConflicts,
 }: RuleUpgradeInfoBarProps): JSX.Element {
   return (
     <UtilityBar>
       <UtilityBarSection>
+        <UtilityBarGroup>
+          <UtilityBarText dataTestSubj="showingRules">
+            {i18n.TOTAL_NUM_OF_FIELDS(totalNumOfFields)}
+          </UtilityBarText>
+        </UtilityBarGroup>
         <UtilityBarGroup>
           <UtilityBarText dataTestSubj="showingRules">
             {i18n.NUM_OF_FIELDS_WITH_UPDATES(numOfFieldsWithUpdates)}

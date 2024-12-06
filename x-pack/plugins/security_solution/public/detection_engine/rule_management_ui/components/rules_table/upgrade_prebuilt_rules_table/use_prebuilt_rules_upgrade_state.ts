@@ -97,11 +97,13 @@ function calcFieldsState(
       continue;
     }
 
-    const conflict = fieldsDiff[fieldName]?.conflict ?? ThreeWayDiffConflict.NONE;
+    const fieldDiff = fieldsDiff[fieldName];
 
-    switch (conflict) {
+    switch (fieldDiff.conflict) {
       case ThreeWayDiffConflict.NONE:
-        fieldsState[fieldName] = { state: FieldUpgradeState.NoConflict };
+        fieldsState[fieldName] = {
+          state: fieldDiff.has_update ? FieldUpgradeState.NoConflict : FieldUpgradeState.NoUpdate,
+        };
         break;
 
       case ThreeWayDiffConflict.SOLVABLE:
@@ -113,7 +115,7 @@ function calcFieldsState(
         break;
 
       default:
-        assertUnreachable(conflict);
+        assertUnreachable(fieldDiff.conflict);
     }
   }
 

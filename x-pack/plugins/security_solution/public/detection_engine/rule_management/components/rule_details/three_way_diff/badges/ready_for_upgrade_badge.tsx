@@ -6,9 +6,16 @@
  */
 
 import React from 'react';
+import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import * as i18n from './translations';
 
-export function ReadyForUpgradeBadge(): JSX.Element {
-  return <EuiBadge color="success">{i18n.READY_FOR_UPDATE}</EuiBadge>;
+interface ReadyForUpgradeBadgeProps {
+  color?: EuiBadgeProps['color'];
+}
+
+export function ReadyForUpgradeBadge({
+  color = 'success',
+}: ReadyForUpgradeBadgeProps): JSX.Element {
+  return <EuiBadge color={color}>{i18n.READY_FOR_UPDATE}</EuiBadge>;
 }

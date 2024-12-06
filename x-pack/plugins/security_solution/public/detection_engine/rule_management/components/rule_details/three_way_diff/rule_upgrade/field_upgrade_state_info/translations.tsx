@@ -7,6 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const NO_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.noUpdate',
+  {
+    defaultMessage: 'No update',
+  }
+);
+
+export const NO_UPDATE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.noUpdateDescription',
+  {
+    defaultMessage:
+      'The field was modified after rule installation but does not have Elastic update.',
+  }
+);
+
 export const NO_CONFLICT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.noConflict',
   {

@@ -29,9 +29,9 @@ export function FieldFinalSideHeader(): JSX.Element {
     setRuleFieldResolvedValue,
   } = useFieldUpgradeContext();
   const { form } = useFieldEditFormContext();
-  const isFieldReadyForUpgrade =
-    fieldUpgradeState === FieldUpgradeState.NoConflict ||
-    fieldUpgradeState === FieldUpgradeState.Accepted;
+  const hasConflict =
+    fieldUpgradeState === FieldUpgradeState.SolvableConflict ||
+    fieldUpgradeState === FieldUpgradeState.NonSolvableConflict;
 
   const handleAccept = useCallback(
     () =>
@@ -49,7 +49,7 @@ export function FieldFinalSideHeader(): JSX.Element {
       return (
         <FieldUpgradeSideHeader>
           <StaticHeaderContent>
-            {!isFieldReadyForUpgrade && (
+            {hasConflict && (
               <EuiButton iconType="checkInCircleFilled" size="s" onClick={handleAccept}>
                 {i18n.ACCEPT}
               </EuiButton>
@@ -67,7 +67,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               disabled={!form?.isValid}
               onClick={handleSave}
             >
-              {!isFieldReadyForUpgrade ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
+              {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
             </EuiButton>
           </StaticHeaderContent>
         </FieldUpgradeSideHeader>

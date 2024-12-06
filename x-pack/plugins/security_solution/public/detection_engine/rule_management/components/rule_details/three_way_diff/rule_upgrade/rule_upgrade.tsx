@@ -27,6 +27,7 @@ export const RuleUpgrade = memo(function RuleUpgrade({
   ruleUpgradeState,
   setRuleFieldResolvedValue,
 }: RuleUpgradeProps): JSX.Element {
+  const totalNumOfFields = calcTotalNumOfFields(ruleUpgradeState);
   const numOfFieldsWithUpdates = calcNumOfFieldsWithUpdates(ruleUpgradeState);
   const numOfSolvableConflicts = calcNumOfSolvableConflicts(ruleUpgradeState);
   const numOfNonSolvableConflicts = calcNumOfNonSolvableConflicts(ruleUpgradeState);
@@ -38,6 +39,7 @@ export const RuleUpgrade = memo(function RuleUpgrade({
     <>
       <EuiSpacer size="s" />
       <RuleUpgradeInfoBar
+        totalNumOfFields={totalNumOfFields}
         numOfFieldsWithUpdates={numOfFieldsWithUpdates}
         numOfConflicts={numOfSolvableConflicts + numOfNonSolvableConflicts}
       />
@@ -61,8 +63,14 @@ export const RuleUpgrade = memo(function RuleUpgrade({
   );
 });
 
-function calcNumOfFieldsWithUpdates(ruleUpgradeState: RuleUpgradeState): number {
+function calcTotalNumOfFields(ruleUpgradeState: RuleUpgradeState): number {
   return Object.keys(ruleUpgradeState.fieldsUpgradeState).length;
+}
+
+function calcNumOfFieldsWithUpdates(ruleUpgradeState: RuleUpgradeState): number {
+  return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
+    ({ state }) => state !== FieldUpgradeState.NoUpdate
+  ).length;
 }
 
 function calcNumOfSolvableConflicts(ruleUpgradeState: RuleUpgradeState): number {
