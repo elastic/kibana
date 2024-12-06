@@ -61,6 +61,7 @@ function createReadmeFile(
 
   const renderedTemplate = template.render({
     package_name: integrationName,
+    datastreams,
     fields,
   });
 

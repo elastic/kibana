@@ -7,10 +7,10 @@ Check the [overview guidelines](https://www.elastic.co/guide/en/integrations-dev
 
 ## Datastreams
 
-{% for data_stream in fields %}
-### {{ data_stream.datastream }}
+{% for datastream in datastreams %}
+### {{ datastream.title }}
 
-{{ data_stream.description }}
+{{ datastream.description }}
 {% endfor %}
 
 ## Requirements
