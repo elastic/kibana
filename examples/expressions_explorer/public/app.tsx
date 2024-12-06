@@ -54,16 +54,13 @@ const ExpressionsExplorer = ({
   actions,
   uiSettings,
   settings,
-  i18n,
-  theme,
-  userProfile,
+  ...startServices
 }: Props) => {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,
-    theme,
+    theme: startServices.theme,
   });
-  const startServices = { i18n, theme, userProfile };
   return (
     <KibanaRenderContextProvider {...startServices}>
       <KibanaReactContextProvider>

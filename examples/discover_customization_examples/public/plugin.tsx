@@ -52,11 +52,11 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
       title: PLUGIN_NAME,
       visibleIn: [],
       mount: async (appMountParams) => {
-        const [{ userProfile }, { discover, data }] = await core.getStartServices();
+        const [coreStart, { discover, data }] = await core.getStartServices();
 
         ReactDOM.render(
           <I18nProvider>
-            <KibanaThemeProvider theme={core.theme} userProfile={userProfile}>
+            <KibanaThemeProvider {...coreStart}>
               <Router history={appMountParams.history}>
                 <Routes>
                   <Route>

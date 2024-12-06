@@ -146,10 +146,10 @@ export class SearchInterceptor {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart, depsStart]) => {
-      const { application, docLinks, analytics, i18n: i18nStart, theme, userProfile } = coreStart;
+      const { application, docLinks, ...startRenderServices } = coreStart;
       this.application = application;
       this.docLinks = docLinks;
-      this.startRenderServices = { analytics, i18n: i18nStart, theme, userProfile };
+      this.startRenderServices = startRenderServices;
       this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
     });
 

@@ -226,17 +226,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    {
-      analytics,
-      http,
-      theme,
-      uiSettings,
-      userProfile,
-      chrome,
-      application,
-      notifications,
-      i18n: i18nStart,
-    }: CoreStart,
+    { http, uiSettings, chrome, application, notifications, ...startServices }: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -255,12 +245,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
 
     const warningsServices = {
-      analytics,
-      i18n: i18nStart,
       inspector,
       notifications,
-      theme,
-      userProfile,
+      ...startServices,
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
@@ -316,7 +303,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               tourDisabled: screenshotMode.isScreenshotMode(),
             })
           ),
-          { analytics, i18n: i18nStart, theme, userProfile }
+          startServices
         ),
       });
     }

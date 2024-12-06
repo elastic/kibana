@@ -23,6 +23,8 @@ import type {
   AnalyticsServiceStart,
   AppMountParameters,
   ScopedHistory,
+  ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type {
   FilterManager,
@@ -96,8 +98,8 @@ export interface DiscoverServices {
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme: CoreStart['theme'];
-  userProfile: CoreStart['userProfile'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
