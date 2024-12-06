@@ -15,7 +15,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         names: [
           '.alerts-security.alerts-default',
           '.alerts-security.alerts-*',
-          '.siem-signals-*',
+          '.siemV2-signals-*',
           '.items-*',
           '.lists-*',
           '.logs-*',
@@ -42,7 +42,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         osquery: ['all'],
         savedObjectsManagement: ['all'],
         savedObjectsTagging: ['all'],
-        siem: [
+        siemV2: [
           'minimal_all',
           'endpoint_list_all',
           'endpoint_list_read',

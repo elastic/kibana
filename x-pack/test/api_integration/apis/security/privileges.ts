@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       actions: ['all', 'read', 'minimal_all', 'minimal_read'],
       stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       ml: ['all', 'read', 'minimal_all', 'minimal_read'],
-      siem: [
+      siemV2: [
         'all',
         'read',
         'minimal_all',

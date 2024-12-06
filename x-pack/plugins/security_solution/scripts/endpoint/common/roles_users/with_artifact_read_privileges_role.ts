@@ -17,7 +17,7 @@ export const getWithArtifactReadPrivilegesRole: () => Omit<Role, 'name'> = () =>
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: [
+          siemV2: [
             'minimal_all',
             'blocklist_read',
             'trusted_applications_read',

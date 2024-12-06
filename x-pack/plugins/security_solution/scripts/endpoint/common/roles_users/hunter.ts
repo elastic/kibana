@@ -17,7 +17,7 @@ export const getHunter: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: [
+          siemV2: [
             'minimal_all',
 
             'policy_management_read',

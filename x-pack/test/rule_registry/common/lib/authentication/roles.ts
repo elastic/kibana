@@ -40,7 +40,7 @@ export const securitySolutionOnlyAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['space1'],
       },
@@ -57,7 +57,7 @@ export const securitySolutionOnlyAllSpace2: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['space2'],
       },
@@ -74,7 +74,7 @@ export const securitySolutionOnlyRead: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
         },
         spaces: ['space1'],
       },
@@ -91,7 +91,7 @@ export const securitySolutionOnlyReadSpace2: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
         },
         spaces: ['space2'],
       },
@@ -183,7 +183,7 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['*'],
       },
@@ -205,7 +205,7 @@ export const securitySolutionOnlyAllSpacesAllWithReadESIndices: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
         },
         spaces: ['*'],
       },
@@ -222,7 +222,7 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
         },
         spaces: ['*'],
       },
