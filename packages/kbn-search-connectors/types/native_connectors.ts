@@ -84,8 +84,6 @@ const ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL = translate(
   }
 );
 
-const;
-
 const getEnableDocumentLevelSecurityTooltip = (serviceName: string) =>
   translate('searchConnectors.nativeConnectors.enableDLS.tooltip', {
     defaultMessage:
