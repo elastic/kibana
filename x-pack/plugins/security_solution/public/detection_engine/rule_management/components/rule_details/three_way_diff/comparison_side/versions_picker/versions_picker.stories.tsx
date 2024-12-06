@@ -16,20 +16,20 @@ export default {
   argTypes: {
     hasBaseVersion: {
       control: 'boolean',
-      description: 'Indicates whether the base version of a field is available',
+      description: 'Indicates whether comparisons with the base version should be shown',
       defaultValue: true,
     },
   },
 };
 
-const Template: Story<{ hasBaseVersion: boolean }> = (args) => {
+const Template: Story<{ shouldShowBaseVersion: boolean }> = (args) => {
   const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
     SelectedVersions.CurrentFinal
   );
 
   return (
     <VersionsPicker
-      hasBaseVersion={args.hasBaseVersion}
+      shouldShowBaseVersion={args.shouldShowBaseVersion}
       selectedVersions={selectedVersions}
       onChange={setSelectedVersions}
     />
@@ -38,10 +38,10 @@ const Template: Story<{ hasBaseVersion: boolean }> = (args) => {
 
 export const Default = Template.bind({});
 Default.args = {
-  hasBaseVersion: true,
+  shouldShowBaseVersion: true,
 };
 
 export const NoBaseVersion = Template.bind({});
 NoBaseVersion.args = {
-  hasBaseVersion: false,
+  shouldShowBaseVersion: false,
 };
