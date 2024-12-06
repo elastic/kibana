@@ -867,6 +867,7 @@ x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/plugins/aiops @elastic/ml-ui
 x-pack/plugins/alerting @elastic/response-ops
+x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/plugins/cases @elastic/response-ops
