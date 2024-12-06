@@ -30,7 +30,7 @@ describe('classicNavigationFactory', function () {
     },
     {
       id: 'enterpriseSearchContent:webCrawlers',
-      title: 'Web crawlers',
+      title: 'Web Crawlers',
       url: '/app/enterprise_search/content/crawlers',
     },
   ];

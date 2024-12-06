@@ -493,7 +493,7 @@
         "label": "KibanaThemeProvider",
         "description": [],
         "signature": [
-          "({ children, theme$, modify }: ",
+          "({ children, theme$, userProfile, modify, }: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -513,7 +513,7 @@
             "id": "def-public.KibanaThemeProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, theme$, modify }",
+            "label": "{\n  children,\n  theme$,\n  userProfile,\n  modify,\n}",
             "description": [],
             "signature": [
               {
@@ -937,7 +937,7 @@
         "label": "toMountPoint",
         "description": [],
         "signature": [
-          "(node: React.ReactNode, { analytics, theme$ }?: ",
+          "(node: React.ReactNode, { analytics, theme$, userProfile }?: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -989,7 +989,7 @@
             "id": "def-public.toMountPoint.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ analytics, theme$ }",
+            "label": "{ analytics, theme$, userProfile }",
             "description": [],
             "signature": [
               {
@@ -1446,7 +1446,9 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.wrapWithTheme",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "wrapWithTheme",
         "description": [],
         "signature": [
@@ -1460,11 +1462,37 @@
             "section": "def-common.KibanaTheme",
             "text": "KibanaTheme"
           },
-          ">) => React.JSX.Element"
+          ">, userProfile?: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          },
+          " | undefined) => React.JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/theme.tsx",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "aiAssistantManagementSelection",
+            "path": "src/plugins/ai_assistant_management/selection/public/management_section/mount_section.tsx"
+          },
+          {
+            "plugin": "aiAssistantManagementSelection",
+            "path": "src/plugins/ai_assistant_management/selection/public/management_section/mount_section.tsx"
+          },
+          {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/app.tsx"
+          },
+          {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/plugins/observability_solution/observability_ai_assistant_management/public/app.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -1504,6 +1532,28 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.wrapWithTheme.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/theme.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2193,6 +2243,27 @@
             "path": "src/plugins/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-public.ToMountPointOptions.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2658,7 +2729,7 @@
             "section": "def-common.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
-          ", \"children\" | \"modify\"> & ",
+          ", \"children\" | \"userProfile\" | \"modify\"> & ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
             "scope": "common",
