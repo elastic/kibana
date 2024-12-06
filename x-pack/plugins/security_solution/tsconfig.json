@@ -205,8 +205,6 @@
     "@kbn/core-theme-browser",
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/config",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
@@ -231,6 +229,7 @@
     "@kbn/langchain",
     "@kbn/react-hooks",
     "@kbn/index-adapter",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/llm-tasks-plugin"
   ]
 }
