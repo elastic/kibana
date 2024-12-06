@@ -29,6 +29,11 @@ export const entitySourceDefinitionRt = z.object({
 
 export type EntitySourceDefinition = z.TypeOf<typeof entitySourceDefinitionRt>;
 
+export interface BuiltInDefinition {
+  type: EntityTypeDefinition;
+  sources: EntitySourceDefinition[];
+}
+
 // Stored definitions
 
 export type DefinitionType = 'type' | 'source';
