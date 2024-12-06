@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ObjectType, schema, Type } from '@kbn/config-schema';
+import { AnyType, ConditionalType, ObjectType, schema, Type } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
@@ -36,6 +36,21 @@ import {
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../../common/content_management';
 import { getResultV3ToV2 } from './transform_utils';
+
+function buildConditionalSchema(conditions: Array<{ type: string; schema: Type<any> }>) {
+  return conditions.reduce<ConditionalType<string, Type<any>, Type<any>> | AnyType>(
+    (acc, condition) => {
+      return schema.conditional(
+        // a panelRefName means the panel is by-reference, so don't validate the panelConfig
+        schema.siblingRef('.panelRefName'),
+        schema.string(),
+        schema.any(),
+        schema.conditional(schema.siblingRef('.type'), condition.type, condition.schema, acc)
+      );
+    },
+    schema.any()
+  );
+}
 
 const apiError = schema.object({
   error: schema.string(),
@@ -251,8 +266,7 @@ export const gridDataSchema = schema.object({
   }),
 });
 
-const genericPanelConfig = schema.object({
-  // type: schema.maybe(schema.string()),
+const commonPanelConfigSchema = schema.object({
   version: schema.maybe(
     schema.string({
       meta: { description: 'The version of the embeddable in the panel.' },
@@ -291,16 +305,15 @@ const genericPanelConfig = schema.object({
 const generatePanelConfig = (getValidationSchema: () => ObjectType<any>) => {
   if (getValidationSchema) {
     const validationSchema = getValidationSchema();
-    const panelConfig = schema.intersection([genericPanelConfig, validationSchema]);
-    return panelConfig;
+    return schema.intersection([commonPanelConfigSchema, validationSchema]);
   }
-  return genericPanelConfig;
+  return commonPanelConfigSchema.extendsDeep({ unknowns: 'allow' });
 };
 
-export const getPanelSchema = (embeddableId: string, embeddable: EmbeddableStart) => {
+const getPanelSchema = (embeddableId: string, embeddable: EmbeddableStart) => {
   const panelConfigSchema = generatePanelConfig(embeddable.getValidationSchema(embeddableId));
   return schema.object({
-    panelConfig: panelConfigSchema.extendsDeep({ unknowns: 'ignore' }),
+    panelConfig: panelConfigSchema,
     id: schema.maybe(
       schema.string({ meta: { description: 'The saved object id for by reference panels' } })
     ),
@@ -358,11 +371,22 @@ export const searchResultsAttributesSchema = schema.object({
 });
 
 export const getDashboardAttributesSchema = (embeddable: EmbeddableStart) => {
-  const panelSchemas = schema.oneOf(
-    embeddable
-      .getRegisteredEmbeddableFactories()
-      .map((embeddableId: string) => getPanelSchema(embeddableId, embeddable))
-  );
+  const panelSchemas = embeddable
+    .getRegisteredEmbeddableFactories()
+    .filter(
+      (embeddableId: string) =>
+        ![
+          'control_group',
+          'dashboard',
+          'optionsListControl',
+          'rangeSliderControl',
+          'timeSlider',
+        ].includes(embeddableId)
+    )
+    .map((embeddableId: string) => ({
+      type: embeddableId,
+      schema: getPanelSchema(embeddableId, embeddable),
+    }));
 
   return searchResultsAttributesSchema.extends({
     // Search
@@ -426,7 +450,7 @@ export const getDashboardAttributesSchema = (embeddable: EmbeddableStart) => {
 
     // Dashboard Content
     controlGroupInput: schema.maybe(controlGroupInputSchema),
-    panels: schema.arrayOf(panelSchemas, { defaultValue: [] }),
+    panels: schema.arrayOf(buildConditionalSchema(panelSchemas), { defaultValue: [] }),
     options: optionsSchema,
     version: schema.maybe(schema.number({ meta: { deprecated: true } })),
   });

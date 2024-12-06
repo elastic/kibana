@@ -5,14 +5,32 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { AnyType, ConditionalType, Type, schema } from '@kbn/config-schema';
 import { datatableVisualizationStateSchema } from './visualization_state/data_table';
-import { getLensAttributesSchema, lensGenericAttributesSchema } from './common';
+import { getLensAttributesSchema } from './common';
+
+function buildConditionalSchema(conditions: Array<{ type: string; schema: Type<any> }>) {
+  return conditions.reduce<ConditionalType<string, Type<any>, Type<any>> | AnyType>(
+    (acc, condition) => {
+      return schema.conditional(
+        schema.siblingRef('.visualizationType'),
+        condition.type,
+        condition.schema,
+        acc
+      );
+    },
+    // Fall back to no validation. Change to schema.never() to enforce validation.
+    schema.any()
+  );
+}
 
 export const getSchema = () =>
   schema.object({
-    attributes: schema.oneOf([
-      getLensAttributesSchema('lnsDatatable', datatableVisualizationStateSchema),
-      // lensGenericAttributesSchema,
+    attributes: buildConditionalSchema([
+      {
+        type: 'lnsDatatable',
+        schema: getLensAttributesSchema('lnsDatatable', datatableVisualizationStateSchema),
+      },
+      // TODO create schemas for other visualization types
     ]),
   });

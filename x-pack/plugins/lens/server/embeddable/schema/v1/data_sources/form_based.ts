@@ -68,6 +68,32 @@ const fieldBasedIndexPatternColumnSchema = baseIndexPatternColumnSchema.extends(
   sourceField: schema.string(),
 });
 
+const countIndexPatternColumnSchema = fieldBasedIndexPatternColumnSchema.extends({
+  operationType: schema.literal('count'),
+  params: schema.object({
+    emptyAsNull: schema.maybe(schema.boolean()),
+    format: schema.maybe(valueFormatConfigSchema),
+  }),
+});
+
+const getMetricColumnSchema = (operationType: string) =>
+  fieldBasedIndexPatternColumnSchema.extends({
+    operationType: schema.literal(operationType),
+    params: schema.maybe(
+      schema.object({
+        emptyAsNull: schema.maybe(schema.boolean()),
+        format: schema.maybe(valueFormatConfigSchema),
+      })
+    ),
+  });
+
+const sumIndexPatternColumnSchema = getMetricColumnSchema('sum');
+const avgIndexPatternColumnSchema = getMetricColumnSchema('average');
+const minIndexPatternColumnSchema = getMetricColumnSchema('min');
+const maxIndexPatternColumnSchema = getMetricColumnSchema('max');
+const medianIndexPatternColumnSchema = getMetricColumnSchema('median');
+const standardDeviationIndexPatternColumnSchema = getMetricColumnSchema('standard_deviation');
+
 const formattedIndexPatternColumnSchema = baseIndexPatternColumnSchema.extends({
   params: schema.maybe(
     schema.object({
@@ -130,7 +156,17 @@ export const formBasedLayerSchema = schema.object({
   columnOrder: schema.arrayOf(schema.string()),
   columns: schema.recordOf(
     schema.string(),
-    schema.oneOf([termsIndexPatternColumnSchema, genericIndexPatternColumnSchema])
+    schema.oneOf([
+      termsIndexPatternColumnSchema,
+      countIndexPatternColumnSchema,
+      sumIndexPatternColumnSchema,
+      avgIndexPatternColumnSchema,
+      minIndexPatternColumnSchema,
+      maxIndexPatternColumnSchema,
+      medianIndexPatternColumnSchema,
+      standardDeviationIndexPatternColumnSchema,
+      genericIndexPatternColumnSchema,
+    ])
   ),
   // TODO indexPatternId should be required, but we make it optional since it might be
   // specified in the state.references array via the HTTP endpoint.

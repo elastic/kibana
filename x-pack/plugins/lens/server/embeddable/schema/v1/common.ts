@@ -9,7 +9,7 @@ import { ObjectType, schema } from '@kbn/config-schema';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { FilterStateStore } from '@kbn/es-query';
-import { formBasedLayerSchema } from './data_sources/form_based';
+import { formBasedLayerSchema } from './data_sources';
 
 const referenceSchema = schema.object(
   {
@@ -178,16 +178,17 @@ export const sortingStateSchema = schema.object({
 });
 
 export const lensGenericAttributesSchema = schema.object({
-  visualizationType: schema.string(),
   title: schema.maybe(schema.string()),
+  type: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
-  state: lensGenericAttributesStateSchema,
   references: schema.arrayOf(referenceSchema),
 });
 
 export const getLensAttributesSchema = (visType: string, visState: ObjectType) =>
   lensGenericAttributesSchema.extends({
-    visualizationType: schema.literal(visType),
+    visualizationType: schema.oneOf([schema.literal(visType)], {
+      meta: { description: 'The type of visualization.' },
+    }),
     state: lensGenericAttributesStateSchema.extends({
       datasourceStates: schema.object({
         formBased: schema.maybe(
