@@ -35,7 +35,6 @@ import {
   RuleActionFrequency,
   RuleActionParam,
   RuleActionParams,
-  RuleNotifyWhenType,
 } from '@kbn/alerting-types';
 import {
   ActionConnector,
@@ -102,7 +101,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const {
     plugins: { actionTypeRegistry, http },
-    formData: { notifyWhen: ruleNotifyWhen, throttle: ruleThrottle },
+    formData: { notifyWhen: ruleNotifyWhen },
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
@@ -343,13 +342,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const onNotifyWhenChange = useCallback(
     (frequency: RuleActionFrequency) => {
-      if (!action.frequency && ruleNotifyWhen) {
-        console.log('dispatching ruleNotifyWhen', {
-          freq: action.frequency,
-          ruleNotifyWhen,
-          frequency,
-        });
-
+      if (ruleNotifyWhen) {
         dispatch({
           type: 'setNotifyWhen',
           payload: frequency.notifyWhen,
@@ -363,11 +356,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           },
         });
       } else {
-        console.log('dispatching action frequency', {
-          freq: action.frequency,
-          ruleNotifyWhen,
-          frequency,
-        });
         dispatch({
           type: 'setActionProperty',
           payload: {
@@ -381,12 +369,8 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         }
       }
     },
-    [action, onDefaultParamsChange, dispatch]
+    [action, onDefaultParamsChange, dispatch, ruleNotifyWhen]
   );
-
-  // const onRuleNotifyChange = useCallback((value: RuleNotifyWhenType) => {}, [dispatch]);
-
-  // const onRuleThrottleChange = useCallback(() => {}, []);
 
   const onActionGroupChange = useCallback(
     (group: string) => {
@@ -550,7 +534,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
               action={action}
               onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
               onNotifyWhenChange={onNotifyWhenChange}
-              // onRuleNotifyChange={onRuleNotifyChange}
               onActionGroupChange={onActionGroupChange}
               onAlertsFilterChange={onAlertsFilterChange}
               onTimeframeChange={onTimeframeChange}

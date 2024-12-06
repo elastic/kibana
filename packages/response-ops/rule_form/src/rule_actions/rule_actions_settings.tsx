@@ -15,7 +15,6 @@ import {
   AlertsFilterTimeframe,
   RecoveredActionGroup,
   RuleActionFrequency,
-  RuleNotifyWhenType,
 } from '@kbn/alerting-types';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { useRuleFormState } from '../hooks';
@@ -28,7 +27,7 @@ import {
   hasFieldsForAad,
   parseDuration,
 } from '../utils';
-import { DEFAULT_VALID_CONSUMERS } from '../constants';
+import { DEFAULT_FREQUENCY, DEFAULT_VALID_CONSUMERS } from '../constants';
 
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
@@ -126,7 +125,6 @@ export interface RuleActionsSettingsProps {
   onActionGroupChange: (group: string) => void;
   onAlertsFilterChange: (query?: AlertsFilter['query']) => void;
   onTimeframeChange: (timeframe?: AlertsFilterTimeframe) => void;
-  onRuleNotifyChange?: (ruleNotifyWhen: RuleNotifyWhenType) => void;
 }
 
 export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
@@ -137,7 +135,6 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     onActionGroupChange,
     onAlertsFilterChange,
     onTimeframeChange,
-    onRuleNotifyChange,
   } = props;
 
   const {
@@ -172,6 +169,8 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const intervalNumber = getDurationNumberInItsUnit(interval ?? 1);
 
   const intervalUnit = getDurationUnitValue(interval);
+
+  const actionNotifyWhen = ruleNotifyWhen ? ruleNotifyWhen : action?.frequency?.notifyWhen;
 
   const actionThrottle = action.frequency?.throttle
     ? getDurationNumberInItsUnit(action.frequency.throttle)
@@ -212,16 +211,17 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
         <EuiFlexGroup alignItems="flexEnd">
           <EuiFlexItem>
             <RuleActionsNotifyWhen
-              frequency={action.frequency}
+              frequency={{
+                ...(action.frequency ?? DEFAULT_FREQUENCY),
+                notifyWhen: actionNotifyWhen ?? DEFAULT_FREQUENCY.notifyWhen,
+              }}
               throttle={actionThrottle}
               throttleUnit={actionThrottleUnit}
               hasAlertsMappings={selectedRuleType.hasAlertsMappings}
               onChange={onNotifyWhenChange}
               onUseDefaultMessage={onUseDefaultMessageChange}
-              // onRuleNotifyChange={onRuleNotifyChange}
               showMinimumThrottleWarning={showMinimumThrottleWarning}
               showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
-              ruleNotifyWhen={ruleNotifyWhen}
             />
           </EuiFlexItem>
           <EuiFlexItem>

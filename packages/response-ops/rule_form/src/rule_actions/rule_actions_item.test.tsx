@@ -182,6 +182,9 @@ describe('ruleActionsItem', () => {
           },
         },
       },
+      formData: {
+        notifyWhen: null,
+      },
       connectors: mockConnectors,
       connectorTypes: mockActionTypes,
       aadTemplateFields: [],
@@ -280,6 +283,59 @@ describe('ruleActionsItem', () => {
       },
       true
     );
+  });
+
+  test('should handle rule level notify when correctly', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('1', {
+        id: 'actionType-1',
+        defaultRecoveredActionParams: { recoveredParamKey: 'recoveredParamValue' },
+        defaultActionParams: { actionParamKey: 'actionParamValue' },
+        validateParams: mockValidate,
+      })
+    );
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+        http: {
+          basePath: {
+            publicBaseUrl: 'publicUrl',
+          },
+        },
+      },
+      formData: {
+        notifyWhen: 'onThrottleInterval',
+        throttle: '9d',
+      },
+      connectors: mockConnectors,
+      connectorTypes: mockActionTypes,
+      aadTemplateFields: [],
+      actionsParamsErrors: {},
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(<RuleActionsItem action={getAction('1')} index={0} producerId="stackAlerts" />);
+
+    await userEvent.click(screen.getByText('Settings'));
+
+    await userEvent.click(screen.getByText('onNotifyWhenChange'));
+
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: 'onThrottleInterval',
+      type: 'setNotifyWhen',
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: {
+        property: 'throttle',
+        value: '5m',
+      },
+      type: 'setRuleProperty',
+    });
   });
 
   test('should allow alerts filter to be changed', async () => {

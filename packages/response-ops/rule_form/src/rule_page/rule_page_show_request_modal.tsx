@@ -43,7 +43,6 @@ const stringifyBodyRequest = ({
     const transformedUpdateRuleBody = transformUpdateRuleBody(
       pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody
     );
-    console.log('rule_page', { transformedUpdateRuleBody, isEdit });
     const request = isEdit
       ? transformedUpdateRuleBody
       : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);

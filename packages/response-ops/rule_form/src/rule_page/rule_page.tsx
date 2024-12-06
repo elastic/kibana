@@ -73,7 +73,6 @@ export const RulePage = (props: RulePageProps) => {
   const styles = useEuiBackgroundColorCSS().transparent;
 
   const onSaveInternal = useCallback(() => {
-    console.log('onSaveInternal', { formData });
     onSave({
       ...formData,
       ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
