@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-const path = require('path');
+require('../../../../../../src/setup_node_env');
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: path.resolve(__dirname, '../../../..'),
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/entities_data_access'],
-};
+const { generateOAS } = require('./generate_oas');
+const { writeFileSync } = require('fs');
+
+const spec = generateOAS({ format: '.yaml' });
+writeFileSync('oas.yaml', spec);

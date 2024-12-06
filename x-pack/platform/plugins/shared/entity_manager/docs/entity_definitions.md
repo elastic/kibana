@@ -7,7 +7,7 @@ Entity definitions are a core concept of the entity model. They define the way t
 > [!NOTE]
 > Entity definitions are based on transform and as such a subset of the configuration is tightly coupled to transform settings. While we provide defaults for these settings, one can still update properties such as `frequency`, `sync.time.delay` and `sync.time.field` (see [transform documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html)).
 
-When creating a definition (see [entity definition schema](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L21)), entity manager will create a transforms to collect entities based on the configured [identityFields](https://github.com/elastic/kibana/blob/main/x-pack/packages/kbn-entities-schema/src/schema/entity_definition.ts#L29).
+When creating a definition (see [entity definition schema](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity_definition.ts#L21)), entity manager will create a transforms to collect entities based on the configured [identityFields](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity_definition.ts#L29).
 The transform creates one document per entity, reading documents from the configured source indices and grouping them by the identity fields. Each entity document gets overwritten each time the transform runs.
 
 The transforms outputs the data to a unique index (`.entities.v1.latest.<definition-id>`).
