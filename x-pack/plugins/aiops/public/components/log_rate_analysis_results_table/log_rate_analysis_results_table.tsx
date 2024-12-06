@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { EuiTableSortingType } from '@elastic/eui';
+import type { Criteria, EuiTableSortingType } from '@elastic/eui';
 import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -109,7 +109,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     groupFilter !== undefined
   );
 
-  const onChange = useCallback((tableSettings: any) => {
+  const onChange = useCallback((tableSettings: Criteria<SignificantItem>) => {
     if (tableSettings.page) {
       const { index, size } = tableSettings.page;
       setPageIndex(index);

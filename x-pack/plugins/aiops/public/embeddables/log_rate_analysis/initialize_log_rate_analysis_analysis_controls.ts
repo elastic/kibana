@@ -11,7 +11,7 @@ import type { LogRateAnalysisComponentApi, LogRateAnalysisEmbeddableState } from
 
 type LogRateAnalysisEmbeddableCustomState = Omit<
   LogRateAnalysisEmbeddableState,
-  'timeRange' | 'title' | 'description' | 'hidePanelTitles'
+  'timeRange' | 'title' | 'description' | 'hidePanelTitles' | 'windowParameters'
 >;
 
 export const initializeLogRateAnalysisControls = (rawState: LogRateAnalysisEmbeddableState) => {

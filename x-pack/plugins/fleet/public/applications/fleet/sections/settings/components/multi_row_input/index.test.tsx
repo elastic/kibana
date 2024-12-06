@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, act } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
@@ -44,13 +44,9 @@ test('it should allow to add a new host', async () => {
 test('it should allow to remove an host', async () => {
   const { utils, mockOnChange } = renderInput(['http://host1.com', 'http://host2.com']);
 
-  await act(async () => {
-    const deleteRowEl = await utils.container.querySelector('[aria-label="Delete row"]');
-    if (!deleteRowEl) {
-      throw new Error('Delete row button not found');
-    }
-    fireEvent.click(deleteRowEl);
-  });
+  const deleteRowEl = await utils.container.querySelector('[aria-label="Delete row"]');
+  expect(deleteRowEl).not.toBeNull();
+  fireEvent.click(deleteRowEl!);
 
   expect(mockOnChange).toHaveBeenCalledWith(['http://host2.com']);
 });
@@ -95,7 +91,7 @@ test('Should display errors in order', async () => {
       { message: 'Error 3', index: 2 },
     ]
   );
-  await act(async () => {
+  await waitFor(async () => {
     const errors = await utils.queryAllByText(/Error [1-3]/);
     expect(errors[0]).toHaveTextContent('Error 1');
     expect(errors[1]).toHaveTextContent('Error 2');
@@ -126,18 +122,14 @@ test('Should remove error when item deleted', async () => {
     );
   });
 
-  await act(async () => {
-    const deleteRowButtons = await utils.container.querySelectorAll('[aria-label="Delete row"]');
-    if (deleteRowButtons.length !== 3) {
-      throw new Error('Delete row buttons not found');
-    }
+  const deleteRowButtons = await utils.container.querySelectorAll('[aria-label="Delete row"]');
+  expect(deleteRowButtons.length).toEqual(3);
 
-    fireEvent.click(deleteRowButtons[1]);
-    expect(mockOnChange).toHaveBeenCalled();
+  fireEvent.click(deleteRowButtons[1]);
+  expect(mockOnChange).toHaveBeenCalled();
 
-    const renderedErrors = await utils.queryAllByText(/Error [1-3]/);
-    expect(renderedErrors).toHaveLength(2);
-    expect(renderedErrors[0]).toHaveTextContent('Error 1');
-    expect(renderedErrors[1]).toHaveTextContent('Error 3');
-  });
+  const renderedErrors = await utils.queryAllByText(/Error [1-3]/);
+  expect(renderedErrors).toHaveLength(2);
+  expect(renderedErrors[0]).toHaveTextContent('Error 1');
+  expect(renderedErrors[1]).toHaveTextContent('Error 3');
 });
