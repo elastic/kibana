@@ -144,7 +144,7 @@ const renderTestComponents = (props?: Partial<ComponentProps<typeof TestComponen
   });
 };
 
-const loadPageMock = jest.fn();
+const loadNextBatchMock = jest.fn();
 
 const useSourcererDataViewMocked = jest.fn().mockReturnValue({
   ...mockSourcererScope,
@@ -195,7 +195,7 @@ describe('query tab with unified timeline', () => {
         },
         refreshedAt: Date.now(),
         totalCount: 3,
-        loadPage: loadPageMock,
+        loadNextBatch: loadNextBatchMock,
       },
     ]);
 
@@ -317,7 +317,7 @@ describe('query tab with unified timeline', () => {
            * This helps in testing `sampleSize` and `loadMore`
            */
           totalCount: 50,
-          loadPage: loadPageMock,
+          loadNextBatch: loadNextBatchMock,
         },
       ]);
 
@@ -424,7 +424,7 @@ describe('query tab with unified timeline', () => {
           expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
         });
         fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
-        expect(loadPageMock).toHaveBeenNthCalledWith(1, 1);
+        expect(loadNextBatchMock).toHaveBeenCalledTimes(1);
       },
       SPECIAL_TEST_TIMEOUT
     );
