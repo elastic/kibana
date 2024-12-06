@@ -9,6 +9,7 @@ import {
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
+  FakeRequest,
   KibanaRequest,
   Logger,
   Plugin,
@@ -39,6 +40,7 @@ import {
   READ_ENTITY_SOURCE_DEFINITION_PRIVILEGE,
   READ_ENTITIES_PRIVILEGE,
 } from './lib/v2/constants';
+import { installBuiltInDefinitions } from './lib/v2/definitions/install_built_in_definitions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
@@ -185,9 +187,19 @@ export class EntityManagerServerPlugin
       .catch((err) => this.logger.error(err));
 
     // Setup v2 definitions index
-    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger).catch((error) => {
-      this.logger.error(error);
-    });
+    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
+      .then(() => {
+        // Using asScope with a FakeRequest to get a IScopedClusterClient which the lib functions expect
+        // They internally grab the internal user to use
+        const fakeRequest: FakeRequest = { headers: {} };
+        return installBuiltInDefinitions(
+          core.elasticsearch.client.asScoped(fakeRequest),
+          this.logger
+        );
+      })
+      .catch((error) => {
+        this.logger.error(error);
+      });
 
     return {
       getScopedClient: async ({ request }: { request: KibanaRequest }) => {

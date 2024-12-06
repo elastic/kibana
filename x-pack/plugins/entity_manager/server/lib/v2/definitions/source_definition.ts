@@ -25,6 +25,7 @@ export async function storeSourceDefinition(
   });
 
   if (sources.length !== 0) {
+    logger.debug(`Entity source definition with ID ${source.id} already exists`);
     throw new EntityDefinitionConflict('source', source.id);
   }
 
@@ -34,6 +35,7 @@ export async function storeSourceDefinition(
     source,
   };
 
+  logger.debug(`Installing entity source definition ${source.id} for type ${source.type_id}`);
   await esClient.index({
     index: DEFINITIONS_ALIAS,
     id: `source:${definition.source.id}`,

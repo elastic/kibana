@@ -25,6 +25,7 @@ export async function storeTypeDefinition(
   });
 
   if (types.length !== 0) {
+    logger.debug(`Entity type definition with ID ${type.id} already exists`);
     throw new EntityDefinitionConflict('type', type.id);
   }
 
@@ -34,6 +35,7 @@ export async function storeTypeDefinition(
     type,
   };
 
+  logger.debug(`Installing entity type definition ${type.id}`);
   await esClient.index({
     index: DEFINITIONS_ALIAS,
     id: `type:${definition.type.id}`,
