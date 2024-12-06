@@ -14,10 +14,10 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ModelItem } from './models_list';
+import type { NLPModelItem } from '../../../common/types/trained_models';
 
 interface ForceStopModelConfirmDialogProps {
-  model: ModelItem;
+  model: NLPModelItem;
   onCancel: () => void;
   onConfirm: (deploymentIds: string[]) => void;
 }
@@ -220,7 +220,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 
 export const getUserConfirmationProvider =
   (overlays: OverlayStart, startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>) =>
-  async (forceStopModel: ModelItem): Promise<string[]> => {
+  async (forceStopModel: NLPModelItem): Promise<string[]> => {
     return new Promise(async (resolve, reject) => {
       try {
         const modalSession = overlays.openModal(
