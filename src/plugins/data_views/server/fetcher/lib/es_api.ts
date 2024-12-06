@@ -8,7 +8,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 

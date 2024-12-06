@@ -11,7 +11,7 @@ import type {
   PropertyName as EsPropertyName,
   MappingProperty as EsMappingProperty,
   MappingPropertyBase as EsMappingPropertyBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Describe a saved object type mapping.

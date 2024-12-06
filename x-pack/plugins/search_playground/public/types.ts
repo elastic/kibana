@@ -10,7 +10,7 @@ import {
   IndexName,
   IndicesStatsIndexMetadataState,
   Uuid,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import React, { ComponentType } from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';

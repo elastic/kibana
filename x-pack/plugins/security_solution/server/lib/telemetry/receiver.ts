@@ -21,7 +21,10 @@ import type {
   OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  SearchHit,
+  SearchRequest as ESSearchRequest,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
@@ -34,11 +37,6 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type {
-  SearchHit,
-  SearchRequest as ESSearchRequest,
-  SortResults,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
 import type {

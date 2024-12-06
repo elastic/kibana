@@ -6,7 +6,7 @@
  */
 import { reject } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ESSearchResponse } from '@kbn/es-types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

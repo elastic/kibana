@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 
 export const DefaultSort: SortCombinations[] = [
   {

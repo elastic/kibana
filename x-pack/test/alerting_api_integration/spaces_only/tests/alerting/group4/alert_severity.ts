@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,

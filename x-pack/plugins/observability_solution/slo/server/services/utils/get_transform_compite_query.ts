@@ -8,7 +8,7 @@
 import {
   AggregationsCompositeAggregationSource,
   TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { createEsParams } from '../../utils/queries';
 
 export function getTransformQueryComposite(transform: TransformPutTransformRequest['body']) {

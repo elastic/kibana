@@ -9,7 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SortOptions } from '@elastic/elasticsearch/lib/api/types';
 
 import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 import { RacRequestHandlerContext } from '../types';

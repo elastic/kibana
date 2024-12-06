@@ -11,7 +11,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
 import { toAsyncKibanaSearchResponse } from './response_utils';

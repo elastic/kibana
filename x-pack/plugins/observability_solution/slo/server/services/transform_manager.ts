@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { IndicatorTypes, SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';

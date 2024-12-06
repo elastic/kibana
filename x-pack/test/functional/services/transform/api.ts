@@ -14,7 +14,7 @@ import type { TransformStats } from '@kbn/transform-plugin/common/types/transfor
 import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/update_transforms';
 import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export async function asyncForEach(array: any[], callback: Function) {

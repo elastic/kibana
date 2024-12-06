@@ -10,7 +10,7 @@ import { mergeWith, uniqWith, isEqual } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type {
   DashboardApi,
   DashboardLocatorParams,

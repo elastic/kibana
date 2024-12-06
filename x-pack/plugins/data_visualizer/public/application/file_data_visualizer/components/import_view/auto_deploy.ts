@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpSetup } from '@kbn/core/public';
 
 const POLL_INTERVAL = 5; // seconds

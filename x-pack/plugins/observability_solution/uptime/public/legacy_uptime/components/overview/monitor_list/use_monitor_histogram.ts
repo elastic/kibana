@@ -7,7 +7,7 @@
 
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import {
   Histogram,

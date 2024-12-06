@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { basename } from 'node:path';

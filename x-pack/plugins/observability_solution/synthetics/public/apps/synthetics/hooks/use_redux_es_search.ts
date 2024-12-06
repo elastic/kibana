@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
 import { useDispatch, useSelector } from 'react-redux';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SignalSource } from '../../../rule_types/types';
 import { deconflictSignalsAndResults, getNotificationResultsLink } from './utils';

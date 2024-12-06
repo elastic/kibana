@@ -7,7 +7,7 @@
 
 import { ValuesType } from 'utility-types';
 import { merge } from 'lodash';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getStats } from './get_stats';
 import { getDestinationMap } from './get_destination_map';

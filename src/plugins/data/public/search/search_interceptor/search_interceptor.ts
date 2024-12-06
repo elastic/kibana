@@ -64,7 +64,7 @@ import {
   AsyncSearchGetResponse,
   ErrorResponseBase,
   SqlGetAsyncResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,

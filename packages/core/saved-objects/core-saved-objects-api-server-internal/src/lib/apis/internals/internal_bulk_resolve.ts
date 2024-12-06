@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type {

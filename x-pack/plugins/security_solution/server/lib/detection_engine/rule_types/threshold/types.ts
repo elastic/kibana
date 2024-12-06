@@ -10,7 +10,7 @@ import type {
   AggregationsCompositeBucket,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { RuleTypeState } from '@kbn/alerting-plugin/server';
 import type { SignalSource } from '../types';

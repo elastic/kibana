@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../../../common/typed_json';
 import {

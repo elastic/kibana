@@ -11,7 +11,7 @@
 
 import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,

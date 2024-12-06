@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { map, mergeMap, catchError, of } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '@kbn/core/server';
 import { from } from 'rxjs';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';

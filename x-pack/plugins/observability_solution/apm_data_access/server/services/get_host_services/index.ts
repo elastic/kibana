@@ -13,7 +13,7 @@ import {
   METRICSET_NAME,
   SERVICE_NAME,
 } from '@kbn/apm-types/es_fields';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   RollupInterval,
   TimeRangeMetadata,
