@@ -69,6 +69,10 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
         level: 'warning',
         message: `Configuring "xpack.task_manager.max_workers" is deprecated and will be removed in a future version. Remove this setting and use "xpack.task_manager.capacity" instead.`,
       }),
+      deprecate('claim_strategy', 'a future version', {
+        level: 'warning',
+        message: `Configuring "xpack.task_manager.claim_strategy" is deprecated and will be removed in a future version. This setting should be removed.`,
+      }),
       (settings, fromPath, addDeprecation) => {
         const taskManager = get(settings, fromPath);
         if (taskManager?.index) {
