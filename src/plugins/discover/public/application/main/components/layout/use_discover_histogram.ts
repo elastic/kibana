@@ -216,14 +216,10 @@ export const useDiscoverHistogram = ({
   /**
    * Request params
    */
-  const { query, filters } = useQuerySubscriber({ data: services.data });
+  const { filters } = useQuerySubscriber({ data: services.data });
   const customFilters = useInternalStateSelector((state) => state.customFilters);
-  const timefilter = services.data.query.timefilter.timefilter;
-  const timeRange = timefilter.getAbsoluteTime();
-  const relativeTimeRange = useObservable(
-    timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
-    timefilter.getTime()
-  );
+  const relativeTimeRange = main$.getValue().timeRangeRelative;
+  const query = main$.getValue().query;
 
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
@@ -337,9 +333,6 @@ export const useDiscoverHistogram = ({
     return allFilters.length ? allFilters : EMPTY_FILTERS;
   }, [filters, customFilters]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
-
   const onVisContextChanged = useCallback(
     (
       nextVisContext: UnifiedHistogramVisContext | undefined,
@@ -399,7 +392,7 @@ export const useDiscoverHistogram = ({
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
     filters: filtersMemoized,
-    timeRange: timeRangeMemoized,
+    timeRange: main$.getValue().timeRange,
     relativeTimeRange,
     columns: isEsqlMode ? esqlColumns : undefined,
     onFilter: histogramCustomization?.onFilter,

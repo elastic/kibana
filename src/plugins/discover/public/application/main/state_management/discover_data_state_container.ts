@@ -12,7 +12,7 @@ import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -30,7 +30,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import { sendResetMsg, sendTimeRangeMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -57,6 +57,9 @@ export interface DataMsg {
 
 export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
+  timeRange?: TimeRange;
+  timeRangeRelative?: TimeRange;
+  filter?: Filter[];
 }
 
 export interface DataDocumentsMsg extends DataMsg {
@@ -342,6 +345,7 @@ export function getDataStateContainer({
   const fetchQuery = async (resetQuery?: boolean) => {
     const query = appStateContainer.getState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
+    sendTimeRangeMsg(dataSubjects.main$, timefilter.getAbsoluteTime(), timefilter.getTime(), query);
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
