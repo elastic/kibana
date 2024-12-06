@@ -141,7 +141,8 @@
     "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
       "platform/plugins/shared/security",
-      "packages/security"
+      "platform/packages/shared/security",
+      "platform/packages/private/security"
     ],
     "xpack.server": "legacy/server",
     "xpack.serverless": "platform/plugins/shared/serverless",
