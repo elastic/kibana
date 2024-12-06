@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, act, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../mock';
@@ -227,10 +227,9 @@ const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunc
   typeof useMultipleAgentPolicies
 >;
 
-describe('edit package policy page', () => {
+describe(`edit package policy page ${i + 1}`, () => {
   let testRenderer: TestRenderer;
-  let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () => (renderResult = testRenderer.render(<EditPackagePolicyPage />));
+  const render = () => testRenderer.render(<EditPackagePolicyPage />);
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
@@ -283,27 +282,22 @@ describe('edit package policy page', () => {
   });
 
   it('should disable submit button on invalid form with empty package var', async () => {
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
-      expect(renderResult.getByDisplayValue('nginx-1')).toBeInTheDocument();
-      expect(renderResult.getByDisplayValue('Nginx description')).toBeInTheDocument();
-    });
+    expect(await renderResult.findByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    expect(await renderResult.findByDisplayValue('nginx-1')).toBeInTheDocument();
+    expect(await renderResult.findByDisplayValue('Nginx description')).toBeInTheDocument();
 
-    await act(async () => {
-      fireEvent.click(renderResult.getByText('Change defaults'));
-    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
 
-    await act(async () => {
-      fireEvent.change(renderResult.getByDisplayValue('/var/log/nginx/access.log*'), {
-        target: { value: '' },
-      });
+    fireEvent.change(renderResult.getByDisplayValue('/var/log/nginx/access.log*'), {
+      target: { value: '' },
     });
 
     expect(
       renderResult.getByText('Your integration policy has errors. Please fix them before saving.')
     ).toBeInTheDocument();
+
     expect(renderResult.getByText(/Save integration/).closest('button')!).toBeDisabled();
 
     renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((btn) => {
@@ -312,54 +306,52 @@ describe('edit package policy page', () => {
   });
 
   it('should navigate on submit', async () => {
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+    expect(await renderResult.findByText('Collect logs from Nginx instances')).toBeInTheDocument();
+
+    fireEvent.change(renderResult.getByTestId('packagePolicyDescriptionInput'), {
+      target: {
+        value: 'new description',
+      },
     });
 
-    await act(async () => {
-      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
-    });
+    expect(renderResult.getByTestId('saveIntegration')).toBeEnabled();
+
+    fireEvent.click(renderResult.getByTestId('saveIntegration'));
+
+    await waitForElementToBeRemoved(renderResult.getByRole('progressbar'));
 
     const { id, ...restProps } = mockPackagePolicy;
+
     expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('nginx-1', {
       ...restProps,
+      description: 'new description',
       vars: {},
-      inputs: [
-        {
-          ...mockPackagePolicy.inputs[0],
-          enabled: false,
-          streams: [
-            {
-              ...mockPackagePolicy.inputs[0].streams[0],
-              enabled: false,
-            },
-          ],
-        },
-      ],
+      inputs: [...mockPackagePolicy.inputs],
     });
+
     expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith('/navigate/path');
   });
 
   it('should show out of date error on 409 statusCode on submit', async () => {
     (sendUpdatePackagePolicy as MockFn).mockResolvedValue({ error: { statusCode: 409 } });
 
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+    expect(await renderResult.findByText('Collect logs from Nginx instances')).toBeInTheDocument();
+
+    fireEvent.change(renderResult.getByTestId('packagePolicyDescriptionInput'), {
+      target: {
+        value: 'new description',
+      },
     });
 
-    await act(async () => {
-      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
-    });
+    expect(renderResult.getByTestId('saveIntegration')).toBeEnabled();
+
+    fireEvent.click(renderResult.getByTestId('saveIntegration'));
+
+    await waitForElementToBeRemoved(renderResult.getByRole('progressbar'));
 
     expect(useStartServices().notifications.toasts.addError).toHaveBeenCalledWith(
       { statusCode: 409 },
@@ -375,18 +367,21 @@ describe('edit package policy page', () => {
   it('should show generic error on other statusCode on submit', async () => {
     (sendUpdatePackagePolicy as MockFn).mockResolvedValue({ error: { statusCode: 500 } });
 
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+    expect(await renderResult.findByText('Collect logs from Nginx instances')).toBeInTheDocument();
+
+    fireEvent.change(renderResult.getByTestId('packagePolicyDescriptionInput'), {
+      target: {
+        value: 'new description',
+      },
     });
 
-    await act(async () => {
-      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
-    });
+    expect(renderResult.getByTestId('saveIntegration')).toBeEnabled();
+
+    fireEvent.click(renderResult.getByTestId('saveIntegration'));
+
+    await waitForElementToBeRemoved(renderResult.getByRole('progressbar'));
 
     expect(useStartServices().notifications.toasts.addError).toHaveBeenCalledWith(
       { statusCode: 500 },
@@ -411,11 +406,9 @@ describe('edit package policy page', () => {
         Component: TestComponent,
       });
 
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByTestId('errorBoundaryFatalHeader')).toBeVisible();
-    });
+    expect(renderResult.getByTestId('errorBoundaryFatalHeader')).toBeVisible();
   });
 
   it('should show ready for upgrade if package useLatestPackageVersion and no conflicts', async () => {
@@ -440,16 +433,17 @@ describe('edit package policy page', () => {
       ],
     });
 
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText(/Upgrade integration/).closest('button')!).not.toBeDisabled();
-      expect(
-        renderResult.getByText(
-          'This integration is ready to be upgraded from version 1.3.0 to 1.4.0. Review the changes below and save to upgrade.'
-        )
-      ).toBeInTheDocument();
-    });
+    expect(
+      (await renderResult.findByText(/Upgrade integration/)).closest('button')!
+    ).not.toBeDisabled();
+
+    expect(
+      await renderResult.findByText(
+        'This integration is ready to be upgraded from version 1.3.0 to 1.4.0. Review the changes below and save to upgrade.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should show review field conflicts if package useLatestPackageVersion and has conflicts', async () => {
@@ -475,11 +469,9 @@ describe('edit package policy page', () => {
       ],
     });
 
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText('Review field conflicts')).toBeInTheDocument();
-    });
+    expect(await renderResult.findByText('Review field conflicts')).toBeInTheDocument();
   });
 
   it('should not show confirmation modal if package is on agentless policy', async () => {
@@ -505,18 +497,12 @@ describe('edit package policy page', () => {
       },
     });
 
-    render();
+    const renderResult = render();
 
-    await waitFor(() => {
-      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
-    });
-    act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
-    });
+    expect(await renderResult.findByText('Collect logs from Nginx instances')).toBeInTheDocument();
 
-    await act(async () => {
-      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
-    });
+    fireEvent.click(renderResult.getByRole('switch'));
+    fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
     expect(sendUpdatePackagePolicy).toHaveBeenCalled();
   });
@@ -529,9 +515,7 @@ describe('edit package policy page', () => {
       isLoading: false,
     });
 
-    await act(async () => {
-      render();
-    });
+    const renderResult = render();
     expect(renderResult.queryByTestId('agentPolicyMultiSelect')).not.toBeInTheDocument();
   });
 
@@ -546,28 +530,22 @@ describe('edit package policy page', () => {
     });
 
     it('should create agent policy with sys monitoring when new agent policy button is clicked', async () => {
-      await act(async () => {
-        render();
-      });
+      const renderResult = render();
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('agentPolicyMultiItem')).toHaveAttribute(
-          'title',
-          'Agent policy 1'
-        );
-      });
+      expect(await renderResult.findByTestId('agentPolicyMultiItem')).toHaveAttribute(
+        'title',
+        'Agent policy 1'
+      );
 
-      await act(async () => {
-        fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton'));
-      });
+      fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton'));
+      fireEvent.click(renderResult.getByTestId('saveIntegration'));
 
-      await act(async () => {
-        fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
-      });
+      const saveAndDeployButton = await (
+        await renderResult.findByText(/Save and deploy changes/, { selector: 'span' })
+      ).closest('button')!;
 
-      await act(async () => {
-        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
-      });
+      fireEvent.click(saveAndDeployButton);
+
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
         {
           description: '',
@@ -579,12 +557,14 @@ describe('edit package policy page', () => {
         },
         { withSysMonitoring: true }
       );
+
       expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
         'nginx-1',
         expect.objectContaining({
           policy_ids: ['agent-policy-1', 'agent-policy-2'],
         })
       );
+
       expect(sendGetAgentStatus).toHaveBeenCalledTimes(1);
     });
 
@@ -613,27 +593,17 @@ describe('edit package policy page', () => {
         isLoading: false,
       });
 
-      await act(async () => {
-        render();
-      });
-      expect(renderResult.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
+      const renderResult = render();
 
-      await act(async () => {
-        renderResult.getByTestId('comboBoxToggleListButton').click();
-      });
+      expect(await renderResult.findByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
+
+      fireEvent.click(renderResult.getByTestId('comboBoxToggleListButton'));
 
       expect(renderResult.queryByText('Agent policy 1')).toBeNull();
 
-      await act(async () => {
-        fireEvent.click(renderResult.getByText('Fleet Server Policy'));
-      });
-
-      await act(async () => {
-        fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
-      });
-      await act(async () => {
-        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
-      });
+      fireEvent.click(renderResult.getByText('Fleet Server Policy'));
+      fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
+      fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
 
       expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
         'nginx-1',
