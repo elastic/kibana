@@ -43,7 +43,7 @@ export const AlertsTabContent = () => {
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
-  const hostsWithAlertsKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
+  const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
 
   return (
     <HeightRetainer>
@@ -65,7 +65,7 @@ export const AlertsTabContent = () => {
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
                 data-test-subj="infraHostAlertsTabAlertsShowAllButton"
-                kuery={hostsWithAlertsKuery}
+                kuery={hostNamesKuery}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
