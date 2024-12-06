@@ -7,7 +7,10 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import { useForm, Form } from '../../../../../../../shared_imports';
+import { extractValidationMessages } from '../../../../../../rule_creation/logic/extract_validation_messages';
+import type { FormWithWarningsSubmitHandler } from '../../../../../../../common/hooks/use_form_with_warnings';
+import { useFormWithWarnings } from '../../../../../../../common/hooks/use_form_with_warnings';
+import { Form } from '../../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import type {
   DiffableAllFields,
@@ -17,6 +20,11 @@ import { useFinalSideContext } from '../../final_side/final_side_context';
 import { useDiffableRuleContext } from '../../diffable_rule_context';
 import * as i18n from '../../translations';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
+import { useConfirmValidationErrorsModal } from '../../../../../../../common/hooks/use_confirm_validation_errors_modal';
+import {
+  VALIDATION_WARNING_CODE_FIELD_NAME_MAP,
+  VALIDATION_WARNING_CODES,
+} from '../../../../../../rule_creation/constants/validation_warning_codes';
 
 type RuleFieldEditComponent = React.ComponentType<RuleFieldEditComponentProps>;
 
@@ -56,9 +64,16 @@ export function RuleFieldEditFormWrapper({
     [deserializer, finalDiffableRule]
   );
 
-  const handleSubmit = useCallback(
-    async (formData: FormData, isValid: boolean) => {
-      if (!isValid) {
+  const { modal, confirmValidationErrors } = useConfirmValidationErrorsModal();
+
+  const handleSubmit = useCallback<FormWithWarningsSubmitHandler>(
+    async (formData: FormData, isValid: boolean, { warnings }) => {
+      const warningMessages = extractValidationMessages(
+        warnings,
+        VALIDATION_WARNING_CODE_FIELD_NAME_MAP
+      );
+
+      if (!isValid || !(await confirmValidationErrors(warningMessages))) {
         return;
       }
 
@@ -69,15 +84,24 @@ export function RuleFieldEditFormWrapper({
       });
       setReadOnlyMode();
     },
-    [fieldName, finalDiffableRule.rule_id, setReadOnlyMode, setRuleFieldResolvedValue]
+    [
+      confirmValidationErrors,
+      fieldName,
+      finalDiffableRule.rule_id,
+      setReadOnlyMode,
+      setRuleFieldResolvedValue,
+    ]
   );
 
-  const { form } = useForm({
+  const { form } = useFormWithWarnings({
     schema: ruleFieldFormSchema,
     defaultValue: getDefaultValue(fieldName, finalDiffableRule),
     deserializer: deserialize,
     serializer,
     onSubmit: handleSubmit,
+    options: {
+      warningValidationCodes: VALIDATION_WARNING_CODES,
+    },
   });
 
   // form.isValid has `undefined` value until all fields are dirty.
@@ -96,6 +120,7 @@ export function RuleFieldEditFormWrapper({
           {i18n.SAVE_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexGroup>
+      {modal}
       <Form form={form}>
         <FieldComponent
           finalDiffableRule={finalDiffableRule}
