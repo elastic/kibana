@@ -32,6 +32,7 @@ export const getMockServices = (overrides?: Partial<Services & UserProfilesServi
     isFavoritesEnabled: () => false,
     bulkGetUserProfiles: async () => [],
     getUserProfile: async () => ({ uid: '', enabled: true, data: {}, user: { username: '' } }),
+    isKibanaVersioningEnabled: false,
     ...overrides,
   };
 

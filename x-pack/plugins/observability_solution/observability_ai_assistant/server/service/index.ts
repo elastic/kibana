@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
-import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
-import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
-import { once } from 'lodash';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { once } from 'lodash';
+import pRetry from 'p-retry';
 import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
-import { conversationComponentTemplate } from './conversation_component_template';
-import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
+import { setupConversationAndKbIndexAssets } from './setup_conversation_and_kb_index_assets';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -45,12 +42,15 @@ export const resourceNames = {
   },
 };
 
+const createIndexAssetsOnce = once(
+  (logger: Logger, core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>) =>
+    pRetry(() => setupConversationAndKbIndexAssets({ logger, core }))
+);
+
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
-  private kbService?: KnowledgeBaseService;
   private config: ObservabilityAIAssistantConfig;
-
   private readonly registrations: RegistrationCallback[] = [];
 
   constructor({
@@ -65,119 +65,7 @@ export class ObservabilityAIAssistantService {
     this.core = core;
     this.logger = logger;
     this.config = config;
-
-    this.resetInit();
   }
-
-  init = async () => {};
-
-  private resetInit = () => {
-    this.init = once(async () => {
-      return this.doInit().catch((error) => {
-        this.resetInit(); // reset the once flag if an error occurs
-        throw error;
-      });
-    });
-  };
-
-  private doInit = async () => {
-    try {
-      this.logger.debug('Setting up index assets');
-      const [coreStart] = await this.core.getStartServices();
-
-      const { asInternalUser } = coreStart.elasticsearch.client;
-
-      await asInternalUser.cluster.putComponentTemplate({
-        create: false,
-        name: resourceNames.componentTemplate.conversations,
-        template: conversationComponentTemplate,
-      });
-
-      await asInternalUser.indices.putIndexTemplate({
-        name: resourceNames.indexTemplate.conversations,
-        composed_of: [resourceNames.componentTemplate.conversations],
-        create: false,
-        index_patterns: [resourceNames.indexPatterns.conversations],
-        template: {
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-            hidden: true,
-          },
-        },
-      });
-
-      const conversationAliasName = resourceNames.aliases.conversations;
-
-      await createConcreteWriteIndex({
-        esClient: asInternalUser,
-        logger: this.logger,
-        totalFieldsLimit: 10000,
-        indexPatterns: {
-          alias: conversationAliasName,
-          pattern: `${conversationAliasName}*`,
-          basePattern: `${conversationAliasName}*`,
-          name: `${conversationAliasName}-000001`,
-          template: resourceNames.indexTemplate.conversations,
-        },
-        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
-      });
-
-      // Knowledge base: component template
-      await asInternalUser.cluster.putComponentTemplate({
-        create: false,
-        name: resourceNames.componentTemplate.kb,
-        template: kbComponentTemplate,
-      });
-
-      // Knowledge base: index template
-      await asInternalUser.indices.putIndexTemplate({
-        name: resourceNames.indexTemplate.kb,
-        composed_of: [resourceNames.componentTemplate.kb],
-        create: false,
-        index_patterns: [resourceNames.indexPatterns.kb],
-        template: {
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-            hidden: true,
-          },
-        },
-      });
-
-      const kbAliasName = resourceNames.aliases.kb;
-
-      // Knowledge base: write index
-      await createConcreteWriteIndex({
-        esClient: asInternalUser,
-        logger: this.logger,
-        totalFieldsLimit: 10000,
-        indexPatterns: {
-          alias: kbAliasName,
-          pattern: `${kbAliasName}*`,
-          basePattern: `${kbAliasName}*`,
-          name: `${kbAliasName}-000001`,
-          template: resourceNames.indexTemplate.kb,
-        },
-        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
-      });
-
-      this.kbService = new KnowledgeBaseService({
-        core: this.core,
-        logger: this.logger.get('kb'),
-        config: this.config,
-        esClient: {
-          asInternalUser,
-        },
-      });
-
-      this.logger.info('Successfully set up index assets');
-    } catch (error) {
-      this.logger.error(`Failed setting up index assets: ${error.message}`);
-      this.logger.debug(error);
-      throw error;
-    }
-  };
 
   async getClient({
     request,
@@ -192,12 +80,11 @@ export class ObservabilityAIAssistantService {
       controller.abort();
     });
 
-    const [_, [coreStart, plugins]] = await Promise.all([
-      this.init(),
-      this.core.getStartServices() as Promise<
-        [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
-      >,
+    const [[coreStart, plugins]] = await Promise.all([
+      this.core.getStartServices(),
+      createIndexAssetsOnce(this.logger, this.core),
     ]);
+
     // user will not be found when executed from system connector context
     const user = plugins.security.authc.getCurrentUser(request);
 
@@ -207,12 +94,25 @@ export class ObservabilityAIAssistantService {
 
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
 
+    const { asInternalUser } = coreStart.elasticsearch.client;
+
+    const kbService = new KnowledgeBaseService({
+      core: this.core,
+      logger: this.logger.get('kb'),
+      config: this.config,
+      esClient: {
+        asInternalUser,
+      },
+    });
+
     return new ObservabilityAIAssistantClient({
+      core: this.core,
+      config: this.config,
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       namespace: spaceId,
       esClient: {
-        asInternalUser: coreStart.elasticsearch.client.asInternalUser,
+        asInternalUser,
         asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
       },
       logger: this.logger,
@@ -222,7 +122,7 @@ export class ObservabilityAIAssistantService {
             name: user.username,
           }
         : undefined,
-      knowledgeBaseService: this.kbService!,
+      knowledgeBaseService: kbService,
       scopes: scopes || ['all'],
     });
   }

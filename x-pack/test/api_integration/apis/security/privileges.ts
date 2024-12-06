@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
     features: {
       graph: ['all', 'read', 'minimal_all', 'minimal_read'],
       savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
-      canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
+      canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
       maps: ['all', 'read', 'minimal_all', 'minimal_read'],
       generalCases: [
         'all',
@@ -60,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
+      searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: [
         'all',
@@ -148,8 +149,9 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'url_create',
         'store_search_session',
+        'generate_report',
       ],
-      visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+      visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create', 'generate_report'],
       dashboard: [
         'all',
         'read',
@@ -157,6 +159,8 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'url_create',
         'store_search_session',
+        'generate_report',
+        'download_csv_report',
       ],
       dev_tools: ['all', 'read', 'minimal_all', 'minimal_read'],
       advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -191,6 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
       inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
+      entityManager: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };
