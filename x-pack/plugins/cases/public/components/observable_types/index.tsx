@@ -21,7 +21,6 @@ import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import type { ObservableTypesConfiguration } from '../../../common/types/domain';
 import { ObservableTypesList } from './observable_types_list';
-import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
 export interface ObservableTypesProps {
   observableTypes: ObservableTypesConfiguration;
@@ -59,9 +58,6 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
       title={
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>{i18n.TITLE}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ExperimentalBadge />
-          </EuiFlexItem>
         </EuiFlexGroup>
       }
       description={<p>{i18n.DESCRIPTION}</p>}
