@@ -5544,7 +5544,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast@link:packages/kbn-esql-ast":
+"@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
   version "0.0.0"
   uid ""
 

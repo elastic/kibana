@@ -352,7 +352,6 @@ packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
-packages/kbn-esql-ast @elastic/kibana-esql
 packages/kbn-esql-editor @elastic/kibana-esql
 packages/kbn-esql-utils @elastic/kibana-esql
 packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
@@ -623,6 +622,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
