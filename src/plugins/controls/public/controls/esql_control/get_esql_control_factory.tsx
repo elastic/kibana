@@ -11,11 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { EuiComboBox } from '@elastic/eui';
-import {
-  useBatchedPublishingSubjects,
-  getUnchangingComparator,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, PublishingSubject } from '@kbn/presentation-publishing';
 import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQL_CONTROL } from '../../../common';
@@ -98,7 +94,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         },
         {
           ...defaultControl.comparators,
-          width: getUnchangingComparator(),
           ...selections.comparators,
         }
       );
