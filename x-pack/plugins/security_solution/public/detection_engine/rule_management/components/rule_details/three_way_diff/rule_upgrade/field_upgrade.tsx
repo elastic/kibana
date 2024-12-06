@@ -10,16 +10,18 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui'
 import { css } from '@emotion/css';
 import { isEqual } from 'lodash';
 import { SplitAccordion } from '../../../../../../common/components/split_accordion';
-import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_engine';
 import { FieldComparisonSide } from '../comparison_side/field_comparison_side';
 import { FieldFinalSide } from '../field_final_side';
 import { FieldUpgradeHeader } from './field_upgrade_header';
 import { useFieldUpgradeContext } from './field_upgrade_context';
+import { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 
 export function FieldUpgrade(): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const { fieldName, fieldUpgradeState, fieldDiff } = useFieldUpgradeContext();
-  const hasConflict = fieldDiff.conflict !== ThreeWayDiffConflict.NONE;
+  const hasConflict =
+    fieldUpgradeState === FieldUpgradeState.SolvableConflict ||
+    fieldUpgradeState === FieldUpgradeState.NonSolvableConflict;
   const isFieldCustomized = useMemo(
     () =>
       fieldDiff.has_base_version
