@@ -19,17 +19,8 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { ReactEmbeddableRenderer, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
 import { useUiActions } from '../../context';
 import { BUTTON_EMBEDDABLE } from '../../embeddables/register_button_embeddable';
-
-export const job: SampleMlJob = {
-  job_id: '123',
-  job_type: 'anomaly_detector',
-  description: 'This is some ML job.',
-};
-
-export const context: SampleApp1ClickContext = { job };
 
 export const DrilldownsWithEmbeddableExample: React.FC = () => {
   const { plugins, managerWithEmbeddable } = useUiActions();
