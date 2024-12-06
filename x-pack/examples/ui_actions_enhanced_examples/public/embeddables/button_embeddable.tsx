@@ -6,13 +6,17 @@
  */
 
 import React, { useCallback } from 'react';
-import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import {
+  DefaultEmbeddableApi,
+  ReactEmbeddableFactory,
+  VALUE_CLICK_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { BUTTON_EMBEDDABLE } from './register_button_embeddable';
 
 export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsStart) => {
-  const factory: ReactEmbeddableFactory<{}, {}, {}> = {
+  const factory: ReactEmbeddableFactory<{}, {}, DefaultEmbeddableApi<{}>> = {
     type: BUTTON_EMBEDDABLE,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
