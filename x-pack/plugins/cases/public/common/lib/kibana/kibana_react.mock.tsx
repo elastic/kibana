@@ -15,7 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { StartServices } from '../../../types';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { UseEuiTheme } from '@elastic/eui';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -118,5 +118,5 @@ export const createKibanaContextProviderMock = () => {
     React.createElement(KibanaContextProvider, { services }, children);
 };
 
-export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>
-  partialTheme as EuiTheme;
+export const getMockTheme = (partialTheme: RecursivePartial<UseEuiTheme>): UseEuiTheme =>
+  partialTheme as UseEuiTheme;
