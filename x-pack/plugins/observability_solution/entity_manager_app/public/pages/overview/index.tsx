@@ -70,7 +70,7 @@ function EntitySourceForm({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormRow label="Filters (comma-separated ESQL filters)">
+        <EuiFormRow label="Filters (comma-separated KQL filters)">
           <EuiFieldText
             data-test-subj="entityManagerFormFilters"
             name="filters"
