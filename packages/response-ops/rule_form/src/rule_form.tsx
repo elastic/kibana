@@ -28,13 +28,46 @@ export interface RuleFormProps {
 }
 
 export const RuleForm = (props: RuleFormProps) => {
-  const { plugins, onCancel, onSubmit } = props;
+  const { plugins: _plugins, onCancel, onSubmit } = props;
   const { id, ruleTypeId } = useParams<{
     id?: string;
     ruleTypeId?: string;
   }>();
 
+  const {
+    http,
+    i18n,
+    theme,
+    userProfile,
+    application,
+    notifications,
+    charts,
+    settings,
+    data,
+    dataViews,
+    unifiedSearch,
+    docLinks,
+    ruleTypeRegistry,
+    actionTypeRegistry,
+  } = _plugins;
+
   const ruleFormComponent = useMemo(() => {
+    const plugins = {
+      http,
+      i18n,
+      theme,
+      userProfile,
+      application,
+      notifications,
+      charts,
+      settings,
+      data,
+      dataViews,
+      unifiedSearch,
+      docLinks,
+      ruleTypeRegistry,
+      actionTypeRegistry,
+    };
     if (id) {
       return <EditRuleForm id={id} plugins={plugins} onCancel={onCancel} onSubmit={onSubmit} />;
     }
@@ -60,7 +93,26 @@ export const RuleForm = (props: RuleFormProps) => {
         }
       />
     );
-  }, [id, ruleTypeId, plugins, onCancel, onSubmit]);
+  }, [
+    http,
+    i18n,
+    theme,
+    userProfile,
+    application,
+    notifications,
+    charts,
+    settings,
+    data,
+    dataViews,
+    unifiedSearch,
+    docLinks,
+    ruleTypeRegistry,
+    actionTypeRegistry,
+    id,
+    ruleTypeId,
+    onCancel,
+    onSubmit,
+  ]);
 
   return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
 };
