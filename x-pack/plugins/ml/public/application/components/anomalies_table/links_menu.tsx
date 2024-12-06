@@ -834,7 +834,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         );
       }
     }
-    if (application.capabilities.maps?.show) {
+    if (application.capabilities.maps_v2?.show) {
       if (anomaly.isGeoRecord === true) {
         items.push(
           <EuiContextMenuItem

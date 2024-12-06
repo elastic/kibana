@@ -69,7 +69,7 @@ export function getActions(
   if (
     services?.uiActions &&
     mapsPlugin &&
-    services.application?.capabilities?.maps?.show === true
+    services.application?.capabilities?.maps_v2?.show === true
   ) {
     actions.push({
       name: i18n.translate('xpack.dataVisualizer.index.dataGrid.exploreInMapsTitle', {
