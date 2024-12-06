@@ -81,8 +81,11 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchConnectorsTableSelect', option);
       },
       async connectorNameExists(connectorName: string) {
-        const connectorsList = await this.getConnectorsList();
-        return Boolean(connectorsList.find((name) => name === connectorName));
+        await retry.tryForTime(10000, async () => {
+          const connectorsList = await this.getConnectorsList();
+          const isFound = Boolean(connectorsList.find((name) => name === connectorName));
+          expect(isFound).to.be(true);
+        });
       },
       async confirmDeleteConnectorModalComponentsExists() {
         await testSubjects.existOrFail('serverlessSearchDeleteConnectorModalFieldText');

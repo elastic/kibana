@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const retry = getService('retry');
 
   describe('connectors', function () {
     before(async () => {
@@ -32,17 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('Connector app is loaded and has no connectors', async () => {
-      retry.tryForTime(
-        3000,
-        async () => {
-          await pageObjects.svlCommonNavigation.sidenav.clickLink({
-            deepLinkId: 'serverlessConnectors',
-          });
-          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
-        },
-        undefined,
-        3
-      );
+      await pageObjects.common.navigateToApp('serverlessConnectors');
+      await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
 
     describe('create and configure connector', () => {
