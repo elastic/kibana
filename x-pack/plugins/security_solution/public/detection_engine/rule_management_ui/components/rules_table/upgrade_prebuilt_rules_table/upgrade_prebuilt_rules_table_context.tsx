@@ -310,11 +310,19 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       }
 
       const hasRuleTypeChange = ruleUpgradeState.diff.fields.type?.has_update ?? false;
+      const hasCustomizations =
+        ruleUpgradeState.current_rule.rule_source.type === 'external' &&
+        ruleUpgradeState.current_rule.rule_source.is_customized;
       const shouldShowRuleTypeChangeCallout =
         hasRuleTypeChange && isPrebuiltRulesCustomizationEnabled;
+
       let updateTabContent = (
         <PerFieldRuleDiffTab
-          header={shouldShowRuleTypeChangeCallout ? <RuleTypeChangeCallout /> : null}
+          header={
+            shouldShowRuleTypeChangeCallout && (
+              <RuleTypeChangeCallout hasCustomizations={hasCustomizations} />
+            )
+          }
           ruleDiff={ruleUpgradeState.diff}
         />
       );
