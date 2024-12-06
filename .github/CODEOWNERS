@@ -840,9 +840,6 @@ x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-tea
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
-x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
-x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
@@ -945,7 +942,6 @@ x-pack/plugins/observability_solution/observability_ai_assistant_management @ela
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
-x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
@@ -994,6 +990,10 @@ x-pack/plugins/translations @elastic/kibana-localization
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
+x-pack/solutions/observability/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
+x-pack/solutions/observability/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
+x-pack/solutions/observability/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
+x-pack/solutions/observability/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
