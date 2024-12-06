@@ -41,7 +41,7 @@ export async function loadDashboardApi({
   const validationResult =
     savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
   if (validationResult === 'invalid') {
-    // throw error to stop the rest of Dashboard loading and make the factory return an ErrorEmbeddable.
+    // throw error to stop the rest of Dashboard loading and make the factory throw an Error
     throw new Error('Dashboard failed saved object result validation');
   } else if (validationResult === 'redirected') {
     return;
