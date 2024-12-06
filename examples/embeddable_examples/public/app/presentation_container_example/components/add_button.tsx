@@ -10,7 +10,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { PageApi } from '../types';
 
 export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
