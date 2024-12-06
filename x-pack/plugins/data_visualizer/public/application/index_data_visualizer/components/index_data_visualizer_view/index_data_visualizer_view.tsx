@@ -525,10 +525,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             <EuiTitle size={'s'}>
               <h2>{currentDataView.getName()}</h2>
             </EuiTitle>
-            <DataVisualizerDataViewManagement
-              currentDataView={currentDataView}
-              useNewFieldsApi={true}
-            />
+            <DataVisualizerDataViewManagement currentDataView={currentDataView} />
           </EuiFlexGroup>
 
           {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
