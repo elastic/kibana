@@ -194,16 +194,6 @@ describe('get_data_telemetry', () => {
           doc_count: 0,
         },
         {
-          pattern_name: 'host_risk_score',
-          index_count: 1,
-          doc_count: 0,
-        },
-        {
-          pattern_name: 'user_risk_score',
-          index_count: 1,
-          doc_count: 0,
-        },
-        {
           data_stream: { dataset: 'nginx.access', type: 'logs' },
           shipper: 'filebeat',
           index_count: 2,
