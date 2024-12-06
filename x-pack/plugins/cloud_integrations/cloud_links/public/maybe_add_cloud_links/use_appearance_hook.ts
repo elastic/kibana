@@ -15,7 +15,7 @@ interface Deps {
   uiSettingsClient: IUiSettingsClient;
 }
 
-export const useThemeDarkmodeToggle = ({ uiSettingsClient }: Deps) => {
+export const useAppearance = ({ uiSettingsClient }: Deps) => {
   const [isDarkModeOn, setIsDarkModeOn] = useState(false);
   const isMounted = useMountedState();
 
