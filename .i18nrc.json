@@ -99,7 +99,7 @@
     "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reactPackages": "packages/react",
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
-    "esqlUtils": "packages/kbn-esql-utils",
+    "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
     "reporting": "packages/kbn-reporting",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
