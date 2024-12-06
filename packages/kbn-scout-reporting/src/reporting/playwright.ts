@@ -21,6 +21,7 @@ import type {
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import stripANSI from 'strip-ansi';
 import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
 import { environmentMetadata } from '../datasources';
 
@@ -172,8 +173,8 @@ export class ScoutPlaywrightReporter implements Reporter {
       event: {
         action: ScoutReportEventAction.TEST_STEP_END,
         error: {
-          message: step.error?.message,
-          stack_trace: step.error?.stack,
+          message: step.error?.message ? stripANSI(step.error.message) : undefined,
+          stack_trace: step.error?.stack ? stripANSI(step.error.stack) : undefined,
         },
       },
     });
@@ -205,8 +206,8 @@ export class ScoutPlaywrightReporter implements Reporter {
       event: {
         action: ScoutReportEventAction.TEST_END,
         error: {
-          message: result.error?.message,
-          stack_trace: result.error?.stack,
+          message: result.error?.message ? stripANSI(result.error.message) : undefined,
+          stack_trace: result.error?.stack ? stripANSI(result.error.stack) : undefined,
         },
       },
     });
@@ -254,8 +255,8 @@ export class ScoutPlaywrightReporter implements Reporter {
       event: {
         action: ScoutReportEventAction.ERROR,
         error: {
-          message: error.message,
-          stack_trace: error.stack,
+          message: error.message ? stripANSI(error.message) : undefined,
+          stack_trace: error.stack ? stripANSI(error.stack) : undefined,
         },
       },
     });
