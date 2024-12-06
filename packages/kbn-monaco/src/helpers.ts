@@ -16,7 +16,7 @@ export function registerLanguage(language: LangModuleType | CustomLangModuleType
   monaco.languages.register({ id: ID });
 
   if ('languageThemeResolver' in language) {
-    monaco.editor.registerLanguageThemeDefinition(ID, language.languageThemeResolver);
+    monaco.editor.registerLanguageThemeResolver(ID, language.languageThemeResolver);
   }
 
   monaco.languages.onLanguage(ID, async () => {
