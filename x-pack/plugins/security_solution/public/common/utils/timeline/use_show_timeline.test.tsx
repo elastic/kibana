@@ -46,7 +46,7 @@ jest.mock('../../lib/kibana', () => {
         ...original.useKibana().services,
         application: {
           capabilities: {
-            siem: {
+            siemV2: {
               show: mockSiemUserCanRead(),
             },
           },
@@ -73,7 +73,7 @@ describe('use show timeline', () => {
         management: {},
         catalogue: {},
         actions: { show: true, crud: true },
-        siem: {
+        siemV2: {
           show: true,
           crud: true,
         },

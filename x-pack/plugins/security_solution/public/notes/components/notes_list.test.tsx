@@ -44,7 +44,7 @@ describe('NotesList', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
 
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      notesPrivileges: { crud: true, read: true },
     });
   });
 
@@ -103,7 +103,7 @@ describe('NotesList', () => {
 
   it('should not render a delete icon when the user does not have crud privileges', () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+      notesPrivileges: { crud: false, read: true },
     });
     const { queryByTestId } = render(
       <TestProviders>
