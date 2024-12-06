@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
 import type { FieldUpgradeState } from './field_upgrade_state';
 
 export type FieldsUpgradeState = Record<
@@ -12,5 +13,5 @@ export type FieldsUpgradeState = Record<
   | {
       state: Exclude<FieldUpgradeState, FieldUpgradeState.Accepted>;
     }
-  | { state: FieldUpgradeState.Accepted; resolvedValue: unknown }
+  | { state: FieldUpgradeState.Accepted; resolvedValue: DiffableAllFields[keyof DiffableAllFields] }
 >;
