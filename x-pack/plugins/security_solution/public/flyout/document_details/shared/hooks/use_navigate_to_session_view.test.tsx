@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useNavigateToSessionView } from './use_navigate_to_session_view';
 import { mockFlyoutApi } from '../mocks/mock_flyout_context';

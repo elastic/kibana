@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isErrorEmbeddable, openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
+import { isErrorEmbeddable, openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '../dashboard_container';
 
 export function addFromLibrary(this: DashboardContainer) {
   if (isErrorEmbeddable(this)) return;
   this.openOverlay(
-    openAddPanelFlyout({
+    openAddFromLibraryFlyout({
       container: this,
-      onAddPanel: (id: string) => {
-        this.setScrollToPanelId(id);
-        this.setHighlightPanelId(id);
-      },
       onClose: () => {
         this.clearOverlays();
       },

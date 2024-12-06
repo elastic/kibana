@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import type { UseSectionsParams, UseSectionsResult } from './use_sections';
 import { useSections } from './use_sections';
 import { useExpandableFlyoutState } from '../..';
@@ -17,7 +16,7 @@ import { useExpandableFlyoutState } from '../..';
 jest.mock('../..');
 
 describe('useSections', () => {
-  let hookResult: RenderHookResult<UseSectionsParams, UseSectionsResult>;
+  let hookResult: RenderHookResult<UseSectionsResult, UseSectionsParams>;
 
   it('should return undefined for all values if no registeredPanels', () => {
     (useExpandableFlyoutState as jest.Mock).mockReturnValue({

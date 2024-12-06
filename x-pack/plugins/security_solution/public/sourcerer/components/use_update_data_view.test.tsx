@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useUpdateDataView } from './use_update_data_view';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import * as i18n from './translations';

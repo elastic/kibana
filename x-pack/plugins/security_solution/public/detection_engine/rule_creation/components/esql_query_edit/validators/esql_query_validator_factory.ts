@@ -7,10 +7,7 @@
 
 import type { QueryClient } from '@tanstack/react-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { ESQLAstQueryExpression, ESQLCommandOption } from '@kbn/esql-ast';
-import { parse } from '@kbn/esql-ast';
-import { isAggregatingQuery } from '@kbn/securitysolution-utils';
-import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
+import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
@@ -77,59 +74,6 @@ export function esqlQueryValidatorFactory({
 
 function hasIdColumn(columns: DatatableColumn[]): boolean {
   return columns.some(({ id }) => '_id' === id);
-}
-
-/**
- * check if esql query valid for Security rule:
- * - if it's non aggregation query it must have metadata operator
- */
-function parseEsqlQuery(query: string) {
-  const { root, errors } = parse(query);
-  const isEsqlQueryAggregating = isAggregatingQuery(root);
-
-  return {
-    errors,
-    isEsqlQueryAggregating,
-    hasMetadataOperator: computeHasMetadataOperator(root),
-  };
-}
-
-/**
- * checks whether query has metadata _id operator
- */
-function computeHasMetadataOperator(astExpression: ESQLAstQueryExpression): boolean {
-  // Check whether the `from` command has `metadata` operator
-  const metadataOption = getMetadataOption(astExpression);
-  if (!metadataOption) {
-    return false;
-  }
-
-  // Check whether the `metadata` operator has `_id` argument
-  const idColumnItem = metadataOption.args.find(
-    (fromArg) => isColumnItem(fromArg) && fromArg.name === '_id'
-  );
-  if (!idColumnItem) {
-    return false;
-  }
-
-  return true;
-}
-
-function getMetadataOption(astExpression: ESQLAstQueryExpression): ESQLCommandOption | undefined {
-  const fromCommand = astExpression.commands.find((x) => x.name === 'from');
-
-  if (!fromCommand?.args) {
-    return undefined;
-  }
-
-  // Check whether the `from` command has `metadata` operator
-  for (const fromArg of fromCommand.args) {
-    if (isOptionItem(fromArg) && fromArg.name === 'metadata') {
-      return fromArg;
-    }
-  }
-
-  return undefined;
 }
 
 function constructSyntaxError(error: Error): ValidationError {
