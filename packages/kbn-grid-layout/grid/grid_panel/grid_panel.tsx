@@ -97,7 +97,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe(([activePanel, gridLayout, runtimeSettings]) => {
-            // console.log('SUBSCRIBE!!!!');
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
             const panel = gridLayout[rowIndex].panels[panelId];
             if (!ref || !panel) return;

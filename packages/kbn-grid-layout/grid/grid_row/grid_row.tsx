@@ -207,10 +207,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           rowIndex={rowIndex}
           gridLayoutStateManager={gridLayoutStateManager}
           renderPanelContents={renderPanelContents}
-          interactionStart={(
-            type: PanelInteractionEvent['type'] | 'drop',
-            e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-          ) => {
+          interactionStart={(type, e) => {
             e.stopPropagation();
 
             // Disable interactions when a panel is expanded
@@ -223,7 +220,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             const panelRect = panelRef.getBoundingClientRect();
             if (type === 'drop') {
               setInteractionEvent(undefined);
-
               // Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction.
               // the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
               syncPanelIds();
