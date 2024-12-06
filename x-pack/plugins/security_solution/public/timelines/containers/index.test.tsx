@@ -57,10 +57,10 @@ jest.mock('../../common/lib/kibana', () => ({
       data: {
         search: {
           search: jest.fn().mockImplementation((args) => {
-            mockSearch();
+            mockSearch(args);
             return {
               subscribe: jest.fn().mockImplementation(({ next }) => {
-                setTimeout(() => {
+                const timelineOut = setTimeout(() => {
                   next({
                     isRunning: false,
                     isPartial: false,
@@ -77,7 +77,11 @@ jest.mock('../../common/lib/kibana', () => ({
                     totalCount: mockTimelineData.length,
                   });
                 }, 50);
-                return { unsubscribe: jest.fn() };
+                return {
+                  unsubscribe: jest.fn(() => {
+                    clearTimeout(timelineOut);
+                  }),
+                };
               }),
             };
           }),
@@ -147,7 +151,7 @@ describe('useTimelineEvents', () => {
         events: [],
         id: TimelineId.active,
         inspect: expect.objectContaining({ dsl: [], response: [] }),
-        loadPage: expect.any(Function),
+        loadNextBatch: expect.any(Function),
         pageInfo: expect.objectContaining({
           activePage: 0,
           querySize: 0,
@@ -178,7 +182,7 @@ describe('useTimelineEvents', () => {
           events: mockEvents,
           id: TimelineId.active,
           inspect: result.current[1].inspect,
-          loadPage: result.current[1].loadPage,
+          loadNextBatch: result.current[1].loadNextBatch,
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
           totalCount: 32,
@@ -220,7 +224,7 @@ describe('useTimelineEvents', () => {
         events: mockEvents,
         id: TimelineId.active,
         inspect: result.current[1].inspect,
-        loadPage: result.current[1].loadPage,
+        loadNextBatch: result.current[1].loadNextBatch,
         pageInfo: result.current[1].pageInfo,
         refetch: result.current[1].refetch,
         totalCount: 32,
@@ -266,98 +270,192 @@ describe('useTimelineEvents', () => {
     await waitFor(() => new Promise((resolve) => resolve(null)));
     mockSearch.mockReset();
     act(() => {
-      result.current[1].loadPage(4);
+      result.current[1].loadNextBatch();
     });
     await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(1));
   });
 
-  test('should query again when a new field is added', async () => {
-    const { rerender } = renderHook((args) => useTimelineEvents(args), {
-      initialProps: props,
+  describe('fields', () => {
+    test('should query again when a new field is added', async () => {
+      const { rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: props,
+      });
+
+      // useEffect on params request
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      rerender({ ...props, startDate, endDate });
+      // useEffect on params request
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+      mockSearch.mockClear();
+
+      rerender({
+        ...props,
+        startDate,
+        endDate,
+        fields: ['@timestamp', 'event.kind', 'event.category'],
+      });
+
+      await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(1));
     });
 
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender({ ...props, startDate, endDate });
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    test('should not query again when a field is removed', async () => {
+      const { rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: props,
+      });
 
-    expect(mockSearch).toHaveBeenCalledTimes(1);
-    mockSearch.mockClear();
+      // useEffect on params request
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      rerender({ ...props, startDate, endDate });
+      // useEffect on params request
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    rerender({
-      ...props,
-      startDate,
-      endDate,
-      fields: ['@timestamp', 'event.kind', 'event.category'],
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+      mockSearch.mockClear();
+
+      rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
+
+      await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
     });
+    test('should not query again when a removed field is added back', async () => {
+      const { rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: props,
+      });
 
-    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(1));
+      // useEffect on params request
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      rerender({ ...props, startDate, endDate });
+      // useEffect on params request
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+      mockSearch.mockClear();
+
+      // remove `event.kind` from default fields
+      rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(mockSearch).toHaveBeenCalledTimes(0);
+
+      // request default Fields
+      rerender({ ...props, startDate, endDate });
+
+      // since there is no new update in useEffect, it should throw an timeout error
+      // await expect(waitFor(() => null)).rejects.toThrowError();
+      await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
+    });
   });
 
-  test('should not query again when a field is removed', async () => {
-    const { rerender } = renderHook((args) => useTimelineEvents(args), {
-      initialProps: props,
+  describe('batching', () => {
+    test('should request cumulative data of all the batches when next batch has been requested', async () => {
+      const { result } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+        );
+      });
+
+      mockSearch.mockClear();
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 50 } })
+        );
+      });
+
+      mockSearch.mockClear();
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 75 } })
+        );
+      });
     });
+    test('should fetch new columns data for the all the batches ', async () => {
+      const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
 
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender({ ...props, startDate, endDate });
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+      });
 
-    expect(mockSearch).toHaveBeenCalledTimes(1);
-    mockSearch.mockClear();
+      ////////
+      // fetch 3 batches before requesting new column
+      ////////
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
 
-    rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+      });
 
-    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
-  });
-  test('should not query again when a removed field is added back', async () => {
-    const { rerender } = renderHook((args) => useTimelineEvents(args), {
-      initialProps: props,
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+      });
+      ///////
+
+      rerender({ ...props, fields: [...props.fields, 'new_column'] });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({
+            fields: ['@timestamp', 'event.kind', 'new_column'],
+            pagination: { activePage: 0, querySize: 75 },
+          })
+        );
+      });
     });
+    test('should reset batch to 0th when the data is `refetched`', async () => {
+      const { result } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
 
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender({ ...props, startDate, endDate });
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
 
-    expect(mockSearch).toHaveBeenCalledTimes(1);
-    mockSearch.mockClear();
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 50 } })
+        );
+      });
 
-    // remove `event.kind` from default fields
-    rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
+      mockSearch.mockClear();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+      act(() => {
+        result.current[1].refetch();
+      });
 
-    expect(mockSearch).toHaveBeenCalledTimes(0);
-
-    // request default Fields
-    rerender({ ...props, startDate, endDate });
-
-    // since there is no new update in useEffect, it should throw an timeout error
-    // await expect(waitFor(() => null)).rejects.toThrowError();
-    await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
-  });
-
-  test('should return the combined list of events for all the pages when multiple pages are queried', async () => {
-    const { result } = renderHook((args) => useTimelineEvents(args), {
-      initialProps: { ...props },
-    });
-    await waitFor(() => {
-      expect(result.current[1].events).toHaveLength(10);
-    });
-
-    result.current[1].loadPage(1);
-
-    await waitFor(() => {
-      expect(result.current[0]).toEqual(DataLoadingState.loadingMore);
-    });
-
-    await waitFor(() => {
-      expect(result.current[1].events).toHaveLength(20);
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledTimes(1);
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+        );
+      });
     });
   });
 });
