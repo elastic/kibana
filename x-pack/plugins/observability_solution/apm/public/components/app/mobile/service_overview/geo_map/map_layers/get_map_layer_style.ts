@@ -15,12 +15,19 @@ import {
   SYMBOLIZE_AS_TYPES,
 } from '@kbn/maps-plugin/common';
 
+import { StyleColorParams } from './style_color_params';
+
 export enum PalleteColors {
   BluetoRed = 'Blue to Red',
   YellowtoRed = 'Yellow to Red',
 }
 
-export function getLayerStyle(fieldName: string, color: PalleteColors): VectorStyleDescriptor {
+export function getLayerStyle(
+  fieldName: string,
+  color: PalleteColors,
+  styleColors: StyleColorParams
+): VectorStyleDescriptor {
+  const { lineColor, labelColor, labelOutlineColor } = styleColors;
   return {
     type: 'VECTOR',
     properties: {
@@ -41,7 +48,7 @@ export function getLayerStyle(fieldName: string, color: PalleteColors): VectorSt
       },
       lineColor: {
         type: STYLE_TYPE.DYNAMIC,
-        options: { color: '#3d3d3d', fieldMetaOptions: { isEnabled: true } },
+        options: { color: lineColor, fieldMetaOptions: { isEnabled: true } },
       },
       lineWidth: { type: STYLE_TYPE.STATIC, options: { size: 1 } },
       iconSize: { type: STYLE_TYPE.STATIC, options: { size: 6 } },
@@ -72,12 +79,12 @@ export function getLayerStyle(fieldName: string, color: PalleteColors): VectorSt
       },
       labelColor: {
         type: STYLE_TYPE.STATIC,
-        options: { color: '#3d3d3d' },
+        options: { color: labelColor },
       },
       labelSize: { type: STYLE_TYPE.STATIC, options: { size: 14 } },
       labelBorderColor: {
         type: STYLE_TYPE.STATIC,
-        options: { color: '#FFFFFF' },
+        options: { color: labelOutlineColor },
       },
       symbolizeAs: { options: { value: SYMBOLIZE_AS_TYPES.CIRCLE } },
       labelBorderSize: { options: { size: LABEL_BORDER_SIZES.SMALL } },

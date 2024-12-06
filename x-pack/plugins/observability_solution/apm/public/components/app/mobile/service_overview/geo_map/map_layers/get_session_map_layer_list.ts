@@ -22,6 +22,7 @@ import {
   SESSION_ID,
 } from '../../../../../../../common/es_fields/apm';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
+import { StyleColorParams } from './style_color_params';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
@@ -36,7 +37,11 @@ const SESSION_PER_REGION = `__kbnjoin__cardinality_of_session.id__${PER_REGION_L
 const label = i18n.translate('xpack.apm.serviceOverview.embeddedMap.session.metric.label', {
   defaultMessage: 'Sessions',
 });
-export function getSessionMapLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
+export function getSessionMapLayerList(
+  maps: MapsStartApi | undefined,
+  dataViewId: string,
+  styleColors: StyleColorParams
+) {
   const sessionsByCountryLayer: VectorLayerDescriptor = {
     joins: [
       {
@@ -64,7 +69,7 @@ export function getSessionMapLayerList(maps: MapsStartApi | undefined, dataViewI
       id: 'world_countries',
       tooltipProperties: [COUNTRY_NAME],
     },
-    style: getLayerStyle(SESSION_PER_COUNTRY, PalleteColors.BluetoRed),
+    style: getLayerStyle(SESSION_PER_COUNTRY, PalleteColors.BluetoRed, styleColors),
     id: uuidv4(),
     label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.sessionCountry.metric.label', {
       defaultMessage: 'Sessions per country',
@@ -103,7 +108,7 @@ export function getSessionMapLayerList(maps: MapsStartApi | undefined, dataViewI
       id: 'administrative_regions_lvl2',
       tooltipProperties: ['region_iso_code'],
     },
-    style: getLayerStyle(SESSION_PER_REGION, PalleteColors.YellowtoRed),
+    style: getLayerStyle(SESSION_PER_REGION, PalleteColors.YellowtoRed, styleColors),
     id: uuidv4(),
     label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.sessionRegion.metric.label', {
       defaultMessage: 'Sessions per region',
