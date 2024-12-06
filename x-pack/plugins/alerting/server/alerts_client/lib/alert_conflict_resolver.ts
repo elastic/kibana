@@ -70,7 +70,6 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
 
   // get numbers for a summary log message
   const { success, errors, conflicts, messages } = getResponseStats(bulkResponse);
-
   if (conflicts === 0 && errors === 0) return;
 
   const allMessages = messages.join('; ');
@@ -291,12 +290,7 @@ interface ResponseStatsResult {
 // generate a summary of the original bulk request attempt, for logging
 function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
   const sanitizedResponse = sanitizeBulkErrorResponse(bulkResponse) as BulkResponse;
-  const stats: ResponseStatsResult = {
-    success: 0,
-    conflicts: 0,
-    errors: 0,
-    messages: [],
-  };
+  const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
   for (const item of sanitizedResponse.items) {
     const op = item.create || item.index || item.update || item.delete;
     if (op?.error) {

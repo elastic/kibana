@@ -729,7 +729,10 @@ export class TaskRunner<
               tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
             });
           } else if (isClusterBlockError(err)) {
-            this.logger.debug('Index is blocked', {
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
+            this.logger.debug(message, {
               tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
             });
           } else {

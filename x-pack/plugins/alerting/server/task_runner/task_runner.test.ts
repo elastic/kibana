@@ -19,6 +19,7 @@ import {
   RuleAlertData,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
+  RuleExecutionStatusErrorReasons,
 } from '../types';
 import {
   ConcreteTaskInstance,
@@ -98,6 +99,7 @@ import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { ErrorWithReason } from '../lib';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3422,6 +3424,38 @@ describe('Task Runner', () => {
     const runnerResult = await taskRunner.run();
 
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  test('reschedules when persistAlerts returns a cluster_block_exception', async () => {
+    const rootError = new Error('Index is blocked');
+    rootError.stack = 'stack message';
+    const err = new ErrorWithReason(RuleExecutionStatusErrorReasons.Blocked, rootError);
+
+    alertsClient.persistAlerts.mockRejectedValueOnce(err);
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockedRawRuleSO);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
+    expect(runnerResult.state).toEqual(mockedTaskInstance.state);
+    expect(runnerResult.schedule!.interval).toEqual('1m');
+    expect(runnerResult.taskRunError).toMatchInlineSnapshot('[Error: Index is blocked]');
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Executing Rule default:test:1 has resulted in Error: Index is blocked',
+      {
+        tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
+      }
+    );
   });
 
   function testAlertingEventLogCalls({

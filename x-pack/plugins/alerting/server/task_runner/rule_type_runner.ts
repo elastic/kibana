@@ -345,30 +345,22 @@ export class RuleTypeRunner<
       })
     );
 
-    try {
-      await withAlertingSpan('alerting:index-alerts-as-data', () =>
-        this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-          const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
+    await withAlertingSpan('alerting:index-alerts-as-data', () =>
+      this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
+        const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
 
-          // Set the event log MW ids again, this time including the ids that matched alerts with
-          // scoped query
-          if (
-            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
-            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
-          ) {
-            context.alertingEventLogger.setMaintenanceWindowIds(
-              updateAlertsMaintenanceWindowResult.maintenanceWindowIds
-            );
-          }
-        })
-      );
-    } catch (err) {
-      return {
-        state: undefined,
-        error: createTaskRunError(err, getErrorSource(err) || TaskErrorSource.FRAMEWORK),
-        stackTrace: { message: err, stackTrace: err.stack },
-      };
-    }
+        // Set the event log MW ids again, this time including the ids that matched alerts with
+        // scoped query
+        if (
+          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
+          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
+        ) {
+          context.alertingEventLogger.setMaintenanceWindowIds(
+            updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+          );
+        }
+      })
+    );
 
     alertsClient.logAlerts({
       ruleRunMetricsStore: context.ruleRunMetricsStore,
