@@ -26,8 +26,12 @@ import {
 } from './request_utils';
 import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
-import { getDefaultSearchParams, getShardTimeout } from '../es_search';
-import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
+import {
+  getDefaultSearchParams,
+  getShardTimeout,
+  getTotalLoaded,
+  shimHitsTotal,
+} from '../es_search';
 import { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
@@ -81,17 +85,12 @@ export const enhancedEsSearchStrategyProvider = (
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
     };
-    const { body, headers, meta } = await client.asyncSearch.get(
+    const { body, headers } = await client.asyncSearch.get(
       { ...params, id: id! },
-      {
-        ...options.transport,
-        signal: options.abortSignal,
-        meta: true,
-        asStream: options.stream,
-      }
+      { ...options.transport, signal: options.abortSignal, meta: true }
     );
-
-    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
+    const response = shimHitsTotal(body.response, options);
+    return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
   }
 
   async function submitAsyncSearch(
@@ -108,10 +107,13 @@ export const enhancedEsSearchStrategyProvider = (
       ...options.transport,
       signal: options.abortSignal,
       meta: true,
-      asStream: options.stream,
     });
-
-    return toAsyncKibanaSearchResponse(body, headers, meta?.request?.params, options);
+    const response = shimHitsTotal(body.response, options);
+    return toAsyncKibanaSearchResponse(
+      { ...body, response },
+      headers?.warning,
+      meta?.request?.params
+    );
   }
 
   function asyncSearch(

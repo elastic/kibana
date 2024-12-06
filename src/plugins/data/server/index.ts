@@ -68,12 +68,11 @@ export type {
   AsyncSearchStatusResponse,
 } from './search';
 export {
+  shimHitsTotal,
   SearchSessionService,
   NoSearchIdInSessionError,
   INITIAL_SEARCH_SESSION_REST_VERSION,
 } from './search';
-
-export { shimHitsTotal } from '../common/search';
 
 // Search namespace
 export const search = {

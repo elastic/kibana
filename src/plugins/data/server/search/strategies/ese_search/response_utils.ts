@@ -9,11 +9,10 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { IncomingHttpHeaders } from 'http';
 import type { AsyncSearchResponse } from './types';
+import { getTotalLoaded } from '../es_search';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 import { AsyncSearchStatusResponse } from './types';
-import { shimHitsTotal, getTotalLoaded, IAsyncSearchOptions } from '../../../../common';
 
 /**
  * Get the Kibana representation of an async search status response.
@@ -36,17 +35,16 @@ export function toAsyncKibanaSearchStatusResponse(
  */
 export function toAsyncKibanaSearchResponse(
   response: AsyncSearchResponse,
-  headers: IncomingHttpHeaders,
-  requestParams?: ConnectionRequestParams,
-  options?: IAsyncSearchOptions
+  warning?: string,
+  requestParams?: ConnectionRequestParams
 ): IKibanaSearchResponse {
   return {
-    id: headers['x-elasticsearch-async-id'] as string,
-    rawResponse: response.response ? shimHitsTotal(response.response, options) : response,
-    isPartial: headers['x-elasticsearch-async-is-running'] === '?1',
-    isRunning: headers['x-elasticsearch-async-is-running'] === '?1',
-    ...(headers.warning ? { warning: headers.warning } : {}),
+    id: response.id,
+    rawResponse: response.response,
+    isPartial: response.is_partial,
+    isRunning: response.is_running,
+    ...(warning ? { warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
-    ...(response.response ? getTotalLoaded(response.response) : {}),
+    ...getTotalLoaded(response.response),
   };
 }
