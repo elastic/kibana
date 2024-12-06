@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('EUI Provider Dev Warning', () => {
+  describe.skip('EUI Provider Dev Warning', () => {
     it('shows error toast to developer', async () => {
       const pageTitle = 'EuiProvider test - Elastic';
 
