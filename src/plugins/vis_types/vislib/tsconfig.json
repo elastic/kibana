@@ -38,7 +38,6 @@
     "@kbn/config-schema",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
-    "@kbn/core-user-profile-browser",
   ],
   "exclude": [
     "target/**/*",
