@@ -9855,10 +9855,10 @@
   dependencies:
     "@statoscope/stats" "5.28.1"
 
-"@statoscope/webpack-model@5.28.2":
-  version "5.28.2"
-  resolved "https://registry.yarnpkg.com/@statoscope/webpack-model/-/webpack-model-5.28.2.tgz#c044479b85a583957d1ab3648c9718b23f1ab377"
-  integrity sha512-q+AVtXBNyRRDh4prEfVVsZKdrgn0GFb5P3xIwFFvf832I/Tk9rn/fMk9v0+PqwXRYl6vxfrKHqrA8lJiRLh/6Q==
+"@statoscope/webpack-model@5.28.3":
+  version "5.28.3"
+  resolved "https://registry.yarnpkg.com/@statoscope/webpack-model/-/webpack-model-5.28.3.tgz#593f26df79fc13387383590eebd81a321cdfa625"
+  integrity sha512-vHlof5PB10Byl/TumcveL/VohWhCwnvhWrbQqm0hXnTMD8xgk7Li+rf8oN1z2mObUI273pLxtliq31WMegDUBQ==
   dependencies:
     "@statoscope/extensions" "5.28.1"
     "@statoscope/helpers" "5.28.1"
@@ -9872,10 +9872,10 @@
     "@types/webpack" "^5.0.0"
     md5 "^2.3.0"
 
-"@statoscope/webpack-plugin@^5.28.2":
-  version "5.28.2"
-  resolved "https://registry.yarnpkg.com/@statoscope/webpack-plugin/-/webpack-plugin-5.28.2.tgz#b2bb329d92cca06ee0b1bf4e57bfedb978de1168"
-  integrity sha512-vFzZw/THVtLeat7+LYbhJhbNYBmHODXiPa1fiqsNQtmNexOTxa9SujrvMkqiVYCKX1elUHVm/UE1JGDmQIcuAA==
+"@statoscope/webpack-plugin@^5.28.3":
+  version "5.28.3"
+  resolved "https://registry.yarnpkg.com/@statoscope/webpack-plugin/-/webpack-plugin-5.28.3.tgz#1eeccdcd30a2083138d218a1e1cb498efd1006a7"
+  integrity sha512-embxjo3shPjmT3bDBL4mhQpmaGqZzjVmZbEmVgIxzVN6IrkkYea+UgBLMc9quPre4S031MfybND8kvLhTafN4g==
   dependencies:
     "@discoveryjs/json-ext" "^0.5.7"
     "@statoscope/report-writer" "5.28.1"
@@ -9883,38 +9883,38 @@
     "@statoscope/stats-extension-compressed" "5.28.1"
     "@statoscope/stats-extension-custom-reports" "5.28.1"
     "@statoscope/types" "5.28.1"
-    "@statoscope/webpack-model" "5.28.2"
-    "@statoscope/webpack-stats-extension-compressed" "5.28.2"
-    "@statoscope/webpack-stats-extension-package-info" "5.28.2"
-    "@statoscope/webpack-ui" "5.28.2"
+    "@statoscope/webpack-model" "5.28.3"
+    "@statoscope/webpack-stats-extension-compressed" "5.28.3"
+    "@statoscope/webpack-stats-extension-package-info" "5.28.3"
+    "@statoscope/webpack-ui" "5.28.3"
     "@types/node" "^18.0.0"
     "@types/webpack" "^5.0.0"
     open "~8.4.0"
 
-"@statoscope/webpack-stats-extension-compressed@5.28.2":
-  version "5.28.2"
-  resolved "https://registry.yarnpkg.com/@statoscope/webpack-stats-extension-compressed/-/webpack-stats-extension-compressed-5.28.2.tgz#5a0ff15f5dda4fab41cef4923e0d7058caf83326"
-  integrity sha512-8rdt6AHx3H28NIdhEXuQLAz5MAKibZA7+h3/YRJYKjvYAfFi6QlJB1hvoulAPmQlV3bIUKVrk5peHxpKQATQFw==
+"@statoscope/webpack-stats-extension-compressed@5.28.3":
+  version "5.28.3"
+  resolved "https://registry.yarnpkg.com/@statoscope/webpack-stats-extension-compressed/-/webpack-stats-extension-compressed-5.28.3.tgz#efa18f4ef9ce3d9c43aa42b401f166790ef4ba61"
+  integrity sha512-JZIi9VIWNW/4uiOY9mioQLFu1jLbLXnFqZq7pMb2ZvMXw15GaVIyNzZw/vu98osY42/0cduB9AR/q21yxqnE/A==
   dependencies:
     "@statoscope/stats" "5.28.1"
     "@statoscope/stats-extension-compressed" "5.28.1"
-    "@statoscope/webpack-model" "5.28.2"
+    "@statoscope/webpack-model" "5.28.3"
     "@types/webpack" "^5.0.0"
 
-"@statoscope/webpack-stats-extension-package-info@5.28.2":
-  version "5.28.2"
-  resolved "https://registry.yarnpkg.com/@statoscope/webpack-stats-extension-package-info/-/webpack-stats-extension-package-info-5.28.2.tgz#479ae5e525bf08f66f23b0ce96ed16fb5e0efc4c"
-  integrity sha512-+pKCnkNp0vGqCTtILHTD5/hBM0wdx8uZBGjFREGNcIMGpeoJM3FbsLMOiS0gFfeJrmL6ZpdhdVzSa58gN6db8A==
+"@statoscope/webpack-stats-extension-package-info@5.28.3":
+  version "5.28.3"
+  resolved "https://registry.yarnpkg.com/@statoscope/webpack-stats-extension-package-info/-/webpack-stats-extension-package-info-5.28.3.tgz#e27c38cbabc3f92939c4e09fecb0cf5dd2f6064a"
+  integrity sha512-aV8ywqrjlJOMByz4XCOFuDIvWHJUL09lvBaH4tQ9n5RI+PpQBP40eEQwDncNyCSaPMp4AuxFwG2L23unTNuoMA==
   dependencies:
     "@statoscope/stats" "5.28.1"
     "@statoscope/stats-extension-package-info" "5.28.1"
-    "@statoscope/webpack-model" "5.28.2"
+    "@statoscope/webpack-model" "5.28.3"
     "@types/webpack" "^5.0.0"
 
-"@statoscope/webpack-ui@5.28.2":
-  version "5.28.2"
-  resolved "https://registry.yarnpkg.com/@statoscope/webpack-ui/-/webpack-ui-5.28.2.tgz#106571a15d8f0febce424e17f94d05e55e904f1c"
-  integrity sha512-jQ9/CXsSD2FPFQHt7ZJgil8JsukFLTRfIclONyC9R2vomdb2FwHzak6/fEqKYjT2bsDWoWJPL0ieM4Kog6I0Nw==
+"@statoscope/webpack-ui@5.28.3":
+  version "5.28.3"
+  resolved "https://registry.yarnpkg.com/@statoscope/webpack-ui/-/webpack-ui-5.28.3.tgz#fa33b5a150c20f6ce5f2b7f84369fe00bb283422"
+  integrity sha512-oMFn42qufRT0jyw3bMKDCQ81LgUrpw026Q2xYZixc5I4HsN1lstbl9WkxGU5EjSkTkYishg0SzcgGqljFmr3PQ==
   dependencies:
     "@statoscope/types" "5.28.1"
     "@types/md5" "^2.3.2"
