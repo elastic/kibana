@@ -5196,7 +5196,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations-plugin@link:src/plugins/custom_integrations":
+"@kbn/custom-integrations-plugin@link:src/platform/plugins/shared/custom_integrations":
   version "0.0.0"
   uid ""
 
@@ -5288,7 +5288,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-fleet@link:packages/deeplinks/fleet":
+"@kbn/deeplinks-fleet@link:src/platform/packages/shared/deeplinks/fleet":
   version "0.0.0"
   uid ""
 
@@ -5744,7 +5744,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/fleet-plugin@link:x-pack/plugins/fleet":
+"@kbn/fleet-plugin@link:x-pack/platform/plugins/shared/fleet":
   version "0.0.0"
   uid ""
 
