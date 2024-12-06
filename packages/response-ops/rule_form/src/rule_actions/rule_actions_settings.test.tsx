@@ -276,13 +276,7 @@ describe('ruleActionsSettings', () => {
   test('should call notifyWhen component event handlers with the correct parameters', async () => {
     render(
       <RuleActionsSettings
-        action={getAction('1', {
-          frequency: {
-            throttle: null,
-            summary: true,
-            notifyWhen: 'onActiveAlert',
-          },
-        })}
+        action={getAction('1')}
         onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
         onNotifyWhenChange={mockOnNotifyWhenChange}
         onActionGroupChange={mockOnActionGroupChange}
@@ -291,7 +285,7 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    await userEvent.click(screen.getByText('onActiveAlert'));
+    await userEvent.click(screen.getByText('onActionGroupChange'));
 
     expect(mockOnNotifyWhenChange).toHaveBeenLastCalledWith({
       notifyWhen: 'onActionGroupChange',
