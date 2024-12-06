@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 import { getHistoricalResultStub } from '../../../../stub/get_historical_result_stub';
@@ -57,7 +57,7 @@ describe('useStoredPatternResults', () => {
         return Promise.reject(new Error('Invalid path'));
       });
 
-      const { result, waitFor } = renderHook(() =>
+      const { result } = renderHook(() =>
         useStoredPatternResults({
           patterns,
           toasts: mockToasts,
@@ -68,7 +68,7 @@ describe('useStoredPatternResults', () => {
         })
       );
 
-      await waitFor(() => result.current.length > 0);
+      await waitFor(() => expect(result.current.length).toBeGreaterThan(0));
 
       expect(httpFetch).toHaveBeenCalledTimes(2);
 
@@ -141,7 +141,7 @@ describe('useStoredPatternResults', () => {
           return Promise.reject(new Error('Invalid path'));
         });
 
-        const { result, waitFor } = renderHook(() =>
+        const { result } = renderHook(() =>
           useStoredPatternResults({
             patterns,
             toasts: mockToasts,
@@ -152,7 +152,7 @@ describe('useStoredPatternResults', () => {
           })
         );
 
-        await waitFor(() => result.current.length > 0);
+        await waitFor(() => expect(result.current.length).toBeGreaterThan(0));
 
         expect(httpFetch).toHaveBeenCalledTimes(2);
 
