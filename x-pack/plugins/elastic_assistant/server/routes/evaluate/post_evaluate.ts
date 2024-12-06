@@ -150,6 +150,8 @@ export const postEvaluateRoute = (
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
           const inference = ctx.elasticAssistant.inference;
+          const productDocsAvailable =
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Data clients
           const anonymizationFieldsDataClient =
@@ -280,6 +282,7 @@ export const postEvaluateRoute = (
                 connectorId: connector.id,
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
+                ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
               };
 
               const tools: StructuredTool[] = assistantTools.flatMap(

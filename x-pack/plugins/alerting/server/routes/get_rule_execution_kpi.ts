@@ -48,7 +48,8 @@ export const getRuleExecutionKPIRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const { id } = req.params;
         return res.ok({
           body: await rulesClient.getRuleExecutionKPI(rewriteReq({ id, ...req.query })),

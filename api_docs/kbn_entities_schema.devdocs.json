@@ -144,10 +144,10 @@
           },
           {
             "parentPluginId": "@kbn/entities-schema",
-            "id": "def-common.EntityV2.entity.last_seen_timestamp",
+            "id": "def-common.EntityV2.entity.type",
             "type": "string",
             "tags": [],
-            "label": "'entity.last_seen_timestamp'",
+            "label": "'entity.type'",
             "description": [],
             "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
             "deprecated": false,
@@ -155,11 +155,25 @@
           },
           {
             "parentPluginId": "@kbn/entities-schema",
-            "id": "def-common.EntityV2.entity.type",
+            "id": "def-common.EntityV2.entity.display_name",
             "type": "string",
             "tags": [],
-            "label": "'entity.type'",
+            "label": "'entity.display_name'",
             "description": [],
+            "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/entities-schema",
+            "id": "def-common.EntityV2.entity.last_seen_timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "'entity.last_seen_timestamp'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/kbn-entities-schema/src/schema/entity.ts",
             "deprecated": false,
             "trackAdoption": false

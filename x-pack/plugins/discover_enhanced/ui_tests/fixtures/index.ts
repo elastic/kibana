@@ -21,7 +21,16 @@ export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
 }
 
 export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async ({ pageObjects, page }, use) => {
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtendedScoutTestFixtures['pageObjects'];
+      page: ExtendedScoutTestFixtures['page'];
+    },
+    use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
+  ) => {
     const extendedPageObjects = {
       ...pageObjects,
       demo: createLazyPageObject(DemoPage, page),
