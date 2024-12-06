@@ -74,7 +74,10 @@ export function DatasetQualityDetailsContextProvider({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
           });
-          const breadcrumbValue = getBreadcrumbValue(state.dataStream, state.integration);
+          const breadcrumbValue = getBreadcrumbValue(
+            state.dataStream,
+            state.integration?.integration
+          );
           setBreadcrumbs([{ text: breadcrumbValue }]);
         }
       );
