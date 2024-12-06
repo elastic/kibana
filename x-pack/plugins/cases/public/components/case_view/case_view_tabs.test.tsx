@@ -21,15 +21,18 @@ import { useGetCase } from '../../containers/use_get_case';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
+import { useCaseObservables } from './use_case_observables';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../../containers/use_get_case_file_stats');
+jest.mock('./use_case_observables');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useGetCaseFileStatsMock = useGetCaseFileStats as jest.Mock;
+const useGetCaseObservablesMock = useCaseObservables as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -58,6 +61,7 @@ describe('CaseViewTabs', () => {
   const data = { total: 3 };
 
   beforeEach(() => {
+    useGetCaseObservablesMock.mockReturnValue({ isLoading: false, observables: [] });
     useGetCaseFileStatsMock.mockReturnValue({ data });
     mockGetCase();
 
@@ -263,12 +267,60 @@ describe('CaseViewTabs', () => {
       expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
     });
 
+    it('navigates to the files tab when the files tab is clicked', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+      await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
+
+      await waitFor(() => {
+        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+          detailName: caseData.id,
+          tabId: CASE_VIEW_PAGE_TABS.FILES,
+        });
+      });
+    });
+
     it('should show the similar cases tab', async () => {
       appMockRenderer.render(
         <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.SIMILAR_CASES} />
       );
 
       expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
+    });
+
+    it('navigates to the similar cases tab when the similar cases tab is clicked', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      appMockRenderer.render(<CaseViewTabs {...caseProps} />);
+
+      await userEvent.click(await screen.findByTestId('case-view-tab-title-similar_cases'));
+
+      await waitFor(() => {
+        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+          detailName: caseData.id,
+          tabId: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
+        });
+      });
+    });
+
+    it('shows the observables tab with the correct count', async () => {
+      appMockRenderer.render(
+        <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+      );
+
+      const badge = await screen.findByTestId('case-view-observables-stats-badge');
+
+      expect(badge).toHaveTextContent('0');
+    });
+
+    it('do not show observables on the files tab if the call isLoading', async () => {
+      useGetCaseObservablesMock.mockReturnValue({ isLoading: true, observables: [] });
+
+      appMockRenderer.render(
+        <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+      );
+
+      expect(screen.queryByTestId('case-view-observables-stats-badge')).not.toBeInTheDocument();
     });
   });
 });

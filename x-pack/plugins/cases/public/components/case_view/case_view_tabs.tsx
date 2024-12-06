@@ -166,7 +166,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   });
   const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
 
-  const observableStatsData = useMemo(() => ({ total: observables.length }), [observables.length]);
   const { data: similarCasesData } = useGetSimilarCases({
     caseData,
     pageSize: 0,
@@ -216,7 +215,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
               badge: (
                 <ObservablesBadge
                   isLoading={isLoadingObservables}
-                  count={observableStatsData.total}
+                  count={observables.length}
                   activeTab={activeTab}
                   euiTheme={euiTheme}
                 />
@@ -246,7 +245,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       fileStatsData,
       canShowObservableTabs,
       isLoadingObservables,
-      observableStatsData.total,
+      observables.length,
       similarCasesData?.total,
     ]
   );
