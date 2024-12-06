@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText, EuiTextProps } from '@elastic/eui';
-import { HEALTH_HEX_CODES } from './gradient';
+import { useHealthHexCodes } from './gradient';
 
 interface Props {
   count?: number;
@@ -24,6 +24,7 @@ const defaultTextProps: EuiTextProps = {
 };
 
 export function ClusterHealth({ count, status, textProps = defaultTextProps }: Props) {
+  const healthHexCodes = useHealthHexCodes();
   if (typeof count === 'number' && count === 0) {
     return null;
   }
@@ -31,22 +32,22 @@ export function ClusterHealth({ count, status, textProps = defaultTextProps }: P
   let color = 'subdued';
   let statusLabel = status;
   if (status === 'successful') {
-    color = HEALTH_HEX_CODES.successful;
+    color = healthHexCodes.successful;
     statusLabel = i18n.translate('inspector.requests.clusters.successfulLabel', {
       defaultMessage: 'successful',
     });
   } else if (status === 'partial') {
-    color = HEALTH_HEX_CODES.partial;
+    color = healthHexCodes.partial;
     statusLabel = i18n.translate('inspector.requests.clusters.partialLabel', {
       defaultMessage: 'partial',
     });
   } else if (status === 'skipped') {
-    color = HEALTH_HEX_CODES.skipped;
+    color = healthHexCodes.skipped;
     statusLabel = i18n.translate('inspector.requests.clusters.skippedLabel', {
       defaultMessage: 'skipped',
     });
   } else if (status === 'failed') {
-    color = HEALTH_HEX_CODES.failed;
+    color = healthHexCodes.failed;
     statusLabel = i18n.translate('inspector.requests.clusters.failedLabel', {
       defaultMessage: 'failed',
     });
