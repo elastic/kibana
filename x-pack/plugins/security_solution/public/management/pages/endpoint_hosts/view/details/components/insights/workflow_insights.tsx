@@ -19,7 +19,7 @@ interface WorkflowInsightsProps {
   endpointOs?: string;
 }
 
-export const WorkflowInsights = ({ endpointId, endpointOs }: WorkflowInsightsProps) => {
+export const WorkflowInsights = React.memo(({ endpointId, endpointOs }: WorkflowInsightsProps) => {
   const [isScanButtonDisabled, setIsScanButtonDisabled] = useState(true);
   const [scanCompleted, setIsScanCompleted] = useState(false);
   const [userTriggeredScan, setUserTriggeredScan] = useState(false);
@@ -110,4 +110,6 @@ export const WorkflowInsights = ({ endpointId, endpointOs }: WorkflowInsightsPro
       <EuiSpacer size="l" />
     </>
   );
-};
+});
+
+WorkflowInsights.displayName = 'WorkflowInsights';

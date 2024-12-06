@@ -49,6 +49,7 @@ export const useFetchOngoingScans = ({
         },
       }),
     {
+      refetchOnWindowFocus: false,
       refetchInterval: isPolling ? 2000 : false,
       select: (response) => {
         return response.data;

@@ -32,6 +32,9 @@ export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConf
       });
       onSuccess();
       return result;
+    },
+    {
+      refetchOnWindowFocus: false,
     }
   );
 };
