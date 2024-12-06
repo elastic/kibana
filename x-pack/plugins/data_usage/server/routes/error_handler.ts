@@ -46,15 +46,11 @@ export const errorHandler = <E extends Error>(
   }
 
   if (error instanceof NoPrivilegeMeteringError) {
-    return res.forbidden({
-      body: error,
-    });
+    return res.forbidden({ body: error });
   }
 
   if (error instanceof NoIndicesMeteringError) {
-    return res.notFound({
-      body: error,
-    });
+    return res.notFound({ body: error });
   }
 
   // Kibana CORE will take care of `500` errors when the handler `throw`'s, including logging the error

@@ -101,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(foundTestDataStream?.name).to.be(testDataStreamName);
       expect(dataStreamNoPermission?.name).to.be(undefined);
     });
+
     it('returns no data streams without necessary privileges', async () => {
       await samlAuth.setCustomRole({
         elasticsearch: {
@@ -123,8 +124,9 @@ export default function ({ getService }: FtrProviderContext) {
         .set('elastic-api-version', '1');
 
       expect(res.statusCode).to.be(403);
-      expect(res.body.message).to.contain(NoPrivilegeMeteringError);
+      expect(res.body.message).to.contain(new NoPrivilegeMeteringError().message);
     });
+
     it('returns no data streams when there are none it has access to', async () => {
       await samlAuth.setCustomRole({
         elasticsearch: {
@@ -147,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('elastic-api-version', '1');
 
       expect(res.statusCode).to.be(404);
-      expect(res.body.message).to.contain(NoIndicesMeteringError);
+      expect(res.body.message).to.contain(new NoIndicesMeteringError().message);
     });
   });
 }
