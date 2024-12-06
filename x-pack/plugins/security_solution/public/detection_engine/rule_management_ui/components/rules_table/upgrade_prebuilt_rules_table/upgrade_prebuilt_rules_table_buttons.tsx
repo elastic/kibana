@@ -38,12 +38,13 @@ export const UpgradePrebuiltRulesTableButtons = ({
 
   const isRuleUpgrading = loadingRules.length > 0;
   const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
-  const everyFieldHasConflict = ruleUpgradeStates.every(
-    ({ hasUnresolvedConflicts }) => hasUnresolvedConflicts
-  );
+
   const doAllSelectedRulesHaveConflicts =
-    isPrebuiltRulesCustomizationEnabled && everyFieldHasConflict;
-  const doAllRulesHaveConflicts = isPrebuiltRulesCustomizationEnabled && everyFieldHasConflict;
+    isPrebuiltRulesCustomizationEnabled &&
+    selectedRules.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
+  const doAllRulesHaveConflicts =
+    isPrebuiltRulesCustomizationEnabled &&
+    ruleUpgradeStates.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
 
   const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
     canUserEditRules,
