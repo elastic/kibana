@@ -7,21 +7,23 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
-import {
-  DEFAULT_TRANSLATION_RISK_SCORE,
-  DEFAULT_TRANSLATION_SEVERITY,
-} from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { performTimelinesInstallation } from '../../../../detection_engine/prebuilt_rules/logic/perform_timelines_installation';
 import { createPrebuiltRules } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules';
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
-import type { RuleCreateProps, RuleResponse } from '../../../../../../common/api/detection_engine';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { UpdateRuleMigrationInput } from '../../data/rule_migrations_data_rules_client';
 import type { StoredRuleMigration } from '../../types';
-import { getPrebuiltRules } from './prebuilt_rules';
-import { MAX_TRANSLATED_RULES_TO_INSTALL } from '../constants';
+import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
+import {
+  MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL,
+  MAX_TRANSLATED_RULES_TO_INSTALL,
+} from '../constants';
+import {
+  convertMigrationCustomRuleToSecurityRulePayload,
+  isMigrationCustomRule,
+} from '../../../../../../common/siem_migrations/utils';
 
 const installPrebuiltRules = async (
   rulesToInstall: StoredRuleMigration[],
@@ -31,9 +33,7 @@ const installPrebuiltRules = async (
   detectionRulesClient: IDetectionRulesClient
 ): Promise<UpdateRuleMigrationInput[]> => {
   // Get required prebuilt rules
-  const prebuiltRulesIds = rulesToInstall
-    .flatMap((rule) => rule.elastic_rule?.prebuilt_rule_id ?? [])
-    .filter((value, index, self) => self.indexOf(value) === index);
+  const prebuiltRulesIds = getUniquePrebuiltRuleIds(rulesToInstall);
   const prebuiltRules = await getPrebuiltRules(rulesClient, savedObjectsClient, prebuiltRulesIds);
 
   const { installed: alreadyInstalledRules, installable } = prebuiltRules.reduce(
@@ -90,21 +90,13 @@ export const installCustomRules = async (
 ): Promise<UpdateRuleMigrationInput[]> => {
   const rulesToUpdate: UpdateRuleMigrationInput[] = [];
   const createCustomRulesOutcome = await initPromisePool({
-    concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+    concurrency: MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL,
     items: rulesToInstall,
     executor: async (rule) => {
-      if (!rule.elastic_rule?.query || !rule.elastic_rule?.description) {
+      if (!isMigrationCustomRule(rule.elastic_rule)) {
         return;
       }
-      const payloadRule: RuleCreateProps = {
-        type: 'esql',
-        language: 'esql',
-        query: rule.elastic_rule.query,
-        name: rule.elastic_rule.title,
-        description: rule.elastic_rule.description,
-        severity: DEFAULT_TRANSLATION_SEVERITY,
-        risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
-      };
+      const payloadRule = convertMigrationCustomRuleToSecurityRulePayload(rule.elastic_rule);
       const createdRule = await detectionRulesClient.createPrebuiltRule({
         params: payloadRule,
       });

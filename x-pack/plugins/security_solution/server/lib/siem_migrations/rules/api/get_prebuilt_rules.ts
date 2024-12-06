@@ -12,7 +12,7 @@ import { GetRuleMigrationPrebuiltRulesRequestParams } from '../../../../../commo
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from './util/with_license';
-import { getPrebuiltRules } from './util/prebuilt_rules';
+import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './util/prebuilt_rules';
 import { MAX_PREBUILT_RULES_TO_FETCH } from './constants';
 
 export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
@@ -55,10 +55,7 @@ export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
               size: MAX_PREBUILT_RULES_TO_FETCH,
             });
 
-            const prebuiltRulesIds = result.data
-              .flatMap((rule) => rule.elastic_rule?.prebuilt_rule_id ?? [])
-              .filter((value, index, self) => self.indexOf(value) === index);
-
+            const prebuiltRulesIds = getUniquePrebuiltRuleIds(result.data);
             const prebuiltRules = await getPrebuiltRules(
               rulesClient,
               savedObjectsClient,
