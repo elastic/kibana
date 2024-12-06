@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { PanelInteractionEvent } from '../types';
 
 export const ResizeHandle = ({
@@ -42,6 +41,7 @@ export const ResizeHandle = ({
         margin: -2px;
         position: absolute;
         width: ${euiThemeVars.euiSizeL};
+        max-width: 100%;
         height: ${euiThemeVars.euiSizeL};
         z-index: ${euiThemeVars.euiZLevel9};
         transition: opacity 0.2s, border 0.2s;

@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -45,16 +45,6 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    const paddingSubscription = gridLayoutStateManager.runtimeSettings$
-      .pipe(
-        map(({ gutterSize }) => gutterSize),
-        distinctUntilChanged()
-      )
-      .subscribe((gutterSize) => {
-        if (!smoothHeightRef.current) return;
-        smoothHeightRef.current.style.padding = `${gutterSize}px`;
-      });
-
     const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
       (expandedPanelId) => {
         if (!smoothHeightRef.current) return;
@@ -70,7 +60,6 @@ export const GridHeightSmoother = ({
     );
     return () => {
       interactionStyleSubscription.unsubscribe();
-      paddingSubscription.unsubscribe();
       expandedPanelSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,6 +69,8 @@ export const GridHeightSmoother = ({
     <div
       ref={smoothHeightRef}
       css={css`
+        // the guttersize cannot currently change, so it's safe to set it just once
+        padding: ${gridLayoutStateManager.runtimeSettings$.getValue().gutterSize};
         overflow-anchor: none;
         transition: height 500ms linear;
       `}

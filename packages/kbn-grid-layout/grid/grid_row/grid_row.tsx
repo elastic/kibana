@@ -124,8 +124,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {
             const rowContainerRef = rowContainer.current;
-            const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
-
             if (!rowContainerRef) return;
 
             if (expandedPanelId) {
@@ -146,18 +144,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                 // Hide the row if it does not contain the expanded panel
                 rowContainerRef.style.height = '0';
               }
-
-              if (rowRef) {
-                rowRef.style.height = '0px';
-                rowRef.style.display = 'block';
-              }
             } else {
               rowContainerRef.style.transform = ``;
               rowContainerRef.style.height = ``;
-              if (rowRef) {
-                rowRef.style.height = '';
-                rowRef.style.display = 'grid';
-              }
             }
           });
 

@@ -23,7 +23,6 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
@@ -110,14 +109,7 @@ export const GridExample = ({
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
-      <EuiPageTemplate
-        grow={false}
-        offset={0}
-        restrictWidth={false}
-        css={css`
-          min-block-size: 0px !important;
-        `}
-      >
+      <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header
           iconType={'dashboardApp'}
           pageTitle={i18n.translate('examples.gridExample.pageTitle', {

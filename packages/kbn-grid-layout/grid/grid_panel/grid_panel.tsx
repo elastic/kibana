@@ -40,7 +40,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
   ) => {
     const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
 
-    // const resizeHandleRef = useRef<HTMLDivElement | null>(null);
     const startIneraction = useCallback(
       (
         type: PanelInteractionEvent['type'] | 'drop',
@@ -138,13 +137,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
                 ref.style.gridRowStart = `${panel.row + 1}`;
                 ref.style.gridColumnEnd = `auto`;
                 ref.style.gridRowEnd = `auto`;
-
-                // if (resizeHandleRef.current) {
-                //   resizeHandleRef.current.style.width = `${Math.min(
-                //     24,
-                //     runtimeSettings.columnPixelWidth * panel.width
-                //   )}px`;
-                // }
               } else {
                 // if the current panel is being dragged, render it with a fixed position + size
                 ref.style.position = 'fixed';
@@ -156,8 +148,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
 
                 // undo any "lock to grid" styles
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
-
-                ref.classList.add('react-draggable-dragging');
               }
             } else {
               ref.style.zIndex = `auto`;
@@ -174,8 +164,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
               ref.style.gridRowStart = `${panel.row + 1}`;
               ref.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
-
-              ref.classList.remove('react-draggable-dragging');
             }
           });
 
