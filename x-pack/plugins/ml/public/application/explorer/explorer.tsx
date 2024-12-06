@@ -94,8 +94,6 @@ const ExplorerChartsContainer = dynamic(async () => ({
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
-  noInfluencersConfigured?: boolean;
-  influencers?: ExplorerState['influencers'];
   filterActive?: boolean;
   filterPlaceHolder?: string;
   indexPattern?: DataView;
@@ -107,8 +105,6 @@ interface ExplorerPageProps {
 const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
   children,
   jobSelectorProps,
-  noInfluencersConfigured,
-  influencers,
   filterActive,
   filterPlaceHolder,
   indexPattern,
@@ -664,8 +660,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
     <ExplorerPage
       dataViews={dataViews}
       jobSelectorProps={jobSelectorProps}
-      noInfluencersConfigured={noInfluencersConfigured}
-      influencers={influencers}
       filterActive={filterActive}
       filterPlaceHolder={filterPlaceHolder}
       indexPattern={indexPattern as DataView}
