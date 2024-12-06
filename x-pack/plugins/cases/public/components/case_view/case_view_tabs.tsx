@@ -92,11 +92,36 @@ const ObservablesBadge = ({
         {count}
       </EuiNotificationBadge>
     )}
-    <ExperimentalBadge compact />
   </>
 );
 
 ObservablesBadge.displayName = 'ObservablesBadge';
+
+const SimilarCasesBadge = ({
+  activeTab,
+  count,
+  euiTheme,
+}: {
+  activeTab: string;
+  count?: number;
+  euiTheme: EuiThemeComputed<{}>;
+}) => (
+  <>
+    {
+      <EuiNotificationBadge
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        data-test-subj="case-view-similar-cases-badge"
+        color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
+      >
+        {count ?? 0}
+      </EuiNotificationBadge>
+    }
+  </>
+);
+
+SimilarCasesBadge.displayName = 'SimilarCasesBadge';
 
 const AlertsBadge = ({
   activeTab,
@@ -126,33 +151,6 @@ const AlertsBadge = ({
 );
 
 AlertsBadge.displayName = 'AlertsBadge';
-
-const SimilarCasesBadge = ({
-  activeTab,
-  count,
-  euiTheme,
-}: {
-  activeTab: string;
-  count?: number;
-  euiTheme: EuiThemeComputed<{}>;
-}) => (
-  <>
-    {
-      <EuiNotificationBadge
-        css={css`
-          margin-left: ${euiTheme.size.xs};
-        `}
-        data-test-subj="case-view-similar-cases-badge"
-        color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
-      >
-        {count ?? 0}
-      </EuiNotificationBadge>
-    }
-    <ExperimentalBadge compact />
-  </>
-);
-
-SimilarCasesBadge.displayName = 'SimilarCasesBadge';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
