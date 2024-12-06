@@ -14,10 +14,11 @@ import {
   EuiFlexItem,
   EuiText,
   useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ServiceGroup, SERVICE_GROUP_COLOR_DEFAULT } from '../../../../../common/service_groups';
+import { ServiceGroup } from '../../../../../common/service_groups';
 import { useObservabilityActiveAlertsHref } from '../../../shared/links/kibana';
 import { ServiceStat } from './service_stat';
 
@@ -30,7 +31,7 @@ interface Props {
 
 export function ServiceGroupsCard({ serviceGroup, href, serviceGroupCounts, isLoading }: Props) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-
+  const { euiTheme } = useEuiTheme();
   const activeAlertsHref = useObservabilityActiveAlertsHref(serviceGroup.kuery);
   const cardProps: EuiCardProps = {
     style: { width: isMobile ? '100%' : 286 },
@@ -38,7 +39,7 @@ export function ServiceGroupsCard({ serviceGroup, href, serviceGroupCounts, isLo
       <>
         <EuiAvatar
           name={serviceGroup.groupName}
-          color={serviceGroup.color || SERVICE_GROUP_COLOR_DEFAULT}
+          color={serviceGroup.color || euiTheme.colors.backgroundFilledPrimary}
           size="l"
         />
       </>

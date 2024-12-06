@@ -19,6 +19,7 @@ import {
   useColorPickerState,
   EuiText,
   isValidHex,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
@@ -43,7 +44,8 @@ export function GroupDetails({
   isLoading,
   titleId,
 }: Props) {
-  const initialColor = serviceGroup?.color || '#5094C4';
+  const { euiTheme } = useEuiTheme();
+  const initialColor = serviceGroup?.color || euiTheme.colors.backgroundFilledPrimary;
   const [name, setName] = useState(serviceGroup?.groupName);
   const [color, setColor, colorPickerErrors] = useColorPickerState(initialColor);
   const [description, setDescription] = useState<string | undefined>(serviceGroup?.description);
