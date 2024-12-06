@@ -19,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { docLinks } from '../common/doc_links';
-import { InferenceEndpoints, getInferenceEndpointsProvider } from './embeddable';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -100,10 +99,7 @@ export class SearchInferenceEndpointsPlugin
       }));
     });
 
-    return {
-      InferenceEdnpointsProvider: getInferenceEndpointsProvider(core, deps),
-      InferenceEndpoints,
-    };
+    return {};
   }
 
   public stop() {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -15,17 +13,12 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
-import type { App } from './components/app';
-import type { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
-
 export * from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchInferenceEndpointsPluginSetup {}
-export interface SearchInferenceEndpointsPluginStart {
-  InferenceEdnpointsProvider: React.FC<React.ComponentProps<typeof InferenceEndpointsProvider>>;
-  InferenceEndpoints: React.FC<React.ComponentProps<typeof App>>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchInferenceEndpointsPluginStart {}
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
