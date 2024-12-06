@@ -35,7 +35,8 @@
     "@kbn/deeplinks-search",
     "@kbn/deeplinks-management",
     "@kbn/serverless",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/search-navigation"
   ],
   "exclude": [
     "target/**/*",
