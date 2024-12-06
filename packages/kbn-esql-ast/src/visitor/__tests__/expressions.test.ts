@@ -158,3 +158,25 @@ test('"visitLiteral" takes over all literal visits', () => {
 
   expect(text).toBe('FROM E | STATS <LITERAL>, <LITERAL>, E, E | LIMIT <LITERAL>');
 });
+
+test('"visitExpression" does visit identifier nodes', () => {
+  const { ast } = parse(`
+    FROM index
+      | RIGHT JOIN a AS b ON c
+  `);
+  const expressions: string[] = [];
+  new Visitor()
+    .on('visitExpression', (ctx) => {
+      expressions.push(ctx.node.name);
+      for (const _ of ctx.visitArguments(undefined));
+    })
+    .on('visitCommand', (ctx) => {
+      for (const _ of ctx.visitArguments());
+    })
+    .on('visitQuery', (ctx) => {
+      for (const _ of ctx.visitCommands());
+    })
+    .visitQuery(ast);
+
+  expect(expressions.sort()).toEqual(['a', 'as', 'b', 'index']);
+});

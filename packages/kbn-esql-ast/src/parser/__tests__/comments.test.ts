@@ -8,6 +8,7 @@
  */
 
 import { parse } from '..';
+import { Walker } from '../../walker';
 
 describe('Comments', () => {
   describe('can attach "top" comment(s)', () => {
@@ -442,6 +443,35 @@ FROM index`;
         ],
       });
     });
+
+    it('to an identifier', () => {
+      const text = `FROM index | LEFT JOIN
+        // comment
+        abc
+        ON a = b`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'join',
+        args: [
+          {
+            type: 'identifier',
+            name: 'abc',
+            formatting: {
+              top: [
+                {
+                  type: 'comment',
+                  subtype: 'single-line',
+                  text: ' comment',
+                },
+              ],
+            },
+          },
+          {},
+        ],
+      });
+    });
   });
 
   describe('can attach "left" comment(s)', () => {
@@ -548,6 +578,34 @@ FROM index`;
           ],
         },
       ]);
+    });
+
+    it('to an identifier', () => {
+      const text = `FROM index | LEFT JOIN
+        /* left */ abc
+        ON a = b`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'join',
+        args: [
+          {
+            type: 'identifier',
+            name: 'abc',
+            formatting: {
+              left: [
+                {
+                  type: 'comment',
+                  subtype: 'multi-line',
+                  text: ' left ',
+                },
+              ],
+            },
+          },
+          {},
+        ],
+      });
     });
   });
 
@@ -774,6 +832,61 @@ FROM index`;
             ],
           },
         ],
+      });
+    });
+
+    it('to an identifier', () => {
+      const text = `FROM index | LEFT JOIN
+        abc /* right */ // right 2
+        ON a = b`;
+      const { root } = parse(text, { withFormatting: true });
+
+      expect(root.commands[1]).toMatchObject({
+        type: 'command',
+        name: 'join',
+        args: [
+          {
+            type: 'identifier',
+            name: 'abc',
+            formatting: {
+              right: [
+                {
+                  type: 'comment',
+                  subtype: 'multi-line',
+                  text: ' right ',
+                },
+              ],
+              rightSingleLine: {
+                type: 'comment',
+                subtype: 'single-line',
+                text: ' right 2',
+              },
+            },
+          },
+          {},
+        ],
+      });
+    });
+
+    it('to a column inside ON option', () => {
+      const text = `FROM index | LEFT JOIN
+        abc
+        ON a /* right */ = b`;
+      const { root } = parse(text, { withFormatting: true });
+      const a = Walker.match(root, { type: 'column', name: 'a' });
+
+      expect(a).toMatchObject({
+        type: 'column',
+        name: 'a',
+        formatting: {
+          right: [
+            {
+              type: 'comment',
+              subtype: 'multi-line',
+              text: ' right ',
+            },
+          ],
+        },
       });
     });
   });

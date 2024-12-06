@@ -55,6 +55,8 @@ import type {
   InlineCastingType,
   ESQLFunctionCallExpression,
   ESQLIdentifier,
+  ESQLBinaryExpression,
+  BinaryExpressionOperator,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -236,6 +238,25 @@ export const createFunctionCall = (ctx: FunctionContext): ESQLFunctionCallExpres
       node.operator = operator;
     }
   }
+
+  return node;
+};
+
+export const createBinaryExpression = (
+  operator: BinaryExpressionOperator,
+  ctx: ParserRuleContext,
+  args: ESQLBinaryExpression['args']
+): ESQLBinaryExpression => {
+  const node = Builder.expression.func.binary(
+    operator,
+    args,
+    {},
+    {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+    }
+  ) as ESQLBinaryExpression;
 
   return node;
 };
