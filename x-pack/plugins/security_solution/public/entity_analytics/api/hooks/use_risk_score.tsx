@@ -179,10 +179,10 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && isAuthorized) {
+    if (!skip && riskScoreRequest != null && isAuthorized && hasEngineBeenInstalled) {
       search(riskScoreRequest);
     }
-  }, [isAuthorized, riskScoreRequest, search, skip]);
+  }, [hasEngineBeenInstalled, isAuthorized, riskScoreRequest, search, skip]);
 
   const result = { ...riskScoreResponse, loading: loading || isStatusLoading };
 
