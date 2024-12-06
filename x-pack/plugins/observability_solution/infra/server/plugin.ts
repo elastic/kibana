@@ -117,6 +117,11 @@ export class InfraServerPlugin
     const LOG_RULES_DATA_VIEW_NAME = 'Log Threshold Alerting Rule Source';
     const METRIC_RULES_DATA_VIEW_NAME = 'Metric AND Inventory Threshold Alerting Rule Source';
 
+    const override = false;
+    const skipFetchFields = false;
+    const displayErrors = true;
+    const setAsDefault = false;
+
     const savedObjectsClient = core.savedObjects.createInternalRepository();
     const esClient = core.elasticsearch.client.asInternalUser;
 
@@ -139,13 +144,19 @@ export class InfraServerPlugin
     const logDataViewExists = await dataViewsService.get(LOG_RULES_DATA_VIEW_ID).catch(() => false);
 
     if (!logDataViewExists) {
-      await dataViewsService.createAndSave({
-        allowNoIndex: false,
-        name: LOG_RULES_DATA_VIEW_NAME,
-        title: logIndices,
-        id: LOG_RULES_DATA_VIEW_ID,
-        timeFieldName: timestampField,
-      });
+      await dataViewsService.createAndSave(
+        {
+          allowNoIndex: false,
+          name: LOG_RULES_DATA_VIEW_NAME,
+          title: logIndices,
+          id: LOG_RULES_DATA_VIEW_ID,
+          timeFieldName: timestampField,
+        },
+        override,
+        skipFetchFields,
+        displayErrors,
+        setAsDefault
+      );
     }
 
     // get metric indices
@@ -158,13 +169,19 @@ export class InfraServerPlugin
       .catch(() => false);
 
     if (!metricDataViewExists) {
-      await dataViewsService.createAndSave({
-        allowNoIndex: false,
-        name: METRIC_RULES_DATA_VIEW_NAME,
-        title: metricIndices,
-        id: METRIC_RULES_DATA_VIEW_ID,
-        timeFieldName: '@timestamp',
-      });
+      await dataViewsService.createAndSave(
+        {
+          allowNoIndex: false,
+          name: METRIC_RULES_DATA_VIEW_NAME,
+          title: metricIndices,
+          id: METRIC_RULES_DATA_VIEW_ID,
+          timeFieldName: '@timestamp',
+        },
+        override,
+        skipFetchFields,
+        displayErrors,
+        setAsDefault
+      );
     }
   }
 
