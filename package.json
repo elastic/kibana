@@ -460,7 +460,7 @@
     "@kbn/discover-plugin": "link:src/plugins/discover",
     "@kbn/discover-shared-plugin": "link:src/plugins/discover_shared",
     "@kbn/discover-utils": "link:packages/kbn-discover-utils",
-    "@kbn/doc-links": "link:packages/kbn-doc-links",
+    "@kbn/doc-links": "link:src/platform/packages/shared/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:packages/kbn-dom-drag-drop",
     "@kbn/ebt-tools": "link:packages/kbn-ebt-tools",
     "@kbn/ecs-data-quality-dashboard": "link:x-pack/packages/security-solution/ecs_data_quality_dashboard",

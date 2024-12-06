@@ -50,7 +50,6 @@ describe('AgentActivityFlyout', () => {
         refreshAgentActivity={refreshAgentActivity}
         setSearch={mockSetSearch}
         setSelectedStatus={mockSetSelectedStatus}
-        agentPolicies={[]}
       />
     </IntlProvider>
   );
