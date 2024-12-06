@@ -34,6 +34,9 @@ import {
 } from '../../common/es_fields/apm';
 import { getElasticJavaMetricQueries } from './agent_metrics/java';
 
+const flattenIndices = (index: string | string[]) =>
+  castArray(index).flatMap((idx) => idx.split(','));
+
 interface ApmDataAvailability {
   hasServiceSummaryMetrics: boolean;
   hasServiceTransactionMetrics: boolean;
@@ -82,7 +85,7 @@ export function registerDataDefinitions({
                 },
                 {
                   terms: {
-                    _index: castArray(apmIndices.metric),
+                    _index: flattenIndices(apmIndices.metric),
                   },
                 },
               ],
@@ -143,7 +146,7 @@ export function registerDataDefinitions({
         return [];
       }
 
-      const traceIndices = [...apmIndices.transaction, ...apmIndices.span];
+      const traceIndices = [apmIndices.transaction, apmIndices.span];
 
       const hasMetricIndices = dataStreams.matches(apmIndices.metric);
 
@@ -169,11 +172,6 @@ export function registerDataDefinitions({
         ...getTransactionQueries(options),
         ...(hasDataForAgentMetrics ? getElasticJavaMetricQueries() : []),
         ...getExitSpanQueries(options),
-        // ...getListUpstreamDependenciesQuery(options),
-        // ...getServiceNameForExitSpanQuery(options),
-        // ...getExitSpanThroughputQuery(options),
-        // ...getExitSpanLatencyQuery(options),
-        // ...getExitSpanFailureRateQuery(options),
       ];
 
       return queries;
@@ -197,6 +195,9 @@ function getTransactionMetricSetName(type: ApmDocumentType) {
 }
 
 function getDocumentTypeForTransactions(availability: ApmDataAvailability) {
+  // TODO: histogram/summary fields need to be supported in ES|QL
+  // https://github.com/elastic/elasticsearch/issues/103060
+
   // if (availability.hasServiceTransactionMetrics) {
   //   return ApmDocumentType.ServiceTransactionMetric;
   // }
