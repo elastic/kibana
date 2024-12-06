@@ -49,6 +49,8 @@ viewer:
         - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.read
+        - feature_securitySolutionNotes.read
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -129,6 +131,8 @@ editor:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -180,6 +184,8 @@ t1_analyst:
         - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.read
+        - feature_securitySolutionNotes.read
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -235,6 +241,8 @@ t2_analyst:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.read
+        - feature_securitySolutionNotes.read
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -306,6 +314,8 @@ t3_analyst:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -368,6 +378,8 @@ threat_intelligence_analyst:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
@@ -436,6 +448,8 @@ rule_author:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -509,6 +523,8 @@ soc_manager:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -569,6 +585,8 @@ detections_admin:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
@@ -628,6 +646,8 @@ platform_engineer:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_fleet.all
@@ -701,6 +721,8 @@ endpoint_operations_analyst:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -776,6 +798,8 @@ endpoint_policy_manager:
         - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
