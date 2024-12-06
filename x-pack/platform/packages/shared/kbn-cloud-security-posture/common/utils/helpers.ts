@@ -112,11 +112,14 @@ export const buildEntityAlertsQuery = (
   from: string,
   queryValue?: string,
   size?: number,
-  severity?: string
+  severity?: string,
+  sortField?: string,
+  sortDirection?: string
 ) => {
   return {
     size: size || 0,
     _source: false,
+    sort: sortField ? [{ [sortField]: sortDirection }] : [],
     fields: [
       '_id',
       '_index',

@@ -29,7 +29,8 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
     notifications: { toasts },
   } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
-
+  console.log('this is opt')
+console.log(options)
   return useQuery(
     ['csp_misconfiguration_findings', { params: options }, rulesStates],
     async () => {

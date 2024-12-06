@@ -73,12 +73,16 @@ export const getMisconfigurationAggregationCount = (
 };
 
 export const buildMisconfigurationsFindingsQuery = (
-  { query }: UseCspOptions,
+  { query, sort }: UseCspOptions,
   rulesStates: CspBenchmarkRulesStates,
-  isPreview = false
+  isPreview = false,
 ) => {
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
-
+  // const obj: { [key: string]: string } = {};
+  // obj[sortField] = sortDirection;
+console.log(buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery))
+console.log('hhell')
+console.log(sort)
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: isPreview ? 0 : 500,
@@ -86,6 +90,8 @@ export const buildMisconfigurationsFindingsQuery = (
     ignore_unavailable: true,
     query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
     _source: MISCONFIGURATIONS_SOURCE_FIELDS,
+    // sort: [{ 'rule.name': 'asc' }],
+    sort,
   };
 };
 
