@@ -347,7 +347,8 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    'processPendingActions' | 'getFileDownload' | 'getFileInfo'
+    // TODO: not yet implemented
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'runscript'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -376,7 +377,8 @@ describe('EndpointActionsClient', () => {
 
     scan: responseActionsClientMock.createScanOptions(getCommonResponseActionOptions()),
 
-    runscript: responseActionsClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
+    // TODO: not yet implemented
+    // runscript: responseActionsClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(

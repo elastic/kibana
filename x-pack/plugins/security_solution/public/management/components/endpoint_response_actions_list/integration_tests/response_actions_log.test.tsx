@@ -1544,8 +1544,9 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
+      // TODO: filter out runscript for now
       expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
-        RESPONSE_ACTION_API_COMMANDS_NAMES.length
+        RESPONSE_ACTION_API_COMMANDS_NAMES.filter((command) => command !== 'runscript').length
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'isolate. To check this option, press Enter.',
