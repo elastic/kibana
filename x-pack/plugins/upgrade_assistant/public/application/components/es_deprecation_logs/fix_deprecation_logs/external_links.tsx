@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
@@ -133,7 +133,7 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint, deprecatio
     },
   } = useAppContext();
 
-  const discoverLocator = url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)!;
+  const discoverLocator = url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
   if (!deprecationDataView.id) return null;
 
