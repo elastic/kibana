@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import type { ESQLSingleAstItem, ESQLAstItem, ESQLFunction, ESQLLiteral } from '@kbn/esql-ast';
-import type { ESQLStringLiteral, ESQLDateTruncFunction, ESQLBucketFunction } from './types';
+import type {
+  ESQLSingleAstItem,
+  ESQLAstItem,
+  ESQLFunction,
+  ESQLLiteral,
+  ESQLColumn,
+} from '@kbn/esql-ast';
+import type {
+  ESQLStringLiteral,
+  ESQLDateTruncFunction,
+  ESQLBucketFunction,
+  ESQLLikeOperator,
+} from './types';
 
 export function isSingleItem(item: ESQLAstItem): item is ESQLSingleAstItem {
   return Object.hasOwn(item, 'type');
@@ -14,6 +25,10 @@ export function isSingleItem(item: ESQLAstItem): item is ESQLSingleAstItem {
 
 export function isFunctionNode(node: ESQLAstItem): node is ESQLFunction {
   return isSingleItem(node) && node.type === 'function';
+}
+
+export function isColumnNode(node: ESQLAstItem): node is ESQLColumn {
+  return isSingleItem(node) && node.type === 'column';
 }
 
 export function isLiteralNode(node: ESQLAstItem): node is ESQLLiteral {
@@ -30,4 +45,8 @@ export function isDateTruncFunctionNode(node: ESQLAstItem): node is ESQLDateTrun
 
 export function isBucketFunctionNode(node: ESQLAstItem): node is ESQLBucketFunction {
   return isFunctionNode(node) && node.subtype === 'variadic-call' && node.name === 'bucket';
+}
+
+export function isLikeOperatorNode(node: ESQLAstItem): node is ESQLLikeOperator {
+  return isFunctionNode(node) && node.subtype === 'binary-expression' && node.name === 'like';
 }
