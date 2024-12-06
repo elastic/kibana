@@ -74,7 +74,7 @@ viewer:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
   run_as: []
@@ -154,7 +154,7 @@ editor:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
   run_as: []
@@ -205,7 +205,7 @@ t1_analyst:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -261,7 +261,7 @@ t2_analyst:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -331,7 +331,7 @@ t3_analyst:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -389,7 +389,7 @@ threat_intelligence_analyst:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -458,7 +458,7 @@ rule_author:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -533,7 +533,7 @@ soc_manager:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -593,7 +593,7 @@ detections_admin:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -656,7 +656,7 @@ platform_engineer:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -729,7 +729,7 @@ endpoint_operations_analyst:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
 
@@ -797,6 +797,6 @@ endpoint_policy_manager:
         - feature_dashboard_v2.all
         - feature_canvas.all
         - feature_graph.all
-        - feature_maps.all
+        - feature_maps_v2.all
         - feature_visualize_v2.all
       resources: '*'
