@@ -9,10 +9,7 @@ import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer, EuiText } from '@e
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
-import {
-  SingleDatasetLocatorParams,
-  SINGLE_DATASET_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
+import { type DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -38,8 +35,7 @@ export function InstallElasticAgent() {
     services: { share },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
-  const singleDatasetLocator =
-    share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const { getState, setState } = useWizard();
   const wizardState = getState();
@@ -52,10 +48,11 @@ export function InstallElasticAgent() {
     (integration === dataset ? dataset : `${integration}.${dataset}`) ?? defaultDatasetName;
 
   async function onContinue() {
-    await singleDatasetLocator!.navigate({
-      integration,
-      dataset: enforcedDatasetName,
-      origin: { id: 'application-log-onboarding' },
+    await discoverLocator!.navigate({
+      dataViewSpec: {
+        title: `logs-${enforcedDatasetName}-*`, // Contrary to its name, this param sets the index pattern
+        timeFieldName: '@timestamp',
+      },
     });
   }
 

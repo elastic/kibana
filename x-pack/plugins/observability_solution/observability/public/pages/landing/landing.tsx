@@ -5,10 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -27,10 +24,13 @@ export function LandingPage() {
       const hasLogsData = logs?.hasData;
 
       if (hasLogsData) {
-        const allDataSetsLocator =
-          url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
-
-        allDataSetsLocator?.navigate({});
+        const discoverLocator = url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+        discoverLocator?.navigate({
+          dataViewSpec: {
+            title: 'logs-*', // Contrary to its name, this param sets the index pattern
+            timeFieldName: '@timestamp',
+          },
+        });
       } else if (hasApmData) {
         navigateToUrl(basePath.prepend('/app/apm/services'));
       } else {

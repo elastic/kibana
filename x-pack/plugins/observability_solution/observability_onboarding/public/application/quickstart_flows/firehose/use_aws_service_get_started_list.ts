@@ -7,10 +7,9 @@
 
 import { useCallback, useMemo } from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { SINGLE_DATASET_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { type DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { AWSIndexName } from '../../../../common/aws_firehose';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 
@@ -33,8 +32,7 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
-  const singleDatasetLocator = share.url.locators.get(SINGLE_DATASET_LOCATOR_ID);
-  const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const generateMetricsDashboardActionLink = useCallback(
     (dashboardId: string, name?: string) => ({
@@ -88,12 +86,14 @@ export function useAWSServiceGetStartedList(): AWSServiceGetStartedConfig[] {
         defaultMessage: 'Explore',
       }),
       href:
-        singleDatasetLocator?.getRedirectUrl({
-          integration: 'AWS',
-          dataset,
+        discoverLocator?.getRedirectUrl({
+          dataViewSpec: {
+            title: `logs-aws.${dataset}-*`, // Contrary to its name, this param sets the index pattern
+            timeFieldName: '@timestamp',
+          },
         }) ?? '',
     }),
-    [singleDatasetLocator]
+    [discoverLocator]
   );
 
   const generateMetricsDiscoverActionLink = useCallback(

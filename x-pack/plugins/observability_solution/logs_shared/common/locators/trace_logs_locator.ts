@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_DATASETS_LOCATOR_ID, AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { TraceLogsLocatorParams } from './types';
@@ -20,10 +20,17 @@ export class TraceLogsLocatorDefinition implements LocatorDefinition<TraceLogsLo
   constructor(private readonly locators: LocatorClient) {}
 
   public readonly getLocation = async (params: TraceLogsLocatorParams) => {
+    const discoverAppLocator = this.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR');
+    if (!discoverAppLocator) {
+      throw new Error('Locator "DISCOVER_APP_LOCATOR" not found');
+    }
+
     const { time } = params;
-    const allDatasetsLocator =
-      this.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
-    return allDatasetsLocator.getLocation({
+    return discoverAppLocator.getLocation({
+      dataViewSpec: {
+        title: 'logs-*', // Contrary to its name, this param sets the index pattern
+        timeFieldName: '@timestamp',
+      },
       query: getTraceQuery(params),
       ...(time
         ? {

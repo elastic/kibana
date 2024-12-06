@@ -14,13 +14,11 @@ import {
   EuiSpacer,
   EuiSkeletonText,
   EuiText,
+  EuiButtonEmpty,
   useGeneratedHtmlId,
   EuiIcon,
 } from '@elastic/eui';
-import {
-  type SingleDatasetLocatorParams,
-  SINGLE_DATASET_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
@@ -30,7 +28,6 @@ import { ProgressIndicator } from '../shared/progress_indicator';
 import { AccordionWithIcon } from '../shared/accordion_with_icon';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
-import { LocatorButtonEmpty } from '../shared/locator_button_empty';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -66,6 +63,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const customIntegrations = installedIntegrations.filter(
     (integration) => integration.installSource === 'custom'
   );
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const assetDetailsLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
 
@@ -291,12 +289,15 @@ export const AutoDetectPanel: FunctionComponent = () => {
                           {customIntegrations.map((integration) =>
                             integration.dataStreams.map((datastream) => (
                               <li key={`${integration.pkgName}/${datastream.dataset}`}>
-                                <LocatorButtonEmpty<SingleDatasetLocatorParams>
-                                  locator={SINGLE_DATASET_LOCATOR_ID}
-                                  params={{
-                                    integration: integration.pkgName,
-                                    dataset: datastream.dataset,
-                                  }}
+                                <EuiButtonEmpty
+                                  data-test-subj="observabilityOnboardingAutoDetectPanelButton"
+                                  href={discoverLocator?.getRedirectUrl({
+                                    dataViewSpec: {
+                                      name: integration.pkgName,
+                                      title: `${datastream.type}-${datastream.dataset}-*`, // Contrary to its name, this param sets the index pattern
+                                      timeFieldName: '@timestamp',
+                                    },
+                                  })}
                                   target="_blank"
                                   iconType="document"
                                   isDisabled={status !== 'dataReceived'}
@@ -304,7 +305,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                   size="s"
                                 >
                                   {integration.pkgName}
-                                </LocatorButtonEmpty>
+                                </EuiButtonEmpty>
                               </li>
                             ))
                           )}

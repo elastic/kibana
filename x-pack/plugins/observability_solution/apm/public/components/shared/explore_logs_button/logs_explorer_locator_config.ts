@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 
 export const buildLogsExplorerLocatorConfig = ({
   locator,
@@ -16,14 +16,18 @@ export const buildLogsExplorerLocatorConfig = ({
   from,
   to,
 }: {
-  locator: LocatorPublic<AllDatasetsLocatorParams>;
+  locator: LocatorPublic<DiscoverAppLocatorParams>;
   kuery?: string;
   from: string;
   to: string;
 }): {
   logsExplorerLinkProps: RouterLinkProps;
 } => {
-  const params: AllDatasetsLocatorParams = {
+  const params: DiscoverAppLocatorParams = {
+    dataViewSpec: {
+      title: 'logs-*', // Contrary to its name, this param sets the index pattern
+      timeFieldName: '@timestamp',
+    },
     timeRange: {
       from,
       to,

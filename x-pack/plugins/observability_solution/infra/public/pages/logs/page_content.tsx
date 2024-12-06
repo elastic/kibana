@@ -15,12 +15,11 @@ import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDevMode } from '@kbn/xstate-utils';
 import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -101,9 +100,12 @@ export const LogsPageContent: React.FunctionComponent = () => {
             path="/stream"
             exact
             render={() => {
-              share.url.locators
-                .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-                ?.navigate({});
+              share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)?.navigate({
+                dataViewSpec: {
+                  title: 'logs-*', // Contrary to its name, this param sets the index pattern
+                  timeFieldName: '@timestamp',
+                },
+              });
 
               return null;
             }}

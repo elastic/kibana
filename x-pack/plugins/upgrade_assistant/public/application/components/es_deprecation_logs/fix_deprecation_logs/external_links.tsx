@@ -12,10 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID,
-  ObsLogsExplorerDataViewLocatorParams,
-} from '@kbn/deeplinks-observability';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
@@ -136,14 +133,12 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint, deprecatio
     },
   } = useAppContext();
 
-  const logsLocator = url.locators.get<ObsLogsExplorerDataViewLocatorParams>(
-    OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID
-  )!;
+  const discoverLocator = url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)!;
 
   if (!deprecationDataView.id) return null;
 
-  const logsUrl = logsLocator.getRedirectUrl({
-    id: deprecationDataView.id,
+  const logsUrl = discoverLocator.getRedirectUrl({
+    dataViewId: deprecationDataView.id,
     timeRange: {
       from: checkpoint,
       to: 'now',

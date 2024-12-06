@@ -13,9 +13,9 @@
  */
 
 import React from 'react';
-import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { buildLogsExplorerLocatorConfig } from './logs_explorer_locator_config';
 
@@ -30,15 +30,14 @@ export function ExploreLogsButton({
 }) {
   const { share } = useApmPluginContext();
 
-  const logsExplorerLocator =
-    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
-  if (!logsExplorerLocator) {
+  if (!discoverLocator) {
     return null;
   }
 
   const { logsExplorerLinkProps } = buildLogsExplorerLocatorConfig({
-    locator: logsExplorerLocator,
+    locator: discoverLocator,
     from: start,
     to: end,
     kuery,

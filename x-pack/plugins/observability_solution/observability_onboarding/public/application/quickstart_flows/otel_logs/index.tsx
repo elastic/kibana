@@ -21,10 +21,7 @@ import {
   EuiImage,
   EuiCallOut,
 } from '@elastic/eui';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -73,19 +70,20 @@ export const OtelLogsPanel: React.FC = () => {
     isServerless && setup ? setup.elasticAgentVersionInfo.agentVersion : stackVersion;
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
 
-  const allDatasetsLocator =
-    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
-
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
 
   const [{ value: deeplinks }, getDeeplinks] = useAsyncFn(async () => {
     return {
-      logs: allDatasetsLocator?.getRedirectUrl({
-        type: 'logs',
+      logs: discoverLocator?.getRedirectUrl({
+        dataViewSpec: {
+          title: 'logs-*', // Contrary to its name, this param sets the index pattern
+          timeFieldName: '@timestamp',
+        },
       }),
       metrics: hostsLocator?.getRedirectUrl({}),
     };
-  }, [allDatasetsLocator]);
+  }, [discoverLocator]);
 
   useEffect(() => {
     getDeeplinks();

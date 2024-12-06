@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
-import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
@@ -41,7 +40,6 @@ export function getMenuSections({
   basePath,
   onFilterByInstanceClick,
   metricsHref,
-  allDatasetsLocator,
   nodeLogsLocator,
   assetDetailsLocator,
 }: {
@@ -49,7 +47,6 @@ export function getMenuSections({
   basePath: IBasePath;
   onFilterByInstanceClick: () => void;
   metricsHref: string;
-  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
   nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
   assetDetailsLocator?: AssetDetailsLocator;
 }) {
