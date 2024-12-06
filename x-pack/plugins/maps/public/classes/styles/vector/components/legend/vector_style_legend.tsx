@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { StyleError } from './style_error';
 import {
   DynamicStyleProperty,
@@ -62,7 +61,8 @@ export function VectorStyleLegend({
     );
   }
 
-  function renderMasksByFieldOrigin(fieldOrigin: FIELD_ORIGIN) {
+  function MasksByFieldOrigin({ fieldOrigin }: { fieldOrigin: FIELD_ORIGIN }) {
+    const { euiTheme } = useEuiTheme();
     const masksByFieldOrigin = masks.filter(
       (mask) => mask.getEsAggField().getOrigin() === fieldOrigin
     );
@@ -89,10 +89,7 @@ export function VectorStyleLegend({
         </EuiText>
         <ul>
           {masksByFieldOrigin.map((mask) => (
-            <li
-              key={mask.getEsAggField().getMbFieldName()}
-              style={{ marginLeft: euiThemeVars.euiSizeS }}
-            >
+            <li key={mask.getEsAggField().getMbFieldName()} style={{ marginLeft: euiTheme.size.s }}>
               <MaskLegend
                 esAggField={mask.getEsAggField()}
                 onlyShowLabelAndValue={true}
@@ -108,8 +105,8 @@ export function VectorStyleLegend({
 
   return (
     <>
-      {renderMasksByFieldOrigin(FIELD_ORIGIN.SOURCE)}
-      {renderMasksByFieldOrigin(FIELD_ORIGIN.JOIN)}
+      <MasksByFieldOrigin fieldOrigin={FIELD_ORIGIN.SOURCE} />
+      <MasksByFieldOrigin fieldOrigin={FIELD_ORIGIN.JOIN} />
       {legendRows}
     </>
   );
