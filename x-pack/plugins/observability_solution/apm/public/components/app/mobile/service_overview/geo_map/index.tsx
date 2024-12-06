@@ -32,9 +32,9 @@ export function GeoMap({
   const { euiTheme } = useEuiTheme();
 
   const styleColors = {
-    lineColor: euiTheme.colors.backgroundFilledText,
-    labelColor: euiTheme.colors.backgroundFilledText,
-    labelOutlineColor: euiTheme.colors.backgroundLightText,
+    lineColor: euiTheme.colors.darkestShade,
+    labelColor: euiTheme.colors.darkestShade,
+    labelOutlineColor: euiTheme.colors.emptyShade,
   } as StyleColorParams;
   return (
     <>
