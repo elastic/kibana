@@ -31,6 +31,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -94,7 +95,7 @@ export function LensEditConfigurationFlyout({
     Array<{
       key: string;
       value: string;
-      type: string;
+      type: EsqlControlType;
     }>
   >(esqlVariablesService.getVariables());
 

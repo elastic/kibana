@@ -69,6 +69,11 @@ export class EsqlVariablesService {
     this.esqlVariables = variables;
   }
 
+  clearVariables() {
+    this.esqlVariables$.next([]);
+    this.esqlVariables = [];
+  }
+
   variableExists(key: string) {
     return this.esqlVariables.some((variable) => variable.key === key);
   }

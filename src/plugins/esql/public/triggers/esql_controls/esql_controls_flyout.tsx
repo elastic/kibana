@@ -339,7 +339,8 @@ export function ESQLControlsFlyout({
   }, [availableFieldsOptions.length, controlType, queryString, search]);
 
   useEffect(() => {
-    const variableExists = esqlVariablesService.variableExists(variableName.replace('?', ''));
+    const variableExists =
+      esqlVariablesService.variableExists(variableName.replace('?', '')) && !isControlInEditMode;
     if (controlType === EsqlControlType.FIELDS) {
       setFormIsInvalid(!selectedFields.length || !variableName || variableExists);
     }
@@ -351,7 +352,7 @@ export function ESQLControlsFlyout({
     if (controlType === EsqlControlType.VALUES) {
       setFormIsInvalid(!valuesQuery || !variableName || variableExists);
     }
-  }, [controlType, selectedFields.length, values, valuesQuery, variableName]);
+  }, [controlType, isControlInEditMode, selectedFields.length, values, valuesQuery, variableName]);
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
@@ -449,14 +450,17 @@ export function ESQLControlsFlyout({
           fullWidth
           autoFocus
           isInvalid={
-            !variableName || esqlVariablesService.variableExists(variableName.replace('?', ''))
+            !variableName ||
+            (esqlVariablesService.variableExists(variableName.replace('?', '')) &&
+              !isControlInEditMode)
           }
           error={
             !variableName
               ? i18n.translate('esql.flyout.variableName.error', {
                   defaultMessage: 'Variable name is required',
                 })
-              : esqlVariablesService.variableExists(variableName.replace('?', ''))
+              : esqlVariablesService.variableExists(variableName.replace('?', '')) &&
+                !isControlInEditMode
               ? i18n.translate('esql.flyout.variableNameExists.error', {
                   defaultMessage: 'Variable name already exists',
                 })

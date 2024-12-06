@@ -14,7 +14,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { EsqlControlType } from '@kbn/esql-validation-autocomplete';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
@@ -27,7 +26,6 @@ import './flyout.scss';
 interface Context {
   queryString: string;
   core: CoreStart;
-  uiActions: UiActionsStart;
   search: ISearchGeneric;
   controlType: EsqlControlType;
   dashboardApi: DashboardApi;
@@ -44,7 +42,6 @@ export async function isActionCompatible(queryString: string) {
 export async function executeAction({
   queryString,
   core,
-  uiActions,
   search,
   controlType,
   dashboardApi,

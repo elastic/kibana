@@ -85,7 +85,7 @@ export function startSyncingDashboardControlGroup(dashboard: DashboardContainer)
   );
 
   dashboard.publishingSubscription.add(
-    esqlVariablesService.esqlVariables$.subscribe(() => dashboard.forceRefresh(false)) // we should not reload the control group when the control group output changes - otherwise, performance is severely impacted
+    esqlVariablesService.esqlVariables$.subscribe(() => dashboard.forceRefresh(false))
   );
 
   // --------------------------------------------------------------------------------------
