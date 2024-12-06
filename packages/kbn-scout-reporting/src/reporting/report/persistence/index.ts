@@ -102,6 +102,7 @@ export class ScoutReportDataStream {
     this.log.info(
       `Updating index template '${template.name}' (version ${existingTemplateVersion} -> ${newTemplateVersion})`
     );
+    await this.es.indices.putIndexTemplate(template);
   }
 
   async addEvent(event: ScoutReportEvent) {

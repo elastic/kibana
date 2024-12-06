@@ -75,7 +75,7 @@ export class ScoutFTRReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'mocha',
+        type: 'ftr',
       },
       test_run: {
         id: this.runId,
@@ -94,7 +94,7 @@ export class ScoutFTRReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'mocha',
+        type: 'ftr',
       },
       test_run: {
         id: this.runId,
@@ -122,7 +122,7 @@ export class ScoutFTRReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'mocha',
+        type: 'ftr',
       },
       test_run: {
         id: this.runId,
@@ -156,7 +156,7 @@ export class ScoutFTRReporter {
       ...datasources.environmentMetadata,
       reporter: {
         name: this.name,
-        type: 'mocha',
+        type: 'ftr',
       },
       test_run: {
         id: this.runId,

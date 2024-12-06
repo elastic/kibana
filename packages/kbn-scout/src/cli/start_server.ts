@@ -17,7 +17,7 @@ import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers'
  */
 export const startServer: Command<void> = {
   name: 'start-server',
-  description: 'Start a Kibana instance for testing purposes',
+  description: 'Start Elasticsearch & Kibana for testing purposes',
   flags: SERVER_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {
     const options = parseServerFlags(flagsReader);

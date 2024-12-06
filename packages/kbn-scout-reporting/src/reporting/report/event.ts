@@ -42,7 +42,7 @@ export interface ScoutReportEventInfo {
  */
 export interface ScoutReporterInfo {
   name: string;
-  type: 'jest' | 'mocha' | 'playwright';
+  type: 'jest' | 'ftr' | 'playwright';
 }
 
 /**

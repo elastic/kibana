@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/paths';
-export * from './src/reporting';
+export const SCOUT_TEST_EVENTS_TEMPLATE_NAME = 'scout-test-events';
+export const SCOUT_TEST_EVENTS_INDEX_PATTERN = `${SCOUT_TEST_EVENTS_TEMPLATE_NAME}-*`;

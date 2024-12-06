@@ -27,7 +27,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     reporter: [
       ['html', { outputFolder: './output/reports', open: 'never' }], // HTML report configuration
       ['json', { outputFile: './output/reports/test-results.json' }], // JSON report
-      scoutPlaywrightReporter(), // Scout report
+      scoutPlaywrightReporter({ name: 'scout-playwright' }), // Scout report
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
