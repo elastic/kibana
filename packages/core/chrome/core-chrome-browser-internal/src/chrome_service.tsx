@@ -240,7 +240,8 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
-    this.handleEuiDevProviderWarning(notifications);
+    // commented out until https://github.com/elastic/kibana/issues/201805 can be fixed
+    // this.handleEuiDevProviderWarning(notifications);
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
