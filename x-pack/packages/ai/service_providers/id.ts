@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * Available AI Service Provider IDs.
+ */
 export type ServiceProviderID = (typeof SERVICE_PROVIDER_IDS)[number];
 
 // There are more service providers in @kbn/stack-connectors-plugin, but until

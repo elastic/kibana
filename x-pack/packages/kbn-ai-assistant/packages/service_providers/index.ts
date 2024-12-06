@@ -34,9 +34,14 @@ export const SERVICE_PROVIDERS = {
   openai,
 } as const;
 
+/** The ID of an AI Service Provider. */
 export type ServiceProviderID = keyof typeof SERVICE_PROVIDERS;
 const SERVICE_PROVIDER_IDS = Object.keys(SERVICE_PROVIDERS) as ServiceProviderID[];
 
+/**
+ * Returns true if the given string is a supported connector type, false otherwise.
+ * @param id The connector type ID to check.
+ */
 export const isSupportedConnectorId = (id: string): id is ServiceProviderID => {
   return id in SERVICE_PROVIDERS;
 };
@@ -53,20 +58,24 @@ export const getServiceProviders = () => SERVICE_PROVIDERS;
 
 /**
  * Return a Service Provider by ID.
+ * @param id The ID of the Service Provider to get.
  */
 export const getServiceProvider = (id: ServiceProviderID) => SERVICE_PROVIDERS[id];
 
 /**
  * Get a lazy-loaded React component, wrapped in a `Suspense` boundary, for the logo of a service provider.
+ * @param id The ID of the service provider.
  */
 export const getReactComponentLogo = (id: ServiceProviderID) => _getReactComponentLogo(id);
 
 /**
  * Get the base64-encoded SVG of the logo of a service provider.
+ * @param id The ID of the service provider.
  */
 export const getBase64Logo = async (id: ServiceProviderID) => _getBase64Logo(id);
 
 /**
  * Get the URL of the logo of a service provider.
+ * @param id The ID of the service provider.
  */
 export const getUrlLogo = async (id: ServiceProviderID) => _getUrlLogo(id);

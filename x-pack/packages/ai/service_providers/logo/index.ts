@@ -48,15 +48,18 @@ const LOGO_URL = {
 
 /**
  * Get a lazy-loaded React component, wrapped in a `Suspense` boundary, for the logo of a service provider.
+ * @param id The ID of the service provider.
  */
 export const getReactComponentLogo = (id: ServiceProviderID) => LOGO_REACT[id];
 
 /**
  * Get the base64-encoded SVG of the logo of a service provider.
+ * @param id The ID of the service provider.
  */
 export const getBase64Logo = async (id: ServiceProviderID) => LOGO_BASE_64[id]();
 
 /**
  * Get the URL of the logo of a service provider.
+ * @param id The ID of the service provider.
  */
 export const getUrlLogo = async (id: ServiceProviderID) => LOGO_URL[id]();

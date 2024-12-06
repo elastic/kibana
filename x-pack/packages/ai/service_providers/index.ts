@@ -7,6 +7,7 @@
 
 export { type ServiceProviderID, SERVICE_PROVIDER_IDS } from './id';
 export { getReactComponentLogo, getBase64Logo, getUrlLogo } from './logo';
+export type { ProviderSolution } from './solutions';
 
 import { SERVICE_PROVIDER_CONNECTOR_IDS } from './connector_id';
 import { type ServiceProviderID, SERVICE_PROVIDER_IDS } from './id';
@@ -41,7 +42,14 @@ export const SERVICE_PROVIDERS = SERVICE_PROVIDER_IDS.reduce((acc, id) => {
   return acc;
 }, {} as Record<ServiceProviderID, ServiceProvider>);
 
-export const { bedrock, gemini, openai } = SERVICE_PROVIDERS;
+export const {
+  /** Amazon Bedrock */
+  bedrock,
+  /** Google Gemini */
+  gemini,
+  /** Open AI */
+  openai,
+} = SERVICE_PROVIDERS;
 
 /**
  * Return all Service Provider IDs.
@@ -55,7 +63,12 @@ export const getServiceProviders = () => SERVICE_PROVIDERS;
 
 /**
  * Return a Service Provider by ID.
+ * @param id The ID of the Service Provider.
  */
 export const getServiceProvider = (id: ServiceProviderID) => SERVICE_PROVIDERS[id];
 
+/**
+ * Returns true if the given string is a supported connector type, false otherwise.
+ * @param id The connector type ID to check.
+ */
 export { isSupportedConnectorId } from './connector_id';

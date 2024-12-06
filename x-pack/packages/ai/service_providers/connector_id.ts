@@ -18,6 +18,7 @@ export const SERVICE_PROVIDER_CONNECTOR_IDS: Record<ServiceProviderID, string> =
 
 /**
  * Returns true if the given string is a supported connector type, false otherwise.
+ * @param id The connector type ID to check.
  */
 export const isSupportedConnectorId = (id: string) =>
   Object.values(SERVICE_PROVIDER_CONNECTOR_IDS).includes(id);

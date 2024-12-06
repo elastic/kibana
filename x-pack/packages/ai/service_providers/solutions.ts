@@ -7,6 +7,9 @@
 
 import { ServiceProviderID } from './id';
 
+/**
+ * Solutions in which AI Service Providers can be used.
+ */
 export type ProviderSolution = 'Observability' | 'Security' | 'Search';
 
 // There are more service providers in @kbn/stack-connectors-plugin,
