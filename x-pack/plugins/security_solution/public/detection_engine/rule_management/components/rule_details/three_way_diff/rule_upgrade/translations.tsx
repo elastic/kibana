@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 
 export const TOTAL_NUM_OF_FIELDS = (count: number) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.fieldsWithUpdates"
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.totalNumOfFieldsWithUpdates"
     defaultMessage="{countValue} {count, plural, one {field} other {fields}} for review"
     values={{ countValue: <strong>{count}</strong>, count }}
   />
@@ -21,7 +21,7 @@ export const TOTAL_NUM_OF_FIELDS = (count: number) => (
 
 export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.fieldsWithUpdates"
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfFieldsWithUpdates"
     defaultMessage="{countValue} {count, plural, one {field} other {fields}} in Elastic update"
     values={{ countValue: <strong>{count}</strong>, count }}
   />
@@ -29,7 +29,7 @@ export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
 
 export const NUM_OF_CONFLICTS = (count: number) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfSolvableConflicts"
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfConflicts"
     defaultMessage="{countValue} {count, plural, one {conflict} other {conflicts}}"
     values={{ countValue: <strong>{count}</strong>, count }}
   />
@@ -85,7 +85,7 @@ export const RULE_HAS_CONFLICTS = (count: number) =>
   );
 
 export const RULE_HAS_SOFT_CONFLICTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSolvableConflictsDescription',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSoftConflictsDescription',
   {
     defaultMessage:
       'Please review and accept conflicts. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
@@ -93,7 +93,7 @@ export const RULE_HAS_SOFT_CONFLICTS_DESCRIPTION = i18n.translate(
 );
 
 export const RULE_HAS_HARD_CONFLICTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasNonSolvableConflictsDescription',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasHardConflictsDescription',
   {
     defaultMessage:
       'Please provide an input for the conflicts. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
