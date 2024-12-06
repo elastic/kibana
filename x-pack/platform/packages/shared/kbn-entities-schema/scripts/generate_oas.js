@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
+require('../../../../../../src/setup_node_env');
 
 const swaggerJsdoc = require('swagger-jsdoc');
 const { zodToJsonSchema } = require('zod-to-json-schema');
@@ -62,6 +62,6 @@ export const generateOAS = (options) =>
         },
       },
     },
-    apis: ['../../plugins/observability_solution/entity_manager/server/routes/**/*.ts'],
+    apis: ['../../../../plugins/observability_solution/entity_manager/server/routes/**/*.ts'],
     ...options,
   });
