@@ -34,20 +34,6 @@ const getStyles = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
   group: css`
     padding-top: ${euiTheme.size.s};
   `,
-  item: css`
-    border: 1px solid transparent;
-    border-radius: ${euiTheme.border.radius.medium};
-    padding: ${euiTheme.size.m};
-    min-width: 100px;
-
-    &.valueItem--selected {
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
-    }
-
-    &:hover {
-      border-color: ${euiTheme.colors.backgroundLightPrimary};
-    }
-  `,
 });
 
 interface Props<T> {
