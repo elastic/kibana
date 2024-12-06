@@ -10,15 +10,15 @@
 import React from 'react';
 import { FieldPicker, FieldPickerProps } from './field_picker';
 import { render, screen } from '@testing-library/react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { DataType, FieldOptionValue } from './types';
 
 const generateFieldWithLabelOfLength = (length: number) => ({
-  label: faker.random.alpha({ count: length }),
+  label: faker.string.alpha(length),
   value: {
     type: 'field' as const,
-    field: faker.random.alpha({ count: length }),
+    field: faker.string.alpha(length),
     dataType: 'date' as DataType,
     operationType: 'count',
   },

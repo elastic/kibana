@@ -217,7 +217,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...emailSettings,
           ...maxScheduledPerMinuteSettings,
           '--xpack.eventLog.logEntries=true',
-          '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,

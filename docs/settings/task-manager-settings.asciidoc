@@ -17,7 +17,7 @@ Task Manager runs background tasks by polling for work on an interval.  You can 
 The maximum number of times a task will be attempted before being abandoned as failed.  Defaults to 3.
 
 `xpack.task_manager.poll_interval`::
-How often, in milliseconds, the task manager will look for more work.  Defaults to 3000 and cannot be lower than 100.
+How often, in milliseconds, the task manager will look for more work.  Defaults to 500 and cannot be lower than 100.
 
 `xpack.task_manager.request_capacity`::
 How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
