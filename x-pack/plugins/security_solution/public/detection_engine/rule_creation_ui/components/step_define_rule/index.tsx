@@ -70,7 +70,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
-import { ThreatMatchInput } from '../threatmatch_input';
+import { ThreatMatchEdit } from '../threat_match_edit/threat_match_edit';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
@@ -92,6 +92,7 @@ import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
+import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -100,14 +101,12 @@ const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
 `;
 export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
-  threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
   form: FormHook<DefineStepRule>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
   isQueryBarValid: boolean;
   setIsQueryBarValid: (valid: boolean) => void;
-  setIsThreatQueryBarValid: (valid: boolean) => void;
   index: string[];
   threatIndex: string[];
   alertSuppressionFields?: string[];
@@ -160,10 +159,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   queryBarSavedId,
   queryBarTitle,
   setIsQueryBarValid,
-  setIsThreatQueryBarValid,
   shouldLoadQueryDynamically,
   threatIndex,
-  threatIndicesConfig,
   thresholdFields,
 }) => {
   const [{ ruleType, queryBar, machineLearningJobId }] = useFormData<DefineStepRule>({
@@ -173,7 +170,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
-  const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
   const {
@@ -237,14 +233,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setIndexModified(!isEqual(index, indicesConfig));
   }, [index, indicesConfig]);
 
-  useEffect(() => {
-    setThreatIndexModified(!isEqual(threatIndex, threatIndicesConfig));
-  }, [threatIndex, threatIndicesConfig]);
-
-  const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({
-    form,
-  });
+  const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({ form });
   usePersistentAlertSuppressionState({ form });
+  usePersistentThreatMatchState({ form });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
@@ -291,11 +282,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     indexField.setValue(indicesConfig);
   }, [getFields, indicesConfig]);
 
-  const handleResetThreatIndices = useCallback(() => {
-    const threatIndexField = getFields().threatIndex;
-    threatIndexField.setValue(threatIndicesConfig);
-  }, [getFields, threatIndicesConfig]);
-
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
   }, []);
@@ -320,28 +306,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       />
     ),
     [aggFields]
-  );
-
-  const ThreatMatchInputChildren = useCallback(
-    ({ threatMapping }: Record<string, FieldHook>) => (
-      <ThreatMatchInput
-        handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={indexPattern}
-        threatIndexModified={threatIndexModified}
-        threatIndexPatterns={threatIndexPatterns}
-        threatIndexPatternsLoading={threatIndexPatternsLoading}
-        threatMapping={threatMapping}
-        onValidityChange={setIsThreatQueryBarValid}
-      />
-    ),
-    [
-      handleResetThreatIndices,
-      indexPattern,
-      setIsThreatQueryBarValid,
-      threatIndexModified,
-      threatIndexPatterns,
-      threatIndexPatternsLoading,
-    ]
   );
 
   const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
@@ -713,23 +677,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isThreatMatchRule(ruleType)}
-            data-test-subj="threatMatchInput"
-            fullWidth
-          >
-            <>
-              <UseMultiFields
-                fields={{
-                  threatMapping: {
-                    path: 'threatMapping',
-                  },
-                }}
-              >
-                {ThreatMatchInputChildren}
-              </UseMultiFields>
-            </>
-          </RuleTypeEuiFormRow>
+          {isThreatMatchRule(ruleType) && (
+            <ThreatMatchEdit
+              indexPatternPath="threatIndex"
+              queryPath="threatQueryBar"
+              mappingPath="threatMapping"
+              indexPatterns={indexPattern}
+              threatIndexPatterns={threatIndexPatterns}
+              loading={threatIndexPatternsLoading}
+            />
+          )}
           <RuleTypeEuiFormRow
             $isVisible={isNewTermsRule(ruleType)}
             data-test-subj="newTermsInput"
