@@ -19,7 +19,8 @@ import { AlertSummaryWidgetDependencies, DependencyProps } from './types';
 
 export const AlertSummaryWidget = ({
   chartProps,
-  featureIds,
+  ruleTypeIds,
+  consumers,
   filter,
   fullSize,
   onClick = () => {},
@@ -34,7 +35,8 @@ export const AlertSummaryWidget = ({
     isLoading,
     error,
   } = useLoadAlertSummary({
-    featureIds,
+    ruleTypeIds,
+    consumers,
     filter,
     timeRange,
   });

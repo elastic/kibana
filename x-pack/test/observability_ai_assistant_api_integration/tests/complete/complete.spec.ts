@@ -32,6 +32,7 @@ import {
   getConversationUpdatedEvent,
 } from '../conversations/helpers';
 import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -39,7 +40,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  const COMPLETE_API_URL = `/internal/observability_ai_assistant/chat/complete`;
+  const COMPLETE_API_URL = '/internal/observability_ai_assistant/chat/complete';
 
   const messages: Message[] = [
     {
@@ -486,5 +487,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     // todo
     it.skip('executes a function', async () => {});
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+            params: {
+              body: {
+                messages,
+                connectorId,
+                persist: false,
+                screenContexts: [],
+                scopes: ['all'],
+              },
+            },
+          });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
+      });
+    });
   });
 }

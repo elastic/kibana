@@ -14,10 +14,12 @@ import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamDetailManagement } from '../stream_detail_management';
 
 export function StreamDetailView() {
-  const { path } = useStreamsAppParams('/{key}/*');
+  const params1 = useStreamsAppParams('/{key}/{tab}', true);
 
-  const key = path.key;
-  const tab = 'tab' in path ? path.tab : 'management';
+  const params2 = useStreamsAppParams('/{key}/management/{subtab}', true);
+
+  const key = params1?.path?.key || params2.path.key;
+  const tab = params1?.path?.tab || 'management';
 
   const {
     dependencies: {
@@ -63,5 +65,12 @@ export function StreamDetailView() {
     },
   ];
 
-  return <EntityDetailViewWithoutParams tabs={tabs} entity={entity} selectedTab={tab} />;
+  return (
+    <EntityDetailViewWithoutParams
+      tabs={tabs}
+      entity={entity}
+      definition={streamEntity}
+      selectedTab={tab}
+    />
+  );
 }

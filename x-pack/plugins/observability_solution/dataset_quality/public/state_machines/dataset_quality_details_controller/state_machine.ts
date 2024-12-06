@@ -28,6 +28,8 @@ import {
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
+
+import { IntegrationType } from '../../../common/data_stream_details';
 import {
   fetchDataStreamDetailsFailedNotifier,
   assertBreakdownFieldEcsFailedNotifier,
@@ -37,7 +39,6 @@ import {
   updateFieldLimitFailedNotifier,
   rolloverDataStreamFailedNotifier,
 } from './notifications';
-import { Integration } from '../../../common/data_streams_stats/integration';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
   initialContext: DatasetQualityDetailsControllerContext
@@ -151,7 +152,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   invoke: {
                     src: 'loadDataStreamSettings',
                     onDone: {
-                      target: 'loadingIntegrationsAndDegradedFields',
+                      target: 'fetchingDataStreamDegradedFields',
                       actions: ['storeDataStreamSettings'],
                     },
                     onError: [
@@ -160,116 +161,102 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         cond: 'isIndexNotFoundError',
                       },
                       {
-                        target: 'done',
+                        target: 'errorFetchingDataStreamSettings',
                         actions: ['notifyFetchDataStreamSettingsFailed'],
                       },
                     ],
                   },
                 },
-                loadingIntegrationsAndDegradedFields: {
-                  type: 'parallel',
-                  states: {
-                    dataStreamDegradedFields: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          invoke: {
-                            src: 'loadDegradedFields',
-                            onDone: {
-                              target: 'done',
-                              actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
-                            },
-                            onError: [
-                              {
-                                target: '#DatasetQualityDetailsController.indexNotFound',
-                                cond: 'isIndexNotFoundError',
-                              },
-                              {
-                                target: 'done',
-                              },
-                            ],
-                          },
-                        },
-                        done: {
-                          on: {
-                            UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
-                              target: 'done',
-                              actions: ['storeDegradedFieldTableOptions'],
-                            },
-                            OPEN_DEGRADED_FIELD_FLYOUT: {
-                              target:
-                                '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
-                              actions: [
-                                'storeExpandedDegradedField',
-                                'resetFieldLimitServerResponse',
-                              ],
-                            },
-                            TOGGLE_CURRENT_QUALITY_ISSUES: {
-                              target: 'fetching',
-                              actions: ['toggleCurrentQualityIssues'],
-                            },
-                          },
-                        },
-                      },
+                errorFetchingDataStreamSettings: {},
+                fetchingDataStreamDegradedFields: {
+                  invoke: {
+                    src: 'loadDegradedFields',
+                    onDone: {
+                      target: 'doneFetchingDegradedFields',
+                      actions: ['storeDegradedFields', 'raiseDegradedFieldsLoaded'],
                     },
-                    integrationDetails: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          invoke: {
-                            src: 'loadDataStreamIntegration',
-                            onDone: {
-                              target: 'done',
-                              actions: ['storeDataStreamIntegration'],
-                            },
-                            onError: {
-                              target: 'done',
-                              actions: ['notifyFetchDatasetIntegrationsFailed'],
-                            },
-                          },
-                        },
-                        done: {},
+                    onError: [
+                      {
+                        target: '#DatasetQualityDetailsController.indexNotFound',
+                        cond: 'isIndexNotFoundError',
                       },
-                    },
-                    integrationDashboards: {
-                      initial: 'fetching',
-                      states: {
-                        fetching: {
-                          invoke: {
-                            src: 'loadIntegrationDashboards',
-                            onDone: {
-                              target: 'done',
-                              actions: ['storeIntegrationDashboards'],
-                            },
-                            onError: [
-                              {
-                                target: 'unauthorized',
-                                cond: 'checkIfActionForbidden',
-                              },
-                              {
-                                target: 'done',
-                                actions: ['notifyFetchIntegrationDashboardsFailed'],
-                              },
-                            ],
-                          },
-                        },
-                        done: {},
-                        unauthorized: {
-                          type: 'final',
-                        },
+                      {
+                        target: 'errorFetchingDegradedFields',
                       },
-                    },
-                  },
-                  onDone: {
-                    target: 'done',
+                    ],
                   },
                 },
-                done: {},
+                doneFetchingDegradedFields: {
+                  on: {
+                    UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
+                      target: 'doneFetchingDegradedFields',
+                      actions: ['storeDegradedFieldTableOptions'],
+                    },
+                    OPEN_DEGRADED_FIELD_FLYOUT: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.degradedFieldFlyout.open',
+                      actions: ['storeExpandedDegradedField', 'resetFieldLimitServerResponse'],
+                    },
+                    TOGGLE_CURRENT_QUALITY_ISSUES: {
+                      target: 'fetchingDataStreamDegradedFields',
+                      actions: ['toggleCurrentQualityIssues'],
+                    },
+                  },
+                },
+                errorFetchingDegradedFields: {},
               },
               on: {
                 UPDATE_TIME_RANGE: {
                   target: '.fetchingDataStreamSettings',
                 },
+              },
+            },
+            checkAndLoadIntegrationAndDashboards: {
+              initial: 'checkingAndLoadingIntegration',
+              states: {
+                checkingAndLoadingIntegration: {
+                  invoke: {
+                    src: 'checkAndLoadIntegration',
+                    onDone: [
+                      {
+                        target: 'loadingIntegrationDashboards',
+                        actions: 'storeDataStreamIntegration',
+                        cond: 'isDataStreamIsPartOfIntegration',
+                      },
+                      {
+                        actions: 'storeDataStreamIntegration',
+                        target: 'done',
+                      },
+                    ],
+                    onError: {
+                      target: 'done',
+                      actions: ['notifyFetchDatasetIntegrationsFailed'],
+                    },
+                  },
+                },
+                loadingIntegrationDashboards: {
+                  invoke: {
+                    src: 'loadIntegrationDashboards',
+                    onDone: {
+                      target: 'done',
+                      actions: ['storeIntegrationDashboards'],
+                    },
+                    onError: [
+                      {
+                        target: 'unauthorizedToLoadDashboards',
+                        cond: 'checkIfActionForbidden',
+                      },
+                      {
+                        target: 'done',
+                        actions: ['notifyFetchIntegrationDashboardsFailed'],
+                      },
+                    ],
+                  },
+                },
+                unauthorizedToLoadDashboards: {
+                  type: 'final',
+                },
+                done: {},
               },
             },
             degradedFieldFlyout: {
@@ -522,7 +509,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
               }
             : {};
         }),
-        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<Integration>) => {
+        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<IntegrationType>) => {
           return 'data' in event
             ? {
                 integration: event.data,
@@ -602,6 +589,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             !event.data.isLatestBackingIndexUpdated
           );
         },
+        isDataStreamIsPartOfIntegration: (_, event) => {
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'isIntegration' in event.data &&
+            event.data.isIntegration
+          );
+        },
       },
     }
   );
@@ -634,9 +629,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
       notifyFetchIntegrationDashboardsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchIntegrationDashboardsFailedNotifier(toasts, event.data),
       notifyFetchDatasetIntegrationsFailed: (context, event: DoneInvokeEvent<Error>) => {
-        const integrationName =
-          'dataStreamSettings' in context ? context.dataStreamSettings?.integration : undefined;
-        return fetchDataStreamIntegrationFailedNotifier(toasts, event.data, integrationName);
+        return fetchDataStreamIntegrationFailedNotifier(toasts, event.data);
       },
       notifySaveNewFieldLimitError: (_context, event: DoneInvokeEvent<Error>) =>
         updateFieldLimitFailedNotifier(toasts, event.data),
@@ -735,18 +728,15 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
           dataStream: context.dataStream,
         });
       },
-      loadDataStreamIntegration: (context) => {
-        if ('dataStreamSettings' in context && context.dataStreamSettings?.integration) {
-          return dataStreamDetailsClient.getDataStreamIntegration({
-            integrationName: context.dataStreamSettings.integration,
-          });
-        }
-        return Promise.resolve();
+      checkAndLoadIntegration: (context) => {
+        return dataStreamDetailsClient.checkAndLoadIntegration({
+          dataStream: context.dataStream,
+        });
       },
       loadIntegrationDashboards: (context) => {
-        if ('dataStreamSettings' in context && context.dataStreamSettings?.integration) {
+        if ('integration' in context && context.integration && context.integration.integration) {
           return dataStreamDetailsClient.getIntegrationDashboards({
-            integration: context.dataStreamSettings.integration,
+            integration: context.integration.integration.name,
           });
         }
 

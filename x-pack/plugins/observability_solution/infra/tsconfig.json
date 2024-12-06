@@ -119,6 +119,9 @@
     "@kbn/observability-utils-server",
     "@kbn/stack-alerts-plugin",
     "@kbn/data-view-editor-plugin"
+    "@kbn/core-plugins-server",
+    "@kbn/config",
+    "@kbn/observability-utils-common"
   ],
   "exclude": ["target/**/*"]
 }

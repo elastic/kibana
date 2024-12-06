@@ -1560,36 +1560,36 @@
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
-            "plugin": "@kbn/alerts-ui-shared",
-            "path": "packages/kbn-alerts-ui-shared/src/rule_form/rule_actions/rule_actions_system_actions_item.tsx"
+            "plugin": "@kbn/response-ops-rule-form",
+            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           }
         ],
         "initialIsOpen": false

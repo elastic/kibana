@@ -7,16 +7,14 @@
 
 import React from 'react';
 
-import { cleanup, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../mock';
 
 import { RootPrivilegesCallout } from './root_privileges_callout';
 
-// FLAKY: https://github.com/elastic/kibana/issues/201210
-describe.skip('RootPrivilegesCallout', () => {
+describe('RootPrivilegesCallout', () => {
   function render(rootIntegrations?: Array<{ name: string; title: string }>) {
-    cleanup();
     const renderer = createFleetTestRendererMock();
     const results = renderer.render(<RootPrivilegesCallout rootIntegrations={rootIntegrations} />);
 
