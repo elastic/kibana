@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../mock';
