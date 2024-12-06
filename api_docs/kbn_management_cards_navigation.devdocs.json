@@ -145,7 +145,7 @@
             "label": "hideLinksTo",
             "description": [],
             "signature": [
-              "(\"transform\" | \"tags\" | \"maintenanceWindows\" | \"dataViews\" | \"spaces\" | \"settings\" | \"data_quality\" | \"data_usage\" | \"filesManagement\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\")[] | undefined"
+              "(\"transform\" | \"tags\" | \"maintenanceWindows\" | \"dataViews\" | \"spaces\" | \"settings\" | \"data_quality\" | \"data_usage\" | \"filesManagement\" | \"pipelines\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"triggersActions\" | \"triggersActionsConnectors\")[] | undefined"
             ],
             "path": "packages/kbn-management/cards_navigation/src/types.ts",
             "deprecated": false,
@@ -202,7 +202,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"transform\" | \"tags\" | \"maintenanceWindows\" | \"dataViews\" | \"spaces\" | \"settings\" | \"data_quality\" | \"data_usage\" | \"filesManagement\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"triggersActions\" | \"triggersActionsConnectors\""
+          "\"transform\" | \"tags\" | \"maintenanceWindows\" | \"dataViews\" | \"spaces\" | \"settings\" | \"data_quality\" | \"data_usage\" | \"filesManagement\" | \"pipelines\" | \"roles\" | \"reporting\" | \"api_keys\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"triggersActions\" | \"triggersActionsConnectors\""
         ],
         "path": "packages/kbn-management/cards_navigation/src/types.ts",
         "deprecated": false,
