@@ -61,12 +61,11 @@ export const ChartFilters = memo<ChartFiltersProps>(
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
     return (
-      <EuiFlexGroup responsive gutterSize="m" alignItems="center" justifyContent="flexEnd">
-        <EuiFlexItem grow={2} />
+      <EuiFlexGroup responsive gutterSize="m" justifyContent="flexStart">
         <EuiFlexItem grow={1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={1}>
           <UsageMetricsDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
@@ -85,6 +84,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
             onClick={onClickRefreshButton}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={2} />
       </EuiFlexGroup>
     );
   }
