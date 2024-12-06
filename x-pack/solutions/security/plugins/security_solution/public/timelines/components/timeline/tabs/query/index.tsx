@@ -177,11 +177,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, inspect, totalCount, loadPage: loadNextEventBatch, refreshedAt, refetch },
+    { events, inspect, totalCount, loadNextBatch: loadNextEventBatch, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
-    fields: ALL_FIELDS,
+    fields: timelineQueryFieldsFromColumns,
     filterQuery: combinedQueries?.filterQuery,
     id: timelineId,
     indexNames: selectedPatterns,
@@ -192,6 +192,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     sort: timelineQuerySortField,
     startDate: start,
     timerangeKind,
+    tab: 'query',
   });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
