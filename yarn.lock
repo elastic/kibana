@@ -5568,7 +5568,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql@link:src/plugins/esql":
+"@kbn/esql@link:src/platform/plugins/shared/esql":
   version "0.0.0"
   uid ""
 
