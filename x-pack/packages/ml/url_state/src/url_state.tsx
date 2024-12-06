@@ -26,6 +26,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -279,8 +280,16 @@ export const useUrlStateService = <K extends Accessor, T>(
   stateKey: K,
   options: UrlStateOptions<K, T>
 ): [T, (update: Partial<T>, replaceState?: boolean) => void, UrlStateService<T>] => {
+  const optionsRef = useRef(options);
+
+  useDeepCompareEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
   const [state, setState] = useUrlState(stateKey);
-  const urlState = isAppStateOptions<T>(stateKey, options) ? state?.[options.pageKey] : state;
+  const urlState = isAppStateOptions<T>(stateKey, optionsRef.current)
+    ? state?.[optionsRef.current.pageKey]
+    : state;
 
   const setCallback = useRef<typeof setState>();
 
@@ -292,7 +301,7 @@ export const useUrlStateService = <K extends Accessor, T>(
 
   const resultState: T = useMemo(() => {
     const result = {
-      ...(options.defaultState ?? {}),
+      ...(optionsRef.current.defaultState ?? {}),
       ...(urlState ?? {}),
     };
 
@@ -312,7 +321,6 @@ export const useUrlStateService = <K extends Accessor, T>(
     prevPageState.current = result;
 
     return result;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlState]);
 
   const onStateUpdate = useCallback(
@@ -320,9 +328,9 @@ export const useUrlStateService = <K extends Accessor, T>(
       if (!setCallback?.current) {
         throw new Error('Callback for URL state update has not been initialized.');
       }
-      if (isAppStateOptions<T>(stateKey, options)) {
+      if (isAppStateOptions<T>(stateKey, optionsRef.current)) {
         setCallback.current(
-          options.pageKey,
+          optionsRef.current.pageKey,
           {
             ...resultState,
             ...update,
@@ -333,7 +341,7 @@ export const useUrlStateService = <K extends Accessor, T>(
         setCallback.current({ ...resultState, ...update });
       }
     },
-    [stateKey, options, resultState]
+    [stateKey, resultState]
   );
 
   const urlStateService = useMemo(() => new UrlStateService<T>(), []);
