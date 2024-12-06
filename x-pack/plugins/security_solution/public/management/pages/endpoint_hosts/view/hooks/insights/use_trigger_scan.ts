@@ -12,7 +12,8 @@ import {
   DefendInsightTypeEnum,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
-import { useKibana } from '../../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
+import { WORKFLOW_INSIGHTS } from '../../translations';
 
 interface UseTriggerScanPayload {
   endpointId: string;
@@ -27,7 +28,13 @@ interface UseTriggerScanConfig {
 
 export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) => {
   const { http } = useKibana().services;
-  return useMutation<DefendInsightsResponse, unknown, UseTriggerScanPayload>(
+  const toasts = useToasts();
+
+  return useMutation<
+    DefendInsightsResponse,
+    { body?: { message?: string } },
+    UseTriggerScanPayload
+  >(
     ({ endpointId, connectorId, actionTypeId }: UseTriggerScanPayload) =>
       http.post<DefendInsightsResponse>(DEFEND_INSIGHTS, {
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
@@ -46,6 +53,12 @@ export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) =>
     {
       onMutate,
       onSuccess,
+      onError: (err) => {
+        toasts.addDanger({
+          title: WORKFLOW_INSIGHTS.toasts.scanError,
+          text: err?.body?.message,
+        });
+      },
     }
   );
 };

@@ -7,10 +7,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
+import { WORKFLOW_INSIGHTS } from '../../translations';
 import type { SecurityWorkflowInsight } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { ActionType } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../../../../common/endpoint/constants';
-import { useKibana } from '../../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 
 interface UseFetchInsightsConfig {
   endpointId: string;
@@ -19,19 +20,28 @@ interface UseFetchInsightsConfig {
 
 export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConfig) => {
   const { http } = useKibana().services;
+  const toasts = useToasts();
 
-  return useQuery<SecurityWorkflowInsight[], unknown, SecurityWorkflowInsight[]>(
+  return useQuery<SecurityWorkflowInsight[], Error, SecurityWorkflowInsight[]>(
     [`fetchInsights-${endpointId}`],
     async () => {
-      const result = await http.get<SecurityWorkflowInsight[]>(WORKFLOW_INSIGHTS_ROUTE, {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-        query: {
-          actionTypes: JSON.stringify([ActionType.Refreshed]),
-          targetIds: JSON.stringify([endpointId]),
-        },
-      });
-      onSuccess();
-      return result;
+      try {
+        const result = await http.get<SecurityWorkflowInsight[]>(WORKFLOW_INSIGHTS_ROUTE, {
+          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          query: {
+            actionTypes: JSON.stringify([ActionType.Refreshed]),
+            targetIds: JSON.stringify([endpointId]),
+          },
+        });
+        onSuccess();
+        return result;
+      } catch (error) {
+        toasts.addDanger({
+          title: WORKFLOW_INSIGHTS.toasts.fetchInsightsError,
+          text: error?.body?.message,
+        });
+        return [];
+      }
     },
     {
       refetchOnWindowFocus: false,

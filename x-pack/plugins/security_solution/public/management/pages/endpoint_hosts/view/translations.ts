@@ -46,6 +46,26 @@ export const WORKFLOW_INSIGHTS = {
       }
     ),
   },
+  toasts: {
+    scanError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.error',
+      {
+        defaultMessage: 'Failed to start scan',
+      }
+    ),
+    fetchInsightsError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.fetchInsightsError',
+      {
+        defaultMessage: 'Failed to fetch insights',
+      }
+    ),
+    fetchPendingInsightsError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.fetchPendingInsightsError',
+      {
+        defaultMessage: 'Failed to retrieve insights in the generation process',
+      }
+    ),
+  },
 };
 
 export const ACTIVITY_LOG = {

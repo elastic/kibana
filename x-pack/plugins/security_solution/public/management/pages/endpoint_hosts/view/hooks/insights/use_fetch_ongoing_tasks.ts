@@ -12,7 +12,8 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { useEffect, useRef } from 'react';
-import { useKibana } from '../../../../../../common/lib/kibana';
+import { WORKFLOW_INSIGHTS } from '../../translations';
+import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 
 interface UseFetchOngoingScansConfig {
   isPolling: boolean;
@@ -26,6 +27,7 @@ export const useFetchOngoingScans = ({
   onSuccess,
 }: UseFetchOngoingScansConfig) => {
   const { http } = useKibana().services;
+  const toasts = useToasts();
 
   // Ref to track if polling was active in the previous render
   const wasPolling = useRef(isPolling);
@@ -38,22 +40,29 @@ export const useFetchOngoingScans = ({
     wasPolling.current = isPolling;
   }, [isPolling, onSuccess]);
 
-  return useQuery<{ data: DefendInsightsResponse[] }, unknown, DefendInsightsResponse[]>(
+  return useQuery<DefendInsightsResponse[], unknown, DefendInsightsResponse[]>(
     [`fetchOngoingTasks-${endpointId}`],
-    () =>
-      http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-        query: {
-          status: DefendInsightStatusEnum.running,
-          endpoint_ids: [endpointId],
-        },
-      }),
+    async () => {
+      try {
+        const response = await http.get<{ data: DefendInsightsResponse[] }>(DEFEND_INSIGHTS, {
+          version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+          query: {
+            status: DefendInsightStatusEnum.running,
+            endpoint_ids: [endpointId],
+          },
+        });
+        return response.data;
+      } catch (error) {
+        toasts.addDanger({
+          title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
+          text: error?.body?.message,
+        });
+        return [];
+      }
+    },
     {
       refetchOnWindowFocus: false,
       refetchInterval: isPolling ? 2000 : false,
-      select: (response) => {
-        return response.data;
-      },
     }
   );
 };
