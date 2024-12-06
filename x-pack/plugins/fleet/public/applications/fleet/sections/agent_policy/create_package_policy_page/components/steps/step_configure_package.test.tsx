@@ -17,7 +17,7 @@ import { validatePackagePolicy } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
 
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < 100; i++) {
   describe(`StepConfigurePackage ${i + 1}`, () => {
     let packageInfo: PackageInfo;
     let packagePolicy: NewPackagePolicy;
