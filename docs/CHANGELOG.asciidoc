@@ -97,15 +97,6 @@ For information about the {kib} 8.17.0 release, review the following information
 The following functionality is deprecated in 8.17.0, and will be removed in 9.0.0.
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
 you make the necessary updates after you upgrade to 8.17.0.
-      
-[discrete]
-[[deprecation-197227]]
-.Removes `metrics:allowCheckingForFailedShards` advanced setting.
-[%collapsible]
-====
-*Details* +
-The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
-====
 
 [discrete]
 .The Observability > Logs > Explorer app is now deprecated in favor of Discover.
@@ -156,13 +147,14 @@ For detailed information about the 8.17.0 release, review the enhancements and b
 Alerting::
 * Allows users to create rules with predefined nonrandom IDs ({kibana-pull}199119[#199119]).
 Cases::
-* Refactors Jira Connector to use latest API only ({kibana-pull}197787[#197787]).
+* The Jira Connector has been updated to use the latest API and support the Jira Data Center ({kibana-pull}197787[#197787]).
 * The Case action is now GA ({kibana-pull}196972[#196972]).
 Dashboards & Visualizations::
 * Allows creating a dashboard with ES|QL chart even when there are no data views ({kibana-pull}196658[#196658]).
 * Newly and default configured line charts are now interpolated by default with a straight linear interpolation in *Lens* ({kibana-pull}196184[#196184]).
 * Simplifies access to some actions when hovering over panels ({kibana-pull}182535[#182535]).
 * Improves URL drilldown authoring experience ({kibana-pull}197454[#197454]).
+* The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
 Data ingestion and Fleet::
 * Filters integrations/packages list shown depending on the `policy_templates_behavior` field ({kibana-pull}200605[#200605]).
 * Adds a `<type>@custom` component template to integrations index template's `composed_of` array ({kibana-pull}192731[#192731]).
@@ -191,6 +183,8 @@ Machine Learning::
 * Anomaly Detection: Adds never expire option to forecast creation modal ({kibana-pull}195151[#195151]).
 Kibana platform::
 * When attempting to save an object with a name that already exists, the name is automatically appended with a suffix to make it unique ({kibana-pull}198777[#198777]).
+
+====
 
 [float]
 [[fixes-v8.17.0]]
