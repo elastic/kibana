@@ -8,14 +8,8 @@
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { storeTypeDefinition } from './type_definition';
 import { storeSourceDefinition } from './source_definition';
-import { EntitySourceDefinition, EntityTypeDefinition } from '../types';
-
-interface BuiltInDefinition {
-  type: EntityTypeDefinition;
-  sources: EntitySourceDefinition[];
-}
-
-const builtInDefinitions: BuiltInDefinition[] = [];
+import { builtInDefinitions } from './built_in';
+import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
 
 export async function installBuiltInDefinitions(
   clusterClient: IScopedClusterClient,
@@ -30,17 +24,21 @@ export async function installBuiltInDefinitions(
     try {
       await storeTypeDefinition(type, clusterClient, logger);
     } catch (error) {
-      logger.debug(error.message);
+      if (!(error instanceof EntityDefinitionConflict)) {
+        logger.debug(error.message);
+      }
     }
 
     for (const source of sources) {
       try {
         await storeSourceDefinition(source, clusterClient, logger);
       } catch (error) {
-        logger.debug(error.message);
+        if (!(error instanceof EntityDefinitionConflict)) {
+          logger.debug(error.message);
+        }
       }
     }
   }
 
-  logger.debug(`Installed ${builtInDefinitions.length} entity definitions`);
+  logger.debug(`Installed ${builtInDefinitions.length} entity definition(s)`);
 }
