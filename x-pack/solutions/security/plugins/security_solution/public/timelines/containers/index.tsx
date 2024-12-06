@@ -199,10 +199,18 @@ export const useTimelineEventsHandler = ({
       if (id === TimelineId.active) {
         activeTimeline.setActivePage(newActivePage);
       }
-      setActivePage(newActivePage);
+
+      setActivePage((prev) => {
+        console.log(`Wrapped - Setting Active Page to ${newActivePage} from ${prev}`);
+        return newActivePage;
+      });
     },
     [clearSignalsState, id]
   );
+
+  const loadNextPage = useCallback(() => {
+    wrappedLoadPage(activePage + 1);
+  }, [activePage, wrappedLoadPage]);
 
   useEffect(() => {
     return () => {
@@ -217,6 +225,8 @@ export const useTimelineEventsHandler = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
+  const oldSampleSize = useRef(limit);
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -230,7 +240,7 @@ export const useTimelineEventsHandler = ({
       querySize: 0,
     },
     events: [],
-    loadPage: wrappedLoadPage,
+    loadPage: loadNextPage,
     refreshedAt: 0,
   });
 
@@ -328,7 +338,7 @@ export const useTimelineEventsHandler = ({
             return {
               ...resp,
               refetch: refetchGrid,
-              loadPage: wrappedLoadPage,
+              loadPage: loadNextPage,
             };
           }
           return prevResp;
@@ -354,11 +364,12 @@ export const useTimelineEventsHandler = ({
       data.search,
       dataViewId,
       refetchGrid,
-      wrappedLoadPage,
+      loadNextPage,
     ]
   );
 
   useEffect(() => {
+    console.log(`Triggering Request with activePage: ${activePage}`);
     if (indexNames.length === 0) {
       return;
     }
@@ -368,7 +379,6 @@ export const useTimelineEventsHandler = ({
       const prevSearchParameters = {
         defaultIndex: prevRequest?.defaultIndex ?? [],
         filterQuery: prevRequest?.filterQuery ?? '',
-        querySize: prevRequest?.pagination?.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
         runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
@@ -382,16 +392,16 @@ export const useTimelineEventsHandler = ({
       const currentSearchParameters = {
         defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
-        querySize: limit,
         sort,
         runtimeMappings,
         ...timerange,
         ...deStructureEqlOptions(eqlOptions),
       };
 
-      const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
-        ? activePage
-        : 0;
+      const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
+      const shouldResetPagination = !areSearchParamsSame || oldSampleSize.current !== limit;
+
+      const newActivePage = shouldResetPagination ? 0 : activePage;
 
       /*
        * optimization to avoid unnecessary network request when a field
@@ -417,8 +427,8 @@ export const useTimelineEventsHandler = ({
         fields: finalFieldRequest,
         filterQuery: createFilter(filterQuery),
         pagination: {
-          activePage: newActivePage,
-          querySize: limit,
+          activePage: 0,
+          querySize: (newActivePage + 1) * limit,
         },
         language,
         runtimeMappings,
@@ -428,6 +438,7 @@ export const useTimelineEventsHandler = ({
       } as const;
 
       if (activePage !== newActivePage) {
+        console.log(`Setting Active Page to ${newActivePage} from ${activePage}`);
         setActivePage(newActivePage);
         if (id === TimelineId.active) {
           activeTimeline.setActivePage(newActivePage);
@@ -486,11 +497,11 @@ export const useTimelineEventsHandler = ({
           querySize: 0,
         },
         events: [],
-        loadPage: wrappedLoadPage,
+        loadPage: loadNextPage,
         refreshedAt: 0,
       });
     }
-  }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
+  }, [filterQuery, id, refetchGrid, loadNextPage]);
 
   return [loading, timelineResponse, timelineSearchHandler];
 };
