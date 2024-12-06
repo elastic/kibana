@@ -521,6 +521,7 @@ export class ExecuteReportTask implements ReportingTask {
 
             if (output) {
               logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              // Update the job status to "completed"
               report = await this._completeJob(report, {
                 ...output,
                 size: stream.bytesWritten,
