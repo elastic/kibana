@@ -31,6 +31,7 @@ import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 const TabTitle = ({ title }: { title: string }) => (
   <EuiTitle size="xxs">

@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { AppMockRenderer } from '../../common/mock';
 import type { UseGetCase } from '../../containers/use_get_case';
@@ -20,13 +21,11 @@ import { useGetCase } from '../../containers/use_get_case';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
-import { useLicense } from '../../common/use_license';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../../containers/use_get_case_file_stats');
-jest.mock('../../common/use_license');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
@@ -62,9 +61,11 @@ describe('CaseViewTabs', () => {
     useGetCaseFileStatsMock.mockReturnValue({ data });
     mockGetCase();
 
-    appMockRenderer = createAppMockRenderer();
+    const license = licensingMock.createLicense({
+      license: { type: 'basic' },
+    });
 
-    (useLicense as jest.Mock).mockReturnValue({ isAtLeastPlatinum: () => false });
+    appMockRenderer = createAppMockRenderer({ license });
   });
 
   afterEach(() => {
@@ -248,12 +249,13 @@ describe('CaseViewTabs', () => {
 
   describe('show observable tabs in platinum tier or higher', () => {
     beforeEach(() => {
-      (useLicense as jest.Mock).mockReturnValue({ isAtLeastPlatinum: () => true });
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+      appMockRenderer = createAppMockRenderer({ license });
     });
 
     it('should show the observables tab', async () => {
-      appMockRenderer = createAppMockRenderer();
-
       appMockRenderer.render(
         <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
       );
@@ -262,8 +264,6 @@ describe('CaseViewTabs', () => {
     });
 
     it('should show the similar cases tab', async () => {
-      appMockRenderer = createAppMockRenderer();
-
       appMockRenderer.render(
         <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.SIMILAR_CASES} />
       );
