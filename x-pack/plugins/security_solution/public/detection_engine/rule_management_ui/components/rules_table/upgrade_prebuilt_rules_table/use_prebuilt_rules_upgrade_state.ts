@@ -63,7 +63,8 @@ export function usePrebuiltRulesUpgradeState(
         ...ruleUpgradeInfo,
         fieldsUpgradeState,
         hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
-          ? Object.values(fieldsUpgradeState).some(
+          ? Boolean(ruleUpgradeInfo.diff.fields.type) ||
+            Object.values(fieldsUpgradeState).some(
               ({ state: fieldState }) =>
                 fieldState === FieldUpgradeState.SolvableConflict ||
                 fieldState === FieldUpgradeState.NonSolvableConflict
