@@ -178,7 +178,7 @@ export const RuleActionsNotifyWhen = ({
 }: RuleActionsNotifyWhenProps) => {
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
 
-  const showCustomThrottleOpts = frequency.notifyWhen === RuleNotifyWhen.THROTTLE;
+  const showCustomThrottleOpts = frequency?.notifyWhen === RuleNotifyWhen.THROTTLE;
 
   const onNotifyWhenValueChange = useCallback(
     (newValue: RuleNotifyWhenType) => {
@@ -188,7 +188,6 @@ export const RuleActionsNotifyWhen = ({
         notifyWhen: newValue,
         throttle: newThrottle ? `${newThrottle}${throttleUnit}` : null,
       });
-      // }
     },
     [onChange, throttle, throttleUnit, frequency]
   );

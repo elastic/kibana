@@ -40,11 +40,8 @@ const stringifyBodyRequest = ({
   isEdit: boolean;
 }): string => {
   try {
-    const transformedUpdateRuleBody = transformUpdateRuleBody(
-      pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody
-    );
     const request = isEdit
-      ? transformedUpdateRuleBody
+      ? transformUpdateRuleBody(pick(formData, UPDATE_FIELDS_WITH_ACTIONS) as UpdateRuleBody)
       : transformCreateRuleBody(omit(formData, 'id') as CreateRuleBody);
     return JSON.stringify(request, null, 2);
   } catch {

@@ -35,8 +35,6 @@ export async function validateActions(
 
   const errors = [];
 
-  console.log('validateActions', { actions, notifyWhen, throttle, hasRuleLevelNotifyWhen });
-
   const allActions = [...actions, ...systemActions];
   const uniqueActions = new Set(allActions.map((action) => action.uuid));
   if (uniqueActions.size < allActions.length) {
