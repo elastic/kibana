@@ -35,7 +35,8 @@
     "@kbn/deeplinks-search",
     "@kbn/deeplinks-management",
     "@kbn/serverless",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/shared-gen-ai-ui"
   ],
   "exclude": [
     "target/**/*",
