@@ -688,5 +688,38 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe.only('preview logged requests', () => {
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+        threshold: {
+          field: 'host.id',
+          value: 1, // This value generates 7 alerts with the current esArchive
+        },
+        max_signals: 5,
+      };
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).toHaveLength(1);
+        expect(requests![0].description).toBe('Threshold request to find all matches');
+        expect(requests![0].request).toContain('POST /auditbeat-*/_search?allow_no_indices=true');
+      });
+    });
   });
 };
