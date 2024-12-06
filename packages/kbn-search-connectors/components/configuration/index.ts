@@ -8,3 +8,4 @@
  */
 
 export * from './connector_configuration';
+export * from './connector_configuration_field';
