@@ -76,9 +76,9 @@ export interface TopNavConfigParams {
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.visualize) return false;
+  if (!anonymousUserCapabilities.visualize_v2) return false;
 
-  const visualize = anonymousUserCapabilities.visualize as unknown as VisualizeCapabilities;
+  const visualize = anonymousUserCapabilities.visualize_v2 as unknown as VisualizeCapabilities;
 
   return !!visualize.show;
 };

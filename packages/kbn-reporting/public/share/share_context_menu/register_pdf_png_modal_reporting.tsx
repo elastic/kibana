@@ -66,7 +66,7 @@ export const reportingExportModalProvider = ({
     const capabilityHasDashboardScreenshotReporting =
       application.capabilities.dashboard_v2?.generateScreenshot === true;
     const capabilityHasVisualizeScreenshotReporting =
-      application.capabilities.visualize?.generateScreenshot === true;
+      application.capabilities.visualize_v2?.generateScreenshot === true;
 
     if (!licenseHasScreenshotReporting) {
       return [];

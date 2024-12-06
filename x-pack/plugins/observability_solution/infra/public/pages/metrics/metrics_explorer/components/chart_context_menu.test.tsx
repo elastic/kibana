@@ -159,7 +159,7 @@ describe('MetricsExplorerChartContextMenu', () => {
     });
 
     it('should not display "Open in Visualize" when unavailble in uiCapabilities', async () => {
-      const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
+      const customUICapabilities = { ...uiCapabilities, visualize_v2: { show: false } };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const component = mountComponentWithProviders({
         timeRange,
@@ -175,7 +175,7 @@ describe('MetricsExplorerChartContextMenu', () => {
     });
 
     it('should not display anything when Visualize is disabled and there are no group bys.', async () => {
-      const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
+      const customUICapabilities = { ...uiCapabilities, visualize_v2: { show: false } };
       const onFilter = jest.fn().mockImplementation((query: string) => void 0);
       const customOptions = { ...options, groupBy: void 0 };
       const component = mountComponentWithProviders({

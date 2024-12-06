@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -150,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'VisualizationFromSavedSearch',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'Visualization',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'VisualizationFromSavedSearch',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -235,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'Visualization',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -250,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'VisualizationFromSavedSearch',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -398,7 +398,7 @@ export default function ({ getService }: FtrProviderContext) {
               title: 'Visualization',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
               hiddenType: false,
@@ -476,7 +476,7 @@ export default function ({ getService }: FtrProviderContext) {
                 icon: 'visualizeApp',
                 inAppUrl: {
                   path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
-                  uiCapabilitiesPath: 'visualize.show',
+                  uiCapabilitiesPath: 'visualize_v2.show',
                 },
                 namespaceType: 'multiple-isolated',
                 hiddenType: false,

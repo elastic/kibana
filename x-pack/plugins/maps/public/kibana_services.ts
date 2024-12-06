@@ -73,7 +73,7 @@ export const getToasts = () => coreStart.notifications.toasts;
 export const getCoreChrome = () => coreStart.chrome;
 export const getDevToolsCapabilities = () => coreStart.application.capabilities.dev_tools;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps_v2;
-export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
+export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize_v2;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getCharts = () => pluginsStart.charts;

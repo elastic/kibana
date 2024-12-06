@@ -451,7 +451,9 @@ export const LensTopNavMenu = ({
   const { AggregateQueryTopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
-  const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    isSaveable && application.capabilities.visualize_v2.save
+  );
   const savingToDashboardPermitted = Boolean(
     isSaveable && application.capabilities.dashboard_v2?.showWriteControls
   );
@@ -539,7 +541,9 @@ export const LensTopNavMenu = ({
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
-    const shareUrlEnabled = Boolean(application.capabilities.visualize.createShortUrl && hasData);
+    const shareUrlEnabled = Boolean(
+      application.capabilities.visualize_v2.createShortUrl && hasData
+    );
 
     const showShareMenu = csvEnabled || shareUrlEnabled;
     const baseMenuEntries = getLensTopNavConfig({

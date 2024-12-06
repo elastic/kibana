@@ -201,7 +201,7 @@ export function App({
   useEffect(() => {
     onAppLeave((actions) => {
       if (
-        application.capabilities.visualize.save &&
+        application.capabilities.visualize_v2.save &&
         !isLensEqualWrapper(persistedDoc) &&
         (isSaveable || persistedDoc)
       ) {
@@ -227,7 +227,7 @@ export function App({
     lastKnownDoc,
     isSaveable,
     persistedDoc,
-    application.capabilities.visualize.save,
+    application.capabilities.visualize_v2.save,
     data.query.filterManager,
     datasourceMap,
     visualizationMap,

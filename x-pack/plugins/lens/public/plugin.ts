@@ -730,7 +730,7 @@ export class LensPlugin {
         });
       },
       canUseEditor: () => {
-        return Boolean(core.application.capabilities.visualize?.show);
+        return Boolean(core.application.capabilities.visualize_v2?.show);
       },
       getXyVisTypes: async () => {
         const { visualizationSubtypes } = await import('./visualizations/xy/types');

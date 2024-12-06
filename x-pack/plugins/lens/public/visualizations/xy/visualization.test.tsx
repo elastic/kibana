@@ -104,7 +104,7 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const core = coreMock.createStart();
-set(core, 'application.capabilities.visualize.save', true);
+set(core, 'application.capabilities.visualize_v2.save', true);
 
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,

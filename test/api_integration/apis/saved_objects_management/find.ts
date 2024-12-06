@@ -268,7 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
               hiddenType: false,
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
             });
@@ -278,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
               hiddenType: false,
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'visualize.show',
+                uiCapabilitiesPath: 'visualize_v2.show',
               },
               namespaceType: 'multiple-isolated',
             });

@@ -88,7 +88,7 @@ exports[`Relationships should render dashboards normally 1`] = `
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/1",
-                "uiCapabilitiesPath": "visualize.show",
+                "uiCapabilitiesPath": "visualize_v2.show",
               },
               "title": "My Visualization Title 1",
             },
@@ -101,7 +101,7 @@ exports[`Relationships should render dashboards normally 1`] = `
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/2",
-                "uiCapabilitiesPath": "visualize.show",
+                "uiCapabilitiesPath": "visualize_v2.show",
               },
               "title": "My Visualization Title 2",
             },
@@ -306,7 +306,7 @@ exports[`Relationships should render index patterns normally 1`] = `
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/2",
-                "uiCapabilitiesPath": "visualize.show",
+                "uiCapabilitiesPath": "visualize_v2.show",
               },
               "title": "My Visualization Title",
             },
@@ -658,7 +658,7 @@ exports[`Relationships should render searches normally 1`] = `
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/app/visualize#/edit/2",
-                "uiCapabilitiesPath": "visualize.show",
+                "uiCapabilitiesPath": "visualize_v2.show",
               },
               "title": "My Visualization Title",
             },

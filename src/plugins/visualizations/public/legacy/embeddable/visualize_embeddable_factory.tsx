@@ -123,7 +123,7 @@ export class VisualizeEmbeddableFactory
   constructor(private readonly deps: VisualizeEmbeddableFactoryDeps) {}
 
   public async isEditable() {
-    return getCapabilities().visualize.save as boolean;
+    return getCapabilities().visualize_v2.save as boolean;
   }
 
   public getDisplayName() {

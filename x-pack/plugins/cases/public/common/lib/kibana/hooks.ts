@@ -196,7 +196,10 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
       },
-      visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
+      visualize: {
+        crud: !!capabilities.visualize_v2?.save,
+        read: !!capabilities.visualize_v2?.show,
+      },
       dashboard: {
         crud: !!capabilities.dashboard_v2?.createNew,
         read: !!capabilities.dashboard_v2?.show,
@@ -207,8 +210,8 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       capabilities.actions?.show,
       capabilities.dashboard_v2?.createNew,
       capabilities.dashboard_v2?.show,
-      capabilities.visualize?.save,
-      capabilities.visualize?.show,
+      capabilities.visualize_v2?.save,
+      capabilities.visualize_v2?.show,
       permissions.all,
       permissions.create,
       permissions.read,

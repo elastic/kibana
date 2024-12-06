@@ -205,7 +205,7 @@ describe('SavedObjectsTable', () => {
             icon: 'visualizeApp',
             inAppUrl: {
               path: '/edit/4',
-              uiCapabilitiesPath: 'visualize.show',
+              uiCapabilitiesPath: 'visualize_v2.show',
             },
           },
         },

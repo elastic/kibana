@@ -306,7 +306,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/edit/4",
-                "uiCapabilitiesPath": "visualize.show",
+                "uiCapabilitiesPath": "visualize_v2.show",
               },
               "title": "MyViz",
             },
