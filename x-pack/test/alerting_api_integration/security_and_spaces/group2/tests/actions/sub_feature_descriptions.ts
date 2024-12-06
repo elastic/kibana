@@ -33,8 +33,21 @@ export default function subFeatureDescriptionsTest({ getService }: FtrProviderCo
         .get('/api/actions/connector_types')
         .expect(200);
       for (const connectorType of connectorTypes) {
-        if (!connectorType.id.startsWith('test.')) {
-          expect(connectorTitles).to.include.string(connectorType.name);
+        if (
+          !connectorType.id.startsWith('test.') &&
+          !connectorTitles.includes(connectorType.name)
+        ) {
+          throw new Error(
+            `Connector type "${connectorType.name}" is not included in any of the "Actions & Connectors" sub-feature descriptions. Each new connector type must be manually added to the relevant sub-features. Please update the sub-feature descriptions in "x-pack/plugins/actions/server/feature.ts" to include "${connectorType.name}" to make this test pass.`
+          );
+        }
+      }
+
+      for (const connectorTitle of connectorTitles) {
+        if (!connectorTypes.find((o) => o.name === connectorTitle)) {
+          throw new Error(
+            `Connector type "${connectorTitle}" is included in the "Actions & Connectors" sub-feature descriptions but not registered as a connector type. Please update the sub-feature descriptions in "x-pack/plugins/actions/server/feature.ts" to remove "${connectorTitle}" to make this test pass.`
+          );
         }
       }
     });
