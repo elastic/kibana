@@ -9,12 +9,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/esql_datagrid'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/esql_datagrid',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/esql_datagrid'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/esql_datagrid',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/esql_datagrid/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/esql_datagrid/{common,public,server}/**/*.{js,ts,tsx}',
   ],
   setupFiles: ['jest-canvas-mock'],
 };

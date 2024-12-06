@@ -121,7 +121,7 @@
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentation": "packages/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
-    "esqlDataGrid": "src/plugins/esql_datagrid",
+    "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],
