@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui'
+import { useEuiTheme } from '@elastic/eui';
 
 export const useGetStatusColor = (status: string | number) => {
   const { euiTheme } = useEuiTheme();

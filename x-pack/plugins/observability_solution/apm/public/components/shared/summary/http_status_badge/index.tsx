@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiToolTip, EuiBadge, useEuiTheme } from '@elastic/eui';
+import { EuiToolTip, EuiBadge } from '@elastic/eui';
 import { statusCodes } from './status_codes';
 import { useGetStatusColor } from '../../../../utils/http_status_code_to_color';
 
@@ -18,7 +18,6 @@ export function HttpStatusBadge({ status }: HttpStatusBadgeProps) {
   const label = i18n.translate('xpack.apm.transactionDetails.statusCode', {
     defaultMessage: 'Status code',
   });
-  
   return (
     <EuiToolTip content={label}>
       <EuiBadge color={useGetStatusColor(status) || 'default'}>

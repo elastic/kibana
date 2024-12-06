@@ -95,7 +95,7 @@ export function useLayerList() {
 
   esTermSourceCountry.whereQuery = getWhereQuery(serviceName!);
 
-  const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
+  const useLayerStyle = (fieldName: string): VectorStyleDescriptor => {
     return {
       type: 'VECTOR',
       properties: {
@@ -165,7 +165,7 @@ export function useLayerList() {
       id: 'world_countries',
       tooltipProperties: [COUNTRY_NAME],
     },
-    style: getLayerStyle(TRANSACTION_DURATION_COUNTRY),
+    style: useLayerStyle(TRANSACTION_DURATION_COUNTRY),
     id: 'e8d1d974-eed8-462f-be2c-f0004b7619b2',
     label: null,
     minZoom: 0,
@@ -189,7 +189,7 @@ export function useLayerList() {
       id: 'administrative_regions_lvl2',
       tooltipProperties: ['region_iso_code', REGION_NAME],
     },
-    style: getLayerStyle(TRANSACTION_DURATION_REGION),
+    style: useLayerStyle(TRANSACTION_DURATION_REGION),
     id: '0e936d41-8765-41c9-97f0-05e166391366',
     label: null,
     minZoom: 3,
