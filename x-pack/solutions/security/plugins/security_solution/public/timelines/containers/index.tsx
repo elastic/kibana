@@ -378,9 +378,7 @@ export const useTimelineEventsHandler = ({
 
       const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
 
-      const shouldResetPagination = !areSearchParamsSame;
-
-      const newActiveBatch = shouldResetPagination ? 0 : activeBatch;
+      const newActiveBatch = !areSearchParamsSame ? 0 : activeBatch;
 
       /*
        * optimization to avoid unnecessary network request when a field
@@ -408,7 +406,7 @@ export const useTimelineEventsHandler = ({
         pagination: {
           /*
            *
-           * fetches data cumulately for the batches upto the activeBatch
+           * fetches data cumulatively for the batches upto the activeBatch
            * This is needed because, we want to get incremental data as well for the old batches
            * For example, newly requested fields
            *

@@ -52,8 +52,6 @@ import { NotesFlyout } from '../../properties/notes_flyout';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 
-const ALL_FIELDS = ['*'];
-
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
   prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
@@ -175,25 +173,22 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { augmentedColumnHeaders, defaultColumns, timelineQueryFieldsFromColumns } =
     useTimelineColumns(columns);
 
-  const [
-    dataLoadingState,
-    { events, inspect, totalCount, loadNextBatch: loadNextEventBatch, refreshedAt, refetch },
-  ] = useTimelineEvents({
-    dataViewId,
-    endDate: end,
-    fields: timelineQueryFieldsFromColumns,
-    filterQuery: combinedQueries?.filterQuery,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    language: kqlQuery.language,
-    limit: sampleSize,
-    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
-    skip: !canQueryTimeline,
-    sort: timelineQuerySortField,
-    startDate: start,
-    timerangeKind,
-    tab: 'query',
-  });
+  const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
+    useTimelineEvents({
+      dataViewId,
+      endDate: end,
+      fields: timelineQueryFieldsFromColumns,
+      filterQuery: combinedQueries?.filterQuery,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      language: kqlQuery.language,
+      limit: sampleSize,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      skip: !canQueryTimeline,
+      sort: timelineQuerySortField,
+      startDate: start,
+      timerangeKind,
+    });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
@@ -386,7 +381,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         dataLoadingState={dataLoadingState}
         totalCount={isBlankTimeline ? 0 : totalCount}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        onFetchMoreRecords={loadNextEventBatch}
+        onFetchMoreRecords={loadNextBatch}
         activeTab={activeTab}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
