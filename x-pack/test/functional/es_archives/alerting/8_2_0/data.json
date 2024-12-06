@@ -10800,7 +10800,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover.all",
+    "id": "application-privilege_kibana-.kibana:feature_discover_v2.all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -10888,7 +10888,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover.all",
+      "name": "feature_discover_v2.all",
       "type": "application-privilege"
     }
   }
@@ -11159,7 +11159,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover.read",
+    "id": "application-privilege_kibana-.kibana:feature_discover_v2.read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -11205,7 +11205,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover.read",
+      "name": "feature_discover_v2.read",
       "type": "application-privilege"
     }
   }
@@ -20495,7 +20495,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover.minimal_all",
+    "id": "application-privilege_kibana-.kibana:feature_discover_v2.minimal_all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20562,7 +20562,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover.minimal_all",
+      "name": "feature_discover_v2.minimal_all",
       "type": "application-privilege"
     }
   }
@@ -20715,7 +20715,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_discover.minimal_read",
+    "id": "application-privilege_kibana-.kibana:feature_discover_v2.minimal_read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20761,7 +20761,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_discover.minimal_read",
+      "name": "feature_discover_v2.minimal_read",
       "type": "application-privilege"
     }
   }
