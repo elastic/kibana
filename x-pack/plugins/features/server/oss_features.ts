@@ -419,8 +419,7 @@ const getBaseDiscoverFeature = ({
         ...(version === 'v1' && {
           replacedBy: [
             { feature: 'discover_v2', privileges: ['read'] },
-            // TODO: should be read when available
-            { feature: 'savedQueryManagement', privileges: ['all'] },
+            { feature: 'savedQueryManagement', privileges: ['read'] },
           ],
         }),
       },
@@ -448,6 +447,9 @@ const getBaseDiscoverFeature = ({
                   read: [],
                 },
                 ui: ['createShortUrl'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'discover_v2', privileges: ['url_create'] }],
+                }),
               },
             ],
           },
@@ -479,6 +481,9 @@ const getBaseDiscoverFeature = ({
                   kibana: ['search_sessions'],
                 },
                 api: ['store_search_session'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'discover_v2', privileges: ['store_search_session'] }],
+                }),
               },
             ],
           },
@@ -547,8 +552,7 @@ const getBaseVisualizeFeature = ({
         ...(version === 'v1' && {
           replacedBy: [
             { feature: 'visualize_v2', privileges: ['read'] },
-            // TODO: should be read when available
-            { feature: 'savedQueryManagement', privileges: ['all'] },
+            { feature: 'savedQueryManagement', privileges: ['read'] },
           ],
         }),
       },
@@ -576,6 +580,9 @@ const getBaseVisualizeFeature = ({
                   read: [],
                 },
                 ui: ['createShortUrl'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'visualize_v2', privileges: ['url_create'] }],
+                }),
               },
             ],
           },
@@ -664,8 +671,7 @@ const getBaseDashboardFeature = ({
         ...(version === 'v1' && {
           replacedBy: [
             { feature: 'dashboard_v2', privileges: ['read'] },
-            // TODO: should be read when available
-            { feature: 'savedQueryManagement', privileges: ['all'] },
+            { feature: 'savedQueryManagement', privileges: ['read'] },
           ],
         }),
       },
@@ -693,6 +699,9 @@ const getBaseDashboardFeature = ({
                   read: [],
                 },
                 ui: ['createShortUrl'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'dashboard_v2', privileges: ['url_create'] }],
+                }),
               },
             ],
           },
@@ -724,6 +733,9 @@ const getBaseDashboardFeature = ({
                   kibana: ['search_sessions'],
                 },
                 api: ['store_search_session'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'dashboard_v2', privileges: ['store_search_session'] }],
+                }),
               },
             ],
           },

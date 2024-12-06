@@ -220,8 +220,7 @@ export class MapsPlugin implements Plugin {
             ...(version === 'v1' && {
               replacedBy: [
                 { feature: 'maps_v2', privileges: ['read'] },
-                // TODO: should be read when available
-                { feature: 'savedQueryManagement', privileges: ['all'] },
+                { feature: 'savedQueryManagement', privileges: ['read'] },
               ],
             }),
           },
