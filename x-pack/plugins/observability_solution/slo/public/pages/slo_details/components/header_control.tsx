@@ -22,9 +22,9 @@ import { SloDeleteModal } from '../../../components/slo/delete_confirmation_moda
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useResetSlo } from '../../../hooks/use_reset_slo';
-import { useKibana } from '../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
@@ -32,11 +32,10 @@ import { useGetQueryParams } from '../hooks/use_get_query_params';
 import { useSloActions } from '../hooks/use_slo_actions';
 
 export interface Props {
-  slo?: SLOWithSummaryResponse;
-  isLoading: boolean;
+  slo: SLOWithSummaryResponse;
 }
 
-export function HeaderControl({ isLoading, slo }: Props) {
+export function HeaderControl({ slo }: Props) {
   const {
     application: { navigateToUrl, capabilities },
     http: { basePath },
@@ -58,10 +57,10 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
-    sloIds: slo ? [slo.id] : undefined,
+    sloIds: [slo.id],
   });
 
-  const rules = slo ? rulesBySlo?.[slo?.id] ?? [] : [];
+  const rules = rulesBySlo?.[slo.id] ?? [];
 
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
@@ -92,10 +91,6 @@ export function HeaderControl({ isLoading, slo }: Props) {
   });
 
   const handleNavigateToApm = () => {
-    if (!slo) {
-      return undefined;
-    }
-
     const url = convertSliApmParamsToApmAppDeeplinkUrl(slo);
     if (url) {
       navigateToUrl(basePath.prepend(url));
@@ -105,10 +100,8 @@ export function HeaderControl({ isLoading, slo }: Props) {
   const navigateToClone = useCloneSlo();
 
   const handleClone = async () => {
-    if (slo) {
-      setIsPopoverOpen(false);
-      navigateToClone(slo);
-    }
+    setIsPopoverOpen(false);
+    navigateToClone(slo);
   };
 
   const handleDelete = () => {
@@ -140,11 +133,9 @@ export function HeaderControl({ isLoading, slo }: Props) {
   };
 
   const handleResetConfirm = async () => {
-    if (slo) {
-      await resetSlo({ id: slo.id, name: slo.name });
-      removeResetQueryParam();
-      setResetConfirmationModalOpen(false);
-    }
+    await resetSlo({ id: slo.id, name: slo.name });
+    removeResetQueryParam();
+    setResetConfirmationModalOpen(false);
   };
 
   const handleResetCancel = () => {
@@ -182,8 +173,6 @@ export function HeaderControl({ isLoading, slo }: Props) {
             iconType="arrowDown"
             iconSize="s"
             onClick={handleActionsClick}
-            isLoading={isLoading}
-            disabled={isLoading}
           >
             {i18n.translate('xpack.slo.sloDetails.headerControl.actions', {
               defaultMessage: 'Actions',
@@ -315,7 +304,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
         refetchRules={refetchRules}
       />
 
-      {slo && isRuleFlyoutVisible ? (
+      {isRuleFlyoutVisible ? (
         <AddRuleFlyout
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
@@ -326,11 +315,11 @@ export function HeaderControl({ isLoading, slo }: Props) {
         />
       ) : null}
 
-      {slo && isDeleteConfirmationModalOpen ? (
+      {isDeleteConfirmationModalOpen ? (
         <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onSuccess={handleDeleteConfirm} />
       ) : null}
 
-      {slo && isResetConfirmationModalOpen ? (
+      {isResetConfirmationModalOpen ? (
         <SloResetConfirmationModal
           slo={slo}
           onCancel={handleResetCancel}
