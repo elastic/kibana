@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [require.resolve('./ftr/one_discover/context_awareness')],
+  testFiles: [require.resolve('./ftr/discover/context_awareness')],
   junit: {
     reportName:
       'Serverless Security Discover Context Awareness Functional Tests - Security Profiles',
