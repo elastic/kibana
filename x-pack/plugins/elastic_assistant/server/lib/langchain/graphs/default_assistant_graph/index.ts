@@ -35,6 +35,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   esClient,
   inference,
   langChainMessages,
+  llmTasks,
   llmType,
   isOssModel,
   logger: parentLogger,
@@ -106,6 +107,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     inference,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
+    llmTasks,
     logger,
     onNewReplacements,
     replacements,
@@ -171,6 +173,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
+    signal: abortSignal,
     tools,
     replacements,
   });
