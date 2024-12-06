@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { capitalize } from 'lodash';
-import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -76,6 +76,26 @@ export const AlertsDetailsTable = memo(
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
+    const [sortField, setSortField] = useState<ContextualFlyoutAlertsField>('ruleName');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    const formatName = (name: string) => {
+      if (name === 'ruleName') return 'kibana.alert.rule.name';
+      else if (name === 'severity') return 'kibana.alert.severity';
+      else return 'kibana.alert.workflow_status';
+    };
+    console.log(formatName(sortField) + ' : ' + sortDirection);
+    const sorting: EuiTableSortingType<ContextualFlyoutAlertsField> = {
+      sort: {
+        field: sortField,
+        direction: sortDirection,
+      },
+    };
+
+    const obj: { [key: string]: string } = {};
+    obj[formatName(sortField)] = sortDirection;
+console.log(sortField)
+console.log(sortDirection)
     const alertsPagination = (alerts: ContextualFlyoutAlertsField[]) => {
       let pageOfItems;
 
@@ -124,12 +144,34 @@ export const AlertsDetailsTable = memo(
       color: getSeverityColor(key),
       filter: () => {
         setCurrentFilter(key);
-        setQuery(buildEntityAlertsQuery(field, to, from, value, 500, key));
+        setQuery(
+          buildEntityAlertsQuery(
+            field,
+            to,
+            from,
+            value,
+            500,
+            key,
+            formatName(sortField),
+            sortDirection
+          )
+        );
       },
       isCurrentFilter: currentFilter === key,
       reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         setCurrentFilter('');
-        setQuery(buildEntityAlertsQuery(field, to, from, value, 500, ''));
+        setQuery(
+          buildEntityAlertsQuery(
+            field,
+            to,
+            from,
+            value,
+            500,
+            '',
+            formatName(sortField),
+            sortDirection
+          )
+        );
         event?.stopPropagation();
       },
     }));
@@ -156,11 +198,28 @@ export const AlertsDetailsTable = memo(
       pageSizeOptions: [10, 25, 100],
     };
 
-    const onTableChange = ({ page }: Criteria<ContextualFlyoutAlertsField>) => {
+    const onTableChange = ({ page, sort }: Criteria<ContextualFlyoutAlertsField>) => {
       if (page) {
         const { index, size } = page;
         setPageIndex(index);
         setPageSize(size);
+      }
+      if (sort) {
+        const { field: fieldSort, direction } = sort;
+        setSortField(fieldSort);
+        setSortDirection(direction);
+        setQuery(
+          buildEntityAlertsQuery(
+            field,
+            to,
+            from,
+            value,
+            500,
+            '',
+            formatName(sortField),
+            sortDirection
+          )
+        );
       }
     };
 
@@ -205,6 +264,7 @@ export const AlertsDetailsTable = memo(
           }
         ),
         width: '55%',
+        sortable: true,
       },
       {
         field: 'severity',
@@ -220,6 +280,7 @@ export const AlertsDetailsTable = memo(
           }
         ),
         width: '20%',
+        sortable: true,
       },
       {
         field: 'status',
@@ -231,6 +292,7 @@ export const AlertsDetailsTable = memo(
           }
         ),
         width: '20%',
+        sortable: true,
       },
     ];
 
@@ -281,6 +343,7 @@ export const AlertsDetailsTable = memo(
             pagination={pagination}
             onChange={onTableChange}
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
+            sorting={sorting}
           />
         </EuiPanel>
       </>

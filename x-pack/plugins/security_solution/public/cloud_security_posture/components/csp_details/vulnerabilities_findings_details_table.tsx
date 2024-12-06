@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useState } from 'react';
-import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -57,13 +57,29 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
 
   const [currentFilter, setCurrentFilter] = useState<string>('');
 
+  const formatName = (name: string) => {
+    if (name === 'result') return 'result.evaluation';
+    else return 'rule.name';
+  };
+
+  const [sortField, setSortField] = useState<string>('Alpha');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const sorting: EuiTableSortingType<VulnerabilitiesFindingDetailFields> = {
+    sort: {
+      field: sortField,
+      direction: sortDirection,
+    },
+  };
+
   const { data } = useVulnerabilitiesFindings({
     query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
     sort: [],
     enabled: true,
     pageSize: 1,
   });
-
+console.log(sortField)
+console.log(sortDirection)
   const { counts } = useHasVulnerabilities('host.name', value);
 
   const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
@@ -96,11 +112,16 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     pageSizeOptions: [10, 25, 100],
   };
 
-  const onTableChange = ({ page }: Criteria<VulnerabilitiesFindingDetailFields>) => {
+  const onTableChange = ({ page, sort }: Criteria<VulnerabilitiesFindingDetailFields>) => {
     if (page) {
       const { index, size } = page;
       setPageIndex(index);
       setPageSize(size);
+    }
+    if (sort) {
+      const { field: fieldSort, direction } = sort;
+      setSortField(fieldSort);
+      setSortDirection(direction);
     }
   };
 
@@ -171,6 +192,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         { defaultMessage: 'Vulnerability' }
       ),
       width: '20%',
+      sortable: true,
     },
     {
       field: 'vulnerability',
@@ -187,6 +209,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         { defaultMessage: 'CVSS' }
       ),
       width: '15%',
+      sortable: true,
     },
     {
       field: 'vulnerability',
@@ -204,6 +227,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         { defaultMessage: 'Severity' }
       ),
       width: '20%',
+      sortable: true,
     },
     {
       field: 'vulnerability',
@@ -215,9 +239,10 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
         { defaultMessage: 'Package' }
       ),
       width: '40%',
+      sortable: true,
     },
   ];
-
+console.log(pageOfItems)
   return (
     <>
       <EuiPanel hasShadow={false}>
@@ -248,6 +273,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
           pagination={pagination}
           onChange={onTableChange}
           data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
+          sorting={sorting}
         />
       </EuiPanel>
     </>
