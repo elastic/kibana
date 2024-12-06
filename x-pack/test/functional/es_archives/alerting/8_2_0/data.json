@@ -20205,7 +20205,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize.all",
+    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20302,7 +20302,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize.all",
+      "name": "feature_visualize_v2.all",
       "type": "application-privilege"
     }
   }
@@ -20311,7 +20311,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize.minimal_all",
+    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.minimal_all",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20401,7 +20401,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize.minimal_all",
+      "name": "feature_visualize_v2.minimal_all",
       "type": "application-privilege"
     }
   }
@@ -20571,7 +20571,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize.minimal_read",
+    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.minimal_read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20634,7 +20634,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize.minimal_read",
+      "name": "feature_visualize_v2.minimal_read",
       "type": "application-privilege"
     }
   }
@@ -20643,7 +20643,7 @@
 {
   "type": "doc",
   "value": {
-    "id": "application-privilege_kibana-.kibana:feature_visualize.read",
+    "id": "application-privilege_kibana-.kibana:feature_visualize_v2.read",
     "index": ".security-7",
     "source": {
       "actions": [
@@ -20706,7 +20706,7 @@
       "application": "kibana-.kibana",
       "metadata": {
       },
-      "name": "feature_visualize.read",
+      "name": "feature_visualize_v2.read",
       "type": "application-privilege"
     }
   }

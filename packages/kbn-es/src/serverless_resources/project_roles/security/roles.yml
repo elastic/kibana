@@ -55,7 +55,7 @@ viewer:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
         - feature_dataQuality.all
       resources: '*'
   run_as: []
@@ -135,7 +135,7 @@ editor:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
   run_as: []
 
@@ -187,7 +187,7 @@ t1_analyst:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 t2_analyst:
@@ -242,7 +242,7 @@ t2_analyst:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 t3_analyst:
@@ -312,7 +312,7 @@ t3_analyst:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 threat_intelligence_analyst:
@@ -374,7 +374,7 @@ threat_intelligence_analyst:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 rule_author:
@@ -442,7 +442,7 @@ rule_author:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 soc_manager:
@@ -516,7 +516,7 @@ soc_manager:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 detections_admin:
@@ -575,7 +575,7 @@ detections_admin:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 platform_engineer:
@@ -637,7 +637,7 @@ platform_engineer:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 endpoint_operations_analyst:
@@ -709,7 +709,7 @@ endpoint_operations_analyst:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 endpoint_policy_manager:
@@ -784,7 +784,7 @@ endpoint_policy_manager:
         - feature_discover_v2.all
         - feature_dashboard.all
         - feature_maps.all
-        - feature_visualize.all
+        - feature_visualize_v2.all
       resources: '*'
 
 # admin role defined in elasticsearch controller
