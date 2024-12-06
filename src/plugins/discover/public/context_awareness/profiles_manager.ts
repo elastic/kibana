@@ -238,7 +238,6 @@ export class ProfilesManager {
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
-    this.ebtManager.updateProfilesContextWith(dscProfiles);
     this.ebtManager.trackContextualProfileResolvedEvent({
       profileLevel: ContextualProfileLevel.rootLevel,
       profileId: rootContextProfileId,
@@ -247,6 +246,8 @@ export class ProfilesManager {
       profileLevel: ContextualProfileLevel.dataSourceLevel,
       profileId: dataSourceContextProfileId,
     });
+
+    this.ebtManager.updateProfilesContextWith(dscProfiles);
   }
 }
 

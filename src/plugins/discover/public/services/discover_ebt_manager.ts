@@ -154,13 +154,18 @@ export class DiscoverEBTManager {
     }
   }
 
-  public enableContext() {
+  public onDiscoverAppMounted() {
     this.isCustomContextEnabled = true;
   }
 
-  public disableAndResetContext() {
+  public onDiscoverAppUnmounted() {
     this.updateProfilesContextWith([]);
     this.isCustomContextEnabled = false;
+    this.lastResolvedContextProfiles = {
+      [ContextualProfileLevel.rootLevel]: undefined,
+      [ContextualProfileLevel.dataSourceLevel]: undefined,
+      [ContextualProfileLevel.documentLevel]: undefined,
+    };
   }
 
   public updateProfilesContextWith(discoverProfiles: DiscoverEBTContextProps['discoverProfiles']) {

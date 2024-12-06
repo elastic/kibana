@@ -95,7 +95,7 @@ describe('DiscoverEBTManager', () => {
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
@@ -112,7 +112,7 @@ describe('DiscoverEBTManager', () => {
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
 
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
@@ -140,14 +140,14 @@ describe('DiscoverEBTManager', () => {
         shouldInitializeCustomContext: true,
         shouldInitializeCustomEvents: false,
       });
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
-      discoverEBTContextManager.disableAndResetContext();
+      discoverEBTContextManager.onDiscoverAppUnmounted();
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
-      discoverEBTContextManager.enableContext();
+      discoverEBTContextManager.onDiscoverAppMounted();
       discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
     });
