@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
+import { openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
 import { DashboardApi } from '../../../dashboard_api/types';
 
 export function addFromLibrary(dashboardApi: DashboardApi) {
   dashboardApi.openOverlay(
-    openAddPanelFlyout({
+    openAddFromLibraryFlyout({
       container: dashboardApi,
-      onAddPanel: (id: string) => {
-        dashboardApi.setScrollToPanelId(id);
-        dashboardApi.setHighlightPanelId(id);
-      },
       onClose: () => {
         dashboardApi.clearOverlays();
       },
