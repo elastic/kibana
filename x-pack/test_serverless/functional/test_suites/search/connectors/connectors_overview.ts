@@ -24,11 +24,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await pageObjects.svlSearchConnectorsPage.helpers.deleteAllConnectors();
 
-      await pageObjects.svlCommonPage.loginWithRole('developer');
+      await pageObjects.svlCommonPage.loginWithRole('admin');
+    });
 
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'serverlessConnectors',
-      });
+    it('has embedded console', async () => {
+      await pageObjects.common.navigateToApp('serverlessConnectors');
+      await testHasEmbeddedConsole(pageObjects);
     });
 
     it('Connector app is loaded and has no connectors', async () => {
@@ -43,9 +44,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         undefined,
         3
       );
-    });
-    it.skip('has embedded console', async () => {
-      await testHasEmbeddedConsole(pageObjects);
     });
 
     describe('create and configure connector', () => {
