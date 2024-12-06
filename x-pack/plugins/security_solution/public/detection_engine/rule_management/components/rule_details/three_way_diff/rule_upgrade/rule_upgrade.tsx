@@ -7,7 +7,6 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { ThreeWayDiff } from '../../../../../../../common/api/detection_engine';
 import {
   FieldUpgradeState,
   type RuleUpgradeState,
@@ -40,8 +39,7 @@ export const RuleUpgrade = memo(function RuleUpgrade({
       <EuiSpacer size="s" />
       <RuleUpgradeInfoBar
         numOfFieldsWithUpdates={numOfFieldsWithUpdates}
-        numOfSolvableConflicts={numOfSolvableConflicts}
-        numOfNonSolvableConflicts={numOfNonSolvableConflicts}
+        numOfConflicts={numOfSolvableConflicts + numOfNonSolvableConflicts}
       />
       <EuiSpacer size="s" />
       <RuleUpgradeCallout
@@ -64,14 +62,7 @@ export const RuleUpgrade = memo(function RuleUpgrade({
 });
 
 function calcNumOfFieldsWithUpdates(ruleUpgradeState: RuleUpgradeState): number {
-  const fieldsDiffEntries: Array<[string, ThreeWayDiff<unknown>]> = Object.entries(
-    ruleUpgradeState.diff.fields
-  );
-  const fieldsUpgradeState = ruleUpgradeState.fieldsUpgradeState;
-
-  return fieldsDiffEntries.filter(
-    ([fieldName, fieldDiff]) => Boolean(fieldsUpgradeState[fieldName]) && fieldDiff.has_update
-  ).length;
+  return Object.keys(ruleUpgradeState.fieldsUpgradeState).length;
 }
 
 function calcNumOfSolvableConflicts(ruleUpgradeState: RuleUpgradeState): number {

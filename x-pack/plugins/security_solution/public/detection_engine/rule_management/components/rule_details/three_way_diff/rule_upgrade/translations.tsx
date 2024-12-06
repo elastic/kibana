@@ -19,19 +19,11 @@ export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
   />
 );
 
-export const NUM_OF_SOLVED_CONFLICTS = (count: number) => (
+export const NUM_OF_CONFLICTS = (count: number) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfSolvableConflicts"
-    defaultMessage="{count} solved {count, plural, one {conflict} other {conflicts}}"
-    values={{ count: <strong>{count}</strong> }}
-  />
-);
-
-export const NUM_OF_UNSOLVED_CONFLICTS = (count: number) => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfNonSolvableConflicts"
-    defaultMessage="{count} unsolved {count, plural, one {conflict} other {conflicts}}"
-    values={{ count: <strong>{count}</strong> }}
+    defaultMessage="{countValue} {count, plural, one {conflict} other {conflicts}}"
+    values={{ countValue: <strong>{count}</strong>, count }}
   />
 );
 
@@ -74,52 +66,29 @@ export const UPGRADE_STATUS = i18n.translate(
   }
 );
 
-export const RULE_HAS_NON_SOLVABLE_AND_SOLVABLE_CONFLICTS = (
-  numOfNonSolvableConflicts: number,
-  numOfSolvableConflicts: number
-) =>
+export const RULE_HAS_CONFLICTS = (count: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSolvableAndNonSolvableConflicts',
-    {
-      values: { numOfNonSolvableConflicts, numOfSolvableConflicts },
-      defaultMessage:
-        '{numOfNonSolvableConflicts} {numOfNonSolvableConflicts, plural, one {field has an unsolved conflict} other {fields have unsolved conflicts}} and {numOfSolvableConflicts} {numOfSolvableConflicts, plural, one {field has a solved conflict} other {fields have solved conflicts}}. Please review and provide a final update.',
-    }
-  );
-
-export const RULE_HAS_NON_SOLVABLE_CONFLICTS = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasNonSolvableConflicts',
+    'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasConflicts',
     {
       values: { count },
       defaultMessage:
-        '{count} {count, plural, one {field has an unsolved conflict} other {fields have unsolved conflicts}}. Please review and provide a final update.',
+        '{count} {count, plural, one {field has a conflict} other {fields have conflicts}}. Please review and provide a final update.',
     }
   );
 
-export const RULE_HAS_NON_SOLVABLE_CONFLICTS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasNonSolvableConflictsDescription',
-  {
-    defaultMessage:
-      'Please provide an input for the unsolved conflict. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
-  }
-);
-
-export const RULE_HAS_SOLVABLE_CONFLICTS = (count: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSolvableConflicts',
-    {
-      values: { count },
-      defaultMessage:
-        '{count} {count, plural, one {field has a solved conflict} other {fields have solved conflicts}}. Please review the final update.',
-    }
-  );
-
-export const RULE_HAS_SOLVABLE_CONFLICTS_DESCRIPTION = i18n.translate(
+export const RULE_HAS_SOFT_CONFLICTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSolvableConflictsDescription',
   {
     defaultMessage:
-      'Please review and accept solved conflicts. You can also keep the current without the updates, or accept the Elastic update but lose your modifications.',
+      'Please review and accept conflicts. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
+  }
+);
+
+export const RULE_HAS_HARD_CONFLICTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasNonSolvableConflictsDescription',
+  {
+    defaultMessage:
+      'Please provide an input for the conflicts. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
   }
 );
 
