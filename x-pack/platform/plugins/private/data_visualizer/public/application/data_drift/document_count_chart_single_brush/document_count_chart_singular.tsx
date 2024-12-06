@@ -38,7 +38,7 @@ import {
 } from './single_brush';
 
 // TODO Consolidate with similar component `DocumentCountChartWithBrush` in
-// x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx
+// x-pack/packages/private/ml/aiops_components/src/document_count_chart/document_count_chart.tsx
 
 declare global {
   interface Window {

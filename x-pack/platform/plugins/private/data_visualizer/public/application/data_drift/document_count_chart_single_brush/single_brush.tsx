@@ -15,7 +15,7 @@ import * as d3Transition from 'd3-transition';
 import { useEuiTheme } from '@elastic/eui';
 
 // TODO Consolidate with similar component `DualBrush` in
-// x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx
+// x-pack/packages/private/ml/aiops_components/src/dual_brush/dual_brush.tsx
 
 const { brush, brushSelection, brushX } = d3Brush;
 const { scaleLinear } = d3Scale;

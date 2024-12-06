@@ -150,7 +150,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
   }, [documentStats, dispatch, earliest, intervalMs, latest]);
 
   useEffect(
-    // TODO: Consolidate this hook/function with the one in `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx`
+    // TODO: Consolidate this hook/function with the one in `x-pack/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx`
     function clearFiltersOnLeave() {
       return () => {
         // We want to clear all filters that have not been pinned globally
