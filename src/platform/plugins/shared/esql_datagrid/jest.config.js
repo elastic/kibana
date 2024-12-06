@@ -11,7 +11,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/esql_datagrid'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/esql_datagrid',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/esql_datagrid',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/shared/esql_datagrid/{common,public,server}/**/*.{js,ts,tsx}',

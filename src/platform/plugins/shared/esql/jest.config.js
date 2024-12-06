@@ -13,6 +13,8 @@ module.exports = {
   roots: ['<rootDir>/src/platform/plugins/shared/esql'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/esql',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/esql/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/esql/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
   setupFiles: ['jest-canvas-mock'],
 };
