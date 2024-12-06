@@ -21,7 +21,7 @@ import { AssistantAvailability } from '../../assistant_context/types';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
-  isServerless?: boolean
+  isServerless?: boolean;
   navControls?: ChromeNavControls;
   children: React.ReactNode;
   providerContext?: Partial<AssistantProviderProps>;
@@ -66,7 +66,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => { },
+      error: () => {},
     },
   });
 

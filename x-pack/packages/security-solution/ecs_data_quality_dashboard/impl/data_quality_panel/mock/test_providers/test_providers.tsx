@@ -36,7 +36,7 @@ import {
 interface TestExternalProvidersProps {
   children: React.ReactNode;
   navControls?: ChromeNavControls;
-  isServerless?: boolean
+  isServerless?: boolean;
 }
 
 window.scrollTo = jest.fn();
@@ -45,7 +45,7 @@ window.scrollTo = jest.fn();
 const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
   children,
   navControls = chromeServiceMock.createStartContract().navControls,
-  isServerless = false
+  isServerless = false,
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
@@ -68,7 +68,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => { },
+      error: () => {},
     },
   });
 

@@ -19,7 +19,7 @@ interface Props {
   hasAssistantPrivilege: UseAssistantContext['assistantAvailability']['hasAssistantPrivilege'];
   navControls: ChromeNavControls;
   showAssistantOverlay: UseAssistantContext['showAssistantOverlay'];
-  isServerless: boolean
+  isServerless: boolean;
 }
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -39,7 +39,7 @@ export const AssistantNavLink: FC<Props> = ({
   showAssistantOverlay,
   hasAssistantPrivilege,
   navControls,
-  isServerless
+  isServerless,
 }) => {
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
 
@@ -67,7 +67,7 @@ export const AssistantNavLink: FC<Props> = ({
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton
+  const EuiButtonBasicOrEmpty = isServerless ? EuiButtonEmpty : EuiButton;
 
   return (
     <InPortal node={portalNode}>

@@ -195,7 +195,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
             await createBasePrompts(notifications, http);
           }
           // eslint-disable-next-line no-empty
-        } catch (e) { }
+        } catch (e) {}
       }
     });
     createSecurityPrompts();
