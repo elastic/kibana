@@ -168,7 +168,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   useEffect(() => {
     if (!loadExplorerDataConfig || loadExplorerDataConfig?.selectedCells === undefined) return;
-    // TODO: Find other way to set loading state as it causes unnecessary re-renders
+    // TODO: Find other way to set loading state as it causes unnecessary re-renders - handle it in anomaly_explorer_common_state
     setExplorerState((prevState) => ({ ...prevState, loading: true }));
     loadExplorerData(loadExplorerDataConfig);
     // eslint-disable-next-line react-hooks/exhaustive-deps

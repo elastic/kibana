@@ -298,6 +298,11 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyExplorerCommonStateService.getSelectedJobs()
   );
 
+  const selectedGroups = useObservable(
+    anomalyExplorerCommonStateService.getSelectedGroups$(),
+    anomalyExplorerCommonStateService.getSelectedGroups()
+  );
+
   const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);
 
   const applyFilter = useCallback(
@@ -434,15 +439,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     );
 
   const handleJobSelectionChange = useCallback(
-    ({
-      jobIds,
-      groups,
-      time,
-    }: {
-      jobIds: string[];
-      groups: string[];
-      time?: { from: string; to: string };
-    }) => {
+    ({ jobIds, time }: { jobIds: string[]; time?: { from: string; to: string } }) => {
       anomalyExplorerCommonStateService.setSelectedJobs(jobIds, time);
     },
     [anomalyExplorerCommonStateService]
@@ -454,6 +451,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     dateFormatTz: getDateFormatTz(uiSettings),
     onSelectionChange: handleJobSelectionChange,
     selectedJobIds,
+    selectedGroups,
   } as unknown as JobSelectorProps;
 
   const noJobsSelected = !selectedJobs || selectedJobs.length === 0;

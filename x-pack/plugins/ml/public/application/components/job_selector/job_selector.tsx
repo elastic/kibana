@@ -79,11 +79,9 @@ export interface JobSelectorProps {
   timeseriesOnly: boolean;
   onSelectionChange?: ({
     jobIds,
-    groups,
     time,
   }: {
     jobIds: string[];
-    groups: GroupObj[];
     time?: { from: string; to: string };
   }) => void;
   selectedJobIds?: string[];
@@ -108,10 +106,6 @@ export function JobSelector({
     true
   );
 
-  const [maps, setMaps] = useState<JobSelectionMaps>({
-    groupsMap: {},
-    jobsMap: {},
-  });
   const [selectedIds, setSelectedIds] = useState(
     mergeSelection(selectedJobIds, selectedGroups, singleSelection)
   );
@@ -138,10 +132,10 @@ export function JobSelector({
   }
 
   const applySelection: JobSelectorFlyoutProps['onSelectionConfirmed'] = useCallback(
-    ({ newSelection, jobIds, groups: newGroups, time }) => {
+    ({ newSelection, jobIds, time }) => {
       setSelectedIds(newSelection);
 
-      onSelectionChange?.({ jobIds, groups: newGroups, time });
+      onSelectionChange?.({ jobIds, time });
       closeFlyout();
     },
     [onSelectionChange]
@@ -162,9 +156,9 @@ export function JobSelector({
               >
                 <IdBadges
                   limit={BADGE_LIMIT}
-                  maps={maps}
                   onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
-                  selectedIds={selectedIds}
+                  selectedJobIds={selectedJobIds}
+                  selectedGroups={selectedGroups}
                   showAllBarBadges={showAllBarBadges}
                 />
               </EuiFlexGroup>
@@ -218,9 +212,7 @@ export function JobSelector({
             singleSelection={singleSelection}
             selectedIds={selectedIds}
             onSelectionConfirmed={applySelection}
-            onJobsFetched={setMaps}
             onFlyoutClose={closeFlyout}
-            maps={maps}
             applyTimeRangeConfig={applyTimeRangeConfig}
             onTimeRangeConfigChange={setApplyTimeRangeConfig}
           />

@@ -192,17 +192,15 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const handleJobSelectionChange = useCallback(
     ({
       jobIds,
-      groups,
       time,
     }: {
       jobIds: string[];
-      groups: string[];
+
       time?: { from: string; to: string };
     }) => {
       setGlobalState({
         ml: {
           jobIds,
-          groups,
         },
         ...(time !== undefined ? { time } : {}),
       });

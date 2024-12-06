@@ -18,6 +18,7 @@ import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locato
 import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
 import { StateService } from '../services/state_service';
 import type { MlJobService } from '../services/job_service';
+import type { GroupObj } from '../components/job_selector/job_selector';
 
 export interface AnomalyExplorerState {
   selectedJobs: ExplorerJob[];
@@ -34,7 +35,7 @@ export type FilterSettings = Required<
  */
 export class AnomalyExplorerCommonStateService extends StateService {
   private _selectedJobs$ = new BehaviorSubject<ExplorerJob[]>([]);
-  private _selectedGroups$ = new BehaviorSubject<string[] | undefined>(undefined);
+  private _selectedGroups$ = new BehaviorSubject<GroupObj[]>([]);
   private _filterSettings$ = new BehaviorSubject<FilterSettings>(this._getDefaultFilterSettings());
   private _invalidJobIds$ = new BehaviorSubject<string[]>([]);
 
@@ -95,23 +96,47 @@ export class AnomalyExplorerCommonStateService extends StateService {
     if (!selectedJobIds || selectedJobIds.length === 0) {
       this._selectedJobs$.next([]);
       this._invalidJobIds$.next([]);
+      this._selectedGroups$.next([]);
       return;
     }
-    const selectedJobs = this.mlJobsService.jobs.filter(
-      (j) => selectedJobIds.includes(j.job_id) || j.groups?.some((g) => selectedJobIds.includes(g))
+    // TODO: We are using mlJobService jobs, which has stale data.
+
+    const groupIds = selectedJobIds.filter((id) =>
+      this.mlJobsService.jobs.some((job) => job.groups?.includes(id))
     );
+
+    const selectedGroups = groupIds.map((groupId) => ({
+      groupId,
+      jobIds: this.mlJobsService.jobs
+        .filter((job) => job.groups?.includes(groupId))
+        .map((job) => job.job_id),
+    }));
+
+    const selectedJobs = this.mlJobsService.jobs.filter(
+      (j) => selectedJobIds.includes(j.job_id) || j.groups?.some((g) => groupIds.includes(g))
+    );
+
     const mappedJobs = createJobs(selectedJobs);
 
     const invalidJobIds = this._getInvalidJobIds(selectedJobIds);
 
     this._invalidJobIds$.next(invalidJobIds);
     this._selectedJobs$.next(mappedJobs);
+    this._selectedGroups$.next(selectedGroups);
   }
 
   private _getInvalidJobIds(jobIds: string[]): string[] {
     return jobIds.filter(
       (id) => !this.mlJobsService.jobs.some((j) => j.job_id === id || j.groups?.includes(id))
     );
+  }
+
+  public getSelectedGroups$(): Observable<GroupObj[]> {
+    return this._selectedGroups$.pipe(distinctUntilChanged(isEqual), shareReplay(1));
+  }
+
+  public getSelectedGroups(): GroupObj[] {
+    return this._selectedGroups$.getValue();
   }
 
   public getInvalidJobIds$(): Observable<string[]> {

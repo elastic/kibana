@@ -20,7 +20,6 @@ import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { getAnnotationStyles, getTimeseriesExplorerStyles } from './styles';
-import type { GroupObj } from '../components/job_selector/job_selector';
 
 interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
@@ -28,11 +27,9 @@ interface TimeSeriesExplorerPageProps {
   noSingleMetricJobsFound?: boolean;
   handleJobSelectionChange?: ({
     jobIds,
-    groups,
     time,
   }: {
     jobIds: string[];
-    groups: GroupObj[];
     time?: { from: string; to: string };
   }) => void;
   selectedJobId?: string[];
