@@ -38,7 +38,7 @@ function generateId() {
   return uuidv4();
 }
 
-export const DashboardAppNoDataPage = ({ showPage }: { showPage: () => void }) => {
+export const DashboardAppNoDataPage = ({ hideNoDataPage }: { hideNoDataPage: () => void }) => {
   const analyticsServices = {
     coreStart: coreServices,
     dataViews: dataService.dataViews,
@@ -118,7 +118,7 @@ export const DashboardAppNoDataPage = ({ showPage }: { showPage: () => void }) =
             },
             path: '#/create',
           });
-          showPage();
+          hideNoDataPage();
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
@@ -131,7 +131,7 @@ export const DashboardAppNoDataPage = ({ showPage }: { showPage: () => void }) =
         }
       }
     }
-  }, [abortController, lensHelpersAsync.value, showPage]);
+  }, [abortController, lensHelpersAsync.value, hideNoDataPage]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
@@ -143,7 +143,7 @@ export const DashboardAppNoDataPage = ({ showPage }: { showPage: () => void }) =
 
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-      <AnalyticsNoDataPage onDataViewCreated={showPage} onTryESQL={onTryESQL} />
+      <AnalyticsNoDataPage onDataViewCreated={hideNoDataPage} onTryESQL={onTryESQL} />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };
