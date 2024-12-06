@@ -37,12 +37,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   describe.skip('Knowledge base user instructions', function () {
     this.tags(['skipMKI']);
     let editorRoleAuthc: RoleCredentials;
-    let johnRoleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
-      // Create API keys for 'editor' role, simulating different users
-      johnRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       editorRoleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await createKnowledgeBaseModel(ml);
@@ -59,7 +56,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await deleteInferenceEndpoint({ es });
       await clearKnowledgeBase(es);
       await clearConversations(es);
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(johnRoleAuthc);
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(editorRoleAuthc);
     });
 
