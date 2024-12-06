@@ -18,10 +18,6 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import {
   getCoreChrome,
-  getAnalytics,
-  getCoreI18n,
-  getTheme,
-  getUserProfile,
   getMapsCapabilities,
   getEmbeddableService,
   getDocLinks,
@@ -111,12 +107,7 @@ export async function renderApp(
   }
 
   render(
-    <KibanaRenderContextProvider
-      analytics={getAnalytics()}
-      i18n={getCoreI18n()}
-      theme={getTheme()}
-      userProfile={getUserProfile()}
-    >
+    <KibanaRenderContextProvider {...getCore()}>
       <AppUsageTracker>
         <TableListViewKibanaProvider
           {...{
