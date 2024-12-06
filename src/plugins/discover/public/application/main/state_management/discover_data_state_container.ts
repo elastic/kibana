@@ -243,6 +243,12 @@ export function getDataStateContainer({
 
           abortController?.abort();
           abortControllerFetchMore?.abort();
+          sendTimeRangeMsg(
+            dataSubjects.main$,
+            timefilter.getAbsoluteTime(),
+            timefilter.getTime(),
+            appStateContainer.getState().query
+          );
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
