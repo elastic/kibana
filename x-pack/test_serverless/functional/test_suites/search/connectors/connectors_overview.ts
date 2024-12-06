@@ -23,8 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('connectors', function () {
     before(async () => {
       await pageObjects.svlSearchConnectorsPage.helpers.deleteAllConnectors();
-
-      await pageObjects.svlCommonPage.loginWithRole('admin');
+      await pageObjects.svlCommonPage.loginWithRole('developer');
     });
 
     it('has embedded console', async () => {
