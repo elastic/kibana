@@ -9,7 +9,7 @@ import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
-import { computeTotalSlicesFromDateRange } from '../../../../services/utils/compute_total_slices_from_date_range';
+import { getSlicesFromDateRange } from '../../../../services/utils/get_slices_from_date_range';
 import { BurnRateRuleParams, WindowSchema } from '../types';
 
 type BurnRateWindowWithDuration = WindowSchema & {
@@ -76,10 +76,7 @@ function buildWindowAgg(
               'params.total != null && params.total > 0 && params.totalSlices > 0 ? ((params.total - params.good) / params.totalSlices) / (1 - params.target) : 0',
             params: {
               target: slo.objective.target,
-              totalSlices: computeTotalSlicesFromDateRange(
-                dateRange,
-                slo.objective.timesliceWindow!
-              ),
+              totalSlices: getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!),
             },
           },
         },
