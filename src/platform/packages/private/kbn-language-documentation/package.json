@@ -9,6 +9,6 @@
   "scripts": {
     "make:docs": "ts-node --transpileOnly scripts/generate_esql_docs.ts",
     "postmake:docs": "yarn run lint:fix",
-    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-language-documentation/src/sections/generated"
+    "lint:fix": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/private/kbn-language-documentation/src/sections/generated"
   }
 }

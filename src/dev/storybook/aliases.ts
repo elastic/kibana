@@ -19,7 +19,7 @@ export const storybookAliases = {
   cloud_security_posture_packages: 'x-pack/packages/kbn-cloud-security-posture/storybook/config',
   cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
-  language_documentation_popover: 'packages/kbn-language-documentation/.storybook',
+  language_documentation_popover: 'src/platform/packages/private/kbn-language-documentation/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
   custom_icons: 'packages/kbn-custom-icons/.storybook',

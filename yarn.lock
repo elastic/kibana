@@ -6084,7 +6084,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/language-documentation@link:packages/kbn-language-documentation":
+"@kbn/language-documentation@link:src/platform/packages/private/kbn-language-documentation":
   version "0.0.0"
   uid ""
 
