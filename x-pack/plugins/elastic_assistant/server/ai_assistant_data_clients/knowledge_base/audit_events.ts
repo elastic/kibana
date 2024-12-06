@@ -49,13 +49,10 @@ const knowledgeBaseEventTypes: Record<KnowledgeBaseAuditAction, ArrayElement<Ecs
 
 export interface KnowledgeBaseAuditEventParams {
   action: KnowledgeBaseAuditAction;
-  username: string;
-  spaceId: string;
   outcome?: EcsEvent['outcome'];
   id?: string;
   error?: Error;
 }
-// knowledgeBaseAuditEvent({ action: KnowledgeBaseAuditAction.CREATE, id: '1', outcome: AUDIT_OUTCOME.SUCCESS, username: 'user', spaceId: 'space' });
 
 export function knowledgeBaseAuditEvent({
   action,
@@ -78,7 +75,7 @@ export function knowledgeBaseAuditEvent({
       action,
       category: [AUDIT_CATEGORY.DATABASE],
       type: type ? [type] : undefined,
-      outcome: outcome ?? (error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS),
+      outcome: error ? AUDIT_OUTCOME.FAILURE : outcome ?? AUDIT_OUTCOME.SUCCESS,
     },
     error: error && {
       code: error.name,
