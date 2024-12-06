@@ -1077,7 +1077,8 @@ module.exports = {
         'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
