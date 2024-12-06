@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';

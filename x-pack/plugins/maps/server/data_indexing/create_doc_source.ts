@@ -8,7 +8,7 @@
 import type {
   IndicesCreateRequest,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import { DataViewsCommonService } from '@kbn/data-plugin/server';
 import { CreateDocSourceResp } from '../../common/types';

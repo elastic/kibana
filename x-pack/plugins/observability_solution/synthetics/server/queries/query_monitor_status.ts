@@ -6,7 +6,7 @@
  */
 
 import times from 'lodash/times';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { cloneDeep, intersection } from 'lodash';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';

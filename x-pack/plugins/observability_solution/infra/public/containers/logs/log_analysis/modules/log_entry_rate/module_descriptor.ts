@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { HttpHandler } from '@kbn/core/public';
 import { IdFormat } from '../../../../../../common/http_api/latest';
 import {

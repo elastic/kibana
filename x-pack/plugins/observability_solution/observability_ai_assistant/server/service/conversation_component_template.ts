@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 const keyword = {
   type: 'keyword' as const,

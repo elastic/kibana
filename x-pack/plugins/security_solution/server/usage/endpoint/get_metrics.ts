@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EndpointMetrics, UniqueEndpointCountResponse } from './types';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { tlog } from '../../lib/telemetry/helpers';

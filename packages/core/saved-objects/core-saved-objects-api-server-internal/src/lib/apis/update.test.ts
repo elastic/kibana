@@ -11,7 +11,7 @@
 
 import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
@@ -357,7 +357,7 @@ describe('#update', () => {
           ...mockTimestampFieldsWithCreated,
         };
         expect(
-          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+          (client.create.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)!
         ).toEqual(expectedType);
       });
 
@@ -403,7 +403,7 @@ describe('#update', () => {
             references,
           });
           expect(
-            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>).body!
+            (client.index.mock.calls[0][0] as estypes.CreateRequest<SavedObjectsRawDocSource>)!
               .references
           ).toEqual([]);
           client.index.mockClear();

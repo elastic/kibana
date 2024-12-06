@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';

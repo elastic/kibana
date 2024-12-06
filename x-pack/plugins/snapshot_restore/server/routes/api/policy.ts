@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
@@ -38,7 +38,7 @@ export function registerPolicyRoutes({
           body: {
             policies: Object.entries(policiesByName).map(([name, policy]) => {
               // TODO: Figure out why our {@link SlmPolicyEs} is not compatible with:
-              // import type { SnapshotLifecyclePolicyMetadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+              // import type { SnapshotLifecyclePolicyMetadata } from '@elastic/elasticsearch/lib/api/types';
               return deserializePolicy(name, policy as SlmPolicyEs, managedPolicies);
             }),
           },

@@ -13,7 +13,7 @@ import {
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import {

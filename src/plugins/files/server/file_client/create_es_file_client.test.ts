@@ -16,7 +16,7 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { createEsFileClient } from './create_es_file_client';
 import { FileClient } from './types';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { FileDocument } from './file_metadata_client/adapters/es_index';
 
 describe('When initializing file client via createESFileClient()', () => {

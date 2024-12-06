@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
 export function getDataSourceLabel() {

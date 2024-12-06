@@ -12,7 +12,7 @@ import {
   AggregationsAggregate,
   SearchHit,
   SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { getValueForSelectedField } from '../utils/get_value_for_selected_field';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {

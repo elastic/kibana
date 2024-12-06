@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

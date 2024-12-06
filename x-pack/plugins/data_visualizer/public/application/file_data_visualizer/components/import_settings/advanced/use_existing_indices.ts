@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 interface EsIndex {

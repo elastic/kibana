@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createEsParams, SyntheticsEsClient } from '../lib';
 import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 

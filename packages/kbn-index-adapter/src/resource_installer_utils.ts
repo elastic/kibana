@@ -10,7 +10,7 @@
 import type {
   IndicesPutIndexTemplateRequest,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ClusterPutComponentTemplateRequest,
   IndicesIndexSettings,

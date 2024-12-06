@@ -9,7 +9,7 @@ import {
   Field,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { SyntheticsEsClient } from '../../lib';
 import {

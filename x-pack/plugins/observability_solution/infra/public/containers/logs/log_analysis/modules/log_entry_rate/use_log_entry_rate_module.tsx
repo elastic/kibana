@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import createContainer from 'constate';
 import { useMemo } from 'react';
 import { IdFormat } from '../../../../../../common/http_api/latest';

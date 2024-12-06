@@ -6,10 +6,7 @@
  */
 
 import rison from '@kbn/rison';
-import type {
-  SearchMvtRequest,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchMvtRequest, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { RENDER_AS } from './constants';
 
 export function getAggsTileRequest({

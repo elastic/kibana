@@ -13,7 +13,7 @@ import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/co
 import { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   APP_ID,
   MVT_GETTILE_API_PATH,

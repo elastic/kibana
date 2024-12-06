@@ -24,6 +24,7 @@ export async function installIndexTemplate(
     const componentNames = indexTemplateDef.components.map(({ name }) => name);
     logger.info(`Installing components for ${indexTemplateDef.name} (${componentNames})`);
     for (const component of indexTemplateDef.components) {
+      // @ts-expect-error TODO elasticsearch-js 9.0.0-alpha.1
       await client.cluster.putComponentTemplate({ name: component.name, ...component.template });
     }
     logger.info(`Installing index template (${indexTemplateDef.name})`);

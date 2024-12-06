@@ -10,7 +10,7 @@ import {
   SearchRequest,
   SearchTotalHits,
   AggregationsAggregationContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,

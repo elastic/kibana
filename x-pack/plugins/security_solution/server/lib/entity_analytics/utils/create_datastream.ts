@@ -9,7 +9,7 @@
 // The original function created an index, while here we create a datastream. If and when responseOps develops first-party code to work with datastreams (https://github.com/elastic/kibana/issues/140403), this file should be removed.
 
 import { get } from 'lodash';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 

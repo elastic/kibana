@@ -8,7 +8,7 @@
 import { Logger } from '@kbn/logging';
 import { CoreStart } from '@kbn/core-lifecycle-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { TaskScheduling } from '../task_scheduling';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { ConcreteTaskInstance, TaskManagerStartContract } from '..';

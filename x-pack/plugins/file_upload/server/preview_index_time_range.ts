@@ -6,10 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type {
-  IngestPipeline,
-  IngestSimulateDocument,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IngestPipeline, IngestSimulateDocument } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 type Doc = IngestSimulateDocument['_source'];

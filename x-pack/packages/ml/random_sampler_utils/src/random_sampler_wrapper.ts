@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getSampleProbability } from './get_sample_probability';
 

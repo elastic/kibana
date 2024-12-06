@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndicesDataStream,
+  IndicesSimulateIndexTemplateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { retryTransientEsErrors } from '@kbn/index-adapter';

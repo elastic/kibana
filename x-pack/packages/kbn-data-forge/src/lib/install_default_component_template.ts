@@ -35,6 +35,7 @@ export async function installDefaultComponentTemplate(
   logger: ToolingLog
 ) {
   logger.info('Installing base component template: kbn-data-forge_base');
+  // @ts-expect-error TODO "no overload matches this call" types of property template are incompatible
   await client.cluster.putComponentTemplate({
     name: `kbn-data-forge@mappings`,
     ...eventIngestedCommonComponentTemplate,

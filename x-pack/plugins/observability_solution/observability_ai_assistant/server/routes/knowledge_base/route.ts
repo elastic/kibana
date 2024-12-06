@@ -13,7 +13,7 @@ import {
   InferenceInferenceEndpointInfo,
   MlDeploymentAllocationState,
   MlDeploymentState,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';

@@ -68,6 +68,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
       await logsEsClient.updateIndexTemplate(
         isLogsDb ? IndexTemplateName.LogsDb : LogsIndex,
+        // @ts-expect-error TODO elasticsearch-js 9.0.0-alpha.1
         (template) => {
           const next = {
             name: LogsIndex,

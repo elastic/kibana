@@ -11,7 +11,7 @@ import type {
   AggregationsExtendedStatsAggregation,
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';

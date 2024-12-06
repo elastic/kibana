@@ -8,7 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import { Agent } from 'supertest';
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
 export async function enableStreams(supertest: Agent) {
   const req = supertest.post('/api/streams/_enable').set('kbn-xsrf', 'xxx');

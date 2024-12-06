@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';

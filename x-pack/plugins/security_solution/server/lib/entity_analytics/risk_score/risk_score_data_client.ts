@@ -8,8 +8,8 @@
 import type {
   MappingDynamicMapping,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+  ClusterPutComponentTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,

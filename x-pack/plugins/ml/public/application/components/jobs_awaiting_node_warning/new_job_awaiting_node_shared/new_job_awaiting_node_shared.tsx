@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

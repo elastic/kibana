@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { Criteria, EuiTableSortingType } from '@elastic/eui';
 import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';

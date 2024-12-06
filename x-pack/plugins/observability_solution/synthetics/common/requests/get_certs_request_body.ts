@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import DateMath from '@kbn/datemath';
 import { EXCLUDE_RUN_ONCE_FILTER, FINAL_SUMMARY_FILTER } from '../constants/client_defaults';
 import type { CertificatesResults } from '../../server/queries/get_certs';
