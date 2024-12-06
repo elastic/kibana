@@ -84,9 +84,9 @@ describe('Add Integration - Automatic Import', () => {
     cy.getBySel(BUTTON_FOOTER_NEXT).click();
 
     // Integration details Page
-    cy.getBySel(INTEGRATION_TITLE_INPUT).type('Test Integration');
     cy.getBySel(INTEGRATION_DESCRIPTION_INPUT).type('Test Integration Description');
-    cy.getBySel(BUTTON_FOOTER_NEXT).click();
+    cy.getBySel(INTEGRATION_TITLE_INPUT).type('Test Integration\n');
+    // Pressing Enter key in a single-line input should move to the next step.
 
     // Datastream details page
     cy.getBySel(DATASTREAM_TITLE_INPUT).type('Audit');
