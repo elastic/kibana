@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-esql-editor'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-esql-editor/setup_tests.ts'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-esql-editor'],
+  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/private/kbn-esql-editor/setup_tests.ts'],
 };

@@ -5552,7 +5552,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-editor@link:packages/kbn-esql-editor":
+"@kbn/esql-editor@link:src/platform/packages/private/kbn-esql-editor":
   version "0.0.0"
   uid ""
 
