@@ -10,9 +10,8 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
-import { transparentize } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { cloneDeep } from 'lodash';
 import { DragPreview } from '../drag_preview';
@@ -35,6 +34,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     const [panelIds, setPanelIds] = useState<string[]>(() => getKeysInOrder(currentRow.panels));
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
+
+    const { euiTheme } = useEuiTheme();
 
     /** Syncs panel IDs in order after a change in the grid layout, such as adding, removing, or reordering panels. */
     const syncPanelIds = useCallback(() => {
@@ -95,7 +96,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
               // apply "targetted row" styles
-              const gridColor = transparentize(euiThemeVars.euiColorSuccess, 0.2);
+              const gridColor = transparentize(euiTheme.colors.accentSecondary, 0.2);
               rowRef.style.backgroundPosition = `top -${gutterSize / 2}px left -${
                 gutterSize / 2
               }px`;
@@ -105,7 +106,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               rowRef.style.backgroundImage = `linear-gradient(to right, ${gridColor} 1px, transparent 1px),
         linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`;
               rowRef.style.backgroundColor = `${transparentize(
-                euiThemeVars.euiColorSuccess,
+                euiTheme.colors.accentSecondary,
                 0.05
               )}`;
             } else {

@@ -11,7 +11,7 @@ import React from 'react';
 
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PanelInteractionEvent } from '../types';
 
@@ -23,6 +23,7 @@ export const ResizeHandle = ({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <button
       className="kbnGridPanel__resizeHandle"
@@ -41,17 +42,17 @@ export const ResizeHandle = ({
         opacity: 0;
         margin: -2px;
         position: absolute;
-        width: ${euiThemeVars.euiSizeL};
-        height: ${euiThemeVars.euiSizeL};
+        width: ${euiTheme.size.l};
+        height: ${euiTheme.size.l};
         transition: opacity 0.2s, border 0.2s;
         border-radius: 7px 0 7px 0;
-        border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
-        border-right: 2px solid ${euiThemeVars.euiColorSuccess};
+        border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
+        border-right: 2px solid ${euiTheme.colors.accentSecondary};
         &:hover,
         &:focus {
           outline-style: none !important;
           opacity: 1;
-          background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
+          background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
           cursor: se-resize;
         }
         .kbnGrid--static & {

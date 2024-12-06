@@ -11,7 +11,6 @@ import React from 'react';
 
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { PanelInteractionEvent } from '../types';
 
@@ -37,17 +36,17 @@ export const DragHandle = ({
         position: absolute;
         align-items: center;
         justify-content: center;
-        top: -${euiThemeVars.euiSizeL};
-        width: ${euiThemeVars.euiSizeL};
-        height: ${euiThemeVars.euiSizeL};
-        z-index: ${euiThemeVars.euiZLevel3};
-        margin-left: ${euiThemeVars.euiSizeS};
+        top: -${euiTheme.size.l};
+        width: ${euiTheme.size.l};
+        height: ${euiTheme.size.l};
+        z-index: ${euiTheme.levels.mask}; // TODO: double check this
+        margin-left: ${euiTheme.size.s};
         border: 1px solid ${euiTheme.border.color};
         border-bottom: none;
-        background-color: ${euiTheme.colors.emptyShade};
-        border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border-radius: ${euiTheme.border.radius} ${euiTheme.border.radius} 0 0;
         cursor: grab;
-        transition: ${euiThemeVars.euiAnimSpeedSlow} opacity;
+        transition: ${euiTheme.animation.slow} opacity;
         .kbnGridPanel:hover &,
         .kbnGridPanel:focus-within &,
         &:active,

@@ -11,6 +11,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
+import { breakpoint } from '@elastic/eui/src/themes/amsterdam/global_styling/variables/_breakpoint';
+import { useEuiTheme } from '@elastic/eui';
 import {
   ActivePanel,
   GridAccessMode,
@@ -38,6 +40,7 @@ export const useGridLayoutState = ({
 } => {
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+  const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(
     () => new BehaviorSubject<string | undefined>(expandedPanelId),
@@ -81,7 +84,9 @@ export const useGridLayoutState = ({
       runtimeSettings$,
       interactionEvent$,
       expandedPanelId$,
-      isMobileView$: new BehaviorSubject<boolean>(shouldShowMobileView(accessMode)),
+      isMobileView$: new BehaviorSubject<boolean>(
+        shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
+      ),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -99,7 +104,9 @@ export const useGridLayoutState = ({
           gridSettings.columnCount;
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
-        gridLayoutStateManager.isMobileView$.next(shouldShowMobileView(currentAccessMode));
+        gridLayoutStateManager.isMobileView$.next(
+          shouldShowMobileView(currentAccessMode, euiTheme.breakpoint.m)
+        );
       });
 
     return () => {

@@ -10,9 +10,14 @@
 import React, { forwardRef, useEffect, useMemo } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { EuiPanel, euiFullHeight, useEuiOverflowScroll } from '@elastic/eui';
+import {
+  EuiPanel,
+  euiFullHeight,
+  useEuiOverflowScroll,
+  useEuiTheme,
+  useEuiThemeCSSVariables,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { DragHandle } from './drag_handle';
@@ -34,6 +39,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
+    const { euiTheme } = useEuiTheme();
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
       const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
@@ -73,7 +79,7 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
               // if the current panel is active, give it fixed positioning depending on the interaction event
               const { position: draggingPosition } = activePanel;
 
-              ref.style.zIndex = `${euiThemeVars.euiZModal}`;
+              ref.style.zIndex = `${euiTheme.levels.modal}`;
               if (currentInteractionEvent?.type === 'resize') {
                 // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
                 ref.style.width = `${Math.max(
