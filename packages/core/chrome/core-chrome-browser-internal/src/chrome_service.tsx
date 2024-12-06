@@ -182,6 +182,7 @@ export class ChromeService {
   };
 
   // Ensure developers are notified if working in a context that lacks the EUI Provider.
+  // @ts-expect-error
   private handleEuiDevProviderWarning = (notifications: NotificationsStart) => {
     const isDev = this.params.coreContext.env.mode.name === 'development';
     if (isDev) {
