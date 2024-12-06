@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-export enum MessageRole {
-  'user' = 'user',
-  'assistant' = 'assistant',
-  'system' = 'system',
-}
+import type { ValidationError } from '../../../shared_imports';
 
-export interface Message {
-  id: string;
-  content: string | React.ReactNode;
-  createdAt?: Date;
-  role: MessageRole;
+export interface ValidationResults {
+  errors: ValidationError[];
+  warnings: ValidationError[];
 }

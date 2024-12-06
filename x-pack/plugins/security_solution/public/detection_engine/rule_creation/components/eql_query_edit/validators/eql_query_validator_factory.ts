@@ -6,13 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { FormData, ValidationError, ValidationFunc } from '../../../../shared_imports';
-import { KibanaServices } from '../../../../common/lib/kibana';
-import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
-import type { EqlOptions } from '../../../../../common/search_strategy';
-import type { EqlResponseError } from '../../../../common/hooks/eql/api';
-import { EQL_ERROR_CODES, validateEql } from '../../../../common/hooks/eql/api';
-import { EQL_VALIDATION_REQUEST_ERROR } from './translations';
+import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
+import { KibanaServices } from '../../../../../common/lib/kibana';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
+import type { EqlOptions } from '../../../../../../common/search_strategy';
+import type { EqlResponseError } from '../../../../../common/hooks/eql/api';
+import { EQL_ERROR_CODES, validateEql } from '../../../../../common/hooks/eql/api';
+import { EQL_VALIDATION_REQUEST_ERROR } from '../translations';
 
 type EqlQueryValidatorFactoryParams =
   | {
@@ -71,7 +71,7 @@ export function eqlQueryValidatorFactory({
 function transformEqlResponseErrorToValidationError(
   responseError: EqlResponseError
 ): ValidationError<EQL_ERROR_CODES> {
-  if (responseError.error) {
+  if (responseError.code === EQL_ERROR_CODES.FAILED_REQUEST) {
     return {
       code: EQL_ERROR_CODES.FAILED_REQUEST,
       message: EQL_VALIDATION_REQUEST_ERROR,
@@ -81,8 +81,7 @@ function transformEqlResponseErrorToValidationError(
 
   return {
     code: responseError.code,
-    message: '',
-    messages: responseError.messages,
+    message: responseError.messages.join(', '),
   };
 }
 
