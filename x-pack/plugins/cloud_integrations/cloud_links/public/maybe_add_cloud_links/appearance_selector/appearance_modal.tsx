@@ -55,6 +55,16 @@ const colorModeOptions: Array<Value<ColorMode>> = [
       defaultMessage: 'Space default',
     }),
     icon: 'spaces',
+    betaBadgeLabel: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalBetaBadgeLabel', {
+      defaultMessage: 'Deprecated',
+    }),
+    betaBadgeTooltipContent: i18n.translate(
+      'xpack.cloudLinks.userMenuLinks.appearanceModalBetaBadgeTooltip',
+      {
+        defaultMessage: 'Space default settings will be deprecated in 10.0.',
+      }
+    ),
+    betaBadgeIconType: 'warning',
   },
 ];
 
