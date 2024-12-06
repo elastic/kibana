@@ -77,5 +77,6 @@
     "@kbn/default-nav-devtools",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/management-settings-ids",
+    "@kbn/core-deprecations-common",
   ]
 }
