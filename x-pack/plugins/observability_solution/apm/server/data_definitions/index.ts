@@ -288,26 +288,25 @@ function getTransactionQueries({ availability, indices }: QueryFactoryOptions) {
   return [
     {
       query: getTransactionThroughputQuery(type),
-      description: 'Throughput for a service',
+      description: 'Throughput per a service',
     },
     {
       query: getTransactionLatencyAvgQuery(type),
-      description: 'Average latency (ms) for a service',
+      description: 'Average latency (ms) per service',
     },
     {
       query: getTransactionLatencyPercentilesQuery(type),
-      description: 'Latency (ms) for a service as a percentile',
+      description: 'Latency (ms) per service as a percentile',
     },
     {
       query: getTransactionFailureRateQuery(type),
-      description: `Failure rate (%) for a service`,
+      description: `Failure rate (%) per service`,
     },
   ]
     .map(({ query, description }) => {
       return {
         query: `${baseQuery}
-          | WHERE service.name == ?serviceName
-          | ${query} BY service.environment, transaction.type`,
+          | ${query} BY service.name, service.environment, transaction.type`,
         description,
       };
     })
@@ -365,8 +364,7 @@ function getTransactionGroupsForServiceQuery(options: {
   indices: APMIndices;
 }) {
   return `${getSourceCommandsForDocumentType(options)}
-    | WHERE service.name == ?serviceName
-    | STATS transaction_groups = VALUES(${TRANSACTION_NAME})`;
+    | STATS transaction_groups = VALUES(${TRANSACTION_NAME}) BY service.name`;
 }
 
 function getDocumentTypeForExitSpans(availability: ApmDataAvailability) {
