@@ -522,7 +522,8 @@
         "label": "InferenceAPIConfigResponse",
         "description": [],
         "signature": [
-          "{ inference_id: string; task_type: \"sparse_embedding\" | \"text_embedding\"; task_settings: { model?: string | undefined; }; } & ",
+          "InferenceInferenceEndpointInfo",
+          " & ",
           "InferenceServiceSettings"
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
@@ -650,7 +651,7 @@
         "label": "TrainedModelType",
         "description": [],
         "signature": [
-          "\"tree_ensemble\" | \"lang_ident\" | \"pytorch\""
+          "\"pytorch\" | \"tree_ensemble\" | \"lang_ident\""
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

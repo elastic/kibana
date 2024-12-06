@@ -226,7 +226,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <EuiSpacer size="m" />
       <AdvancedSettings
         value={advancedSettings}
-        onChange={useCallback((update: any) => {
+        onChange={useCallback((update: Partial<MlAnomalyDetectionAlertAdvancedSettings>) => {
           Object.keys(update).forEach((k) => {
             setRuleParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
           });

@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_ID } from '../common';
 import { sendMessageEvent, SendMessageEventData } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
@@ -53,6 +54,14 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.POST_QUERY_SOURCE_FIELDS,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [PLUGIN_ID],
+        },
+      },
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),
@@ -74,6 +83,14 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.POST_CHAT_MESSAGE,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [PLUGIN_ID],
+        },
+      },
       validate: {
         body: schema.object({
           data: schema.object({
@@ -194,6 +211,14 @@ export function defineRoutes({
   router.get(
     {
       path: APIRoutes.GET_INDICES,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [PLUGIN_ID],
+        },
+      },
       validate: {
         query: schema.object({
           search_query: schema.maybe(schema.string()),
@@ -223,6 +248,14 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.POST_SEARCH_QUERY,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [PLUGIN_ID],
+        },
+      },
       validate: {
         body: schema.object({
           search_query: schema.string(),
@@ -287,6 +320,14 @@ export function defineRoutes({
   router.post(
     {
       path: APIRoutes.GET_INDEX_MAPPINGS,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [PLUGIN_ID],
+        },
+      },
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),

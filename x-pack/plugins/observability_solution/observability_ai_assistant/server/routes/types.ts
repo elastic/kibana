@@ -85,5 +85,4 @@ export interface ObservabilityAIAssistantRouteCreateOptions {
     payload?: number;
     idleSocket?: number;
   };
-  tags: Array<'access:ai_assistant'>;
 }

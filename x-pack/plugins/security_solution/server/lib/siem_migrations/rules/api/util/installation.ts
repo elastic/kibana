@@ -42,7 +42,7 @@ const installPrebuiltRules = async (
   const rulesToUpdate: UpdateRuleMigrationInput[] = [];
   const assetsToInstall: PrebuiltRuleAsset[] = [];
   rulesToInstall.forEach((ruleToInstall) => {
-    // If prebuilt rule has already been install, then just update migration rule with the installed rule id
+    // If prebuilt rule has already been installed, then just update migration rule with the installed rule id
     const installedRule = currentRules.find(
       (rule) => rule.rule_id === ruleToInstall.elastic_rule?.prebuilt_rule_id
     );
@@ -177,10 +177,8 @@ export const installTranslated = async ({
   const detectionRulesClient = securitySolutionContext.getDetectionRulesClient();
   const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
 
-  const { data: rulesToInstall } = await ruleMigrationsClient.data.rules.get({
-    migrationId,
-    ids,
-    installable: true,
+  const { data: rulesToInstall } = await ruleMigrationsClient.data.rules.get(migrationId, {
+    filters: { ids, installable: true },
   });
 
   const { customRulesToInstall, prebuiltRulesToInstall } = rulesToInstall.reduce(

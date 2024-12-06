@@ -25,7 +25,7 @@ export const configSchema = schema.object({
 
 export const config: PluginConfigDescriptor<ObservabilityLogsExplorerConfig> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
     renameFromRoot(
       'xpack.discoverLogExplorer.featureFlags.deepLinkVisible',
       'xpack.observabilityLogsExplorer.navigation.showAppLink',
@@ -41,6 +41,7 @@ export const config: PluginConfigDescriptor<ObservabilityLogsExplorerConfig> = {
       'xpack.observabilityLogsExplorer.enabled',
       { level: 'warning' }
     ),
+    unused('navigation.showAppLink', { level: 'warning' }),
   ],
   exposeToBrowser: {
     navigation: {

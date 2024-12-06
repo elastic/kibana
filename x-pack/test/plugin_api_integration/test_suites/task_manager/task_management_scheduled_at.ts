@@ -14,8 +14,7 @@ export default function createTaskManagementScheduledAtTests({ getService }: Ftr
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/198664
-  describe.skip('task management scheduled at', () => {
+  describe('task management scheduled at', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/task_manager_tasks');
     });

@@ -37,7 +37,7 @@ export const buildOSSFeatures = ({
       privileges: {
         all: {
           app: ['discover', 'kibana'],
-          api: ['fileUpload:analyzeFile'],
+          api: ['fileUpload:analyzeFile', 'savedQuery:manage', 'savedQuery:read'],
           catalogue: ['discover'],
           savedObject: {
             all: ['search', 'query'],
@@ -53,6 +53,7 @@ export const buildOSSFeatures = ({
             read: ['index-pattern', 'search', 'query'],
           },
           ui: ['show'],
+          api: ['savedQuery:read'],
         },
       },
       subFeatures: [
@@ -139,6 +140,7 @@ export const buildOSSFeatures = ({
             read: ['index-pattern', 'search', 'tag'],
           },
           ui: ['show', 'delete', 'save', 'saveQuery'],
+          api: ['savedQuery:manage', 'savedQuery:read'],
         },
         read: {
           app: ['visualize', 'lens', 'kibana'],
@@ -148,6 +150,7 @@ export const buildOSSFeatures = ({
             read: ['index-pattern', 'search', 'visualization', 'query', 'lens', 'tag'],
           },
           ui: ['show'],
+          api: ['savedQuery:read'],
         },
       },
       subFeatures: [
@@ -213,7 +216,12 @@ export const buildOSSFeatures = ({
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
-          api: ['bulkGetUserProfiles', 'dashboardUsageStats'],
+          api: [
+            'bulkGetUserProfiles',
+            'dashboardUsageStats',
+            'savedQuery:manage',
+            'savedQuery:read',
+          ],
         },
         read: {
           app: ['dashboards', 'kibana'],
@@ -234,7 +242,7 @@ export const buildOSSFeatures = ({
             ],
           },
           ui: ['show'],
-          api: ['bulkGetUserProfiles', 'dashboardUsageStats'],
+          api: ['bulkGetUserProfiles', 'dashboardUsageStats', 'savedQuery:read'],
         },
       },
       subFeatures: [
@@ -545,7 +553,7 @@ export const buildOSSFeatures = ({
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
         defaultMessage:
-          'If set to "All", saved queries can be managed across Kibana in all applications that support them. If set to "None", saved query privileges will be determined independently by each application.',
+          'If set to "All", saved queries can be managed across Kibana in all applications that support them. Otherwise, saved query privileges will be determined independently by each application.',
       }),
       privileges: {
         all: {
@@ -556,9 +564,16 @@ export const buildOSSFeatures = ({
             read: [],
           },
           ui: ['saveQuery'],
+          api: ['savedQuery:manage', 'savedQuery:read'],
         },
-        // No read-only mode supported
-        read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        read: {
+          savedObject: {
+            all: [],
+            read: ['query'],
+          },
+          ui: [],
+          api: ['savedQuery:read'],
+        },
       },
     },
   ];

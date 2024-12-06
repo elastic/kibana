@@ -16,8 +16,7 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
-  const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
-  const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
+  const kibanaAccessControlTags = ['access:generateReport'];
 
   const registerPublicPostGenerationEndpoint = () => {
     const path = `${PUBLIC_ROUTES.GENERATE_PREFIX}/{exportType}`;

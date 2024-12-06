@@ -68,7 +68,7 @@ export const CONNECTOR_LABEL: string = i18n.translate('xpack.serverlessSearch.co
 export const WEB_CRAWLERS_LABEL: string = i18n.translate(
   'xpack.serverlessSearch.webCrawlersLabel',
   {
-    defaultMessage: 'Web crawlers',
+    defaultMessage: 'Web Crawlers',
   }
 );
 

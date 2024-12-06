@@ -42,7 +42,7 @@ export default function searchSolutionNavigation({
         { id: 'Content', label: 'Content' },
         { id: 'Indices', label: 'Indices' },
         { id: 'Connectors', label: 'Connectors' },
-        { id: 'Crawlers', label: 'Web crawlers' },
+        { id: 'Crawlers', label: 'Web Crawlers' },
         { id: 'Build', label: 'Build' },
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search Applications' },
@@ -76,7 +76,7 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.clickNavItem('Crawlers');
       await searchClassicNavigation.expectNavItemActive('Crawlers');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Web crawlers');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Web Crawlers');
 
       // Check Build
       // > Playground

@@ -16,11 +16,12 @@ import {
   EuiFlexGroup,
   EuiSpacer,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import { useRequestProfile } from '../../hooks';
+import { useHasIndices, useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
 import { Editor, type EditorProps } from './editor';
@@ -45,6 +46,8 @@ export const ProfileQueryEditor = memo(() => {
   const dispatch = useProfilerActionContext();
 
   const { getLicenseStatus, notifications, location } = useAppContext();
+
+  const { data: indicesData, isLoading, error: indicesDataError } = useHasIndices();
 
   const queryParams = new URLSearchParams(location.search);
   const indexName = queryParams.get('index');
@@ -85,6 +88,32 @@ export const ProfileQueryEditor = memo(() => {
     []
   );
   const licenseEnabled = getLicenseStatus().valid;
+
+  const hasIndices = isLoading || indicesDataError ? false : indicesData?.hasIndices;
+
+  const isDisabled = !licenseEnabled || !hasIndices;
+  const tooltipContent = !licenseEnabled
+    ? i18n.translate('xpack.searchProfiler.formProfileButton.noLicenseTooltip', {
+        defaultMessage: 'You need an active license to use Search Profiler',
+      })
+    : i18n.translate('xpack.searchProfiler.formProfileButton.noIndicesTooltip', {
+        defaultMessage: 'You must have at least one index to use Search Profiler',
+      });
+
+  const button = (
+    <EuiButton
+      data-test-subj={isDisabled ? 'disabledProfileButton' : 'profileButton'}
+      fill
+      disabled={isDisabled}
+      onClick={!isDisabled ? handleProfileClick : undefined}
+    >
+      <EuiText>
+        {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
+          defaultMessage: 'Profile',
+        })}
+      </EuiText>
+    </EuiButton>
+  );
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
@@ -135,18 +164,13 @@ export const ProfileQueryEditor = memo(() => {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
-            <EuiButton
-              data-test-subj="profileButton"
-              fill
-              disabled={!licenseEnabled}
-              onClick={() => handleProfileClick()}
-            >
-              <EuiText>
-                {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
-                  defaultMessage: 'Profile',
-                })}
-              </EuiText>
-            </EuiButton>
+            {isDisabled ? (
+              <EuiToolTip position="top" content={tooltipContent}>
+                {button}
+              </EuiToolTip>
+            ) : (
+              button
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

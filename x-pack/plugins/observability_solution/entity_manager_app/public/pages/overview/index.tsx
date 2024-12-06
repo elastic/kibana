@@ -70,7 +70,7 @@ function EntitySourceForm({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormRow label="Filters (comma-separated ESQL filters)">
+        <EuiFormRow label="Filters (comma-separated KQL filters)">
           <EuiFieldText
             data-test-subj="entityManagerFormFilters"
             name="filters"
@@ -185,7 +185,7 @@ export function EntityManagerOverviewPage() {
                 .filter(
                   (source) => source.index_patterns.length > 0 && source.identity_fields.length > 0
                 )
-                .map((source) => ({ ...source, type: entityType })),
+                .map((source) => ({ ...source, type_id: entityType })),
             },
           },
         }

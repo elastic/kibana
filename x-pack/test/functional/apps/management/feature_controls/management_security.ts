@@ -72,6 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'triggersActions',
             'cases',
             'triggersActionsConnectors',
+            'reporting',
             'jobsListLink',
             'maintenanceWindows',
           ],

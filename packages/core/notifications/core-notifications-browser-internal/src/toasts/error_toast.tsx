@@ -25,11 +25,13 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface StartServices {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
+  userProfile: UserProfileService;
   theme: ThemeServiceStart;
 }
 
@@ -62,7 +64,10 @@ export function showErrorDialog({
   error,
   openModal,
   ...startServices
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'analytics' | 'i18n' | 'theme'>) {
+}: Pick<
+  ErrorToastProps,
+  'error' | 'title' | 'openModal' | 'analytics' | 'i18n' | 'userProfile' | 'theme'
+>) {
   let text = '';
 
   if (isRequestError(error)) {

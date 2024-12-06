@@ -16,7 +16,7 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
  * with Reporting sub-feature integration (if enabled)
  */
 export function getCanvasFeature(plugins: { reporting?: ReportingStart }): KibanaFeatureConfig {
-  const includeReporting = plugins.reporting && plugins.reporting.usesUiCapabilities();
+  const includeReporting = Boolean(plugins.reporting);
 
   return {
     id: 'canvas',

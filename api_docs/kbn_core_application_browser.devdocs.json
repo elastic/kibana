@@ -1202,6 +1202,10 @@
                 "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
               },
               {
+                "plugin": "assetInventory",
+                "path": "x-pack/plugins/asset_inventory/public/application.tsx"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
               },

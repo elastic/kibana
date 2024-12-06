@@ -6,21 +6,18 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { groupBy } from 'lodash';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type {
-  ElasticCuratedModelName,
-  ElserVersion,
-  InferenceAPIConfigResponse,
-} from '@kbn/ml-trained-models-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticCuratedModelName, ElserVersion } from '@kbn/ml-trained-models-utils';
+import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
-import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { RouteInitialization } from '../types';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
+import { modelsProvider } from '../models/model_management';
+import type { RouteInitialization } from '../types';
+import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import {
   createIngestPipelineSchema,
   curatedModelsParamsSchema,
@@ -39,70 +36,57 @@ import {
   threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
-import type { PipelineDefinition } from '../../common/types/trained_models';
-import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
-import { mlLog } from '../lib/log';
-import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
-import { modelsProvider } from '../models/model_management';
 
 export function filterForEnabledFeatureModels<
   T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
 >(models: T[], enabledFeatures: MlFeatures) {
   let filteredModels = models;
   if (enabledFeatures.nlp === false) {
-    filteredModels = filteredModels.filter((m) => m.model_type === 'tree_ensemble');
+    filteredModels = filteredModels.filter((m) => m.model_type !== TRAINED_MODEL_TYPE.PYTORCH);
   }
-
   if (enabledFeatures.dfa === false) {
-    filteredModels = filteredModels.filter((m) => m.model_type !== 'tree_ensemble');
+    filteredModels = filteredModels.filter(
+      (m) => m.model_type !== TRAINED_MODEL_TYPE.TREE_ENSEMBLE
+    );
   }
-
   return filteredModels;
 }
-
-export const populateInferenceServicesProvider = (client: IScopedClusterClient) => {
-  return async function populateInferenceServices(
-    trainedModels: TrainedModelConfigResponse[],
-    asInternal: boolean = false
-  ) {
-    const esClient = asInternal ? client.asInternalUser : client.asCurrentUser;
-
-    try {
-      // Check if model is used by an inference service
-      const { endpoints } = await esClient.transport.request<{
-        endpoints: InferenceAPIConfigResponse[];
-      }>({
-        method: 'GET',
-        path: `/_inference/_all`,
-      });
-
-      const inferenceAPIMap = groupBy(
-        endpoints,
-        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
-      );
-
-      for (const model of trainedModels) {
-        const inferenceApis = inferenceAPIMap[model.model_id];
-        model.hasInferenceServices = !!inferenceApis;
-        if (model.hasInferenceServices && !asInternal) {
-          model.inference_apis = inferenceApis;
-        }
-      }
-    } catch (e) {
-      if (!asInternal && e.statusCode === 403) {
-        // retry with internal user to get an indicator if models has associated inference services, without mentioning the names
-        await populateInferenceServices(trainedModels, true);
-      } else {
-        mlLog.error(e);
-      }
-    }
-  };
-};
 
 export function trainedModelsRoutes(
   { router, routeGuard, getEnabledFeatures }: RouteInitialization,
   cloud: CloudSetup
 ) {
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models_list`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
+      },
+      summary: 'Get trained models list',
+      description:
+        'Retrieves a complete list of trained models with stats, pipelines, and indices.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+        try {
+          const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
+          const models = await modelsClient.getTrainedModelList();
+          return response.ok({
+            body: models,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId?}`,
@@ -128,14 +112,7 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
-          const {
-            with_pipelines: withPipelines,
-            with_indices: withIndicesRaw,
-            ...getTrainedModelsRequestParams
-          } = request.query;
-
-          const withIndices =
-            request.query.with_indices === 'true' || request.query.with_indices === true;
+          const { ...getTrainedModelsRequestParams } = request.query;
 
           const resp = await mlClient.getTrainedModels({
             ...getTrainedModelsRequestParams,
@@ -146,125 +123,7 @@ export function trainedModelsRoutes(
           // @ts-ignore
           const result = resp.trained_model_configs as TrainedModelConfigResponse[];
 
-          const populateInferenceServices = populateInferenceServicesProvider(client);
-          await populateInferenceServices(result, false);
-
-          try {
-            if (withPipelines) {
-              // Also need to retrieve the list of deployment IDs from stats
-              const stats = await mlClient.getTrainedModelsStats({
-                ...(modelId ? { model_id: modelId } : {}),
-                size: 10000,
-              });
-
-              const modelDeploymentsMap = stats.trained_model_stats.reduce((acc, curr) => {
-                if (!curr.deployment_stats) return acc;
-                // @ts-ignore elasticsearch-js client is missing deployment_id
-                const deploymentId = curr.deployment_stats.deployment_id;
-                if (acc[curr.model_id]) {
-                  acc[curr.model_id].push(deploymentId);
-                } else {
-                  acc[curr.model_id] = [deploymentId];
-                }
-                return acc;
-              }, {} as Record<string, string[]>);
-
-              const modelIdsAndAliases: string[] = Array.from(
-                new Set([
-                  ...result
-                    .map(({ model_id: id, metadata }) => {
-                      return [id, ...(metadata?.model_aliases ?? [])];
-                    })
-                    .flat(),
-                  ...Object.values(modelDeploymentsMap).flat(),
-                ])
-              );
-              const modelsClient = modelsProvider(client, mlClient, cloud);
-
-              const modelsPipelinesAndIndices = await Promise.all(
-                modelIdsAndAliases.map(async (modelIdOrAlias) => {
-                  return {
-                    modelIdOrAlias,
-                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdOrAlias, {
-                      withIndices,
-                    }),
-                  };
-                })
-              );
-
-              for (const model of result) {
-                const modelAliases = model.metadata?.model_aliases ?? [];
-                const modelMap = modelsPipelinesAndIndices.find(
-                  (d) => d.modelIdOrAlias === model.model_id
-                )?.result;
-
-                const allRelatedModels = modelsPipelinesAndIndices
-                  .filter(
-                    (m) =>
-                      [
-                        model.model_id,
-                        ...modelAliases,
-                        ...(modelDeploymentsMap[model.model_id] ?? []),
-                      ].findIndex((alias) => alias === m.modelIdOrAlias) > -1
-                  )
-                  .map((r) => r?.result)
-                  .filter(isDefined);
-                const ingestPipelinesFromModelAliases = allRelatedModels
-                  .map((r) => r?.ingestPipelines)
-                  .filter(isDefined) as Array<Map<string, Record<string, PipelineDefinition>>>;
-
-                model.pipelines = ingestPipelinesFromModelAliases.reduce<
-                  Record<string, PipelineDefinition>
-                >((allPipelines, modelsToPipelines) => {
-                  for (const [, pipelinesObj] of modelsToPipelines?.entries()) {
-                    Object.entries(pipelinesObj).forEach(([pipelineId, pipelineInfo]) => {
-                      allPipelines[pipelineId] = pipelineInfo;
-                    });
-                  }
-                  return allPipelines;
-                }, {});
-
-                if (modelMap && withIndices) {
-                  model.indices = modelMap.indices;
-                }
-              }
-            }
-          } catch (e) {
-            // the user might not have required permissions to fetch pipelines
-            // log the error to the debug log as this might be a common situation and
-            // we don't need to fill kibana's log with these messages.
-            mlLog.debug(e);
-          }
-
           const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
-
-          try {
-            const jobIds = filteredModels
-              .map((model) => {
-                const id = model.metadata?.analytics_config?.id;
-                if (id) {
-                  return `${id}*`;
-                }
-              })
-              .filter((id) => id !== undefined);
-
-            if (jobIds.length) {
-              const { data_frame_analytics: jobs } = await mlClient.getDataFrameAnalytics({
-                id: jobIds.join(','),
-                allow_no_match: true,
-              });
-
-              filteredModels.forEach((model) => {
-                const dfaId = model?.metadata?.analytics_config?.id;
-                if (dfaId !== undefined) {
-                  // if this is a dfa model, set origin_job_exists
-                  model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
-                }
-              });
-            }
-          } catch (e) {
-            // Swallow error to prevent blocking trained models result
-          }
 
           return response.ok({
             body: filteredModels,
@@ -367,9 +226,12 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
           const { modelId } = request.params;
-          const result = await modelsProvider(client, mlClient, cloud).getModelsPipelines(
-            modelId.split(',')
-          );
+          const result = await modelsProvider(
+            client,
+            mlClient,
+            cloud,
+            getEnabledFeatures()
+          ).getModelsPipelines(modelId.split(','));
           return response.ok({
             body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
           });
@@ -396,9 +258,14 @@ export function trainedModelsRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response }) => {
         try {
-          const body = await modelsProvider(client, mlClient, cloud).getPipelines();
+          const body = await modelsProvider(
+            client,
+            mlClient,
+            cloud,
+            getEnabledFeatures()
+          ).getPipelines();
           return response.ok({
             body,
           });
@@ -432,10 +299,12 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
         try {
           const { pipeline, pipelineName } = request.body;
-          const body = await modelsProvider(client, mlClient, cloud).createInferencePipeline(
-            pipeline!,
-            pipelineName
-          );
+          const body = await modelsProvider(
+            client,
+            mlClient,
+            cloud,
+            getEnabledFeatures()
+          ).createInferencePipeline(pipeline!, pipelineName);
           return response.ok({
             body,
           });
@@ -517,7 +386,12 @@ export function trainedModelsRoutes(
 
           if (withPipelines) {
             // first we need to delete pipelines, otherwise ml api return an error
-            await modelsProvider(client, mlClient, cloud).deleteModelPipelines(modelId.split(','));
+            await modelsProvider(
+              client,
+              mlClient,
+              cloud,
+              getEnabledFeatures()
+            ).deleteModelPipelines(modelId.split(','));
           }
 
           const body = await mlClient.deleteTrainedModel({
@@ -773,7 +647,12 @@ export function trainedModelsRoutes(
       },
       routeGuard.fullLicenseAPIGuard(async ({ response, mlClient, client }) => {
         try {
-          const body = await modelsProvider(client, mlClient, cloud).getModelDownloads();
+          const body = await modelsProvider(
+            client,
+            mlClient,
+            cloud,
+            getEnabledFeatures()
+          ).getModelDownloads();
 
           return response.ok({
             body,
@@ -809,7 +688,7 @@ export function trainedModelsRoutes(
         try {
           const { version } = request.query;
 
-          const body = await modelsProvider(client, mlClient, cloud).getELSER(
+          const body = await modelsProvider(client, mlClient, cloud, getEnabledFeatures()).getELSER(
             version ? { version: Number(version) as ElserVersion } : undefined
           );
 
@@ -847,10 +726,12 @@ export function trainedModelsRoutes(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
             const { modelId } = request.params;
-            const body = await modelsProvider(client, mlClient, cloud).installElasticModel(
-              modelId,
-              mlSavedObjectService
-            );
+            const body = await modelsProvider(
+              client,
+              mlClient,
+              cloud,
+              getEnabledFeatures()
+            ).installElasticModel(modelId, mlSavedObjectService);
 
             return response.ok({
               body,
@@ -882,7 +763,12 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
-            const body = await modelsProvider(client, mlClient, cloud).getModelsDownloadStatus();
+            const body = await modelsProvider(
+              client,
+              mlClient,
+              cloud,
+              getEnabledFeatures()
+            ).getModelsDownloadStatus();
 
             return response.ok({
               body,
@@ -920,10 +806,14 @@ export function trainedModelsRoutes(
       routeGuard.fullLicenseAPIGuard(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
-            const body = await modelsProvider(client, mlClient, cloud).getCuratedModelConfig(
-              request.params.modelName as ElasticCuratedModelName,
-              { version: request.query.version as ElserVersion }
-            );
+            const body = await modelsProvider(
+              client,
+              mlClient,
+              cloud,
+              getEnabledFeatures()
+            ).getCuratedModelConfig(request.params.modelName as ElasticCuratedModelName, {
+              version: request.query.version as ElserVersion,
+            });
 
             return response.ok({
               body,
