@@ -10,6 +10,8 @@ import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-types';
 import {
   rawRuleExecutionStatusSchema as rawRuleExecutionStatusSchemaV3,
   rawRuleSchema as rawRuleSchemaV3,
+  rawRuleLastRunSchema as rawRuleLastRunSchemaV3,
+  executionStatusWarningReason as executionStatusWarningReasonV3,
 } from './v3';
 
 export * from './v3';
@@ -25,6 +27,12 @@ export const executionStatusErrorReason = schema.oneOf([
   schema.literal(RuleExecutionStatusErrorReasons.Validate),
   schema.literal(RuleExecutionStatusErrorReasons.Blocked), // new
 ]);
+
+export const rawRuleLastRunSchema = rawRuleLastRunSchemaV3.extends({
+  warning: schema.maybe(
+    schema.nullable(schema.oneOf([executionStatusErrorReason, executionStatusWarningReasonV3]))
+  ),
+});
 
 const rawRuleExecutionStatusSchema = rawRuleExecutionStatusSchemaV3.extends({
   error: schema.nullable(
