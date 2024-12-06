@@ -23,7 +23,7 @@ import {
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
-import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
+import { OTHER_CATEGORY_LABEL } from '../style_util';
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
@@ -246,9 +246,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return this._chartsPaletteServiceGetColor('__other__');
     }
 
-    return this._options.otherCategoryColor
-      ? this._options.otherCategoryColor
-      : OTHER_CATEGORY_DEFAULT_COLOR;
+    return this._options.otherCategoryColor;
   }
 
   _getColorPaletteStops() {
