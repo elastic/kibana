@@ -6,12 +6,10 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { extractValidationMessages } from '../../../../../../rule_creation/logic/extract_validation_messages';
 import type { FormWithWarningsSubmitHandler } from '../../../../../../../common/hooks/use_form_with_warnings';
 import { useFormWithWarnings } from '../../../../../../../common/hooks/use_form_with_warnings';
 import { Form } from '../../../../../../../shared_imports';
-import { useForm, Form } from '../../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import type {
   DiffableAllFields,
