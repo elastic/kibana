@@ -8,22 +8,43 @@
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { i18n } from '@kbn/i18n';
-import { nodeBuilder } from '@kbn/es-query';
-import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
 
 export const getLegacyRbacDeprecationsInfo = async ({
-  savedObjectsClient,
+  esClient,
 }: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
-  const filter = nodeBuilder.and([
-    nodeBuilder.is('usage-counter.attributes.counterType', 'legacyRBACExemption'),
-  ]);
-
-  const { saved_objects: legacyRBACExemptions } = await savedObjectsClient.find({
-    filter,
-    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  const { hits: legacyRBACExemptions } = await esClient.asCurrentUser.search({
+    index: '.kibana*',
+    body: {
+      runtime_mappings: {
+        apiKeyVersion: {
+          type: 'keyword',
+          script: {
+            source:
+              "def alert = params._source['alert']; if (alert != null) { def meta = alert.meta; if (meta != null) { emit(meta.versionApiKeyLastmodified); } else { emit('');}}",
+          },
+        },
+      },
+      size: 10000,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                type: 'alert',
+              },
+            },
+            {
+              term: {
+                apiKeyVersion: 'pre-7.10.0',
+              },
+            },
+          ],
+        },
+      },
+    },
   });
 
-  if (legacyRBACExemptions.length) {
+  if (legacyRBACExemptions.hits.length) {
     return [
       {
         title: i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.title', {

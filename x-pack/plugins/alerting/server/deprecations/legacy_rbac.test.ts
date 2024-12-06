@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { GetDeprecationsContext, SavedObjectsFindResponse } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { GetDeprecationsContext } from '@kbn/core/server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getLegacyRbacDeprecationsInfo } from './legacy_rbac';
+import { SearchHit } from '@kbn/es-types';
 
 let context: GetDeprecationsContext;
-
-const savedObjectsClient = savedObjectsClientMock.create();
+const esClient = elasticsearchClientMock.createScopedClusterClient();
 
 describe('getLegacyRbacDeprecationsInfo', () => {
   beforeEach(async () => {
-    context = { savedObjectsClient } as unknown as GetDeprecationsContext;
+    context = { esClient } as unknown as GetDeprecationsContext;
   });
 
   afterEach(() => {
@@ -23,27 +23,36 @@ describe('getLegacyRbacDeprecationsInfo', () => {
   });
 
   test('does not return deprecations when there is no legacyRBACExemption usage', async () => {
-    savedObjectsClient.find.mockResolvedValueOnce({
-      saved_objects: [],
-    } as unknown as SavedObjectsFindResponse);
+    esClient.asCurrentUser.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: [],
+      },
+    });
     expect(await getLegacyRbacDeprecationsInfo(context)).toMatchInlineSnapshot(`Array []`);
   });
 
   test('does return deprecations when there is legacyRBACExemption usage', async () => {
-    savedObjectsClient.find.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          attributes: {
-            domainId: 'test-domain-id',
-            counterName: 'test',
-            counterType: 'legacyRBACExemption',
-            source: 'test',
-            count: 2,
-          },
-          id: 'test-1',
-        },
-      ],
-    } as unknown as SavedObjectsFindResponse);
+    esClient.asCurrentUser.search.mockResponse({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        hits: [{} as SearchHit<unknown>],
+      },
+    });
 
     expect(await getLegacyRbacDeprecationsInfo(context)).toMatchInlineSnapshot(`
       Array [
