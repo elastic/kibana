@@ -10,8 +10,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
-
-import { breakpoint } from '@elastic/eui/src/themes/amsterdam/global_styling/variables/_breakpoint';
 import { useEuiTheme } from '@elastic/eui';
 import {
   ActivePanel,
