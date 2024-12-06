@@ -25,7 +25,7 @@ viewer:
   cluster: []
   indices:
     - names:
-        - ".siemV2-signals*"
+        - ".siem-signals*"
         - ".lists-*"
         - ".items-*"
       privileges:
@@ -67,6 +67,8 @@ viewer:
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.read
+        - feature_securitySolutionNotes.read
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -84,7 +86,7 @@ editor:
   cluster: []
   indices:
     - names:
-        - ".siemV2-signals*"
+        - ".siem-signals*"
         - ".lists-*"
         - ".items-*"
       privileges:
@@ -147,6 +149,8 @@ editor:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -164,7 +168,7 @@ t1_analyst:
   indices:
     - names:
         - ".alerts-security*"
-        - ".siemV2-signals-*"
+        - ".siem-signals-*"
       privileges:
         - read
         - write
@@ -197,6 +201,8 @@ t1_analyst:
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.read
+        - feature_securitySolutionNotes.read
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -214,7 +220,7 @@ t2_analyst:
   indices:
     - names:
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
       privileges:
         - read
         - write
@@ -253,6 +259,8 @@ t2_analyst:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.read
+        - feature_securitySolutionNotes.read
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.read
@@ -283,7 +291,7 @@ t3_analyst:
         - write
     - names:
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
       privileges:
         - read
         - write
@@ -324,6 +332,8 @@ t3_analyst:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -358,7 +368,7 @@ threat_intelligence_analyst:
         - write
     - names:
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
       privileges:
         - read
         - write
@@ -382,6 +392,8 @@ threat_intelligence_analyst:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.read
         - feature_osquery.all
@@ -411,7 +423,7 @@ rule_author:
         - write
     - names:
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
         - .internal.preview.alerts-security*
         - .preview.alerts-security*
       privileges:
@@ -451,6 +463,8 @@ rule_author:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.read
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -481,7 +495,7 @@ soc_manager:
         - write
     - names:
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
       privileges:
@@ -525,6 +539,8 @@ soc_manager:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -552,7 +568,7 @@ detections_admin:
         - .lists*
         - .items*
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
       privileges:
@@ -586,6 +602,8 @@ detections_admin:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_dev_tools.all
@@ -613,7 +631,7 @@ platform_engineer:
         - .lists*
         - .items*
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
         - risk-score.risk-score-*
@@ -646,6 +664,8 @@ platform_engineer:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_fleet.all
@@ -687,7 +707,7 @@ endpoint_operations_analyst:
         - read
     - names:
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
       privileges:
@@ -720,6 +740,8 @@ endpoint_operations_analyst:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
@@ -765,7 +787,7 @@ endpoint_policy_manager:
         - write
     - names:
         - .alerts-security*
-        - .siemV2-signals-*
+        - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
       privileges:
@@ -788,6 +810,8 @@ endpoint_policy_manager:
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
+        - feature_securitySolutionTimeline.all
+        - feature_securitySolutionNotes.all
         - feature_actions.all
         - feature_builtInAlerts.all
         - feature_osquery.all
