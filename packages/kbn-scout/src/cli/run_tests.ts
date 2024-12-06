@@ -18,11 +18,14 @@ import { parseTestFlags, runTests as runTestsFn } from '../playwright/runner';
 export const runTests: Command<void> = {
   name: 'run-tests',
   description: `
-  Run Scout UI Tests
+  Run a Scout Playwright config.
+
+  Note:
+    This also handles server starts. Make sure a Scout test server is not already running before invoking this command.
 
   Common usage:
-  ./scripts/scout run-tests --stateful --config <playwright_config_path>
-  ./scripts/scout run-tests --serverless=es --headed --config <playwright_config_path>
+    node scripts/scout run-tests --stateful --config <playwright_config_path>
+    node scripts/scout run-tests --serverless=es --headed --config <playwright_config_path>
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {

@@ -134,6 +134,9 @@ export const reporterProperties: Record<PropertyName, MappingProperty> = {
 };
 
 export const testRunProperties: Record<PropertyName, MappingProperty> = {
+  id: {
+    type: 'wildcard',
+  },
   status: {
     type: 'keyword',
   },

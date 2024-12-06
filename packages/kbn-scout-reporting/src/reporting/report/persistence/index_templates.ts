@@ -8,13 +8,14 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SCOUT_TEST_EVENTS_TEMPLATE_NAME, SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
 import * as componentTemplates from './component_templates';
 
 export const testEvents: IndicesPutIndexTemplateRequest = {
-  name: 'scout-test-events',
+  name: SCOUT_TEST_EVENTS_TEMPLATE_NAME,
   version: 1,
   data_stream: {},
-  index_patterns: 'scout-test-events-*',
+  index_patterns: SCOUT_TEST_EVENTS_INDEX_PATTERN,
   composed_of: [
     'ecs@mappings',
     componentTemplates.buildkiteMappings.name,

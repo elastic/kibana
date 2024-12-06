@@ -15,25 +15,25 @@ export interface BuildkiteMetadata {
   commit?: string;
   job_id?: string;
   message?: string;
-  build?: {
+  build: {
     id?: string;
     number?: string;
     url?: string;
   };
-  pipeline?: {
+  pipeline: {
     id?: string;
     name?: string;
     slug?: string;
   };
-  agent?: {
+  agent: {
     name?: string;
   };
-  group?: {
+  group: {
     id?: string;
     key?: string;
     label?: string;
   };
-  step?: {
+  step: {
     id?: string;
     key?: string;
     label?: string;
@@ -78,4 +78,10 @@ export const buildkite: BuildkiteMetadata =
         },
         command: process.env.BUILDKITE_COMMAND,
       }
-    : {};
+    : {
+        build: {},
+        pipeline: {},
+        agent: {},
+        group: {},
+        step: {},
+      };
