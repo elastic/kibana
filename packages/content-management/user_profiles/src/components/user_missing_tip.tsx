@@ -55,7 +55,7 @@ export const NoUpdaterTip = (props: {
       props.includeVersionTip ? (
         <FormattedMessage
           id="contentManagement.userProfiles.noUpdaterTipWithVersion"
-          defaultMessage="Updated by is set when {entityNamePlural} are updated by users (not by API) starting from version {version}."
+          defaultMessage="Updated by is set when {entityNamePlural} are updated by users (not by API) starting from version {version}"
           values={{
             version: '8.15',
             entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural,
@@ -64,7 +64,7 @@ export const NoUpdaterTip = (props: {
       ) : (
         <FormattedMessage
           id="contentManagement.userProfiles.noUpdaterTip"
-          defaultMessage="Updated by is set when {entityNamePlural} are created by users (not by API)."
+          defaultMessage="Updated by is set when {entityNamePlural} are created by users (not by API)"
           values={{ entityNamePlural: props.entityNamePlural ?? fallbackEntityNamePlural }}
         />
       )
