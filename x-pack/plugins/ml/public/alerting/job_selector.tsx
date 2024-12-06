@@ -18,7 +18,7 @@ import type { MlApi } from '../application/services/ml_api_service';
 import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
 import { LoadingIndicator } from '../application/components/loading_indicator';
 
-interface JobSelection {
+export interface JobSelection {
   jobIds?: JobId[];
   groupIds?: string[];
 }
