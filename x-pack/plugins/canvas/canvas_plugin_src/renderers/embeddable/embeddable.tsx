@@ -6,9 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import {
-  ReactEmbeddableRenderer,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
