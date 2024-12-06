@@ -127,9 +127,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<UnifiedChatCompleteResponse> {
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>({
       method: 'POST',
-      path: `/_connector`,
-      body: params,
+      path: `_inference/completion/${this.inferenceId}/_unified`,
+      body: params.body,
     });
+
     return response;
   }
 

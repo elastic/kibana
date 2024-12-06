@@ -29,25 +29,35 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 > = ({ actionParams, editAction, index, errors, actionConnector }) => {
   const { subAction, subActionParams } = actionParams;
 
-  const { taskType } = (actionConnector as unknown as InferenceActionConnector).config;
+  const { taskType, provider } = (actionConnector as unknown as InferenceActionConnector).config;
 
   useEffect(() => {
     if (!subAction) {
-      editAction('subAction', taskType, index);
+      editAction(
+        'subAction',
+        provider === 'openai' && taskType === SUB_ACTION.COMPLETION
+          ? SUB_ACTION.UNIFIED_COMPLETION
+          : taskType,
+        index
+      );
     }
-  }, [editAction, index, subAction, taskType]);
+  }, [editAction, index, provider, subAction, taskType]);
 
   useEffect(() => {
     if (!subActionParams) {
       editAction(
         'subActionParams',
         {
-          ...(DEFAULTS_BY_TASK_TYPE[taskType] ?? {}),
+          ...(DEFAULTS_BY_TASK_TYPE[
+            provider === 'openai' && taskType === SUB_ACTION.COMPLETION
+              ? SUB_ACTION.UNIFIED_COMPLETION
+              : taskType
+          ] ?? {}),
         },
         index
       );
     }
-  }, [editAction, index, subActionParams, taskType]);
+  }, [editAction, index, provider, subActionParams, taskType]);
 
   const editSubActionParams = useCallback(
     (params: Partial<InferenceActionParams['subActionParams']>) => {
@@ -138,19 +148,19 @@ const UnifiedCompletionParamsFields: React.FunctionComponent<{
   return (
     <>
       <JsonEditorWithMessageVariables
-        paramsProperty={'input'}
-        inputTargetValue={JSON.stringify(subActionParams)}
-        label={i18n.INPUT}
-        errors={errors.input as string[]}
+        paramsProperty={'body'}
+        inputTargetValue={JSON.stringify(subActionParams.body)}
+        label={i18n.BODY}
+        errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editSubActionParams({ input: json.trim() });
+          editSubActionParams({ body: { ...JSON.parse(json) } });
         }}
         onBlur={() => {
-          if (!subActionParams.messages) {
-            editSubActionParams({ input: [] });
+          if (!subActionParams.body) {
+            editSubActionParams({ body: { messages: [] } });
           }
         }}
-        dataTestSubj="inference-inputJsonEditor"
+        dataTestSubj="inference-bodyJsonEditor"
       />
     </>
   );
