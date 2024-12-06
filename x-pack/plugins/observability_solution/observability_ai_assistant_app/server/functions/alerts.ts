@@ -14,8 +14,10 @@ import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  AlertConsumers,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { omit } from 'lodash';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-plugin/common/constants';
 import { FunctionRegistrationParameters } from '.';
 
 const defaultFields = [
@@ -59,15 +61,6 @@ const OMITTED_ALERT_FIELDS = [
   'kibana.space_ids',
   'kibana.alert.time_range',
   'kibana.version',
-] as const;
-
-const DEFAULT_FEATURE_IDS = [
-  'apm',
-  'infrastructure',
-  'logs',
-  'uptime',
-  'slo',
-  'observability',
 ] as const;
 
 export function registerAlertsFunction({
@@ -183,7 +176,16 @@ export function registerAlertsFunction({
         const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
 
         const response = await alertsClient.find({
-          featureIds: DEFAULT_FEATURE_IDS as unknown as string[],
+          ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+          consumers: [
+            AlertConsumers.APM,
+            AlertConsumers.INFRASTRUCTURE,
+            AlertConsumers.LOGS,
+            AlertConsumers.UPTIME,
+            AlertConsumers.SLO,
+            AlertConsumers.OBSERVABILITY,
+            AlertConsumers.ALERTS,
+          ],
           query: {
             bool: {
               filter: [
@@ -194,17 +196,17 @@ export function registerAlertsFunction({
                       lte: end,
                     },
                   },
-                },
-                ...kqlQuery,
-                ...(!includeRecovered
-                  ? [
-                      {
-                        term: {
-                          [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                  ...kqlQuery,
+                  ...(!includeRecovered
+                    ? [
+                        {
+                          term: {
+                            [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                          },
                         },
-                      },
-                    ]
-                  : []),
+                      ]
+                    : []),
+                },
               ],
             },
           },

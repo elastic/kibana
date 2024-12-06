@@ -9,23 +9,17 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import type { ActionStatus, AgentPolicy } from '../../../../../types';
+import type { ActionStatus } from '../../../../../types';
 
 const MAX_VIEW_AGENTS_COUNT = 1000;
 
 export const ViewAgentsButton: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
-  agentPolicies?: AgentPolicy[];
-}> = ({ action, onClickViewAgents, agentPolicies }) => {
+}> = ({ action, onClickViewAgents }) => {
   const isDisabled = useMemo(() => {
-    if (action.type !== 'POLICY_CHANGE') {
-      return action.nbAgentsActionCreated > MAX_VIEW_AGENTS_COUNT;
-    }
-
-    const actionPolicyId = action.actionId.split(':')[0];
-    return agentPolicies?.find((agentPolicy) => agentPolicy.id === actionPolicyId)?.agents === 0;
-  }, [action, agentPolicies]);
+    return action.nbAgentsActionCreated > MAX_VIEW_AGENTS_COUNT;
+  }, [action]);
 
   if (action.type === 'UPDATE_TAGS') {
     return null;
@@ -46,8 +40,22 @@ export const ViewAgentsButton: React.FunctionComponent<{
     </EuiButtonEmpty>
   );
 
-  if (action.type !== 'POLICY_CHANGE' && !isDisabled) {
-    return button;
+  if (isDisabled) {
+    return (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.viewAgentsButtonDisabledMaxTooltip"
+            defaultMessage="The view agents feature is only available for action impacting less than {agentCount} agents"
+            values={{
+              agentCount: MAX_VIEW_AGENTS_COUNT,
+            }}
+          />
+        }
+      >
+        {button}
+      </EuiToolTip>
+    );
   }
 
   if (action.type === 'POLICY_CHANGE') {
@@ -65,19 +73,5 @@ export const ViewAgentsButton: React.FunctionComponent<{
     );
   }
 
-  return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="xpack.fleet.agentActivityFlyout.viewAgentsButtonDisabledMaxTooltip"
-          defaultMessage="The view agents feature is only available for action impacting less than {agentCount} agents"
-          values={{
-            agentCount: MAX_VIEW_AGENTS_COUNT,
-          }}
-        />
-      }
-    >
-      {button}
-    </EuiToolTip>
-  );
+  return button;
 };

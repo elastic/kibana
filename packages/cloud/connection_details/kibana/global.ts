@@ -21,6 +21,7 @@ export interface ConnectionDetailsGlobalDependencies {
       http: CoreStart['http'];
       application: CoreStart['application'];
       overlays: CoreStart['overlays'];
+      userProfile: CoreStart['userProfile'];
     };
     plugins: {
       cloud?: CloudStart;
