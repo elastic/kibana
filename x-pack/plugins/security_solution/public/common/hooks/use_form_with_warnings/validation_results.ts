@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { BaseError } from '../common/errors';
+import type { ValidationError } from '../../../shared_imports';
 
-export class AutoOpsError extends BaseError {}
+export interface ValidationResults {
+  errors: ValidationError[];
+  warnings: ValidationError[];
+}
