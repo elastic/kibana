@@ -94,6 +94,7 @@ export async function openSaveModal({
           };
 
           // TODO If this is a managed dashboard - unlink all by reference embeddables on clone
+          // https://github.com/elastic/kibana/issues/190138
 
           const beforeAddTime = window.performance.now();
 
