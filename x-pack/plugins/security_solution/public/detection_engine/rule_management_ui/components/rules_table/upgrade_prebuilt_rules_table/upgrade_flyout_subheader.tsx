@@ -57,7 +57,7 @@ export const UpgradeFlyoutSubHeader = memo(function UpgradeFlyoutSubHeader({
   const fieldsNamesWithUpdates = Object.keys(ruleUpgradeState.fieldsUpgradeState).filter(
     (fieldName) => fieldsDiff[fieldName].has_update
   );
-  const fieldUpdates = fieldsNamesWithUpdates.length > 0 && (
+  const fieldUpdates = !fieldsDiff.type && fieldsNamesWithUpdates.length > 0 && (
     <EuiText size="s">
       <strong>
         {i18n.FIELD_UPDATES}
