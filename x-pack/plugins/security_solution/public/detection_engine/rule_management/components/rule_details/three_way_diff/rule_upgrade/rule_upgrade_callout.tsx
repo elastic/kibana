@@ -30,18 +30,13 @@ export function RuleUpgradeCallout({
             &nbsp;
             <ActionRequiredBadge />
             &nbsp;
-            {numOfSolvableConflicts > 0
-              ? i18n.RULE_HAS_NON_SOLVABLE_AND_SOLVABLE_CONFLICTS(
-                  numOfNonSolvableConflicts,
-                  numOfSolvableConflicts
-                )
-              : i18n.RULE_HAS_NON_SOLVABLE_CONFLICTS(numOfNonSolvableConflicts)}
+            {i18n.RULE_HAS_CONFLICTS(numOfNonSolvableConflicts + numOfSolvableConflicts)}
           </>
         }
         color="danger"
         size="s"
       >
-        <p>{i18n.RULE_HAS_NON_SOLVABLE_CONFLICTS_DESCRIPTION}</p>
+        <p>{i18n.RULE_HAS_HARD_CONFLICTS_DESCRIPTION}</p>
       </EuiCallOut>
     );
   }
@@ -55,13 +50,13 @@ export function RuleUpgradeCallout({
             &nbsp;
             <ReviewRequiredBadge />
             &nbsp;
-            {i18n.RULE_HAS_SOLVABLE_CONFLICTS(numOfSolvableConflicts)}
+            {i18n.RULE_HAS_CONFLICTS(numOfSolvableConflicts)}
           </>
         }
         color="warning"
         size="s"
       >
-        <p>{i18n.RULE_HAS_SOLVABLE_CONFLICTS_DESCRIPTION}</p>
+        <p>{i18n.RULE_HAS_SOFT_CONFLICTS_DESCRIPTION}</p>
       </EuiCallOut>
     );
   }

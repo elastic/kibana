@@ -16,14 +16,12 @@ import * as i18n from './translations';
 
 interface RuleUpgradeInfoBarProps {
   numOfFieldsWithUpdates: number;
-  numOfSolvableConflicts: number;
-  numOfNonSolvableConflicts: number;
+  numOfConflicts: number;
 }
 
 export function RuleUpgradeInfoBar({
   numOfFieldsWithUpdates,
-  numOfSolvableConflicts,
-  numOfNonSolvableConflicts,
+  numOfConflicts,
 }: RuleUpgradeInfoBarProps): JSX.Element {
   return (
     <UtilityBar>
@@ -35,12 +33,7 @@ export function RuleUpgradeInfoBar({
         </UtilityBarGroup>
         <UtilityBarGroup>
           <UtilityBarText dataTestSubj="showingRules">
-            {i18n.NUM_OF_SOLVED_CONFLICTS(numOfSolvableConflicts)}
-          </UtilityBarText>
-        </UtilityBarGroup>
-        <UtilityBarGroup>
-          <UtilityBarText dataTestSubj="showingRules">
-            {i18n.NUM_OF_UNSOLVED_CONFLICTS(numOfNonSolvableConflicts)}
+            {i18n.NUM_OF_CONFLICTS(numOfConflicts)}
           </UtilityBarText>
         </UtilityBarGroup>
       </UtilityBarSection>
