@@ -291,8 +291,6 @@ export class DiscoverEBTManager {
       [CONTEXT_PROFILE_ID]: profileId,
     };
 
-    console.log('eventData', eventData);
-
     this.reportEvent(CONTEXT_PROFILE_RESOLVED_EVENT_TYPE, eventData);
   }
 }
