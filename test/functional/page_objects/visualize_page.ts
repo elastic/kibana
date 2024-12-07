@@ -44,6 +44,7 @@ export class VisualizePageObject extends FtrService {
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly dataViews = this.ctx.getService('dataViews');
 
   index = {
     LOGSTASH_TIME_BASED: 'logstash-*',
@@ -165,6 +166,16 @@ export class VisualizePageObject extends FtrService {
         throw new Error('wait for vis groups select step');
       }
     });
+  }
+
+  public async selectIndexPattern(
+    indexPattern: string,
+    waitUntilLoadingHasFinished: boolean = true
+  ) {
+    await this.dataViews.switchTo(indexPattern);
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   /**

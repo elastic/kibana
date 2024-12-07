@@ -51,6 +51,7 @@ export class DashboardPageObject extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly appsMenu = this.ctx.getService('appsMenu');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly dataViews = this.ctx.getService('dataViews');
 
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -403,6 +404,16 @@ export class DashboardPageObject extends FtrService {
     }
     // make sure the dashboard page is shown
     await this.waitForRenderComplete();
+  }
+
+  public async selectIndexPattern(
+    indexPattern: string,
+    waitUntilLoadingHasFinished: boolean = true
+  ) {
+    await this.dataViews.switchTo(indexPattern);
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   public async clickCreateDashboardPrompt() {
