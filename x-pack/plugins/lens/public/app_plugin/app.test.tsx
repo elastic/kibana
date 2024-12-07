@@ -532,8 +532,8 @@ describe('Lens App', () => {
       it('shows a disabled save button when the user does not have permissions', async () => {
         services.application.capabilities = {
           ...services.application.capabilities,
-          visualize: { save: false, saveQuery: false, show: true },
-          dashboard: {
+          visualize_v2: { save: false, saveQuery: false, show: true },
+          dashboard_v2: {
             showWriteControls: false,
           },
         };
@@ -829,7 +829,7 @@ describe('Lens App', () => {
     it('should still be enabled even if the user is missing save permissions', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true, createShortUrl: true },
+        visualize_v2: { save: false, saveQuery: false, show: true, createShortUrl: true },
       };
 
       await renderApp({
@@ -844,7 +844,7 @@ describe('Lens App', () => {
     it('should still be enabled even if the user is missing shortUrl permissions', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: true, saveQuery: false, show: true, createShortUrl: false },
+        visualize_v2: { save: true, saveQuery: false, show: true, createShortUrl: false },
       };
 
       await renderApp({
@@ -860,7 +860,7 @@ describe('Lens App', () => {
     it('should be disabled if the user is missing shortUrl permissions and visualization is not saveable', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true, createShortUrl: false },
+        visualize_v2: { save: false, saveQuery: false, show: true, createShortUrl: false },
       };
 
       await renderApp({
@@ -1282,7 +1282,7 @@ describe('Lens App', () => {
     it('does not confirm if the user is missing save permissions', async () => {
       services.application.capabilities = {
         ...services.application.capabilities,
-        visualize: { save: false, saveQuery: false, show: true },
+        visualize_v2: { save: false, saveQuery: false, show: true },
       };
       await renderApp({
         preloadedState: { isSaveable: true },

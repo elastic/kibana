@@ -408,7 +408,7 @@ describe('getSharingData', () => {
 });
 
 describe('showPublicUrlSwitch', () => {
-  test('returns false if "discover" app is not available', () => {
+  test('returns false if "discover_v2" app is not available', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
@@ -419,12 +419,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns false if "discover" app is not accessible', () => {
+  test('returns false if "discover_v2" app is not accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      discover: {
+      discover_v2: {
         show: false,
       },
     };
@@ -433,12 +433,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns true if "discover" app is not available an accessible', () => {
+  test('returns true if "discover_v2" app is not available an accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      discover: {
+      discover_v2: {
         show: true,
       },
     };

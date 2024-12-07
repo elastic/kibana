@@ -33,7 +33,7 @@ const uiCapabilities: Capabilities = {
   navLinks: { show: false },
   management: { fake: { show: false } },
   catalogue: { show: false },
-  visualize: { show: true },
+  visualize_v2: { show: true },
   infrastructure: { save: true },
 };
 

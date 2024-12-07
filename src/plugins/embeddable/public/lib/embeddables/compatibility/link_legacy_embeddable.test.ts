@@ -27,8 +27,8 @@ const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, 
 
 const defaultCapabilities = {
   advancedSettings: {},
-  visualize: { save: true },
-  maps: { save: true },
+  visualize_v2: { save: true },
+  maps_v2: { save: true },
   navLinks: {},
 };
 
