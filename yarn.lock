@@ -5788,6 +5788,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/genai-common@link:x-pack/packages/kbn-genai-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate-console-definitions@link:packages/kbn-generate-console-definitions":
   version "0.0.0"
   uid ""
