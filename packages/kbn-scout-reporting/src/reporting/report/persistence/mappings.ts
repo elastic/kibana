@@ -95,35 +95,6 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   },
 };
 
-export const eventProperties: Record<PropertyName, MappingProperty> = {
-  action: {
-    type: 'keyword',
-  },
-  outcome: {
-    type: 'keyword',
-  },
-  error: {
-    type: 'object',
-    properties: {
-      message: {
-        type: 'text',
-      },
-      id: {
-        type: 'wildcard',
-      },
-      code: {
-        type: 'wildcard',
-      },
-      stack_trace: {
-        type: 'text',
-      },
-      type: {
-        type: 'keyword',
-      },
-    },
-  },
-};
-
 export const reporterProperties: Record<PropertyName, MappingProperty> = {
   name: {
     type: 'text',
