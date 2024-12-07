@@ -12,6 +12,7 @@ import type {
   CoreStart,
   Logger,
   CustomRequestHandlerContext,
+  PackageInfo,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { MINIMUM_LICENSE_TYPE } from '../common/constants';
@@ -31,6 +32,7 @@ export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContex
     }>['getStartServices'];
     isAvailable: () => boolean;
     logger: Logger;
+    packageInfo: PackageInfo;
   };
 }>;
 
@@ -41,12 +43,14 @@ export class IntegrationAssistantPlugin
   private readonly config: IntegrationAssistantConfigType;
   private isAvailable: boolean;
   private hasLicense: boolean;
+  private packageInfo: PackageInfo;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get();
     this.isAvailable = true;
     this.hasLicense = false;
+    this.packageInfo = initializerContext.env.packageInfo;
   }
 
   public setup(
@@ -61,6 +65,7 @@ export class IntegrationAssistantPlugin
       getStartServices: core.getStartServices,
       isAvailable: () => this.isAvailable && this.hasLicense,
       logger: this.logger,
+      packageInfo: this.packageInfo,
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
     const experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental ?? []);
