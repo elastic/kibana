@@ -36,6 +36,13 @@ export const RULE_MONITORING_TAB = i18n.translate(
   }
 );
 
+export const RULE_AI_MONITORING_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.aiMonitoring',
+  {
+    defaultMessage: 'AI Rule Monitoring ✨',
+  }
+);
+
 export const RULE_UPDATES_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.allRules.tabs.updates',
   {

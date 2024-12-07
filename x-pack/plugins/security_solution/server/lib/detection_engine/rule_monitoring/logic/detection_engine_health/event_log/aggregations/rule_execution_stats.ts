@@ -10,13 +10,17 @@ import { mapValues } from 'lodash';
 
 import type {
   AggregatedMetric,
-  HealthOverviewStats,
+  RuleHealthOverviewStats,
   LogLevel,
   NumberOfDetectedGaps,
   NumberOfExecutions,
   NumberOfLoggedMessages,
   RuleExecutionStatus,
+  RuleInfo,
+  RuleInfoWithPercentiles,
   TopMessages,
+  TopRulesByMetrics,
+  SpaceHealthOverviewStats,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevelEnum,
@@ -29,7 +33,7 @@ import {
   RULE_EXECUTION_LOG_PROVIDER,
 } from '../../../event_log/event_log_constants';
 import * as f from '../../../event_log/event_log_fields';
-import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
+import { DEFAULT_BASE_RULE_FIELDS, DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
 import type { RawData } from '../../../utils/normalization';
 
 export type RuleExecutionStatsAggregationLevel = 'whole-interval' | 'histogram';
@@ -196,10 +200,199 @@ export const getRuleExecutionStatsAggregation = (
   };
 };
 
+export const getTopRulesByMetricsAggregation = (
+  numOfTopRules: number
+): Record<string, estypes.AggregationsAggregationContainer> => {
+  return {
+    topRulesByExecutionDurationMs: {
+      filter: {
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: ALERTING_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: 'execute' } },
+            { term: { [f.EVENT_CATEGORY]: 'siem' } },
+          ],
+        },
+      },
+      aggs: {
+        rules: {
+          terms: {
+            field: 'rule.id',
+            size: numOfTopRules,
+            order: { [`percentiles.${DEFAULT_PERCENTILES[1]}`]: 'desc' },
+          },
+          aggs: {
+            percentiles: {
+              percentiles: {
+                field: f.RULE_EXECUTION_TOTAL_DURATION_MS,
+                missing: 0,
+                percents: DEFAULT_PERCENTILES,
+              },
+            },
+            rule: {
+              top_hits: {
+                size: 1,
+                _source: DEFAULT_BASE_RULE_FIELDS,
+              },
+            },
+          },
+        },
+      },
+    },
+    topRulesByScheduleDelay: {
+      filter: {
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: ALERTING_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: 'execute' } },
+            { term: { [f.EVENT_CATEGORY]: 'siem' } },
+          ],
+        },
+      },
+      aggs: {
+        rules: {
+          terms: {
+            field: 'rule.id',
+            size: numOfTopRules,
+            order: { [`percentiles.${DEFAULT_PERCENTILES[1]}`]: 'desc' },
+          },
+          aggs: {
+            percentiles: {
+              percentiles: {
+                field: f.RULE_EXECUTION_SCHEDULE_DELAY_NS,
+                missing: 0,
+                percents: DEFAULT_PERCENTILES,
+              },
+            },
+            rule: {
+              top_hits: {
+                size: 1,
+                _source: DEFAULT_BASE_RULE_FIELDS,
+              },
+            },
+          },
+        },
+      },
+    },
+    topRulesBySearchDurationMs: {
+      filter: {
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: RuleExecutionEventTypeEnum['execution-metrics'] } },
+          ],
+        },
+      },
+      aggs: {
+        rules: {
+          terms: {
+            field: 'rule.id',
+            size: numOfTopRules,
+            order: { [`percentiles.${DEFAULT_PERCENTILES[1]}`]: 'desc' },
+          },
+          aggs: {
+            percentiles: {
+              percentiles: {
+                field: f.RULE_EXECUTION_SEARCH_DURATION_MS,
+                missing: 0,
+                percents: DEFAULT_PERCENTILES,
+              },
+            },
+            rule: {
+              top_hits: {
+                size: 1,
+                _source: DEFAULT_BASE_RULE_FIELDS,
+              },
+            },
+          },
+        },
+      },
+    },
+    topRulesByIndexingDurationMs: {
+      filter: {
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: RuleExecutionEventTypeEnum['execution-metrics'] } },
+          ],
+        },
+      },
+      aggs: {
+        rules: {
+          terms: {
+            field: 'rule.id',
+            size: numOfTopRules,
+            order: { [`percentiles.${DEFAULT_PERCENTILES[1]}`]: 'desc' },
+          },
+          aggs: {
+            percentiles: {
+              percentiles: {
+                field: f.RULE_EXECUTION_INDEXING_DURATION_MS,
+                missing: 0,
+                percents: DEFAULT_PERCENTILES,
+              },
+            },
+            rule: {
+              top_hits: {
+                size: 1,
+                _source: DEFAULT_BASE_RULE_FIELDS,
+              },
+            },
+          },
+        },
+      },
+    },
+    topRulesByEnrichmentDurationMs: {
+      filter: {
+        bool: {
+          filter: [
+            { term: { [f.EVENT_PROVIDER]: RULE_EXECUTION_LOG_PROVIDER } },
+            { term: { [f.EVENT_ACTION]: RuleExecutionEventTypeEnum['execution-metrics'] } },
+          ],
+        },
+      },
+      aggs: {
+        rules: {
+          terms: {
+            field: 'rule.id',
+            size: numOfTopRules,
+            order: { [`percentiles.${DEFAULT_PERCENTILES[1]}`]: 'desc' },
+          },
+          aggs: {
+            percentiles: {
+              percentiles: {
+                field: f.RULE_EXECUTION_TOTAL_ENRICHMENT_DURATION_MS,
+                missing: 0,
+                percents: DEFAULT_PERCENTILES,
+              },
+            },
+            rule: {
+              top_hits: {
+                size: 1,
+                _source: DEFAULT_BASE_RULE_FIELDS,
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
+export const normalizeSpaceExecutionStatsAggregationResult = (
+  aggregations: Record<string, RawData>,
+  aggregationLevel: RuleExecutionStatsAggregationLevel
+): SpaceHealthOverviewStats => {
+  return {
+    top_rules: normalizeTopRulesByMetricsAggregationResult(aggregations),
+    ...normalizeRuleExecutionStatsAggregationResult(aggregations, aggregationLevel),
+  };
+};
+
 export const normalizeRuleExecutionStatsAggregationResult = (
   aggregations: Record<string, RawData>,
   aggregationLevel: RuleExecutionStatsAggregationLevel
-): HealthOverviewStats => {
+): RuleHealthOverviewStats => {
   const executeEvents = aggregations.executeEvents || {};
   const statusChangeEvents = aggregations.statusChangeEvents || {};
   const executionMetricsEvents = aggregations.executionMetricsEvents || {};
@@ -229,6 +422,56 @@ export const normalizeRuleExecutionStatsAggregationResult = (
       aggregationLevel === 'whole-interval'
         ? normalizeTopWarnings(messageContainingEvents)
         : undefined,
+  };
+};
+
+const normalizeTopRulesByMetricsAggregationResult = (
+  aggregations: Record<string, RawData>
+): TopRulesByMetrics => {
+  const topRulesByExecutionDurationMs = aggregations.topRulesByExecutionDurationMs || {};
+  const topRulesByScheduleDelay = aggregations.topRulesByScheduleDelay || {};
+  const topRulesBySearchDurationMs = aggregations.topRulesBySearchDurationMs || {};
+  const topRulesByIndexingDurationMs = aggregations.topRulesByIndexingDurationMs || {};
+  const topRulesByEnrichmentDurationMs = aggregations.topRulesByEnrichmentDurationMs || {};
+
+  return {
+    by_execution_duration_ms:
+      normalizeTopRuleAggregationResult(topRulesByExecutionDurationMs) ?? [],
+    by_schedule_delay_ms: normalizeTopRuleAggregationResult(topRulesByScheduleDelay) ?? [],
+    by_search_duration_ms: normalizeTopRuleAggregationResult(topRulesBySearchDurationMs) ?? [],
+    by_indexing_duration_ms: normalizeTopRuleAggregationResult(topRulesByIndexingDurationMs) ?? [],
+    by_enrichment_duration_ms:
+      normalizeTopRuleAggregationResult(topRulesByEnrichmentDurationMs) ?? [],
+  };
+};
+
+const normalizeTopRuleAggregationResult = (
+  topRules: RawData
+): RuleInfoWithPercentiles[] | undefined => {
+  if (!topRules?.rules?.buckets) {
+    return undefined;
+  }
+
+  return topRules.rules.buckets.map((bucket: RawData) => ({
+    ...normalizeRuleInfo(bucket.rule),
+    ...normalizeAggregatedMetric(bucket.percentiles),
+  }));
+};
+
+const normalizeRuleInfo = (ruleBucket: RawData): RuleInfo | undefined => {
+  if (
+    !ruleBucket?.hits?.hits?.[0]?._source?.rule ||
+    typeof ruleBucket.hits.hits[0]._source.rule !== 'object'
+  ) {
+    return undefined;
+  }
+
+  const ruleData = ruleBucket.hits.hits[0]._source.rule;
+
+  return {
+    id: ruleData.id,
+    name: ruleData.name,
+    category: ruleData.category,
   };
 };
 

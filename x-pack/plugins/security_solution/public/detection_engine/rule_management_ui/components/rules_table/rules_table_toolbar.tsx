@@ -21,6 +21,7 @@ import * as i18nAssistant from '../../../../detections/pages/detection_engine/ru
 export enum AllRulesTabs {
   management = 'management',
   monitoring = 'monitoring',
+  aiMonitoring = 'ai_monitoring',
   updates = 'updates',
 }
 
@@ -54,6 +55,16 @@ export const RulesTableToolbar = React.memo(() => {
         name: i18n.RULE_MONITORING_TAB,
         disabled: false,
         href: `/rules/${AllRulesTabs.monitoring}`,
+        isBeta: installedTotal > 0,
+        betaOptions: {
+          text: `${installedTotal}`,
+        },
+      },
+      [AllRulesTabs.aiMonitoring]: {
+        id: AllRulesTabs.aiMonitoring,
+        name: i18n.RULE_AI_MONITORING_TAB,
+        disabled: false,
+        href: `/rules/${AllRulesTabs.aiMonitoring}`,
         isBeta: installedTotal > 0,
         betaOptions: {
           text: `${installedTotal}`,

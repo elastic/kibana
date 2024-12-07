@@ -55,3 +55,8 @@ export const GET_RULE_EXECUTION_RESULTS_URL =
   `${INTERNAL_URL}/rules/{ruleId}/execution/results` as const;
 export const getRuleExecutionResultsUrl = (ruleId: string) =>
   `${INTERNAL_URL}/rules/${ruleId}/execution/results` as const;
+
+// -------------------------------------------------------------------------------------------------
+// AI Rule Monitoring
+
+export const GET_AI_RULE_MONITORING_RESULTS_URL = `${INTERNAL_URL}/ai_monitoring/_results` as const;
