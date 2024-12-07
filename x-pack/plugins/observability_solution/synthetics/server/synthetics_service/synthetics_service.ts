@@ -152,7 +152,9 @@ export class SyntheticsService {
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
       this.logger.debug(
-        `Fetched ${service.locations} Synthetics service locations from manifest: ${this.config.manifestUrl}`
+        `Fetched ${service.locations
+          .map((loc) => loc.id)
+          .join(',')} Synthetics service locations from manifest: ${this.config.manifestUrl}`
       );
     } catch (e) {
       this.logger.error(e);
@@ -167,7 +169,7 @@ export class SyntheticsService {
       [SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE]: {
         title: 'Synthetics Service - Sync Saved Monitors',
         description: 'This task periodically pushes saved monitors to Synthetics Service.',
-        timeout: '1m',
+        timeout: '2m',
         maxAttempts: 3,
 
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
@@ -671,10 +673,10 @@ export class SyntheticsService {
 
       if (lastRunAt) {
         // log if it has missed last schedule
-        const diff = moment(lastRunAt).diff(current, 'minutes');
+        const diff = moment(current).diff(lastRunAt, 'minutes');
         const syncInterval = Number((this.config.syncInterval ?? '5m').split('m')[0]);
         if (diff > syncInterval) {
-          const message = `Synthetics monitor sync task has missed its schedule, it last ran ${diff} ago.`;
+          const message = `Synthetics monitor sync task has missed its schedule, it last ran ${diff} minutes ago.`;
           this.logger.warn(message);
           sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
             message,
@@ -682,11 +684,8 @@ export class SyntheticsService {
             type: 'syncTaskMissedSchedule',
             stackVersion: this.server.stackVersion,
           });
-        } else {
-          this.logger.debug(
-            `Synthetics monitor sync task is running as expected, it last ran ${diff} minutes ago.`
-          );
         }
+        this.logger.debug(`Synthetics monitor sync task last ran ${diff} minutes ago.`);
       }
       state.lastRunAt = current.toISOString();
     } catch (e) {

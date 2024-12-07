@@ -510,7 +510,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
           {tab === SETTINGS_TAB && (
             <RuleActionsSettings
               action={action}
-              producerId={producerId}
               onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
               onNotifyWhenChange={onNotifyWhenChange}
               onActionGroupChange={onActionGroupChange}

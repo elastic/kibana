@@ -26,6 +26,7 @@ const mockRuleType: (
   recoveryActionGroup: { id: 'recovered', name: 'recovered' },
   actionGroups: [],
   defaultActionGroupId: 'default',
+  category: 'my-category',
 });
 
 const pickRuleTypeName = (ruleType: RuleTypeWithDescription) => ({ name: ruleType.name });

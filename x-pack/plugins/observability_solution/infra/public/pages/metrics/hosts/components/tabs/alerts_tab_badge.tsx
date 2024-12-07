@@ -7,15 +7,17 @@
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { INFRA_ALERT_CONSUMERS } from '../../../../../../common/constants';
+import { INFRA_RULE_TYPE_IDS } from '../../../../../../common/alerting/metrics/types';
 import { useAlertsCount } from '../../../../../hooks/use_alerts_count';
 import { useAlertsQuery } from '../../hooks/use_alerts_query';
-import { infraAlertFeatureIds } from '../../../../../components/shared/alerts/constants';
 
 export const AlertsTabBadge = () => {
   const { alertsEsQuery } = useAlertsQuery();
 
   const { alertsCount, loading, error } = useAlertsCount({
-    featureIds: infraAlertFeatureIds,
+    ruleTypeIds: INFRA_RULE_TYPE_IDS,
+    consumers: INFRA_ALERT_CONSUMERS,
     query: alertsEsQuery,
   });
 
