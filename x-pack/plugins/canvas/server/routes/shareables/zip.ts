@@ -24,7 +24,16 @@ export function initializeZipShareableWorkpadRoute(deps: RouteInitializerDeps) {
       access: 'internal',
     })
     .addVersion(
-      { version: '1', validate: { request: { body: RenderedWorkpadSchema } } },
+      {
+        version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: { request: { body: RenderedWorkpadSchema } },
+      },
       async (_context, request, response) => {
         const workpad = request.body;
         const archive = archiver('zip');

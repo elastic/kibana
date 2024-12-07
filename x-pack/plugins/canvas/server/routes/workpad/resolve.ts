@@ -21,6 +21,12 @@ export function initializeResolveWorkpadRoute(deps: RouteInitializerDeps) {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object({

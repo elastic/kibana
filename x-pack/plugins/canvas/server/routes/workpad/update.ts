@@ -38,6 +38,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object({
@@ -71,6 +77,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object({
@@ -109,6 +121,12 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             params: schema.object({
