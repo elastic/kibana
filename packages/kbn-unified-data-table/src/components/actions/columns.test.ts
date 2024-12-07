@@ -25,7 +25,6 @@ function getStateColumnAction(
     } as unknown as Capabilities,
     dataView: dataViewMock,
     dataViews: dataViewsMock,
-    useNewFieldsApi: true,
     setAppState,
     columns: state.columns,
     sort: state.sort,

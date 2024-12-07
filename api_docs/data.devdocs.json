@@ -12736,6 +12736,10 @@
               },
               {
                 "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
@@ -19264,6 +19268,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
               },
               {
                 "plugin": "dataViewManagement",
