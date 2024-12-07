@@ -236,7 +236,7 @@ describe('useDashboardListingTable', () => {
   test('createItem should be undefined when showWriteControls equals false', () => {
     coreServices.application.capabilities = {
       ...coreServices.application.capabilities,
-      dashboard: {
+      dashboard_v2: {
         showWriteControls: false,
       },
     };

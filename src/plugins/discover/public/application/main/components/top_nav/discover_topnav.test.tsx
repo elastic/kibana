@@ -55,7 +55,7 @@ jest.mock('../../../../customizations', () => ({
 }));
 
 const mockDefaultCapabilities = {
-  discover: { save: true },
+  discover_v2: { save: true },
 } as unknown as typeof mockDiscoverService.capabilities;
 
 function getProps(

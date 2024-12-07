@@ -118,7 +118,7 @@ const mockedServices = {
   },
   application: {
     capabilities: {
-      discover: { save: true, saveQuery: true, show: true },
+      discover_v2: { save: true, saveQuery: true, show: true },
     },
   },
   core: corePluginMock,
