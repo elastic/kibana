@@ -140,7 +140,7 @@ export class ObservabilityLogsExplorerPlugin
   }
 
   public start(core: CoreStart, _pluginsStart: ObservabilityLogsExplorerStartDeps) {
-    const { discover, fleet, logs } = core.application.capabilities;
+    const { discover_v2: discover, fleet, logs } = core.application.capabilities;
 
     if (!(discover?.show && fleet?.read && logs?.show)) {
       this.appStateUpdater.next(() => ({
