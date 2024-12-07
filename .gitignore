@@ -54,7 +54,6 @@ __tmp__
 
 /html_docs
 .eslintcache
-/plugins/
 /data
 disabledPlugins
 webpackstats.json

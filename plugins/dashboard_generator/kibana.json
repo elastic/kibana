@@ -1,0 +1,14 @@
+{
+  "id": "dashboardGenerator",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Joe Reuter",
+    "githubTeam": "flash1293"
+  },
+  "description": "generates dashboards",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
