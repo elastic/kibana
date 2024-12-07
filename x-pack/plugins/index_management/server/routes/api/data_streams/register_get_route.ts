@@ -89,23 +89,22 @@ const enhanceDataStreams = ({
 };
 
 const getDataStreams = (client: IScopedClusterClient, name = '*') => {
-  return client.asCurrentUser.indices.getDataStream({
-    name,
-    expand_wildcards: 'all',
+  // TODO: Replace this request with the one below when the JS client is updated to 8.16
+  return client.asCurrentUser.transport.request({
+    method: 'GET',
+    path: `/_data_stream/${name}?expand_wildcards=all&verbose=true`,
   });
+
+  // return client.asCurrentUser.indices.getDataStream({
+  //   name,
+  //   expand_wildcards: 'all',
+  //   verbose: true,
+  // });
 };
 
 const getDataStreamLifecycle = (client: IScopedClusterClient, name: string) => {
   return client.asCurrentUser.indices.getDataLifecycle({
     name,
-  });
-};
-
-const getDataStreamsStats = (client: IScopedClusterClient, name = '*') => {
-  return client.asCurrentUser.indices.dataStreamsStats({
-    name,
-    expand_wildcards: 'all',
-    human: true,
   });
 };
 
@@ -151,9 +150,6 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         let dataStreamsPrivileges;
         let meteringStats;
 
-        if (includeStats && config.isDataStreamStatsEnabled !== false) {
-          ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client));
-        }
         if (includeStats && config.isSizeAndDocCountEnabled !== false) {
           ({ datastreams: meteringStats } = await getMeteringStats(client));
         }
@@ -205,10 +201,6 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
         const lifecycle = await getDataStreamLifecycle(client, name);
         // @ts-ignore - TS doesn't know about the `global_retention` property yet
         const globalMaxRetention = lifecycle?.global_retention?.max_retention;
-
-        if (config.isDataStreamStatsEnabled !== false) {
-          ({ data_streams: dataStreamsStats } = await getDataStreamsStats(client, name));
-        }
 
         if (config.isSizeAndDocCountEnabled !== false) {
           ({ datastreams: meteringStats } = await getMeteringStats(client, name));

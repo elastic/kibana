@@ -140,32 +140,30 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         sortable: true,
       });
     }
-    if (config.enableDataStreamStats) {
-      columns.push({
-        field: 'maxTimeStamp',
-        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
-          defaultMessage: 'Last updated',
-        }),
-        truncateText: true,
-        sortable: true,
-        render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
-          maxTimeStamp
-            ? humanizeTimeStamp(maxTimeStamp)
-            : i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnNoneMessage', {
-                defaultMessage: 'Never',
-              }),
-      });
-      columns.push({
-        field: 'storageSizeBytes',
-        name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
-          defaultMessage: 'Storage size',
-        }),
-        truncateText: true,
-        sortable: true,
-        render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
-          dataStream.storageSize,
-      });
-    }
+    columns.push({
+      field: 'maxTimeStamp',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnTitle', {
+        defaultMessage: 'Last updated',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (maxTimeStamp: DataStream['maxTimeStamp']) =>
+        maxTimeStamp
+          ? humanizeTimeStamp(maxTimeStamp)
+          : i18n.translate('xpack.idxMgmt.dataStreamList.table.maxTimeStampColumnNoneMessage', {
+              defaultMessage: 'Never',
+            }),
+    });
+    columns.push({
+      field: 'storageSizeBytes',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
+        defaultMessage: 'Storage size',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        dataStream.storageSize,
+    });
   }
 
   columns.push({
