@@ -47,7 +47,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         isInspected: false,
         totalCount: 0,
         refetch: jest.fn(),
-        isModuleEnabled: true,
+        hasEngineBeenInstalled: true,
       });
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
     });

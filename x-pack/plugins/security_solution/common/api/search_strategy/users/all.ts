@@ -22,7 +22,6 @@ export const usersSchema = requestOptionsPaginatedSchema.extend({
     field: z.enum([UsersFields.name, UsersFields.lastSeen]),
   }),
   timerange,
-  isNewRiskScoreModuleInstalled: z.boolean().default(false),
   factoryQueryType: z.literal(UsersQueries.users),
 });
 
