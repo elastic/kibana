@@ -9,6 +9,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
+
 import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
 import { APP_API_ROUTES } from '../../constants';
@@ -130,7 +131,7 @@ export const generateServiceTokenHandler: RequestHandler<
       token?: GenerateServiceTokenResponse;
     }>({
       method: 'POST',
-      path: `_security/service/elastic/${serviceAccount}/credential/token/token-${Date.now()}`,
+      path: `_security/service/elastic/${serviceAccount}/credential/token/token-${uuidv4()}`,
     });
 
     if (tokenResponse.created && tokenResponse.token) {
