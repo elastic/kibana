@@ -9,7 +9,6 @@ import type { PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
-import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeSideHeader } from '../../field_upgrade_side_header';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import {
@@ -21,17 +20,9 @@ import { FieldFinalSideHelpInfo } from './field_final_side_help_info';
 import * as i18n from './translations';
 
 export function FieldFinalSideHeader(): JSX.Element {
-  const {
-    fieldName,
-    fieldUpgradeState,
-    rightSideMode,
-    finalDiffableRule,
-    setRuleFieldResolvedValue,
-  } = useFieldUpgradeContext();
+  const { fieldName, hasConflict, rightSideMode, finalDiffableRule, setRuleFieldResolvedValue } =
+    useFieldUpgradeContext();
   const { form } = useFieldEditFormContext();
-  const hasConflict =
-    fieldUpgradeState === FieldUpgradeState.SolvableConflict ||
-    fieldUpgradeState === FieldUpgradeState.NonSolvableConflict;
 
   const handleAccept = useCallback(
     () =>

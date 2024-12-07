@@ -34,6 +34,10 @@ interface FieldUpgradeContextType {
    */
   fieldUpgradeState: FieldUpgradeState;
   /**
+   * Whether rule has an unresolved conflict. This state is derived from `fieldUpgradeState`.
+   */
+  hasConflict: boolean;
+  /**
    * Field's three way diff
    */
   fieldDiff: ThreeWayDiff<unknown>;
@@ -93,6 +97,9 @@ export function FieldUpgradeContextProvider({
     () => ({
       fieldName,
       fieldUpgradeState,
+      hasConflict:
+        fieldUpgradeState === FieldUpgradeState.SolvableConflict ||
+        fieldUpgradeState === FieldUpgradeState.NonSolvableConflict,
       fieldDiff,
       finalDiffableRule: calcFinalDiffableRule(ruleUpgradeState),
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
