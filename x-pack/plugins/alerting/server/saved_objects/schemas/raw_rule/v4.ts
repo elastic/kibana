@@ -34,7 +34,7 @@ export const rawRuleLastRunSchema = rawRuleLastRunSchemaV3.extends({
   ),
 });
 
-const rawRuleExecutionStatusSchema = rawRuleExecutionStatusSchemaV3.extends({
+export const rawRuleExecutionStatusSchema = rawRuleExecutionStatusSchemaV3.extends({
   error: schema.nullable(
     schema.object({
       reason: executionStatusErrorReason,
