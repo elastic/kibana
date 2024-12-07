@@ -6,7 +6,7 @@
  */
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
@@ -80,5 +80,9 @@ export const formatSyntheticsPolicy = (
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
   }
 
-  return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
+  return {
+    formattedPolicy: omit(formattedPolicy, [ConfigKey.SOURCE_INLINE]) as NewPackagePolicy,
+    hasDataStream: Boolean(dataStream),
+    hasInput: Boolean(currentInput),
+  };
 };

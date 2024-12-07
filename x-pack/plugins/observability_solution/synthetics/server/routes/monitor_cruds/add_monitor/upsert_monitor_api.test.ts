@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddEditMonitorAPI } from './add_monitor_api';
+import { UpsertMonitorAPI } from './upsert_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 
@@ -16,7 +16,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         enabled: true,
       },
     } as any);
-    const api = new AddEditMonitorAPI({
+    const api = new UpsertMonitorAPI({
       syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
       request: {
         body: {},
@@ -55,7 +55,7 @@ describe('AddNewMonitorsPublicAPI', () => {
     const syntheticsService = new SyntheticsService({
       config: {},
     } as any);
-    const api = new AddEditMonitorAPI({
+    const api = new UpsertMonitorAPI({
       syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
       request: {
         body: {},
