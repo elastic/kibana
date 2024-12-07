@@ -26,4 +26,4 @@ This software consists of voluntary contributions made by many
 individuals. For exact contribution history, see the revision history
 available at the following locations:
  - https://github.com/handlebars-lang/handlebars.js
- - https://github.com/elastic/kibana/tree/main/packages/kbn-handlebars
+ - https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn-handlebars
