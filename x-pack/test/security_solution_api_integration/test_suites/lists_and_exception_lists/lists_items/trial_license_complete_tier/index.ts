@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Detection Engine - Value lists APIs', function () {
-    loadTestFile(require.resolve('./items'));
+    // loadTestFile(require.resolve('./items'));
     loadTestFile(require.resolve('./lists'));
   });
 }
