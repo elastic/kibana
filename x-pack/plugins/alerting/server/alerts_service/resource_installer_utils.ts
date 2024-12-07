@@ -6,7 +6,7 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { DynamicTemplate, FieldMap } from '@kbn/alerts-as-data-utils';
 import { getComponentTemplateFromFieldMap } from '../../common';
 
 interface GetComponentTemplateNameOpts {
@@ -63,6 +63,7 @@ type GetComponentTemplateOpts = GetComponentTemplateNameOpts & {
   fieldMap: FieldMap;
   dynamic?: 'strict' | false;
   includeSettings?: boolean;
+  dynamicTemplates?: DynamicTemplate;
 };
 
 export const getComponentTemplate = ({
@@ -71,10 +72,12 @@ export const getComponentTemplate = ({
   name,
   dynamic,
   includeSettings,
+  dynamicTemplates,
 }: GetComponentTemplateOpts): ClusterPutComponentTemplateRequest =>
   getComponentTemplateFromFieldMap({
     name: getComponentTemplateName({ context, name }),
     fieldMap,
     dynamic,
     includeSettings,
+    dynamicTemplates,
   });
