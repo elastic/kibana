@@ -12,11 +12,10 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client as ESClient } from '@elastic/elasticsearch';
+import { SCOUT_TEST_EVENTS_DATA_STREAM_NAME } from '@kbn/scout-info';
 import { ScoutReportEvent } from '../event';
 import * as componentTemplates from './component_templates';
 import * as indexTemplates from './index_templates';
-
-export const dataStreamName = 'scout-test-events-kibana';
 
 export class ScoutReportDataStream {
   private log: ToolingLog;
@@ -26,7 +25,7 @@ export class ScoutReportDataStream {
   }
 
   async exists() {
-    return await this.es.indices.exists({ index: dataStreamName });
+    return await this.es.indices.exists({ index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME });
   }
 
   async initialize() {
@@ -37,9 +36,9 @@ export class ScoutReportDataStream {
       return;
     }
 
-    this.log.info(`Creating data stream '${dataStreamName}'`);
+    this.log.info(`Creating data stream '${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}'`);
     await this.es.indices.createDataStream({
-      name: dataStreamName,
+      name: SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
     });
   }
 
@@ -106,7 +105,7 @@ export class ScoutReportDataStream {
   }
 
   async addEvent(event: ScoutReportEvent) {
-    await this.es.index({ index: dataStreamName, document: event });
+    await this.es.index({ index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME, document: event });
   }
 
   async addEventsFromFile(eventLogPath: string) {
@@ -124,12 +123,14 @@ export class ScoutReportDataStream {
       }
     };
 
-    this.log.info(`Uploading events from file ${eventLogPath} to data stream '${dataStreamName}'`);
+    this.log.info(
+      `Uploading events from file ${eventLogPath} to data stream '${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}'`
+    );
 
     const stats = await this.es.helpers.bulk({
       datasource: events(),
       onDocument: () => {
-        return { create: { _index: dataStreamName } };
+        return { create: { _index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME } };
       },
     });
 
