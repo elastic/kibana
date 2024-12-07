@@ -79,6 +79,10 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     return actionsProvider.current!.autoIndent();
   }, []);
 
+  const generateWithAICallback = useCallback(async () => {
+    return actionsProvider.current!.generateWithAI(context);
+  }, [context]);
+
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(dispatch, context);
   }, [dispatch, context]);
@@ -195,6 +199,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
             getDocumentation={getDocumenationLink}
             autoIndent={autoIndentCallback}
             notifications={notifications}
+            generateQueryWithAI={generateWithAICallback}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

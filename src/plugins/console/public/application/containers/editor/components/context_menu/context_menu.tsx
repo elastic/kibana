@@ -39,6 +39,7 @@ interface Props {
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev: React.MouseEvent) => void;
   notifications: NotificationsSetup;
+  generateQueryWithAI: () => void;
 }
 
 const styles = {
@@ -66,6 +67,7 @@ export const ContextMenu = ({
   getDocumentation,
   autoIndent,
   notifications,
+  generateQueryWithAI,
 }: Props) => {
   // Get default language from local storage
   const {
@@ -271,6 +273,17 @@ export const ContextMenu = ({
       <FormattedMessage
         id="console.monaco.requestOptions.openDocumentationButtonLabel"
         defaultMessage="Open API reference"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="Generate query with AI"
+      data-test-subj="consoleMenuOpenDocs"
+      onClick={generateQueryWithAI}
+      icon="compute"
+    >
+      <FormattedMessage
+        id="console.monaco.requestOptions.generateQueryAIButtonLabel"
+        defaultMessage="Generate query with AI"
       />
     </EuiContextMenuItem>,
   ];
