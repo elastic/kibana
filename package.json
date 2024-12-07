@@ -1690,7 +1690,7 @@
     "babel-plugin-styled-components": "^2.1.4",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
-    "backport": "^8.9.8",
+    "backport": "^9.6.3",
     "blob-polyfill": "^7.0.20220408",
     "buildkite-test-collector": "^1.7.0",
     "callsites": "^3.1.0",
