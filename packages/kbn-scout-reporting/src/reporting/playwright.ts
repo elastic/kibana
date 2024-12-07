@@ -22,6 +22,7 @@ import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
 import { environmentMetadata } from '../datasources';
 
@@ -109,6 +110,10 @@ export class ScoutPlaywrightReporter implements Reporter {
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
       },
+      file: {
+        path: path.relative(REPO_ROOT, test.location.file),
+        owner: '?',
+      },
     });
   }
 
@@ -140,6 +145,10 @@ export class ScoutPlaywrightReporter implements Reporter {
       },
       event: {
         action: ScoutReportEventAction.TEST_STEP_BEGIN,
+      },
+      file: {
+        path: path.relative(REPO_ROOT, test.location.file),
+        owner: '?',
       },
     });
   }
@@ -177,6 +186,10 @@ export class ScoutPlaywrightReporter implements Reporter {
           stack_trace: step.error?.stack ? stripANSI(step.error.stack) : undefined,
         },
       },
+      file: {
+        path: path.relative(REPO_ROOT, test.location.file),
+        owner: '?',
+      },
     });
   }
 
@@ -209,6 +222,10 @@ export class ScoutPlaywrightReporter implements Reporter {
           message: result.error?.message ? stripANSI(result.error.message) : undefined,
           stack_trace: result.error?.stack ? stripANSI(result.error.stack) : undefined,
         },
+      },
+      file: {
+        path: path.relative(REPO_ROOT, test.location.file),
+        owner: '?',
       },
     });
   }

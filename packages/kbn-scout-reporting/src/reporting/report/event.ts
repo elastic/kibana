@@ -84,6 +84,14 @@ export interface ScoutTestInfo {
 }
 
 /**
+ * Scout file info
+ */
+export interface ScoutFileInfo {
+  path: string;
+  owner: string;
+}
+
+/**
  * Document that records an event to be logged by the Scout reporter
  */
 export interface ScoutReportEvent {
@@ -91,6 +99,7 @@ export interface ScoutReportEvent {
   buildkite?: BuildkiteMetadata;
   host?: HostMetadata;
   event: ScoutReportEventInfo;
+  file?: ScoutFileInfo;
   labels?: { [id: string]: string };
   reporter: ScoutReporterInfo;
   test_run: ScoutTestRunInfo;
