@@ -53,7 +53,7 @@ describe('AddEventNoteAction', () => {
     jest.clearAllMocks();
 
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      notesPrivileges: { crud: true, read: true },
       endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
     });
 
@@ -137,7 +137,7 @@ describe('AddEventNoteAction', () => {
   describe('button state', () => {
     test('should disable the add note button when the user does NOT have crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
-        kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+        notesPrivileges: { crud: false, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       });
 
@@ -151,7 +151,7 @@ describe('AddEventNoteAction', () => {
 
     test('should enable the add note button when the user has crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
-        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+        notesPrivileges: { crud: true, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
       });
 

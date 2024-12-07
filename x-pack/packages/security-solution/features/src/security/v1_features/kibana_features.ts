@@ -19,15 +19,18 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type { BaseKibanaFeatureConfig } from '../types';
 import {
   APP_ID,
   SERVER_APP_ID,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   CLOUD_DEFEND_APP_ID,
-} from '../constants';
-import type { SecurityFeatureParams } from './types';
+  SECURITY_FEATURE_ID_V2,
+  TIMELINE_FEATURE_ID,
+  NOTES_FEATURE_ID,
+} from '../../constants';
+import type { SecurityFeatureParams } from '../types';
+import type { BaseKibanaFeatureConfig } from '../../types';
 
 const SECURITY_RULE_TYPES = [
   LEGACY_NOTIFICATIONS_ID,
@@ -49,11 +52,24 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 export const getSecurityBaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
+  deprecated: {
+    notice: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
+      {
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {idV2}.',
+        values: {
+          currentId: SERVER_APP_ID,
+          idV2: SECURITY_FEATURE_ID_V2,
+        },
+      }
+    ),
+  },
+
   id: SERVER_APP_ID,
   name: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle',
+    'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitleDeprecated',
     {
-      defaultMessage: 'Security',
+      defaultMessage: 'Security (Deprecated)',
     }
   ),
   order: 1100,
@@ -74,6 +90,11 @@ export const getSecurityBaseKibanaFeature = ({
   ),
   privileges: {
     all: {
+      replacedBy: [
+        { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
+        { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
+        { feature: NOTES_FEATURE_ID, privileges: ['all'] },
+      ],
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
@@ -92,8 +113,12 @@ export const getSecurityBaseKibanaFeature = ({
         read: [],
       },
       alerting: {
-        rule: { all: alertingFeatures },
-        alert: { all: alertingFeatures },
+        rule: {
+          all: alertingFeatures,
+        },
+        alert: {
+          all: alertingFeatures,
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -101,6 +126,12 @@ export const getSecurityBaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
+      replacedBy: [
+        { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
+        { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
+        { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+      ],
+
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],

@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
             osquery: ['all', 'read', 'minimal_all', 'minimal_read'],
             enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
-            siem: ['all', 'read', 'minimal_all', 'minimal_read'],
+            siemV2: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -154,7 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
-            siem: [
+            siemV2: [
               'actions_log_management_all',
               'actions_log_management_read',
               'all',
@@ -214,6 +214,8 @@ export default function ({ getService }: FtrProviderContext) {
               'create_comment',
               'case_reopen',
             ],
+            securitySolutionTimeline: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
             dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
