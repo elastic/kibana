@@ -15,6 +15,12 @@ export function functionsRoute(router: IRouter, { functions }: { functions: Load
   router.get(
     {
       path: '/internal/timelion/functions',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {

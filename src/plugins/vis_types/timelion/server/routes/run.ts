@@ -39,6 +39,12 @@ export function runRoute(
   router.post(
     {
       path: '/internal/timelion/run',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           sheet: schema.arrayOf(schema.string()),
