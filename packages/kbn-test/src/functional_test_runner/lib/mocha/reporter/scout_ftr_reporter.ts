@@ -135,7 +135,7 @@ export class ScoutFTRReporter {
         id: getTestIDForTitle(test.fullTitle()),
         title: test.title,
         tags: [],
-        status: test.isPassed() ? 'passed' : 'failed',
+        status: test.isPending() ? 'skipped' : test.isPassed() ? 'passed' : 'failed',
         duration: test.duration,
       },
       event: {
