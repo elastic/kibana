@@ -52,7 +52,6 @@ export const AwsInputVarFields = ({
                     varDef={{
                       ...findVariableDef(packageInfo, field.id)!,
                       required: true,
-                      type: 'password',
                     }}
                     value={field.value || ''}
                     onChange={(value) => {
