@@ -95,9 +95,12 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
       unsavedChanges,
       resetUnsavedChanges: () => {
         const lastSaved = lastSavedState$.getValue();
+        const unsavedChangesKeys = Object.keys(unsavedChanges.getValue() ?? {});
         for (const key of comparatorKeys) {
-          const setter = comparators[key][1]; // setter function is the 1st element of the tuple
-          setter(lastSaved?.[key] as RuntimeState[typeof key]);
+          if (key in unsavedChangesKeys) {
+            const setter = comparators[key][1]; // setter function is the 1st element of the tuple
+            setter(lastSaved?.[key] as RuntimeState[typeof key]);
+          }
         }
       },
       snapshotRuntimeState,
