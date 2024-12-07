@@ -30,6 +30,16 @@ export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkAc
         },
       ];
 
+    case BulkActionEditTypeEnum.add_alert_suppression:
+    case BulkActionEditTypeEnum.delete_alert_suppression:
+    case BulkActionEditTypeEnum.set_alert_suppression:
+      return [
+        {
+          type: editAction,
+          value: { group_by: ['test_field'] },
+        },
+      ];
+
     case BulkActionEditTypeEnum.add_index_patterns:
     case BulkActionEditTypeEnum.delete_index_patterns:
     case BulkActionEditTypeEnum.set_index_patterns:

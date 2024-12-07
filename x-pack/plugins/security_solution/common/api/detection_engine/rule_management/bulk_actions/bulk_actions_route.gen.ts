@@ -27,6 +27,8 @@ import {
   IndexPatternArray,
   RuleTagArray,
   InvestigationFields,
+  AlertSuppressionDuration,
+  AlertSuppressionMissingFieldsStrategy,
   TimelineTemplateId,
   TimelineTemplateTitle,
 } from '../../model/rule_schema/common_attributes.gen';
@@ -53,6 +55,7 @@ export const BulkActionsDryRunErrCode = z.enum([
   'MACHINE_LEARNING_AUTH',
   'MACHINE_LEARNING_INDEX_PATTERN',
   'ESQL_INDEX_PATTERN',
+  'ALERT_SUPPRESSION_FEATURE',
   'MANUAL_RULE_RUN_FEATURE',
   'MANUAL_RULE_RUN_DISABLED_RULE',
 ]);
@@ -211,6 +214,9 @@ export const BulkActionEditType = z.enum([
   'add_investigation_fields',
   'delete_investigation_fields',
   'set_investigation_fields',
+  'add_alert_suppression',
+  'delete_alert_suppression',
+  'set_alert_suppression',
 ]);
 export type BulkActionEditTypeEnum = typeof BulkActionEditType.enum;
 export const BulkActionEditTypeEnum = BulkActionEditType.enum;
@@ -275,6 +281,44 @@ export const BulkActionEditPayloadInvestigationFields = z.object({
   value: InvestigationFields,
 });
 
+export type BulkActionEditPayloadAlertSuppressionConfig = z.infer<
+  typeof BulkActionEditPayloadAlertSuppressionConfig
+>;
+export const BulkActionEditPayloadAlertSuppressionConfig = z.object({
+  duration: AlertSuppressionDuration.optional(),
+  missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.optional(),
+});
+
+export type BulkActionEditPayloadAddSetAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadAddSetAlertSuppression
+>;
+export const BulkActionEditPayloadAddSetAlertSuppression = z.object({
+  type: z.enum(['add_alert_suppression', 'set_alert_suppression']),
+  value: z.object({
+    group_by: z.array(z.string()).max(3),
+    suppression_config: BulkActionEditPayloadAlertSuppressionConfig.optional(),
+  }),
+});
+
+export type BulkActionEditPayloadDeleteAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadDeleteAlertSuppression
+>;
+export const BulkActionEditPayloadDeleteAlertSuppression = z.object({
+  type: z.literal('delete_alert_suppression'),
+  value: z.object({
+    group_by: z.array(z.string()),
+    suppression_config: BulkActionEditPayloadAlertSuppressionConfig.optional(),
+  }),
+});
+
+export type BulkActionEditPayloadAlertSuppression = z.infer<
+  typeof BulkActionEditPayloadAlertSuppression
+>;
+export const BulkActionEditPayloadAlertSuppression = z.union([
+  BulkActionEditPayloadAddSetAlertSuppression,
+  BulkActionEditPayloadDeleteAlertSuppression,
+]);
+
 export type BulkActionEditPayloadTimeline = z.infer<typeof BulkActionEditPayloadTimeline>;
 export const BulkActionEditPayloadTimeline = z.object({
   type: z.literal('set_timeline'),
@@ -288,6 +332,7 @@ export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,
+  BulkActionEditPayloadAlertSuppression,
   BulkActionEditPayloadTimeline,
   BulkActionEditPayloadRuleActions,
   BulkActionEditPayloadSchedule,
