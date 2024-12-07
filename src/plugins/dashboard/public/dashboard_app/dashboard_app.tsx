@@ -59,6 +59,7 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
   expandedPanelId?: string;
+  spaceId?: string;
 }
 
 export function DashboardApp({
@@ -67,6 +68,7 @@ export function DashboardApp({
   redirectTo,
   history,
   expandedPanelId,
+  spaceId,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -204,6 +206,7 @@ export function DashboardApp({
             redirectTo={redirectTo}
             embedSettings={embedSettings}
             dashboardApi={dashboardApi}
+            spaceId={spaceId}
           />
         </>
       )}

@@ -764,7 +764,13 @@ export class DashboardPageObject extends FtrService {
 
   public async waitForRenderComplete() {
     this.log.debug('waitForRenderComplete');
-    const count = await this.getSharedItemsCount();
+    // catch cases where there are no items to be rendered
+    let count: string;
+    try {
+      count = await this.getSharedItemsCount();
+    } catch (e) {
+      count = '0';
+    }
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));
   }

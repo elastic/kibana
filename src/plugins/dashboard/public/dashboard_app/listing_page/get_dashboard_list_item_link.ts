@@ -7,32 +7,127 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryState } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-
+import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { QueryState } from '@kbn/data-plugin/common';
+import { DashboardPanelMap, convertPanelMapToSavedPanels } from '../../../common';
 import {
-  DASHBOARD_APP_ID,
-  GLOBAL_STATE_STORAGE_KEY,
-  createDashboardEditUrl,
-} from '../../dashboard_constants';
+  DASHBOARD_STATE_SESSION_KEY,
+  PANELS_CONTROL_GROUP_KEY,
+  getDashboardBackupService,
+} from '../../services/dashboard_backup_service';
+import { DashboardLocatorParams } from '../../dashboard_container';
+import { DASHBOARD_APP_ID, createDashboardEditUrl } from '../../dashboard_constants';
 import { coreServices } from '../../services/kibana_services';
 
-export const getDashboardListItemLink = (
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  id: string,
-  timeRestore: boolean
-) => {
-  const useHash = coreServices.uiSettings.get('state:storeInSessionStorage'); // use hash
+interface SessionStorageDashboardStates {
+  [spaceId: string]: {
+    [dashboardId: string]: {
+      panels: DashboardPanelMap;
+    };
+  };
+}
 
-  let url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
+export const getDashboardListItemLink = (
+  id: string,
+  timeRestore: boolean,
+  spaceId?: string,
+  includeBasepath: boolean = false
+) => {
+  let unsavedStateForLocator: DashboardLocatorParams = {};
+
+  const { dashboardState: unsavedDashboardState, panels: panelModifications } =
+    getDashboardBackupService().getState(id) ?? {};
+
+  const allUnsavedPanels = (() => {
+    if (
+      Object.keys(unsavedDashboardState?.panels ?? {}).length === 0 &&
+      Object.keys(panelModifications ?? {}).length === 0
+    ) {
+      // if this dashboard has no modifications or unsaved panels return early. No overrides needed.
+      return;
+    }
+
+    const sessionDashboard: SessionStorageDashboardStates = JSON.parse(
+      sessionStorage.getItem(DASHBOARD_STATE_SESSION_KEY) || '{}'
+    );
+
+    // format unsaved changes in session storage vs the share url which pulls it from the dashboard api
+    let latestPanels: DashboardPanelMap | undefined;
+
+    Object.entries(sessionDashboard).map((value) => {
+      const [unsavedSpaceId, dashboardUnsavedInfo] = value;
+      if (unsavedSpaceId === spaceId) {
+        return Object.entries(dashboardUnsavedInfo).map(([dashboardId, unsavedDashboardInfo]) => {
+          if (dashboardId === id && unsavedDashboardInfo.panels) {
+            return Object.entries(unsavedDashboardInfo).map(([panelId, panels]) => {
+              if (panelId === 'panels') {
+                return (latestPanels = panels);
+              }
+            });
+          }
+        });
+      }
+    });
+    const modifiedPanels = panelModifications
+      ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
+          if (unsavedPanel && latestPanels?.[panelId]) {
+            acc[panelId] = {
+              ...latestPanels[panelId],
+              explicitInput: {
+                ...latestPanels?.[panelId].explicitInput,
+                ...unsavedPanel,
+                id: panelId,
+              },
+            };
+          }
+          return acc;
+        }, {} as DashboardPanelMap)
+      : {};
+
+    const allUnsavedPanelsMap = {
+      ...latestPanels,
+      ...modifiedPanels,
+    };
+
+    return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
+  })();
+
+  if (unsavedDashboardState) {
+    unsavedStateForLocator = {
+      query: unsavedDashboardState.query,
+      filters: unsavedDashboardState.filters,
+      controlGroupState: panelModifications?.[
+        PANELS_CONTROL_GROUP_KEY
+      ] as DashboardLocatorParams['controlGroupState'],
+      panels: allUnsavedPanels as DashboardLocatorParams['panels'],
+
+      // options
+      useMargins: unsavedDashboardState?.useMargins,
+      syncColors: unsavedDashboardState?.syncColors,
+      syncCursor: unsavedDashboardState?.syncCursor,
+      syncTooltips: unsavedDashboardState?.syncTooltips,
+      hidePanelTitles: unsavedDashboardState?.hidePanelTitles,
+    };
+  }
+  const url = coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
     path: `#${createDashboardEditUrl(id)}`,
+    absolute: includeBasepath,
   });
-  const globalStateInUrl = kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) || {};
+  const globalStateInUrl = getStateFromKbnUrl<QueryState>('_g', url);
 
   if (timeRestore) {
-    delete globalStateInUrl.time;
-    delete globalStateInUrl.refreshInterval;
+    delete globalStateInUrl?.time;
+    delete globalStateInUrl?.refreshInterval;
   }
-  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
-  return url;
+
+  const baseUrl = setStateToKbnUrl('_g', globalStateInUrl, undefined, url);
+
+  const shareableUrl = setStateToKbnUrl(
+    '_a',
+    unsavedStateForLocator,
+    { useHash: false, storeInHashQuery: true },
+    unhashUrl(baseUrl)
+  );
+
+  return shareableUrl;
 };
