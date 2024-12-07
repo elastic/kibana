@@ -26,6 +26,15 @@ export interface Capabilities {
   /** Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. */
   catalogue: Record<string, boolean>;
 
+  // @ts-expect-error
+  discover?: {};
+  // @ts-expect-error
+  dashboard?: {};
+  // @ts-expect-error
+  maps?: {};
+  // @ts-expect-error
+  visualize?: {};
+
   /** Custom capabilities, registered by plugins. */
   [key: string]: Record<string, boolean | Record<string, boolean>>;
 }
