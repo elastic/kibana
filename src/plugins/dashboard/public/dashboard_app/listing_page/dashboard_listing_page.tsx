@@ -100,7 +100,7 @@ export const DashboardListingPage = ({
 
   return (
     <>
-      {showNoDataPage && <DashboardAppNoDataPage showPage={() => setShowNoDataPage(false)} />}
+      {showNoDataPage && <DashboardAppNoDataPage hideNoDataPage={() => setShowNoDataPage(false)} />}
       {!showNoDataPage && (
         <DashboardListing
           useSessionStorageIntegration={true}
