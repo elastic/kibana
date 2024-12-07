@@ -18,7 +18,6 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
-  SecurityServiceStart,
   AuditLogger,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
@@ -74,10 +73,6 @@ export interface ElasticAssistantPluginStart {
    * Inference plugin start contract.
    */
   inference: InferenceServerStart;
-  /**
-   * Security plugin start contract.
-   */
-  security: SecurityServiceStart;
   /**
    * Register features to be used by the elastic assistant.
    *
