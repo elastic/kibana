@@ -16,6 +16,7 @@ export const storybookAliases = {
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'packages/kbn-cell-actions/.storybook',
   cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
+  cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
