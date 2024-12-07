@@ -45,9 +45,11 @@ export const registerSiemRuleMigrationsResourceGetMissingRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-            const resources = await ruleMigrationsClient.data.getMissingResources(migrationId);
+            const options = { filters: { hasContent: false } };
+            const batches = ruleMigrationsClient.data.resources.searchBatches(migrationId, options);
+            const missingResources = await batches.all(); // TODO: return only type and name
 
-            return res.ok({ body: resources });
+            return res.ok({ body: missingResources });
           } catch (err) {
             logger.error(err);
             return res.badRequest({ body: err.message });

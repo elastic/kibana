@@ -425,6 +425,16 @@ paths:
             description: The names of the resource to retrieve
             items:
               type: string
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
       responses:
         200:
           description: Indicates migration resources have been retrieved correctly
@@ -454,19 +464,11 @@ paths:
             $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
-          description: Indicates missing migration resources have been identified correctly
+          description: Indicates missing migration resources have been retrieved correctly
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  macro:
-                    type: array
-                    description: The macro resources missing
-                    items:
-                      type: string
-                  list:
-                    type: array
-                    description: The list resources missing
-                    items:
-                      type: string
+                type: array
+                description: The identified resources missing
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'

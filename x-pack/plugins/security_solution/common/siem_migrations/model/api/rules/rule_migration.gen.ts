@@ -81,6 +81,8 @@ export type GetRuleMigrationResourcesRequestQuery = z.infer<
 export const GetRuleMigrationResourcesRequestQuery = z.object({
   type: RuleMigrationResourceType.optional(),
   names: ArrayFromString(z.string()).optional(),
+  from: z.coerce.number().optional(),
+  size: z.coerce.number().optional(),
 });
 export type GetRuleMigrationResourcesRequestQueryInput = z.input<
   typeof GetRuleMigrationResourcesRequestQuery
@@ -109,19 +111,13 @@ export type GetRuleMigrationResourcesMissingRequestParamsInput = z.input<
   typeof GetRuleMigrationResourcesMissingRequestParams
 >;
 
+/**
+ * The identified resources missing
+ */
 export type GetRuleMigrationResourcesMissingResponse = z.infer<
   typeof GetRuleMigrationResourcesMissingResponse
 >;
-export const GetRuleMigrationResourcesMissingResponse = z.object({
-  /**
-   * The macro resources missing
-   */
-  macro: z.array(z.string()).optional(),
-  /**
-   * The list resources missing
-   */
-  list: z.array(z.string()).optional(),
-});
+export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResource);
 
 export type GetRuleMigrationStatsRequestParams = z.infer<typeof GetRuleMigrationStatsRequestParams>;
 export const GetRuleMigrationStatsRequestParams = z.object({
