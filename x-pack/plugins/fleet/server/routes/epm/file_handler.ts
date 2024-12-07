@@ -105,10 +105,18 @@ export const getFileHandler: FleetRequestHandler<
     });
   } else {
     const registryResponse = await getFile(pkgName, pkgVersion, filePath);
+    if (!registryResponse)
+      return response.custom({
+        body: {},
+        statusCode: 400,
+        headers: { ...CACHE_CONTROL_10_MINUTES_HEADER },
+      });
+
     const headersToProxy: KnownHeaders[] = ['content-type'];
     const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-      const value = registryResponse.headers.get(knownHeader);
-      if (value !== null) {
+      const value = registryResponse?.headers.get(knownHeader);
+
+      if (!!value) {
         headers[knownHeader] = value;
       }
       return headers;
