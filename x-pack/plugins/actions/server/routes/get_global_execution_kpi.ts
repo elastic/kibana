@@ -42,6 +42,12 @@ export const getGlobalExecutionKPIRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/_global_connector_execution_kpi`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

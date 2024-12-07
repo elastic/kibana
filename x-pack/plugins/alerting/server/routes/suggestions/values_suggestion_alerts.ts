@@ -49,6 +49,12 @@ export function registerAlertsValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/alerts/suggestions/values',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: AlertsSuggestionsSchema,
     },

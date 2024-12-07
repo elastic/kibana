@@ -31,6 +31,12 @@ export const updateRuleRoute = (
   router.put(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Update a rule`,

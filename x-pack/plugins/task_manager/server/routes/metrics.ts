@@ -48,6 +48,12 @@ export function metricsRoute(params: MetricsRouteParams) {
   router.get(
     {
       path: `/api/task_manager/metrics`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to

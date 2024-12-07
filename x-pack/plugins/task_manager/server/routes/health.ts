@@ -139,6 +139,12 @@ export function healthRoute(params: HealthRouteParams): {
   router.get(
     {
       path: '/api/task_manager/_health',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
       // options: { tags: ['access:taskManager'] },
       validate: false,

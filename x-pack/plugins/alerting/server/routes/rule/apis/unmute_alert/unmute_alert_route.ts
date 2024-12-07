@@ -22,6 +22,12 @@ export const unmuteAlertRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{rule_id}/alert/{alert_id}/_unmute`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Unmute an alert`,

@@ -27,6 +27,12 @@ export const findRulesRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/rules/_find`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: 'Get information about rules',

@@ -24,6 +24,12 @@ export const listTypesWithSystemRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector_types`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: connectorTypesQuerySchemaV1,
       },

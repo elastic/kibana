@@ -22,6 +22,12 @@ export const scheduleBackfillRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_schedule`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: {
         body: scheduleBodySchemaV1,

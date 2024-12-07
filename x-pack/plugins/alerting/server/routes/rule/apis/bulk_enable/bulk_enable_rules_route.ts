@@ -27,6 +27,12 @@ export const bulkEnableRulesRoute = ({
   router.patch(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_bulk_enable`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: {
         body: bulkEnableBodySchemaV1,

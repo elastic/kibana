@@ -22,6 +22,12 @@ export const bulkUntrackAlertsByQueryRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack_by_query`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: {
         body: bulkUntrackByQueryBodySchemaV1,

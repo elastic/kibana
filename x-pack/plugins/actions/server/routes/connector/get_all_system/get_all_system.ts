@@ -20,6 +20,12 @@ export const getAllConnectorsIncludingSystemRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connectors`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

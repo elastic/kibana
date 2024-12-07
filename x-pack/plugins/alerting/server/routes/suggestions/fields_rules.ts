@@ -30,6 +30,12 @@ export function registerFieldsRoute(
   router.post(
     {
       path: '/internal/rules/saved_objects/fields',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: {
         body: schema.nullable(

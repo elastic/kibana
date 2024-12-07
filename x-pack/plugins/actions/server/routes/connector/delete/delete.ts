@@ -22,6 +22,12 @@ export const deleteConnectorRoute = (
   router.delete(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Delete a connector`,

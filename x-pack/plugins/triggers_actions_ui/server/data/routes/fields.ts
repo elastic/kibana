@@ -29,6 +29,12 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
   router.post(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

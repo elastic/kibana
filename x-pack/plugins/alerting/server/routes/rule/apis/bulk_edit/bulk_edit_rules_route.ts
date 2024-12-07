@@ -33,6 +33,12 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
   router.post(
     {
       path,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: { access: 'internal' },
       validate: {
         body: bulkEditRulesRequestBodySchemaV1,
