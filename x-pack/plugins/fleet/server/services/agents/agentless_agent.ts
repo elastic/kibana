@@ -37,6 +37,15 @@ import { listFleetServerHosts } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
 import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
 
+interface AgentlessAgentErrorHandlingMessages {
+  [key: string]: {
+    [key: string]: {
+      log: string;
+      message: string;
+    };
+  };
+}
+
 class AgentlessAgentService {
   public async createAgentlessAgent(
     esClient: ElasticsearchClient,
@@ -104,16 +113,7 @@ class AgentlessAgentService {
         labels,
       },
       method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-        'X-Request-ID': traceId,
-      },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: tlsConfig.rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
-      }),
+      ...this.getHeaders(tlsConfig, traceId),
     };
 
     const cloudSetup = appContextService.getCloud();
@@ -148,6 +148,7 @@ class AgentlessAgentService {
 
   public async deleteAgentlessAgent(agentlessPolicyId: string) {
     const logger = appContextService.getLogger();
+    const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const requestConfig = {
@@ -156,17 +157,9 @@ class AgentlessAgentService {
         `/deployments/${agentlessPolicyId}`
       ),
       method: 'DELETE',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: tlsConfig.rejectUnauthorized,
-        cert: tlsConfig.certificate,
-        key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
-      }),
+      ...this.getHeaders(tlsConfig, traceId),
     };
-    const traceId = apm.currentTransaction?.traceparent;
+
     const errorMetadata: LogMeta = {
       trace: {
         id: traceId,
@@ -209,6 +202,22 @@ class AgentlessAgentService {
     });
 
     return response;
+  }
+
+  private getHeaders(tlsConfig: SslConfig, traceId: string | undefined) {
+    return {
+      headers: {
+        'Content-type': 'application/json',
+        'X-Request-ID': traceId,
+        'x-elastic-internal-origin': 'Kibana',
+      },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: tlsConfig.rejectUnauthorized,
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+        ca: tlsConfig.certificateAuthorities,
+      }),
+    };
   }
 
   private getAgentlessTags(agentlessAgentPolicy: AgentPolicy) {
@@ -326,14 +335,12 @@ class AgentlessAgentService {
       throw this.getAgentlessAgentError(action, error.message, traceId);
     }
 
-    const ERROR_HANDLING_MESSAGES = this.getErrorHandlingMessages(agentlessPolicyId);
+    const ERROR_HANDLING_MESSAGES: AgentlessAgentErrorHandlingMessages =
+      this.getErrorHandlingMessages(agentlessPolicyId);
 
     if (error.response) {
       if (error.response.status in ERROR_HANDLING_MESSAGES) {
-        const handledResponseErrorMessage =
-          ERROR_HANDLING_MESSAGES[error.response.status as keyof typeof ERROR_HANDLING_MESSAGES][
-            action
-          ];
+        const handledResponseErrorMessage = ERROR_HANDLING_MESSAGES[error.response.status][action];
         this.handleResponseError(
           action,
           error.response,
@@ -426,7 +433,7 @@ class AgentlessAgentService {
       : new AgentlessAgentDeleteError(this.withRequestIdMessage(userMessage, traceId));
   }
 
-  private getErrorHandlingMessages(agentlessPolicyId: string) {
+  private getErrorHandlingMessages(agentlessPolicyId: string): AgentlessAgentErrorHandlingMessages {
     return {
       400: {
         create: {
@@ -483,13 +490,7 @@ class AgentlessAgentService {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 429 for agentless policy, agentless agent limit has been reached for this deployment or project.',
           message:
-            'the Agentless API could not create the agentless agent, you have reached the limit of agentless agents provisioned for this deployment or project.  Consider removing some agentless agents and try again or use agent-based agents for this integration.',
-        },
-        // this is likely to happen when deleting agentless agents, but covering it in case
-        delete: {
-          log: '[Agentless API] Deleting the agentless deployment failed with a status 429 for agentless policy, agentless agent limit has been reached for this deployment or project.',
-          message:
-            'the Agentless API could not delete the agentless deployment, you have reached the limit of agentless agents provisioned for this deployment or project.  Consider removing some agentless agents and try again or use agent-based agents for this integration.',
+            'you have reached the limit for agentless provisioning. Please remove some or switch to agent-based integration.',
         },
       },
       500: {
