@@ -122,7 +122,6 @@ export class ElasticAssistantPlugin
     return {
       actions: plugins.actions,
       inference: plugins.inference,
-      security: plugins.security,
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
