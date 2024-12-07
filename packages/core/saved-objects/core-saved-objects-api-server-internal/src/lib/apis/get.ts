@@ -14,7 +14,12 @@ import {
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
-import { isFoundGetResponse, getSavedObjectFromSource, rawDocExistsInNamespace } from './utils';
+import {
+  isFoundGetResponse,
+  getSavedObjectFromSource,
+  rawDocExistsInNamespace,
+  getRawDocNamespacesFromSource,
+} from './utils';
 import { ApiExecutionContext } from './types';
 
 export interface PerformGetParams {
@@ -49,17 +54,20 @@ export const performGet = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
   }
 
-  const objectNotFound =
-    !isFoundGetResponse(body) ||
-    indexNotFound ||
-    !rawDocExistsInNamespace(registry, body, namespace);
+  const isObjectFound = isFoundGetResponse(body);
 
+  const objectNotFound =
+    !isObjectFound || indexNotFound || !rawDocExistsInNamespace(registry, body, namespace);
+
+  const existingNamespaces = isObjectFound
+    ? getRawDocNamespacesFromSource(registry, body._source)
+    : [];
   const authorizationResult = await securityExtension?.authorizeGet({
     namespace,
     object: {
       type,
       id,
-      existingNamespaces: body?._source?.namespaces ?? [],
+      existingNamespaces,
     },
     objectNotFound,
   });

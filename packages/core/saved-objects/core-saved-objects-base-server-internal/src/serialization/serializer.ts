@@ -15,7 +15,7 @@ import type {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils, DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 import { decodeVersion, encodeVersion } from '../version';
 
@@ -90,7 +90,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
     const { _id, _source, _seq_no, _primary_term } = doc;
     const {
       type,
-      namespaces,
+      namespaces = [],
       originId,
       references,
       coreMigrationVersion,
@@ -109,6 +109,10 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
     const includeNamespace =
       namespace && (namespaceTreatment === 'lax' || this.registry.isSingleNamespace(type));
     const includeNamespaces = this.registry.isMultiNamespace(type);
+
+    if (!namespaces.length) {
+      namespaces.push(DEFAULT_NAMESPACE_STRING);
+    }
 
     return {
       type,
