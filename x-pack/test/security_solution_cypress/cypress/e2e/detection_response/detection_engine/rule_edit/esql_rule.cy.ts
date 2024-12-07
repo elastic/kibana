@@ -86,6 +86,8 @@ describe.skip(
     });
 
     it('edits ES|QL rule query and override rule name with new property', () => {
+      cy.intercept('PUT', /(\/api\/detection_engine\/rules)/).as('saveRule');
+
       fillEsqlQueryBar(expectedValidEsqlQuery);
 
       goToAboutStepTab();
@@ -94,8 +96,9 @@ describe.skip(
 
       saveEditedRule();
 
-      // ensure rule name override is displayed on details page
-      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'event.category');
+      cy.wait('@saveRule').then(({ response }) => {
+        cy.wrap(response?.body.rule_name_override).should('eql', 'event.category');
+      });
     });
 
     it('adds ES|QL override rule name on edit', () => {
