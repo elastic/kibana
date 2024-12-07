@@ -21,12 +21,7 @@ import {
 } from './catch_retryable_es_client_errors';
 import type { IndexNotFound, AcknowledgeResponse, OperationNotSupported } from '.';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
-import {
-  DEFAULT_TIMEOUT,
-  INDEX_AUTO_EXPAND_REPLICAS,
-  INDEX_NUMBER_OF_SHARDS,
-  WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
-} from './constants';
+import { DEFAULT_TIMEOUT, INDEX_AUTO_EXPAND_REPLICAS, INDEX_NUMBER_OF_SHARDS } from './constants';
 import { isClusterShardLimitExceeded } from './es_errors';
 import type { ClusterShardLimitExceeded } from './create_index';
 
@@ -84,7 +79,6 @@ export const cloneIndex = ({
       .clone({
         index: source,
         target,
-        wait_for_active_shards: WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
         settings: {
           index: {
             // The source we're cloning from will have a write block set, so
@@ -157,11 +151,11 @@ export const cloneIndex = ({
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right(res);
       } else {
-        // Otherwise, wait until the target index has a 'yellow' status.
+        // Otherwise, wait until the target index has a 'green' status.
         return pipe(
           waitForIndexStatus({ client, index: target, timeout, status: 'green' }),
           TaskEither.map((value) => {
-            /** When the index status is 'yellow' we know that all shards were started */
+            /** When the index status is 'green' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };
           })
         );
