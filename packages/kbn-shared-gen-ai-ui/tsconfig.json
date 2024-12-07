@@ -5,23 +5,20 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@kbn/ambient-ui-types"
     ]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
-   "@kbn/i18n",
-   "@kbn/search-connectors",
-   "@kbn/es-ui-shared-plugin",
-   "@kbn/i18n-react",
-   "@kbn/triggers-actions-ui-plugin",
-   "@kbn/core-http-browser",
-   "@kbn/core-notifications-browser"
+    "@kbn/i18n",
+    "@kbn/search-connectors",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n-react",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-elasticsearch-server"
   ]
 }

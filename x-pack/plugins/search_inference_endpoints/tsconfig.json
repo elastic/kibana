@@ -36,8 +36,7 @@
     "@kbn/deeplinks-management",
     "@kbn/serverless",
     "@kbn/utility-types",
-    "@kbn/shared-gen-ai-ui",
-    "@kbn/triggers-actions-ui-plugin"
+    "@kbn/genai-common"
   ],
   "exclude": [
     "target/**/*",
