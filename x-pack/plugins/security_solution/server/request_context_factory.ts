@@ -139,6 +139,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
+          isRuleCustomizationEnabled: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
         });
       }),
 

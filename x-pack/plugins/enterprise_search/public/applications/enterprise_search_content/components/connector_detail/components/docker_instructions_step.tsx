@@ -34,12 +34,14 @@ export interface DockerInstructionsStepProps {
   hasApiKey: boolean;
   isWaitingForConnector: boolean;
   serviceType: string;
+  connectorVersion: string;
 }
 export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
   connectorId,
   isWaitingForConnector,
   serviceType,
   apiKeyData,
+  connectorVersion,
 }) => {
   const [isOpen, setIsOpen] = React.useState<EuiAccordionProps['forceState']>('open');
   const { elasticsearchUrl } = useCloudDetails();
@@ -163,7 +165,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
           showTopBar={false}
           languageType="bash"
           codeSnippet={getRunFromDockerSnippet({
-            version: '8.15.0',
+            version: connectorVersion,
           })}
         />
       </EuiAccordion>

@@ -15,6 +15,8 @@ const createClientMock = (): jest.Mocked<AgentClient> => ({
   getAgentStatusForAgentPolicy: jest.fn(),
   listAgents: jest.fn(),
   getLatestAgentAvailableVersion: jest.fn(),
+  getLatestAgentAvailableBaseVersion: jest.fn(),
+  getLatestAgentAvailableDockerImageVersion: jest.fn(),
 });
 
 const createServiceMock = (): DeeplyMockedKeys<AgentService> => ({

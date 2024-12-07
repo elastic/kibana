@@ -41,7 +41,7 @@ import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
 import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
 import { Globals } from '../../static_globals';
-import { getIndexPatterns } from './get_index_patterns';
+import { getIndexPatterns } from '../../../common/get_index_patterns';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.

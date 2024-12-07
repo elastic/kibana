@@ -81,12 +81,12 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
             const meteringStatsIndices = parseMeteringStats(meteringStats.indices);
 
             const availableIndices = await fetchAvailableIndices(esClient, {
-              indexPattern: decodedIndexName,
+              indexNameOrPattern: decodedIndexName,
               startDate: decodedStartDate,
               endDate: decodedEndDate,
             });
 
-            if (!availableIndices.aggregations?.index?.buckets) {
+            if (availableIndices.length === 0) {
               logger.warn(
                 `No available indices found under pattern: ${decodedIndexName}, in the given date range: ${decodedStartDate} - ${decodedEndDate}`
               );
@@ -95,10 +95,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
               });
             }
 
-            const indices = pickAvailableMeteringStats(
-              availableIndices.aggregations.index.buckets,
-              meteringStatsIndices
-            );
+            const indices = pickAvailableMeteringStats(availableIndices, meteringStatsIndices);
 
             return response.ok({
               body: indices,

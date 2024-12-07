@@ -171,6 +171,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
       tabs.map((tab, index) => {
         return (
           <EuiTab
+            data-test-subj={`indexCheckFlyoutTab-${tab.id}`}
             onClick={() => handleTabClick(tab.id)}
             isSelected={tab.id === selectedTabId}
             key={index}
@@ -199,7 +200,9 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
               {partitionedFieldMetadata?.incompatible != null && (
                 <IndexResultBadge incompatible={partitionedFieldMetadata.incompatible.length} />
               )}
-              <h2 id={indexCheckFlyoutTitleId}>{indexName}</h2>
+              <h2 data-test-subj="indexCheckFlyoutHeading" id={indexCheckFlyoutTitleId}>
+                {indexName}
+              </h2>
             </EuiFlexGroup>
           </EuiTitle>
           {indexResult != null && indexResult.checkedAt != null && (
@@ -236,7 +239,13 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="refresh" isLoading={isChecking} onClick={handleCheckNow} fill>
+              <EuiButton
+                data-test-subj="indexCheckFlyoutCheckNowButton"
+                iconType="refresh"
+                isLoading={isChecking}
+                onClick={handleCheckNow}
+                fill
+              >
                 {CHECK_NOW}
               </EuiButton>
             </EuiFlexItem>

@@ -169,13 +169,40 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   ]);
 
-  const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
+  const deploymentStatItems = useMemo<AllocatedModel[]>(() => {
     const deploymentStats = stats.deployment_stats;
     const modelSizeStats = stats.model_size_stats;
 
     if (!deploymentStats || !modelSizeStats) return [];
 
-    const items: AllocatedModel[] = deploymentStats.flatMap((perDeploymentStat) => {
+    return deploymentStats.flatMap((perDeploymentStat) => {
+      // A deployment can be in a starting state and not allocated to any node yet.
+      if (perDeploymentStat.nodes.length < 1) {
+        return [
+          {
+            key: `${perDeploymentStat.deployment_id}_no_node`,
+            ...perDeploymentStat,
+            ...modelSizeStats,
+            node: {
+              name: '-',
+              average_inference_time_ms: 0,
+              inference_count: 0,
+              routing_state: {
+                routing_state: perDeploymentStat.state,
+                reason: perDeploymentStat.reason,
+              },
+              last_access: 0,
+              number_of_pending_requests: 0,
+              start_time: 0,
+              throughput_last_minute: 0,
+              number_of_allocations: 0,
+              threads_per_allocation: 0,
+              error_count: 0,
+            },
+          },
+        ];
+      }
+
       return perDeploymentStat.nodes.map((n) => {
         const nodeName = Object.values(n.node)[0].name;
         return {
@@ -200,8 +227,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         };
       });
     });
-
-    return items;
   }, [stats]);
 
   const hideColumns = useMemo(() => {

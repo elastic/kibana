@@ -6,23 +6,20 @@
  */
 
 import type { ComponentProps, ReactElement } from 'react';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
-import { defaultUdtHeaders } from '../unified_components/default_headers';
-import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
+import { defaultHeaders } from './column_headers/default_headers';
 
 export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {
   header: ReactElement;
-  pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
 }
 
 export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
   const {
     header,
     isSortEnabled,
-    pageInfo,
     columns,
     rowRenderers,
     timelineId,
@@ -33,29 +30,15 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     refetch,
     dataLoadingState,
     totalCount,
-    onChangePage,
+    onFetchMoreRecords,
     activeTab,
     updatedAt,
     trailingControlColumns,
     leadingControlColumns,
+    onUpdatePageIndex,
   } = props;
 
-  const [pageRows, setPageRows] = useState<TimelineItem[][]>([]);
-
-  const rows = useMemo(() => pageRows.flat(), [pageRows]);
-
-  useEffect(() => {
-    setPageRows((currentPageRows) => {
-      if (pageInfo.activePage !== 0 && currentPageRows[pageInfo.activePage]?.length) {
-        return currentPageRows;
-      }
-      const newPageRows = pageInfo.activePage === 0 ? [] : [...currentPageRows];
-      newPageRows[pageInfo.activePage] = events;
-      return newPageRows;
-    });
-  }, [events, pageInfo.activePage]);
-
-  const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
+  const columnsHeader = useMemo(() => columns ?? defaultHeaders, [columns]);
 
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">
@@ -73,16 +56,17 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             itemsPerPage={itemsPerPage}
             itemsPerPageOptions={itemsPerPageOptions}
             sort={sort}
-            events={rows}
+            events={events}
             refetch={refetch}
             dataLoadingState={dataLoadingState}
             totalCount={totalCount}
-            onChangePage={onChangePage}
+            onFetchMoreRecords={onFetchMoreRecords}
             activeTab={activeTab}
             updatedAt={updatedAt}
             isTextBasedQuery={false}
             trailingControlColumns={trailingControlColumns}
             leadingControlColumns={leadingControlColumns}
+            onUpdatePageIndex={onUpdatePageIndex}
           />
         </RootDragDropProvider>
       </StyledUnifiedTableFlexItem>

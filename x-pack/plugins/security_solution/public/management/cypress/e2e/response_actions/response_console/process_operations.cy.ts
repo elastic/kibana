@@ -26,90 +26,102 @@ import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_
 
 const AGENT_BEAT_FILE_PATH_SUFFIX = '/components/agentbeat';
 
-describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
-  beforeEach(() => {
-    login();
-  });
+describe(
+  'Response console',
+  {
+    tags: [
+      '@ess',
+      '@serverless',
+      '@brokenInServerless',
+      '@skipInServerless',
+      '@skipInServerlessMKI',
+    ],
+  },
+  () => {
+    beforeEach(() => {
+      login();
+    });
 
-  describe('Processes operations:', () => {
-    let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
-    let createdHost: CreateAndEnrollEndpointHostResponse;
+    describe('Processes operations:', () => {
+      let indexedPolicy: IndexedFleetEndpointPolicyResponse;
+      let policy: PolicyData;
+      let createdHost: CreateAndEnrollEndpointHostResponse;
 
-    before(() => {
-      getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version).then((data) => {
-          indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
+      before(() => {
+        getEndpointIntegrationVersion().then((version) =>
+          createAgentPolicyTask(version).then((data) => {
+            indexedPolicy = data;
+            policy = indexedPolicy.integrationPolicies[0];
 
-          return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_ids[0]).then((host) => {
-              createdHost = host as CreateAndEnrollEndpointHostResponse;
+            return enableAllPolicyProtections(policy.id).then(() => {
+              // Create and enroll a new Endpoint host
+              return createEndpointHost(policy.policy_ids[0]).then((host) => {
+                createdHost = host as CreateAndEnrollEndpointHostResponse;
+              });
             });
+          })
+        );
+      });
+
+      after(() => {
+        if (createdHost) {
+          cy.task('destroyEndpointHost', createdHost);
+        }
+
+        if (indexedPolicy) {
+          cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
+        }
+
+        if (createdHost) {
+          deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+        }
+      });
+
+      it('"processes" - should obtain a list of processes', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        openResponseConsoleFromEndpointList();
+
+        // get running processes
+        performCommandInputChecks('processes');
+        submitCommand();
+        cy.contains('Action pending.').should('exist');
+
+        // on success
+        cy.getByTestSubj('processesOutput-processListTable', { timeout: 120000 }).within(() => {
+          ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
+            cy.contains(header);
           });
-        })
-      );
-    });
 
-    after(() => {
-      if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost);
-      }
-
-      if (indexedPolicy) {
-        cy.task('deleteIndexedFleetEndpointPolicies', indexedPolicy);
-      }
-
-      if (createdHost) {
-        deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
-      }
-    });
-
-    it('"processes" - should obtain a list of processes', () => {
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      openResponseConsoleFromEndpointList();
-
-      // get running processes
-      performCommandInputChecks('processes');
-      submitCommand();
-      cy.contains('Action pending.').should('exist');
-
-      // on success
-      cy.getByTestSubj('processesOutput-processListTable', { timeout: 120000 }).within(() => {
-        ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
-          cy.contains(header);
+          cy.get('tbody > tr').should('have.length.greaterThan', 0);
+          cy.get('tbody > tr > td').should('contain', AGENT_BEAT_FILE_PATH_SUFFIX);
         });
+      });
 
-        cy.get('tbody > tr').should('have.length.greaterThan', 0);
-        cy.get('tbody > tr > td').should('contain', AGENT_BEAT_FILE_PATH_SUFFIX);
+      it('"kill-process --pid" - should kill a process', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        openResponseConsoleFromEndpointList();
+
+        // get running processes
+        getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
+          // kill the process using PID
+          inputConsoleCommand(`kill-process --pid ${pid}`);
+          submitCommand();
+          waitForCommandToBeExecuted('kill-process');
+        });
+      });
+
+      it('"suspend-process --pid" - should suspend a process', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        openResponseConsoleFromEndpointList();
+
+        // get running processes
+        getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
+          // suspend the process using PID
+          inputConsoleCommand(`suspend-process --pid ${pid}`);
+          submitCommand();
+          waitForCommandToBeExecuted('suspend-process');
+        });
       });
     });
-
-    it('"kill-process --pid" - should kill a process', () => {
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      openResponseConsoleFromEndpointList();
-
-      // get running processes
-      getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
-        // kill the process using PID
-        inputConsoleCommand(`kill-process --pid ${pid}`);
-        submitCommand();
-        waitForCommandToBeExecuted('kill-process');
-      });
-    });
-
-    it('"suspend-process --pid" - should suspend a process', () => {
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      openResponseConsoleFromEndpointList();
-
-      // get running processes
-      getRunningProcesses(AGENT_BEAT_FILE_PATH_SUFFIX).then((pid) => {
-        // suspend the process using PID
-        inputConsoleCommand(`suspend-process --pid ${pid}`);
-        submitCommand();
-        waitForCommandToBeExecuted('suspend-process');
-      });
-    });
-  });
-});
+  }
+);

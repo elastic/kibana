@@ -23,6 +23,7 @@ import { ERROR_LOADING_METADATA_TITLE, LOADING_STATS } from './translations';
 import { useHistoricalResults } from './hooks/use_historical_results';
 import { getHistoricalResultStub } from '../../../stub/get_historical_result_stub';
 import userEvent from '@testing-library/user-event';
+import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from './constants';
 
 const pattern = 'auditbeat-*';
 
@@ -94,11 +95,10 @@ describe('pattern', () => {
       </TestExternalProviders>
     );
 
-    const accordionToggle = screen.getByRole('button', {
-      name: 'Fail auditbeat-* hot (1) unmanaged (2) Incompatible fields 4 Indices checked 3 Indices 3 Size 17.9MB Docs 19,127',
-    });
-
-    expect(accordionToggle).toBeInTheDocument();
+    const accordionToggle = screen.getByTestId('patternAccordionButton-auditbeat-*');
+    expect(accordionToggle).toHaveTextContent(
+      'Failauditbeat-*hot (1)unmanaged (2)Incompatible fields4Indices checked3Indices3Size17.9MBDocs19,127'
+    );
     expect(accordionToggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('summaryTable')).toBeInTheDocument();
   });
@@ -139,9 +139,10 @@ describe('pattern', () => {
             </TestExternalProviders>
           );
 
-          const accordionToggle = await screen.findByRole('button', {
-            name: 'auditbeat-* Incompatible fields 0 Indices checked 0 Indices 0 Size 0B Docs 0',
-          });
+          const accordionToggle = screen.getByTestId('patternAccordionButton-auditbeat-*');
+          expect(accordionToggle).toHaveTextContent(
+            'auditbeat-*Incompatible fields0Indices checked0Indices0Size0BDocs0'
+          );
 
           expect(onAccordionToggle).toHaveBeenCalledTimes(1);
 
@@ -186,10 +187,7 @@ describe('pattern', () => {
             </TestExternalProviders>
           );
 
-          const accordionToggle = screen.getByRole('button', {
-            name: 'Fail auditbeat-* hot (1) unmanaged (2) Incompatible fields 4 Indices checked 3 Indices 3 Size 17.9MB Docs 19,127',
-          });
-
+          const accordionToggle = screen.getByTestId('patternAccordionButton-auditbeat-*');
           expect(onAccordionToggle).toHaveBeenCalledTimes(1);
 
           await userEvent.click(accordionToggle);
@@ -234,9 +232,7 @@ describe('pattern', () => {
           </TestExternalProviders>
         );
 
-        const accordionToggle = screen.getByRole('button', {
-          name: 'Fail auditbeat-* hot (1) unmanaged (2) Incompatible fields 4 Indices checked 3 Indices 3 Size 17.9MB Docs 19,127',
-        });
+        const accordionToggle = screen.getByTestId('patternAccordionButton-auditbeat-*');
 
         expect(onAccordionToggle).toHaveBeenCalledTimes(1);
         expect(onAccordionToggle).toHaveBeenCalledWith(pattern, true, false);
@@ -484,14 +480,11 @@ describe('pattern', () => {
           </TestExternalProviders>
         );
 
-        const rows = screen.getAllByRole('row');
-        const firstBodyRow = within(rows[1]);
-
         expect(screen.queryByTestId('indexCheckFlyout')).not.toBeInTheDocument();
 
-        const checkNowButton = firstBodyRow.getByRole('button', {
-          name: 'Check now',
-        });
+        const checkNowButton = screen.getByTestId(
+          'checkNowAction-.ds-auditbeat-8.6.1-2023.02.07-000001'
+        );
 
         await userEvent.click(checkNowButton);
 
@@ -505,12 +498,11 @@ describe('pattern', () => {
           indexName,
           pattern,
         });
-        expect(screen.getByTestId('indexCheckFlyout')).toBeInTheDocument();
-        expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+        expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).toHaveAttribute(
           'aria-selected',
           'true'
         );
-        expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+        expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).toHaveAttribute(
           'aria-selected',
           'false'
         );
@@ -566,15 +558,11 @@ describe('pattern', () => {
           </TestExternalProviders>
         );
 
-        const rows = screen.getAllByRole('row');
-        const firstBodyRow = within(rows[1]);
-
         expect(screen.queryByTestId('indexCheckFlyout')).not.toBeInTheDocument();
 
-        const viewHistoryButton = firstBodyRow.getByRole('button', {
-          name: 'View history',
-        });
-
+        const viewHistoryButton = screen.getByTestId(
+          'viewHistoryAction-.ds-auditbeat-8.6.1-2023.02.07-000001'
+        );
         await userEvent.click(viewHistoryButton);
 
         // assert
@@ -583,12 +571,11 @@ describe('pattern', () => {
           abortController: expect.any(AbortController),
           indexName,
         });
-        expect(screen.getByTestId('indexCheckFlyout')).toBeInTheDocument();
-        expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+        expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).toHaveAttribute(
           'aria-selected',
           'false'
         );
-        expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+        expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).toHaveAttribute(
           'aria-selected',
           'true'
         );
@@ -644,24 +631,21 @@ describe('pattern', () => {
           </TestExternalProviders>
         );
 
-        const rows = screen.getAllByRole('row');
-        const firstBodyRow = within(rows[1]);
-
+        // assert
         expect(screen.queryByTestId('indexCheckFlyout')).not.toBeInTheDocument();
 
-        const viewHistoryButton = firstBodyRow.getByRole('button', {
-          name: 'View history',
-        });
+        const viewHistoryButton = screen.getByTestId(
+          'viewHistoryAction-.ds-auditbeat-8.6.1-2023.02.07-000001'
+        );
 
+        // act
         await userEvent.click(viewHistoryButton);
-
-        const closeButton = screen.getByRole('button', { name: 'Close this dialog' });
-
+        const closeButton = screen.getByTestId('euiFlyoutCloseButton');
         await userEvent.click(closeButton);
 
         // assert
         expect(screen.queryByTestId('indexCheckFlyout')).not.toBeInTheDocument();
-      }, 15000);
+      });
     });
 
     describe('when chartSelectedIndex is set', () => {
@@ -718,15 +702,15 @@ describe('pattern', () => {
           indexName,
           pattern,
         });
-        expect(screen.getByTestId('indexCheckFlyout')).toBeInTheDocument();
-        expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+        expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).toHaveAttribute(
           'aria-selected',
           'true'
         );
-        expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+        expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).toHaveAttribute(
           'aria-selected',
           'false'
         );
+
         expect(screen.getByTestId('latestResults')).toBeInTheDocument();
         expect(screen.queryByTestId('historicalResults')).not.toBeInTheDocument();
       });
@@ -766,19 +750,13 @@ describe('pattern', () => {
           </TestExternalProviders>
         );
 
-        const rows = screen.getAllByRole('row');
-        // skipping the first row which is the header
-        const firstBodyRow = within(rows[1]);
-
-        const tourWrapper = await firstBodyRow.findByTestId('historicalResultsTour');
+        const tourWrapper = await screen.findByTestId('historicalResultsTour');
 
         expect(
-          within(tourWrapper).getByRole('button', { name: 'View history' })
+          within(tourWrapper).getByTestId('viewHistoryAction-.ds-auditbeat-8.6.1-2023.02.07-000001')
         ).toBeInTheDocument();
 
-        expect(
-          screen.getByRole('dialog', { name: 'Introducing data quality history' })
-        ).toBeInTheDocument();
+        expect(screen.getByTestId('historicalResultsTourPanel')).toBeInTheDocument();
       });
 
       describe('when accordion is collapsed', () => {
@@ -815,14 +793,11 @@ describe('pattern', () => {
 
           expect(await screen.findByTestId('historicalResultsTour')).toBeInTheDocument();
 
-          const accordionToggle = screen.getByRole('button', {
-            name: 'Fail auditbeat-* hot (1) unmanaged (2) Incompatible fields 4 Indices checked 3 Indices 3 Size 17.9MB Docs 19,127',
-          });
-
+          const accordionToggle = screen.getByTestId('patternAccordionButton-auditbeat-*');
           await userEvent.click(accordionToggle);
 
           expect(screen.queryByTestId('historicalResultsTour')).not.toBeInTheDocument();
-        }, 10000);
+        });
       });
 
       describe('when the tour close button is clicked', () => {
@@ -859,11 +834,8 @@ describe('pattern', () => {
             </TestExternalProviders>
           );
 
-          const tourDialog = await screen.findByRole('dialog', {
-            name: 'Introducing data quality history',
-          });
-
-          const closeButton = within(tourDialog).getByRole('button', { name: 'Close' });
+          const tourDialog = await screen.findByTestId('historicalResultsTourPanel');
+          const closeButton = within(tourDialog).getByText('Close');
 
           await userEvent.click(closeButton);
 
@@ -905,28 +877,24 @@ describe('pattern', () => {
             </TestExternalProviders>
           );
 
-          const tourDialog = await screen.findByRole('dialog', {
-            name: 'Introducing data quality history',
-          });
-
-          const tryItButton = within(tourDialog).getByRole('button', { name: 'Try it' });
+          const tourDialog = await screen.findByTestId('historicalResultsTourPanel');
+          const tryItButton = within(tourDialog).getByText('Try it');
 
           await userEvent.click(tryItButton);
 
           expect(onDismissTour).toHaveBeenCalledTimes(1);
-          expect(screen.getByTestId('indexCheckFlyout')).toBeInTheDocument();
-          expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+          expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).toHaveAttribute(
             'aria-selected',
             'false'
           );
-          expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+          expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).toHaveAttribute(
             'aria-selected',
             'true'
           );
         });
       });
 
-      describe('when latest latest check flyout tab is opened', () => {
+      describe('when latest check flyout tab is opened', () => {
         it('hides the tour in listview and shows in flyout', async () => {
           (useIlmExplain as jest.Mock).mockReturnValue({
             error: null,
@@ -960,41 +928,41 @@ describe('pattern', () => {
             </TestExternalProviders>
           );
 
-          const rows = screen.getAllByRole('row');
-          // skipping the first row which is the header
-          const firstBodyRow = within(rows[1]);
+          const summaryTableWrapper = within(screen.getByTestId('summaryTable'));
 
-          expect(await firstBodyRow.findByTestId('historicalResultsTour')).toBeInTheDocument();
           expect(
-            screen.getByRole('dialog', { name: 'Introducing data quality history' })
+            await summaryTableWrapper.findByTestId('historicalResultsTour')
           ).toBeInTheDocument();
+          expect(screen.queryByTestId('historicalResultsTourPanel')).toBeInTheDocument();
 
-          const checkNowButton = firstBodyRow.getByRole('button', {
-            name: 'Check now',
-          });
+          const checkNowButton = summaryTableWrapper.getByTestId(
+            'checkNowAction-.ds-auditbeat-8.6.1-2023.02.07-000001'
+          );
           await userEvent.click(checkNowButton);
 
-          expect(screen.getByTestId('indexCheckFlyout')).toBeInTheDocument();
-          expect(screen.getByRole('tab', { name: 'Latest Check' })).toHaveAttribute(
+          expect(screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`)).toHaveAttribute(
             'aria-selected',
             'true'
           );
-          expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute(
+          expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).toHaveAttribute(
             'aria-selected',
             'false'
           );
 
-          expect(firstBodyRow.queryByTestId('historicalResultsTour')).not.toBeInTheDocument();
+          expect(
+            summaryTableWrapper.queryByTestId('historicalResultsTour')
+          ).not.toBeInTheDocument();
 
-          const tabWrapper = await screen.findByRole('tab', { name: 'History' });
-          await waitFor(() =>
+          const tabWrapper = await screen.findByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`);
+          await waitFor(() => {
             expect(
               tabWrapper.closest('[data-test-subj="historicalResultsTour"]')
-            ).toBeInTheDocument()
-          );
+            ).toBeInTheDocument();
+            expect(screen.queryByTestId('historicalResultsTourPanel')).toBeInTheDocument();
+          });
 
           expect(onDismissTour).not.toHaveBeenCalled();
-        }, 10000);
+        });
       });
     });
 

@@ -1355,4 +1355,64 @@ describe('UnifiedDataTable', () => {
       EXTENDED_JEST_TIMEOUT
     );
   });
+
+  describe('pagination', () => {
+    const onChangePageMock = jest.fn();
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    test('should effect pageIndex change', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        onUpdatePageIndex: onChangePageMock,
+        rowsPerPageState: 1,
+        rowsPerPageOptions: [1, 5],
+      });
+
+      expect(findTestSubject(component, 'pagination-button-1').exists()).toBeTruthy();
+      onChangePageMock.mockClear();
+      findTestSubject(component, 'pagination-button-1').simulate('click');
+      expect(onChangePageMock).toHaveBeenNthCalledWith(1, 1);
+    });
+
+    test('should effect pageIndex change when itemsPerPage has been changed', async () => {
+      /*
+       * Use Case:
+       *
+       * Let's say we have 4 pages and we are on page 1 with 1 item per page.
+       * Now if we change items per page to 4, it should automatically change the pageIndex to 0.
+       *
+       * */
+      const component = await getComponent({
+        ...getProps(),
+        onUpdatePageIndex: onChangePageMock,
+        rowsPerPageState: 1,
+        rowsPerPageOptions: [1, 4],
+      });
+
+      expect(findTestSubject(component, 'pagination-button-4').exists()).toBeTruthy();
+      onChangePageMock.mockClear();
+      // go to last page
+      findTestSubject(component, 'pagination-button-4').simulate('click');
+      expect(onChangePageMock).toHaveBeenNthCalledWith(1, 4);
+      onChangePageMock.mockClear();
+
+      // Change items per Page so that pageIndex autoamtically changes.
+      expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+        'Rows per page: 1'
+      );
+      findTestSubject(component, 'tablePaginationPopoverButton').simulate('click');
+      component.setProps({
+        rowsPerPageState: 5,
+      });
+
+      await waitFor(() => {
+        expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
+          'Rows per page: 5'
+        );
+      });
+
+      expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
+    });
+  });
 });

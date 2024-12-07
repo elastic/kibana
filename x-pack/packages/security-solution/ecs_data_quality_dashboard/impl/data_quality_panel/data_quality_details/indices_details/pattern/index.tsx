@@ -322,7 +322,9 @@ const PatternComponent: React.FC<Props> = ({
           id={patternComponentAccordionId}
           forceState={isAccordionOpen ? 'open' : 'closed'}
           onToggle={handleAccordionToggle}
-          buttonElement="div"
+          buttonProps={{
+            'data-test-subj': `patternAccordionButton-${pattern}`,
+          }}
           buttonContent={
             <PatternSummary
               incompatible={getTotalPatternIncompatible(patternRollup?.results)}

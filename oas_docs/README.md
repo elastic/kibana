@@ -39,13 +39,4 @@ The `oas_docs/output` folder contains the final resulting Kibana OpenAPI bundles
 
 ## Bundling commands
 
-Besides the scripts in the `oas_docs/scripts` folder, there is an `oas_docs/makefile` to simplify the workflow. The following makefile targets are available:
-
-| Command                    | Description                                                                                                                                                                                                        |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `api-docs`                 | Builds ESS Kibana OpenAPI bundle                                                                                                                                                                                   |
-| `api-docs-serverless`      | Builds Serverless Kibana OpenAPI bundle                                                                                                                                                                            |
-| `api-docs-lint`            | Lints built result bundles              |
-| `api-docs-preview`         | Generates (ESS + Serverless) Kibana OpenAPI bundles preview                                                                                                                                                        |
-| `api-docs-overlay`         | Applies [overlays](https://docs.bump.sh/help/specification-support/overlays/) from `overlays` folder to the Kibana OpenAPI bundles and generate `*.new.yaml` files. Overlays help to fine tune the result bundles. |
-| `api-docs-overlay-preview` | Generates a preview for bundles produced by `api-docs-overlay`                                                                                                                                                     |
+Besides the scripts in the `oas_docs/scripts` folder, there is an `oas_docs/makefile` to simplify the workflow. Use `make help` to see available commands.

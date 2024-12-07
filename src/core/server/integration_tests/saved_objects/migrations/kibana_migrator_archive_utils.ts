@@ -25,7 +25,7 @@ import {
 import { delay } from './test_utils';
 import { baselineTypes, getBaselineDocuments } from './kibana_migrator_test_kit.fixtures';
 
-export const BASELINE_ELASTICSEARCH_VERSION = '8.16.1';
+export const BASELINE_ELASTICSEARCH_VERSION = '8.16.2';
 export const BASELINE_DOCUMENTS_PER_TYPE_1K = 200;
 export const BASELINE_DOCUMENTS_PER_TYPE_500K = 100_000;
 // we discard the second half with exclude on upgrade (firstHalf !== true)

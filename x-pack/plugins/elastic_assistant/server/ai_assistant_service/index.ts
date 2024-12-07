@@ -41,7 +41,7 @@ import { hasAIAssistantLicense } from '../routes/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-function getResourceName(resource: string) {
+export function getResourceName(resource: string) {
   return `.kibana-elastic-ai-assistant-${resource}`;
 }
 

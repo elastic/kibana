@@ -206,6 +206,11 @@ export class CrowdstrikeConnector extends SubActionConnector<
       const response = await this.request<R>(
         {
           ...req,
+          // We don't validate responses from Crowdstrike API's because we do not want failures for cases
+          // where the external system might add/remove/change values in the response that we have no
+          // control over.
+          responseSchema:
+            RelaxedCrowdstrikeBaseApiResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
           headers: {
             ...req.headers,
             Authorization: `Bearer ${CrowdstrikeConnector.token}`,

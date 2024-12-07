@@ -26,6 +26,7 @@ interface ImportRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
+  isRuleCustomizationEnabled: boolean;
 }
 
 export const importRule = async ({
@@ -34,6 +35,7 @@ export const importRule = async ({
   importRulePayload,
   prebuiltRuleAssetClient,
   mlAuthz,
+  isRuleCustomizationEnabled,
 }: ImportRuleOptions): Promise<RuleResponse> => {
   const { ruleToImport, overwriteRules, allowMissingConnectorSecrets } = importRulePayload;
 
@@ -57,6 +59,7 @@ export const importRule = async ({
       prebuiltRuleAssetClient,
       existingRule,
       ruleUpdate: ruleToImport,
+      isRuleCustomizationEnabled,
     });
 
     const updatedRule = await rulesClient.update({

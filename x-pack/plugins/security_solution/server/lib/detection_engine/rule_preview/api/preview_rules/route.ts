@@ -83,7 +83,8 @@ export const previewRulesRoute = (
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   getStartServices: StartServicesAccessor<StartPlugins>,
-  logger: Logger
+  logger: Logger,
+  isServerless: boolean
 ) => {
   router.versioned
     .post({
@@ -315,6 +316,7 @@ export const previewRulesRoute = (
                   const date = startedAt.toISOString();
                   return { dateStart: date, dateEnd: date };
                 },
+                isServerless,
               })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
               const errors = loggedStatusChanges

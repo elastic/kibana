@@ -442,8 +442,60 @@ describe('description_step', () => {
 
         expect(result[0].title).toEqual('Threshold label');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
-        expect(mount(result[0].description as React.ReactElement).html()).toContain(
+        expect(mount(result[0].description as React.ReactElement).html()).toEqual(
           'Results aggregated by user.name >= 100'
+        );
+      });
+
+      test('returns threshold description when threshold exist, field is set, and cardinality is not set', () => {
+        const mockThreshold = {
+          threshold: {
+            field: ['user.name'],
+            value: 100,
+            cardinality: {
+              field: [],
+              value: 0,
+            },
+          },
+        };
+        const result: ListItems[] = getDescriptionItem(
+          'threshold',
+          'Threshold label',
+          mockThreshold,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Threshold label');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+        expect(mount(result[0].description as React.ReactElement).html()).toEqual(
+          'Results aggregated by user.name >= 100'
+        );
+      });
+
+      test('returns threshold description when threshold exist, field is set and cardinality is set', () => {
+        const mockThreshold = {
+          threshold: {
+            field: ['user.name'],
+            value: 100,
+            cardinality: {
+              field: ['host.test_value'],
+              value: 10,
+            },
+          },
+        };
+        const result: ListItems[] = getDescriptionItem(
+          'threshold',
+          'Threshold label',
+          mockThreshold,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Threshold label');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+        expect(mount(result[0].description as React.ReactElement).html()).toContain(
+          'Results aggregated by user.name >= 100 when unique values count of host.test_value >= 10'
         );
       });
     });
