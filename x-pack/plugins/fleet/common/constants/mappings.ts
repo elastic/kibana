@@ -102,6 +102,40 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    // Will see if can put that behind the feature flag
+    agent_policy: {
+      properties: {
+        name: {
+          type: 'text',
+        },
+        namespace: {
+          type: 'keyword',
+        },
+        package_policies: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'text',
+            },
+            namespace: {
+              type: 'keyword',
+            },
+            package: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+                version: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     default_api_key: {
       type: 'keyword',
     },
