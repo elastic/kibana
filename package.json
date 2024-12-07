@@ -1825,7 +1825,7 @@
     "sharp": "0.32.6",
     "simple-git": "^3.16.0",
     "sinon": "^7.4.2",
-    "sort-package-json": "^1.53.1",
+    "sort-package-json": "^2.12.0",
     "source-map": "^0.7.4",
     "string-replace-loader": "^2.2.0",
     "style-loader": "^1.1.3",
