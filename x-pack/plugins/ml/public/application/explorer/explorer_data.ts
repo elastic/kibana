@@ -6,12 +6,14 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
-import type { ExplorerChartsData } from '../../explorer_charts/explorer_charts_container_service';
-import { getDefaultChartsData } from '../../explorer_charts/explorer_charts_container_service';
-import type { AnomaliesTableData, ExplorerJob } from '../../explorer_utils';
-import type { AnnotationsTable } from '../../../../../common/types/annotations';
-import type { InfluencerValueData } from '../../../components/influencers_list/influencers_list';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import type { AnomaliesTableData, ExplorerJob } from './explorer_utils';
+import type { AnnotationsTable } from '../../../common/types/annotations';
+import type { InfluencerValueData } from '../components/influencers_list/influencers_list';
+import {
+  type ExplorerChartsData,
+  getDefaultChartsData,
+} from './explorer_charts/explorer_charts_container_service';
 
 export interface ExplorerState {
   overallAnnotations: AnnotationsTable;
@@ -56,7 +58,7 @@ export function getExplorerDefaultState(): ExplorerState {
     indexPattern: getDefaultIndexPattern(),
     influencers: {},
     isAndOperator: false,
-    loading: true,
+    loading: false,
     maskAll: false,
     noInfluencersConfigured: true,
     queryString: '',

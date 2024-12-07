@@ -54,6 +54,7 @@ import type { MlResultsService } from '../services/results_service';
 import type { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 
 export interface ExplorerJob {
   id: string;
@@ -62,6 +63,7 @@ export interface ExplorerJob {
   isSingleMetricViewerJob?: boolean;
   sourceIndices?: string[];
   modelPlotEnabled: boolean;
+  groups?: string[];
 }
 
 export function isExplorerJob(arg: unknown): arg is ExplorerJob {
@@ -149,6 +151,7 @@ export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
       isSingleMetricViewerJob: isTimeSeriesViewJob(job),
       sourceIndices: job.datafeed_config.indices,
       modelPlotEnabled: job.model_plot_config?.enabled === true,
+      groups: job.groups,
     };
   });
 }
@@ -488,6 +491,7 @@ export async function loadAnomaliesTableData(
   influencersFilterQuery?: InfluencersFilterQuery
 ): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
+
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, bounds);
 
@@ -699,4 +703,18 @@ export async function getDataViewsAndIndicesWithGeoFields(
     }
   }
   return { sourceIndicesWithGeoFieldsMap, dataViews: [...dataViewsMap.values()] };
+}
+
+// Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
+// Field objects required fields: name, type, aggregatable, searchable
+export function getIndexPattern(influencers: ExplorerJob[]) {
+  return {
+    title: ML_RESULTS_INDEX_PATTERN,
+    fields: influencers.map((influencer) => ({
+      name: influencer.id,
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+    })),
+  };
 }

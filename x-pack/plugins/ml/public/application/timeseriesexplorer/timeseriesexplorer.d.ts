@@ -23,6 +23,15 @@ interface TimeSeriesExplorerProps {
   tableInterval?: string;
   tableSeverity?: number;
   zoom?: { from?: string; to?: string };
+  handleJobSelectionChange: ({
+    jobIds,
+    groups,
+    time,
+  }: {
+    jobIds: string[];
+    groups: string[];
+    time?: { from: string; to: string };
+  }) => void;
 }
 
 // eslint-disable-next-line react/prefer-stateless-function

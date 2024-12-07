@@ -124,7 +124,7 @@ export class AnomalyTimelineStateService extends StateService {
       update: AnomalyExplorerSwimLaneUrlState,
       replaceState?: boolean
     ) => {
-      const explorerUrlState = this.anomalyExplorerUrlStateService.getPageUrlState();
+      const explorerUrlState = this.anomalyExplorerUrlStateService.getUrlState();
       const mlExplorerSwimLaneState = explorerUrlState?.mlExplorerSwimlane;
       const resultUpdate = replaceState ? update : { ...mlExplorerSwimLaneState, ...update };
       return this.anomalyExplorerUrlStateService.updateUrlState({
@@ -145,7 +145,7 @@ export class AnomalyTimelineStateService extends StateService {
 
     subscription.add(
       this.anomalyExplorerUrlStateService
-        .getPageUrlState$()
+        .getUrlState$()
         .pipe(
           map((v) => v?.mlExplorerSwimlane),
           distinctUntilChanged(isEqual)
