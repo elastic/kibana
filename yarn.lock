@@ -11751,10 +11751,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/license-checker@15.0.0":
-  version "15.0.0"
-  resolved "https://registry.yarnpkg.com/@types/license-checker/-/license-checker-15.0.0.tgz#685d69e2cf61ffd862320434601f51c85e28bba1"
-  integrity sha512-dHZdn+VxvPGwKyKUlqi6Dj/t3Q4KFmbmPpsCOwagytr8P98jmz/nXzyxzz9wbfgpw72mVMx7PMlR/PT0xNsF7A==
+"@types/license-checker@25.0.6":
+  version "25.0.6"
+  resolved "https://registry.yarnpkg.com/@types/license-checker/-/license-checker-25.0.6.tgz#c346285ee7e42bac58a4922059453f50a5d4175d"
+  integrity sha512-ju/75+YPkNE5vX1iPer+qtI1eI/LqJVYZgOsmSHI1iiEM1bQL5Gh1lEvyjR9T7ZXVE1FwJa2doWJEEmPNwbZkw==
 
 "@types/linkify-it@*":
   version "2.1.0"
