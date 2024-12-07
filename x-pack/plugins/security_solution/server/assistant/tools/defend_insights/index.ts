@@ -119,7 +119,9 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
           defendInsights: insights,
           request,
         });
-        workflowInsights.map(securityWorkflowInsightsService.create);
+        workflowInsights.map((workflowInsight) =>
+          securityWorkflowInsightsService.create(workflowInsight)
+        );
 
         return JSON.stringify({ eventsContextCount, insights }, null, 2);
       },

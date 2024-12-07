@@ -12,6 +12,7 @@ import {
   DefendInsightTypeEnum,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
+import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 
@@ -30,6 +31,8 @@ export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) =>
   const { http } = useKibana().services;
   const toasts = useToasts();
 
+  const { data: anonymizationFields } = useFetchAnonymizationFields();
+
   return useMutation<
     DefendInsightsResponse,
     { body?: { message?: string } },
@@ -41,7 +44,7 @@ export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) =>
         body: JSON.stringify({
           endpointIds: [endpointId],
           insightType: DefendInsightTypeEnum.incompatible_antivirus,
-          anonymizationFields: [],
+          anonymizationFields: anonymizationFields.data,
           replacements: {},
           subAction: 'invokeAI',
           apiConfig: {
