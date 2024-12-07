@@ -7,13 +7,14 @@
 import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { omit } from 'lodash';
-import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { HTTPFields, PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants/settings_defaults';
 
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
@@ -27,6 +28,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
     let editorUser: RoleCredentials;
+    let privateLocation: PrivateLocation;
+
+    const privateLocationTestService = new PrivateLocationTestService(getService);
 
     const addMonitorAPI = async (monitor: any, statusCode = 200) => {
       return addMonitorAPIHelper(supertest, monitor, statusCode, editorUser, samlAuth);
@@ -43,8 +47,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(async () => {
-      httpMonitorJson = _httpMonitorJson;
       await kibanaServer.savedObjects.cleanStandardList();
+      privateLocation = await privateLocationTestService.addTestPrivateLocation();
+      httpMonitorJson = {
+        ..._httpMonitorJson,
+        locations: [privateLocation],
+      };
       await supertest
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set(editorUser.apiKeyHeader)

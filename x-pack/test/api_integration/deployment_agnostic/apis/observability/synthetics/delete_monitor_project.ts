@@ -22,8 +22,6 @@ import { PrivateLocationTestService } from '../../../services/synthetics_private
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('DeleteProjectMonitors', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
@@ -36,12 +34,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let testPolicyId = '';
     const testPrivateLocationsService = new PrivateLocationTestService(getService);
 
-    const setUniqueIds = (
+    const setUniqueIdsAndLocations = (
       request: ProjectMonitorsRequest,
       privateLocations: PrivateLocation[] = []
     ) => {
       return {
         ...request,
+        locations: [],
         privateLocations: privateLocations.map((location) => location.label),
         monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
       };
@@ -57,7 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(() => {
-      projectMonitors = setUniqueIds(
+      projectMonitors = setUniqueIdsAndLocations(
         getFixtureJson('project_browser_monitor'),
         testPrivateLocations
       );

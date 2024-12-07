@@ -51,7 +51,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let viewerUser: RoleCredentials;
     let privateLocations: PrivateLocation[] = [];
 
-    let testPolicyId = '';
+    let testPolicyId1 = '';
+    let testPolicyId2 = '';
     const testPolicyName = 'Fleet test server policy' + Date.now();
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
@@ -97,9 +98,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      privateLocations = await testPrivateLocations.setTestLocations([testPolicyId]);
+      const apiResponse1 = await testPrivateLocations.addFleetPolicy(testPolicyName);
+      const apiResponse2 = await testPrivateLocations.addFleetPolicy(`${testPolicyName}-2`);
+      testPolicyId1 = apiResponse1.body.item.id;
+      testPolicyId2 = apiResponse2.body.item.id;
+      privateLocations = await testPrivateLocations.setTestLocations([
+        testPolicyId1,
+        testPolicyId2,
+      ]);
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set(editorUser.apiKeyHeader)
@@ -122,7 +128,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         return monitors.map((monitor) => {
           return {
             ...monitor,
-            privateLocations: privateLocations.map((location) => location.label),
+            /* cannot configure public locations for deployment agnostic tests
+             * they would fail in MKI and ESS due to missing mock location */
+            locations: [],
+            privateLocations: [privateLocations[0].label],
           };
         });
       };
@@ -219,17 +228,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 lat: 0,
                 lon: 0,
               },
-              id: 'dev',
-              isServiceManaged: true,
-              label: 'Dev Service',
-            },
-            {
-              geo: {
-                lat: 0,
-                lon: 0,
-              },
-              id: testPolicyId,
-              agentPolicyId: testPolicyId,
+              id: testPolicyId1,
+              agentPolicyId: testPolicyId1,
               isServiceManaged: false,
               label: privateLocations[0].label,
             },
@@ -419,17 +419,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: 'dev',
-                isServiceManaged: true,
-                label: 'Dev Service',
-              },
-              {
-                geo: {
-                  lat: 0,
-                  lon: 0,
-                },
-                id: testPolicyId,
-                agentPolicyId: testPolicyId,
+                id: testPolicyId1,
+                agentPolicyId: testPolicyId1,
                 isServiceManaged: false,
                 label: privateLocations[0].label,
               },
@@ -558,17 +549,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: 'dev',
-                isServiceManaged: true,
-                label: 'Dev Service',
-              },
-              {
-                geo: {
-                  lat: 0,
-                  lon: 0,
-                },
-                id: testPolicyId,
-                agentPolicyId: testPolicyId,
+                id: testPolicyId1,
+                agentPolicyId: testPolicyId1,
                 isServiceManaged: false,
                 label: privateLocations[0].label,
               },
@@ -687,17 +669,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: 'dev',
-                isServiceManaged: true,
-                label: 'Dev Service',
-              },
-              {
-                geo: {
-                  lat: 0,
-                  lon: 0,
-                },
-                id: testPolicyId,
-                agentPolicyId: testPolicyId,
+                id: testPolicyId1,
+                agentPolicyId: testPolicyId1,
                 isServiceManaged: false,
                 label: privateLocations[0].label,
               },
@@ -829,8 +802,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   match: 'check if title is present',
                 },
                 id: projectMonitors.monitors[0].id,
-                locations: ['dev'],
-                privateLocations: privateLocations.map((location) => location.label),
+                locations: [],
+                privateLocations: [privateLocations[0].label],
                 name: 'check if title is present',
                 params: {},
                 playwrightOptions: {
@@ -1288,12 +1261,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId1}`
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${project}-default-${privateLocations[0].label}`
         );
-        expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId1);
 
         const configId = monitorsResponse.body.monitors[0].config_id;
         const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
@@ -1306,7 +1279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id,
             configId,
             projectId: project,
-            locationId: testPolicyId,
+            locationId: testPolicyId1,
             locationName: privateLocations[0].label,
           })
         );
@@ -1358,12 +1331,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId1}`
         );
         expect(packagePolicy.name).eql(
           `${httpProjectMonitors.monitors[1].id}-${project}-default-${privateLocations[0].label}`
         );
-        expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId1);
 
         const configId = monitorsResponse.body.monitors[0].config_id;
         const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
@@ -1377,7 +1350,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             configId,
             projectId: project,
             locationName: privateLocations[0].label,
-            locationId: testPolicyId,
+            locationId: testPolicyId1,
           })
         );
       } finally {
@@ -1395,7 +1368,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const monitorRequest = {
         monitors: [
-          { ...httpProjectMonitors.monitors[1], privateLocations: [privateLocations[0].label] },
+          {
+            ...httpProjectMonitors.monitors[1],
+            privateLocations: [privateLocations[0].label, privateLocations[1].label],
+          },
         ],
       };
       try {
@@ -1424,10 +1400,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId1}`
         );
 
-        expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId1);
 
         await supertest
           .put(
@@ -1436,7 +1412,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({
-            monitors: [{ ...monitorRequest.monitors[0], privateLocations: [] }],
+            monitors: [
+              { ...monitorRequest.monitors[0], privateLocations: [privateLocations[1].label] },
+            ],
           })
           .expect(200);
 
@@ -1447,7 +1425,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId1}`
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1468,7 +1446,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .send({
             monitors: [
-              { ...projectMonitors.monitors[0], privateLocations: [privateLocations[0].label] },
+              {
+                ...projectMonitors.monitors[0],
+                privateLocations: [privateLocations[0].label, privateLocations[1].label],
+              },
             ],
           })
           .expect(200);
@@ -1489,10 +1470,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId1}`
         );
 
-        expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId1);
 
         const configId = monitorsResponse.body.monitors[0].config_id;
         const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
@@ -1505,7 +1486,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id,
             configId,
             projectId: project,
-            locationId: testPolicyId,
+            locationId: testPolicyId1,
             locationName: privateLocations[0].label,
           })
         );
@@ -1517,7 +1498,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({
-            monitors: [{ ...projectMonitors.monitors[0], privateLocations: [] }],
+            monitors: [
+              { ...projectMonitors.monitors[0], privateLocations: [privateLocations[1].label] },
+            ],
           })
           .expect(200);
 
@@ -1528,7 +1511,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId1}`
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1576,13 +1559,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const configId = monitorsResponse.body.monitors[0].id;
         const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
-        const policyId = `${id}-${testPolicyId}`;
+        const policyId = `${id}-${testPolicyId1}`;
 
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId
         );
 
-        expect(packagePolicy.policy_id).eql(testPolicyId);
+        expect(packagePolicy.policy_id).eql(testPolicyId1);
 
         comparePolicies(
           packagePolicy,
@@ -1592,7 +1575,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id,
             configId,
             projectId: project,
-            locationId: testPolicyId,
+            locationId: testPolicyId1,
             locationName: privateLocations[0].label,
           })
         );
@@ -1620,7 +1603,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const configId2 = monitorsResponse.body.monitors[0].id;
         const id2 = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
-        const policyId2 = `${id}-${testPolicyId}`;
+        const policyId2 = `${id}-${testPolicyId1}`;
 
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId2
@@ -1634,7 +1617,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
-            locationId: testPolicyId,
+            locationId: testPolicyId1,
             locationName: privateLocations[0].label,
             namespace: 'custom_namespace',
           })
@@ -1649,7 +1632,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    it('handles location formatting for both private and public locations', async () => {
+    // this test is skipped because it would fail in MKI due to public locations not being available
+    it.skip('handles location formatting for both private and public locations', async () => {
       const project = `test-project-${uuidv4()}`;
       try {
         await supertest
@@ -1692,8 +1676,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               {
                 label: privateLocations[0].label,
                 isServiceManaged: false,
-                agentPolicyId: testPolicyId,
-                id: testPolicyId,
+                agentPolicyId: testPolicyId1,
+                id: testPolicyId1,
                 geo: {
                   lat: 0,
                   lon: 0,
@@ -1793,7 +1777,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
                 id: projectMonitors.monitors[0].id,
-                locations: ['dev'],
+                locations: [],
                 privateLocations: [privateLocations[0].label],
                 name: 'My Monitor 3',
                 response: {
@@ -1880,7 +1864,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    it('project monitors - handles sending invalid public location', async () => {
+    // This test is skipped because it would fail in MKI and ESS
+    it.skip('project monitors - handles sending invalid public location', async () => {
       const project = `test-project-${uuidv4()}`;
       try {
         const response = await supertest
@@ -1977,6 +1962,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             monitors: [
               {
                 ...httpProjectMonitors.monitors[1],
+                locations: [],
                 privateLocations: ['does not exist'],
               },
             ],
@@ -1986,7 +1972,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           createdMonitors: [],
           failedMonitors: [
             {
-              details: `Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are '${privateLocations[0].label}'`,
+              details: `Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are '${privateLocations[0].label}|${privateLocations[1].label}'`,
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
@@ -2023,7 +2009,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 timeout: '80s',
                 type: 'http',
                 urls: ['http://localhost:9200'],
-                locations: ['dev'],
+                locations: [],
                 params: {
                   testGlobalParam2: 'testGlobalParamOverwrite',
                   testLocal1: 'testLocalParamsValue',

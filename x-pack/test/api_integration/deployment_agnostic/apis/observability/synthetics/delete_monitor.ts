@@ -9,6 +9,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
   HTTPFields,
   MonitorFields,
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -19,8 +20,6 @@ import { SyntheticsMonitorTestService } from '../../../services/synthetics_monit
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('DeleteMonitorRoute', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
@@ -32,6 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let httpMonitorJson: HTTPFields;
     let editorUser: RoleCredentials;
     let testPolicyId = '';
+    let privateLocations: PrivateLocation[];
 
     const saveMonitor = async (
       monitor: MonitorFields
@@ -52,21 +52,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      _httpMonitorJson = getFixtureJson('http_monitor');
-
       await kibanaServer.savedObjects.cleanStandardList();
-
       await testPrivateLocations.installSyntheticsPackage();
-
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      privateLocations = await testPrivateLocations.setTestLocations([testPolicyId]);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+
+      _httpMonitorJson = getFixtureJson('http_monitor');
     });
 
     beforeEach(() => {
-      httpMonitorJson = _httpMonitorJson;
+      httpMonitorJson = {
+        ..._httpMonitorJson,
+        locations: [privateLocations[0]],
+      };
     });
 
     it('deletes monitor by id', async () => {

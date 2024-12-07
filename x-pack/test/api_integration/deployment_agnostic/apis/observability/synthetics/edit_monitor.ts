@@ -12,6 +12,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
   HTTPFields,
   MonitorFields,
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -25,8 +26,6 @@ import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditMonitorAPI', function () {
-    this.tags('skipCloud');
-
     const supertestWithAuth = getService('supertest');
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
@@ -39,6 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let httpMonitorJson: HTTPFields;
     let testPolicyId = '';
     let editorUser: RoleCredentials;
+    let privateLocations: PrivateLocation[];
 
     const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
       const apiURL = spaceId
@@ -48,9 +48,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(apiURL + '?internal=true')
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(monitor);
-
-      expect(res.status).eql(200, JSON.stringify(res.body));
+        .send(monitor)
+        .expect(200);
 
       const { url, created_at: createdAt, updated_at: updatedAt, ...rest } = res.body;
 
@@ -76,7 +75,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      _httpMonitorJson = getFixtureJson('http_monitor');
       await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
@@ -88,7 +86,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      privateLocations = await testPrivateLocations.setTestLocations([testPolicyId]);
+      _httpMonitorJson = getFixtureJson('http_monitor');
     });
 
     after(async () => {
@@ -96,7 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(() => {
-      httpMonitorJson = { ..._httpMonitorJson };
+      httpMonitorJson = { ..._httpMonitorJson, locations: [privateLocations[0]] };
     });
 
     it('edits the monitor', async () => {

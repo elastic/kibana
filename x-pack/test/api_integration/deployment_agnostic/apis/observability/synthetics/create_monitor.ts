@@ -14,6 +14,7 @@ import {
   ConfigKey,
   MonitorTypeEnum,
   HTTPFields,
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -25,6 +26,7 @@ import {
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export const addMonitorAPIHelper = async (
   supertestAPI: any,
@@ -62,6 +64,7 @@ export const keyToOmitList = [
   'config_id',
   'form_monitor_type',
   'spaceId',
+  'private_locations',
 ];
 
 export const omitMonitorKeys = (monitor: any) => {
@@ -76,7 +79,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const samlAuth = getService('samlAuth');
     const kibanaServer = getService('kibanaServer');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
+    const privateLocationsService = new PrivateLocationTestService(getService);
 
+    let privateLocation: PrivateLocation;
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
     let editorRoleAuthc: RoleCredentials;
@@ -97,10 +102,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await kibanaServer.savedObjects.cleanStandardList();
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      privateLocation = await privateLocationsService.addTestPrivateLocation();
     });
 
     beforeEach(async () => {
-      httpMonitorJson = _httpMonitorJson;
+      httpMonitorJson = {
+        ..._httpMonitorJson,
+        locations: [privateLocation],
+      };
     });
 
     it('returns the newly added monitor', async () => {
@@ -124,15 +133,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(apiResponse.message).eql('Invalid value "invalid-data-steam" supplied to "type"');
     });
-    const localLoc = {
-      id: 'dev',
-      label: 'Dev Service',
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
-      isServiceManaged: true,
-    };
 
     it('can create valid monitors without all defaults', async () => {
       // Delete a required property to make payload invalid
@@ -140,7 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: 'Sample name',
         type: 'http',
         urls: 'https://elastic.co',
-        locations: [localLoc],
+        locations: [privateLocation],
       };
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
@@ -160,7 +160,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         urls: 'https://elastic.co',
         name: `Sample name ${uuidv4()}`,
         type: 'http',
-        locations: [localLoc],
+        locations: [privateLocation],
       };
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
@@ -175,7 +175,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         urls: 'https://elastic.co',
         name: `Sample name ${uuidv4()}`,
         type: 'http',
-        locations: [localLoc],
+        locations: [privateLocation],
       };
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
@@ -189,7 +189,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         urls: 'https://elastic.co',
         name: `Sample name ${uuidv4()}`,
         type: 'http',
-        locations: [localLoc],
+        locations: [privateLocation],
       };
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
@@ -202,7 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const newMonitor = {
         name: 'Sample name',
         url: 'https://elastic.co',
-        locations: [localLoc],
+        locations: [privateLocation],
       };
       await addMonitorAPI(newMonitor, 400);
     });
@@ -214,7 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         url: 'https://elastic.co',
         unknownKey: 'unknownValue',
         type: 'http',
-        locations: [localLoc],
+        locations: [privateLocation],
       };
       const apiResponse = await addMonitorAPI(newMonitor, 400);
       expect(apiResponse.message).not.to.have.keys(
