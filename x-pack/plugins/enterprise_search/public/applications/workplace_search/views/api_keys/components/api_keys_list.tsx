@@ -9,7 +9,13 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiCopy,
+  EuiConfirmModal,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import { DELETE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
@@ -32,16 +38,19 @@ export const ApiKeysList: React.FC = () => {
   const { deleteApiKey, onPaginate, stageTokenNameForDeletion, hideDeleteModal } =
     useActions(ApiKeysLogic);
   const { apiTokens, meta, dataLoading, deleteModalVisible } = useValues(ApiKeysLogic);
+  const modalTitleId = useGeneratedHtmlId();
 
   const deleteModal = (
     <EuiConfirmModal
       title={API_KEYS_CONFIRM_DELETE_TITLE}
+      titleProps={{ id: modalTitleId }}
       onCancel={hideDeleteModal}
       onConfirm={deleteApiKey}
       cancelButtonText={CANCEL_BUTTON_LABEL}
       confirmButtonText={DELETE_BUTTON_LABEL}
       buttonColor="danger"
       defaultFocusedButton="confirm"
+      aria-labelledby={modalTitleId}
     >
       <p>{API_KEYS_CONFIRM_DELETE_LABEL}</p>
     </EuiConfirmModal>
