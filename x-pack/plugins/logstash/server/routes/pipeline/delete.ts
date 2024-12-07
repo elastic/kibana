@@ -14,6 +14,12 @@ export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
   router.delete(
     {
       path: '/api/logstash/pipeline/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Delete a managed Logstash pipeline`,
