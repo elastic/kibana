@@ -158,6 +158,11 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         expect(events[1].properties).to.eql({
           profileLevel: 'dataSourceLevel',
+          profileId: 'default-data-source-profile',
+        });
+
+        expect(events[2].properties).to.eql({
+          profileLevel: 'dataSourceLevel',
           profileId: 'observability-logs-data-source-profile',
         });
 
@@ -171,7 +176,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(2);
+        expect(events.length).to.be(3);
 
         // should detect a new data source profile when switching to a different data source
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
@@ -186,12 +191,12 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         log.debug(events);
 
-        expect(events[2].properties).to.eql({
+        expect(events[3].properties).to.eql({
           profileLevel: 'dataSourceLevel',
           profileId: 'default-data-source-profile',
         });
 
-        expect(events.length).to.be(3);
+        expect(events.length).to.be(4);
       });
 
       it('should send EBT events when a different document profile gets resolved', async () => {
