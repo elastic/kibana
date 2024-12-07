@@ -25,9 +25,9 @@ export const generateApiKey = async (
   const aclIndexName = `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
 
   const apiKeyResult = await client.asCurrentUser.security.createApiKey({
-    name: `${indexName}-connector`,
+    name: `${indexName}`,
     role_descriptors: {
-      [`${toAlphanumeric(indexName)}-connector-role`]: {
+      [`${toAlphanumeric(indexName)}-role`]: {
         cluster: ['monitor', 'manage_connector'],
         index: [
           {
