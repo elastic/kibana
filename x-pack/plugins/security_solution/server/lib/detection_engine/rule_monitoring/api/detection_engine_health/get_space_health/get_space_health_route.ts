@@ -111,7 +111,10 @@ const handleSpaceHealthRequest = async (args: HandleSpaceHealthRequestArgs) => {
     const params = resolveParameters();
     const { healthClient } = await resolveDependencies();
 
-    const spaceHealthParameters = { interval: params.interval };
+    const spaceHealthParameters = {
+      interval: params.interval,
+      num_of_top_rules: params.num_of_top_rules,
+    };
     const spaceHealth = await healthClient.calculateSpaceHealth(spaceHealthParameters);
 
     const responseBody: GetSpaceHealthResponse = {
