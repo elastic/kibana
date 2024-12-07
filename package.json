@@ -1610,7 +1610,7 @@
     "@types/minimatch": "^2.0.29",
     "@types/minimist": "^1.2.2",
     "@types/mock-fs": "^4.13.1",
-    "@types/moment-duration-format": "^2.2.3",
+    "@types/moment-duration-format": "^2.2.6",
     "@types/multistream": "^4.1.0",
     "@types/mustache": "^0.8.31",
     "@types/nock": "^10.0.3",
