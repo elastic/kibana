@@ -31540,10 +31540,10 @@ tsconfig-paths@^4.1.2, tsconfig-paths@^4.2.0:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
-tsd@^0.31.1:
-  version "0.31.1"
-  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.31.1.tgz#350f8332169b30faf50ad0b3e66fe87f51b1d4c7"
-  integrity sha512-sSL84A0SFwx2xGMWrxlGaarKFSQszWjJS2vgNDDLwatytzg2aq6ShlwHsBYxRNmjzXISODwMva5ZOdAg/4AoOA==
+tsd@^0.31.2:
+  version "0.31.2"
+  resolved "https://registry.yarnpkg.com/tsd/-/tsd-0.31.2.tgz#9bfef86f43517e6e4b66973402daf17d094ae6d4"
+  integrity sha512-VplBAQwvYrHzVihtzXiUVXu5bGcr7uH1juQZ1lmKgkuGNGT+FechUCqmx9/zk7wibcqR2xaNEwCkDyKh+VVZnQ==
   dependencies:
     "@tsd/typescript" "~5.4.3"
     eslint-formatter-pretty "^4.1.0"
