@@ -17,7 +17,6 @@ export interface HostKpiChartsProps {
   dateRange: TimeRange;
   query?: Query;
   filters?: Filter[];
-  searchSessionId?: string;
   getSubtitle?: (formulaValue: string) => string;
   loading?: boolean;
 }
@@ -28,7 +27,6 @@ export const HostKpiCharts = ({
   filters,
   getSubtitle,
   query,
-  searchSessionId,
   loading = false,
 }: HostKpiChartsProps) => {
   const { euiTheme } = useEuiTheme();
@@ -47,7 +45,6 @@ export const HostKpiCharts = ({
             dateRange={dateRange}
             filters={filters}
             query={query}
-            searchSessionId={searchSessionId}
             loading={loading}
           />
         </EuiFlexItem>

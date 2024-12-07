@@ -10,7 +10,6 @@ import createContainer from 'constate';
 import { useCallback, useMemo, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { BehaviorSubject } from 'rxjs';
-import { useSearchSessionContext } from '../../../hooks/use_search_session';
 import { parseDateRange } from '../../../utils/datemath';
 import { AssetDetailsProps } from '../types';
 import { getDefaultDateRange, toTimestampRange } from '../utils';
@@ -22,7 +21,6 @@ export function useDatePicker({
   dateRange = getDefaultDateRange(),
   autoRefresh,
 }: UseDateRangeProviderProps) {
-  const { updateSearchSessionId } = useSearchSessionContext();
   const autoRefreshTick$ = useMemo(() => new BehaviorSubject(null), []);
   const autoRefreshConfig$ = useMemo(
     () => new BehaviorSubject<UseDateRangeProviderProps['autoRefresh'] | undefined>(undefined),
@@ -58,16 +56,13 @@ export function useDatePicker({
 
   const onRefresh = useCallback(
     (newDateRange: TimeRange) => {
-      // auto-refresh updates the search session id when the date range changes
       if (autoRefreshEnabled) {
         autoRefreshTick$.next(null);
-      } else {
-        updateSearchSessionId();
       }
 
       setDateRange(newDateRange);
     },
-    [autoRefreshEnabled, autoRefreshTick$, setDateRange, updateSearchSessionId]
+    [autoRefreshEnabled, autoRefreshTick$, setDateRange]
   );
 
   const setAutoRefresh = useCallback(

@@ -16,7 +16,6 @@ import {
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
 import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
-import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
 
 interface Props {
   dataView?: DataView;
@@ -26,8 +25,6 @@ interface Props {
 }
 
 export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
-  const { searchSessionId } = useSearchSessionContext();
-
   const filters = useMemo(() => {
     return [
       buildCombinedAssetFilter({
@@ -37,23 +34,12 @@ export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
       }),
     ];
   }, [dataView, assetId, assetType]);
-
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
       {assetType === 'host' ? (
-        <HostKpiCharts
-          dataView={dataView}
-          filters={filters}
-          dateRange={dateRange}
-          searchSessionId={searchSessionId}
-        />
+        <HostKpiCharts dataView={dataView} filters={filters} dateRange={dateRange} />
       ) : (
-        <ContainerKpiCharts
-          dataView={dataView}
-          filters={filters}
-          dateRange={dateRange}
-          searchSessionId={searchSessionId}
-        />
+        <ContainerKpiCharts dataView={dataView} filters={filters} dateRange={dateRange} />
       )}
     </EuiFlexGroup>
   );

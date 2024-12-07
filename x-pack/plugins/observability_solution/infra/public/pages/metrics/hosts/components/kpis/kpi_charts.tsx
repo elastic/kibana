@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
 import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -17,7 +16,6 @@ import { useMetricsDataViewContext } from '../../../../../containers/metrics_sou
 
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { searchSessionId } = useSearchSessionContext();
   const { hostNodes, loading: hostsLoading } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
@@ -67,7 +65,6 @@ export const KpiCharts = () => {
     dateRange: searchCriteria.dateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
-    searchSessionId,
     getSubtitle,
   });
 
@@ -77,7 +74,6 @@ export const KpiCharts = () => {
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
       query={afterLoadedState.query}
-      searchSessionId={afterLoadedState.searchSessionId}
       getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
     />

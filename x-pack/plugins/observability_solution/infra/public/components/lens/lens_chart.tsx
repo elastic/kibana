@@ -35,7 +35,6 @@ const DEFAULT_DISABLED_ACTIONS = [
 export type LensChartProps = BaseChartProps &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
-    searchSessionId?: string;
     description?: string;
   } & {
     lensAttributes: UseLensAttributesParams;
@@ -55,7 +54,6 @@ export const LensChart = React.memo(
     onFilter,
     overrides,
     toolTip,
-    searchSessionId,
     disableTriggers = false,
     height = MIN_HEIGHT,
     loading = false,
@@ -71,7 +69,6 @@ export const LensChart = React.memo(
       timeRange: dateRange,
       query,
       filters,
-      searchSessionId,
     });
 
     const handleBeforeBadgesRender = useCallback((messages: UserMessage[]) => {
@@ -141,7 +138,6 @@ export const LensChart = React.memo(
         query={query}
         overrides={overrides}
         onBrushEnd={onBrushEnd}
-        searchSessionId={searchSessionId}
         onFilter={onFilter}
         onBeforeBadgesRender={handleBeforeBadgesRender}
       />

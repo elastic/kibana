@@ -22,7 +22,6 @@ export interface ContainerKpiChartsProps {
   dateRange: TimeRange;
   query?: Query;
   filters?: Filter[];
-  searchSessionId?: string;
   options?: {
     getSubtitle?: (formulaValue: string) => string;
   };
@@ -34,7 +33,6 @@ export const ContainerKpiCharts = ({
   dataView,
   filters,
   query,
-  searchSessionId,
   loading = false,
 }: ContainerKpiChartsProps) => {
   const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
@@ -53,7 +51,6 @@ export const ContainerKpiCharts = ({
           dataView={dataView}
           filters={filters}
           query={query}
-          searchSessionId={searchSessionId}
           loading={loading}
         />
       )}
@@ -63,7 +60,6 @@ export const ContainerKpiCharts = ({
           dataView={dataView}
           filters={filters}
           query={query}
-          searchSessionId={searchSessionId}
           loading={loading}
         />
       )}
@@ -76,7 +72,6 @@ const DockerKpiCharts = ({
   dataView,
   filters,
   query,
-  searchSessionId,
   loading = false,
 }: ContainerKpiChartsProps) => {
   const { euiTheme } = useEuiTheme();
@@ -94,7 +89,6 @@ const DockerKpiCharts = ({
             dateRange={dateRange}
             filters={filters}
             query={query}
-            searchSessionId={searchSessionId}
             loading={loading}
           />
         </EuiFlexItem>
@@ -107,9 +101,7 @@ const KubernetesKpiCharts = ({
   dateRange,
   dataView,
   filters,
-  options,
   query,
-  searchSessionId,
   loading = false,
 }: ContainerKpiChartsProps) => {
   const { euiTheme } = useEuiTheme();
@@ -127,7 +119,6 @@ const KubernetesKpiCharts = ({
             dateRange={dateRange}
             filters={filters}
             query={query}
-            searchSessionId={searchSessionId}
             loading={loading}
           />
         </EuiFlexItem>

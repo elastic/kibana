@@ -15,7 +15,6 @@ import { buildCombinedAssetFilter } from '../../../utils/filters/build';
 import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../lens';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
-import { useSearchSessionContext } from '../../../hooks/use_search_session';
 
 export type ChartProps = Pick<LensChartProps, 'overrides'> & {
   id: string;
@@ -34,7 +33,6 @@ export const Chart = ({
   lensAttributes,
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
-  const { searchSessionId } = useSearchSessionContext();
   const {
     services: { dataViews },
   } = useKibanaContextForPlugin();
@@ -86,7 +84,6 @@ export const Chart = ({
       borderRadius="m"
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}
-      searchSessionId={searchSessionId}
       filters={filters}
       lensAttributes={lensAttributes}
       overrides={overrides}

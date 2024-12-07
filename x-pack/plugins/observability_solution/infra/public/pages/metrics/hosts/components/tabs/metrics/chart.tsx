@@ -7,7 +7,6 @@
 import React from 'react';
 import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
 import useAsync from 'react-use/lib/useAsync';
-import { useSearchSessionContext } from '../../../../../../hooks/use_search_session';
 import { resolveDataView } from '../../../../../../utils/data_view';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HOST_NAME_FIELD } from '../../../../../../../common/constants';
@@ -26,7 +25,6 @@ export type ChartProps = LensConfig & {
 export const Chart = ({ id, ...chartProps }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { loading } = useHostsViewContext();
-  const { searchSessionId } = useSearchSessionContext();
   const { currentPage } = useHostsTableContext();
   const {
     services: { dataViews },
@@ -40,7 +38,6 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
   const { afterLoadedState } = useAfterLoadedState(loading, {
     dateRange: searchCriteria.dateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
-    searchSessionId,
   });
 
   const { value: filters = [] } = useAsync(async () => {
@@ -77,7 +74,6 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
       loading={loading}
       filters={filters}
       query={afterLoadedState.query}
-      searchSessionId={afterLoadedState.searchSessionId}
     />
   );
 };
