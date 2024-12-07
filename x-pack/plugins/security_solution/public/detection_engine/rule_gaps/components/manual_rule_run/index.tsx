@@ -21,6 +21,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import * as i18n from './translations';
 
@@ -33,6 +34,12 @@ interface ManualRuleRunModalProps {
 
 const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
+
+  const {
+    uiSettings,
+  } = useKibana().services;
+
+  const dateFormat = uiSettings.get('dateFormat');
 
   const now = moment();
 
@@ -94,8 +101,10 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
         >
           <EuiDatePickerRange
             data-test-subj="manual-rule-run-time-range"
+            fullWidth
             startDateControl={
               <EuiDatePicker
+                fullWidth
                 className="start-date-picker"
                 aria-label="Start date range"
                 selected={startDate}
@@ -103,10 +112,12 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
                 startDate={startDate}
                 endDate={endDate}
                 showTimeSelect={true}
+                dateFormat={dateFormat}
               />
             }
             endDateControl={
               <EuiDatePicker
+                fullWidth
                 className="end-date-picker"
                 aria-label="End date range"
                 selected={endDate}
@@ -114,6 +125,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
                 startDate={startDate}
                 endDate={endDate}
                 showTimeSelect={true}
+                dateFormat={dateFormat}
               />
             }
           />
