@@ -790,7 +790,7 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "json-stable-stringify",
@@ -837,26 +837,6 @@
       "matchDepNames": [
         "license-checker",
         "@types/license-checker"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "loader-utils",
-      "matchDepNames": [
-        "loader-utils",
-        "@types/loader-utils"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1123,25 +1103,6 @@
       "enabled": true
     },
     {
-      "groupName": "@statoscope/webpack-plugin",
-      "matchDepNames": [
-        "@statoscope/webpack-plugin"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "mocha",
       "matchDepNames": [
         "mocha",
@@ -1355,6 +1316,7 @@
         "clean-webpack-plugin",
         "css-loader",
         "file-loader",
+        "loader-utils",
         "mini-css-extract-plugin",
         "postcss-loader",
         "raw-loader",
@@ -1369,6 +1331,8 @@
         "webpack-merge",
         "webpack-sources",
         "webpack-visualizer-plugin2",
+        "@statoscope/webpack-plugin",
+        "@types/loader-utils",
         "@types/webpack",
         "@types/webpack-bundle-analyzer",
         "@types/webpack-env",
@@ -1387,7 +1351,7 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "yargs",
@@ -1435,7 +1399,8 @@
       "groupName": "package.json/yarn.lock utils",
       "matchDepNames": [
         "@yarnpkg/lockfile",
-        "sort-package-json"
+        "sort-package-json",
+        "yarn-deduplicate"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1551,25 +1516,6 @@
       "groupName": "exit-hook",
       "matchDepNames": [
         "exit-hook"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "expect",
-      "matchDepNames": [
-        "expect"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1836,25 +1782,6 @@
       "groupName": "tslib",
       "matchDepNames": [
         "tslib"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "yarn-deduplicate",
-      "matchDepNames": [
-        "yarn-deduplicate"
       ],
       "reviewers": [
         "team:kibana-operations"
