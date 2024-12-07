@@ -3,7 +3,7 @@
 set -e
 
 TMP=.tmp-handlebars
-HASH_FILE=packages/kbn-handlebars/src/spec/.upstream_git_hash
+HASH_FILE=src/platform/packages/private/kbn-handlebars/src/spec/.upstream_git_hash
 
 function cleanup {
   rm -fr $TMP
@@ -32,14 +32,14 @@ else
   echo "  1. Investigate the commits in the '4.x' branch of the upstream git repository."
   echo "     If files inside the 'spec' folder has been updated, sync those updates with"
   echo "     our local versions of these files (located in"
-  echo "     'packages/kbn-handlebars/src/spec')."
+  echo "     'src/platform/packages/private/kbn-handlebars/src/spec')."
   echo
   echo "     https://github.com/handlebars-lang/handlebars.js/compare/$expected_hash...4.x"
   echo
   echo "  2. Execute the following script and commit the updated '$HASH_FILE'"
   echo "     file including any changes you made to our own spec files."
   echo
-  echo "     ./packages/kbn-handlebars/scripts/update_upstream_git_hash.sh"
+  echo "     ./src/platform/packages/private/kbn-handlebars/scripts/update_upstream_git_hash.sh"
   echo
   exit 1
 fi

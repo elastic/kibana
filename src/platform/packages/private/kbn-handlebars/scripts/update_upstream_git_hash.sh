@@ -3,7 +3,7 @@
 set -e
 
 TMP=.tmp-handlebars
-HASH_FILE=packages/kbn-handlebars/src/spec/.upstream_git_hash
+HASH_FILE=src/platform/packages/private/kbn-handlebars/src/spec/.upstream_git_hash
 
 function cleanup {
   rm -fr $TMP
