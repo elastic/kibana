@@ -10,6 +10,7 @@
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   generateTestRunId,
   getTestIDForTitle,
@@ -111,6 +112,10 @@ export class ScoutFTRReporter {
       event: {
         action: ScoutReportEventAction.TEST_BEGIN,
       },
+      file: {
+        path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
+        owner: '?',
+      },
     });
   };
 
@@ -144,6 +149,10 @@ export class ScoutFTRReporter {
           message: test.err?.message,
           stack_trace: test.err?.stack,
         },
+      },
+      file: {
+        path: test.file ? path.relative(REPO_ROOT, test.file) : 'unknown',
+        owner: '?',
       },
     });
   };
