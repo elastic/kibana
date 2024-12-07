@@ -97,7 +97,7 @@ export class AssetCriticalityDataClient {
     query,
     size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
-    sort,
+    sort = ['@timestamp'], // without a default sort order the results are not deterministic which makes testing hard
   }: {
     query: ESFilter;
     size?: number;
