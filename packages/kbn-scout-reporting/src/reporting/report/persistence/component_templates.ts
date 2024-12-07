@@ -37,7 +37,7 @@ export const reporterMappings: ClusterPutComponentTemplateRequest = {
   template: {
     mappings: {
       properties: {
-        test_run: {
+        reporter: {
           type: 'object',
           properties: reporterProperties,
         },
