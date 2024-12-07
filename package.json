@@ -1738,7 +1738,7 @@
     "eslint-plugin-react-perf": "^3.3.1",
     "eslint-plugin-testing-library": "^6.4.0",
     "eslint-traverse": "^1.0.0",
-    "exit-hook": "^2.2.0",
+    "exit-hook": "^4.0.0",
     "expect": "^29.7.0",
     "expose-loader": "^0.7.5",
     "express": "^4.21.1",
