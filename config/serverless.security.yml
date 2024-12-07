@@ -8,6 +8,7 @@ xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.search.notebooks.enabled: false
+xpack.searchPlayground.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
