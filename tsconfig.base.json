@@ -1628,6 +1628,8 @@
       "@kbn/security-solution-navigation/*": ["x-pack/packages/security-solution/navigation/*"],
       "@kbn/security-solution-plugin": ["x-pack/plugins/security_solution"],
       "@kbn/security-solution-plugin/*": ["x-pack/plugins/security_solution/*"],
+      "@kbn/security-solution-sample-data-plugin": ["x-pack/examples/security_solution_sample_data"],
+      "@kbn/security-solution-sample-data-plugin/*": ["x-pack/examples/security_solution_sample_data/*"],
       "@kbn/security-solution-serverless": ["x-pack/plugins/security_solution_serverless"],
       "@kbn/security-solution-serverless/*": ["x-pack/plugins/security_solution_serverless/*"],
       "@kbn/security-solution-side-nav": ["x-pack/packages/security-solution/side_nav"],

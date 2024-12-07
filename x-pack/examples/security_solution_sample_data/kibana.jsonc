@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-solution-sample-data-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "Registers security solution sample data.",
+  "plugin": {
+    "id": "securitySolutionSampleData",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "home"
+    ],
+    "requiredBundles": []
+  }
+}

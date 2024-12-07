@@ -106,6 +106,8 @@ export class SampleDataRegistry {
     return {
       getSampleDatasets: () => this.sampleDatasets,
 
+      registerSampleDataSet: (datasetProvider: SampleDatasetProvider) => this.registerSampleDataSet(datasetProvider),
+
       addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject[]) => {
         const sampleDataset = this.sampleDatasets.find((dataset) => {
           return dataset.id === id;

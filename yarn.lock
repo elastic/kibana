@@ -7072,6 +7072,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-sample-data-plugin@link:x-pack/examples/security_solution_sample_data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
   version "0.0.0"
   uid ""

@@ -829,6 +829,7 @@
     "@kbn/security-solution-fixtures-plugin": "link:x-pack/test/cases_api_integration/common/plugins/security_solution",
     "@kbn/security-solution-navigation": "link:x-pack/packages/security-solution/navigation",
     "@kbn/security-solution-plugin": "link:x-pack/plugins/security_solution",
+    "@kbn/security-solution-sample-data-plugin": "link:x-pack/examples/security_solution_sample_data",
     "@kbn/security-solution-serverless": "link:x-pack/plugins/security_solution_serverless",
     "@kbn/security-solution-side-nav": "link:x-pack/packages/security-solution/side_nav",
     "@kbn/security-solution-storybook-config": "link:x-pack/packages/security-solution/storybook/config",
