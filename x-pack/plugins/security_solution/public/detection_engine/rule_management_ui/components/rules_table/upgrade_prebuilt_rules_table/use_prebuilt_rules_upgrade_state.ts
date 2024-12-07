@@ -59,16 +59,18 @@ export function usePrebuiltRulesUpgradeState(
         rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
       );
 
+      const hasRuleTypeChange = Boolean(ruleUpgradeInfo.diff.fields.type);
+      const hasFieldConflicts = Object.values(fieldsUpgradeState).some(
+        ({ state: fieldState }) =>
+          fieldState === FieldUpgradeState.SolvableConflict ||
+          fieldState === FieldUpgradeState.NonSolvableConflict
+      );
+
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
         fieldsUpgradeState,
         hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
-          ? Boolean(ruleUpgradeInfo.diff.fields.type) ||
-            Object.values(fieldsUpgradeState).some(
-              ({ state: fieldState }) =>
-                fieldState === FieldUpgradeState.SolvableConflict ||
-                fieldState === FieldUpgradeState.NonSolvableConflict
-            )
+          ? hasRuleTypeChange || hasFieldConflicts
           : false,
       };
     }
