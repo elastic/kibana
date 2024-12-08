@@ -9,6 +9,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback } from 'react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
 import { EntityDetailsLeftPanelTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -54,6 +55,7 @@ export const useNavigateEntityInsight = ({
       params: isHostNameField
         ? {
             name: value,
+            scopeId: TableId.alertsOnAlertsPage,
             isRiskScoreExist: hasRiskScore,
             hasMisconfigurationFindings,
             hasVulnerabilitiesFindings,
@@ -65,6 +67,7 @@ export const useNavigateEntityInsight = ({
           }
         : {
             user: { name: value },
+            scopeId: TableId.alertsOnAlertsPage,
             isRiskScoreExist: hasRiskScore,
             hasMisconfigurationFindings,
             hasNonClosedAlerts,
