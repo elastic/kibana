@@ -227,7 +227,7 @@ const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunc
   typeof useMultipleAgentPolicies
 >;
 
-describe(`edit package policy page ${i + 1}`, () => {
+describe(`edit package policy page`, () => {
   let testRenderer: TestRenderer;
   const render = () => testRenderer.render(<EditPackagePolicyPage />);
 
