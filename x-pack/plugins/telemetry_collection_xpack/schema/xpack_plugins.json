@@ -20050,67 +20050,6 @@
     },
     "task_manager": {
       "properties": {
-        "ephemeral_tasks_enabled": {
-          "type": "boolean"
-        },
-        "ephemeral_request_capacity": {
-          "type": "short"
-        },
-        "ephemeral_stats": {
-          "properties": {
-            "status": {
-              "type": "keyword"
-            },
-            "queued_tasks": {
-              "properties": {
-                "p50": {
-                  "type": "long"
-                },
-                "p90": {
-                  "type": "long"
-                },
-                "p95": {
-                  "type": "long"
-                },
-                "p99": {
-                  "type": "long"
-                }
-              }
-            },
-            "load": {
-              "properties": {
-                "p50": {
-                  "type": "long"
-                },
-                "p90": {
-                  "type": "long"
-                },
-                "p95": {
-                  "type": "long"
-                },
-                "p99": {
-                  "type": "long"
-                }
-              }
-            },
-            "executions_per_cycle": {
-              "properties": {
-                "p50": {
-                  "type": "long"
-                },
-                "p90": {
-                  "type": "long"
-                },
-                "p95": {
-                  "type": "long"
-                },
-                "p99": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
         "task_type_exclusion": {
           "type": "array",
           "items": {
