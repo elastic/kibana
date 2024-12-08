@@ -126,7 +126,8 @@ describe(
         'suspend-process',
         'get-file',
         'upload',
-        'scan'
+        'scan',
+        'runscript'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');
