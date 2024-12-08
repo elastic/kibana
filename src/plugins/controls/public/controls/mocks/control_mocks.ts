@@ -43,7 +43,9 @@ export const getMockedBuildApi =
       uuid,
       parentApi: controlGroupApi ?? getMockedControlGroupApi(),
       unsavedChanges: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
-      resetUnsavedChanges: () => {},
+      resetUnsavedChanges: () => {
+        return true;
+      },
       type: factory.type,
     };
   };
