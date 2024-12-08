@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { ReactNode } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { HoverActionPopover } from './hover_popover_action';
 
@@ -39,12 +38,19 @@ export function HighlightField({
   children,
   ...props
 }: HighlightFieldProps) {
+  const { euiTheme } = useEuiTheme();
+
   const hasFieldDescription = !!fieldMetadata?.short;
 
   return formattedValue && value ? (
     <div {...props}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-        <EuiTitle css={fieldNameStyle} size="xxxs">
+        <EuiTitle
+          css={css`
+            color: ${euiTheme.colors.textHeading};
+          `}
+          size="xxxs"
+        >
           <span>{label}</span>
         </EuiTitle>
         {hasFieldDescription ? <HighlightFieldDescription fieldMetadata={fieldMetadata} /> : null}
@@ -80,7 +86,3 @@ const FormattedValue = ({ value }: { value: string }) => (
     dangerouslySetInnerHTML={{ __html: value }}
   />
 );
-
-const fieldNameStyle = css`
-  color: ${euiThemeVars.euiColorDarkShade};
-`;

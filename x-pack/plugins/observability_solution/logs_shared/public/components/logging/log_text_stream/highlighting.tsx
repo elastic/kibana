@@ -7,33 +7,18 @@
 
 import React from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { chooseLightOrDarkColor, tintOrShade } from '../../../utils/styles';
+import styled from '@emotion/styled';
 
-export const ActiveHighlightMarker = euiStyled.mark`
-  color: ${(props) =>
-    chooseLightOrDarkColor(
-      props.theme.eui.euiColorAccent,
-      props.theme.eui.euiColorEmptyShade,
-      props.theme.eui.euiColorDarkestShade
-    )};
-  background-color: ${(props) => props.theme.eui.euiColorAccent};
-  outline: 1px solid ${(props) => props.theme.eui.euiColorAccent};
-  };
+export const ActiveHighlightMarker = styled.mark`
+  color: ${({ theme }) => theme.euiTheme.colors.textParagraph};
+  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundFilledAccent};
+  outline: 1px solid ${({ theme }) => theme.euiTheme.colors.backgroundFilledAccent};
 `;
 
-export const HighlightMarker = euiStyled.mark`
-  color: ${(props) =>
-    chooseLightOrDarkColor(
-      tintOrShade(props.theme.eui.euiTextColor, props.theme.eui.euiColorAccent, 0.7, 0.5),
-      props.theme.eui.euiColorEmptyShade,
-      props.theme.eui.euiColorDarkestShade
-    )};
-  background-color: ${(props) =>
-    tintOrShade(props.theme.eui.euiTextColor, props.theme.eui.euiColorAccent, 0.7, 0.5)};
-  outline: 1px solid ${(props) =>
-    tintOrShade(props.theme.eui.euiTextColor, props.theme.eui.euiColorAccent, 0.7, 0.5)};
-  };
+export const HighlightMarker = styled.mark`
+  color: ${({ theme }) => theme.euiTheme.colors.textParagraph};
+  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundLightAccent};
+  outline: 1px solid ${({ theme }) => theme.euiTheme.colors.backgroundLightAccent};
 `;
 
 export const highlightFieldValue = (
