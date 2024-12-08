@@ -189,7 +189,7 @@ export const SummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.third}>
         <ChartPanel
-          styles={{
+          css={{
             padding: `${euiTheme.size.m} ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.m}`,
           }}
           title={i18n.translate(
