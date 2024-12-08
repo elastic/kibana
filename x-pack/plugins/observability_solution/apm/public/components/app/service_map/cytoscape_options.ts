@@ -8,6 +8,7 @@
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { type EuiThemeComputed } from '@elastic/eui';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
@@ -26,21 +27,21 @@ function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
 }
 
 function getBorderColorFn(
-  theme: EuiTheme
+  euiTheme: EuiThemeComputed
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
     const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
     const anomalyStats = getServiceAnomalyStats(el);
     if (hasAnomalyDetectionJob) {
       return getServiceHealthStatusColor(
-        theme,
+        euiTheme,
         anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown
       );
     }
     if (el.hasClass('primary') || el.selected()) {
-      return theme.eui.euiColorPrimary;
+      return euiTheme.colors.primary;
     }
-    return theme.eui.euiColorMediumShade;
+    return euiTheme.colors.mediumShade;
   };
 }
 
@@ -96,7 +97,15 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.Stylesheet[] => {
+const getStyle = ({
+  theme,
+  euiTheme,
+  isTraceExplorerEnabled,
+}: {
+  theme: EuiTheme;
+  euiTheme: EuiThemeComputed;
+  isTraceExplorerEnabled: boolean;
+}): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
@@ -113,7 +122,7 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
         'background-height': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
         'background-width': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
-        'border-color': getBorderColorFn(theme),
+        'border-color': getBorderColorFn(euiTheme),
         'border-style': getBorderStyle,
         'border-width': getBorderWidth,
         color: (el: cytoscape.NodeSingular) =>
@@ -250,12 +259,17 @@ ${theme.eui.euiColorLightShade}`,
   marginTop: 0,
 });
 
-export const getCytoscapeOptions = (
-  theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
-): cytoscape.CytoscapeOptions => ({
+export const getCytoscapeOptions = ({
+  theme,
+  euiTheme,
+  isTraceExplorerEnabled,
+}: {
+  theme: EuiTheme;
+  euiTheme: EuiThemeComputed;
+  isTraceExplorerEnabled: boolean;
+}): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style: getStyle(theme, isTraceExplorerEnabled),
+  style: getStyle({ theme, euiTheme, isTraceExplorerEnabled }),
 });

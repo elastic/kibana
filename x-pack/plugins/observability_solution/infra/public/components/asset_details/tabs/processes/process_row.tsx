@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import useToggle from 'react-use/lib/useToggle';
@@ -226,7 +227,16 @@ const ExpandedRowCell = euiStyled(EuiTableRowCell).attrs({
   textOnly: false,
   colSpan: 6,
 })`
-  padding-top: ${(props) => props.theme.eui.euiSizeM} !important;
-  padding-bottom: ${(props) => props.theme.eui.euiSizeM} !important;
-  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+  padding-top: ${() => {
+    const { euiTheme } = useEuiTheme();
+    return euiTheme.size.m;
+  }} !important;
+  padding-bottom: ${() => {
+    const { euiTheme } = useEuiTheme();
+    return euiTheme.size.m;
+  }} !important;
+  background-color: ${() => {
+    const { euiTheme } = useEuiTheme();
+    return euiTheme.colors.lightestShade;
+  }};
 `;

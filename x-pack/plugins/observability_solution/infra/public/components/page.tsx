@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPage } from '@elastic/eui';
+import { EuiPage, useEuiTheme } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
@@ -20,7 +20,10 @@ export const PageContent = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
   flex-direction: row;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  background-color: ${() => {
+    const { euiTheme } = useEuiTheme();
+    return euiTheme.colors.emptyShade;
+  }};
 `;
 
 export const FlexPage = euiStyled(EuiPage)`
