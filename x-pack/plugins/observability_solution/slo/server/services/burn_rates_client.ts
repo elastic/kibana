@@ -25,7 +25,7 @@ import { computeBurnRate, computeSLI } from '../domain/services';
 import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../domain/services/get_lookback_date_range';
 import { InternalQueryError } from '../errors';
-import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
+import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
 type WindowName = string;
 export interface BurnRatesClient {
@@ -224,10 +224,8 @@ function handleWindowedResult(
         from: new Date(bucket.from_as_string!),
         to: new Date(bucket.to_as_string!),
       };
-      const totalSlices = computeTotalSlicesFromDateRange(
-        dateRange,
-        slo.objective.timesliceWindow!
-      );
+
+      const totalSlices = getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
 
       sliValue = computeSLI(good, total, totalSlices);
     } else {
