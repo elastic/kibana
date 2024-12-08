@@ -1132,7 +1132,7 @@
     "elastic-apm-node": "^4.8.1",
     "email-addresses": "^5.0.0",
     "eventsource-parser": "^3.0.0",
-    "execa": "^5.1.1",
+    "execa": "^9.5.1",
     "expiry-js": "0.1.7",
     "exponential-backoff": "^3.1.1",
     "extract-zip": "^2.0.1",
