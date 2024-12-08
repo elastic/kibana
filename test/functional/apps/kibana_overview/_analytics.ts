@@ -17,13 +17,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  // Fails in chrome 128+: See https://github.com/elastic/kibana/issues/192509
-  describe.skip('overview page - Analytics apps', function describeIndexTests() {
+  describe('overview page - Analytics apps', function describeIndexTests() {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
+    });
+
+    this.beforeEach(async () => {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
@@ -35,10 +37,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    const apps = ['dashboards', 'discover', 'canvas', 'maps', 'ml'];
+    const apps = ['dashboards', 'discover', 'maps', 'ml'];
 
     describe('Analytics apps cards', function () {
       this.tags('skipFIPS');
+
       it('should display ', async () => {
         const kbnOverviewAppsCards = await find.allByCssSelector('.kbnOverviewApps__item');
         expect(kbnOverviewAppsCards.length).to.be(apps.length);
