@@ -31,7 +31,7 @@ jest.mock('react-router-dom', () => ({
 
 const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();
-const onChangePageMock = jest.fn();
+const onFetchMoreRecordsMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
 
@@ -72,7 +72,7 @@ const TestComponent = (props: TestComponentProps) => {
         refetch={refetchMock}
         dataLoadingState={DataLoadingState.loaded}
         totalCount={mockTimelineData.length}
-        onFetchMoreRecords={onChangePageMock}
+        onFetchMoreRecords={onFetchMoreRecordsMock}
         updatedAt={Date.now()}
         onSetColumns={jest.fn()}
         onFilter={jest.fn()}
@@ -315,7 +315,7 @@ describe('unified data table', () => {
         expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
         fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
         await waitFor(() => {
-          expect(onChangePageMock).toHaveBeenNthCalledWith(1, 1);
+          expect(onFetchMoreRecordsMock).toHaveBeenCalledTimes(1);
         });
       },
       SPECIAL_TEST_TIMEOUT
