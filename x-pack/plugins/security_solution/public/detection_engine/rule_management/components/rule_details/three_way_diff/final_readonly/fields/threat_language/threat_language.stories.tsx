@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { ThreatLanguageReadOnly } from './threat_language';
-import { FieldReadOnly } from '../../field_readonly';
+import { FieldFinalReadOnly } from '../../field_final_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockThreatMatchRule } from '../../storybook/mocks';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
@@ -24,8 +24,11 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="threat_language" />
+    <ThreeWayDiffStorybookProviders
+      finalDiffableRule={args.finalDiffableRule}
+      fieldName="threat_language"
+    >
+      <FieldFinalReadOnly />
     </ThreeWayDiffStorybookProviders>
   );
 };
