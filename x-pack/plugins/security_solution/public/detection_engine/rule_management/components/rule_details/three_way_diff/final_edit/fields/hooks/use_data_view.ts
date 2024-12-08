@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../../../../../../../common/lib/kibana';
 
-type UseDataViewParams =
+export type UseDataViewParams =
   | { indexPatterns: string[]; dataViewId?: never }
   | { indexPatterns?: never; dataViewId: string };
 
@@ -33,6 +33,7 @@ export function useDataView(indexPatternsOrDataViewId: UseDataViewParams): UseDa
         if (indexPatternsOrDataViewId.indexPatterns) {
           const indexPatternsDataView = await dataViewsService.create({
             title: indexPatternsOrDataViewId.indexPatterns.join(','),
+            id: indexPatternsOrDataViewId.indexPatterns.join(','),
             allowNoIndex: true,
           });
 
