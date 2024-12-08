@@ -19,36 +19,22 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  CHANGE_RULE_STATE,
-  uiMetricService,
-} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { uniqBy } from 'lodash';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
-import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './use_change_csp_rule_state';
+import { CspBenchmarkRulesWithStates, useRules } from './rules_context';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
 
-type RulesTableProps = Pick<
-  RulesState,
-  'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page'
-> & {
-  setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
+interface RulesTableProps {
   onRuleClick: (ruleID: string) => void;
   selectedRuleId?: string;
+}
+
+type GetColumnProps = Pick<RulesTableProps, 'onRuleClick'> & {
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-  onSortChange: (value: 'asc' | 'desc') => void;
-};
-
-type GetColumnProps = Pick<
-  RulesTableProps,
-  'onRuleClick' | 'selectedRules' | 'setSelectedRules'
-> & {
   items: CspBenchmarkRulesWithStates[];
   setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
   isAllRulesSelectedThisPage: boolean;
@@ -58,43 +44,44 @@ type GetColumnProps = Pick<
   ) => boolean;
 };
 
-export const RulesTable = ({
-  setPagination,
-  perPage: pageSize,
-  rules_page: items,
-  page,
-  total,
-  loading,
-  error,
-  selectedRuleId,
-  selectedRules,
-  setSelectedRules,
-  onRuleClick,
-  onSortChange,
-}: RulesTableProps) => {
+export const RulesTable = ({ selectedRuleId, onRuleClick }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    page,
+    setPage,
+    setSelectedRules,
+    selectedRules,
+    rules: items,
+    total,
+    error,
+    loading,
+    pageSize,
+    setPageSize,
+    sortOrder,
+    setSortOrder,
+  } = useRules();
+
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
   const sorting: EuiTableSortingType<CspBenchmarkRulesWithStates> = {
     sort: {
       field: 'metadata.benchmark.rule_number' as keyof CspBenchmarkRulesWithStates,
-      direction: sortDirection,
+      direction: sortOrder,
     },
   };
-  const onTableChange = ({
-    page: pagination,
-    sort: sortOrder,
-  }: Criteria<CspBenchmarkRulesWithStates>) => {
+  const onTableChange = ({ page: pagination, sort }: Criteria<CspBenchmarkRulesWithStates>) => {
     if (!pagination) return;
-    if (pagination) setPagination({ page: pagination.index, perPage: pagination.size });
-    if (sortOrder) {
-      setSortDirection(sortOrder.direction);
-      onSortChange(sortOrder.direction);
+    if (pagination && (pagination.index !== page || pagination.size !== pageSize)) {
+      setPageSize(pagination.size);
+      setPage(pagination.index);
+    }
+    if (sort && sort.direction !== sortOrder) {
+      setSortOrder(sort.direction);
     }
   };
 
@@ -272,34 +259,16 @@ const getColumns = ({
 ];
 
 const RuleStateSwitch = ({ rule }: { rule: CspBenchmarkRulesWithStates }) => {
+  const { toggleRuleState } = useRules();
   const isRuleMuted = rule?.state === 'muted';
-  const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
 
-  const { mutate: mutateRulesStates } = useChangeCspRuleState();
-
-  const rulesObjectRequest = {
-    benchmark_id: rule?.metadata.benchmark.id,
-    benchmark_version: rule?.metadata.benchmark.version,
-    /* Rule number always exists from 8.7 */
-    rule_number: rule?.metadata.benchmark.rule_number!,
-    rule_id: rule?.metadata.id,
-  };
-  const changeCspRuleStateFn = async () => {
-    if (rule?.metadata.benchmark.rule_number) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, CHANGE_RULE_STATE);
-      mutateRulesStates({
-        newState: nextRuleState,
-        ruleIds: [rulesObjectRequest],
-      });
-    }
-  };
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiSwitch
           className="eui-textTruncate"
           checked={!isRuleMuted}
-          onChange={changeCspRuleStateFn}
+          onChange={() => toggleRuleState(rule)}
           data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
           label=""
           compressed={true}
