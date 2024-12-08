@@ -45,4 +45,5 @@ export const rawRuleExecutionStatusSchema = rawRuleExecutionStatusSchemaV3.exten
 
 export const rawRuleSchema = rawRuleSchemaV3.extends({
   executionStatus: rawRuleExecutionStatusSchema,
+  lastRun: schema.maybe(schema.nullable(rawRuleLastRunSchema)),
 });

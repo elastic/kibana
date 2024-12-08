@@ -186,6 +186,7 @@ export const ruleExecutionStatusSchema = schema.object({
           schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
           schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
           schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
+          schema.literal(ruleExecutionStatusErrorReasonV1.BLOCKED),
         ],
         {
           meta: {
@@ -258,6 +259,7 @@ export const ruleLastRunSchema = schema.object({
           schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
           schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
           schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
+          schema.literal(ruleExecutionStatusErrorReasonV1.BLOCKED),
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
           schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
