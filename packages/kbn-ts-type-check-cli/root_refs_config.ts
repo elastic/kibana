@@ -35,7 +35,7 @@ async function isRootRefsConfigSelfManaged() {
 
 function generateTsConfig(refs: string[]) {
   return dedent`
-    // This file is automatically updated when you run \`node scripts/build_ts_refs\`.
+    // This file is automatically updated when you run \`node scripts/type_check\`.
     {
       "include": [],
       "references": [
