@@ -29,11 +29,13 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     previousMessages,
     functionCalling,
     stream,
+    abortSignal,
   }: OutputOptions<string, ToolSchema | undefined, boolean>) => {
     const response = chatCompleteApi({
       connectorId,
       stream,
       functionCalling,
+      abortSignal,
       system,
       messages: ensureMultiTurn([
         ...(previousMessages || []),
