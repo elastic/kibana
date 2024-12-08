@@ -52,6 +52,7 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiPopover
+          data-test-subj="legendActionPopover"
           button={
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -59,6 +60,7 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
                   iconType="boxesHorizontal"
                   aria-label={UX_LABELS.dataQualityPopup.open}
                   onClick={() => togglePopover(uniqueStreamName)}
+                  data-test-subj="legendActionButton"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
