@@ -82,7 +82,7 @@ const DockerKpiCharts = ({
   const { euiTheme } = useEuiTheme();
   const charts = useDockerContainerKpiCharts({
     dataViewId: dataView?.id,
-    seriesColor: euiTheme.colors.lightestShade,
+    seriesColor: euiTheme.colors.backgroundLightText,
   });
 
   return (
@@ -115,7 +115,7 @@ const KubernetesKpiCharts = ({
   const { euiTheme } = useEuiTheme();
   const charts = useK8sContainerKpiCharts({
     dataViewId: dataView?.id,
-    seriesColor: euiTheme.colors.lightestShade,
+    seriesColor: euiTheme.colors.backgroundLightText,
   });
 
   return (
