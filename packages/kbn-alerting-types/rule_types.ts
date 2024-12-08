@@ -97,6 +97,7 @@ export enum RuleExecutionStatusErrorReasons {
   Timeout = 'timeout',
   Disabled = 'disabled',
   Validate = 'validate',
+  Blocked = 'blocked',
 }
 
 export enum RuleExecutionStatusWarningReasons {

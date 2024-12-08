@@ -41,7 +41,11 @@ import {
 } from '../types';
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
+import {
+  isAlertSavedObjectNotFoundError,
+  isClusterBlockError,
+  isEsUnavailableError,
+} from '../lib/is_alerting_error';
 import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
@@ -75,6 +79,7 @@ import {
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
+const CLUSTER_BLOCKED_EXCEPTION_RETRY_INTERVAL = '1m';
 
 interface TaskRunnerConstructorParams<
   Params extends RuleTypeParams,
@@ -724,6 +729,13 @@ export class TaskRunner<
             this.logger.debug(message, {
               tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
             });
+          } else if (isClusterBlockError(err)) {
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
+            this.logger.debug(message, {
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed', errorSourceTag],
+            });
           } else {
             const error = this.stackTraceLog ? this.stackTraceLog.message : err;
             const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
@@ -755,6 +767,10 @@ export class TaskRunner<
             parseDuration(retryInterval) > parseDuration(CONNECTIVITY_RETRY_INTERVAL)
               ? CONNECTIVITY_RETRY_INTERVAL
               : retryInterval;
+        }
+
+        if (isClusterBlockError(error)) {
+          retryInterval = CLUSTER_BLOCKED_EXCEPTION_RETRY_INTERVAL;
         }
 
         return { interval: retryInterval };
