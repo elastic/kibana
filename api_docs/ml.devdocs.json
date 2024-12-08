@@ -1092,9 +1092,9 @@
         "description": [],
         "signature": [
           "MlTrainedModelConfig",
-          " & { pipelines?: Record<string, ",
-          "PipelineDefinition",
-          "> | null | undefined; origin_job_exists?: boolean | undefined; metadata?: ({ analytics_config: ",
+          " & { metadata?: (",
+          "MlTrainedModelConfigMetadata",
+          " & { analytics_config?: ",
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
             "scope": "common",
@@ -1102,7 +1102,7 @@
             "section": "def-common.DataFrameAnalyticsConfig",
             "text": "DataFrameAnalyticsConfig"
           },
-          "; input: unknown; total_feature_importance?: ",
+          " | undefined; input: unknown; total_feature_importance?: ",
           {
             "pluginId": "@kbn/ml-data-frame-analytics-utils",
             "scope": "common",
@@ -1118,25 +1118,7 @@
             "section": "def-common.FeatureImportanceBaseline",
             "text": "FeatureImportanceBaseline"
           },
-          " | undefined; model_aliases?: string[] | undefined; } & Record<string, unknown>) | undefined; model_id: string; model_type: ",
-          {
-            "pluginId": "@kbn/ml-trained-models-utils",
-            "scope": "common",
-            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
-            "section": "def-common.TrainedModelType",
-            "text": "TrainedModelType"
-          },
-          "; tags: string[]; version: string; inference_config?: Record<string, any> | undefined; indices?: Record<string, ",
-          "IndicesIndexState",
-          " | null>[] | undefined; hasInferenceServices?: boolean | undefined; inference_apis?: ",
-          {
-            "pluginId": "@kbn/ml-trained-models-utils",
-            "scope": "common",
-            "docId": "kibKbnMlTrainedModelsUtilsPluginApi",
-            "section": "def-common.InferenceAPIConfigResponse",
-            "text": "InferenceAPIConfigResponse"
-          },
-          "[] | undefined; }"
+          " | undefined; } & Record<string, unknown>) | undefined; }"
         ],
         "path": "x-pack/plugins/ml/common/types/trained_models.ts",
         "deprecated": false,
@@ -1643,6 +1625,8 @@
         "InferenceQueryParams",
         " | undefined): Promise<",
         "TrainedModelConfigResponse",
+        "[]>; getTrainedModelsList(): Promise<",
+        "TrainedModelUIItem",
         "[]>; getTrainedModelStats(modelId?: string | string[] | undefined, params?: ",
         "InferenceStatsQueryParams",
         " | undefined): Promise<",

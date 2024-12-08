@@ -496,6 +496,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           "ESQLStringLiteral",
           "; option: ",
@@ -530,6 +532,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -572,6 +576,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -614,6 +620,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -754,6 +762,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -870,6 +880,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; option: ",
           {
             "pluginId": "@kbn/esql-ast",
