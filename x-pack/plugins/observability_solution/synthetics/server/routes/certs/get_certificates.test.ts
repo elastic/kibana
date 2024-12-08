@@ -10,16 +10,11 @@ import * as getCerts from '../../queries/get_certs';
 import { getSyntheticsCertsRoute } from './get_certificates';
 
 describe('getSyntheticsCertsRoute', () => {
-  let getMonitorsSpy: jest.SpyInstance;
-
-  beforeEach(() => {
-    getMonitorsSpy = jest.spyOn(getAllMonitors, 'getAllMonitors').mockReturnValue([] as any);
-  });
-
   afterEach(() => jest.clearAllMocks());
 
   it('returns empty set when no monitors are found', async () => {
     const route = getSyntheticsCertsRoute();
+    const getAll = jest.fn().mockReturnValue([]);
     expect(
       await route.handler({
         // @ts-expect-error partial implementation for testing
@@ -27,6 +22,8 @@ describe('getSyntheticsCertsRoute', () => {
         // @ts-expect-error partial implementation for testing
         syntheticsEsClient: jest.fn(),
         savedObjectClient: jest.fn(),
+        // @ts-expect-error partial implementation for testing
+        monitorConfigRepository: { getAll },
       })
     ).toEqual({
       data: {
@@ -34,7 +31,7 @@ describe('getSyntheticsCertsRoute', () => {
         total: 0,
       },
     });
-    expect(getMonitorsSpy).toHaveBeenCalledTimes(1);
+    expect(getAll).toHaveBeenCalledTimes(1);
   });
 
   it('returns cert data when monitors are found', async () => {
@@ -78,15 +75,17 @@ describe('getSyntheticsCertsRoute', () => {
       // @ts-expect-error partial implementation for testing
       .mockReturnValue(getCertsResult);
     const route = getSyntheticsCertsRoute();
-    getMonitorsSpy.mockReturnValue(getMonitorsResult);
+    const getAll = jest.fn().mockReturnValue(getMonitorsResult);
     const result = await route.handler({
       // @ts-expect-error partial implementation for testing
       request: { query: {} },
       // @ts-expect-error partial implementation for testing
       syntheticsEsClient: jest.fn(),
       savedObjectClient: jest.fn(),
+      // @ts-expect-error partial implementation for testing
+      monitorConfigRepository: { getAll },
     });
-    expect(getMonitorsSpy).toHaveBeenCalledTimes(1);
+    expect(getAll).toHaveBeenCalledTimes(1);
     expect(processMonitorsSpy).toHaveBeenCalledTimes(1);
     expect(processMonitorsSpy).toHaveBeenCalledWith(getMonitorsResult);
     expect(getSyntheticsCertsSpy).toHaveBeenCalledTimes(1);

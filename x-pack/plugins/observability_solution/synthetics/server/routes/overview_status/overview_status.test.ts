@@ -10,7 +10,6 @@ import { periodToMs } from './overview_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { getStatus } from './overview_status';
 import times from 'lodash/times';
-import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { RouteContext } from '../types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
@@ -1039,7 +1038,7 @@ describe('current status route', () => {
       [['North America - US Central', 'US Central QA'], 2],
       [undefined, 2],
     ])('handles disabled count when using location filters', async (locations, disabledCount) => {
-      jest.spyOn(monitorsFns, 'getAllMonitors').mockResolvedValue([
+      const getAll = jest.fn().mockResolvedValue([
         {
           type: 'synthetics-monitor',
           id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
@@ -1190,16 +1189,14 @@ describe('current status route', () => {
           syntheticsEsClient,
           savedObjectsClient: savedObjectsClientMock.create(),
           server: serverMock,
+          monitorConfigRepository: {
+            getAll,
+          },
+          request: { query: { locations } },
         } as unknown as RouteContext,
-        {
-          locations,
-        }
+        {}
       );
-      expect(result).toEqual(
-        expect.objectContaining({
-          disabledCount,
-        })
-      );
+      expect(result.disabledCount).toEqual(disabledCount);
     });
 
     it.each([
@@ -1208,7 +1205,7 @@ describe('current status route', () => {
       [['North America - US Central', 'US Central QA'], 2],
       [undefined, 2],
     ])('handles pending count when using location filters', async (locations, pending) => {
-      jest.spyOn(monitorsFns, 'getAllMonitors').mockResolvedValue([
+      const getAll = jest.fn().mockResolvedValue([
         {
           type: 'synthetics-monitor',
           id: 'a9a94f2f-47ba-4fe2-afaa-e5cd29b281f1',
@@ -1250,21 +1247,18 @@ describe('current status route', () => {
       ]);
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.msearch.mockResponseOnce({ responses: [getEsResponse([])], took: 605 });
-      expect(
-        await getStatus(
-          {
-            syntheticsEsClient,
-            savedObjectsClient: savedObjectsClientMock.create(),
-          } as unknown as RouteContext,
-          {
-            locations,
-          }
-        )
-      ).toEqual(
-        expect.objectContaining({
-          pending,
-        })
+      const result = await getStatus(
+        {
+          syntheticsEsClient,
+          savedObjectsClient: savedObjectsClientMock.create(),
+          monitorConfigRepository: {
+            getAll,
+          },
+          request: { query: { locations } },
+        } as unknown as RouteContext,
+        {}
       );
+      expect(result.pending).toEqual(pending);
     });
   });
 });

@@ -9,10 +9,7 @@ import datemath, { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { ConfigKey, OverviewStatusState } from '../../../common/runtime_types';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorFilters, OverviewStatusSchema, OverviewStatusQuery } from '../common';
@@ -36,7 +33,7 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
  * @returns The counts of up/down/disabled monitor by location, and a map of each monitor:location status.
  */
 export async function getStatus(context: RouteContext, params: OverviewStatusQuery) {
-  const { syntheticsEsClient, savedObjectsClient } = context;
+  const { syntheticsEsClient, monitorConfigRepository } = context;
 
   const { query, scopeStatusByLocation = true, showFromAllSpaces } = params;
 
@@ -47,13 +44,9 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
    * latest ping for all enabled monitors.
    */
 
-  const { filtersStr, locationFilter: queryLocations } = await getMonitorFilters({
-    ...params,
-    context,
-  });
+  const { filtersStr, locationFilter: queryLocations } = await getMonitorFilters(context);
 
-  const allMonitors = await getAllMonitors({
-    soClient: savedObjectsClient,
+  const allMonitors = await monitorConfigRepository.getAll({
     showFromAllSpaces,
     search: query ? `${query}*` : undefined,
     filter: filtersStr,
