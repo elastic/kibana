@@ -62,7 +62,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
 
   const openCasesModalCallback = useCasesModal(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE);
 
-  const canEditDashboards = capabilities.dashboard.createNew;
+  const canEditDashboards = capabilities.dashboard_v2.createNew;
 
   const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
     create: false,

@@ -56,7 +56,7 @@ function mountWith({
 }
 
 test('renders readonly empty prompt when showWriteControls is off', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -68,7 +68,7 @@ test('renders readonly empty prompt when showWriteControls is off', async () => 
 });
 
 test('renders empty prompt with link when showWriteControls is on', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -80,7 +80,7 @@ test('renders empty prompt with link when showWriteControls is on', async () => 
 });
 
 test('renders disabled action button when disableCreateDashboardButton is true', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
 
   let component: ReactWrapper;
   await act(async () => {
@@ -95,7 +95,7 @@ test('renders disabled action button when disableCreateDashboardButton is true',
 });
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
   let component: ReactWrapper;
   let props: DashboardListingEmptyPromptProps;
   await act(async () => {
@@ -114,7 +114,7 @@ test('renders continue button when no dashboards exist but one is in progress', 
 });
 
 test('renders discard button when no dashboards exist but one is in progress', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
   let component: ReactWrapper;
   await act(async () => {
     ({ component } = mountWith({

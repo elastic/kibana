@@ -48,7 +48,7 @@ const defaultDashboardCapabilities: DashboardCapabilities = {
 
 export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
-  (core.application.capabilities as any).dashboard = defaultDashboardCapabilities;
+  (core.application.capabilities as any).dashboard_v2 = defaultDashboardCapabilities;
 
   setKibanaServices(core, {
     contentManagement: contentManagementMock.createStartContract(),
