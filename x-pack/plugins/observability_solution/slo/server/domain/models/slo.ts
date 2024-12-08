@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 
 type SLODefinition = t.TypeOf<typeof sloDefinitionSchema>;
 type StoredSLODefinition = t.OutputOf<typeof sloDefinitionSchema>;
-
 type SLOId = t.TypeOf<typeof sloIdSchema>;
 
 export type { SLODefinition, StoredSLODefinition, SLOId };

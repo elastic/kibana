@@ -55,21 +55,20 @@ export class RuleMigrationsDataBaseClient {
     search: SearchRequest,
     keepAlive: Duration = DEFAULT_PIT_KEEP_ALIVE
   ) {
-    let current: Promise<SearchResponse<T>> | undefined;
-
     const pitPromise = this.getIndexName().then((index) =>
       this.esClient
         .openPointInTime({ index, keep_alive: keepAlive })
         .then(({ id }) => ({ id, keep_alive: keepAlive }))
     );
 
+    let currentBatchSearch: Promise<SearchResponse<T>> | undefined;
     /* Returns the next batch of search results */
     const next = async (): Promise<Array<Stored<T>>> => {
       const pit = await pitPromise;
-      if (!current) {
-        current = this.esClient.search<T>({ ...search, pit });
+      if (!currentBatchSearch) {
+        currentBatchSearch = this.esClient.search<T>({ ...search, pit });
       } else {
-        current = current.then((previousResponse) => {
+        currentBatchSearch = currentBatchSearch.then((previousResponse) => {
           if (previousResponse.hits.hits.length === 0) {
             return previousResponse;
           }
@@ -77,7 +76,8 @@ export class RuleMigrationsDataBaseClient {
           return this.esClient.search<T>({ ...search, pit, search_after: lastSort });
         });
       }
-      return current.then((response) => this.processResponseHits(response));
+      const response = await currentBatchSearch;
+      return this.processResponseHits(response);
     };
 
     /** Returns all the search results */

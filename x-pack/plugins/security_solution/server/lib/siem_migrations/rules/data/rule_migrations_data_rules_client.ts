@@ -52,8 +52,7 @@ export interface RuleMigrationGetOptions {
 }
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
- * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
- */
+ * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
 const BULK_MAX_SIZE = 500 as const;
 /* DEFAULT_SEARCH_BATCH_SIZE defines the default number of documents to retrieve per search operation
  * when retrieving search results in batches. */
