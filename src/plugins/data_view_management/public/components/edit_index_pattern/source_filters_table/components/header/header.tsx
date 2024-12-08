@@ -19,7 +19,7 @@ export const Header = () => (
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.sourceLabel"
           defaultMessage="Field filters can be used to exclude one or more fields when fetching a document. This happens when
-          viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app.
+          viewing a document in the Discover app, or with a table displaying results from a Discover Session in the Dashboard app.
           If you have documents with large or unimportant fields you may benefit from filtering those out at this lower level."
         />
       </p>

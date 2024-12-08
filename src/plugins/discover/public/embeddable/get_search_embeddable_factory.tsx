@@ -151,7 +151,7 @@ export const getSearchEmbeddableFactory = ({
           },
           getTypeDisplayName: () =>
             i18n.translate('discover.embeddable.search.displayName', {
-              defaultMessage: 'search',
+              defaultMessage: 'Discover Session',
             }),
           canLinkToLibrary: async () => {
             return (

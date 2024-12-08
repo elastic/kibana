@@ -54,7 +54,7 @@ export const checkForDuplicateTitle = async ({
     (await hasDuplicatedTitle(title, contentManagement))
   ) {
     onTitleDuplicate();
-    return Promise.reject(new Error(`Saved search title already exists: ${title}`));
+    return Promise.reject(new Error(`Saved Discover Session title already exists: ${title}`));
   }
 
   return;

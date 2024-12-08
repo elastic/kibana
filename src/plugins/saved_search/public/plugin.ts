@@ -102,7 +102,7 @@ export class SavedSearchPublicPlugin
         latest: LATEST_VERSION,
       },
       name: i18n.translate('savedSearch.contentManagementType', {
-        defaultMessage: 'Saved search',
+        defaultMessage: 'Discover Session',
       }),
     });
 
