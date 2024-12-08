@@ -73,6 +73,7 @@ export type ProcessingDefinition = z.infer<typeof processingDefinitionSchema>;
 export const fieldDefinitionSchema = z.object({
   name: z.string(),
   type: z.enum(['keyword', 'match_only_text', 'long', 'double', 'date', 'boolean', 'ip']),
+  format: z.optional(z.string()),
 });
 
 export type FieldDefinition = z.infer<typeof fieldDefinitionSchema>;
