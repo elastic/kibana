@@ -82,7 +82,7 @@ describe('transformCreateRuleBody', () => {
       name: 'test',
       enabled: true,
       throttle: null,
-      notifyWhen: 'onActionGroupChange',
+      notify_when: 'onActionGroupChange',
       rule_type_id: '.index-threshold',
       actions: [
         {

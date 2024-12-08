@@ -27,7 +27,7 @@ import {
   hasFieldsForAad,
   parseDuration,
 } from '../utils';
-import { DEFAULT_VALID_CONSUMERS } from '../constants';
+import { DEFAULT_FREQUENCY, DEFAULT_VALID_CONSUMERS } from '../constants';
 
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
@@ -142,6 +142,8 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     formData: {
       consumer,
       schedule: { interval },
+      notifyWhen: ruleNotifyWhen,
+      throttle: ruleThrottle,
     },
     actionsErrors = {},
     validConsumers = DEFAULT_VALID_CONSUMERS,
@@ -168,12 +170,18 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
 
   const intervalUnit = getDurationUnitValue(interval);
 
+  const actionNotifyWhen = ruleNotifyWhen ? ruleNotifyWhen : action?.frequency?.notifyWhen;
+
   const actionThrottle = action.frequency?.throttle
     ? getDurationNumberInItsUnit(action.frequency.throttle)
+    : ruleThrottle
+    ? getDurationNumberInItsUnit(ruleThrottle)
     : null;
 
   const actionThrottleUnit = action.frequency?.throttle
     ? getDurationUnitValue(action.frequency?.throttle)
+    : ruleThrottle
+    ? getDurationUnitValue(ruleThrottle)
     : 'h';
 
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = [
@@ -203,7 +211,10 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
         <EuiFlexGroup alignItems="flexEnd">
           <EuiFlexItem>
             <RuleActionsNotifyWhen
-              frequency={action.frequency}
+              frequency={{
+                ...(action.frequency ?? DEFAULT_FREQUENCY),
+                notifyWhen: actionNotifyWhen ?? DEFAULT_FREQUENCY.notifyWhen,
+              }}
               throttle={actionThrottle}
               throttleUnit={actionThrottleUnit}
               hasAlertsMappings={selectedRuleType.hasAlertsMappings}
