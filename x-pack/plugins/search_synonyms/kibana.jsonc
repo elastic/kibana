@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-synonyms",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchSynonyms",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchSynonyms"
+    ],
+    "requiredPlugins": [
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "usageCollection",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+    ]
+  }
+}
