@@ -18,7 +18,7 @@ import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { omit } from 'lodash';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
-import { getDevLocation } from '@kbn/synthetics-plugin/server/synthetics_service/get_service_locations';
+import rawExpect from 'expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
@@ -86,7 +86,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
 
       const testResponse: Array<PrivateLocation | ServiceLocation> = [
-        ...getDevLocation('mockDevUrl'),
         {
           id: testFleetPolicyID,
           isServiceManaged: false,
@@ -100,7 +99,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       ];
 
-      expect(apiResponse.body.locations).eql(testResponse);
+      rawExpect(apiResponse.body.locations).toEqual(rawExpect.arrayContaining(testResponse));
     });
 
     it('does not add a monitor if there is an error in creating integration', async () => {

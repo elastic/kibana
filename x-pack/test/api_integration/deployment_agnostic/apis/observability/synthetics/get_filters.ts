@@ -8,26 +8,21 @@
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
+import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
-export const LOCAL_LOCATION = {
-  id: 'dev',
-  label: 'Dev Service',
-  geo: {
-    lat: 0,
-    lon: 0,
-  },
-  isServiceManaged: true,
-};
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('getMonitorFilters', function () {
-    this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertest = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
 
+    const privateLocationTestService = new PrivateLocationTestService(getService);
+
     let editorUser: RoleCredentials;
+    let privateLocation: PrivateLocation;
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
@@ -36,6 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      privateLocation = await privateLocationTestService.addTestPrivateLocation();
     });
 
     it('get list of filters', async () => {
@@ -60,7 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         type: 'http',
         urls: 'https://elastic.co',
         tags: ['apm', 'synthetics'],
-        locations: [LOCAL_LOCATION],
+        locations: [privateLocation],
       };
 
       await supertest
@@ -82,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { label: 'apm', count: 1 },
           { label: 'synthetics', count: 1 },
         ],
-        locations: [{ label: 'dev', count: 1 }],
+        locations: [{ label: privateLocation.id, count: 1 }],
         projects: [],
         schedules: [{ label: '3', count: 1 }],
       });
