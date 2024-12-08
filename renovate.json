@@ -888,7 +888,8 @@
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
