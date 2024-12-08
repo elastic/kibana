@@ -137,7 +137,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
       expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
     }
 
-    const response = await supertest.get(`/api/alerts/alert/${id}`);
+    const response = await supertest.get(`/api/alerting/rule/${id}`);
     expect(response.status).to.eql(200);
 
     const { executionStatus } = response.body || {};

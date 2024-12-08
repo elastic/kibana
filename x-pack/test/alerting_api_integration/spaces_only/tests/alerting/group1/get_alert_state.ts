@@ -115,7 +115,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         // wait for alert to actually execute
         await retry.try(async () => {
           const response = await supertest.get(
-            `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/state`
+            `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/state`
           );
 
           expect(response.status).to.eql(200);

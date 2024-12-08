@@ -15,7 +15,7 @@ export function MonitoringAlertsProvider({ getService }) {
 
       return await Promise.all(
         alerts.map(async (alert) =>
-          supertest.delete(`/api/alerts/alert/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
+          supertest.delete(`/api/alerting/rule/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
         )
       );
     }
