@@ -17,5 +17,5 @@ export declare const renderApp: (
     canUseAPIKeyTrustModel: boolean;
   },
   history: ScopedHistory,
-  startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>
+  startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>
 ) => ReturnType<RegisterManagementAppArgs['mount']>;
