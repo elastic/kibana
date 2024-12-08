@@ -25103,10 +25103,10 @@ node-source-walk@^6.0.0, node-source-walk@^6.0.1, node-source-walk@^6.0.2:
   dependencies:
     "@babel/parser" "^7.21.8"
 
-nodemailer@^6.9.15:
-  version "6.9.15"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.15.tgz#57b79dc522be27e0e47ac16cc860aa0673e62e04"
-  integrity sha512-AHf04ySLC6CIfuRtRiEYtGEXgRfa6INgWGluDhnxTZhHSKvrBu7lc1VVchQ0d8nPc4cFaZoPq8vkyNoZr0TpGQ==
+nodemailer@^6.9.16:
+  version "6.9.16"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.16.tgz#3ebdf6c6f477c571c0facb0727b33892635e0b8b"
+  integrity sha512-psAuZdTIRN08HKVd/E8ObdV6NO7NTBY3KsC30F7M4H1OnmLCUNaS56FpYxyb26zWLSyYF9Ozch9KYHhHegsiOQ==
 
 nopt@^4.0.1:
   version "4.0.3"
