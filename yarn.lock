@@ -9161,11 +9161,6 @@
     styled-components "^6.0.7"
     yargs "17.0.1"
 
-"@redocly/config@^0.16.0":
-  version "0.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.16.0.tgz#4b7700a5cb6e04bc6d6fdb94b871c9e260a1fba6"
-  integrity sha512-t9jnODbUcuANRSl/K4L9nb12V+U5acIHnVSl26NWrtSdDZVtoqUXk2yGFPZzohYf62cCfEQUT8ouJ3bhPfpnJg==
-
 "@redocly/config@^0.17.0":
   version "0.17.1"
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.17.1.tgz#2def04cecf440dd78c0f102f53f3444fac050768"
