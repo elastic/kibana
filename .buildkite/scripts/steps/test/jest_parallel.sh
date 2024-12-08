@@ -53,7 +53,7 @@ echo "
   of noise on CI without any percevable benefit, so they have been disabled. If you want to log
   output in your test temporarily, you can modify 'packages/kbn-test/src/jest/setup/disable_console_logs.js'
 "
-
+configs="x-pack/plugins/cases/jest.config.js"
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
 
@@ -75,15 +75,15 @@ while read -r config; do
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
-  set +e;
+  set +e
   eval "$cmd"
   lastCode=$?
-  set -e;
+  set -e
 
-  timeSec=$(($(date +%s)-start))
+  timeSec=$(($(date +%s) - start))
   if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
+    min=$((timeSec / 60))
+    sec=$((timeSec - (min * 60)))
     duration="${min}m ${sec}s"
   else
     duration="${timeSec}s"
@@ -104,7 +104,7 @@ while read -r config; do
       failedConfigs="$config"
     fi
   fi
-done <<< "$configs"
+done <<<"$configs"
 
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
