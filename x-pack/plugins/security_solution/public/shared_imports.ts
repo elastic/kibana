@@ -10,6 +10,7 @@ export type {
   FieldValidateResponse,
   FormData,
   FormHook,
+  FormConfig,
   FormSchema,
   FormSubmitHandler,
   ValidationError,
