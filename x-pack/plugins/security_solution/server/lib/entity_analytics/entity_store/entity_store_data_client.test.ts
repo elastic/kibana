@@ -16,6 +16,7 @@ import type { EntityType } from '../../../../common/api/entity_analytics/entity_
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
+import { mockGlobalState } from '../../../../public/common/mock';
 
 describe('EntityStoreDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
@@ -31,6 +32,7 @@ describe('EntityStoreDataClient', () => {
     dataViewsService: {} as DataViewsService,
     appClient: {} as AppClient,
     config: {} as EntityStoreConfig,
+    experimentalFeatures: mockGlobalState.app.enableExperimental,
   });
 
   const defaultSearchParams = {
