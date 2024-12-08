@@ -20,29 +20,26 @@ export const getEsWarningText = (warning: string): string | null => {
 };
 
 export function registerPutDataRetention({ router, lib: { handleEsError } }: RouteDependencies) {
-  const paramsSchema = schema.object({
-    name: schema.string(),
-  });
   const bodySchema = schema.object({
+    dataStreams: schema.arrayOf(schema.string()),
     dataRetention: schema.maybe(schema.string()),
     enabled: schema.maybe(schema.boolean()),
   });
 
   router.put(
     {
-      path: addBasePath('/data_streams/{name}/data_retention'),
-      validate: { params: paramsSchema, body: bodySchema },
+      path: addBasePath('/data_streams/data_retention'),
+      validate: { body: bodySchema },
     },
     async (context, request, response) => {
-      const { name } = request.params as TypeOf<typeof paramsSchema>;
-      const { dataRetention, enabled } = request.body as TypeOf<typeof bodySchema>;
+      const { dataStreams, dataRetention, enabled } = request.body as TypeOf<typeof bodySchema>;
 
       const { client } = (await context.core).elasticsearch;
 
       try {
         // Only when enabled is explicitly set to false, we delete the data retention policy.
         if (enabled === false) {
-          await client.asCurrentUser.indices.deleteDataLifecycle({ name });
+          await client.asCurrentUser.indices.deleteDataLifecycle({ name: dataStreams });
         } else {
           // Otherwise, we create or update the data retention policy.
           //
@@ -51,7 +48,7 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
           // global data retention limit set.
           const { headers } = await client.asCurrentUser.indices.putDataLifecycle(
             {
-              name,
+              name: dataStreams,
               data_retention: dataRetention,
             },
             { meta: true }
