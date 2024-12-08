@@ -308,6 +308,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             tuples,
             remainingGap,
             warningStatusMessage: rangeTuplesWarningMessage,
+            gap,
           } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
@@ -329,7 +330,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
               message: gapErrorMessage,
-              metrics: { executionGap: remainingGap },
+              metrics: {
+                executionGap: remainingGap,
+                gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+              },
             });
           }
 
@@ -508,6 +512,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
+                  gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
                 },
                 userError: result.userError,
               });

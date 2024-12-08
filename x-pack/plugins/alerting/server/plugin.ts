@@ -128,6 +128,7 @@ export const EVENT_LOG_ACTIONS = {
   activeInstance: 'active-instance',
   executeTimeout: 'execute-timeout',
   untrackedInstance: 'untracked-instance',
+  gap: 'gap',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
