@@ -369,7 +369,7 @@ paths:
           in: path
           required: true
           schema:
-            description: The migration id to install translated rules for
+            description: The migration id to retrieve prebuilt rules for
             $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
