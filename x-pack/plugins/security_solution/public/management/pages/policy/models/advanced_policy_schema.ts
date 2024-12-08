@@ -73,6 +73,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.artifacts.global.channel',
+    first_supported_version: '8.18',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.channel',
+      {
+        defaultMessage:
+          'The release channel to use for receiving global artifacts. By default, staged roll-out is applied. Set to rapid to receive candidate artifacts as soon as available. Set to stable to only receive stable artifacts. Default: default',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.artifacts.user.public_key',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -284,6 +295,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.global.channel',
+    first_supported_version: '8.18',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.channel',
+      {
+        defaultMessage:
+          'The release channel to use for receiving global artifacts. By default, staged roll-out is applied. Set to rapid to receive candidate artifacts as soon as available. Set to stable to only receive stable artifacts. Default: default',
       }
     ),
   },
@@ -509,6 +531,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Interval between global artifact manifest download attempts, in seconds. Default: 3600.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.global.channel',
+    first_supported_version: '8.18',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.channel',
+      {
+        defaultMessage:
+          'The release channel to use for receiving global artifacts. By default, staged roll-out is applied. Set to rapid to receive candidate artifacts as soon as available. Set to stable to only receive stable artifacts. Default: default',
       }
     ),
   },
