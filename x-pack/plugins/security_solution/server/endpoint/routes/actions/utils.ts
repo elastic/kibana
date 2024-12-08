@@ -70,6 +70,11 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     sentinel_one: false,
     crowdstrike: false,
   },
+  runscript: {
+    endpoint: false,
+    sentinel_one: false,
+    crowdstrike: true,
+  },
 });
 
 /**
