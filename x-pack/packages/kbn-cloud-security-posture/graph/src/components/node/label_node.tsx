@@ -7,18 +7,52 @@
 
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { LabelNodeContainer, LabelShape, HandleStyleOverride, LabelShapeOnHover } from './styles';
+import { css } from '@emotion/react';
+import {
+  LabelNodeContainer,
+  LabelShape,
+  HandleStyleOverride,
+  LabelShapeOnHover,
+  NodeButton,
+  LABEL_PADDING_X,
+  LABEL_BORDER_WIDTH,
+} from './styles';
 import type { LabelNodeViewModel, NodeProps } from '../types';
+import { NodeExpandButton } from './node_expand_button';
+import { getTextWidth } from '../graph/utils';
 
 export const LabelNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, label, interactive } = props.data as LabelNodeViewModel;
+  const { id, color, label, interactive, nodeClick, expandButtonClick } =
+    props.data as LabelNodeViewModel;
+  const text = Boolean(label) ? label : id;
+  const labelWidth = Math.max(
+    100,
+    getTextWidth(text ?? '') + LABEL_PADDING_X * 2 + LABEL_BORDER_WIDTH * 2
+  );
 
   return (
     <LabelNodeContainer>
       {interactive && <LabelShapeOnHover color={color} />}
       <LabelShape color={color} textAlign="center">
-        {Boolean(label) ? label : id}
+        {text}
       </LabelShape>
+      {interactive && (
+        <>
+          <NodeButton
+            css={css`
+              margin-top: -24px;
+            `}
+            height={24}
+            width={labelWidth}
+            onClick={(e) => nodeClick?.(e, props)}
+          />
+          <NodeExpandButton
+            onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+            x={`${labelWidth}px`}
+            y={`${-24 + (24 - NodeExpandButton.ExpandButtonSize) / 2}px`}
+          />
+        </>
+      )}
       <Handle
         type="target"
         isConnectable={false}

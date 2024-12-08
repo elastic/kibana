@@ -12,8 +12,8 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
-import { useGraphPreview } from '../hooks/use_graph_preview';
-import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
+import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -22,8 +22,8 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 
-jest.mock('../hooks/use_graph_preview');
-jest.mock('../hooks/use_fetch_graph_data', () => ({
+jest.mock('../../shared/hooks/use_graph_preview');
+jest.mock('../../shared/hooks/use_fetch_graph_data', () => ({
   useFetchGraphData: jest.fn(),
 }));
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
