@@ -22,7 +22,7 @@ import {
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
@@ -212,7 +212,7 @@ export const waitForActionToSucceed = (
  */
 export const ensureResponseActionAuthzAccess = (
   accessLevel: Exclude<UserAuthzAccessLevel, 'read'>,
-  responseAction: ResponseActionsApiCommandNames,
+  responseAction: EDRActionsApiCommandNames<'endpoint'>,
   username: string,
   password: string
 ): Cypress.Chainable => {

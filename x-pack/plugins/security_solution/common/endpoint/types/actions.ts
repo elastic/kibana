@@ -9,6 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type {
+  CrowdStrikeActionDataParameterTypes,
+  CrowdStrikeActionResponseDataOutput,
+} from './crowdstrike';
+import type {
   UploadActionApiRequestBody,
   ActionStatusRequestSchema,
   KillProcessRequestBody,
@@ -17,7 +21,7 @@ import type {
 
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionStatus,
 } from '../service/response_actions/constants';
 
@@ -25,7 +29,7 @@ export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
 export interface ActionResponseOutput<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent = ActionDetailsAgentTypeMapping[ResponseActionAgentType]['output']
 > {
   type: 'json' | 'text';
   content: TOutputContent;
@@ -93,6 +97,11 @@ export interface ResponseActionExecuteOutputContent {
 }
 
 export interface ResponseActionScanOutputContent {
+  code: string;
+}
+
+export interface ResponseActionRunScriptOutputContent {
+  output: string;
   code: string;
 }
 
@@ -233,7 +242,8 @@ export type EndpointActionResponseDataOutput =
   | GetProcessesActionOutputContent
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
-  | ResponseActionScanOutputContent;
+  | ResponseActionScanOutputContent
+  | ResponseActionRunScriptOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -242,7 +252,7 @@ export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
-  command: ResponseActionsApiCommandNames;
+  command: EDRActionsApiCommandNames<'endpoint'>;
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
@@ -374,7 +384,7 @@ export interface ResponseActionApiResponse<
 export interface EndpointPendingActions {
   agent_id: string;
   /** Number of actions pending for each type */
-  pending_actions: Partial<Record<ResponseActionsApiCommandNames, number>> & {
+  pending_actions: Partial<Record<EDRActionsApiCommandNames<'endpoint'>, number>> & {
     // Defined any other key just in case we get back some other actions
     [key: string]: number;
   };
@@ -393,9 +403,24 @@ export interface ActionDetailsAgentState {
   completedAt: string | undefined;
 }
 
+export interface ActionDetailsAgentTypeMapping {
+  endpoint: {
+    output: EndpointActionResponseDataOutput;
+    parameters: EndpointActionDataParameterTypes;
+  };
+  crowdstrike: {
+    output: CrowdStrikeActionResponseDataOutput;
+    parameters: CrowdStrikeActionDataParameterTypes;
+  };
+  sentinel_one: {
+    output: unknown;
+    parameters: unknown;
+  };
+}
+
 export interface ActionDetails<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TOutputContent = ActionDetailsAgentTypeMapping['endpoint']['output'],
+  TParameters = ActionDetailsAgentTypeMapping['endpoint']['parameters']
 > {
   /**
    * The action ID. This is a legacy property action and should no longer be used. Only here for
@@ -421,7 +446,7 @@ export interface ActionDetails<
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: ResponseActionsApiCommandNames;
+  command: EDRActionsApiCommandNames<'endpoint'>;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date

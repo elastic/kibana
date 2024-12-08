@@ -15,7 +15,7 @@ import type { ActionListApiResponse, LogsEndpointAction } from '../../../../comm
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
@@ -206,7 +206,7 @@ const getActionDetailsList = async ({
   try {
     const { data, total } = await fetchActionRequests({
       agentTypes,
-      commands: commands as ResponseActionsApiCommandNames[],
+      commands: commands as Array<EDRActionsApiCommandNames<'endpoint'>>,
       esClient,
       elasticAgentIds,
       startDate,

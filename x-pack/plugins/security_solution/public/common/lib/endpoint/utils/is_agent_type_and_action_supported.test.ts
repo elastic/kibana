@@ -7,7 +7,7 @@
 
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { isAgentTypeAndActionSupported } from './is_agent_type_and_action_supported';
@@ -70,7 +70,7 @@ describe('isAgentTypeAndActionSupported() util', () => {
       runSetup,
     }: {
       agentType: ResponseActionAgentType;
-      actionName?: ResponseActionsApiCommandNames;
+      actionName?: EDRActionsApiCommandNames<'endpoint'>;
       actionType?: ResponseActionType;
       runSetup?: () => void;
       expectedValue: boolean;

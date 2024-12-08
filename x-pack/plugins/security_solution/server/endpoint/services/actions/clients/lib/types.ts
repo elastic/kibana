@@ -155,4 +155,14 @@ export interface ResponseActionsClient {
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
+
+  /**
+   * Run a script
+   * @param actionRequest
+   * @param options
+   */
+  runscript: <TRequest = never, TOutput = never, TParameters = never>(
+    actionRequest: TRequest,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<TOutput, TParameters>>;
 }

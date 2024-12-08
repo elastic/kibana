@@ -15,11 +15,11 @@ import { fetchActionRequestById } from '../../services/actions/utils/fetch_actio
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 type CommandsWithFileAccess = Readonly<
-  Record<ResponseActionsApiCommandNames, Readonly<Record<ResponseActionAgentType, boolean>>>
+  Record<EDRActionsApiCommandNames<'endpoint'>, Readonly<Record<ResponseActionAgentType, boolean>>>
 >;
 
 // FYI: this object here should help to quickly catch instances where we might forget to update the

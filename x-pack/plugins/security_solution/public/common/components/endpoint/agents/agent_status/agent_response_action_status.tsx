@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { ISOLATED_LABEL, ISOLATING_LABEL, RELEASING_LABEL } from './translations';
 import type { EndpointPendingActions } from '../../../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
 
@@ -59,7 +59,7 @@ export const AgentResponseActionsStatus = memo<AgentResponseActionsStatusProps>(
           count: actionCount,
           label:
             RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
-              actionName as ResponseActionsApiCommandNames
+              actionName as EDRActionsApiCommandNames<'endpoint'>
             ] ?? actionName,
         });
       });

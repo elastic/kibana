@@ -18,7 +18,8 @@ export type ResponseActionAgentType = (typeof RESPONSE_ACTION_AGENT_TYPE)[number
 /**
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
  */
-export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
+
+export const ENDPOINT_ACTIONS = [
   'isolate',
   'unisolate',
   'kill-process',
@@ -30,9 +31,33 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'scan',
 ] as const;
 
-export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
+export const CROWDSTRIKE_ACTIONS = ['isolate', 'unisolate', 'runscript'] as const;
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
+export const SENTINEL_ONE_ACTIONS = [] as const;
+
+export const ALL_EDR_ACTIONS = Array.from(
+  new Set([...ENDPOINT_ACTIONS, ...CROWDSTRIKE_ACTIONS, ...SENTINEL_ONE_ACTIONS])
+);
+export type AllEDRActions = (typeof ALL_EDR_ACTIONS)[number];
+
+export const EDR_ACTION_API_COMMANDS_NAMES = {
+  endpoint: ENDPOINT_ACTIONS,
+  crowdstrike: CROWDSTRIKE_ACTIONS,
+  sentinel_one: SENTINEL_ONE_ACTIONS,
+};
+
+export type EDRActionsApiCommandNames<TAgentType extends ResponseActionAgentType> =
+  (typeof EDR_ACTION_API_COMMANDS_NAMES)[TAgentType][number];
+
+export const getActionsForAgentType = <TAgentType extends ResponseActionAgentType>(
+  agentType: TAgentType = 'endpoint' as TAgentType
+): ReadonlyArray<EDRActionsApiCommandNames<TAgentType>> => {
+  return EDR_ACTION_API_COMMANDS_NAMES[agentType];
+};
+
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: Array<
+  EDRActionsApiCommandNames<'endpoint'>
+> = [
   'isolate',
   // TODO: TC- Uncomment these when we go GA with automated process actions
   // 'kill-process',
@@ -54,6 +79,7 @@ export const ENDPOINT_CAPABILITIES = [
   'execute',
   'upload_file',
   'scan',
+  'runscript',
 ] as const;
 
 export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
@@ -72,6 +98,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'execute',
   'upload',
   'scan',
+  'runscript',
 ] as const;
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
@@ -100,10 +127,11 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   execute: 'writeExecuteOperations',
   upload: 'writeFileOperations',
   scan: 'writeScanOperations',
+  runscript: 'writeExecuteOperations',
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
-  Record<ResponseActionsApiCommandNames, ConsoleResponseActionCommands>
+  Record<EDRActionsApiCommandNames<ResponseActionAgentType>, ConsoleResponseActionCommands>
 >({
   isolate: 'isolate',
   unisolate: 'release',
@@ -114,10 +142,11 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   'suspend-process': 'suspend-process',
   upload: 'upload',
   scan: 'scan',
+  runscript: 'runscript',
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
-  Record<ConsoleResponseActionCommands, ResponseActionsApiCommandNames>
+  Record<ConsoleResponseActionCommands, EDRActionsApiCommandNames<ResponseActionAgentType>>
 >({
   isolate: 'isolate',
   release: 'unisolate',
@@ -128,6 +157,7 @@ export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
   'suspend-process': 'suspend-process',
   upload: 'upload',
   scan: 'scan',
+  runscript: 'runscript',
 });
 
 export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.freeze<
@@ -142,6 +172,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY = Object.fr
   'suspend-process': 'suspend_process',
   upload: 'upload_file',
   scan: 'scan',
+  runscript: 'runscript',
 });
 
 /**
@@ -159,6 +190,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ = Object.freeze<
   'kill-process': 'canKillProcess',
   'suspend-process': 'canSuspendProcess',
   scan: 'canWriteScanOperations',
+  runscript: 'canWriteExecuteOperations',
 });
 
 // 4 hrs in seconds

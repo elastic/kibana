@@ -11,8 +11,8 @@ import { createAppRootMockRenderer, endpointAlertDataMock } from '../../mock/end
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS,
+  getActionsForAgentType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { AlertResponseActionsSupport } from './use_alert_response_actions_support';
 import {
@@ -36,7 +36,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       noAgentSupport: boolean;
     }> = {}
   ): AlertResponseActionsSupport => {
-    const agentType = overrides.details?.agentType ?? 'endpoint';
+    const agentType: ResponseActionAgentType = overrides.details?.agentType ?? 'endpoint';
 
     return merge(
       {
@@ -46,7 +46,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         details: {
           agentId: 'abfe4a35-d5b4-42a0-a539-bd054c791769',
           agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0],
-          agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce((acc, commandName) => {
+          agentSupport: getActionsForAgentType(agentType).reduce((acc, commandName) => {
             acc[commandName] = options.noAgentSupport
               ? false
               : isAgentTypeAndActionSupported(agentType, commandName);

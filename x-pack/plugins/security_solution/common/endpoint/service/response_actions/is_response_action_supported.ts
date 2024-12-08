@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { AllEDRActions } from './constants';
 import {
   type ResponseActionAgentType,
-  type ResponseActionsApiCommandNames,
+  type EDRActionsApiCommandNames,
   type ResponseActionType,
 } from './constants';
 
 type SupportMap = Record<
-  ResponseActionsApiCommandNames,
+  AllEDRActions,
   Record<ResponseActionType, Record<ResponseActionAgentType, boolean>>
 >;
 
@@ -126,6 +127,18 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       crowdstrike: false,
     },
   },
+  runscript: {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: true,
+    },
+  },
 };
 
 /**
@@ -136,7 +149,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
  */
 export const isActionSupportedByAgentType = (
   agentType: ResponseActionAgentType,
-  actionName: ResponseActionsApiCommandNames,
+  actionName: EDRActionsApiCommandNames<typeof agentType>,
   actionType: ResponseActionType
 ): boolean => {
   return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
