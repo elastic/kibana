@@ -16,18 +16,13 @@ import { ContextProviders } from '../../context_providers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useSearchSessionContext } from '../../../../hooks/use_search_session';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
 jest.mock('../../../../hooks/use_kibana');
-jest.mock('../../../../hooks/use_search_session');
 
 const useKibanaMock = useKibanaContextForPlugin as jest.MockedFunction<
   typeof useKibanaContextForPlugin
->;
-const useSearchSessionContextMock = useSearchSessionContext as jest.MockedFunction<
-  typeof useSearchSessionContext
 >;
 
 const mockUseKibana = () => {
@@ -37,13 +32,6 @@ const mockUseKibana = () => {
       data: dataPluginMock.createStartContract(),
     },
   } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
-};
-
-const mockSearchSessionContext = () => {
-  useSearchSessionContextMock.mockReturnValue({
-    updateSearchSessionId: jest.fn(),
-    searchSessionId: '',
-  });
 };
 
 const renderHostMetadata = () =>
@@ -74,7 +62,6 @@ const renderHostMetadata = () =>
 
 beforeEach(() => {
   mockUseKibana();
-  mockSearchSessionContext();
 });
 
 afterEach(() => {

@@ -65,12 +65,10 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
         timeRange,
         query,
         filters,
-        searchSessionId,
       }: {
         timeRange: TimeRange;
         filters: Filter[];
         query: Query | AggregateQuery;
-        searchSessionId?: string;
       }) =>
       () => {
         const injectedAttributes = injectFilters({ filters, query });
@@ -80,7 +78,6 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
               id: '',
               timeRange,
               attributes: injectedAttributes,
-              searchSessionId,
             },
             {
               openInNewTab: true,
@@ -96,16 +93,12 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       timeRange,
       filters = [],
       query = { language: 'kuery', query: '' },
-      searchSessionId,
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
       query?: Query | AggregateQuery;
-      searchSessionId?: string;
     }) => {
-      const openInLens = getOpenInLensAction(
-        openInLensAction({ timeRange, filters, query, searchSessionId })
-      );
+      const openInLens = getOpenInLensAction(openInLensAction({ timeRange, filters, query }));
       return [openInLens];
     },
     [openInLensAction]

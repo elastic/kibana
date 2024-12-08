@@ -15,7 +15,6 @@ export const Kpi = ({
   dateRange,
   query,
   filters,
-  searchSessionId,
   loading,
   ...chartProps
 }: LensConfig & {
@@ -23,7 +22,6 @@ export const Kpi = ({
   dateRange: TimeRange;
   query?: Query;
   filters?: Filter[];
-  searchSessionId?: string;
   loading?: boolean;
 }) => {
   const tooltipContent = useMemo(
@@ -44,7 +42,6 @@ export const Kpi = ({
       query={query}
       loading={loading}
       toolTip={tooltipContent}
-      searchSessionId={searchSessionId}
       disableTriggers
       hidePanelTitles
     />

@@ -37,7 +37,6 @@ import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
-import { SearchSessionProvider } from '../../hooks/use_search_session';
 import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
@@ -77,74 +76,72 @@ export const InfrastructurePage = () => {
     <EuiErrorBoundary>
       <ReactQueryProvider>
         <AlertPrefillProvider>
-          <SearchSessionProvider>
-            <InfraMLCapabilitiesProvider>
-              <HelpCenterContent
-                feedbackLink="https://discuss.elastic.co/c/metrics"
-                appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                  defaultMessage: 'Metrics',
-                })}
-              />
-              {setHeaderActionMenu && theme$ && (
-                <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-                  <EuiFlexGroup responsive={false} gutterSize="s">
-                    <EuiFlexItem>
-                      <EuiHeaderLinks gutterSize="xs">
-                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                          {settingsTabTitle}
-                        </EuiHeaderLink>
-                        <Routes>
-                          <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
-                          <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
-                          <HeaderLinkAnomalyFlyoutRoute path="/detail/host/:node" />
-                        </Routes>
-                        {config.featureFlags.alertsAndRulesDropdownEnabled && (
-                          <MetricsAlertDropdown />
-                        )}
-                        <Routes>
-                          <HeaderLinkAddDataRoute
-                            path="/hosts"
-                            onboardingFlow={OnboardingFlow.Hosts}
-                            exact
-                          />
-                          <HeaderLinkAddDataRoute
-                            path="/detail/host/:node"
-                            onboardingFlow={OnboardingFlow.Hosts}
-                            exact
-                          />
-                          <HeaderLinkAddDataRoute path="/" onboardingFlow={OnboardingFlow.Infra} />
-                        </Routes>
-                      </EuiHeaderLinks>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </HeaderMenuPortal>
+          <InfraMLCapabilitiesProvider>
+            <HelpCenterContent
+              feedbackLink="https://discuss.elastic.co/c/metrics"
+              appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                defaultMessage: 'Metrics',
+              })}
+            />
+            {setHeaderActionMenu && theme$ && (
+              <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+                <EuiFlexGroup responsive={false} gutterSize="s">
+                  <EuiFlexItem>
+                    <EuiHeaderLinks gutterSize="xs">
+                      <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                        {settingsTabTitle}
+                      </EuiHeaderLink>
+                      <Routes>
+                        <HeaderLinkAnomalyFlyoutRoute path="/inventory" />
+                        <HeaderLinkAnomalyFlyoutRoute path="/hosts" />
+                        <HeaderLinkAnomalyFlyoutRoute path="/detail/host/:node" />
+                      </Routes>
+                      {config.featureFlags.alertsAndRulesDropdownEnabled && (
+                        <MetricsAlertDropdown />
+                      )}
+                      <Routes>
+                        <HeaderLinkAddDataRoute
+                          path="/hosts"
+                          onboardingFlow={OnboardingFlow.Hosts}
+                          exact
+                        />
+                        <HeaderLinkAddDataRoute
+                          path="/detail/host/:node"
+                          onboardingFlow={OnboardingFlow.Hosts}
+                          exact
+                        />
+                        <HeaderLinkAddDataRoute path="/" onboardingFlow={OnboardingFlow.Infra} />
+                      </Routes>
+                    </EuiHeaderLinks>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </HeaderMenuPortal>
+            )}
+
+            <Routes>
+              <Route path="/inventory" component={SnapshotPage} />
+              {config.featureFlags.metricsExplorerEnabled && (
+                <Route path="/explorer" component={MetricsExplorerPage} />
               )}
+              <Route path="/detail/:type/:node" component={NodeDetail} />
+              <Route path="/hosts" component={HostsPage} />
+              <Route path="/settings" component={MetricsSettingsPage} />
 
-              <Routes>
-                <Route path="/inventory" component={SnapshotPage} />
-                {config.featureFlags.metricsExplorerEnabled && (
-                  <Route path="/explorer" component={MetricsExplorerPage} />
+              <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
+              <RedirectWithQueryParams from="/metrics-explorer" exact to="/explorer" />
+              <RedirectWithQueryParams from="/" exact to="/inventory" />
+
+              <Route
+                render={() => (
+                  <NotFoundPage
+                    title={i18n.translate('xpack.infra.header.infrastructureLabel', {
+                      defaultMessage: 'Infrastructure',
+                    })}
+                  />
                 )}
-                <Route path="/detail/:type/:node" component={NodeDetail} />
-                <Route path="/hosts" component={HostsPage} />
-                <Route path="/settings" component={MetricsSettingsPage} />
-
-                <RedirectWithQueryParams from="/snapshot" exact to="/inventory" />
-                <RedirectWithQueryParams from="/metrics-explorer" exact to="/explorer" />
-                <RedirectWithQueryParams from="/" exact to="/inventory" />
-
-                <Route
-                  render={() => (
-                    <NotFoundPage
-                      title={i18n.translate('xpack.infra.header.infrastructureLabel', {
-                        defaultMessage: 'Infrastructure',
-                      })}
-                    />
-                  )}
-                />
-              </Routes>
-            </InfraMLCapabilitiesProvider>
-          </SearchSessionProvider>
+              />
+            </Routes>
+          </InfraMLCapabilitiesProvider>
         </AlertPrefillProvider>
       </ReactQueryProvider>
     </EuiErrorBoundary>
