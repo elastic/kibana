@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { EntityV2 } from '@kbn/entities-schema';
@@ -59,72 +60,87 @@ export class EntityClient {
     sort,
     limit,
   }: SearchBySources) {
-    const entities = await Promise.all(
-      sources.map(async (source) => {
-        const mandatoryFields = [
-          ...source.identity_fields,
-          ...(source.timestamp_field ? [source.timestamp_field] : []),
-          ...(source.display_name ? [source.display_name] : []),
-        ];
-        const metaFields = [...metadataFields, ...source.metadata_fields];
+    const searches = sources.map(async (source) => {
+      const mandatoryFields = [
+        ...source.identity_fields,
+        ...(source.timestamp_field ? [source.timestamp_field] : []),
+        ...(source.display_name ? [source.display_name] : []),
+      ];
+      const metaFields = [...metadataFields, ...source.metadata_fields];
 
-        // operations on an unmapped field result in a failing query so we verify
-        // field capabilities beforehand
-        const { fields } = await this.options.clusterClient.asCurrentUser.fieldCaps({
+      // operations on an unmapped field result in a failing query so we verify
+      // field capabilities beforehand. the field caps is also used to check
+      // index existence
+      const { fields } = await this.options.clusterClient.asCurrentUser
+        .fieldCaps({
           index: source.index_patterns,
           fields: [...mandatoryFields, ...metaFields],
+        })
+        .catch((err) => {
+          if (err.meta?.statusCode === 404) {
+            throw new Error(
+              `No index found for source [${source.id}] with index patterns [${source.index_patterns}]`
+            );
+          }
+          throw err;
         });
 
-        const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
-        if (!sourceHasMandatoryFields) {
-          // we can't build entities without id fields so we ignore the source.
-          // TODO filters should likely behave similarly. we should also throw
-          const missingFields = mandatoryFields.filter((field) => !fields[field]);
-          this.options.logger.info(
-            `Ignoring source for type [${source.type_id}] with index_patterns [${
-              source.index_patterns
-            }] because some mandatory fields [${missingFields.join(', ')}] are not mapped`
-          );
-          return [];
-        }
-
-        // but metadata field not being available is fine
-        const availableMetadataFields = metaFields.filter((field) => fields[field]);
-        if (availableMetadataFields.length < metaFields.length) {
-          this.options.logger.info(
-            `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(
-              ', '
-            )}]`
-          );
-        }
-
-        const { query, filter } = getEntityInstancesQuery({
-          source: {
-            ...source,
-            metadata_fields: availableMetadataFields,
-            filters: [...source.filters, ...filters],
-          },
-          start,
-          end,
-          sort,
-          limit,
-        });
-        this.options.logger.debug(
-          () => `Entity query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+      const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
+      if (!sourceHasMandatoryFields) {
+        // we can't build entities without id fields
+        // TODO filters should likely behave similarly
+        const missingFields = mandatoryFields.filter((field) => !fields[field]);
+        throw new Error(
+          `Ignoring source [${source.id}] because some mandatory fields [${missingFields.join(
+            ', '
+          )}] are not mapped in [${source.index_patterns}]`
         );
+      }
 
-        const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
-          query,
-          filter,
-          esClient: this.options.clusterClient.asCurrentUser,
-          logger: this.options.logger,
-        });
+      // but metadata field not being available is fine
+      const availableMetadataFields = metaFields.filter((field) => fields[field]);
+      if (availableMetadataFields.length < metaFields.length) {
+        this.options.logger.info(
+          `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(', ')}]`
+        );
+      }
 
-        return rawEntities;
-      })
-    ).then((results) => results.flat());
+      const { query, filter } = getEntityInstancesQuery({
+        source: {
+          ...source,
+          metadata_fields: availableMetadataFields,
+          filters: [...source.filters, ...filters],
+        },
+        start,
+        end,
+        sort,
+        limit,
+      });
+      this.options.logger.debug(
+        () => `Entity query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+      );
 
-    return mergeEntitiesList(sources, entities).slice(0, limit);
+      const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
+        query,
+        filter,
+        esClient: this.options.clusterClient.asCurrentUser,
+        logger: this.options.logger,
+      });
+
+      return rawEntities;
+    });
+
+    const results = await Promise.allSettled(searches);
+    const entities = (
+      results.filter((result) => result.status === 'fulfilled') as PromiseFulfilledResult<
+        EntityV2[]
+      >[]
+    ).flatMap((result) => result.value);
+    const errors = (
+      results.filter((result) => result.status === 'rejected') as PromiseRejectedResult[]
+    ).map((result) => result.reason.message);
+
+    return { entities: mergeEntitiesList(sources, entities), errors };
   }
 
   async storeTypeDefinition(type: EntityTypeDefinition) {
