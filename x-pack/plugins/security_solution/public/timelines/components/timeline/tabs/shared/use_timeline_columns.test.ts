@@ -6,7 +6,7 @@
  */
 
 import { TestProviders } from '../../../../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTimelineColumns } from './use_timeline_columns';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
