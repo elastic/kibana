@@ -8,13 +8,20 @@
  */
 
 import { ESQLErrorListener, getLexer as _getLexer } from '@kbn/esql-ast';
+import type { UseEuiTheme } from '@elastic/eui';
 import { ESQL_TOKEN_POSTFIX } from './constants';
 import { buildESQLTheme } from './esql_theme';
 import { CharStreams } from 'antlr4';
 
+const mockTheme: UseEuiTheme = {
+  colorMode: 'DARK',
+  euiTheme: { colors: {} } as unknown as UseEuiTheme['euiTheme'],
+  modifications: {},
+};
+
 describe('ESQL Theme', () => {
   it('should not have multiple rules for a single token', () => {
-    const theme = buildESQLTheme({ darkMode: false });
+    const theme = buildESQLTheme(mockTheme);
 
     const seen = new Set<string>();
     const duplicates: string[] = [];
@@ -40,7 +47,7 @@ describe('ESQL Theme', () => {
     .map((name) => name!.toLowerCase());
 
   it('every rule should apply to a valid lexical name', () => {
-    const theme = buildESQLTheme({ darkMode: false });
+    const theme = buildESQLTheme(mockTheme);
 
     // These names aren't from the lexer... they are added on our side
     // see packages/kbn-monaco/src/esql/lib/esql_token_helpers.ts
@@ -62,7 +69,7 @@ describe('ESQL Theme', () => {
   });
 
   it('every valid lexical name should have a corresponding rule', () => {
-    const theme = buildESQLTheme({ darkMode: false });
+    const theme = buildESQLTheme(mockTheme);
     const tokenIDs = theme.rules.map((rule) => rule.token.replace(ESQL_TOKEN_POSTFIX, ''));
 
     const validExceptions = [
