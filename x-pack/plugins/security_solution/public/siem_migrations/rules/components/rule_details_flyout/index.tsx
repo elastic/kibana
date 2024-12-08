@@ -81,15 +81,13 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
   }: MigrationRuleDetailsFlyoutProps) => {
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-    const rule: RuleResponse = useMemo(() => {
-      if (matchedPrebuiltRule) {
-        return matchedPrebuiltRule;
+    const rule = useMemo(() => {
+      if (isMigrationCustomRule(ruleMigration.elastic_rule)) {
+        return convertMigrationCustomRuleToSecurityRulePayload(
+          ruleMigration.elastic_rule
+        ) as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter;
       }
-      return {
-        ...(isMigrationCustomRule(ruleMigration.elastic_rule)
-          ? convertMigrationCustomRuleToSecurityRulePayload(ruleMigration.elastic_rule)
-          : {}),
-      } as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter
+      return matchedPrebuiltRule;
     }, [matchedPrebuiltRule, ruleMigration]);
 
     const translationTab: EuiTabbedContentTab = useMemo(
@@ -114,16 +112,18 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.OVERVIEW_TAB_LABEL,
         content: (
           <TabContentPadding>
-            <RuleOverviewTab
-              rule={rule}
-              columnWidths={
-                size === 'l'
-                  ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
-                  : DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS
-              }
-              expandedOverviewSections={expandedOverviewSections}
-              toggleOverviewSection={toggleOverviewSection}
-            />
+            {rule && (
+              <RuleOverviewTab
+                rule={rule}
+                columnWidths={
+                  size === 'l'
+                    ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
+                    : DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS
+                }
+                expandedOverviewSections={expandedOverviewSections}
+                toggleOverviewSection={toggleOverviewSection}
+              />
+            )}
           </TabContentPadding>
         ),
       }),
@@ -164,7 +164,9 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
-            <h2 id={migrationsRulesFlyoutTitleId}>{rule.name}</h2>
+            <h2 id={migrationsRulesFlyoutTitleId}>
+              {rule?.name ?? ruleMigration.original_rule.title}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="l" />
         </EuiFlyoutHeader>
