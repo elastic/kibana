@@ -6548,7 +6548,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/osquery-io-ts-types@link:packages/kbn-osquery-io-ts-types":
+"@kbn/osquery-io-ts-types@link:src/platform/packages/shared/kbn-osquery-io-ts-types":
   version "0.0.0"
   uid ""
 

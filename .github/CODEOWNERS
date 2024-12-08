@@ -428,7 +428,6 @@ packages/kbn-openapi-common @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
-packages/kbn-osquery-io-ts-types @elastic/security-asset-management
 packages/kbn-panel-loader @elastic/kibana-presentation
 packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
@@ -623,6 +622,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
