@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { isEmpty } from 'lodash';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
@@ -24,6 +25,11 @@ export const PrivateLocationSchema = schema.object({
     schema.object({
       lat: schema.number(),
       lon: schema.number(),
+    })
+  ),
+  spaces: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      minSize: 1,
     })
   ),
 });
@@ -86,15 +92,17 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
 
     const soClient = routeContext.server.coreStart.savedObjects.createInternalRepository();
 
+    const { spaces } = location;
+
     const result = await soClient.create<PrivateLocationAttributes>(
       privateLocationSavedObjectName,
       formattedLocation,
       {
         id: location.agentPolicyId,
-        initialNamespaces: ['*'],
+        initialNamespaces: isEmpty(spaces) || spaces?.includes('*') ? ['*'] : spaces,
       }
     );
 
-    return toClientContract(result.attributes, agentPolicies);
+    return toClientContract(result, agentPolicies);
   },
 });
