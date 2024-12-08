@@ -7,7 +7,7 @@
 
 import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
 
-type Params = FunctionDefinition['parameters'];
+type Params = NonNullable<FunctionDefinition['parameters']>;
 
 export function createInitializedObject(parameters: Params) {
   const emptyObject: Record<string, string | any> = {};
