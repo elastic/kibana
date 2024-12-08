@@ -88,10 +88,13 @@ export type GetRuleMigrationPrebuiltRulesRequestParamsInput = z.input<
   typeof GetRuleMigrationPrebuiltRulesRequestParams
 >;
 
+/**
+ * The map of prebuilt rules, with the rules id as a key
+ */
 export type GetRuleMigrationPrebuiltRulesResponse = z.infer<
   typeof GetRuleMigrationPrebuiltRulesResponse
 >;
-export const GetRuleMigrationPrebuiltRulesResponse = z.array(PrebuiltRuleVersion);
+export const GetRuleMigrationPrebuiltRulesResponse = z.object({}).catchall(PrebuiltRuleVersion);
 export type GetRuleMigrationResourcesRequestQuery = z.infer<
   typeof GetRuleMigrationResourcesRequestQuery
 >;

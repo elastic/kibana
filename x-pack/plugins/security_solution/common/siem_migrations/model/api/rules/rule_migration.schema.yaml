@@ -377,9 +377,9 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  description: The list of prebuilt rules
+                type: object
+                description: The map of prebuilt rules, with the rules id as a key
+                additionalProperties:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/PrebuiltRuleVersion'
 
   # Rule migration resources APIs

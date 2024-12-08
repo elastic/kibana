@@ -47,7 +47,7 @@ export const getPrebuiltRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rulesIds?: string[]
-): Promise<PrebuiltRulesResults[]> => {
+): Promise<Record<string, PrebuiltRulesResults>> => {
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
   const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
@@ -70,13 +70,13 @@ export const getPrebuiltRules = async (
     filteredPrebuiltRulesMap = prebuiltRulesMap;
   }
 
-  const prebuiltRules: PrebuiltRulesResults[] = [];
-  filteredPrebuiltRulesMap.forEach((ruleVersions) => {
+  const prebuiltRules: Record<string, PrebuiltRulesResults> = {};
+  filteredPrebuiltRulesMap.forEach((ruleVersions, ruleId) => {
     if (ruleVersions.target) {
-      prebuiltRules.push({
+      prebuiltRules[ruleId] = {
         target: convertPrebuiltRuleAssetToRuleResponse(ruleVersions.target),
         current: ruleVersions.current,
-      });
+      };
     }
   });
 

@@ -54,7 +54,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { data: translationStats, isLoading: isStatsLoading } =
       useGetMigrationTranslationStats(migrationId);
 
-    const { data: prebuiltRules = [], isLoading: isPrebuiltRulesLoading } =
+    const { data: prebuiltRules = {}, isLoading: isPrebuiltRulesLoading } =
       useGetMigrationPrebuiltRules(migrationId);
 
     const {

@@ -16,7 +16,7 @@ import type {
 import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
 
 interface UseMigrationRuleDetailsFlyoutParams {
-  prebuiltRules: PrebuiltRuleVersion[];
+  prebuiltRules: Record<string, PrebuiltRuleVersion>;
   ruleActionsFactory: (ruleMigration: RuleMigration, closeRulePreview: () => void) => ReactNode;
   extraTabsFactory?: (ruleMigration: RuleMigration) => EuiTabbedContentTab[];
 }
@@ -49,9 +49,9 @@ export function useMigrationRuleDetailsFlyout({
       setMigrationRuleForPreview(rule);
 
       // Find matched prebuilt rule if any and prioritize its installed version
-      const matchedPrebuiltRuleVersion = prebuiltRules.find(
-        (value) => value.target.rule_id === rule.elastic_rule?.prebuilt_rule_id
-      );
+      const matchedPrebuiltRuleVersion = rule.elastic_rule?.prebuilt_rule_id
+        ? prebuiltRules[rule.elastic_rule.prebuilt_rule_id]
+        : undefined;
       const prebuiltRule =
         matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
       setMatchedPrebuiltRule(prebuiltRule);

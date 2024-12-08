@@ -36,7 +36,7 @@ const installPrebuiltRules = async (
   const prebuiltRulesIds = getUniquePrebuiltRuleIds(rulesToInstall);
   const prebuiltRules = await getPrebuiltRules(rulesClient, savedObjectsClient, prebuiltRulesIds);
 
-  const { installed: alreadyInstalledRules, installable } = prebuiltRules.reduce(
+  const { installed: alreadyInstalledRules, installable } = Object.values(prebuiltRules).reduce(
     (acc, item) => {
       if (item.current) {
         acc.installed.push(item.current);
