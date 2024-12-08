@@ -123,7 +123,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   const [errorEncountered, setErrorEncountered] = useState<number | undefined>();
 
   const isMounted = useMountedState();
-  const { mlApi, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
+  const { mlApi, mlTimeSeriesExplorerService } = mlServices;
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(coreStart, ['http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -270,36 +270,32 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
               }}
             >
               <DatePickerContextProvider {...datePickerDeps}>
-                {selectedJobId !== undefined &&
-                  autoZoomDuration !== undefined &&
-                  selectedJobId === selectedJobWrapper?.job.job_id && (
-                    <TimeSeriesExplorerEmbeddableChart
-                      api={api}
-                      chartWidth={chartDimensions.width - containerPadding}
-                      chartHeight={chartDimensions.height - containerPadding}
-                      dataViewsService={pluginStart.data.dataViews}
-                      toastNotificationService={toastNotificationService}
-                      appStateHandler={appStateHandler}
-                      autoZoomDuration={autoZoomDuration}
-                      bounds={bounds}
-                      dateFormatTz={tz.guess()}
-                      lastRefresh={lastRefresh ?? 0}
-                      previousRefresh={previousRefresh}
-                      selectedJobId={selectedJobId}
-                      selectedDetectorIndex={selectedDetectorIndex}
-                      selectedEntities={selectedEntities}
-                      selectedForecastId={selectedForecastId}
-                      tableInterval="auto"
-                      tableSeverity={0}
-                      zoom={zoom}
-                      functionDescription={functionDescription}
-                      selectedJob={selectedJobWrapper.job}
-                      selectedJobStats={selectedJobWrapper.stats}
-                      onRenderComplete={onRenderComplete}
-                      onForecastComplete={onForecastComplete}
-                      shouldShowForecastButton={shouldShowForecastButton}
-                    />
-                  )}
+                {selectedJobWrapper !== undefined && autoZoomDuration !== undefined && (
+                  <TimeSeriesExplorerEmbeddableChart
+                    api={api}
+                    chartWidth={chartDimensions.width - containerPadding}
+                    chartHeight={chartDimensions.height - containerPadding}
+                    appStateHandler={appStateHandler}
+                    autoZoomDuration={autoZoomDuration}
+                    bounds={bounds}
+                    dateFormatTz={tz.guess()}
+                    isEmbeddable={true}
+                    lastRefresh={lastRefresh ?? 0}
+                    previousRefresh={previousRefresh}
+                    selectedDetectorIndex={selectedDetectorIndex}
+                    selectedEntities={selectedEntities}
+                    selectedForecastId={selectedForecastId}
+                    tableInterval="auto"
+                    tableSeverity={0}
+                    zoom={zoom}
+                    functionDescription={functionDescription}
+                    selectedJob={selectedJobWrapper.job}
+                    selectedJobStats={selectedJobWrapper.stats}
+                    onRenderComplete={onRenderComplete}
+                    onForecastComplete={onForecastComplete}
+                    shouldShowForecastButton={shouldShowForecastButton}
+                  />
+                )}
               </DatePickerContextProvider>
             </KibanaContextProvider>
           </KibanaRenderContextProvider>

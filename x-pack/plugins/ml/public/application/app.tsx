@@ -28,6 +28,8 @@ import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
 import { getMlGlobalServices } from './util/get_services';
+import type { MlResultsService } from './services/results_service';
+import type { TimeSeriesExplorerService } from './util/time_series_explorer_service';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -51,7 +53,10 @@ export interface MlServicesContext {
   mlServices: MlGlobalServices;
 }
 
-export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
+export type MlGlobalServices = ReturnType<typeof getMlGlobalServices> & {
+  mlResultsService?: MlResultsService;
+  mlTimeSeriesExplorerService?: TimeSeriesExplorerService;
+};
 
 const App: FC<AppProps> = ({
   coreStart,

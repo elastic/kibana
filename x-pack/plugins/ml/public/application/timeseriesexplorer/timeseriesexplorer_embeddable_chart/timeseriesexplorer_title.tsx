@@ -89,7 +89,7 @@ interface SingleMetricViewerTitleProps {
   functionLabel: string;
 }
 
-export const SingleMetricViewerTitle: FC<SingleMetricViewerTitleProps> = ({
+export const SingleMetricViewerTitleWithFilters: FC<SingleMetricViewerTitleProps> = ({
   api,
   entityData,
   functionLabel,
