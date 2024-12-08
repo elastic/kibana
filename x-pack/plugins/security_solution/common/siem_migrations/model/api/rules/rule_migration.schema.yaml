@@ -357,7 +357,7 @@ paths:
 
   /internal/siem_migrations/rules/{migration_id}/prebuilt_rules:
     get:
-      summary: Retrieves all prebuilt rules
+      summary: Retrieves all prebuilt rules for a specific migration
       operationId: GetRuleMigrationPrebuiltRules
       x-codegen-enabled: true
       x-internal: true
