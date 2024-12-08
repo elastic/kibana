@@ -54,8 +54,6 @@ export const cli = () => {
         )
         .boolean('inspect');
 
-      const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
-
       _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
@@ -70,8 +68,19 @@ ${JSON.stringify(argv, null, 2)}
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
-        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
+      // Adjust tooling log level based on the `TOOLING_LOG_LEVEL` property, which can be
+      // defined in the cypress config file or set in the `env`
+      {
+        const logLevel =
+          process.env.TOOLING_LOG_LEVEL ||
+          process.env.CYPRESS_TOOLING_LOG_LEVEL ||
+          cypressConfigFile.env?.TOOLING_LOG_LEVEL ||
+          '';
+
+        if (logLevel) {
+          _cliLogger.info(`Setting tooling log level to [${logLevel}]`);
+          createToolingLogger.defaultLogLevel = logLevel;
+        }
       }
 
       const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
@@ -449,7 +458,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   });
                 } else {
                   result = await cypress.run({
-                    browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
+                    browser: 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
