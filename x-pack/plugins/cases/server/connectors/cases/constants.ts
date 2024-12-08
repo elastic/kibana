@@ -19,4 +19,5 @@ export const VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS: Record<
   [CustomFieldTypes.TEXT]: 'N/A',
   [CustomFieldTypes.TOGGLE]: false,
   [CustomFieldTypes.NUMBER]: 0,
+  [CustomFieldTypes.LIST]: 'N/A',
 };

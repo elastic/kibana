@@ -22,6 +22,7 @@ import {
   CustomFieldTextTypeRt,
   CustomFieldToggleTypeRt,
   CustomFieldNumberTypeRt,
+  CustomFieldListTypeRt,
 } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
@@ -71,6 +72,31 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   ),
 ]);
 
+export const ListCustomFieldOptionRt = rt.strict({
+  label: rt.string,
+  key: rt.string,
+});
+
+export const ListCustomFieldConfigurationRt = rt.intersection([
+  rt.strict({ type: CustomFieldListTypeRt }),
+  CustomFieldConfigurationWithoutTypeRt,
+  rt.strict({
+    options: limitedArraySchema({
+      codec: ListCustomFieldOptionRt,
+      min: 1,
+      max: 10,
+      fieldName: 'options',
+    }),
+  }),
+  rt.exact(
+    rt.partial({
+      // Do NOT use CaseCustomFieldListWithValidationValueRt here, as the defaultValue should be the key of the option
+      // Key gets transformed to the display value in the UI
+      defaultValue: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
+
 export const NumberCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldNumberTypeRt }),
   CustomFieldConfigurationWithoutTypeRt,
@@ -89,6 +115,7 @@ export const CustomFieldsConfigurationRt = limitedArraySchema({
     TextCustomFieldConfigurationRt,
     ToggleCustomFieldConfigurationRt,
     NumberCustomFieldConfigurationRt,
+    ListCustomFieldConfigurationRt,
   ]),
   min: 0,
   max: MAX_CUSTOM_FIELDS_PER_CASE,

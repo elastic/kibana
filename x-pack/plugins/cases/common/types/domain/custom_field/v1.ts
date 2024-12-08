@@ -9,11 +9,13 @@ import * as rt from 'io-ts';
 export enum CustomFieldTypes {
   TEXT = 'text',
   TOGGLE = 'toggle',
+  LIST = 'list',
   NUMBER = 'number',
 }
 
 export const CustomFieldTextTypeRt = rt.literal(CustomFieldTypes.TEXT);
 export const CustomFieldToggleTypeRt = rt.literal(CustomFieldTypes.TOGGLE);
+export const CustomFieldListTypeRt = rt.literal(CustomFieldTypes.LIST);
 export const CustomFieldNumberTypeRt = rt.literal(CustomFieldTypes.NUMBER);
 
 const CaseCustomFieldTextRt = rt.strict({
@@ -28,6 +30,12 @@ export const CaseCustomFieldToggleRt = rt.strict({
   value: rt.union([rt.boolean, rt.null]),
 });
 
+export const CaseCustomFieldListRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldListTypeRt,
+  value: rt.union([rt.record(rt.string, rt.string), rt.null]),
+});
+
 export const CaseCustomFieldNumberRt = rt.strict({
   key: rt.string,
   type: CustomFieldNumberTypeRt,
@@ -38,11 +46,23 @@ export const CaseCustomFieldRt = rt.union([
   CaseCustomFieldTextRt,
   CaseCustomFieldToggleRt,
   CaseCustomFieldNumberRt,
+  CaseCustomFieldListRt,
 ]);
 export const CaseCustomFieldsRt = rt.array(CaseCustomFieldRt);
 
+export const CustomFieldValueRt = rt.union([
+  rt.string,
+  rt.number,
+  rt.boolean,
+  rt.record(rt.string, rt.string),
+  rt.null,
+]);
+export type CustomFieldValue = rt.TypeOf<typeof CustomFieldValueRt>;
+
 export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type CaseCustomField = rt.TypeOf<typeof CaseCustomFieldRt>;
+
 export type CaseCustomFieldToggle = rt.TypeOf<typeof CaseCustomFieldToggleRt>;
 export type CaseCustomFieldText = rt.TypeOf<typeof CaseCustomFieldTextRt>;
+export type CaseCustomFieldList = rt.TypeOf<typeof CaseCustomFieldListRt>;
 export type CaseCustomFieldNumber = rt.TypeOf<typeof CaseCustomFieldNumberRt>;
