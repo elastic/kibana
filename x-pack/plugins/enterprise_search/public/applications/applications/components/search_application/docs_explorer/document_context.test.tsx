@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { DocumentProvider, useSelectedDocument } from './document_context';
 

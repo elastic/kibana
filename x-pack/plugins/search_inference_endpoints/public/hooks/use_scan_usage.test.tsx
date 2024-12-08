@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { useScanUsage } from './use_scan_usage';
 import { useKibana } from './use_kibana';
@@ -43,7 +43,7 @@ describe('useScanUsage', () => {
   });
 
   test('should call API endpoint with the correct parameters and return response', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useScanUsage({
           type: 'text_embedding',
@@ -52,18 +52,18 @@ describe('useScanUsage', () => {
       { wrapper }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(mockDelete).toHaveBeenCalledWith(
+        '/internal/inference_endpoint/endpoints/text_embedding/in-1',
+        { query: { scanUsage: true } }
+      );
 
-    expect(mockDelete).toHaveBeenCalledWith(
-      '/internal/inference_endpoint/endpoints/text_embedding/in-1',
-      { query: { scanUsage: true } }
-    );
-
-    expect(result.current.data).toEqual({
-      acknowledge: true,
-      error_message: 'inference id is being used',
-      indexes: ['index1', 'index2'],
-      pipelines: ['pipeline1', 'pipeline2'],
+      expect(result.current.data).toEqual({
+        acknowledge: true,
+        error_message: 'inference id is being used',
+        indexes: ['index1', 'index2'],
+        pipelines: ['pipeline1', 'pipeline2'],
+      });
     });
   });
 });
