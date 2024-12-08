@@ -38,8 +38,16 @@ describe('registerCelInputRoute', () => {
     path: CEL_INPUT_GRAPH_PATH,
     body: {
       connectorId: 'testConnector',
-      dataStreamName: 'testStream',
-      apiDefinition: 'testApiDefinitionFileContents',
+      dataStreamTitle: 'testStream',
+      celDetails: {
+        path: 'testPath',
+        auth: 'basic',
+        openApiDetails: {
+          operation: '{}',
+          schemas: '{}',
+          auth: '{}',
+        },
+      },
     },
   });
 

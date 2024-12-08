@@ -15,9 +15,14 @@ import {
   celStateSettings,
   celRedact,
 } from '../../../__jest__/fixtures/cel';
-import { mockedRequestWithApiDefinition } from '../../../__jest__/fixtures';
+import { mockedRequestWithCelDetails } from '../../../__jest__/fixtures';
 import { handleSummarizeQuery } from './summarize_query';
 import { handleBuildProgram } from './build_program';
+import { handleUpdateProgramHeaderAuth } from './auth_header';
+import { handleAnalyzeHeaders } from './analyze_headers';
+import { handleUpdateProgramBasic } from './auth_basic';
+import { handleRemoveHeadersDigest } from './auth_digest';
+import { handleUpdateProgramOauth2 } from './auth_oauth2';
 import { handleGetStateVariables } from './retrieve_state_vars';
 import { handleGetStateDetails } from './retrieve_state_details';
 
@@ -32,6 +37,11 @@ const model = new FakeLLM({
 
 jest.mock('./summarize_query');
 jest.mock('./build_program');
+jest.mock('./auth_header');
+jest.mock('./analyze_headers');
+jest.mock('./auth_basic');
+jest.mock('./auth_digest');
+jest.mock('./auth_oauth2');
 jest.mock('./retrieve_state_vars');
 jest.mock('./retrieve_state_details');
 
@@ -80,17 +90,160 @@ describe('CelGraph', () => {
     }
   });
 
-  it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
+  describe('Runs the whole graph, with mocked outputs from the LLM.', () => {
+    it('header auth', async () => {
+      const celGraph = await getCelGraph({ model });
+      let response;
+      try {
+        const mockRequest = { ...mockedRequestWithCelDetails, authType: 'header' };
+        response = await celGraph.invoke(mockRequest);
+      } catch (error) {
+        throw Error(`getCelGraph threw an error: ${error}`);
+      }
+
+      expect(handleSummarizeQuery).toHaveBeenCalled();
+      expect(handleBuildProgram).toHaveBeenCalled();
+      expect(handleUpdateProgramHeaderAuth).toHaveBeenCalled();
+      expect(handleGetStateVariables).toHaveBeenCalled();
+      expect(handleGetStateDetails).toHaveBeenCalled();
+
+      expect(response.results).toStrictEqual(celExpectedResults);
+    });
+
+    describe('program with headers', () => {
+      beforeEach(() => {
+        const mockInvokeAnalyzeHeaders = jest.fn().mockResolvedValue(true);
+        (handleAnalyzeHeaders as jest.Mock).mockImplementation(async () => ({
+          hasProgramHeaders: await mockInvokeAnalyzeHeaders(),
+          lastExecutedChain: 'analyzeProgramHeaders',
+        }));
+      });
+
+      it('basic auth', async () => {
+        const celGraph = await getCelGraph({ model });
+        let response;
+        try {
+          const mockRequest = { ...mockedRequestWithCelDetails, authType: 'basic' };
+          response = await celGraph.invoke(mockRequest);
+        } catch (error) {
+          throw Error(`getCelGraph threw an error: ${error}`);
+        }
+
+        expect(handleSummarizeQuery).toHaveBeenCalled();
+        expect(handleBuildProgram).toHaveBeenCalled();
+        expect(handleAnalyzeHeaders).toHaveBeenCalled();
+        expect(handleUpdateProgramBasic).toHaveBeenCalled();
+        expect(handleGetStateVariables).toHaveBeenCalled();
+        expect(handleGetStateDetails).toHaveBeenCalled();
+
+        expect(response.results).toStrictEqual(celExpectedResults);
+      });
+
+      it('digest auth', async () => {
+        const celGraph = await getCelGraph({ model });
+        let response;
+        try {
+          const mockRequest = { ...mockedRequestWithCelDetails, authType: 'digest' };
+          response = await celGraph.invoke(mockRequest);
+        } catch (error) {
+          throw Error(`getCelGraph threw an error: ${error}`);
+        }
+
+        expect(handleSummarizeQuery).toHaveBeenCalled();
+        expect(handleBuildProgram).toHaveBeenCalled();
+        expect(handleAnalyzeHeaders).toHaveBeenCalled();
+        expect(handleRemoveHeadersDigest).toHaveBeenCalled();
+        expect(handleGetStateVariables).toHaveBeenCalled();
+        expect(handleGetStateDetails).toHaveBeenCalled();
+
+        expect(response.results).toStrictEqual(celExpectedResults);
+      });
+
+      it('oauth', async () => {
+        const celGraph = await getCelGraph({ model });
+        let response;
+        try {
+          const mockRequest = { ...mockedRequestWithCelDetails, authType: 'oauth2' };
+          response = await celGraph.invoke(mockRequest);
+        } catch (error) {
+          throw Error(`getCelGraph threw an error: ${error}`);
+        }
+
+        expect(handleSummarizeQuery).toHaveBeenCalled();
+        expect(handleBuildProgram).toHaveBeenCalled();
+        expect(handleAnalyzeHeaders).toHaveBeenCalled();
+        expect(handleUpdateProgramOauth2).toHaveBeenCalled();
+        expect(handleGetStateVariables).toHaveBeenCalled();
+        expect(handleGetStateDetails).toHaveBeenCalled();
+
+        expect(response.results).toStrictEqual(celExpectedResults);
+      });
+    });
+  });
+});
+
+describe('program without headers', () => {
+  beforeEach(() => {
+    const mockInvokeAnalyzeHeaders = jest.fn().mockResolvedValue(false);
+    (handleAnalyzeHeaders as jest.Mock).mockImplementation(async () => ({
+      hasProgramHeaders: await mockInvokeAnalyzeHeaders(),
+      lastExecutedChain: 'analyzeProgramHeaders',
+    }));
+  });
+  it('basic auth', async () => {
     const celGraph = await getCelGraph({ model });
     let response;
     try {
-      response = await celGraph.invoke(mockedRequestWithApiDefinition);
+      const mockRequest = { ...mockedRequestWithCelDetails, authType: 'basic' };
+      response = await celGraph.invoke(mockRequest);
     } catch (error) {
       throw Error(`getCelGraph threw an error: ${error}`);
     }
 
     expect(handleSummarizeQuery).toHaveBeenCalled();
     expect(handleBuildProgram).toHaveBeenCalled();
+    expect(handleAnalyzeHeaders).toHaveBeenCalled();
+    expect(handleUpdateProgramBasic).toHaveBeenCalled();
+    expect(handleGetStateVariables).toHaveBeenCalled();
+    expect(handleGetStateDetails).toHaveBeenCalled();
+
+    expect(response.results).toStrictEqual(celExpectedResults);
+  });
+
+  it('digest auth', async () => {
+    const celGraph = await getCelGraph({ model });
+    let response;
+    try {
+      const mockRequest = { ...mockedRequestWithCelDetails, authType: 'digest' };
+      response = await celGraph.invoke(mockRequest);
+    } catch (error) {
+      throw Error(`getCelGraph threw an error: ${error}`);
+    }
+
+    expect(handleSummarizeQuery).toHaveBeenCalled();
+    expect(handleBuildProgram).toHaveBeenCalled();
+    expect(handleAnalyzeHeaders).toHaveBeenCalled();
+    expect(handleRemoveHeadersDigest).toHaveBeenCalled();
+    expect(handleGetStateVariables).toHaveBeenCalled();
+    expect(handleGetStateDetails).toHaveBeenCalled();
+
+    expect(response.results).toStrictEqual(celExpectedResults);
+  });
+
+  it('oauth', async () => {
+    const celGraph = await getCelGraph({ model });
+    let response;
+    try {
+      const mockRequest = { ...mockedRequestWithCelDetails, authType: 'oauth2' };
+      response = await celGraph.invoke(mockRequest);
+    } catch (error) {
+      throw Error(`getCelGraph threw an error: ${error}`);
+    }
+
+    expect(handleSummarizeQuery).toHaveBeenCalled();
+    expect(handleBuildProgram).toHaveBeenCalled();
+    expect(handleAnalyzeHeaders).toHaveBeenCalled();
+    expect(handleUpdateProgramOauth2).toHaveBeenCalled();
     expect(handleGetStateVariables).toHaveBeenCalled();
     expect(handleGetStateDetails).toHaveBeenCalled();
 
