@@ -10,7 +10,7 @@
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest } from 'rxjs';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useEuiTheme } from '@elastic/eui';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -19,6 +19,7 @@ export const GridHeightSmoother = ({
 }: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
+  const { euiTheme } = useEuiTheme();
   useEffect(() => {
     const interactionStyleSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
@@ -51,7 +52,7 @@ export const GridHeightSmoother = ({
         if (expandedPanelId) {
           const smoothHeightRefY =
             smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
-          const gutterSize = parseFloat(euiThemeVars.euiSizeL);
+          const gutterSize = parseFloat(euiTheme.size.l);
 
           // When panel is expanded, ensure the page occupies the full viewport height
           // If the parent element is a flex container (preferred approach):
