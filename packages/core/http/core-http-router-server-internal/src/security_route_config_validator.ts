@@ -59,6 +59,10 @@ const requiredPrivilegesSchema = schema.arrayOf(
         return 'Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege.';
       }
 
+      if (anyRequired.includes(ReservedPrivilegesSet.operator)) {
+        return 'Using operator privilege in anyRequired is not allowed';
+      }
+
       if (anyRequired.length && allRequired.length) {
         for (const privilege of anyRequired) {
           if (allRequired.includes(privilege)) {

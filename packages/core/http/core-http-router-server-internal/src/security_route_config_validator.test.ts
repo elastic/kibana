@@ -304,4 +304,19 @@ describe('RouteSecurity validation', () => {
       `"[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."`
     );
   });
+
+  it('should fail validation when anyRequired has operator privileges set', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege1', 'privilege2'], allRequired: ['privilege4'] },
+          { anyRequired: ['privilege5', ReservedPrivilegesSet.operator] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Using operator privilege in anyRequired is not allowed"`
+    );
+  });
 });
