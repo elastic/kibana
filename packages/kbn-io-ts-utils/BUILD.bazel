@@ -3,7 +3,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 SRCS = glob(
   [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.js",
   ],
   exclude = [
     "**/*.config.js",
@@ -20,18 +20,9 @@ SRCS = glob(
   ],
 )
 
-SHARED_DEPS = [
-  "@npm//@elastic/ebt",
-  "@npm//@elastic/apm-rum-core",
-  "@npm//react",
-  "@npm//react-router-dom",
-  "//packages/kbn-io-ts-utils"
-]
-
 js_library(
-  name = "kbn-ebt-tools",
-  package_name = "@kbn/ebt-tools",
+  name = "kbn-io-ts-utils",
+  package_name = "@kbn/io-ts-utils",
   srcs = ["package.json"] + SRCS,
-  deps = SHARED_DEPS,
   visibility = ["//visibility:public"],
 )
