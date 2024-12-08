@@ -180,4 +180,6 @@ describe('EntityStoreDataClient', () => {
       expect(response.records[0]).toEqual(fakeEntityRecord);
     });
   });
+
+  // TODO getComponentFromEntityDefinition
 });
