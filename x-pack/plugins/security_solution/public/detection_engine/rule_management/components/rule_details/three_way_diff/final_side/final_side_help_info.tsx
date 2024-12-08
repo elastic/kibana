@@ -9,6 +9,7 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { UPDATE_BUTTON_LABEL } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/translations';
 
 /**
  * Theme doesn't expose width variables. Using provided size variables will require
@@ -35,7 +36,10 @@ export function FinalSideHelpInfo(): JSX.Element {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.rules.upgradeRules.upgradeHelpText"
-          defaultMessage="Choose field values used in the upgraded rule. "
+          defaultMessage="The Final Update section lets you preview and edit the final value of a field. This is the value the rule will have after you click {updateButtonLabel}."
+          values={{
+            updateButtonLabel: <i>{UPDATE_BUTTON_LABEL}</i>,
+          }}
         />
       </EuiText>
     </EuiPopover>
