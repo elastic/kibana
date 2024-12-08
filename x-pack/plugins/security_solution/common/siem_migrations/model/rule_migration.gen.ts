@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString } from './common.gen';
+import { NonEmptyString } from '../../api/model/primitives.gen';
 
 /**
  * The original rule vendor identifier.
