@@ -129,6 +129,7 @@ describe('Text based languages utils', () => {
         {
           fieldName: 'timestamp',
           columnId: 'timestamp',
+          label: 'timestamp',
           meta: {
             type: 'date',
           },
@@ -136,6 +137,7 @@ describe('Text based languages utils', () => {
         {
           fieldName: 'memory',
           columnId: 'memory',
+          label: 'memory',
           meta: {
             type: 'number',
           },

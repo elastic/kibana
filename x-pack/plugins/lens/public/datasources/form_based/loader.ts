@@ -18,7 +18,12 @@ import {
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import {
+  FormBasedPersistedState,
+  FormBasedPrivateState,
+  FormBasedLayer,
+  TextBasedLayer,
+} from './types';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
@@ -53,6 +58,8 @@ export function extractReferences({ layers }: FormBasedPrivateState) {
     layers: {},
   };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
+    if (!indexPatternId) return;
+
     persistableState.layers[layerId] = persistableLayer;
     savedObjectReferences.push({
       type: 'index-pattern',
@@ -67,17 +74,21 @@ export function injectReferences(
   state: FormBasedPersistedState,
   references: SavedObjectReference[]
 ) {
-  const layers: Record<string, FormBasedLayer> = {};
+  const layers: Record<string, FormBasedLayer | TextBasedLayer> = {};
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
-    const indexPatternId = references.find(
-      ({ name }) => name === getLayerReferenceName(layerId)
-    )?.id;
+    if (persistedLayer.type === 'esql') {
+      layers[layerId] = persistedLayer;
+    } else {
+      const indexPatternId = references.find(
+        ({ name }) => name === getLayerReferenceName(layerId)
+      )?.id;
 
-    if (indexPatternId) {
-      layers[layerId] = {
-        ...persistedLayer,
-        indexPatternId,
-      };
+      if (indexPatternId) {
+        layers[layerId] = {
+          ...persistedLayer,
+          indexPatternId,
+        };
+      }
     }
   });
   return {
@@ -103,7 +114,7 @@ function getUsedIndexPatterns({
   defaultIndexPatternId,
 }: {
   state?: {
-    layers: Record<string, FormBasedLayer>;
+    layers: Record<string, FormBasedLayer | TextBasedLayer>;
   };
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
@@ -180,6 +191,7 @@ export function loadInitialState({
     layers: {},
     ...state,
     currentIndexPatternId,
+    indexPatternRefs: [],
   };
 }
 
@@ -199,7 +211,9 @@ export function changeIndexPattern({
     ...state,
     layers: isSingleEmptyLayer(state.layers)
       ? mapValues(state.layers, (layer) =>
-          updateLayerIndexPattern(layer, indexPatterns[indexPatternId])
+          layer.type === 'esql'
+            ? layer
+            : updateLayerIndexPattern(layer, indexPatterns[indexPatternId])
         )
       : state.layers,
     currentIndexPatternId: indexPatternId,
@@ -276,8 +290,9 @@ export function changeLayerIndexPattern({
   };
 
   layerIds.forEach((layerId) => {
+    if (state.layers[layerId].type === 'esql') return;
     newLayers[layerId] = updateLayerIndexPattern(
-      state.layers[layerId],
+      state.layers[layerId] as FormBasedLayer,
       indexPatterns[indexPatternId]
     );
   });
@@ -291,5 +306,7 @@ export function changeLayerIndexPattern({
 
 function isSingleEmptyLayer(layerMap: FormBasedPrivateState['layers']) {
   const layers = Object.values(layerMap);
-  return layers.length === 1 && layers[0].columnOrder.length === 0;
+  return layers.length === 1 && layers[0].type === 'esql'
+    ? (layers[0] as TextBasedLayer).columns.length === 0
+    : (layers[0] as FormBasedLayer).columnOrder.length === 0;
 }

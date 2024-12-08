@@ -315,7 +315,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
               name,
-              meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
+              meta: {
+                type: esFieldTypeToKibanaFieldType(type),
+                esType: type,
+                sourceParams: {
+                  appliedTimeRange: input?.timeRange,
+                  params: {},
+                },
+              },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 
