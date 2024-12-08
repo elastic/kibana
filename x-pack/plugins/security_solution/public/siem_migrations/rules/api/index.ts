@@ -206,8 +206,8 @@ export const getRuleMigrationsPrebuiltRules = async ({
   migrationId,
   signal,
 }: GetRuleMigrationsPrebuiltRulesParams): Promise<GetRuleMigrationPrebuiltRulesResponse> => {
-  return KibanaServices.get().http.fetch<GetRuleMigrationPrebuiltRulesResponse>(
+  return KibanaServices.get().http.get<GetRuleMigrationPrebuiltRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH, { migration_id: migrationId }),
-    { method: 'GET', version: '1', signal }
+    { version: '1', signal }
   );
 };
