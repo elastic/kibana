@@ -27,7 +27,7 @@ export class XyVisualization {
     { editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getXyVisualization } = await import('../../async_services');
+      const { getXyVisualization } = await import('./visualization');
       const [
         coreStart,
         {
