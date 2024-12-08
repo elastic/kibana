@@ -28,6 +28,7 @@ describe('ServiceNowITSM Fields: Preview', () => {
     priority: '2',
     category: 'Denial of Service',
     subcategory: '12',
+    additionalFields: '{"foo": "bar"}',
   };
 
   let appMockRenderer: AppMockRenderer;
@@ -54,5 +55,6 @@ describe('ServiceNowITSM Fields: Preview', () => {
     expect(getByText('Priority: 2 - High')).toBeInTheDocument();
     expect(getByText('Category: Denial of Service')).toBeInTheDocument();
     expect(getByText('Subcategory: Inbound or outbound')).toBeInTheDocument();
+    expect(getByText('Additional Fields: {"foo": "bar"}')).toBeInTheDocument();
   });
 });

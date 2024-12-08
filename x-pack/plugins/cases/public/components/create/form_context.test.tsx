@@ -78,6 +78,14 @@ jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../app/use_available_owners');
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => ({
+  ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/components'),
+  /*
+   * This component causes the tests to timeout.
+   * Since we are not explicitly testing it here we mock it.
+   */
+  JsonEditorField: () => <input value="Generic JsonEditorField" onChange={() => {}} />,
+}));
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
@@ -618,6 +626,7 @@ describe('Create case', () => {
               urgency: null,
               category: null,
               subcategory: null,
+              additionalFields: null,
             },
             id: 'servicenow-1',
             name: 'My SN connector',
@@ -818,7 +827,7 @@ describe('Create case', () => {
       });
 
       await user.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
-      expect(screen.getByTestId('severitySelect')).toHaveValue('4');
+      expect(await screen.findByTestId('severitySelect')).toHaveValue('4');
 
       await user.click(screen.getByTestId('dropdown-connectors'));
       await user.click(screen.getByTestId('dropdown-connector-servicenow-2'));
@@ -836,6 +845,7 @@ describe('Create case', () => {
                 impact: null,
                 severity: null,
                 urgency: null,
+                additionalFields: null,
               },
               id: 'servicenow-2',
               name: 'My SN connector 2',

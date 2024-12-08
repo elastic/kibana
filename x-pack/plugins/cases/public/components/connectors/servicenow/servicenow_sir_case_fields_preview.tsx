@@ -38,6 +38,7 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
     priority = null,
     sourceIp = true,
     subcategory = null,
+    additionalFields = null,
   } = fields ?? {};
 
   const { http } = useKibana().services;
@@ -140,6 +141,14 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
             },
           ]
         : []),
+      ...(additionalFields != null && additionalFields.length > 0
+        ? [
+            {
+              title: i18n.ADDITIONAL_FIELDS_LABEL,
+              description: additionalFields,
+            },
+          ]
+        : []),
     ],
     [
       category,
@@ -152,6 +161,7 @@ const ServiceNowSIRFieldsPreviewComponent: React.FunctionComponent<
       sourceIp,
       subcategory,
       subcategoryOptions,
+      additionalFields,
     ]
   );
 

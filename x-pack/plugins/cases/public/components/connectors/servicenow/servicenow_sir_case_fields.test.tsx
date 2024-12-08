@@ -32,6 +32,7 @@ describe('ServiceNowSIR Fields', () => {
     priority: '1',
     category: 'Denial of Service',
     subcategory: '26',
+    additionalFields: '{}',
   };
 
   beforeAll(() => {
@@ -68,6 +69,7 @@ describe('ServiceNowSIR Fields', () => {
     expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
     expect(screen.getByTestId('categorySelect')).toBeInTheDocument();
     expect(screen.getByTestId('subcategorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('additionalFieldsEditor')).toBeInTheDocument();
   });
 
   it('transforms the categories to options correctly', async () => {
