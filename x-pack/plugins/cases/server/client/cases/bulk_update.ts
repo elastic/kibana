@@ -20,7 +20,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
 import type { CasesClient, CasesClientArgs } from '..';
-import type { OwnerEntity } from '../../authorization';
+import type { OwnerEntity, OperationDetails } from '../../authorization';
 import type { PatchCasesArgs } from '../../services/cases/types';
 import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
 
@@ -193,6 +193,12 @@ async function getAlertComments({
   });
 }
 
+function haveSameElements(arr1?: Array<{ uid: string }>, arr2?: Array<{ uid: string }>): boolean {
+  if (!arr1 || !arr2 || arr1.length !== arr2.length) return false;
+  const set1 = new Set(arr1);
+  return arr2.every((item) => set1.has(item));
+}
+
 /**
  * Returns what status the alert comment should have based on whether it is associated to a case.
  */
@@ -273,10 +279,12 @@ function partitionPatchRequest(
   // This will be a deduped array of case IDs with their corresponding owner
   casesToAuthorize: OwnerEntity[];
   reopenedCases: CasePatchRequest[];
+  changedAssignees: CasePatchRequest[];
 } {
   const nonExistingCases: CasePatchRequest[] = [];
   const conflictedCases: CasePatchRequest[] = [];
   const reopenedCases: CasePatchRequest[] = [];
+  const changedAssignees: CasePatchRequest[] = [];
   const casesToAuthorize: Map<string, OwnerEntity> = new Map<string, OwnerEntity>();
 
   for (const reqCase of patchReqCases) {
@@ -299,14 +307,41 @@ function partitionPatchRequest(
     } else {
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     }
+    if (reqCase.assignees) {
+      if (!haveSameElements(reqCase.assignees, foundCase?.attributes.assignees) && foundCase) {
+        changedAssignees.push(reqCase);
+      }
+    }
   }
 
   return {
     nonExistingCases,
     conflictedCases,
     reopenedCases,
+    changedAssignees,
     casesToAuthorize: Array.from(casesToAuthorize.values()),
   };
+}
+
+function getOperationsToAuthorize(
+  reopenedCases: CasePatchRequest[],
+  changedAssignees: CasePatchRequest[]
+): OperationDetails[] {
+  const operations: OperationDetails[] = [];
+
+  if (reopenedCases.length > 0) {
+    operations.push(Operations.reopenCase);
+  }
+
+  if (changedAssignees.length > 0) {
+    operations.push(Operations.assignCase);
+  }
+
+  if (changedAssignees.length === 0 && reopenedCases.length === 0) {
+    return [Operations.updateCase];
+  }
+
+  return operations;
 }
 
 export interface UpdateRequestWithOriginalCase {
@@ -355,13 +390,10 @@ export const bulkUpdate = async (
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
 
-    const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases } =
+    const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
       partitionPatchRequest(casesMap, query.cases);
 
-    const operationsToAuthorize =
-      reopenedCases.length > 0
-        ? [Operations.reopenCase, Operations.updateCase]
-        : [Operations.updateCase];
+    const operationsToAuthorize = getOperationsToAuthorize(reopenedCases, changedAssignees);
 
     await authorization.ensureAuthorized({
       entities: casesToAuthorize,

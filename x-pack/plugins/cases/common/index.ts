@@ -58,6 +58,7 @@ export {
   CASES_SETTINGS_CAPABILITY,
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
+  ASSIGN_CASE_CAPABILITY,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';
