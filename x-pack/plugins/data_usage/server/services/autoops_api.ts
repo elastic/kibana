@@ -21,7 +21,7 @@ import {
   type UsageMetricsRequestBody,
 } from '../../common/rest_types';
 import { AutoOpsConfig } from '../types';
-import { AutoOpsError } from './errors';
+import { AutoOpsError } from '../errors';
 import { appContextService } from './app_context';
 
 const AUTO_OPS_REQUEST_FAILED_PREFIX = '[AutoOps API] Request failed';

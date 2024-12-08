@@ -7,11 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/entity_manager'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/entity_manager',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/entity_manager'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/entity_manager',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/entity_manager/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/entity_manager/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };
