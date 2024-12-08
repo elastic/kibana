@@ -250,5 +250,35 @@ describe('POST risk_engine/preview route', () => {
         expect(result.ok).toHaveBeenCalledWith(expect.objectContaining({ after_keys: {} }));
       });
     });
+
+    describe('exclude_alert_statuses', () => {
+      it('respects the provided exclude_alert_statuses', async () => {
+        const request = buildRequest({
+          exclude_alert_statuses: ['open'],
+        });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ excludeAlertStatuses: ['open'] })
+        );
+      });
+    });
+
+    describe('exclude_alert_tags', () => {
+      it('respects the provided exclude_alert_tags', async () => {
+        const request = buildRequest({
+          exclude_alert_tags: ['tag1'],
+        });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+
+        expect(response.status).toEqual(200);
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
+          expect.objectContaining({ excludeAlertTags: ['tag1'] })
+        );
+      });
+    });
   });
 });
