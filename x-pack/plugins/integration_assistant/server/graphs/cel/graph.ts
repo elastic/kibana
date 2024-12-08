@@ -13,6 +13,7 @@ import { handleGetStateDetails } from './retrieve_state_details';
 import { handleGetStateVariables } from './retrieve_state_vars';
 import { handleSummarizeQuery } from './summarize_query';
 import { CelInputBaseNodeParams, CelInputGraphParams } from './types';
+import { ValidateCelTask } from './validation/validate_task';
 
 const graphState: StateGraphArgs<CelInputState>['channels'] = {
   lastExecutedChain: {
@@ -58,6 +59,10 @@ const graphState: StateGraphArgs<CelInputState>['channels'] = {
   redactVars: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
+  },
+  validateCelTask: {
+    value: (x: ValidateCelTask, y?: ValidateCelTask) => y ?? x,
+    default: undefined,
   },
 };
 
