@@ -3,7 +3,7 @@ info:
   description: >-
     You can create rules that automatically turn events and external alerts sent
     to Elastic Security into detection alerts. These alerts are displayed on the
-    Detections page.
+    **Detections** page.
   title: Security Detections API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
@@ -6256,5 +6256,15 @@ tags:
       You can create rules that automatically turn events and external alerts
       sent to Elastic Security into detection alerts. These alerts are displayed
       on the Detections page.
+
+      > warn
+
+      > If the API key used for authorization has different privileges than the
+      key that created or most recently updated a rule, the rule behavior might
+      change.
+
+
+      > If the API key that created a rule is deleted, or the user that created
+      the rule becomes inactive, the rule will stop running.
     name: Security Detections API
     x-displayName: Security detections
