@@ -24,19 +24,12 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
-import {
-  DEFAULT_TRANSLATION_SEVERITY,
-  DEFAULT_TRANSLATION_FIELDS,
-} from '../../../../../common/siem_migrations/constants';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   RuleOverviewTab,
   useOverviewTabSections,
 } from '../../../../detection_engine/rule_management/components/rule_details/rule_overview_tab';
-import {
-  type RuleResponse,
-  type Severity,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import * as i18n from './translations';
 import {
@@ -44,6 +37,10 @@ import {
   LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
 } from './constants';
 import { TranslationTab } from './translation_tab';
+import {
+  convertMigrationCustomRuleToSecurityRulePayload,
+  isMigrationCustomRule,
+} from '../../../../../common/siem_migrations/utils';
 
 /*
  * Fixes tabs to the top and allows the content to scroll.
@@ -67,6 +64,7 @@ export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) 
 interface MigrationRuleDetailsFlyoutProps {
   ruleActions?: React.ReactNode;
   ruleMigration: RuleMigration;
+  matchedPrebuiltRule?: RuleResponse;
   size?: EuiFlyoutProps['size'];
   extraTabs?: EuiTabbedContentTab[];
   closeFlyout: () => void;
@@ -76,6 +74,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
   ({
     ruleActions,
     ruleMigration,
+    matchedPrebuiltRule,
     size = 'm',
     extraTabs = [],
     closeFlyout,
@@ -83,19 +82,15 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
     const rule: RuleResponse = useMemo(() => {
-      const esqlLanguage = ruleMigration.elastic_rule?.query_language ?? 'esql';
+      if (matchedPrebuiltRule) {
+        return matchedPrebuiltRule;
+      }
       return {
-        type: esqlLanguage,
-        language: esqlLanguage,
-        name: ruleMigration.elastic_rule?.title,
-        description: ruleMigration.elastic_rule?.description,
-        query: ruleMigration.elastic_rule?.query,
-
-        ...DEFAULT_TRANSLATION_FIELDS,
-        severity:
-          (ruleMigration.elastic_rule?.severity as Severity) ?? DEFAULT_TRANSLATION_SEVERITY,
+        ...(isMigrationCustomRule(ruleMigration.elastic_rule)
+          ? convertMigrationCustomRuleToSecurityRulePayload(ruleMigration.elastic_rule)
+          : {}),
       } as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter
-    }, [ruleMigration]);
+    }, [matchedPrebuiltRule, ruleMigration]);
 
     const translationTab: EuiTabbedContentTab = useMemo(
       () => ({
@@ -103,11 +98,14 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.TRANSLATION_TAB_LABEL,
         content: (
           <TabContentPadding>
-            <TranslationTab ruleMigration={ruleMigration} />
+            <TranslationTab
+              ruleMigration={ruleMigration}
+              matchedPrebuiltRule={matchedPrebuiltRule}
+            />
           </TabContentPadding>
         ),
       }),
-      [ruleMigration]
+      [matchedPrebuiltRule, ruleMigration]
     );
 
     const overviewTab: EuiTabbedContentTab = useMemo(

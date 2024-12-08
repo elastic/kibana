@@ -26,6 +26,7 @@ import { useInstallMigrationRules } from '../../logic/use_install_migration_rule
 import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
 import { useInstallTranslatedMigrationRules } from '../../logic/use_install_translated_migration_rules';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_prebuilt_rules';
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
@@ -52,6 +53,9 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const { data: translationStats, isLoading: isStatsLoading } =
       useGetMigrationTranslationStats(migrationId);
+
+    const { data: prebuiltRules = [], isLoading: isPrebuiltRulesLoading } =
+      useGetMigrationPrebuiltRules(migrationId);
 
     const {
       data: { ruleMigrations, total } = { ruleMigrations: [], total: 0 },
@@ -129,6 +133,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
     } = useMigrationRuleDetailsFlyout({
+      prebuiltRules,
       ruleActionsFactory,
     });
 
@@ -137,6 +142,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       openMigrationRuleDetails: openRulePreview,
       installMigrationRule: installSingleRule,
     });
+
+    const isLoading = isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading;
 
     return (
       <>
@@ -159,7 +166,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <BulkActions
-                      isTableLoading={isStatsLoading || isDataLoading || isTableLoading}
+                      isTableLoading={isLoading}
                       numberOfTranslatedRules={translationStats?.rules.installable ?? 0}
                       numberOfSelectedRules={0}
                       installTranslatedRule={installTranslatedRules}

@@ -26,6 +26,7 @@ import {
   OriginalRule,
   RuleMigration,
   RuleMigrationTranslationStats,
+  PrebuiltRuleVersion,
   RuleMigrationResourceData,
   RuleMigrationResourceType,
   RuleMigrationResource,
@@ -76,6 +77,21 @@ export const GetRuleMigrationResponse = z.object({
   total: z.number(),
   data: z.array(RuleMigration),
 });
+
+export type GetRuleMigrationPrebuiltRulesRequestParams = z.infer<
+  typeof GetRuleMigrationPrebuiltRulesRequestParams
+>;
+export const GetRuleMigrationPrebuiltRulesRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetRuleMigrationPrebuiltRulesRequestParamsInput = z.input<
+  typeof GetRuleMigrationPrebuiltRulesRequestParams
+>;
+
+export type GetRuleMigrationPrebuiltRulesResponse = z.infer<
+  typeof GetRuleMigrationPrebuiltRulesResponse
+>;
+export const GetRuleMigrationPrebuiltRulesResponse = z.array(PrebuiltRuleVersion);
 export type GetRuleMigrationResourcesRequestQuery = z.infer<
   typeof GetRuleMigrationResourcesRequestQuery
 >;
