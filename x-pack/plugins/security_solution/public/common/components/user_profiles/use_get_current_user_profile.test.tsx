@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockCurrentUserProfile } from './mock';
@@ -38,13 +38,12 @@ describe('useGetCurrentUserProfile hook', () => {
   it('returns current user', async () => {
     const userProfiles = useKibana().services.security.userProfiles;
     const spyOnUserProfiles = jest.spyOn(userProfiles, 'getCurrent');
-    const { result, waitForNextUpdate } = renderHook(() => useGetCurrentUserProfile(), {
+    const { result } = renderHook(() => useGetCurrentUserProfile(), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.data).toEqual(mockCurrentUserProfile);
   });
 });
