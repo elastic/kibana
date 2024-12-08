@@ -234,8 +234,9 @@ export function getTextBasedDatasource({
           c?.meta?.type
         );
         return {
-          columnId: c.id,
-          fieldName: c.name,
+          columnId: c.variable ?? c.id,
+          fieldName: c.variable ? `?${c.variable}` : c.name,
+          variable: c.variable,
           meta: c.meta,
           // makes non-number fields to act as metrics, used for datatable suggestions
           ...(inMetricDimension && {

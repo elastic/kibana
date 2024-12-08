@@ -18,11 +18,14 @@
       "expressions",
       "dataViews",
       "uiActions",
-      "contentManagement"
+      "contentManagement",
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
+    ],
+    "extraPublicDirs": [
+      "common"
     ]
   }
 }

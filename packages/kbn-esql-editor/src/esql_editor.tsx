@@ -39,6 +39,7 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { EsqlControlType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -66,6 +67,26 @@ import './overwrite.scss';
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 
+const triggerControl = async (
+  queryString: string,
+  controlType: EsqlControlType,
+  position: monaco.Position | null | undefined,
+  uiActions: ESQLEditorDeps['uiActions'],
+  panelId?: string,
+  dashboardApi?: ESQLEditorProps['dashboardApi']
+) => {
+  if (!dashboardApi) {
+    return;
+  }
+  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+    queryString,
+    controlType,
+    dashboardApi,
+    panelId,
+    cursorPosition: position,
+  });
+};
+
 export const ESQLEditor = memo(function ESQLEditor({
   query,
   onTextLangQueryChange,
@@ -84,6 +105,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   hideQueryHistory,
   hasOutline,
   displayDocumentationAsFlyout,
+  dashboardApi,
+  panelId,
+  disableAutoFocus,
+  supportsVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -97,6 +122,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     core,
     fieldsMetadata,
     uiSettings,
+    uiActions,
+    esqlService,
   } = kibana.services;
   const darkMode = core.theme?.getTheme().darkMode;
 
@@ -203,6 +230,14 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [code, query.esql]);
 
+  useEffect(() => {
+    if (supportsVariables) {
+      esqlService.enable();
+    } else {
+      esqlService.disable();
+    }
+  }, [esqlService, supportsVariables]);
+
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
   }, []);
@@ -244,6 +279,42 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
     openTimePickerPopover();
+  });
+
+  monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      EsqlControlType.TIME_LITERAL,
+      position,
+      uiActions,
+      panelId,
+      dashboardApi
+    );
+  });
+
+  monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      EsqlControlType.FIELDS,
+      position,
+      uiActions,
+      panelId,
+      dashboardApi
+    );
+  });
+
+  monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      EsqlControlType.VALUES,
+      position,
+      uiActions,
+      panelId,
+      dashboardApi
+    );
   });
 
   const styles = esqlEditorStyles(
@@ -389,12 +460,19 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      getVariablesByType: (type: EsqlControlType) => {
+        return esqlService.getVariablesByType(type);
+      },
+      canSuggestVariables: () => {
+        return esqlService.isEnabled;
+      },
     };
     return callbacks;
   }, [
+    fieldsMetadata,
+    dataSourcesCache,
     query.esql,
     memoizedSources,
-    dataSourcesCache,
     dataViews,
     core,
     esqlFieldsCache,
@@ -403,7 +481,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    fieldsMetadata,
+    esqlService,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -727,8 +805,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
 
                     // Auto-focus the editor and move the cursor to the end.
-                    editor.focus();
-                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    if (!disableAutoFocus) {
+                      editor.focus();
+                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    }
                   }}
                 />
               </div>

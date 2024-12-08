@@ -37,6 +37,18 @@ export interface ESQLSourceResult {
   type?: string;
 }
 
+export interface ESQLControlVariable {
+  key: string;
+  value: string;
+  type: EsqlControlType;
+}
+
+export enum EsqlControlType {
+  TIME_LITERAL = 'time_literal',
+  FIELDS = 'fields',
+  VALUES = 'values',
+}
+
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
   getColumnsFor?: CallbackFn<{ query: string }, ESQLRealField>;
@@ -46,6 +58,8 @@ export interface ESQLCallbacks {
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
+  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[];
+  canSuggestVariables?: () => boolean;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
