@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
@@ -22,6 +22,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { debounce } from 'lodash';
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlFactory } from '../types';
@@ -59,6 +60,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
+      const changeRangeByDragging$ = new BehaviorSubject<boolean>(false);
 
       const timeRangePercentage = initTimeRangePercentage(
         initialState,
@@ -112,7 +114,12 @@ export const getTimesliderControlFactory = (): ControlFactory<
         setSelectedRange(nextSelectedRange);
       }
 
+      const debouncedOnChange = debounce((updateTimeslice) => {
+        onChange(updateTimeslice);
+      }, 300);
+
       function onPrevious() {
+        changeRangeByDragging$.next(false);
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
         const value = timeslice$.value;
         const tickRange = ticks[1].value - ticks[0].value;
@@ -149,6 +156,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       function onNext() {
+        changeRangeByDragging$.next(false);
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
         const value = timeslice$.value;
         const tickRange = ticks[1].value - ticks[0].value;
@@ -270,7 +278,10 @@ export const getTimesliderControlFactory = (): ControlFactory<
         Component: (controlPanelClassNames) => {
           const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
             useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
-
+          const [localTimeslice, setLocalTimeslice] = useState<Timeslice>([
+            timeRangeMeta.timeRangeMin,
+            timeRangeMeta.timeRangeMax,
+          ]);
           useEffect(() => {
             return () => {
               cleanupTimeRangeSubscription();
@@ -306,8 +317,12 @@ export const getTimesliderControlFactory = (): ControlFactory<
               <TimeSliderPopoverContent
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
                 setIsAnchored={setIsAnchored}
-                value={[from, to]}
-                onChange={onChange}
+                value={changeRangeByDragging$.getValue() ? localTimeslice : [from, to]}
+                onChange={(value) => {
+                  changeRangeByDragging$.next(true);
+                  setLocalTimeslice(value as Timeslice);
+                  debouncedOnChange(value);
+                }}
                 stepSize={timeRangeMeta.stepSize}
                 ticks={timeRangeMeta.ticks}
                 timeRangeMin={timeRangeMeta.timeRangeMin}
