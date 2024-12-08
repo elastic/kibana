@@ -15,25 +15,31 @@ import {
   EuiText,
   useEuiBackgroundColor,
   useEuiTheme,
+  CommonProps,
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 
+export { NodeLabel } from './node_label';
+
 export const LABEL_PADDING_X = 15;
 export const LABEL_BORDER_WIDTH = 1;
 export const NODE_WIDTH = 90;
 export const NODE_HEIGHT = 90;
-const NODE_LABEL_WIDTH = 120;
 
 export const LabelNodeContainer = styled.div`
+  position: relative;
   text-wrap: nowrap;
   min-width: 100px;
   height: 24px;
 `;
 
 export const LabelShape = styled(EuiText)`
-  background: ${(props) => useEuiBackgroundColor(props.color as _EuiBackgroundColor)};
+  background: ${({ color }) => {
+    const fillColor = (color === 'danger' ? 'primary' : color) ?? 'primary';
+    return useEuiBackgroundColor(fillColor as _EuiBackgroundColor);
+  }};
   border: ${(props) => {
     const { euiTheme } = useEuiTheme();
     return `solid ${
@@ -101,26 +107,28 @@ export const NodeShapeSvg = styled.svg`
   z-index: 1;
 `;
 
-export interface NodeButtonProps {
+export interface NodeButtonProps extends CommonProps {
+  width?: number;
+  height?: number;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-export const NodeButton: React.FC<NodeButtonProps> = ({ onClick }) => (
-  <StyledNodeContainer>
-    <StyledNodeButton onClick={onClick} />
+export const NodeButton: React.FC<NodeButtonProps> = ({ onClick, width, height, ...props }) => (
+  <StyledNodeContainer width={width} height={height} {...props}>
+    <StyledNodeButton width={width} height={height} onClick={onClick} />
   </StyledNodeContainer>
 );
 
-const StyledNodeContainer = styled.div`
+const StyledNodeContainer = styled.div<NodeButtonProps>`
   position: absolute;
-  width: ${NODE_WIDTH}px;
-  height: ${NODE_HEIGHT}px;
+  width: ${(props) => props.width ?? NODE_WIDTH}px;
+  height: ${(props) => props.height ?? NODE_HEIGHT}px;
   z-index: 1;
 `;
 
-const StyledNodeButton = styled.div`
-  width: ${NODE_WIDTH}px;
-  height: ${NODE_HEIGHT}px;
+const StyledNodeButton = styled.div<NodeButtonProps>`
+  width: ${(props) => props.width ?? NODE_WIDTH}px;
+  height: ${(props) => props.height ?? NODE_HEIGHT}px;
 `;
 
 export const StyledNodeExpandButton = styled.div<NodeExpandButtonProps>`
@@ -136,7 +144,7 @@ export const StyledNodeExpandButton = styled.div<NodeExpandButtonProps>`
     opacity: 1;
   }
 
-  ${NodeShapeContainer}:hover & {
+  ${NodeShapeContainer}:hover &, ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
@@ -153,11 +161,11 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
 
-  ${NodeShapeContainer}:hover & {
+  ${NodeShapeContainer}:hover &, ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) & {
+  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &, ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
@@ -183,19 +191,6 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
       </div>
     </foreignObject>
   );
-};
-
-export const NodeLabel = styled(EuiText)`
-  width: ${NODE_LABEL_WIDTH}px;
-  margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
-  text-overflow: ellipsis;
-  // white-space: nowrap;
-  overflow: hidden;
-`;
-
-NodeLabel.defaultProps = {
-  size: 'xs',
-  textAlign: 'center',
 };
 
 export const ExpandButtonSize = 18;
