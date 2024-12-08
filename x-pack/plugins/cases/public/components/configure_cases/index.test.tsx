@@ -71,7 +71,7 @@ describe('ConfigureCases', () => {
 
   beforeEach(() => {
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
-    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => false });
   });
 
   describe('rendering', () => {
@@ -1257,6 +1257,28 @@ describe('ConfigureCases', () => {
     });
   });
 
+  describe('observable types', () => {
+    let appMockRender: AppMockRenderer;
+    const persistCaseConfigure = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true, isAtLeastGold: () => true });
+    });
+
+    it('should render observable types section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
+    });
+  });
+
   describe('rendering with license limitations', () => {
     let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
@@ -1273,7 +1295,10 @@ describe('ConfigureCases', () => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
 
       // Updated
-      useLicenseMock.mockReturnValue({ isAtLeastGold: () => false });
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => false,
+        isAtLeastPlatinum: () => false,
+      });
     });
 
     it('should not render connectors and closure options', () => {

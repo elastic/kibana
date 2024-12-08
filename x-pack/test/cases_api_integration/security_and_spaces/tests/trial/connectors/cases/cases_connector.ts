@@ -342,6 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: null,
               username: 'elastic',
             },
+            observables: [],
           });
         });
 
@@ -454,6 +455,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: null,
               username: 'elastic',
             },
+            observables: [],
           });
         });
 
@@ -831,6 +833,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: null,
                 username: 'elastic',
               },
+              observables: [],
             });
 
             expect(secondCase).to.eql({
@@ -878,6 +881,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: null,
                 username: 'elastic',
               },
+              observables: [],
             });
           });
 
@@ -1415,6 +1419,7 @@ const createCaseWithId = async ({
       external_service: null,
       total_alerts: 0,
       total_comments: 0,
+      observables: [],
     },
     overwrite: false,
   });

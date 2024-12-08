@@ -22,6 +22,9 @@ import type {
   UserActionFindResponse,
   SingleCaseMetricsResponse,
   CustomFieldPutRequest,
+  CasesSimilarResponse,
+  AddObservableRequest,
+  UpdateObservableRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -36,6 +39,8 @@ import type {
   CasesUI,
   FilterOptions,
   CaseUICustomField,
+  SimilarCasesProps,
+  CasesSimilarResponseUI,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -50,6 +55,8 @@ import {
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
+  getCaseCreateObservableUrl,
+  getCaseUpdateObservableUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -58,6 +65,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_SIMILAR_CASES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -71,6 +79,7 @@ import {
   convertCaseToCamelCase,
   convertCasesToCamelCase,
   convertCaseResolveToCamelCase,
+  convertSimilarCasesToCamel,
 } from '../api/utils';
 
 import type {
@@ -93,7 +102,7 @@ import {
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
 } from './utils';
-import { decodeCasesFindResponse } from '../api/decoders';
+import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
 
 export const getCase = async (
   caseId: string,
@@ -607,4 +616,63 @@ export const getCaseUsers = async ({
     method: 'GET',
     signal,
   });
+};
+
+export const postObservable = async (
+  request: AddObservableRequest,
+  caseId: string,
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseCreateObservableUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ observable: request.observable }),
+    signal,
+  });
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const patchObservable = async (
+  request: UpdateObservableRequest,
+  caseId: string,
+  observableId: string,
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getCaseUpdateObservableUrl(caseId, observableId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ observable: request.observable }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const deleteObservable = async (
+  caseId: string,
+  observableId: string,
+  signal?: AbortSignal
+): Promise<void> => {
+  await KibanaServices.get().http.fetch<Case>(getCaseUpdateObservableUrl(caseId, observableId), {
+    method: 'DELETE',
+    signal,
+  });
+};
+
+export const getSimilarCases = async ({
+  caseId,
+  signal,
+  perPage,
+  page,
+}: SimilarCasesProps): Promise<CasesSimilarResponseUI> => {
+  const response = await KibanaServices.get().http.fetch<CasesSimilarResponse>(
+    INTERNAL_CASE_SIMILAR_CASES_URL.replace('{case_id}', caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ page, perPage }),
+      signal,
+    }
+  );
+
+  return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
 };

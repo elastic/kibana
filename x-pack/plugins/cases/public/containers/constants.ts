@@ -64,6 +64,9 @@ export const casesMutationsKeys = {
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
   replaceCustomField: ['replace-custom-field'] as const,
+  postObservables: ['post-observables'] as const,
+  patchObservables: ['patch-observables'] as const,
+  deleteObservables: ['delete-observables'] as const,
 };
 
 const DEFAULT_SEARCH_FIELDS = ['title', 'description'];

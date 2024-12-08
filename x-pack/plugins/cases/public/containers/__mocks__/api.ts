@@ -30,6 +30,7 @@ import {
   getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
   customFieldsMock,
+  allCasesSnake,
 } from '../mock';
 import type {
   CaseConnectors,
@@ -187,3 +188,7 @@ export const replaceCustomField = async ({
   customFieldValue: string | boolean | null;
   caseVersion: string;
 }): Promise<CaseUICustomField> => Promise.resolve(customFieldsMock[0]);
+
+export const getSimilarCases = async () => allCasesSnake;
+
+export const postObservable = async () => {};
