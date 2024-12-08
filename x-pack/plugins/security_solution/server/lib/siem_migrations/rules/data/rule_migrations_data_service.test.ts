@@ -42,7 +42,7 @@ describe('SiemRuleMigrationsDataService', () => {
   describe('constructor', () => {
     it('should create IndexPatternAdapters', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
-      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(3);
+      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(4);
     });
 
     it('should create component templates', () => {
@@ -57,6 +57,9 @@ describe('SiemRuleMigrationsDataService', () => {
       expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-integrations` })
       );
+      expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
+      );
     });
 
     it('should create index templates', () => {
@@ -70,6 +73,9 @@ describe('SiemRuleMigrationsDataService', () => {
       );
       expect(indexPatternAdapter.setIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-integrations` })
+      );
+      expect(indexPatternAdapter.setIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
       );
     });
   });
@@ -102,6 +108,7 @@ describe('SiemRuleMigrationsDataService', () => {
         rulesIndexPatternAdapter,
         resourcesIndexPatternAdapter,
         integrationsIndexPatternAdapter,
+        prebuiltrulesIndexPatternAdapter,
       ] = MockedIndexPatternAdapter.mock.instances;
       (rulesIndexPatternAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
 
@@ -111,6 +118,7 @@ describe('SiemRuleMigrationsDataService', () => {
       await mockIndexNameProviders.rules();
       await mockIndexNameProviders.resources();
       await mockIndexNameProviders.integrations();
+      await mockIndexNameProviders.prebuiltrules();
 
       expect(rulesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
       expect(rulesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
@@ -120,6 +128,9 @@ describe('SiemRuleMigrationsDataService', () => {
 
       expect(integrationsIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
       expect(integrationsIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
+
+      expect(prebuiltrulesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
+      expect(prebuiltrulesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
     });
   });
 });

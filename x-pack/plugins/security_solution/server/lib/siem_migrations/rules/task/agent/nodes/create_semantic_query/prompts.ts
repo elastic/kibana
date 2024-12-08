@@ -6,7 +6,6 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-
 export const CREATE_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
@@ -29,7 +28,7 @@ Go through the relevant title, description and data sources from the above query
 - The query should be short and concise.
 - Include keywords that are relevant to the use case.
 - Add related keywords you detected from the above query, like one or more vendor, product, cloud provider, OS platform etc.
-- Always reply with a JSON object with the key "query" and the value as the semantic search query inside three backticks as shown in the below example.
+- Always reply with a JSON object with the key "semantic_query" and the value as the semantic search query inside three backticks as shown in the below example.
 </guidelines>
 
 <example_response>
@@ -38,11 +37,11 @@ Title: Processes created by netsh
 Description: This search looks for processes launching netsh.exe to execute various commands via the netsh command-line utility. Netsh.exe is a command-line scripting utility that allows you to, either locally or remotely, display or modify the network configuration of a computer that is currently running. Netsh can be used as a persistence proxy technique to execute a helper .dll when netsh.exe is executed. In this search, we are looking for processes spawned by netsh.exe that are executing commands via the command line. Deprecated because we have another detection of the same type.
 Data Sources:
 </query>
-A: Please find the query keywords JSON object below:
+A: Please find the semantic_query keywords JSON object below:
 \`\`\`json
-{{"query": "windows host endpoint netsh.exe process creation command-line utility network configuration persistence proxy dll execution sysmon event id 1"}}
+{{"semantic_query": "windows host endpoint netsh.exe process creation command-line utility network configuration persistence proxy dll execution sysmon event id 1"}}
 \`\`\`
 </example_response>`,
   ],
-  ['ai', 'Please find the query keywords JSON object below:'],
+  ['ai', 'Please find the semantic_query keywords JSON object below:'],
 ]);
