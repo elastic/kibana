@@ -16,7 +16,7 @@ import { useStyles } from './styles';
 import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
-interface SessionViewDetailPanelDeps {
+export interface SessionViewDetailPanelDeps {
   index: string;
   selectedProcess: Process | null;
   alerts?: ProcessEvent[];
@@ -142,3 +142,5 @@ export const SessionViewDetailPanel = ({
     </div>
   );
 };
+// eslint-disable-next-line import/no-default-export
+export { SessionViewDetailPanel as default };
