@@ -115,28 +115,28 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Elasticsearch',
-        href: '/app/enterprise_search/elasticsearch',
+        href: '/app/elasticsearch/elasticsearch',
         id: 'elasticsearch',
         items: undefined,
         name: 'Elasticsearch',
       },
       {
         'data-test-subj': 'searchSideNav-VectorSearch',
-        href: '/app/enterprise_search/vector_search',
+        href: '/app/elasticsearch/vector_search',
         id: 'vectorSearch',
         items: undefined,
         name: 'Vector Search',
       },
       {
         'data-test-subj': 'searchSideNav-SemanticSearch',
-        href: '/app/enterprise_search/semantic_search',
+        href: '/app/elasticsearch/semantic_search',
         id: 'semanticSearch',
         items: undefined,
         name: 'Semantic Search',
       },
       {
         'data-test-subj': 'searchSideNav-AISearch',
-        href: '/app/enterprise_search/ai_search',
+        href: '/app/elasticsearch/ai_search',
         id: 'aiSearch',
         items: undefined,
         name: 'AI Search',
@@ -220,22 +220,22 @@ const mockNavLinks = [
   {
     id: 'enterpriseSearchElasticsearch',
     title: 'Elasticsearch',
-    url: '/app/enterprise_search/elasticsearch',
+    url: '/app/elasticsearch/elasticsearch',
   },
   {
     id: 'enterpriseSearchVectorSearch',
     title: 'Vector Search',
-    url: '/app/enterprise_search/vector_search',
+    url: '/app/elasticsearch/vector_search',
   },
   {
     id: 'enterpriseSearchSemanticSearch',
     title: 'Semantic Search',
-    url: '/app/enterprise_search/semantic_search',
+    url: '/app/elasticsearch/semantic_search',
   },
   {
     id: 'enterpriseSearchAISearch',
     title: 'AI Search',
-    url: '/app/enterprise_search/ai_search',
+    url: '/app/elasticsearch/ai_search',
   },
 ];
 
