@@ -15,7 +15,8 @@ export function getDatasourceExpressionsByLayers(
   indexPatterns: IndexPatternMap,
   dateRange: DateRange,
   nowInstant: Date,
-  searchSessionId?: string
+  searchSessionId?: string,
+  forceDSL?: boolean
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -34,7 +35,8 @@ export function getDatasourceExpressionsByLayers(
         indexPatterns,
         dateRange,
         nowInstant,
-        searchSessionId
+        searchSessionId,
+        forceDSL
       );
       if (result) {
         datasourceExpressions.push([layerId, result]);
@@ -67,6 +69,7 @@ export function buildExpression({
   dateRange,
   nowInstant,
   searchSessionId,
+  forceDSL,
 }: {
   title?: string;
   description?: string;
@@ -79,6 +82,7 @@ export function buildExpression({
   searchSessionId?: string;
   dateRange: DateRange;
   nowInstant: Date;
+  forceDSL?: boolean;
 }): Ast | null {
   // if an unregistered visualization is passed in the SO
   // then this will be set as "undefined". Relax the check to catch both
@@ -92,7 +96,8 @@ export function buildExpression({
     indexPatterns,
     dateRange,
     nowInstant,
-    searchSessionId
+    searchSessionId,
+    forceDSL
   );
 
   const visualizationExpression = visualization.toExpression(

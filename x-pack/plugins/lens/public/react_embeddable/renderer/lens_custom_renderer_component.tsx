@@ -59,6 +59,7 @@ export function LensRenderer({
   filters,
   timeRange,
   disabledActions,
+  forceDSL,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -147,6 +148,7 @@ export function LensRenderer({
           ...initialStateRef.current,
           attributes: props.attributes,
         }),
+        forceDSL,
       })}
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}
