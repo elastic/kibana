@@ -12,3 +12,7 @@ export function getProcessingPipelineName(id: string) {
 export function getReroutePipelineName(id: string) {
   return `${id}@stream.reroutes`;
 }
+
+export function getClassicPipelineName(id: string) {
+  return `${id}@stream`;
+}
