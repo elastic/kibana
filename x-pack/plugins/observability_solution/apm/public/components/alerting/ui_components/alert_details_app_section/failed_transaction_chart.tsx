@@ -7,7 +7,6 @@
 /* Error Rate */
 
 import React from 'react';
-import chroma from 'chroma-js';
 import {
   EuiFlexItem,
   EuiPanel,
@@ -16,7 +15,6 @@ import {
   EuiIconTip,
   RecursivePartial,
   useEuiTheme,
-  transparentize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BoolQuery } from '@kbn/es-query';
@@ -155,7 +153,7 @@ function FailedTransactionChart({
         <AlertActiveTimeRangeAnnotation
           alertStart={alertStart}
           alertEnd={alertEnd}
-          color={chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()}
+          color={euiTheme.colors.backgroundBaseAccent}
           id={'alertActiveRect'}
           key={'alertActiveRect'}
         />,
