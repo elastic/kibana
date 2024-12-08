@@ -17,7 +17,7 @@ import { createServerRoute } from '../create_server_route';
 import { conditionSchema, streamDefinitonWithoutChildrenSchema } from '../../../common/types';
 import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
-import { isChildOf } from '../../lib/streams/helpers/hierarchy';
+import { isChildOf, isDSNS } from '../../lib/streams/helpers/hierarchy';
 import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const forkStreamsRoute = createServerRoute({
@@ -58,8 +58,10 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      if (rootDefinition.managed === false) {
-        throw new MalformedStreamId('Cannot fork a stream that is not managed');
+      if (rootDefinition.managed === false && !isDSNS(rootDefinition)) {
+        throw new MalformedStreamId(
+          'Cannot fork a stream that is not managed and does not follow the DSNS'
+        );
       }
 
       const childDefinition = { ...params.body.stream, children: [] };
@@ -77,11 +79,17 @@ export const forkStreamsRoute = createServerRoute({
         );
       }
 
-      await validateAncestorFields(
-        scopedClusterClient,
-        params.body.stream.id,
-        params.body.stream.fields
-      );
+      if (!childDefinition.managed) {
+        throw new MalformedStreamId(`The child stream must be wired`);
+      }
+
+      if (rootDefinition.managed) {
+        await validateAncestorFields(
+          scopedClusterClient,
+          params.body.stream.id,
+          params.body.stream.fields
+        );
+      }
 
       // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
       await syncStream({

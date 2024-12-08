@@ -25,7 +25,7 @@ import {
 } from './data_streams/manage_data_streams';
 import { DefinitionNotFound } from './errors';
 import { MalformedFields } from './errors/malformed_fields';
-import { getAncestors } from './helpers/hierarchy';
+import { getAncestors, isDSNS } from './helpers/hierarchy';
 import { generateIndexTemplate } from './index_templates/generate_index_template';
 import { deleteTemplate, upsertTemplate } from './index_templates/manage_index_templates';
 import { getIndexTemplateName } from './index_templates/name';
@@ -215,7 +215,6 @@ export async function readStream({
     return {
       definition: {
         ...definition,
-        managed: true,
       },
     };
   } catch (e) {
@@ -470,10 +469,48 @@ export async function syncStream({
     logger,
     pipeline: reroutePipeline,
   });
+  let classicRoot: StreamDefinition | undefined;
+  if (isDSNS(definition) && definition.managed) {
+    // if the stream is a DSNS but wired, it doesn't inherit from logs, but from a classic stream
+    // we need to find that classic stream to be able to build the component stack properly
+    // we can do this by iteratively searching for a .streams doc which has the current definitions id as child
+    // until we hit a classic one
+    let current = definition;
+    while (current) {
+      // do a search request for
+      const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
+        index: STREAMS_INDEX,
+        body: {
+          query: {
+            bool: {
+              filter: {
+                term: {
+                  'children.id': current.id,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (response.hits.hits.length === 0) {
+        break;
+      }
+      const parent = response.hits.hits[0]._source;
+      if (!parent) {
+        break;
+      }
+      if (!parent.managed) {
+        classicRoot = parent;
+        break;
+      }
+      current = parent;
+    }
+  }
+
   await upsertTemplate({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    template: generateIndexTemplate(definition.id),
+    template: generateIndexTemplate(definition, classicRoot),
   });
   if (rootDefinition) {
     const parentReroutePipeline = await generateReroutePipeline({
@@ -516,9 +553,6 @@ async function syncUnmanagedStream({ scopedClusterClient, definition, logger }: 
     throw new Error(
       'Unmanaged streams cannot have managed fields, please edit the component templates directly'
     );
-  }
-  if (definition.children.length) {
-    throw new Error('Unmanaged streams cannot have managed children, coming soon');
   }
   const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({
     name: definition.id,

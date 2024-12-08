@@ -47,6 +47,16 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
 
 export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
   return {
-    processors: generateProcessingSteps(definition),
+    processors: [
+      ...generateProcessingSteps(definition),
+      ...definition.children.map((child) => {
+        return {
+          reroute: {
+            destination: child.id,
+            if: conditionToPainless(child.condition),
+          },
+        };
+      }),
+    ],
   };
 }
