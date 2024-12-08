@@ -372,6 +372,7 @@ export interface DocLinks {
       readonly assetCriticality: string;
     };
     readonly detectionEngineOverview: string;
+    readonly signalsMigrationApi: string;
   };
   readonly query: {
     readonly eql: string;
