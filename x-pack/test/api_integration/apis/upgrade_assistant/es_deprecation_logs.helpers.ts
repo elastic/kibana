@@ -30,7 +30,6 @@ const deprecationMock = {
   message:
     '[types removal] Specifying include_type_name in get index template requests is deprecated.',
   'data_stream.type': 'logs',
-  'data_stream.dataset': 'deprecation.elasticsearch',
   'data_stream.namespace': 'default',
   'ecs.version': '1.7',
   'elasticsearch.event.category': 'types',
