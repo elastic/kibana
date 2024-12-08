@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_params';
 import { useMonitorsSortedByStatus } from './use_monitors_sorted_by_status';
 import { WrappedHelper } from '../utils/testing';
@@ -37,10 +37,9 @@ describe('useMonitorsSortedByStatus', () => {
   const WrapperWithState = ({
     children,
     sortOrder = 'asc',
-  }: {
-    children: React.ReactElement;
+  }: React.PropsWithChildren<{
     sortOrder: 'asc' | 'desc';
-  }) => {
+  }>) => {
     return (
       <WrappedHelper
         state={{
@@ -110,14 +109,14 @@ describe('useMonitorsSortedByStatus', () => {
           },
         }}
       >
-        {children}
+        {React.createElement(React.Fragment, null, children)}
       </WrappedHelper>
     );
   };
 
   it('returns monitors down first when sort order is asc', () => {
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: WrapperWithState,
+      wrapper: ({ children }) => React.createElement(WrapperWithState, null, children),
     });
     expect(result.current).toMatchInlineSnapshot(`
       Array [
@@ -167,7 +166,7 @@ describe('useMonitorsSortedByStatus', () => {
 
   it('returns monitors up first when sort order is desc', () => {
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
+      wrapper: ({ children }: React.PropsWithChildren) => (
         <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
       ),
     });
@@ -223,7 +222,7 @@ describe('useMonitorsSortedByStatus', () => {
     } as SyntheticsUrlParams);
 
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
+      wrapper: ({ children }: React.PropsWithChildren) => (
         <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
       ),
     });
@@ -254,7 +253,7 @@ describe('useMonitorsSortedByStatus', () => {
     } as SyntheticsUrlParams);
 
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
+      wrapper: ({ children }: React.PropsWithChildren) => (
         <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
       ),
     });
@@ -285,7 +284,7 @@ describe('useMonitorsSortedByStatus', () => {
     } as SyntheticsUrlParams);
 
     const { result } = renderHook(() => useMonitorsSortedByStatus(), {
-      wrapper: ({ children }: { children: React.ReactElement }) => (
+      wrapper: ({ children }: React.PropsWithChildren) => (
         <WrapperWithState sortOrder="desc">{children}</WrapperWithState>
       ),
     });
