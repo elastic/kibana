@@ -21,6 +21,7 @@ import {
   getTheme,
   getContentManagement,
   getUISettings,
+  getUserProfile,
 } from '../services';
 import type { BaseVisType } from '../vis_types';
 
@@ -94,7 +95,7 @@ export function showNewVisModal({
         </Suspense>
       );
     }),
-    { analytics: getAnalytics(), i18n: getI18n(), theme: getTheme() }
+    { analytics: getAnalytics(), i18n: getI18n(), theme: getTheme(), userProfile: getUserProfile() }
   );
 
   unmount = mount(container);

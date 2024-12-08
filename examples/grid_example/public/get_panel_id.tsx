@@ -98,10 +98,7 @@ export const getPanelId = async ({
             session.close();
           }}
         />,
-        {
-          theme: coreStart.theme,
-          i18n: coreStart.i18n,
-        }
+        coreStart
       )
     );
   });

@@ -21,6 +21,7 @@ import type {
   ExecutionContextSetup,
   AnalyticsServiceStart,
   I18nStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -42,6 +43,8 @@ export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClie
 export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
+export const [getUserProfile, setUserProfile] =
+  createGetterSetter<UserProfileService>('UserProfile');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 

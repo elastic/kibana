@@ -48,7 +48,7 @@ const App = ({
   }
 
   return (
-    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+    <KibanaRenderContextProvider {...core}>
       <EuiPage>
         <EuiPageBody>
           <EuiPageSection>

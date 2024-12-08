@@ -16,7 +16,7 @@ import { SearchSessionsMgmtMain } from '../components/main';
 
 export const renderApp = (
   elem: HTMLElement | null,
-  { i18n, uiSettings, ...homeDeps }: AppDependencies
+  { uiSettings, ...homeDeps }: AppDependencies
 ) => {
   if (!elem) {
     return () => undefined;
@@ -28,7 +28,7 @@ export const renderApp = (
   });
 
   render(
-    <KibanaRenderContextProvider theme={homeDeps.core.theme} i18n={i18n}>
+    <KibanaRenderContextProvider {...homeDeps.core}>
       <KibanaReactContextProvider>
         <SearchSessionsMgmtMain {...homeDeps} timezone={uiSettings.get('dateFormat:tz')} />
       </KibanaReactContextProvider>

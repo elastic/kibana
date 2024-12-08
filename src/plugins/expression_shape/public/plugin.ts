@@ -27,10 +27,12 @@ export class ExpressionShapePlugin
   implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
-    expressions.registerFunction(shapeFunction);
-    expressions.registerFunction(progressFunction);
-    expressions.registerRenderer(shapeRendererFactory(core));
-    expressions.registerRenderer(progressRendererFactory(core));
+    core.getStartServices().then(([start]) => {
+      expressions.registerFunction(shapeFunction);
+      expressions.registerFunction(progressFunction);
+      expressions.registerRenderer(shapeRendererFactory(start));
+      expressions.registerRenderer(progressRendererFactory(start));
+    });
   }
 
   public start(core: CoreStart): ExpressionShapePluginStart {}
