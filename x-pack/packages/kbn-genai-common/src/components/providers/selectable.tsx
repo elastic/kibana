@@ -1,42 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import { EuiSelectable, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiSelectableProps,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ServiceProviderKeys } from '../../../constants';
 import {
   ProviderSolution,
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
   ServiceProviderName,
-} from '../render_service_provider/service_provider';
+} from './render_service_provider/service_provider';
+import { ServiceProviderKeys } from '../../constants';
+import { InferenceProvider } from '../../types/types';
 
-/**
- * Modifies options by creating new property `providerTitle`(with value of `title`), and by setting `title` to undefined.
- * Thus prevents appearing default browser tooltip on option hover (attribute `title` that gets rendered on li element)
- *
- * @param {EuiSelectableOption[]} options
- * @returns {EuiSelectableOption[]} modified options
- */
-
-export interface SelectableProviderProps {
-  isLoading: boolean;
-  getSelectableOptions: (searchProviderValue?: string) => EuiSelectableOption[];
+interface SelectableProviderProps {
+  providers: InferenceProvider[];
   onClosePopover: () => void;
   onProviderChange: (provider?: string) => void;
 }
 
-const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
-  isLoading,
-  getSelectableOptions,
+export const SelectableProvider: React.FC<SelectableProviderProps> = ({
+  providers,
   onClosePopover,
   onProviderChange,
 }) => {
@@ -60,10 +55,10 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
             <EuiBadge color="hollow">{solution}</EuiBadge>
           </EuiFlexItem>
         ))) ?? (
-        <EuiFlexItem>
-          <EuiBadge color="hollow">{'Search' as ProviderSolution}</EuiBadge>
-        </EuiFlexItem>
-      );
+          <EuiFlexItem>
+            <EuiBadge color="hollow">{'Search' as ProviderSolution}</EuiBadge>
+          </EuiFlexItem>
+        );
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -88,17 +83,6 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
       );
     },
     []
-  );
-
-  const handleProviderChange = useCallback<NonNullable<EuiSelectableProps['onChange']>>(
-    (options) => {
-      const selectedProvider = options.filter((option) => option.checked === 'on');
-      if (selectedProvider != null && selectedProvider.length > 0) {
-        onProviderChange(selectedProvider[0].label);
-      }
-      onClosePopover();
-    },
-    [onClosePopover, onProviderChange]
   );
 
   const EuiSelectableContent = useCallback<NonNullable<EuiSelectableProps['children']>>(
@@ -128,20 +112,35 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
     [onSearchProvider]
   );
 
+  const handleProviderChange = useCallback<NonNullable<EuiSelectableProps['onChange']>>(
+    (options) => {
+      const selectedProvider = options.filter((option) => option.checked === 'on');
+      if (selectedProvider != null && selectedProvider.length > 0) {
+        onProviderChange(selectedProvider[0].label);
+      }
+      onClosePopover();
+    },
+    [onClosePopover, onProviderChange]
+  );
+
+  const getSelectableOptions = useCallback(() => {
+    return providers?.map((p) => ({
+      label: p.provider,
+      key: p.provider,
+    })) as EuiSelectableOption[];
+  }, [providers]);
+
   return (
     <EuiSelectable
       data-test-subj="selectable-provider-input"
-      isLoading={isLoading}
       renderOption={renderProviderOption}
       onChange={handleProviderChange}
       searchable
       searchProps={searchProps}
       singleSelection={true}
-      options={getSelectableOptions(searchProviderValue)}
+      options={getSelectableOptions()}
     >
       {EuiSelectableContent}
     </EuiSelectable>
   );
 };
-
-export const SelectableProvider = memo(SelectableProviderComponent);

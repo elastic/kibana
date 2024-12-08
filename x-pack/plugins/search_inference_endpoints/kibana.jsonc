@@ -28,8 +28,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "esUiShared",
-      "triggersActionsUi"
+      "esUiShared"
     ]
   }
 }

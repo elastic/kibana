@@ -12,10 +12,10 @@ import { docLinks } from '../../common/doc_links';
 import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
 interface InferenceEndpointsHeaderProps {
-  setIsAIConnectorFlyoutOpen: (state: boolean) => void;
+  setIsAddInferenceFlyoutOpen: (state: boolean) => void;
 }
 export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> = ({
-  setIsAIConnectorFlyoutOpen,
+  setIsAddInferenceFlyoutOpen,
 }) => {
   const trainedModelPageUrl = useTrainedModelPageUrl();
 
@@ -31,7 +31,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
           fill
           iconSize="m"
           data-test-subj="add-ai-connector"
-          onClick={() => setIsAIConnectorFlyoutOpen(true)}
+          onClick={() => setIsAddInferenceFlyoutOpen(true)}
         >
           {i18n.ADD_ENDPOINT_LABEL}
         </EuiButton>,

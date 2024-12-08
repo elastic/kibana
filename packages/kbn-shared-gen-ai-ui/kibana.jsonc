@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/shared-gen-ai-ui",
-  "owner": ["@elastic/response-ops"],
-  "group": "platform",
-  "visibility": "shared"
-}

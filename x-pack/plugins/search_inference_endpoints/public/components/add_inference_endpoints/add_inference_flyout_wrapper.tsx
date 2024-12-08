@@ -16,15 +16,28 @@ import {
 import React from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import { InferenceAPIConnectorFields } from '@kbn/shared-gen-ai-ui';
+import { InferenceServices } from '@kbn/genai-common';
+import { useKibana } from '../../hooks/use_kibana';
+import { useProviders } from '../../hooks/user_providers';
 
-interface AIConnectorFlyoutWrapperProps {
-  setIsAIConnectorFlyoutOpen: (state: boolean) => void;
+interface AddInferenceFlyoutWrapperProps {
+  setIsAddInferenceFlyoutOpen: (state: boolean) => void;
 }
 
-export const AIConnectorFlyoutWrapper: React.FC<AIConnectorFlyoutWrapperProps> = ({
-  setIsAIConnectorFlyoutOpen,
+export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps> = ({
+  setIsAddInferenceFlyoutOpen,
 }) => {
+  // const {
+  //   http,
+  //   notifications: { toasts },
+  // } = useKibana().services;
+
+  const {
+    services: { http },
+  } = useKibana();
+
+  const { data: providers, isLoading } = useProviders(http);
+
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
@@ -36,7 +49,7 @@ export const AIConnectorFlyoutWrapper: React.FC<AIConnectorFlyoutWrapperProps> =
   return (
     <EuiFlyout
       ownFocus
-      onClose={() => setIsAIConnectorFlyoutOpen(false)}
+      onClose={() => setIsAddInferenceFlyoutOpen(false)}
       aria-labelledby={inferenceCreationFlyoutId}
     >
       <EuiFlyoutHeader hasBorder>
@@ -45,19 +58,11 @@ export const AIConnectorFlyoutWrapper: React.FC<AIConnectorFlyoutWrapperProps> =
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
-          <p>
-            For consistency across the many flyouts, please utilize the following code for
-            implementing the flyout with a header.
-          </p>
-        </EuiText>
-        <Form form={form}>
-          <InferenceAPIConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => { }}
-          />
-        </Form>
+        {providers ? (
+          <Form form={form}>
+            <InferenceServices providers={providers} />
+          </Form>
+        ) : null}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
