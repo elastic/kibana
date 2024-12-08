@@ -152,9 +152,13 @@ coreSetup.deprecations.registerDeprecations({
 ```
 
 The `getDeprecations` function is invoked when the user requests to see the deprecations affecting their deployment.
-The function provides a context object which contains a scoped Elasticsearch client and a saved objects client.
+The function provides a context object which contains a scoped Elasticsearch client and a Saved Objects client.
 
-To check the full TS types of the service please check the [generated core docs](../../../../docs/development/core/server/kibana-plugin-core-server.deprecationsservicesetup.md).
+⚠️When using the Saved Objects client, bear in mind that all Spaces must be checked for deprecations:
+By default, the Saved Objects client retrieves data from the current Space only. To override this behavior, add the 
+option `namespaces: ['*']` to search in all Spaces. When getting by ID, it's best to loop through all the spaces and get with `namespaces: [mySpaceOverride]`.  
+
+To check the full TS types of the service please check the [generated core docs](https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-deprecations-server).
 
 ### Example
 ```ts
