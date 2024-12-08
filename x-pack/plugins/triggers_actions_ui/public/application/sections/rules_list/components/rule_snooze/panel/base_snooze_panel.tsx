@@ -223,7 +223,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                           height: '36px',
                           // Replicate euiPanel--accent vs euiPanel--subdued
                           // Applying these classNames by themselves doesn't work due to a CSS-in-JS issue with EuiPanel
-                          color: isActive ? '#a8376a' : euiTheme.colors.subduedText,
+                          color: isActive ? '#a8376a' : euiTheme.colors.textSubdued,
                           backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : euiTheme.colors.body,
                         }}
                         className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
