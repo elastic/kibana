@@ -26,6 +26,13 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
+import {
+  FavoriteButton,
+  FavoritesClient,
+  FavoritesContextProvider,
+} from '@kbn/content-management-favorites-public';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { css } from '@emotion/react';
 
 import { UI_SETTINGS } from '../../common';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -39,7 +46,12 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings } from '../dashboard_app/types';
-import { LEGACY_DASHBOARD_APP_ID, getFullEditPath } from '../dashboard_constants';
+import {
+  LEGACY_DASHBOARD_APP_ID,
+  getFullEditPath,
+  DASHBOARD_APP_ID,
+  DASHBOARD_CONTENT_ID,
+} from '../dashboard_constants';
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
@@ -49,6 +61,7 @@ import {
   dataService,
   navigationService,
   serverlessService,
+  usageCollectionService,
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
@@ -64,6 +77,38 @@ export interface InternalDashboardTopNavProps {
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const DashboardFavoriteButton = ({ dashboardId }: { dashboardId: string }) => {
+  const dashboardFavoritesClient = useMemo(() => {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+      http: coreServices.http,
+      usageCollection: usageCollectionService,
+    });
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <FavoritesContextProvider favoritesClient={dashboardFavoritesClient}>
+        <FavoriteButton
+          id={dashboardId}
+          css={css`
+            // aligns the favorite button with the breadcrumb height
+            margin-top: -6px;
+            margin-bottom: -6px;
+          `}
+        />
+      </FavoritesContextProvider>
+    </QueryClientProvider>
+  );
+};
 
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
@@ -153,9 +198,13 @@ export function InternalDashboardTopNav({
                 className="dshTitleBreadcrumbs__updateIcon"
                 onClick={() => openSettingsFlyout(dashboardApi)}
               />
+              {lastSavedId && <DashboardFavoriteButton dashboardId={lastSavedId} />}
             </>
           ) : (
-            dashboardTitle
+            <>
+              {dashboardTitle}
+              {lastSavedId && <DashboardFavoriteButton dashboardId={lastSavedId} />}
+            </>
           ),
       },
     ];
@@ -186,7 +235,7 @@ export function InternalDashboardTopNav({
         }
       );
     }
-  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);
+  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs, lastSavedId]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
