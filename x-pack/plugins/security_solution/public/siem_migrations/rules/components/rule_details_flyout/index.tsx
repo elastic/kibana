@@ -40,7 +40,7 @@ import { TranslationTab } from './translation_tab';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
-} from '../../../../../common/siem_migrations/utils';
+} from '../../../../../common/siem_migrations/rules/utils';
 
 /*
  * Fixes tabs to the top and allows the content to scroll.

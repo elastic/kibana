@@ -23,7 +23,7 @@ import {
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
-} from '../../../../../../common/siem_migrations/utils';
+} from '../../../../../../common/siem_migrations/rules/utils';
 
 const installPrebuiltRules = async (
   rulesToInstall: StoredRuleMigration[],

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Severity } from '../api/detection_engine';
-import { DEFAULT_TRANSLATION_FIELDS, DEFAULT_TRANSLATION_SEVERITY } from './constants';
-import type { ElasticRule, ElasticRulePartial } from './model/rule_migration.gen';
+import type { Severity } from '../../api/detection_engine';
+import { DEFAULT_TRANSLATION_FIELDS, DEFAULT_TRANSLATION_SEVERITY } from '../constants';
+import type { ElasticRule, ElasticRulePartial } from '../model/rule_migration.gen';
 
 export type MigrationPrebuiltRule = ElasticRulePartial &
   Required<Pick<ElasticRulePartial, 'title' | 'description' | 'prebuilt_rule_id'>>;
