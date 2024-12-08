@@ -55,7 +55,6 @@ import {
 } from '../../../../shared_imports';
 import type { FormHook, FieldHook } from '../../../../shared_imports';
 import { schema } from './schema';
-import { getTermsAggregationFields } from './utils';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
@@ -72,8 +71,6 @@ import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { NewTermsFields } from '../new_terms_fields';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -90,6 +87,10 @@ import {
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
+import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
+import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
+import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
+import { usePersistentNewTermsState } from './use_persistent_new_terms_state';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
 import { usePersistentQuery } from './use_persistent_query';
 
@@ -211,18 +212,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () => (indexPattern.fields as FieldSpec[]).filter((field) => field.aggregatable === true),
     [indexPattern.fields]
   );
-  const termsAggregationFields = useMemo(
-    /**
-     * Typecasting to FieldSpec because fields is
-     * typed as DataViewFieldBase[] which does not have
-     * the 'aggregatable' property, however the type is incorrect
-     *
-     * fields does contain elements with the aggregatable property.
-     * We will need to determine where these types are defined and
-     * figure out where the discrepency is.
-     */
-    () => getTermsAggregationFields(indexPattern.fields as FieldSpec[]),
-    [indexPattern.fields]
+
+  const termsAggregationFields = useTermsAggregationFields(indexPattern.fields);
+  const termsAggregationFieldNames = useMemo(
+    () => termsAggregationFields.map((field) => field.name),
+    [termsAggregationFields]
   );
 
   const [threatIndexPatternsLoading, { indexPatterns: threatIndexPatterns }] =
@@ -245,6 +239,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     form,
   });
   usePersistentAlertSuppressionState({ form });
+  usePersistentNewTermsState({
+    form,
+    ruleTypePath: 'ruleType',
+    newTermsFieldsPath: 'newTermsFields',
+    historyWindowStartPath: 'historyWindowSize',
+  });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
@@ -730,30 +730,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isNewTermsRule(ruleType)}
-            data-test-subj="newTermsInput"
-            fullWidth
-          >
-            <>
-              <UseField
-                path="newTermsFields"
-                component={NewTermsFields}
-                componentProps={{
-                  browserFields: termsAggregationFields,
-                }}
-              />
-              <UseField
-                path="historyWindowSize"
-                component={ScheduleItem}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  dataTestSubj: 'detectionEngineStepDefineRuleHistoryWindowSize',
-                  timeTypes: ['m', 'h', 'd'],
-                }}
-              />
-            </>
-          </RuleTypeEuiFormRow>
+          {isNewTermsRule(ruleType) && (
+            <EuiFormRow data-test-subj="newTermsInput" fullWidth>
+              <>
+                <NewTermsFieldsEdit path="newTermsFields" fieldNames={termsAggregationFieldNames} />
+                <HistoryWindowStartEdit path="historyWindowSize" />
+              </>
+            </EuiFormRow>
+          )}
           <EuiSpacer size="m" />
 
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>
