@@ -43,7 +43,7 @@ import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
-const RULE_TYPES_SUPPORTING_LOGGED_REQUESTS: Type[] = ['esql', 'eql'];
+const RULE_TYPES_SUPPORTING_LOGGED_REQUESTS: Type[] = ['esql', 'eql', 'threshold'];
 
 const timeRanges = [
   { start: 'now/d', end: 'now', label: 'Today' },

@@ -8,3 +8,4 @@
 export * from './log_esql';
 export * from './log_eql';
 export * from './log_query';
+export * from './log_search_request';

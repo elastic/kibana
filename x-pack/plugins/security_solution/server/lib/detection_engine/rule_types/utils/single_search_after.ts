@@ -17,6 +17,8 @@ import { createErrorsFromShard, makeFloatString } from './utils';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import { logSearchRequest } from './logged_requests';
 
 export interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -35,6 +37,7 @@ export interface SingleSearchAfterParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
+  isLoggedRequestsEnabled?: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -57,12 +60,16 @@ export const singleSearchAfter = async <
   trackTotalHits,
   additionalFilters,
   overrideBody,
+  isLoggedRequestsEnabled,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
   searchErrors: string[];
+  loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
   return withSecuritySpan('singleSearchAfter', async () => {
+    const loggedRequests: RulePreviewLoggedRequest[] = [];
+
     try {
       const searchAfterQuery = buildEventsSearchQuery({
         aggregations,
@@ -98,10 +105,19 @@ export const singleSearchAfter = async <
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
 
+      if (isLoggedRequestsEnabled) {
+        loggedRequests.push({
+          request: logSearchRequest(searchAfterQuery as estypes.SearchRequest),
+          description: 'Search documents',
+          duration: end - start,
+        });
+      }
+
       return {
         searchResult: nextSearchAfterResult,
         searchDuration: makeFloatString(end - start),
         searchErrors,
+        loggedRequests,
       };
     } catch (exc) {
       ruleExecutionLogger.error(`Searching events operation failed: ${exc}`);
@@ -129,6 +145,7 @@ export const singleSearchAfter = async <
           searchResult: searchRes,
           searchDuration: '-1.0',
           searchErrors: exc.message,
+          loggedRequests,
         };
       }
 
