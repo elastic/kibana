@@ -94,7 +94,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
       if (apiHasLibraryTransforms(embeddable)) {
         await embeddable.parentApi.replacePanel(embeddable.uuid, {
           panelType: embeddable.type,
-          initialState: { ...embeddable.getByValueState(), title },
+          runtimeState: { ...embeddable.getByValueState(), title },
         });
       } else if (apiHasInPlaceLibraryTransforms(embeddable)) {
         embeddable.unlinkFromLibrary();

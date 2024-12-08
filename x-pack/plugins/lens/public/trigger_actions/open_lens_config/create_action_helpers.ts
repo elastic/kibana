@@ -125,7 +125,7 @@ export async function executeCreateAction({
 
   const embeddable = await api.addNewPanel<object, LensApi>({
     panelType: 'lens',
-    initialState: {
+    runtimeState: {
       attributes: attrs,
       id: generateId(),
       isNewPanel: true,

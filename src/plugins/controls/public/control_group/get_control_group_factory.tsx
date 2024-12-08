@@ -179,7 +179,7 @@ export const getControlGroupEmbeddableFactory = () => {
             onSave: ({ type: controlType, state: initialState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: settings?.controlStateTransform
+                runtimeState: settings?.controlStateTransform
                   ? settings.controlStateTransform(initialState, controlType)
                   : initialState,
               });
