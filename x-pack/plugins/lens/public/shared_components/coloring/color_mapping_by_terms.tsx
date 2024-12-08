@@ -21,12 +21,12 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   CategoricalColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
-  AVAILABLE_PALETTES,
   PaletteOutput,
   PaletteRegistry,
   CustomPaletteParams,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
+import { KbnPalettes } from '@kbn/palettes';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
@@ -36,6 +36,7 @@ interface ColorMappingByTermsProps {
   isDarkMode: boolean;
   colorMapping?: ColorMapping.Config;
   palette?: PaletteOutput<CustomPaletteParams>;
+  palettes: KbnPalettes;
   isInlineEditing?: boolean;
   setPalette: (palette: PaletteOutput) => void;
   setColorMapping: (colorMapping?: ColorMapping.Config) => void;
@@ -48,6 +49,7 @@ export function ColorMappingByTerms({
   isDarkMode,
   colorMapping,
   palette,
+  palettes,
   isInlineEditing,
   setPalette,
   setColorMapping,
@@ -67,7 +69,7 @@ export function ColorMappingByTerms({
       fullWidth
     >
       <PalettePanelContainer
-        palette={getColorStops(paletteService, isDarkMode, palette, colorMapping)}
+        palette={getColorStops(paletteService, palettes, isDarkMode, palette, colorMapping)}
         siblingRef={panelRef}
         title={
           useNewColorMapping
@@ -119,7 +121,7 @@ export function ColorMappingByTerms({
                   model={colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                   onModelUpdate={setColorMapping}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
-                  palettes={AVAILABLE_PALETTES}
+                  palettes={palettes}
                   data={{
                     type: 'categories',
                     categories,

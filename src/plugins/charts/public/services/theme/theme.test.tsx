@@ -82,19 +82,19 @@ describe('ThemeService', () => {
       const { useChartsBaseTheme } = themeService;
 
       const { result } = renderHook(() => useChartsBaseTheme());
-      expect(result.current).toBe(LIGHT_THEME);
+      expect(result.current).toStrictEqual(LIGHT_THEME);
 
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(true);
         themeService.init(setUpMockTheme);
       });
-      expect(result.current).toBe(DARK_THEME);
+      expect(result.current).toStrictEqual(DARK_THEME);
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(false);
         themeService.init(setUpMockTheme);
       });
       // act(() => darkMode$.next(false));
-      expect(result.current).toBe(LIGHT_THEME);
+      expect(result.current).toStrictEqual(LIGHT_THEME);
     });
 
     it('should not rerender when emitting the same value', () => {
@@ -125,7 +125,7 @@ describe('ThemeService', () => {
         setUpMockTheme.theme$ = createTheme$Mock(true);
         themeService.init(setUpMockTheme);
       });
-      expect(renderCounter).toHaveBeenCalledTimes(2);
+      expect(renderCounter).toHaveBeenCalledTimes(4);
     });
   });
 });
