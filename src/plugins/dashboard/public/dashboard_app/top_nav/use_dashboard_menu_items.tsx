@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
+
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -26,6 +27,8 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+
+
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -221,6 +224,16 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
         run: () => openSettingsFlyout(dashboardApi),
       },
+
+      showSource: {
+        ...topNavStrings.showSource,
+        id: 'showSource',
+        testId: 'dashboardShowSourceButton',
+        disableButton: disableTopNav,
+        run: () => {
+          dashboardApi.showSource();
+        },
+      },
     };
   }, [
     disableTopNav,
@@ -302,7 +315,13 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
+    return [
+      ...labsMenuItem,
+      menuItems.settings,
+      menuItems.showSource,
+      ...shareMenuItem,
+      ...editModeItems,
+    ];
   }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
