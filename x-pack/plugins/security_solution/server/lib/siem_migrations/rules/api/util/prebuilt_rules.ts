@@ -57,16 +57,21 @@ export const getPrebuiltRules = async (
   });
 
   // Filter out prebuilt rules by `rule_id`
+  let filteredPrebuiltRulesMap: typeof prebuiltRulesMap;
   if (rulesIds) {
-    for (const ruleId of prebuiltRulesMap.keys()) {
-      if (!rulesIds.includes(ruleId)) {
-        prebuiltRulesMap.delete(ruleId);
+    filteredPrebuiltRulesMap = new Map();
+    for (const ruleId of rulesIds) {
+      const prebuiltRule = prebuiltRulesMap.get(ruleId);
+      if (prebuiltRule) {
+        filteredPrebuiltRulesMap.set(ruleId, prebuiltRule);
       }
     }
+  } else {
+    filteredPrebuiltRulesMap = prebuiltRulesMap;
   }
 
   const prebuiltRules: PrebuiltRulesResults[] = [];
-  prebuiltRulesMap.forEach((ruleVersions, ruleId) => {
+  filteredPrebuiltRulesMap.forEach((ruleVersions) => {
     if (ruleVersions.target) {
       prebuiltRules.push({
         target: convertPrebuiltRuleAssetToRuleResponse(ruleVersions.target),

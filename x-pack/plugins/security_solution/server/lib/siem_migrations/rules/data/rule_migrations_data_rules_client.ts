@@ -42,7 +42,7 @@ export interface RuleMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
   installable?: boolean;
-  prebuiltRulesOnly?: boolean;
+  prebuilt?: boolean;
   searchTerm?: string;
 }
 export interface RuleMigrationGetOptions {
@@ -337,7 +337,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   private getFilterQuery(
     migrationId: string,
-    { status, ids, installable, prebuiltRulesOnly, searchTerm }: RuleMigrationFilters = {}
+    { status, ids, installable, prebuilt, searchTerm }: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (status) {
@@ -353,7 +353,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     if (installable) {
       filter.push(...conditions.isInstallable());
     }
-    if (prebuiltRulesOnly) {
+    if (prebuilt) {
       filter.push(conditions.isPrebuilt());
     }
     if (searchTerm?.length) {

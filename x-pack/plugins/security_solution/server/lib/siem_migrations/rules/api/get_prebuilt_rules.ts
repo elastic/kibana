@@ -49,7 +49,7 @@ export const registerSiemRuleMigrationsPrebuiltRulesRoute = (
 
             const result = await ruleMigrationsClient.data.rules.get(migrationId, {
               filters: {
-                prebuiltRulesOnly: true,
+                prebuilt: true,
               },
               from: 0,
               size: MAX_PREBUILT_RULES_TO_FETCH,
