@@ -19,15 +19,17 @@ import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { syncSavedObjectsFactory } from '../saved_objects';
 
 export function inferenceModelRoutes(
-  { router, routeGuard }: RouteInitialization,
+  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
   cloud: CloudSetup
 ) {
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/{taskType}/{inferenceId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateInferenceEndpoint'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateInferenceEndpoint'],
+        },
       },
       summary: 'Create an inference endpoint',
       description: 'Create an inference endpoint',
@@ -46,7 +48,12 @@ export function inferenceModelRoutes(
         async ({ client, mlClient, request, response, mlSavedObjectService }) => {
           try {
             const { inferenceId, taskType } = request.params;
-            const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
+            const body = await modelsProvider(
+              client,
+              mlClient,
+              cloud,
+              getEnabledFeatures()
+            ).createInferenceEndpoint(
               inferenceId,
               taskType as InferenceTaskType,
               request.body as InferenceInferenceEndpoint
@@ -67,8 +74,10 @@ export function inferenceModelRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get all inference endpoints',
       description: 'Get all inference endpoints',

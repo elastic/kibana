@@ -116,7 +116,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiFormRow label={strings.getValuesLabel()} display="columnCompressedSwitch">
+      <EuiFormRow label={strings.getValuesLabel()} display="columnCompressed">
         <EuiSwitch
           compressed
           checked={showValues}

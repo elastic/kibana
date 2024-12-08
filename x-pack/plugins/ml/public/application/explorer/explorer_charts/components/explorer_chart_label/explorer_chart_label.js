@@ -19,8 +19,10 @@ export function ExplorerChartLabel({
   detectorLabel,
   entityFields,
   infoTooltip,
+  isEmbeddable,
   wrapLabel = false,
   onSelectEntity,
+  showFilterIcons,
 }) {
   // Depending on whether we wrap the entityField badges to a new line, we render this differently:
   //
@@ -34,9 +36,9 @@ export function ExplorerChartLabel({
   // Using &nbsp;s here to make sure those spaces get rendered.
   const labelSeparator =
     wrapLabel === true || entityFields.length === 0 || detectorLabel.length === 0 ? (
-      <React.Fragment>&nbsp;</React.Fragment>
+      <>&nbsp;</>
     ) : (
-      <React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>
+      <>&nbsp;&ndash;&nbsp;</>
     );
 
   const applyFilter = useCallback(
@@ -50,12 +52,15 @@ export function ExplorerChartLabel({
     return (
       <Fragment key={`badge-wrapper-${key}`}>
         <ExplorerChartLabelBadge entity={entity} />
-        {onSelectEntity !== undefined && (
+        {onSelectEntity !== undefined && showFilterIcons === true ? (
           <EntityFilter
+            isEmbeddable={isEmbeddable}
             onFilter={applyFilter}
             influencerFieldName={entity.fieldName}
             influencerFieldValue={entity.fieldValue}
           />
+        ) : (
+          <>&nbsp;</>
         )}
       </Fragment>
     );
@@ -73,7 +78,7 @@ export function ExplorerChartLabel({
   );
 
   return (
-    <React.Fragment>
+    <>
       <span className="ml-explorer-chart-label">
         <span className="ml-explorer-chart-label-detector">
           {detectorLabel}
@@ -81,17 +86,18 @@ export function ExplorerChartLabel({
         </span>
         {wrapLabel && infoIcon}
         {!wrapLabel && (
-          <React.Fragment>
+          <>
             {entityFieldBadges} {infoIcon}
-          </React.Fragment>
+          </>
         )}
       </span>
       {wrapLabel && <span className="ml-explorer-chart-label-badges">{entityFieldBadges}</span>}
-    </React.Fragment>
+    </>
   );
 }
 ExplorerChartLabel.propTypes = {
   detectorLabel: PropTypes.object.isRequired,
+  isEmbeddable: PropTypes.bool,
   entityFields: PropTypes.arrayOf(ExplorerChartLabelBadge.propTypes.entity),
   infoTooltip: PropTypes.object.isRequired,
   wrapLabel: PropTypes.bool,

@@ -36,6 +36,7 @@ const avgDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.avg', {
     defaultMessage: 'The average of a numeric field.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -85,6 +86,7 @@ const countDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.count', {
     defaultMessage: 'Returns the total number (count) of input values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -214,7 +216,7 @@ const countDefinition: FunctionDefinition = {
   validate: undefined,
   examples: [
     'FROM employees\n| STATS COUNT(height)',
-    'FROM employees \n| STATS count = COUNT(*) BY languages \n| SORT languages DESC',
+    'FROM employees\n| STATS count = COUNT(*) BY languages\n| SORT languages DESC',
     'ROW words="foo;bar;baz;qux;quux;foo"\n| STATS word_count = COUNT(SPLIT(words, ";"))',
     'ROW n=1\n| WHERE n < 0\n| STATS COUNT(n)',
     'ROW n=1\n| STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)',
@@ -228,6 +230,7 @@ const countDistinctDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.count_distinct', {
     defaultMessage: 'Returns the approximate number of distinct values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -330,6 +333,61 @@ const countDistinctDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'unsigned_long',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'precision',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
           optional: false,
         },
         {
@@ -743,6 +801,7 @@ const maxDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.max', {
     defaultMessage: 'The maximum value of a field.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -764,6 +823,16 @@ const maxDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -853,6 +922,7 @@ const medianDefinition: FunctionDefinition = {
     defaultMessage:
       'The value that is greater than half of all values and less than half of all values, also known as the 50% `PERCENTILE`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -906,6 +976,7 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
         "Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point's deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.",
     }
   ),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -955,6 +1026,7 @@ const minDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.min', {
     defaultMessage: 'The minimum value of a field.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -976,6 +1048,16 @@ const minDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -1065,6 +1147,7 @@ const percentileDefinition: FunctionDefinition = {
     defaultMessage:
       'Returns the value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the `MEDIAN`.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1228,6 +1311,7 @@ const stCentroidAggDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.st_centroid_agg', {
     defaultMessage: 'Calculate the spatial centroid over a field with spatial point geometry type.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1258,12 +1342,63 @@ const stCentroidAggDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stdDevDefinition: FunctionDefinition = {
+  type: 'agg',
+  name: 'std_dev',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.std_dev', {
+    defaultMessage: 'The standard deviation of a numeric field.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
+  supportedCommands: ['stats', 'inlinestats', 'metrics'],
+  supportedOptions: undefined,
+  validate: undefined,
+  examples: [
+    'FROM employees\n| STATS STD_DEV(height)',
+    'FROM employees\n| STATS stddev_salary_change = STD_DEV(MV_MAX(salary_change))',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const sumDefinition: FunctionDefinition = {
   type: 'agg',
   name: 'sum',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sum', {
     defaultMessage: 'The sum of a numeric expression.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1313,6 +1448,7 @@ const topDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.top', {
     defaultMessage: 'Collects the top values for a field. Includes repeated values.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1510,6 +1646,7 @@ const valuesDefinition: FunctionDefinition = {
     defaultMessage:
       "Returns all values in a group as a multivalued field. The order of the returned values isn't guaranteed. If you need the values returned in order use esql-mv_sort.",
   }),
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -1531,6 +1668,16 @@ const valuesDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -1618,6 +1765,7 @@ const weightedAvgDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.weighted_avg', {
     defaultMessage: 'The weighted average of a numeric expression.',
   }),
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -1773,6 +1921,7 @@ export const aggregationFunctionDefinitions = [
   minDefinition,
   percentileDefinition,
   stCentroidAggDefinition,
+  stdDevDefinition,
   sumDefinition,
   topDefinition,
   valuesDefinition,

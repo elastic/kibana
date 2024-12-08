@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_ESQL_LIMIT = 10000;
+export const DEFAULT_ESQL_LIMIT = 5000;

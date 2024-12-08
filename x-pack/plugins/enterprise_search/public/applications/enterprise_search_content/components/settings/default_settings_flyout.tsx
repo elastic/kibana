@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -56,6 +56,8 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
     reduce_whitespace: reduceWhitespace,
     run_ml_inference: runMLInference,
   } = pipelineState;
+  // Reference the first focusable element in the flyout for accessibility on click or Enter key action either Reset or Save button
+  const firstFocusInFlyoutRef = useRef<HTMLAnchorElement>(null);
   return (
     <EuiFlyout onClose={closeFlyout} size="s" paddingSize="l">
       <EuiFlyoutHeader hasBorder>
@@ -81,6 +83,7 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                     data-telemetry-id="entSearchContent-defaultSettingsFlyout-ingestPipelinesLink"
                     href={docLinks.ingestPipelines}
                     target="_blank"
+                    ref={firstFocusInFlyoutRef}
                   >
                     {i18n.translate(
                       'xpack.enterpriseSearch.defaultSettingsFlyout.body.description.ingestPipelinesLink.link',
@@ -204,7 +207,10 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   color="primary"
                   disabled={hasNoChanges}
                   isLoading={isLoading}
-                  onClick={() => setPipeline(defaultPipeline)}
+                  onClick={() => {
+                    setPipeline(defaultPipeline);
+                    firstFocusInFlyoutRef.current?.focus();
+                  }}
                   data-test-subj={'entSearchContentSettingsResetButton'}
                 >
                   {i18n.translate('xpack.enterpriseSearch.content.settings.resetButtonLabel', {
@@ -218,7 +224,10 @@ export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ cl
                   fill
                   disabled={hasNoChanges}
                   isLoading={isLoading}
-                  onClick={() => makeRequest(pipelineState)}
+                  onClick={() => {
+                    makeRequest(pipelineState);
+                    firstFocusInFlyoutRef.current?.focus();
+                  }}
                   data-test-subj={'entSearchContentSettingsSaveButton'}
                 >
                   {i18n.translate('xpack.enterpriseSearch.content.settings.saveButtonLabel', {

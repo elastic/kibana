@@ -20,6 +20,7 @@ import {
   ESQLTimeInterval,
   ESQLInlineCast,
   ESQLUnknownItem,
+  ESQLIdentifier,
 } from '../types';
 import { walk, Walker } from './walker';
 
@@ -80,6 +81,23 @@ describe('structurally can walk all nodes', () => {
         'stats',
         'where',
       ]);
+    });
+
+    test('can traverse JOIN command', () => {
+      const { ast } = parse('FROM index | LEFT JOIN a AS b ON c, d');
+      const commands: ESQLCommand[] = [];
+      const identifiers: ESQLIdentifier[] = [];
+      const columns: ESQLColumn[] = [];
+
+      walk(ast, {
+        visitCommand: (cmd) => commands.push(cmd),
+        visitIdentifier: (id) => identifiers.push(id),
+        visitColumn: (col) => columns.push(col),
+      });
+
+      expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'join']);
+      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['a', 'as', 'b', 'c', 'd']);
+      expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
     });
 
     test('"visitAny" can capture command nodes', () => {
@@ -709,6 +727,25 @@ describe('structurally can walk all nodes', () => {
           ]);
         });
 
+        test('can visit a column inside a deeply nested inline cast', () => {
+          const query =
+            'FROM index | WHERE 123 == add(1 + fn(NOT -(a.b.c)::INTEGER /* comment */))';
+          const { root } = parse(query);
+
+          const columns: ESQLColumn[] = [];
+
+          walk(root, {
+            visitColumn: (node) => columns.push(node),
+          });
+
+          expect(columns).toMatchObject([
+            {
+              type: 'column',
+              name: 'a.b.c',
+            },
+          ]);
+        });
+
         test('"visitAny" can capture cast expression', () => {
           const query = 'FROM index | STATS a = 123::integer';
           const { ast } = parse(query);
@@ -812,6 +849,112 @@ describe('Walker.params()', () => {
       },
     ]);
   });
+
+  test('can collect params from column names', () => {
+    const query = 'ROW ?a.?b';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'a',
+      },
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'b',
+      },
+    ]);
+  });
+
+  test('can collect params from column names, where first part is not a param', () => {
+    const query = 'ROW a.?b';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'b',
+      },
+    ]);
+  });
+
+  test('can collect all types of param from column name', () => {
+    const query = 'ROW ?.?0.?a';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'unnamed',
+      },
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+        value: 0,
+      },
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'a',
+      },
+    ]);
+  });
+
+  test('can collect params from function names', () => {
+    const query = 'FROM a | STATS ?lala()';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+        value: 'lala',
+      },
+    ]);
+  });
+
+  test('can collect params from function names (unnamed)', () => {
+    const query = 'FROM a | STATS ?()';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'unnamed',
+      },
+    ]);
+  });
+
+  test('can collect params from function names (positional)', () => {
+    const query = 'FROM a | STATS agg(test), ?123()';
+    const { ast } = parse(query);
+    const params = Walker.params(ast);
+
+    expect(params).toMatchObject([
+      {
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+        value: 123,
+      },
+    ]);
+  });
 });
 
 describe('Walker.find()', () => {
@@ -908,6 +1051,52 @@ describe('Walker.match()', () => {
           value: 1,
         },
       ],
+    });
+  });
+
+  test('can find a deeply nested column', () => {
+    const query =
+      'FROM index | WHERE 123 == add(1 + fn(NOT 10 + -(a.b.c::ip)::INTEGER /* comment */))';
+    const { root } = parse(query);
+    const res = Walker.match(root, {
+      type: 'column',
+      name: 'a.b.c',
+    });
+
+    expect(res).toMatchObject({
+      type: 'column',
+      name: 'a.b.c',
+    });
+  });
+
+  test('can find WHERE command by its type', () => {
+    const query = 'FROM index | LEFT JOIN a | RIGHT JOIN b';
+    const { root } = parse(query);
+
+    const join1 = Walker.match(root, {
+      type: 'command',
+      name: 'join',
+      commandType: 'left',
+    })!;
+    const identifier1 = Walker.match(join1, {
+      type: 'identifier',
+      name: 'a',
+    })!;
+    const join2 = Walker.match(root, {
+      type: 'command',
+      name: 'join',
+      commandType: 'right',
+    })!;
+    const identifier2 = Walker.match(join2, {
+      type: 'identifier',
+      name: 'b',
+    })!;
+
+    expect(identifier1).toMatchObject({
+      name: 'a',
+    });
+    expect(identifier2).toMatchObject({
+      name: 'b',
     });
   });
 });

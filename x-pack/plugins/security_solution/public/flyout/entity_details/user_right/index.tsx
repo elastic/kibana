@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
@@ -33,6 +33,8 @@ import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -98,18 +100,15 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery('user.name', userName),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-    ignore_unavailable: true,
+  const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: 'user.name',
+    value: userName,
+    to,
+    from,
+    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
   });
-
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
-
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
   useQueryInspector({
     deleteQuery,
@@ -123,7 +122,7 @@ export const UserPanel = ({
   const { openLeftPanel } = useExpandableFlyoutApi();
   const openPanelTab = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportRiskInputsExpandedFlyoutOpened({
+      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
         entity: 'user',
       });
 
@@ -138,6 +137,7 @@ export const UserPanel = ({
           },
           path: tab ? { tab } : undefined,
           hasMisconfigurationFindings,
+          hasNonClosedAlerts,
         },
       });
     },
@@ -149,6 +149,7 @@ export const UserPanel = ({
       userName,
       email,
       hasMisconfigurationFindings,
+      hasNonClosedAlerts,
     ]
   );
   const openPanelFirstTab = useCallback(
@@ -190,7 +191,8 @@ export const UserPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode && (hasUserDetailsData || hasMisconfigurationFindings)
+                !isPreviewMode &&
+                (hasUserDetailsData || hasMisconfigurationFindings || hasNonClosedAlerts)
               }
               expandDetails={openPanelFirstTab}
             />

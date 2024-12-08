@@ -5,39 +5,35 @@
  * 2.0.
  */
 import type { RootSchema } from '@kbn/core/public';
-import type { TelemetryEventTypes } from '../../constants';
 
-export interface ReportManualRuleRunOpenModalParams {
+export enum ManualRuleRunEventTypes {
+  ManualRuleRunOpenModal = 'Manual Rule Run Open Modal',
+  ManualRuleRunExecute = 'Manual Rule Run Execute',
+  ManualRuleRunCancelJob = 'Manual Rule Run Cancel Job',
+}
+interface ReportManualRuleRunOpenModalParams {
   type: 'single' | 'bulk';
 }
 
-export interface ReportManualRuleRunExecuteParams {
+interface ReportManualRuleRunExecuteParams {
   rangeInMs: number;
   rulesCount: number;
   status: 'success' | 'error';
 }
 
-export interface ReportManualRuleRunCancelJobParams {
+interface ReportManualRuleRunCancelJobParams {
   totalTasks: number;
   completedTasks: number;
   errorTasks: number;
 }
 
-export type ReportManualRuleRunTelemetryEventParams =
-  | ReportManualRuleRunOpenModalParams
-  | ReportManualRuleRunExecuteParams
-  | ReportManualRuleRunCancelJobParams;
+export interface ManualRuleRunTelemetryEventsMap {
+  [ManualRuleRunEventTypes.ManualRuleRunOpenModal]: ReportManualRuleRunOpenModalParams;
+  [ManualRuleRunEventTypes.ManualRuleRunExecute]: ReportManualRuleRunExecuteParams;
+  [ManualRuleRunEventTypes.ManualRuleRunCancelJob]: ReportManualRuleRunCancelJobParams;
+}
 
-export type ManualRuleRunTelemetryEvent =
-  | {
-      eventType: TelemetryEventTypes.ManualRuleRunOpenModal;
-      schema: RootSchema<ReportManualRuleRunOpenModalParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.ManualRuleRunExecute;
-      schema: RootSchema<ReportManualRuleRunExecuteParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.ManualRuleRunCancelJob;
-      schema: RootSchema<ReportManualRuleRunCancelJobParams>;
-    };
+export interface ManualRuleRunTelemetryEvent {
+  eventType: ManualRuleRunEventTypes;
+  schema: RootSchema<ManualRuleRunTelemetryEventsMap[ManualRuleRunEventTypes]>;
+}

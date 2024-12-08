@@ -46,15 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await a11y.testAppSnapshot();
       });
-
-      it('loads a setup guide', async function () {
-        await testSubjects.click('setupGuideLink');
-        await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
-        );
-        await a11y.testAppSnapshot();
-      });
     });
 
     describe('Content', () => {

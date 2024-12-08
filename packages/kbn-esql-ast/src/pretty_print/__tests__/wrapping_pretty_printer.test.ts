@@ -14,10 +14,108 @@ const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src);
   const text = WrappingPrettyPrinter.print(root, opts);
 
-  // console.log(JSON.stringify(ast, null, 2));
+  // console.log(JSON.stringify(root.commands, null, 2));
 
   return { text };
 };
+
+describe('commands', () => {
+  describe('JOIN', () => {
+    test('with short identifiers', () => {
+      const { text } = reprint('FROM a | RIGHT JOIN b AS c ON d, e');
+
+      expect(text).toBe('FROM a | RIGHT JOIN b AS c ON d, e');
+    });
+
+    test('with long identifiers', () => {
+      const { text } = reprint(
+        'FROM aaaaaaaaaaaa | RIGHT JOIN bbbbbbbbbbbbbbbbb AS cccccccccccccccccccc ON dddddddddddddddddddddddddddddddddddddddd, eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+      );
+
+      expect('\n' + text).toBe(`
+FROM aaaaaaaaaaaa
+  | RIGHT JOIN bbbbbbbbbbbbbbbbb AS cccccccccccccccccccc
+        ON
+          dddddddddddddddddddddddddddddddddddddddd,
+          eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`);
+    });
+  });
+
+  describe('GROK', () => {
+    test('two basic arguments', () => {
+      const { text } = reprint('FROM search-movies | GROK Awards "text"');
+
+      expect(text).toBe('FROM search-movies | GROK Awards "text"');
+    });
+
+    test('two long arguments', () => {
+      const { text } = reprint(
+        'FROM search-movies | GROK AwardsAwardsAwardsAwardsAwardsAwardsAwardsAwards "texttexttexttexttexttexttexttexttexttexttexttexttexttexttext"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM search-movies
+  | GROK
+      AwardsAwardsAwardsAwardsAwardsAwardsAwardsAwards
+      "texttexttexttexttexttexttexttexttexttexttexttexttexttexttext"`);
+    });
+  });
+
+  describe('DISSECT', () => {
+    test('two basic arguments', () => {
+      const { text } = reprint('FROM index | DISSECT input "pattern"');
+
+      expect(text).toBe('FROM index | DISSECT input "pattern"');
+    });
+
+    test('two long arguments', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM index
+  | DISSECT
+      InputInputInputInputInputInputInputInputInputInputInputInputInputInput
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"`);
+    });
+
+    test('with APPEND_SEPARATOR option', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"'
+      );
+
+      expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR = "<separator>"');
+    });
+
+    test('two long arguments with short APPEND_SEPARATOR option', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern" APPEND_SEPARATOR="sep"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM index
+  | DISSECT
+      InputInputInputInputInputInputInputInputInputInputInputInputInputInput
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"
+        APPEND_SEPARATOR = "sep"`);
+    });
+
+    test('two long arguments with long APPEND_SEPARATOR option', () => {
+      const { text } = reprint(
+        'FROM index | DISSECT InputInputInputInputInputInputInputInputInputInputInputInputInputInput "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern" APPEND_SEPARATOR="<SeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparator>"'
+      );
+
+      expect('\n' + text).toBe(`
+FROM index
+  | DISSECT
+      InputInputInputInputInputInputInputInputInputInputInputInputInputInput
+      "PatternPatternPatternPatternPatternPatternPatternPatternPatternPattern"
+        APPEND_SEPARATOR =
+          "<SeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparatorSeparator>"`);
+    });
+  });
+});
 
 describe('casing', () => {
   test('can chose command name casing', () => {

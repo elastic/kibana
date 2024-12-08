@@ -19,7 +19,6 @@
     "@kbn/expect",
     "@kbn/search-types",
     "@kbn/core-http-common",
-    "@kbn/bfetch-plugin",
     "@kbn/data-plugin",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",

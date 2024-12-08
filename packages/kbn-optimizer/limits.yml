@@ -2,9 +2,10 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 10000
+  aiops: 17680
   alerting: 106936
   apm: 64385
+  assetInventory: 18478
   banners: 17946
   bfetch: 22837
   canvas: 29355
@@ -31,9 +32,9 @@ pageLoadAssetSize:
   dataUsage: 30000
   dataViewEditor: 28082
   dataViewFieldEditor: 42021
-  dataViewManagement: 5300
+  dataViewManagement: 5370
   dataViews: 65000
-  dataVisualizer: 27530
+  dataVisualizer: 30000
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
@@ -42,6 +43,7 @@ pageLoadAssetSize:
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
+  entityManagerApp: 20378
   esql: 37000
   esqlDataGrid: 24582
   esUiShared: 326654
@@ -119,11 +121,12 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 80000
+  observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
   presentationUtil: 58834
+  productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
   reporting: 58600
@@ -138,10 +141,11 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchAssistant: 19831
-  searchConnectors: 30000
+  searchConnectors: 65000
   searchHomepage: 19831
   searchIndices: 20519
   searchInferenceEndpoints: 20470
+  searchNavigation: 19233
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
@@ -159,6 +163,8 @@ pageLoadAssetSize:
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
+  streams: 16742
+  streamsApp: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586

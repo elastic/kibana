@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_details';
 import { getAlertIndexAlias, useEventDetails } from './use_event_details';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -45,7 +45,7 @@ describe('getAlertIndexAlias', () => {
 });
 
 describe('useEventDetails', () => {
-  let hookResult: RenderHookResult<UseEventDetailsParams, UseEventDetailsResult>;
+  let hookResult: RenderHookResult<UseEventDetailsResult, UseEventDetailsParams>;
 
   it('should return all properties', () => {
     jest.mocked(useSpaceId).mockReturnValue('default');

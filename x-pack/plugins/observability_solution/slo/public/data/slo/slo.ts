@@ -39,6 +39,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       good: 'http_status: 2xx',
       total: 'a query',
       timestampField: 'custom_timestamp',
+      dataViewId: 'some-data-view-id',
     },
   },
   timeWindow: {

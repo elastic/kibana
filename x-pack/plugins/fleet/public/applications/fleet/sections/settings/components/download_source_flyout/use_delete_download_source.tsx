@@ -25,45 +25,54 @@ const ConfirmTitle = () => (
 
 interface ConfirmDeleteDescriptionProps {
   downloadSource: DownloadSource;
-  agentCount: number;
-  agentPolicyCount: number;
+  agentCount?: number;
+  agentPolicyCount?: number;
 }
 
 const ConfirmDeleteDescription: React.FunctionComponent<ConfirmDeleteDescriptionProps> = ({
   downloadSource,
   agentCount,
   agentPolicyCount,
-}) => (
-  <FormattedMessage
-    id="xpack.fleet.settings.deleteDowloadSource.confirmModalText"
-    defaultMessage="This action will delete {downloadSourceName} agent binary source. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      downloadSourceName: <strong>{downloadSource.name}</strong>,
-      agents: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.deleteDowloadSource.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.deleteDowloadSource.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
-  />
-);
+}) =>
+  agentCount !== undefined && agentPolicyCount !== undefined ? (
+    <FormattedMessage
+      id="xpack.fleet.settings.deleteDowloadSource.confirmModalText"
+      defaultMessage="This action will delete {downloadSourceName} agent binary source. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
+      values={{
+        downloadSourceName: <strong>{downloadSource.name}</strong>,
+        agents: (
+          <strong>
+            <FormattedMessage
+              id="xpack.fleet.settings.deleteDowloadSource.agentsCount"
+              defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
+            />
+          </strong>
+        ),
+        policies: (
+          <strong>
+            <FormattedMessage
+              id="xpack.fleet.settings.deleteDowloadSource.agentPolicyCount"
+              defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
+              values={{
+                agentPolicyCount,
+              }}
+            />
+          </strong>
+        ),
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.settings.deleteDowloadSource.confirmModalTextWithoutCount"
+      defaultMessage="This action will delete {downloadSourceName} agent binary source and it will update its related policies and agents. This action can not be undone. Are you sure you wish to continue?"
+      values={{
+        downloadSourceName: <strong>{downloadSource.name}</strong>,
+      }}
+    />
+  );
 
 export function useDeleteDownloadSource(onSuccess: () => void) {
   const { confirm } = useConfirmModal();
@@ -71,7 +80,10 @@ export function useDeleteDownloadSource(onSuccess: () => void) {
   const deleteDownloadSource = useCallback(
     async (downloadSource: DownloadSource) => {
       try {
-        const { agentCount, agentPolicyCount } = await getCountsForDownloadSource(downloadSource);
+        const { agentCount, agentPolicyCount } = await getCountsForDownloadSource(
+          downloadSource
+          // Fail gracefully when counts are not available
+        ).catch(() => ({ agentCount: undefined, agentPolicyCount: undefined }));
 
         const isConfirmed = await confirm(
           <ConfirmTitle />,

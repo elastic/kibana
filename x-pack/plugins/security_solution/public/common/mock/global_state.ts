@@ -349,7 +349,6 @@ export const mockGlobalState: State = {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventIdToNoteIds: { '1': ['1'] },
@@ -358,7 +357,6 @@ export const mockGlobalState: State = {
         historyIds: [],
         isFavorite: false,
         isLive: false,
-        isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],

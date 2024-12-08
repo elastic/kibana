@@ -15,6 +15,7 @@ import { inspect } from 'util';
 import { isReadable } from 'stream';
 import {
   ChatCompleteAPI,
+  ChatCompleteCompositeResponse,
   OutputAPI,
   ChatCompletionEvent,
   InferenceTaskError,
@@ -22,10 +23,12 @@ import {
   InferenceTaskEventType,
   createInferenceInternalError,
   withoutOutputUpdateEvents,
+  type ToolOptions,
+  ChatCompleteOptions,
 } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import type { InferenceConnector } from '../../common/connectors';
-import { createOutputApi } from '../../common/create_output_api';
+import { createOutputApi } from '../../common/output/create_output_api';
 import { eventSourceStreamIntoObservable } from '../../server/util/event_source_stream_into_observable';
 
 // eslint-disable-next-line spaced-comment
@@ -154,7 +157,7 @@ export class KibanaClient {
   }
 
   createInferenceClient({ connectorId }: { connectorId: string }): ScriptInferenceClient {
-    function stream(responsePromise: Promise<AxiosResponse>) {
+    function streamResponse(responsePromise: Promise<AxiosResponse>) {
       return from(responsePromise).pipe(
         switchMap((response) => {
           if (isReadable(response.data)) {
@@ -174,14 +177,18 @@ export class KibanaClient {
       );
     }
 
-    const chatCompleteApi: ChatCompleteAPI = ({
+    const chatCompleteApi: ChatCompleteAPI = <
+      TToolOptions extends ToolOptions = ToolOptions,
+      TStream extends boolean = false
+    >({
       connectorId: chatCompleteConnectorId,
       messages,
       system,
       toolChoice,
       tools,
       functionCalling,
-    }) => {
+      stream,
+    }: ChatCompleteOptions<TToolOptions, TStream>) => {
       const body: ChatCompleteRequestBody = {
         connectorId: chatCompleteConnectorId,
         system,
@@ -191,15 +198,29 @@ export class KibanaClient {
         functionCalling,
       };
 
-      return stream(
-        this.axios.post(
-          this.getUrl({
-            pathname: `/internal/inference/chat_complete`,
-          }),
-          body,
-          { responseType: 'stream', timeout: NaN }
-        )
-      );
+      if (stream) {
+        return streamResponse(
+          this.axios.post(
+            this.getUrl({
+              pathname: `/internal/inference/chat_complete/stream`,
+            }),
+            body,
+            { responseType: 'stream', timeout: NaN }
+          )
+        ) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+      } else {
+        return this.axios
+          .post(
+            this.getUrl({
+              pathname: `/internal/inference/chat_complete/stream`,
+            }),
+            body,
+            { responseType: 'stream', timeout: NaN }
+          )
+          .then((response) => {
+            return response.data;
+          }) as ChatCompleteCompositeResponse<TToolOptions, TStream>;
+      }
     };
 
     const outputApi: OutputAPI = createOutputApi(chatCompleteApi);
@@ -211,8 +232,13 @@ export class KibanaClient {
           ...options,
         });
       },
-      output: (id, options) => {
-        return outputApi(id, { ...options }).pipe(withoutOutputUpdateEvents());
+      output: (options) => {
+        const response = outputApi({ ...options });
+        if (options.stream) {
+          return (response as any).pipe(withoutOutputUpdateEvents());
+        } else {
+          return response;
+        }
       },
     };
   }

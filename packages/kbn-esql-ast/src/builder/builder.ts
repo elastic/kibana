@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
@@ -28,6 +29,9 @@ import {
   ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
+  ESQLParamLiteral,
+  ESQLFunction,
+  ESQLAstItem,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -125,16 +129,23 @@ export namespace Builder {
     };
 
     export const column = (
-      template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted'>,
+      template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLColumn => {
-      return {
+      const node: ESQLColumn = {
         ...template,
         ...Builder.parserFields(fromParser),
+        parts: template.args.map((arg) =>
+          arg.type === 'identifier' ? arg.name : LeafPrinter.param(arg)
+        ),
         quoted: false,
-        name: template.parts.join('.'),
+        name: '',
         type: 'column',
       };
+
+      node.name = LeafPrinter.column(node);
+
+      return node;
     };
 
     export const order = (
@@ -163,6 +174,53 @@ export namespace Builder {
       };
     };
 
+    export namespace func {
+      export const node = (
+        template: AstNodeTemplate<ESQLFunction>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        return {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'function',
+        };
+      };
+
+      export const call = (
+        nameOrOperator: string | ESQLIdentifier | ESQLParamLiteral,
+        args: ESQLAstItem[],
+        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        let name: string;
+        let operator: ESQLIdentifier | ESQLParamLiteral;
+        if (typeof nameOrOperator === 'string') {
+          name = nameOrOperator;
+          operator = Builder.identifier({ name });
+        } else {
+          operator = nameOrOperator;
+          name = LeafPrinter.print(operator);
+        }
+        return Builder.expression.func.node(
+          { ...template, name, operator, args, subtype: 'variadic-call' },
+          fromParser
+        );
+      };
+
+      export const binary = (
+        name: string,
+        args: [left: ESQLAstItem, right: ESQLAstItem],
+        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        const operator = Builder.identifier({ name });
+        return Builder.expression.func.node(
+          { ...template, name, operator, args, subtype: 'binary-expression' },
+          fromParser
+        );
+      };
+    }
+
     export namespace literal {
       /**
        * Constructs an integer literal node.
@@ -179,6 +237,21 @@ export namespace Builder {
         };
 
         return node;
+      };
+
+      export const integer = (
+        value: number,
+        template?: Omit<AstNodeTemplate<ESQLIntegerLiteral | ESQLDecimalLiteral>, 'name'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLIntegerLiteral | ESQLDecimalLiteral => {
+        return Builder.expression.literal.numeric(
+          {
+            ...template,
+            value,
+            literalType: 'integer',
+          },
+          fromParser
+        );
       };
 
       export const list = (
@@ -253,6 +326,26 @@ export namespace Builder {
       };
 
       return node;
+    };
+
+    export const build = (
+      name: string,
+      options: Partial<ESQLParamLiteral> = {},
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLParam => {
+      const value: string = name.startsWith('?') ? name.slice(1) : name;
+
+      if (!value) {
+        return Builder.param.unnamed(options);
+      }
+
+      const isNumeric = !isNaN(Number(value)) && String(Number(value)) === value;
+
+      if (isNumeric) {
+        return Builder.param.positional({ ...options, value: Number(value) }, fromParser);
+      } else {
+        return Builder.param.named({ ...options, value }, fromParser);
+      }
     };
   }
 }

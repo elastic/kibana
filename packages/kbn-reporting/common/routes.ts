@@ -24,7 +24,6 @@ export const INTERNAL_ROUTES = {
     DELETE_PREFIX: prefixInternalPath + '/jobs/delete', // docId is added to the final path
     DOWNLOAD_PREFIX: prefixInternalPath + '/jobs/download', // docId is added to the final path
   },
-  DOWNLOAD_CSV: prefixInternalPath + '/generate/immediate/csv_searchsource', // DEPRECATED
   GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path
 };
 

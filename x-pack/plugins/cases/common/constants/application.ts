@@ -12,7 +12,9 @@ import { CASE_VIEW_PAGE_TABS } from '../types';
  */
 
 export const APP_ID = 'cases' as const;
+/** @deprecated Please use FEATURE_ID_V2 instead */
 export const FEATURE_ID = 'generalCases' as const;
+export const FEATURE_ID_V2 = 'generalCasesV2' as const;
 export const APP_OWNER = 'cases' as const;
 export const APP_PATH = '/app/management/insightsAndAlerting/cases' as const;
 export const CASES_CREATE_PATH = '/create' as const;

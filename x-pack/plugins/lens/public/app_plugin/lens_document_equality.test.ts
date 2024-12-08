@@ -7,7 +7,7 @@
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
-import { Document } from '../persistence/saved_object_store';
+import { LensDocument } from '../persistence/saved_object_store';
 import {
   AnnotationGroups,
   Datasource,
@@ -18,7 +18,7 @@ import {
 
 const visualizationType = 'lnsSomeVis';
 
-const defaultDoc: Document = {
+const defaultDoc: LensDocument = {
   title: 'some-title',
   visualizationType,
   state: {
@@ -105,7 +105,7 @@ describe('lens document equality', () => {
     expect(
       isLensEqual(
         undefined,
-        {} as Document,
+        {} as LensDocument,
         mockInjectFilterReferences,
         {},
         mockVisualizationMap,
@@ -114,7 +114,7 @@ describe('lens document equality', () => {
     ).toBeFalsy();
     expect(
       isLensEqual(
-        {} as Document,
+        {} as LensDocument,
         undefined,
         mockInjectFilterReferences,
         {},

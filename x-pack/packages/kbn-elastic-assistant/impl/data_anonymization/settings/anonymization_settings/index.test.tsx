@@ -13,7 +13,6 @@ import { AnonymizationSettings } from '.';
 import type { Props } from '.';
 
 const props: Props = {
-  defaultPageSize: 5,
   anonymizationFields: {
     total: 4,
     page: 1,

@@ -99,6 +99,6 @@ export const getDateHistogramCompletionItem: (
       defaultMessage: 'Add date histogram using bucket()',
     }
   ),
-  sortText: '1A',
+  sortText: '1',
   command: TRIGGER_SUGGESTION_COMMAND,
 });

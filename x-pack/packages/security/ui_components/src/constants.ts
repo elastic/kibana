@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const NO_PRIVILEGE_VALUE: string = 'none';
+export const NO_PRIVILEGE_VALUE = 'none' as const;
 export const CUSTOM_PRIVILEGE_VALUE: string = 'custom';

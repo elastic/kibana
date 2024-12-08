@@ -40,6 +40,8 @@ interface Props {
   httpFetch: HttpHandler;
   telemetryEvents: TelemetryEvents;
   isILMAvailable: boolean;
+  startTime: string;
+  endTime: string;
 }
 export const useResultsRollup = ({
   httpFetch,
@@ -47,11 +49,20 @@ export const useResultsRollup = ({
   patterns,
   isILMAvailable,
   telemetryEvents,
+  startTime,
+  endTime,
 }: Props): UseResultsRollupReturnValue => {
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
 
-  const storedPatternsResults = useStoredPatternResults(patterns, toasts, httpFetch);
+  const storedPatternsResults = useStoredPatternResults({
+    httpFetch,
+    patterns,
+    toasts,
+    isILMAvailable,
+    startTime,
+    endTime,
+  });
 
   useEffect(() => {
     if (!isEmpty(storedPatternsResults)) {

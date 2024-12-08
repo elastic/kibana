@@ -36,7 +36,7 @@ export async function showCategorizeFlyout(
 ): Promise<void> {
   const { overlays, application, i18n } = coreStart;
 
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const onFlyoutClose = () => {
         flyoutSession.close();

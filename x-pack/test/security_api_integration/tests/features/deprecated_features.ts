@@ -14,6 +14,7 @@ import type {
   FeatureKibanaPrivilegesReference,
   KibanaFeatureConfig,
 } from '@kbn/features-plugin/common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { Role } from '@kbn/security-plugin-types-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -163,10 +164,99 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    it('all deprecated features are known', async () => {
+      const { body: features } = await supertest
+        .get('/internal/features_provider/features')
+        .expect(200);
+
+      // **NOTE**: This test is to ensure the AppEx Security team has a chance to review all features marked as
+      // deprecated. If you’re adding a new deprecated feature, make sure to add it to the list below manually or by
+      // running the API integration test locally with the --updateSnapshot flag.
+      expectSnapshot(
+        (features as KibanaFeatureConfig[]).flatMap((f) => (f.deprecated ? [f.id] : [])).sort()
+      ).toMatchInline(`
+        Array [
+          "case_1_feature_a",
+          "case_2_feature_a",
+          "case_3_feature_a",
+          "case_4_feature_a",
+          "case_4_feature_b",
+          "generalCases",
+          "observabilityCases",
+          "securitySolutionCases",
+        ]
+      `);
+    });
+
+    it('all deprecated features are replaced by a single feature only', async () => {
+      const featuresResponse = await supertest
+        .get('/internal/features_provider/features')
+        .expect(200);
+      const features = featuresResponse.body as KibanaFeatureConfig[];
+
+      // **NOTE**: This test ensures that deprecated features displayed in the Space’s feature visibility toggles screen
+      // are only replaced by a single feature. This way, if a feature is toggled off for a particular Space, there
+      // won’t be any ambiguity about which replacement feature should also be toggled off. Currently, we don’t
+      // anticipate having a deprecated feature replaced by more than one feature, so this test is intended to catch
+      // such scenarios early. If there’s a need for a deprecated feature to be replaced by multiple features, please
+      // reach out to the AppEx Security team to discuss how this should affect Space’s feature visibility toggles.
+      const featureIdsThatSupportMultipleReplacements = new Set([
+        'case_2_feature_a',
+        'case_4_feature_a',
+        'case_4_feature_b',
+      ]);
+      for (const feature of features) {
+        if (
+          !feature.deprecated ||
+          !feature.scope?.includes(KibanaFeatureScope.Spaces) ||
+          featureIdsThatSupportMultipleReplacements.has(feature.id)
+        ) {
+          continue;
+        }
+
+        // Collect all feature privileges including the ones provided by sub-features, if any.
+        const allPrivileges = Object.values(feature.privileges ?? {}).concat(
+          feature.subFeatures?.flatMap((subFeature) =>
+            subFeature.privilegeGroups.flatMap(({ privileges }) => privileges)
+          ) ?? []
+        );
+
+        // Collect all features IDs that are referenced by the deprecated feature privileges.
+        const referencedFeaturesIds = new Set();
+        for (const privilege of allPrivileges) {
+          const replacedBy = privilege.replacedBy
+            ? 'default' in privilege.replacedBy
+              ? privilege.replacedBy.default.concat(privilege.replacedBy.minimal)
+              : privilege.replacedBy
+            : [];
+          for (const privilegeReference of replacedBy) {
+            referencedFeaturesIds.add(privilegeReference.feature);
+          }
+        }
+
+        if (referencedFeaturesIds.size > 1) {
+          throw new Error(
+            `Feature "${feature.id}" is deprecated and replaced by more than one feature: ${
+              referencedFeaturesIds.size
+            } features: ${Array.from(referencedFeaturesIds).join(
+              ', '
+            )}. If it's intentional, please contact the AppEx Security team.`
+          );
+        }
+      }
+    });
+
     it('all privileges of the deprecated features should have a proper replacement', async () => {
       // Fetch all features first.
-      const featuresResponse = await supertest.get('/api/features').expect(200);
+      const featuresResponse = await supertest
+        .get('/internal/features_provider/features')
+        .expect(200);
       const features = featuresResponse.body as KibanaFeatureConfig[];
+
+      // Check if the action provided by the deprecated feature is directly replaceable by other
+      // features. The `ui:`-prefixed actions are special since they are prefixed with a feature ID,
+      // and do not need to be replaced like any other privilege actions.
+      const isReplaceableAction = (action: string) => !action.startsWith('ui:');
 
       // Collect all deprecated features.
       const deprecatedFeatures = features.filter((f) => f.deprecated);
@@ -207,7 +297,10 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           for (const deprecatedAction of deprecatedActions) {
-            if (!replacementActions.has(deprecatedAction)) {
+            if (
+              isReplaceableAction(deprecatedAction) &&
+              !replacementActions.has(deprecatedAction)
+            ) {
               throw new Error(
                 `Action "${deprecatedAction}" granted by the privilege "${privilegeId}" of the deprecated feature "${feature.id}" is not properly replaced.`
               );
@@ -225,22 +318,23 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ applications: [] })
         .expect(200);
 
-      // Both deprecated and new UI capabilities should be toggled.
+      // Only new UI capabilities should be toggled, deprecated ones should not be present.
       expect(capabilities).toEqual(
         expect.objectContaining({
-          // UI flags from the deprecated feature privilege.
-          case_2_feature_a: {
-            ui_all_one: true,
-            ui_all_two: true,
-            ui_read_one: false,
-            ui_read_two: false,
-          },
-
           // UI flags from the feature privileges that replace deprecated one.
           case_2_feature_b: { ui_all_one: true, ui_read_one: false },
           case_2_feature_c: { ui_all_two: true, ui_read_two: false },
         })
       );
+      for (const deprecatedFeatureId of [
+        'case_1_feature_a',
+        'case_2_feature_a',
+        'case_3_feature_a',
+        'case_4_feature_a',
+        'case_4_feature_b',
+      ]) {
+        expect(capabilities).not.toHaveProperty(deprecatedFeatureId);
+      }
     });
 
     it('Cases privileges are properly handled for deprecated privileges', async () => {
@@ -398,56 +492,88 @@ export default function ({ getService }: FtrProviderContext) {
       const ruleOneTransformed = await createRule(
         transformedUser,
         'case_2_a_transform_one',
-        'case_2_feature_b',
+        'case_2_feature_a',
         'alerting_rule_type_one'
       );
       const ruleTwoTransformed = await createRule(
         transformedUser,
         'case_2_a_transform_two',
+        'case_2_feature_a',
+        'alerting_rule_type_two'
+      );
+
+      // Create rules as user with new privileges (B).
+      const newUserB = getUserCredentials('case_2_b_new');
+      const ruleOneNewBConsumerA = await createRule(
+        newUserB,
+        'case_2_b_new_one',
+        'case_2_feature_a',
+        'alerting_rule_type_one'
+      );
+      const ruleOneNewBConsumerB = await createRule(
+        newUserB,
+        'case_2_b_new_one',
+        'case_2_feature_b',
+        'alerting_rule_type_one'
+      );
+
+      // Create cases as user with new privileges (C).
+      const newUserC = getUserCredentials('case_2_c_new');
+      const ruleTwoNewCConsumerA = await createRule(
+        newUserC,
+        'case_2_c_new_two',
+        'case_2_feature_a',
+        'alerting_rule_type_two'
+      );
+      const ruleTwoNewCConsumerC = await createRule(
+        newUserC,
+        'case_2_c_new_two',
         'case_2_feature_c',
         'alerting_rule_type_two'
       );
 
       // Users with deprecated privileges should be able to access rules created by themselves and
-      // users with new privileges.
+      // users with new privileges assuming the consumer is the same.
       for (const ruleToCheck of [
         ruleOneDeprecated,
         ruleTwoDeprecated,
         ruleOneTransformed,
         ruleTwoTransformed,
+        ruleOneNewBConsumerA,
+        ruleTwoNewCConsumerA,
       ]) {
         expect(await getRule(deprecatedUser, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(transformedUser, ruleToCheck.id)).toBeDefined();
       }
 
-      // NOTE: Scenarios below require SO migrations for both alerting rules and alerts to switch to
-      // a new producer that is tied to feature ID. Presumably we won't have this requirement once
-      // https://github.com/elastic/kibana/pull/183756 is resolved.
+      // Any new consumer that is not known to the deprecated feature shouldn't be available to the
+      // users with the deprecated privileges unless deprecated features are update to explicitly
+      // support new consumers.
+      for (const ruleToCheck of [ruleOneNewBConsumerB, ruleTwoNewCConsumerC]) {
+        expect(await getRule(deprecatedUser, ruleToCheck.id)).toBeUndefined();
+        expect(await getRule(transformedUser, ruleToCheck.id)).toBeDefined();
+      }
 
-      // Create rules as user with new privileges (B).
-      // const newUserB = getUserCredentials('case_2_b_new');
-      // const caseOneNewB = await createRule(newUserB, {
-      //   title: 'case_2_b_new_one',
-      //   owner: 'cases_owner_one',
-      // });
-      //
-      // // Create cases as user with new privileges (C).
-      // const newUserC = getUserCredentials('case_2_c_new');
-      // const caseTwoNewC = await createRule(newUserC, {
-      //   title: 'case_2_c_new_two',
-      //   owner: 'cases_owner_two',
-      // });
-      //
-
-      // User B and User C should be able to access cases created by themselves and users with
-      // deprecated and transformed privileges, but only for the specific owner.
-      // for (const caseToCheck of [ruleOneDeprecated, ruleOneTransformed, caseOneNewB]) {
-      //   expect(await getRule(newUserB, caseToCheck.id)).toBeDefined();
-      //   expect(await getRule(newUserC, caseToCheck.id)).toBeUndefined();
-      // }
-      // for (const caseToCheck of [ruleTwoDeprecated, ruleTwoTransformed, caseTwoNewC]) {
-      //   expect(await getRule(newUserC, caseToCheck.id)).toBeDefined();
-      //   expect(await getRule(newUserB, caseToCheck.id)).toBeUndefined();
-      // }
+      // User B and User C should be able to access rule types created by themselves and users with
+      // deprecated and transformed privileges, but only for the specific consumer.
+      for (const ruleToCheck of [
+        ruleOneDeprecated,
+        ruleOneTransformed,
+        ruleOneNewBConsumerA,
+        ruleOneNewBConsumerB,
+      ]) {
+        expect(await getRule(newUserB, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(newUserC, ruleToCheck.id)).toBeUndefined();
+      }
+      for (const ruleToCheck of [
+        ruleTwoDeprecated,
+        ruleTwoTransformed,
+        ruleTwoNewCConsumerA,
+        ruleTwoNewCConsumerC,
+      ]) {
+        expect(await getRule(newUserC, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(newUserB, ruleToCheck.id)).toBeUndefined();
+      }
     });
   });
 }

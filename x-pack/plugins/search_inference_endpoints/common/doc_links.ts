@@ -15,7 +15,7 @@ class InferenceEndpointsDocLinks {
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
-    this.createInferenceEndpoint = newDocLinks.enterpriseSearch.inferenceApiCreate;
+    this.createInferenceEndpoint = newDocLinks.inferenceManagement.inferenceAPIDocumentation;
     this.semanticSearchElser = newDocLinks.enterpriseSearch.elser;
     this.semanticSearchE5 = newDocLinks.enterpriseSearch.e5Model;
   }

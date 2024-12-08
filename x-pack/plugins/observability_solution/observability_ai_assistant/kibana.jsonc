@@ -4,8 +4,8 @@
   "owner": [
     "@elastic/obs-ai-assistant"
   ],
-  "group": "observability",
-  "visibility": "private",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "observabilityAIAssistant",
     "browser": true,

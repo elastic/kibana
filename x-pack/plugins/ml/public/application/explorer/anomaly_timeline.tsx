@@ -465,7 +465,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             <EuiFlexItem grow={true} css={{ maxWidth: '500px' }}>
               <SeverityControl
                 value={severityUpdate ?? 0}
-                onChange={useCallback((update: any) => {
+                onChange={useCallback((update: number | undefined) => {
                   setSeverityUpdate(update);
                 }, [])}
               />

@@ -48,15 +48,12 @@ export default function (providerContext: FtrProviderContext) {
         const packageInfo = await supertest
           .get(`/api/fleet/epm/packages/${pkgName}/${pkgVersion}`)
           .expect(200);
-        const packageSOAttributes = packageInfo.body.item.savedObject.attributes;
+        const installationInfo = packageInfo.body.item.installationInfo;
         const { body }: { body: GetBulkAssetsResponse } = await supertest
           .post(`/api/fleet/epm/bulk_assets`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            assetIds: [
-              ...packageSOAttributes.installed_es,
-              ...packageSOAttributes.installed_kibana,
-            ],
+            assetIds: [...installationInfo.installed_es, ...installationInfo.installed_kibana],
           })
           .expect(200);
 

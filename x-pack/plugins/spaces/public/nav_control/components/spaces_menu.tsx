@@ -117,7 +117,7 @@ class SpacesMenuUI extends Component<Props> {
               <EuiPopoverTitle paddingSize="s">
                 {search ||
                   i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
-                    defaultMessage: 'Your spaces',
+                    defaultMessage: 'Spaces',
                   })}
               </EuiPopoverTitle>
               {list}

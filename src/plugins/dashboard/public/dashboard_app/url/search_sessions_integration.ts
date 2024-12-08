@@ -22,7 +22,7 @@ import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardLocatorParams } from '../../dashboard_container';
-import { convertPanelMapToSavedPanels } from '../../../common';
+import { convertPanelMapToPanelsArray } from '../../../common';
 import { dataService } from '../../services/kibana_services';
 import { DashboardApi } from '../../dashboard_api/types';
 
@@ -93,7 +93,7 @@ function getLocatorParams({
       : undefined,
     panels: savedObjectId
       ? undefined
-      : (convertPanelMapToSavedPanels(
+      : (convertPanelMapToPanelsArray(
           dashboardApi.panels$.value
         ) as DashboardLocatorParams['panels']),
   };

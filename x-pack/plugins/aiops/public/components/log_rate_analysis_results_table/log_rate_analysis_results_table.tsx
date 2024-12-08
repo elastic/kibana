@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { EuiTableSortingType } from '@elastic/eui';
+import type { Criteria, EuiTableSortingType } from '@elastic/eui';
 import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -83,13 +83,11 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   }, [allSignificantItems, groupFilter]);
 
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
-  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
-  const pinnedSignificantItem = useAppSelector(
-    (s) => s.logRateAnalysisTableRow.pinnedSignificantItem
-  );
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTable.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTable.selectedGroup);
+  const pinnedSignificantItem = useAppSelector((s) => s.logRateAnalysisTable.pinnedSignificantItem);
   const selectedSignificantItem = useAppSelector(
-    (s) => s.logRateAnalysisTableRow.selectedSignificantItem
+    (s) => s.logRateAnalysisTable.selectedSignificantItem
   );
 
   const dispatch = useAppDispatch();
@@ -111,7 +109,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     groupFilter !== undefined
   );
 
-  const onChange = useCallback((tableSettings: any) => {
+  const onChange = useCallback((tableSettings: Criteria<SignificantItem>) => {
     if (tableSettings.page) {
       const { index, size } = tableSettings.page;
       setPageIndex(index);

@@ -30,6 +30,7 @@ import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
+import { registerAPIRoutes } from './api';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -74,6 +75,8 @@ export class DashboardPlugin
       },
     });
 
+    plugins.contentManagement.favorites.registerFavoriteType('dashboard');
+
     if (plugins.taskManager) {
       initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
     }
@@ -110,6 +113,12 @@ export class DashboardPlugin
     );
 
     core.uiSettings.register(getUISettings());
+
+    registerAPIRoutes({
+      http: core.http,
+      contentManagement: plugins.contentManagement,
+      logger: this.logger,
+    });
 
     return {};
   }

@@ -10,13 +10,34 @@ import { HttpHandler } from '@kbn/core-http-browser';
 import { isEmpty } from 'lodash/fp';
 
 import { DataQualityCheckResult } from '../../../../types';
-import { formatResultFromStorage, getStorageResults } from '../../utils/storage';
+import {
+  GetStorageResultsOpts,
+  formatResultFromStorage,
+  getStorageResults,
+} from '../../utils/storage';
 
-export const useStoredPatternResults = (
-  patterns: string[],
-  toasts: IToasts,
-  httpFetch: HttpHandler
-) => {
+export interface UseStoredPatternResultsOpts {
+  patterns: string[];
+  toasts: IToasts;
+  httpFetch: HttpHandler;
+  isILMAvailable: boolean;
+  startTime: string;
+  endTime: string;
+}
+
+export type UseStoredPatternResultsReturnValue = Array<{
+  pattern: string;
+  results: Record<string, DataQualityCheckResult>;
+}>;
+
+export const useStoredPatternResults = ({
+  patterns,
+  toasts,
+  httpFetch,
+  isILMAvailable,
+  startTime,
+  endTime,
+}: UseStoredPatternResultsOpts): UseStoredPatternResultsReturnValue => {
   const [storedPatternResults, setStoredPatternResults] = useState<
     Array<{ pattern: string; results: Record<string, DataQualityCheckResult> }>
   >([]);
@@ -28,8 +49,20 @@ export const useStoredPatternResults = (
 
     const abortController = new AbortController();
     const fetchStoredPatternResults = async () => {
-      const requests = patterns.map((pattern) =>
-        getStorageResults({ pattern, httpFetch, abortController, toasts }).then((results = []) => ({
+      const requests = patterns.map(async (pattern) => {
+        const getStorageResultsOpts: GetStorageResultsOpts = {
+          pattern,
+          httpFetch,
+          abortController,
+          toasts,
+        };
+
+        if (!isILMAvailable) {
+          getStorageResultsOpts.startTime = startTime;
+          getStorageResultsOpts.endTime = endTime;
+        }
+
+        return getStorageResults(getStorageResultsOpts).then((results) => ({
           pattern,
           results: Object.fromEntries(
             results.map((storageResult) => [
@@ -37,8 +70,8 @@ export const useStoredPatternResults = (
               formatResultFromStorage({ storageResult, pattern }),
             ])
           ),
-        }))
-      );
+        }));
+      });
 
       const patternResults = await Promise.all(requests);
       if (patternResults?.length) {
@@ -47,7 +80,7 @@ export const useStoredPatternResults = (
     };
 
     fetchStoredPatternResults();
-  }, [httpFetch, patterns, toasts]);
+  }, [endTime, httpFetch, isILMAvailable, patterns, startTime, toasts]);
 
   return storedPatternResults;
 };

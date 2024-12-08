@@ -1,0 +1,185 @@
+{
+  "id": "productDocBase",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "productDocBase",
+      "id": "def-public.ProductDocBasePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ProductDocBasePluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/ai_infra/product_doc_base/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "productDocBase",
+      "id": "def-public.ProductDocBasePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ProductDocBasePluginStart",
+      "description": [],
+      "path": "x-pack/plugins/ai_infra/product_doc_base/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "productDocBase",
+          "id": "def-public.ProductDocBasePluginStart.installation",
+          "type": "Object",
+          "tags": [],
+          "label": "installation",
+          "description": [],
+          "signature": [
+            "InstallationAPI"
+          ],
+          "path": "x-pack/plugins/ai_infra/product_doc_base/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "productDocBase",
+        "id": "def-server.SearchApi",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchApi",
+        "description": [],
+        "signature": [
+          "(options: ",
+          "DocSearchOptions",
+          ") => Promise<",
+          "DocSearchResponse",
+          ">"
+        ],
+        "path": "x-pack/plugins/ai_infra/product_doc_base/server/services/search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "productDocBase",
+            "id": "def-server.SearchApi.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "DocSearchOptions"
+            ],
+            "path": "x-pack/plugins/ai_infra/product_doc_base/server/services/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "productDocBase",
+      "id": "def-server.ProductDocBaseSetupContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "ProductDocBaseSetupContract",
+      "description": [],
+      "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "productDocBase",
+      "id": "def-server.ProductDocBaseStartContract",
+      "type": "Interface",
+      "tags": [],
+      "label": "ProductDocBaseStartContract",
+      "description": [],
+      "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "productDocBase",
+          "id": "def-server.ProductDocBaseStartContract.search",
+          "type": "Function",
+          "tags": [],
+          "label": "search",
+          "description": [],
+          "signature": [
+            "(options: ",
+            "DocSearchOptions",
+            ") => Promise<",
+            "DocSearchResponse",
+            ">"
+          ],
+          "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "productDocBase",
+              "id": "def-server.ProductDocBaseStartContract.search.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "DocSearchOptions"
+              ],
+              "path": "x-pack/plugins/ai_infra/product_doc_base/server/services/search/types.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "productDocBase",
+          "id": "def-server.ProductDocBaseStartContract.management",
+          "type": "Object",
+          "tags": [],
+          "label": "management",
+          "description": [],
+          "signature": [
+            "DocumentationManagerAPI"
+          ],
+          "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

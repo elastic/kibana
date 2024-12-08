@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import { isNil } from 'lodash';
 import { DebugState } from '@elastic/charts';
 import { FtrService } from '../../ftr_provider_context';
 
@@ -30,36 +29,24 @@ export class PieChartService extends FtrService {
 
   async clickOnPieSlice(name?: string) {
     this.log.debug(`PieChart.clickOnPieSlice(${name})`);
-    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
-      const slices = this.getSlices(
-        await this.visChart.getEsChartDebugState(partitionVisChartSelector)
-      );
-      let sliceLabel = name || slices[0].name;
-      if (name === 'Other') {
-        sliceLabel = '__other__';
-      }
-      const pieSlice = slices.find((slice) => String(slice.name) === sliceLabel);
-      const pie = await this.testSubjects.find(partitionVisChartSelector);
-      if (pieSlice) {
-        const pieSize = await pie.getSize();
-        const pieHeight = pieSize.height;
-        const pieWidth = pieSize.width;
-        await pie.clickMouseButton({
-          xOffset: pieSlice.coords[0] - Math.floor(pieWidth / 2),
-          yOffset: pieSlice.coords[1] - Math.floor(pieHeight / 2),
-        });
-      }
-    } else {
-      if (name) {
-        await this.testSubjects.click(`pieSlice-${name.split(' ').join('-')}`);
-      } else {
-        // If no pie slice has been provided, find the first one available.
-        await this.retry.try(async () => {
-          const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
-          this.log.debug('Slices found:' + slices.length);
-          return slices[0].click();
-        });
-      }
+
+    const slices = this.getSlices(
+      await this.visChart.getEsChartDebugState(partitionVisChartSelector)
+    );
+    let sliceLabel = name || slices[0].name;
+    if (name === 'Other') {
+      sliceLabel = '__other__';
+    }
+    const pieSlice = slices.find((slice) => String(slice.name) === sliceLabel);
+    const pie = await this.testSubjects.find(partitionVisChartSelector);
+    if (pieSlice) {
+      const pieSize = await pie.getSize();
+      const pieHeight = pieSize.height;
+      const pieWidth = pieSize.width;
+      await pie.clickMouseButton({
+        xOffset: pieSlice.coords[0] - Math.floor(pieWidth / 2),
+        yOffset: pieSlice.coords[1] - Math.floor(pieHeight / 2),
+      });
     }
   }
 
@@ -100,12 +87,8 @@ export class PieChartService extends FtrService {
 
   async getPieSliceStyle(name: string) {
     this.log.debug(`VisualizePage.getPieSliceStyle(${name})`);
-    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
-      const selectedSlice = await this.getSelectedSlice(name);
-      return selectedSlice[0]?.color;
-    }
-    const pieSlice = await this.getPieSlice(name);
-    return await pieSlice.getAttribute('style');
+    const selectedSlice = await this.getSelectedSlice(name);
+    return selectedSlice[0]?.color;
   }
 
   async getAllPieSlicesColors() {
@@ -121,27 +104,8 @@ export class PieChartService extends FtrService {
 
   async getAllPieSliceColor(name: string) {
     this.log.debug(`VisualizePage.getAllPieSliceColor(${name})`);
-    if (await this.visChart.isNewLibraryChart(partitionVisChartSelector)) {
-      const selectedSlice = await this.getSelectedSlice(name);
-      return selectedSlice.map((slice) => slice.color);
-    }
-    const pieSlices = await this.getAllPieSlices(name);
-    const slicesStyles = await Promise.all(
-      pieSlices.map(async (pieSlice) => (await pieSlice.getAttribute('style')) ?? '')
-    );
-    return slicesStyles
-      .map(
-        (styles) =>
-          styles.split(';').reduce<Record<string, string>>((styleAsObj, style) => {
-            const stylePair = style.split(':');
-            if (stylePair.length !== 2) {
-              return styleAsObj;
-            }
-            styleAsObj[stylePair[0].trim()] = stylePair[1].trim();
-            return styleAsObj;
-          }, {}).fill // in vislib the color is available on the `fill` style prop
-      )
-      .filter((d) => !isNil(d));
+    const selectedSlice = await this.getSelectedSlice(name);
+    return selectedSlice.map((slice) => slice.color);
   }
 
   async getPieChartData() {
@@ -155,57 +119,41 @@ export class PieChartService extends FtrService {
     await this.inspector.expectTableData(expectedTableData);
   }
 
-  async getPieChartLabels(isNewLibrary: boolean = true) {
-    if (isNewLibrary) {
-      const slices = this.getSlices(
-        await this.visChart.getEsChartDebugState(partitionVisChartSelector)
-      );
-      return slices.map((slice) => {
-        if (slice.name === '__missing__') {
-          return 'Missing';
-        } else if (slice.name === '__other__') {
-          return 'Other';
-        } else if (typeof slice.name === 'number') {
-          // debugState of escharts returns the numbers without comma
-          const val = slice.name as number;
-          return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
-        } else {
-          return slice.name;
-        }
-      });
-    }
-    const chartTypes = await this.find.allByCssSelector('path.slice', this.defaultFindTimeout * 2);
-    return await Promise.all(
-      chartTypes.map(async (chart) => await chart.getAttribute('data-label'))
+  async getPieChartLabels() {
+    const slices = this.getSlices(
+      await this.visChart.getEsChartDebugState(partitionVisChartSelector)
     );
+    return slices.map((slice) => {
+      if (slice.name === '__missing__') {
+        return 'Missing';
+      } else if (slice.name === '__other__') {
+        return 'Other';
+      } else if (typeof slice.name === 'number') {
+        // debugState of escharts returns the numbers without comma
+        const val = slice.name as number;
+        return val.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',');
+      } else {
+        return slice.name;
+      }
+    });
   }
 
-  async getPieChartValues(isNewLibrary: boolean = true) {
+  async getPieChartValues() {
     this.log.debug('PieChart.getPieChartValues');
-    if (isNewLibrary) {
-      const slices = this.getSlices(
-        await this.visChart.getEsChartDebugState(partitionVisChartSelector)
-      );
-      return slices.map((slice) => {
-        return slice.value;
-      });
-    }
-    const chartTypes = await this.find.allByCssSelector('path.slice', this.defaultFindTimeout * 2);
-    return await Promise.all(
-      chartTypes.map(async (chart) => await chart.getAttribute('data-value'))
+    const slices = this.getSlices(
+      await this.visChart.getEsChartDebugState(partitionVisChartSelector)
     );
+    return slices.map((slice) => {
+      return slice.value;
+    });
   }
 
-  async getPieSliceCount(isNewLibrary: boolean = true) {
+  async getPieSliceCount() {
     this.log.debug('PieChart.getPieSliceCount');
-    if (isNewLibrary) {
-      const slices = this.getSlices(
-        await this.visChart.getEsChartDebugState(partitionVisChartSelector)
-      );
-      return slices?.length;
-    }
-    const slices = await this.find.allByCssSelector('svg > g > g.arcs > path.slice');
-    return slices.length;
+    const slices = this.getSlices(
+      await this.visChart.getEsChartDebugState(partitionVisChartSelector)
+    );
+    return slices?.length;
   }
 
   async getSliceCountForAllPies() {
@@ -234,10 +182,10 @@ export class PieChartService extends FtrService {
     expect(slices.length).to.be(expectedCount);
   }
 
-  async expectPieSliceCount(expectedCount: number, isNewLibrary: boolean = true) {
+  async expectPieSliceCount(expectedCount: number) {
     this.log.debug(`PieChart.expectPieSliceCount(${expectedCount})`);
     await this.retry.try(async () => {
-      const slicesCount = await this.getPieSliceCount(isNewLibrary);
+      const slicesCount = await this.getPieSliceCount();
       expect(slicesCount).to.be(expectedCount);
     });
   }
@@ -254,10 +202,10 @@ export class PieChartService extends FtrService {
     expect(noResult).to.be(true);
   }
 
-  async expectPieChartLabels(expectedLabels: string[], isNewLibrary: boolean = true) {
+  async expectPieChartLabels(expectedLabels: string[]) {
     this.log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
     await this.retry.try(async () => {
-      const pieData = await this.getPieChartLabels(isNewLibrary);
+      const pieData = await this.getPieChartLabels();
       expect(pieData.sort()).to.eql(expectedLabels);
     });
   }

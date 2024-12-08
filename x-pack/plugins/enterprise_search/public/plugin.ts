@@ -35,6 +35,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -55,11 +56,11 @@ import {
   SEARCH_RELEVANCE_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
-import { ClientConfigType, InitialAppData } from '../common/types';
+import { ClientConfigType, InitialAppData, ProductAccess } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
-import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
+import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
   SEARCH_INDICES_PATH,
@@ -80,8 +81,8 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 
 interface PluginsSetup {
   cloud?: CloudSetup;
-  licensing: LicensingPluginStart;
   home?: HomePublicPluginSetup;
+  licensing: LicensingPluginStart;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
 }
@@ -98,8 +99,9 @@ export interface PluginsStart {
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchNavigation?: SearchNavigationPluginStart;
+  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
 }
@@ -129,7 +131,7 @@ const contentLinks: AppDeepLink[] = [
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
-      defaultMessage: 'Web crawlers',
+      defaultMessage: 'Web Crawlers',
     }),
   },
 ];
@@ -149,14 +151,6 @@ const relevanceLinks: AppDeepLink[] = [
 ];
 
 const applicationsLinks: AppDeepLink[] = [
-  {
-    id: 'playground',
-    path: `/${PLAYGROUND_PATH}`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
-      defaultMessage: 'Playground',
-    }),
-    visibleIn: ['sideNav', 'globalSearch'],
-  },
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
@@ -199,7 +193,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
     }
 
-    if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
@@ -280,6 +273,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
+      order: 0,
       title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
       visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
     });
@@ -305,6 +299,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
+      order: 1,
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
     });
 
@@ -619,6 +614,27 @@ export class EnterpriseSearchPlugin implements Plugin {
         })
       );
     });
+    if (plugins.searchNavigation !== undefined) {
+      // while we have ent-search apps in the side nav, we need to provide access
+      // to the base set of classic side nav items to the search-navigation plugin.
+      import('./applications/shared/layout/base_nav').then(({ buildBaseClassicNavItems }) => {
+        plugins.searchNavigation?.setGetBaseClassicNavItems(() => {
+          const productAccess: ProductAccess = this.data?.access ?? {
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: false,
+          };
+
+          return buildBaseClassicNavItems({ productAccess });
+        });
+      });
+
+      // This is needed so that we can fetch product access for plugins
+      // that need to share the classic nav. This can be removed when we
+      // remove product access and ent-search apps.
+      plugins.searchNavigation.registerOnAppMountHandler(async () => {
+        return this.getInitialData(core.http);
+      });
+    }
 
     plugins.licensing?.license$.subscribe((license) => {
       if (hasEnterpriseLicense(license)) {

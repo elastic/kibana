@@ -104,7 +104,9 @@ export function ChatHeader({
             size={breakpoint === 'xs' ? 'xs' : 's'}
             value={newTitle}
             className={css`
-              color: ${!!title ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
+              color: ${!!title
+                ? theme.euiTheme.colors.textParagraph
+                : theme.euiTheme.colors.textSubdued};
             `}
             inputAriaLabel={i18n.translate('xpack.aiAssistant.chatHeader.editConversationInput', {
               defaultMessage: 'Edit conversation',
@@ -142,11 +144,11 @@ export function ChatHeader({
                           flyoutPositionMode === 'overlay'
                             ? i18n.translate(
                                 'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
-                                { defaultMessage: 'Dock chat' }
+                                { defaultMessage: 'Dock conversation' }
                               )
                             : i18n.translate(
                                 'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
-                                { defaultMessage: 'Undock chat' }
+                                { defaultMessage: 'Undock conversation' }
                               )
                         }
                         display="block"

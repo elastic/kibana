@@ -107,19 +107,9 @@ describe('AddFile', () => {
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
   });
 
-  it('AddFile is not rendered if user has no create permission', async () => {
+  it('AddFile is not rendered if user has no createComment permission', async () => {
     appMockRender = createAppMockRenderer({
-      permissions: buildCasesPermissions({ create: false }),
-    });
-
-    appMockRender.render(<AddFile caseId={'foobar'} />);
-
-    expect(screen.queryByTestId('cases-files-add')).not.toBeInTheDocument();
-  });
-
-  it('AddFile is not rendered if user has no update permission', async () => {
-    appMockRender = createAppMockRenderer({
-      permissions: buildCasesPermissions({ update: false }),
+      permissions: buildCasesPermissions({ createComment: false }),
     });
 
     appMockRender.render(<AddFile caseId={'foobar'} />);

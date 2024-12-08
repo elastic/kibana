@@ -32,9 +32,13 @@ export const createMaintenanceWindowRoute = (
       validate: {
         body: createBodySchemaV1,
       },
+      security: {
+        authz: {
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
+        },
+      },
       options: {
         access: 'internal',
-        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
       },
     },
     router.handleLegacyErrors(

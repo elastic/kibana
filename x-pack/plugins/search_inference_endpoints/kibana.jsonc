@@ -2,6 +2,11 @@
   "type": "plugin",
   "id": "@kbn/search-inference-endpoints",
   "owner": "@elastic/search-kibana",
+  // TODO enterpriseSearch depends on it, and Observability has a menu entry for enterpriseSearch
+  // must be refactored / fixed before solution-specific builds
+  // cc sphilipse
+  "group": "search",
+  "visibility": "private",
   "plugin": {
     "id": "searchInferenceEndpoints",
     "server": true,
@@ -19,6 +24,7 @@
     "optionalPlugins": [
       "cloud",
       "console",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact"

@@ -17,8 +17,9 @@ import {
   getPathParameters,
   createOpIdGenerator,
   GetOpId,
+  assignToPaths,
+  extractTags,
 } from './util';
-import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
   test.each([
@@ -115,9 +116,13 @@ describe('assignToPaths', () => {
     const paths = {};
     assignToPaths(paths, '/foo', {});
     assignToPaths(paths, '/bar/{id?}', {});
+    assignToPaths(paths, '/bar/file/{path*}', {});
+    assignToPaths(paths, '/bar/file/{path*}/{id?}', {});
     expect(paths).toEqual({
       '/foo': {},
       '/bar/{id}': {},
+      '/bar/file/{path}': {},
+      '/bar/file/{path}/{id}': {},
     });
   });
 });
@@ -129,7 +134,7 @@ describe('prepareRoutes', () => {
     {
       input: [{ path: '/api/foo', options: { access: internal } }],
       output: [{ path: '/api/foo', options: { access: internal } }],
-      filters: {},
+      filters: { access: internal },
     },
     {
       input: [
@@ -137,7 +142,7 @@ describe('prepareRoutes', () => {
         { path: '/api/bar', options: { access: internal } },
       ],
       output: [{ path: '/api/bar', options: { access: internal } }],
-      filters: { pathStartsWith: ['/api/bar'] },
+      filters: { pathStartsWith: ['/api/bar'], access: internal },
     },
     {
       input: [
@@ -320,7 +325,7 @@ describe('createOpIdGenerator', () => {
     {
       input: {
         method: 'get',
-        path: '/api/my/resource/{path*}',
+        path: '/api/my/resource/{path}',
       },
       output: 'get-my-resource-path',
     },

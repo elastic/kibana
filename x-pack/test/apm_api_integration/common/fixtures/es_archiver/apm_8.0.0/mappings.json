@@ -6213,10 +6213,6 @@
           "read_only_allow_delete": "false"
         },
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-7.14.0-error"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -6225,8 +6221,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
-        "priority": "100",
-        "refresh_interval": "5s"
+        "priority": "100"
       }
     }
   }
@@ -11748,10 +11743,6 @@
           "read_only_allow_delete": "false"
         },
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-7.14.0-metric"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -11760,8 +11751,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
-        "priority": "100",
-        "refresh_interval": "5s"
+        "priority": "100"
       }
     }
   }
@@ -16847,10 +16837,6 @@
           "read_only_allow_delete": "false"
         },
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-7.14.0-span"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -16859,8 +16845,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
-        "priority": "100",
-        "refresh_interval": "5s"
+        "priority": "100"
       }
     }
   }
@@ -22037,10 +22022,6 @@
           "read_only_allow_delete": "false"
         },
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-7.14.0-transaction"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -22049,8 +22030,7 @@
         "max_docvalue_fields_search": "200",
         "number_of_replicas": "1",
         "number_of_shards": "1",
-        "priority": "100",
-        "refresh_interval": "5s"
+        "priority": "100"
       }
     }
   }

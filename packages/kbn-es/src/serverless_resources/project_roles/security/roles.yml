@@ -46,7 +46,7 @@ viewer:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
-        - feature_securitySolutionCases.read
+        - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -126,7 +126,7 @@ editor:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -140,7 +140,7 @@ editor:
   run_as: []
 
 t1_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - '.alerts-security*'
@@ -150,6 +150,8 @@ t1_analyst:
         - write
         - maintenance
     - names:
+        - .lists*
+        - .items*
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -175,7 +177,7 @@ t1_analyst:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
-        - feature_securitySolutionCases.read
+        - feature_securitySolutionCasesV2.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -189,7 +191,7 @@ t1_analyst:
       resources: '*'
 
 t2_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - .alerts-security*
@@ -230,7 +232,7 @@ t2_analyst:
         - feature_siem.read
         - feature_siem.read_alerts
         - feature_siem.endpoint_list_read
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -244,7 +246,7 @@ t2_analyst:
       resources: '*'
 
 t3_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -273,6 +275,7 @@ t3_analyst:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -300,7 +303,7 @@ t3_analyst:
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
         - feature_siem.scan_operations_all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -313,7 +316,7 @@ t3_analyst:
       resources: '*'
 
 threat_intelligence_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -362,7 +365,7 @@ threat_intelligence_analyst:
         - feature_siem.all
         - feature_siem.endpoint_list_read
         - feature_siem.blocklist_all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -375,7 +378,7 @@ threat_intelligence_analyst:
       resources: '*'
 
 rule_author:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -430,7 +433,7 @@ rule_author:
         - feature_siem.host_isolation_exceptions_read
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.read
@@ -443,7 +446,7 @@ rule_author:
       resources: '*'
 
 soc_manager:
-  cluster:
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -474,6 +477,7 @@ soc_manager:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -502,7 +506,7 @@ soc_manager:
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
         - feature_siem.scan_operations_all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -562,7 +566,7 @@ detections_admin:
         - feature_siem.all
         - feature_siem.read_alerts
         - feature_siem.crud_alerts
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -621,7 +625,7 @@ platform_engineer:
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
         - feature_siem.actions_log_management_read
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -637,7 +641,7 @@ platform_engineer:
       resources: '*'
 
 endpoint_operations_analyst:
-  cluster:
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -694,7 +698,7 @@ endpoint_operations_analyst:
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
         - feature_siem.scan_operations_all
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -709,7 +713,7 @@ endpoint_operations_analyst:
       resources: '*'
 
 endpoint_policy_manager:
-  cluster:
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -769,7 +773,7 @@ endpoint_policy_manager:
         - feature_siem.event_filters_all
         - feature_siem.host_isolation_exceptions_all
         - feature_siem.blocklist_all # Elastic Defend Policy Management
-        - feature_securitySolutionCases.all
+        - feature_securitySolutionCasesV2.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all

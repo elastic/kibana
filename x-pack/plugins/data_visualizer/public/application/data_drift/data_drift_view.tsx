@@ -216,7 +216,7 @@ export const DataDriftView = ({
         runAnalysisDisabled={!dataView || requiresWindowParameters}
       >
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="columnCompressedSwitch">
+          <EuiFormRow display="columnCompressed">
             <EuiSwitch
               label={showOnlyDriftedFieldsOptionLabel}
               aria-label={showOnlyDriftedFieldsOptionLabel}

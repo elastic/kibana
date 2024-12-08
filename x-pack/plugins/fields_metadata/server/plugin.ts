@@ -56,8 +56,8 @@ export class FieldsMetadataPlugin
     };
   }
 
-  public start(_core: CoreStart, _plugins: FieldsMetadataServerPluginStartDeps) {
-    const fieldsMetadata = this.fieldsMetadataService.start();
+  public start(core: CoreStart, _plugins: FieldsMetadataServerPluginStartDeps) {
+    const fieldsMetadata = this.fieldsMetadataService.start(core);
 
     return { getClient: fieldsMetadata.getClient };
   }

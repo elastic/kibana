@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -28,6 +30,7 @@ import {
   NOTES_COUNT_TEST_ID,
   NOTES_LOADING_TEST_ID,
   NOTES_TITLE_TEST_ID,
+  NOTES_VIEW_NOTES_BUTTON_TEST_ID,
 } from './test_ids';
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
@@ -54,6 +57,12 @@ export const ADD_NOTE_BUTTON = i18n.translate(
     defaultMessage: 'Add note',
   }
 );
+export const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.right.notes.viewNoteButtonAriaLabel',
+  {
+    defaultMessage: 'View notes',
+  }
+);
 
 /**
  * Renders a block with the number of notes for the event
@@ -61,8 +70,9 @@ export const ADD_NOTE_BUTTON = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, isPreview, isPreviewMode } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
   const { openLeftPanel } = useExpandableFlyoutApi();
   const openExpandedFlyoutNotesTab = useCallback(
@@ -80,8 +90,11 @@ export const Notes = memo(() => {
   );
 
   useEffect(() => {
-    dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
-  }, [dispatch, eventId]);
+    // only fetch notes if we are not in a preview panel, or not in a rule preview workflow
+    if (!isPreviewMode && !isPreview) {
+      dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
+    }
+  }, [dispatch, eventId, isPreview, isPreviewMode]);
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
@@ -97,6 +110,61 @@ export const Notes = memo(() => {
     }
   }, [addErrorToast, fetchError, fetchStatus]);
 
+  const viewNotesButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        onClick={openExpandedFlyoutNotesTab}
+        size="s"
+        disabled={isPreviewMode || isPreview}
+        aria-label={VIEW_NOTES_BUTTON_ARIA_LABEL}
+        data-test-subj={NOTES_VIEW_NOTES_BUTTON_TEST_ID}
+      >
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.notes.viewNoteButtonLabel"
+          defaultMessage="View {count, plural, one {note} other {notes}}"
+          values={{ count: notes.length }}
+        />
+      </EuiButtonEmpty>
+    ),
+    [isPreview, isPreviewMode, notes.length, openExpandedFlyoutNotesTab]
+  );
+  const addNoteButton = useMemo(
+    () => (
+      <EuiButtonEmpty
+        iconType="plusInCircle"
+        onClick={openExpandedFlyoutNotesTab}
+        size="s"
+        disabled={isPreviewMode || isPreview}
+        aria-label={ADD_NOTE_BUTTON}
+        data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
+      >
+        {ADD_NOTE_BUTTON}
+      </EuiButtonEmpty>
+    ),
+    [isPreview, isPreviewMode, openExpandedFlyoutNotesTab]
+  );
+  const addNoteButtonIcon = useMemo(
+    () => (
+      <EuiButtonIcon
+        onClick={openExpandedFlyoutNotesTab}
+        iconType="plusInCircle"
+        disabled={isPreviewMode || isPreview || !kibanaSecuritySolutionsPrivileges.crud}
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        aria-label={ADD_NOTE_BUTTON}
+        data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
+      />
+    ),
+    [
+      euiTheme.size.xs,
+      isPreview,
+      isPreviewMode,
+      kibanaSecuritySolutionsPrivileges.crud,
+      openExpandedFlyoutNotesTab,
+    ]
+  );
+
   return (
     <AlertHeaderBlock
       title={
@@ -107,37 +175,27 @@ export const Notes = memo(() => {
       }
       data-test-subj={NOTES_TITLE_TEST_ID}
     >
-      {fetchStatus === ReqStatus.Loading ? (
-        <EuiLoadingSpinner data-test-subj={NOTES_LOADING_TEST_ID} size="m" />
+      {isPreview ? (
+        getEmptyTagValue()
       ) : (
         <>
-          {notes.length === 0 ? (
-            <EuiButtonEmpty
-              iconType="plusInCircle"
-              onClick={openExpandedFlyoutNotesTab}
-              size="s"
-              aria-label={ADD_NOTE_BUTTON}
-              data-test-subj={NOTES_ADD_NOTE_BUTTON_TEST_ID}
-            >
-              {ADD_NOTE_BUTTON}
-            </EuiButtonEmpty>
+          {fetchStatus === ReqStatus.Loading ? (
+            <EuiLoadingSpinner data-test-subj={NOTES_LOADING_TEST_ID} size="m" />
           ) : (
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-              <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
-                <FormattedCount count={notes.length} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiButtonIcon
-                  onClick={openExpandedFlyoutNotesTab}
-                  iconType="plusInCircle"
-                  css={css`
-                    margin-left: ${euiTheme.size.xs};
-                  `}
-                  aria-label={ADD_NOTE_BUTTON}
-                  data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <>
+              {notes.length === 0 ? (
+                <>{kibanaSecuritySolutionsPrivileges.crud ? addNoteButton : getEmptyTagValue()}</>
+              ) : (
+                <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                  <EuiFlexItem data-test-subj={NOTES_COUNT_TEST_ID}>
+                    <FormattedCount count={notes.length} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    {kibanaSecuritySolutionsPrivileges.crud ? addNoteButtonIcon : viewNotesButton}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </>
           )}
         </>
       )}

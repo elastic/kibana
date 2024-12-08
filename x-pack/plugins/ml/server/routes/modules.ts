@@ -35,8 +35,10 @@ export function dataRecognizer(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/{indexPatternTitle}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Recognize index pattern',
       description:
@@ -96,8 +98,10 @@ export function dataRecognizer(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/recognize_by_module/{moduleId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Recognize module',
       description:
@@ -152,8 +156,10 @@ export function dataRecognizer(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/{moduleId?}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get module',
       description:
@@ -224,8 +230,10 @@ export function dataRecognizer(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/modules/setup/{moduleId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Setup module',
       description:
@@ -323,8 +331,10 @@ export function dataRecognizer(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/jobs_exist/{moduleId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Check if module jobs exist',
       description: `Check whether the jobs in the module with the specified ID exist in the current list of jobs. The check runs a test to see if any of the jobs in existence have an ID which ends with the ID of each job in the module. This is done as a prefix may be supplied in the setup endpoint which is added to the start of the ID of every job in the module.`,

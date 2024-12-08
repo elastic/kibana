@@ -20,6 +20,7 @@ import { DataUsageConfigType } from '../config';
 
 export interface DataUsageSetupDependencies {
   features: FeaturesPluginSetup;
+  cloud: CloudSetup;
 }
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -31,6 +32,7 @@ export interface DataUsageServerStart {}
 
 interface DataUsageApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
+  logFactory: LoggerFactory;
 }
 
 export type DataUsageRequestHandlerContext = CustomRequestHandlerContext<{

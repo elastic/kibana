@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
+
 import { loadMappingForTransform } from './mappings';
 
 describe('loadMappingForTransform', () => {
@@ -13,6 +15,7 @@ describe('loadMappingForTransform', () => {
       {
         packageInfo: {} as any,
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
       },
       'test'
@@ -49,6 +52,7 @@ describe('loadMappingForTransform', () => {
             ),
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [
           '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs.yml',
           '/package/ti_opencti/2.1.0/elasticsearch/transform/latest_ioc/fields/ecs-extra.yml',

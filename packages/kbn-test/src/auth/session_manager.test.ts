@@ -8,6 +8,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import crypto from 'crypto';
 import { Cookie } from 'tough-cookie';
 import { Session } from './saml_auth';
 import { SamlSessionManager, SupportedRoles } from './session_manager';
@@ -32,6 +33,8 @@ const createLocalSAMLSessionMock = jest.spyOn(samlAuth, 'createLocalSAMLSession'
 const getSecurityProfileMock = jest.spyOn(samlAuth, 'getSecurityProfile');
 const readCloudUsersFromFileMock = jest.spyOn(helper, 'readCloudUsersFromFile');
 const isValidHostnameMock = jest.spyOn(helper, 'isValidHostname');
+
+const getTestToken = () => 'kbn_cookie_' + crypto.randomBytes(16).toString('hex');
 
 jest.mock('../kbn_client/kbn_client', () => {
   return {
@@ -103,6 +106,34 @@ describe('SamlSessionManager', () => {
       await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(2);
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
+    });
+
+    test(`'getSessionCookieForRole' should call 'createLocalSAMLSession' again if 'forceNewSession = true'`, async () => {
+      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
+      createLocalSAMLSessionMock.mockResolvedValueOnce(
+        new Session(
+          Cookie.parse(`sid=${getTestToken()}; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT`)!,
+          testEmail
+        )
+      );
+      const cookieStr1 = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+        roleViewer
+      );
+      createLocalSAMLSessionMock.mockResolvedValueOnce(
+        new Session(
+          Cookie.parse(`sid=${getTestToken()}; Path=/; Expires=Wed, 01 Oct 2023 08:00:00 GMT`)!,
+          testEmail
+        )
+      );
+      const cookieStr2 = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+        roleViewer,
+        {
+          forceNewSession: true,
+        }
+      );
+      expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(2);
+      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
+      expect(cookieStr1).not.toEqual(cookieStr2);
     });
 
     test(`'getEmail' return the correct email`, async () => {
@@ -253,6 +284,34 @@ describe('SamlSessionManager', () => {
       await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
       expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(0);
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(2);
+    });
+
+    test(`'getSessionCookieForRole' should call 'createCloudSAMLSession' again if 'forceNewSession = true'`, async () => {
+      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
+      createCloudSAMLSessionMock.mockResolvedValueOnce(
+        new Session(
+          Cookie.parse(`sid=${getTestToken()}; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT`)!,
+          cloudEmail
+        )
+      );
+      const cookieStr1 = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+        roleViewer
+      );
+      createCloudSAMLSessionMock.mockResolvedValueOnce(
+        new Session(
+          Cookie.parse(`sid=${getTestToken()}; Path=/; Expires=Wed, 01 Oct 2023 08:00:00 GMT`)!,
+          cloudEmail
+        )
+      );
+      const cookieStr2 = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(
+        roleViewer,
+        {
+          forceNewSession: true,
+        }
+      );
+      expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(0);
+      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(2);
+      expect(cookieStr1).not.toEqual(cookieStr2);
     });
 
     test(`'getEmail' return the correct email`, async () => {

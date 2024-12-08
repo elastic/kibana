@@ -9,8 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { Logger } from '@kbn/logging';
-import { firstValueFrom, lastValueFrom, filter } from 'rxjs';
-import { isOutputCompleteEvent } from '@kbn/inference-common';
+import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '../../../../server/tasks/nl_to_esql';
 import { chatClient, evaluationClient, logger } from '../../services';
 import { EsqlDocumentBase } from '../../../../server/tasks/nl_to_esql/doc_base';
@@ -66,11 +65,10 @@ const retrieveUsedCommands = async ({
   answer: string;
   esqlDescription: string;
 }) => {
-  const commandsListOutput = await firstValueFrom(
-    evaluationClient
-      .output('retrieve_commands', {
-        connectorId: evaluationClient.getEvaluationConnectorId(),
-        system: `
+  const commandsListOutput = await evaluationClient.output({
+    id: 'retrieve_commands',
+    connectorId: evaluationClient.getEvaluationConnectorId(),
+    system: `
       You are a helpful, respected Elastic ES|QL assistant.
 
       Your role is to enumerate the list of ES|QL commands and functions that were used
@@ -82,34 +80,32 @@ const retrieveUsedCommands = async ({
 
       ${esqlDescription}
     `,
-        input: `
+    input: `
       # Question
       ${question}
 
       # Answer
       ${answer}
       `,
-        schema: {
-          type: 'object',
-          properties: {
-            commands: {
-              description:
-                'The list of commands that were used in the provided ES|QL question and answer',
-              type: 'array',
-              items: { type: 'string' },
-            },
-            functions: {
-              description:
-                'The list of functions that were used in the provided ES|QL question and answer',
-              type: 'array',
-              items: { type: 'string' },
-            },
-          },
-          required: ['commands', 'functions'],
-        } as const,
-      })
-      .pipe(filter(isOutputCompleteEvent))
-  );
+    schema: {
+      type: 'object',
+      properties: {
+        commands: {
+          description:
+            'The list of commands that were used in the provided ES|QL question and answer',
+          type: 'array',
+          items: { type: 'string' },
+        },
+        functions: {
+          description:
+            'The list of functions that were used in the provided ES|QL question and answer',
+          type: 'array',
+          items: { type: 'string' },
+        },
+      },
+      required: ['commands', 'functions'],
+    } as const,
+  });
 
   const output = commandsListOutput.output;
 

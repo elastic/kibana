@@ -43,6 +43,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         <>
           <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
             <EuiFieldNumber
+              compressed
               value={step}
               onChange={(event) => {
                 const newStep = event.target.valueAsNumber;
@@ -100,6 +101,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           clearSelections: () => {
             selections.setValue(undefined);
           },
+          hasSelections$: selections.hasRangeSelection$,
         },
         {
           ...dataControl.comparators,

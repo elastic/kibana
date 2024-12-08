@@ -100,7 +100,7 @@ describe('getAggConfigFromEsAgg', () => {
       field: 'products.base_price',
       parentAgg: result,
       aggConfig: {
-        percents: '1,5,25,50,75,95,99',
+        percents: [1, 5, 25, 50, 75, 95, 99],
       },
     });
 

@@ -101,7 +101,6 @@ export type MlClientParams =
   | Parameters<MlClient['info']>
   | Parameters<MlClient['openJob']>
   | Parameters<MlClient['postCalendarEvents']>
-  | Parameters<MlClient['postData']>
   | Parameters<MlClient['previewDatafeed']>
   | Parameters<MlClient['putCalendar']>
   | Parameters<MlClient['putCalendarJob']>
@@ -121,8 +120,7 @@ export type MlClientParams =
   | Parameters<MlClient['updateFilter']>
   | Parameters<MlClient['updateJob']>
   | Parameters<MlClient['updateModelSnapshot']>
-  | Parameters<MlClient['validate']>
-  | Parameters<MlClient['validateDetector']>;
+  | Parameters<MlClient['validate']>;
 
 export type MlGetADParams = Parameters<MlClient['getJobStats']> | Parameters<MlClient['getJobs']>;
 

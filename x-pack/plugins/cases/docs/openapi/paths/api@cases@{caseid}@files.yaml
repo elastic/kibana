@@ -1,0 +1,40 @@
+post:
+  summary: Attach a file to a case
+  operationId: addCaseFileDefaultSpace
+  description: >
+    Attach a file to a case.
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana
+    feature privileges, depending on the owner of the case you're updating.
+    The request must include:
+
+    - The `Content-Type: multipart/form-data` HTTP header.
+
+    - The location of the file that is being uploaded.
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/case_id.yaml'
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../components/schemas/add_case_file_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/case_response_properties.yaml'
+          examples:
+            addCaseFileResponse:
+              $ref: '../components/examples/add_comment_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'

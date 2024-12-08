@@ -21,6 +21,7 @@ const spaceSolutionSchema = schema.oneOf([
       schema.literal('security'),
       schema.literal('observability'),
       schema.literal('elasticsearch'),
+      schema.literal('search'),
     ]),
   }),
 ]);
@@ -37,6 +38,13 @@ export function initSetSolutionSpaceApi(deps: InternalRouteDeps) {
   router.put(
     {
       path: '/internal/spaces/space/{id}/solution',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
+      },
       options: {
         description: `Update solution for a space`,
       },

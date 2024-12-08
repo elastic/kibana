@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
-import { i18n } from '@kbn/i18n';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { sloKeys } from '../../../hooks/query_key_factory';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { sloKeys } from '../../../hooks/query_key_factory';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
-import { useKibana } from '../../../utils/kibana_react';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useKibana } from '../../../hooks/use_kibana';
 import { SearchState } from './use_url_search_state';
 
 interface SLOsOverviewParams {
@@ -38,8 +39,8 @@ export function useFetchSLOsOverview({
   filters: filterDSL = [],
   lastRefresh,
 }: SLOsOverviewParams = {}): UseFetchSloGroupsResponse {
+  const { sloClient } = usePluginContext();
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -73,10 +74,12 @@ export function useFetchSLOsOverview({
       lastRefresh,
     }),
     queryFn: async ({ signal }) => {
-      return await http.get<GetOverviewResponse>('/internal/observability/slos/overview', {
-        query: {
-          ...(kqlQuery && { kqlQuery }),
-          ...(filters && { filters }),
+      return await sloClient.fetch('GET /internal/observability/slos/overview', {
+        params: {
+          query: {
+            ...(kqlQuery && { kqlQuery }),
+            ...(filters && { filters }),
+          },
         },
         signal,
       });

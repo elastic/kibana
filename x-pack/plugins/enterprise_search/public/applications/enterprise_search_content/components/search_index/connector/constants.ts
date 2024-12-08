@@ -39,6 +39,6 @@ export const getRunFromDockerSnippet = ({ version }: { version: string }) => `do
 -v "$HOME/elastic-connectors:/config" \\
 --tty \\
 --rm \\
-docker.elastic.co/enterprise-search/elastic-connectors:${version} \\
+docker.elastic.co/integrations/elastic-connectors:${version} \\
 /app/bin/elastic-ingest \\
 -c /config/config.yml`;

@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/ui-shared-deps-src",
-  "owner": "@elastic/kibana-operations"
+  "owner": [
+    "@elastic/kibana-operations"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

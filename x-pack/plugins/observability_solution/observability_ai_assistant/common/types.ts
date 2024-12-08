@@ -82,8 +82,8 @@ export type ConversationUpdateRequest = ConversationRequestBase & {
 export interface KnowledgeBaseEntry {
   '@timestamp': string;
   id: string;
+  title?: string;
   text: string;
-  doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
@@ -96,12 +96,12 @@ export interface KnowledgeBaseEntry {
 }
 
 export interface Instruction {
-  doc_id: string;
+  id: string;
   text: string;
 }
 
 export interface AdHocInstruction {
-  doc_id?: string;
+  id?: string;
   text: string;
   instruction_type: 'user_instruction' | 'application_instruction';
 }

@@ -4,63 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core-saved-objects-server';
-import {
-  formatTelemetryDeleteEvent,
-  sendTelemetryEvents,
-} from '../../telemetry/monitor_upgrade_sender';
-import {
-  ConfigKey,
-  MonitorFields,
-  SyntheticsMonitor,
-  EncryptedSyntheticsMonitorAttributes,
-  SyntheticsMonitorWithId,
-} from '../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import { RouteContext } from '../../types';
 
-export const deleteMonitorBulk = async ({
-  monitors,
-  routeContext,
-}: {
-  monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
-  routeContext: RouteContext;
-}) => {
-  const { savedObjectsClient, server, spaceId, syntheticsMonitorClient } = routeContext;
-  const { logger, telemetry, stackVersion } = server;
+import { schema } from '@kbn/config-schema';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 
-  try {
-    const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
-      monitors.map((normalizedMonitor) => ({
-        ...normalizedMonitor.attributes,
-        id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
-      })) as SyntheticsMonitorWithId[],
-      savedObjectsClient,
-      spaceId
-    );
+export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
+  Array<{ id: string; deleted: boolean }>,
+  Record<string, string>,
+  Record<string, string>,
+  { ids: string[] }
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/_bulk_delete',
+  validate: {},
+  validation: {
+    request: {
+      body: schema.object({
+        ids: schema.arrayOf(schema.string(), {
+          minSize: 1,
+        }),
+      }),
+    },
+  },
+  handler: async (routeContext): Promise<any> => {
+    const { request } = routeContext;
 
-    const deletePromises = savedObjectsClient.bulkDelete(
-      monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
-    );
+    const { ids: idsToDelete } = request.body || {};
+    const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
-    const [errors, result] = await Promise.all([deleteSyncPromise, deletePromises]);
-
-    monitors.forEach((monitor) => {
-      sendTelemetryEvents(
-        logger,
-        telemetry,
-        formatTelemetryDeleteEvent(
-          monitor,
-          stackVersion,
-          new Date().toISOString(),
-          Boolean((monitor.attributes as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-          errors
-        )
-      );
+    const { errors, result } = await deleteMonitorAPI.execute({
+      monitorIds: idsToDelete,
     });
 
-    return { errors, result };
-  } catch (e) {
-    throw e;
-  }
-};
+    return { result, errors };
+  },
+});

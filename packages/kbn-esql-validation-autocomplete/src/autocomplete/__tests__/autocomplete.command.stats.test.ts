@@ -150,6 +150,7 @@ describe('autocomplete.suggest', () => {
           ...getFieldNamesByType([
             ...ESQL_COMMON_NUMERIC_TYPES,
             'date',
+            'date_nanos',
             'boolean',
             'ip',
             'version',
@@ -158,7 +159,16 @@ describe('autocomplete.suggest', () => {
           ]),
           ...getFunctionSignaturesByReturnType(
             'stats',
-            [...ESQL_COMMON_NUMERIC_TYPES, 'date', 'boolean', 'ip', 'version', 'text', 'keyword'],
+            [
+              ...ESQL_COMMON_NUMERIC_TYPES,
+              'date',
+              'boolean',
+              'ip',
+              'version',
+              'text',
+              'keyword',
+              'date_nanos',
+            ],
             {
               scalar: true,
             }

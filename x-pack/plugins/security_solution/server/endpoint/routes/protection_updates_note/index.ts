@@ -25,7 +25,12 @@ export function registerProtectionUpdatesNoteRoutes(
     .post({
       access: 'public',
       path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -45,7 +50,12 @@ export function registerProtectionUpdatesNoteRoutes(
     .get({
       access: 'public',
       path: PROTECTION_UPDATES_NOTE_ROUTE,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
     })
     .addVersion(
       {

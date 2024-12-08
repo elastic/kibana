@@ -23,9 +23,7 @@ import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
-  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
-  getPluginNameFromRequest,
   getSystemPromptFromUserConversation,
   langChainExecute,
   performChecks,
@@ -99,6 +97,8 @@ export const postActionsConnectorExecuteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const inference = ctx.elasticAssistant.inference;
+          const productDocsAvailable =
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
           const connector = connectors.length > 0 ? connectors[0] : undefined;
@@ -152,6 +152,7 @@ export const postActionsConnectorExecuteRoute = (
             response,
             telemetry,
             systemPrompt,
+            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });
         } catch (err) {
           logger.error(err);
@@ -159,17 +160,9 @@ export const postActionsConnectorExecuteRoute = (
           if (onLlmResponse) {
             await onLlmResponse(error.message, {}, true);
           }
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const v2KnowledgeBaseEnabled =
-            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              v2KnowledgeBaseEnabled,
-            })) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
           const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
           telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: request.body.actionTypeId,

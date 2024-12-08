@@ -57,7 +57,9 @@ Other useful query parameters for filtering are:
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const fooResource = schema.object({
-  name: schema.string()
+  name: schema.string({
+    meta: { description: 'A unique identifier for...' },
+  }),
   // ...and any other fields you may need
 });
 
@@ -114,8 +116,14 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
       access: 'public',
       summary: 'Create a foo resource'
       description: `A foo resource enables baz. See the following [documentation](${docLinks.links.fooResource}).`,
-      tags: ['oas-tag:my tag'],  // Each operation must have a tag that's used to group similar endpoints in the docs
-      deprecated: true  // An indicator that the operation is deprecated
+      deprecated: true,  // An indicator that the operation is deprecated
+      options: {
+        tags: ['oas-tag:my tag'],  // Each operation must have a tag that's used to group similar endpoints in the docs
+        availability: {
+          since: '1.0.0',
+          stability: 'experimental',
+        },
+      },
     })
     .addVersion({
       version: '2023-10-31',

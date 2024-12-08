@@ -8,6 +8,24 @@
 import { extractJson } from '.';
 
 describe('extractJson', () => {
+  it('returns an empty string if input is undefined', () => {
+    const input = undefined;
+
+    expect(extractJson(input)).toBe('');
+  });
+
+  it('returns an empty string if input an array', () => {
+    const input = ['some', 'array'];
+
+    expect(extractJson(input)).toBe('');
+  });
+
+  it('returns an empty string if input is an object', () => {
+    const input = {};
+
+    expect(extractJson(input)).toBe('');
+  });
+
   it('returns the JSON text surrounded by ```json and ``` with no whitespace or additional text', () => {
     const input = '```json{"key": "value"}```';
 

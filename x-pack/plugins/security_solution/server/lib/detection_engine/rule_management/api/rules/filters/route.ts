@@ -56,8 +56,10 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
     .get({
       access: 'internal',
       path: RULE_MANAGEMENT_FILTERS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -68,7 +70,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
       async (context, _, response): Promise<IKibanaResponse<GetRuleManagementFiltersResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const ctx = await context.resolve(['alerting']);
-        const rulesClient = ctx.alerting.getRulesClient();
+        const rulesClient = await ctx.alerting.getRulesClient();
 
         try {
           const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =

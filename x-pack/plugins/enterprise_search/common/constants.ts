@@ -27,7 +27,7 @@ import { IngestPipelineParams } from '@kbn/search-connectors';
 import { ProductFeatures } from './types';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
-  defaultMessage: 'Search',
+  defaultMessage: 'Elasticsearch',
 });
 export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
   defaultMessage: 'Enterprise Search',
@@ -211,7 +211,7 @@ export const SEARCH_RELEVANCE_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
     defaultMessage: 'Manage your inference endpoints for semantic search and AI use cases.',
   }),
-  URL: '/app/enterprise_search/relevance',
+  URL: '/app/elasticsearch/relevance',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };

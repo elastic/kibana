@@ -137,7 +137,7 @@
             "id": "def-common.AutocompleteFieldMatchComponent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n  onWarning,\n  warning,\n  'aria-label': ariaLabel,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading = false,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n  onWarning,\n  warning,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
               "AutocompleteFieldMatchProps"
@@ -294,31 +294,29 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-autocomplete",
-        "id": "def-common.FieldComponent",
+        "id": "def-common.EsFieldSelector",
         "type": "Function",
         "tags": [],
-        "label": "FieldComponent",
+        "label": "EsFieldSelector",
         "description": [],
         "signature": [
-          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, acceptsCustomOptions, showMappingConflicts, \"aria-label\": ariaLabel, }: ",
-          "FieldProps",
-          "): JSX.Element; displayName: string | undefined; }"
+          "({\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n  showMappingConflicts = false,\n  'aria-label': ariaLabel,\n}: EsFieldSelectorProps) => JSX.Element"
         ],
-        "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
+        "path": "packages/kbn-securitysolution-autocomplete/src/es_field_selector/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
-            "id": "def-common.FieldComponent.$1",
+            "id": "def-common.EsFieldSelector.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n  showMappingConflicts = false,\n  'aria-label': ariaLabel,\n}",
             "description": [],
             "signature": [
-              "FieldProps"
+              "EsFieldSelectorProps"
             ],
-            "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
+            "path": "packages/kbn-securitysolution-autocomplete/src/es_field_selector/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

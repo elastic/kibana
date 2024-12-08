@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
@@ -21,15 +21,15 @@ jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const hasAll = {
-  securitySolutionCases: allCasesCapabilities(),
-  observabilityCases: allCasesCapabilities(),
-  generalCases: allCasesCapabilities(),
+  securitySolutionCasesV2: allCasesCapabilities(),
+  observabilityCasesV2: allCasesCapabilities(),
+  generalCasesV2: allCasesCapabilities(),
 };
 
 const secAllObsReadGenNone = {
-  securitySolutionCases: allCasesCapabilities(),
-  observabilityCases: readCasesCapabilities(),
-  generalCases: noCasesCapabilities(),
+  securitySolutionCasesV2: allCasesCapabilities(),
+  observabilityCasesV2: readCasesCapabilities(),
+  generalCasesV2: noCasesCapabilities(),
 };
 
 const unrelatedFeatures = {

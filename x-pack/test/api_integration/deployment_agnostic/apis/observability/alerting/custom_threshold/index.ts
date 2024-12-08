@@ -10,5 +10,12 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_c
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Custom Threshold rule', () => {
     loadTestFile(require.resolve('./avg_pct_fired'));
+    loadTestFile(require.resolve('./avg_pct_no_data'));
+    loadTestFile(require.resolve('./avg_us_fired'));
+    loadTestFile(require.resolve('./custom_eq_avg_bytes_fired'));
+    loadTestFile(require.resolve('./documents_count_fired'));
+    loadTestFile(require.resolve('./group_by_fired'));
+    loadTestFile(require.resolve('./p99_pct_fired'));
+    loadTestFile(require.resolve('./rate_bytes_fired'));
   });
 }

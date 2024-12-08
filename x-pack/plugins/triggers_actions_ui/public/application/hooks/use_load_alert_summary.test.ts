@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import {
   mockedAlertSummaryResponse,
@@ -18,7 +17,7 @@ jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 describe('useLoadAlertSummary', () => {
-  const featureIds: ValidFeatureId[] = ['apm'];
+  const ruleTypeIds: string[] = ['apm'];
   const mockedPostAPI = jest.fn();
 
   beforeAll(() => {
@@ -34,9 +33,9 @@ describe('useLoadAlertSummary', () => {
       ...mockedAlertSummaryResponse,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadAlertSummary({
-        featureIds,
+        ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
       })
     );
@@ -49,7 +48,7 @@ describe('useLoadAlertSummary', () => {
       },
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const { alertSummary, error } = result.current;
     expect(alertSummary).toEqual({
@@ -70,28 +69,29 @@ describe('useLoadAlertSummary', () => {
       ...mockedAlertSummaryResponse,
     });
 
-    const { waitForNextUpdate } = renderHook(() =>
+    renderHook(() =>
       useLoadAlertSummary({
-        featureIds,
+        ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
         filter,
       })
     );
 
-    await waitForNextUpdate();
-
     const body = JSON.stringify({
       fixed_interval: fixedInterval,
       gte: utcFrom,
       lte: utcTo,
-      featureIds,
+      ruleTypeIds,
       filter: [filter],
     });
-    expect(mockedPostAPI).toHaveBeenCalledWith(
-      '/internal/rac/alerts/_alert_summary',
-      expect.objectContaining({
-        body,
-      })
+
+    await waitFor(() =>
+      expect(mockedPostAPI).toHaveBeenCalledWith(
+        '/internal/rac/alerts/_alert_summary',
+        expect.objectContaining({
+          body,
+        })
+      )
     );
   });
 
@@ -99,15 +99,13 @@ describe('useLoadAlertSummary', () => {
     const error = new Error('Fetch Alert Summary Failed');
     mockedPostAPI.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadAlertSummary({
-        featureIds,
+        ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toMatch(error.message);
+    await waitFor(() => expect(result.current.error).toMatch(error.message));
   });
 });

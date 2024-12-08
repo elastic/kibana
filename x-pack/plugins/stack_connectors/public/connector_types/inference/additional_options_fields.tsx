@@ -32,10 +32,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ConfigEntryView } from '../../../common/dynamic_config/types';
 import { ConnectorConfigurationFormItems } from '../lib/dynamic_config/connector_configuration_form_items';
 import * as i18n from './translations';
 import { DEFAULT_TASK_TYPE } from './constants';
-import { ConfigEntryView } from '../lib/dynamic_config/types';
 import { Config } from './types';
 import { TaskTypeOption } from './helpers';
 
@@ -52,7 +52,7 @@ interface AdditionalOptionsConnectorFieldsProps {
   isEdit: boolean;
   optionalProviderFormFields: ConfigEntryView[];
   onSetProviderConfigEntry: (key: string, value: unknown) => Promise<void>;
-  onTaskTypeOptionsSelect: (taskType: string, provider?: string) => Promise<void>;
+  onTaskTypeOptionsSelect: (taskType: string, provider?: string) => void;
   selectedTaskType?: string;
   taskTypeFormFields: ConfigEntryView[];
   taskTypeSchema: ConfigEntryView[];
@@ -111,7 +111,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
           <div
             css={css`
               font-size: ${xsFontSize};
-              color: ${euiTheme.colors.subduedText};
+              color: ${euiTheme.colors.textSubdued};
             `}
           >
             <FormattedMessage
@@ -255,7 +255,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
             <div
               css={css`
                 font-size: ${xsFontSize};
-                color: ${euiTheme.colors.subduedText};
+                color: ${euiTheme.colors.textSubdued};
               `}
             >
               <FormattedMessage
@@ -289,7 +289,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
         <div
           css={css`
             font-size: ${xsFontSize};
-            color: ${euiTheme.colors.subduedText};
+            color: ${euiTheme.colors.textSubdued};
           `}
         >
           <FormattedMessage

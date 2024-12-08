@@ -8,14 +8,14 @@
  */
 
 import LRUCache from 'lru-cache';
-import { DashboardCrudTypes } from '../../../common/content_management';
+import type { DashboardGetOut } from '../../../server/content_management';
 import { DASHBOARD_CACHE_SIZE, DASHBOARD_CACHE_TTL } from '../../dashboard_constants';
 
 export class DashboardContentManagementCache {
-  private cache: LRUCache<string, DashboardCrudTypes['GetOut']>;
+  private cache: LRUCache<string, DashboardGetOut>;
 
   constructor() {
-    this.cache = new LRUCache<string, DashboardCrudTypes['GetOut']>({
+    this.cache = new LRUCache<string, DashboardGetOut>({
       max: DASHBOARD_CACHE_SIZE,
       maxAge: DASHBOARD_CACHE_TTL,
     });
@@ -27,7 +27,7 @@ export class DashboardContentManagementCache {
   }
 
   /** Add the fetched dashboard to the cache */
-  public addDashboard({ item: dashboard, meta }: DashboardCrudTypes['GetOut']) {
+  public addDashboard({ item: dashboard, meta }: DashboardGetOut) {
     this.cache.set(dashboard.id, {
       meta,
       item: dashboard,

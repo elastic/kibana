@@ -9,6 +9,8 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
+import { useAppContext } from '../../app_context';
+import { IndexMode } from '../../../../common/types/data_streams';
 import {
   DocumentFields,
   RuntimeFieldsList,
@@ -32,6 +34,7 @@ import { DocLinksStart } from './shared_imports';
 import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
 import { SearchResult } from './components/document_fields/search_fields';
 import { parseMappings } from '../../shared/parse_mappings';
+import { LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../../../../common/constants';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
@@ -52,10 +55,12 @@ export interface Props {
   docLinks: DocLinksStart;
   /** List of plugins installed in the cluster nodes */
   esNodesPlugins: string[];
+  indexMode?: IndexMode;
 }
 
 export const MappingsEditor = React.memo(
-  ({ onChange, value, docLinks, indexSettings, esNodesPlugins }: Props) => {
+  ({ onChange, value, docLinks, indexSettings, esNodesPlugins, indexMode }: Props) => {
+    const { canUseSyntheticSource } = useAppContext();
     const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
       () => parseMappings(value),
       [value]
@@ -119,6 +124,23 @@ export const MappingsEditor = React.memo(
       },
       [dispatch]
     );
+
+    useEffect(() => {
+      if (
+        !state.configuration.defaultValue._source &&
+        (indexMode === LOGSDB_INDEX_MODE || indexMode === TIME_SERIES_MODE)
+      ) {
+        if (canUseSyntheticSource) {
+          // If the source field is undefined (hasn't been set in the form)
+          // and if the user has selected a `logsdb` or `time_series` index mode in the Logistics step,
+          // update the form data with synthetic _source
+          dispatch({
+            type: 'configuration.save',
+            value: { ...state.configuration.defaultValue, _source: { mode: 'synthetic' } } as any,
+          });
+        }
+      }
+    }, [indexMode, dispatch, state.configuration, canUseSyntheticSource]);
 
     const tabToContentMap = {
       fields: (

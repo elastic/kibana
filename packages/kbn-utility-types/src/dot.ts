@@ -23,7 +23,9 @@ type DedotKey<
 export type DedotObject<TObject extends Record<string, any>> = UnionToIntersection<
   Exclude<
     ValuesType<{
-      [TKey in keyof TObject]: {} extends Pick<TObject, TKey>
+      [TKey in keyof TObject as string]: string extends TKey
+        ? Record<TKey, TObject[TKey]>
+        : {} extends Pick<TObject, TKey>
         ? DeepPartial<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>>
         : DedotKey<TObject, TKey, TObject[TKey]>;
     }>,

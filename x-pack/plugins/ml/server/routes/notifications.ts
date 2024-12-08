@@ -23,12 +23,14 @@ export function notificationsRoutes({
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/notifications`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
       summary: 'Get notifications',
       description: 'Retrieves notifications based on provided criteria.',
@@ -67,12 +69,14 @@ export function notificationsRoutes({
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/notifications/count`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canGetJobs',
-          'access:ml:canGetDataFrameAnalytics',
-          'access:ml:canGetTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canGetJobs',
+            'ml:canGetDataFrameAnalytics',
+            'ml:canGetTrainedModels',
+          ],
+        },
       },
       summary: 'Get notification counts',
       description: 'Counts notifications by level.',

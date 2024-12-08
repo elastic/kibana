@@ -63,8 +63,8 @@ console.log(JSON.stringify(pipeline, null, 2));
 function getBuildJob() {
   return {
     command: '.buildkite/scripts/steps/build_kibana.sh',
-    label: 'Build Kibana Distribution and Plugins',
-    agents: { queue: 'c2-8' },
+    label: 'Build Kibana Distribution',
+    agents: { queue: 'n2-8' },
     key: BUILD_UUID,
     if: `build.env('${KIBANA_BUILD_ID}') == null || build.env('${KIBANA_BUILD_ID}') == ''`,
   };

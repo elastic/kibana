@@ -31,7 +31,7 @@ export interface DynamicSideNavItems {
 const title = i18n.translate(
   'xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle',
   {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }
 );
 const icon = 'logoElasticsearch';
@@ -151,7 +151,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
-                      link: 'enterpriseSearchApplications:playground',
+                      link: 'searchPlayground',
                     },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {

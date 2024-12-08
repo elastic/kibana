@@ -11,9 +11,9 @@ interface ToolSchemaFragmentBase {
   description?: string;
 }
 
-interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
+export interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
-  properties?: Record<string, ToolSchemaType>;
+  properties: Record<string, ToolSchemaType>;
   required?: string[] | readonly string[];
 }
 
@@ -40,6 +40,9 @@ interface ToolSchemaTypeArray extends ToolSchemaFragmentBase {
   items: Exclude<ToolSchemaType, ToolSchemaTypeArray>;
 }
 
+/**
+ * A tool schema property's possible types.
+ */
 export type ToolSchemaType =
   | ToolSchemaTypeObject
   | ToolSchemaTypeString

@@ -28,7 +28,11 @@ export const getAgentStatusForAgentPolicyRoute = (
     .get({
       access: 'internal',
       path: '/internal/osquery/fleet_wrapper/agent_status',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
     })
     .addVersion(
       {

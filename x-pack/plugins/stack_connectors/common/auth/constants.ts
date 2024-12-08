@@ -19,4 +19,5 @@ export enum WebhookMethods {
   PATCH = 'patch',
   POST = 'post',
   PUT = 'put',
+  GET = 'get',
 }

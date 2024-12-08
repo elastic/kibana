@@ -160,6 +160,10 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string; expected: string };
   };
+  fnUnsupportedAfterCommand: {
+    message: string;
+    type: { function: string; command: string };
+  };
   expectedConstant: {
     message: string;
     type: { fn: string; given: string };
@@ -195,6 +199,10 @@ export interface ValidationErrors {
     type: {
       nestedAgg: string;
     };
+  };
+  onlyWhereCommandSupported: {
+    message: string;
+    type: { fn: string };
   };
 }
 

@@ -18,7 +18,7 @@ const mockChatService = createMockChatService();
 
 let items: ReturnType<typeof getTimelineItemsfromConversation>;
 
-function Providers({ children }: { children: React.ReactElement }) {
+function Providers({ children }: { children: React.ReactNode }) {
   return (
     <IntlProvider locale="en" messages={{}}>
       <KibanaContextProvider
@@ -247,7 +247,7 @@ describe('getTimelineItemsFromConversation', () => {
 
       expect(pick(items[3], 'actions', 'display')).toEqual({
         actions: {
-          canCopy: true,
+          canCopy: false,
           canEdit: false,
           canGiveFeedback: false,
           canRegenerate: false,

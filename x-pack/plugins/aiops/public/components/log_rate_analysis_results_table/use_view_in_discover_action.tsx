@@ -16,6 +16,7 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 
 const viewInDiscoverMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover',
@@ -28,9 +29,13 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
   const { application, share, data } = useAiopsAppContext();
 
   const discoverLocator = useMemo(
-    () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
-    [share.url.locators]
+    () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+    [share?.url.locators]
   );
+
+  // We cannot rely on the time range from AiOps App context because it is not always in sync with the time range used for analysis.
+  // E.g. In the case of an embeddable inside cases, the time range is fixed and not coming from the time picker.
+  const { timeRange } = useFilterQueryUpdates();
 
   const discoverUrlError = useMemo(() => {
     if (!application.capabilities.discover?.show) {
@@ -69,7 +74,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
     if (discoverLocator !== undefined) {
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,
-        timeRange: data.query.timefilter.timefilter.getTime(),
+        timeRange,
         filters: data.query.filterManager.getFilters(),
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,

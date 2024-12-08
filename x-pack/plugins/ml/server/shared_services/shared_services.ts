@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type {
-  IClusterClient,
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-  UiSettingsServiceStart,
-  KibanaRequest,
-  CoreAuditService,
-} from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { CompatibleModule } from '../../common/constants/app';
+import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { IClusterClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { CoreAuditService } from '@kbn/core-security-server';
+import type { CompatibleModule, MlFeatures } from '../../common/constants/app';
 import type { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
@@ -113,7 +110,8 @@ export function createSharedServices(
   getDataViews: () => DataViewsPluginStart,
   getAuditService: () => CoreAuditService | null,
   isMlReady: () => Promise<void>,
-  compatibleModuleType: CompatibleModule | null
+  compatibleModuleType: CompatibleModule | null,
+  enabledFeatures: MlFeatures
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -191,7 +189,7 @@ export function createSharedServices(
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
-      ...getTrainedModelsProvider(getGuards, cloud),
+      ...getTrainedModelsProvider(getGuards, cloud, enabledFeatures),
     },
     /**
      * Services providers for ML internal usage
@@ -269,7 +267,7 @@ function getRequestItemsProvider(
     };
 
     let mlSavedObjectService;
-    if (request instanceof CoreKibanaRequest) {
+    if (isCoreKibanaRequest(request)) {
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       const auditLogger = new MlAuditLogger(auditService, request);

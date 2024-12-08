@@ -1,0 +1,40 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "typings/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    ".storybook/**/*"
+  ],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/typed-react-router-config",
+    "@kbn/i18n",
+    "@kbn/observability-utils-browser",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-query",
+    "@kbn/logging",
+    "@kbn/deeplinks-observability",
+    "@kbn/config-schema",
+    "@kbn/calculate-auto",
+    "@kbn/streams-plugin",
+    "@kbn/share-plugin",
+    "@kbn/observability-utils-server",
+    "@kbn/code-editor",
+    "@kbn/ui-theme",
+    "@kbn/navigation-plugin",
+  ]
+}

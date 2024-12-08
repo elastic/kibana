@@ -8,6 +8,7 @@
  */
 
 export { getColorMode } from './color_mode';
+export { getThemeConfigByName, DEFAULT_THEME_CONFIG, type ThemeConfig } from './theme';
 export type { KibanaTheme, ThemeServiceStart } from './types';
 
 import type { KibanaTheme } from './types';
@@ -18,4 +19,5 @@ import type { KibanaTheme } from './types';
  */
 export const defaultTheme: KibanaTheme = {
   darkMode: false,
+  name: 'amsterdam',
 };

@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/avc-banner",
-  "owner": "@elastic/security-defend-workflows"
+  "owner": [
+    "@elastic/security-defend-workflows"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

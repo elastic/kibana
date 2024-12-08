@@ -25,10 +25,3 @@ export const DeleteTimelinesRequestBody = z.object({
   searchIds: z.array(z.string()).optional(),
 });
 export type DeleteTimelinesRequestBodyInput = z.input<typeof DeleteTimelinesRequestBody>;
-
-export type DeleteTimelinesResponse = z.infer<typeof DeleteTimelinesResponse>;
-export const DeleteTimelinesResponse = z.object({
-  data: z.object({
-    deleteTimeline: z.boolean(),
-  }),
-});

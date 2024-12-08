@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/inference-common",
-  "owner": "@elastic/appex-ai-infra"
+  "owner": [
+    "@elastic/appex-ai-infra"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

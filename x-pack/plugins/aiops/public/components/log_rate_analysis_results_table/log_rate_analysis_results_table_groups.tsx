@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 
-import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
   useEuiBackgroundColor,
   EuiBadge,
@@ -77,7 +77,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<'docCount' | 'pValue'>(
+  const [sortField, setSortField] = useState<keyof GroupTableItem>(
     zeroDocsFallback ? DEFAULT_SORT_FIELD_ZERO_DOCS_FALLBACK : DEFAULT_SORT_FIELD
   );
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
@@ -91,8 +91,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTable.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTable.selectedGroup);
   const dispatch = useAppDispatch();
   const isMounted = useMountedState();
 
@@ -247,7 +247,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   groupColumns.push(...columns);
 
-  const onChange = useCallback((tableSettings: any) => {
+  const onChange = useCallback((tableSettings: Criteria<GroupTableItem>) => {
     if (tableSettings.page) {
       const { index, size } = tableSettings.page;
       setPageIndex(index);

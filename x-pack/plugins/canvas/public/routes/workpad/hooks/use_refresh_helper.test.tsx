@@ -6,7 +6,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useRefreshHelper } from './use_refresh_helper';
 import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 
@@ -31,7 +31,7 @@ const getMockedContext = (context: any) =>
 
 const getContextWrapper =
   (context: WorkpadRoutingContextType) =>
-  ({ children }: PropsWithChildren<unknown>) =>
+  ({ children }: PropsWithChildren) =>
     <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useRefreshHelper', () => {
@@ -77,7 +77,7 @@ describe('useRefreshHelper', () => {
     expect(mockDispatch).not.toHaveBeenCalledWith(refreshAction);
 
     state.transient.inFlight = true;
-    // @ts-expect-error @types/react@18 - Type '() => void' has no properties in common with type '{ children?: ReactNode; }'.
+
     rerender(useRefreshHelper);
 
     jest.runAllTimers();

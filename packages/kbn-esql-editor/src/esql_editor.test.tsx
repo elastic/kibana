@@ -16,23 +16,20 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
-import { of } from 'rxjs';
+import { coreMock } from '@kbn/core/server/mocks';
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
   const uiSettings = {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
-  const theme = {
-    theme$: of({ darkMode: false }),
-  };
 
   const services = {
     uiSettings,
     settings: {
       client: uiSettings,
     },
-    theme,
+    core: coreMock.createStart(),
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {

@@ -39,16 +39,8 @@ describe('Timeline middleware helpers', () => {
     it('should return a draft timeline with a savedObjectId when an unsaved timeline is passed', async () => {
       const mockSavedObjectId = 'mockSavedObjectId';
       (persistTimeline as jest.Mock).mockResolvedValue({
-        data: {
-          persistTimeline: {
-            code: 200,
-            message: 'success',
-            timeline: {
-              ...mockGlobalState.timeline.timelineById[TimelineId.test],
-              savedObjectId: mockSavedObjectId,
-            },
-          },
-        },
+        ...mockGlobalState.timeline.timelineById[TimelineId.test],
+        savedObjectId: mockSavedObjectId,
       });
 
       const returnedTimeline = await ensureTimelineIsSaved({

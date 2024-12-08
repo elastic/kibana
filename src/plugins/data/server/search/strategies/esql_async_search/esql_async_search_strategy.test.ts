@@ -29,6 +29,10 @@ const mockAsyncResponse = {
       },
     },
   },
+  headers: {
+    'x-elasticsearch-async-id': 'foo',
+    'x-elasticsearch-async-is-running': '?0',
+  },
 };
 
 describe('ES|QL async search strategy', () => {

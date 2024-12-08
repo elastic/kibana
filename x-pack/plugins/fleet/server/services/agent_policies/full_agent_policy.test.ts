@@ -888,6 +888,10 @@ describe('getFullAgentPolicy', () => {
       advanced_settings: {
         agent_limits_go_max_procs: 2,
         agent_logging_level: 'debug',
+        agent_logging_to_files: true,
+        agent_logging_files_rotateeverybytes: 10000,
+        agent_logging_files_keepfiles: 10,
+        agent_logging_files_interval: '7h',
       },
     });
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
@@ -896,7 +900,11 @@ describe('getFullAgentPolicy', () => {
       id: 'agent-policy',
       agent: {
         limits: { go_max_procs: 2 },
-        logging: { level: 'debug' },
+        logging: {
+          level: 'debug',
+          to_files: true,
+          files: { rotateeverybytes: 10000, keepfiles: 10, interval: '7h' },
+        },
       },
     });
   });
@@ -1198,16 +1206,7 @@ ssl.test: 123
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',
       hosts: ['test:9999'],
-      topics: [
-        {
-          topic: 'test',
-        },
-        // Deprecated conditionnal topic
-        {
-          topic: 'deprecated',
-          when: { condition: 'test:100', type: 'equals' },
-        },
-      ],
+      topic: 'test',
       is_default: false,
       is_default_monitoring: false,
       name: 'test output',

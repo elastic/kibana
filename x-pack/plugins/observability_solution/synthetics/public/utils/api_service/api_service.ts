@@ -54,11 +54,15 @@ class ApiService {
       if (isRight(decoded)) {
         return decoded.right as T;
       } else {
+        // This was changed from using template literals to using %s string
+        // interpolation, but the previous version included the apiUrl value
+        // twice. To ensure the log output doesn't change, this continues.
+        //
         // eslint-disable-next-line no-console
         console.error(
-          `API ${apiUrl} is not returning expected response, ${formatErrors(
-            decoded.left
-          )} for response`,
+          'API %s is not returning expected response, %s for response',
+          apiUrl,
+          formatErrors(decoded.left).toString(),
           apiUrl,
           response
         );

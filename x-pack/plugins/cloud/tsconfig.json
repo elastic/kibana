@@ -17,6 +17,7 @@
     "@kbn/config-schema",
     "@kbn/logging-mocks",
     "@kbn/logging",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",

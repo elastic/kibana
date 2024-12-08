@@ -17,13 +17,16 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
 import { AppWrapper } from './app_containers';
 
 interface StartServices {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export interface StartDeps extends StartServices {
@@ -68,7 +71,7 @@ export class RenderingService {
           {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
           <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
             {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id="app-fixed-viewport" />
+            <div id={APP_FIXED_VIEWPORT_ID} />
 
             {/* The actual plugin/app */}
             {appComponent}

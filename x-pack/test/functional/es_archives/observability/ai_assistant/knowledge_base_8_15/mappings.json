@@ -1,0 +1,102 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".kibana-observability-ai-assistant-kb": {
+        "is_write_index": true
+      }
+    },
+    "index": ".kibana-observability-ai-assistant-kb-000001",
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "confidence": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "conversation": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "last_updated": {
+              "type": "date"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "doc_id": {
+          "fielddata": true,
+          "type": "text"
+        },
+        "id": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "is_correction": {
+          "type": "boolean"
+        },
+        "labels": {
+          "dynamic": "true",
+          "type": "object"
+        },
+        "ml": {
+          "properties": {
+            "tokens": {
+              "type": "rank_features"
+            }
+          }
+        },
+        "namespace": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "public": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "text"
+        },
+        "title": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "type": {
+          "ignore_above": 1024,
+          "type": "keyword"
+        },
+        "user": {
+          "properties": {
+            "id": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "hidden": "true",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiSuperDatePicker,
   type EuiSuperDatePickerProps,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { TimeRange } from '@kbn/es-query';
@@ -103,6 +104,10 @@ interface DatePickerWrapperProps {
    * when EuiSuperDatePicker's 'Refresh'|'Update' button is clicked
    */
   onRefresh?: () => void;
+  /**
+   * Tooltip message for the update button
+   */
+  tooltipMessage?: string;
 }
 
 /**
@@ -122,6 +127,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
     isDisabled = false,
     needsUpdate,
     onRefresh,
+    tooltipMessage,
   } = props;
   const {
     data,
@@ -318,34 +324,40 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           recentlyUsedRanges={recentlyUsedRanges}
           dateFormat={dateFormat}
           commonlyUsedRanges={commonlyUsedRanges}
+          isDisabled={isDisabled}
           updateButtonProps={{
             iconOnly: isWithinLBreakpoint,
             fill: false,
             ...(needsUpdate ? { needsUpdate } : {}),
           }}
           width={width}
-          isDisabled={isDisabled}
         />
       </EuiFlexItem>
       {showRefresh === true || !isTimeRangeSelectorEnabled ? (
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill={false}
-            color={needsUpdate ? 'success' : 'primary'}
-            iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
-            onClick={handleRefresh}
-            data-test-subj={`mlDatePickerRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
-            isLoading={isLoading}
-          >
-            {needsUpdate ? (
-              <FormattedMessage id="xpack.ml.datePicker.pageUpdateButton" defaultMessage="Update" />
-            ) : (
-              <FormattedMessage
-                id="xpack.ml.datePicker.pageRefreshButton"
-                defaultMessage="Refresh"
-              />
-            )}
-          </EuiButton>
+          <EuiToolTip content={tooltipMessage}>
+            <EuiButton
+              fill={false}
+              color={needsUpdate ? 'success' : 'primary'}
+              iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
+              onClick={handleRefresh}
+              data-test-subj={`mlDatePickerRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
+              isLoading={isLoading}
+              isDisabled={isDisabled}
+            >
+              {needsUpdate ? (
+                <FormattedMessage
+                  id="xpack.ml.datePicker.pageUpdateButton"
+                  defaultMessage="Update"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.datePicker.pageRefreshButton"
+                  defaultMessage="Refresh"
+                />
+              )}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       ) : null}
     </>

@@ -15,7 +15,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { StartServices } from '../../../types';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { UseEuiTheme } from '@elastic/eui';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -83,7 +83,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: { save: true, show: true },
-    generalCases: {
+    generalCasesV2: {
       create_cases: true,
       read_cases: true,
       update_cases: true,
@@ -91,6 +91,8 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       push_cases: true,
       cases_connectors: true,
       cases_settings: true,
+      case_reopen: true,
+      create_comment: true,
     },
     visualize: { save: true, show: true },
     dashboard: { show: true, createNew: true },
@@ -116,5 +118,5 @@ export const createKibanaContextProviderMock = () => {
     React.createElement(KibanaContextProvider, { services }, children);
 };
 
-export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>
-  partialTheme as EuiTheme;
+export const getMockTheme = (partialTheme: RecursivePartial<UseEuiTheme>): UseEuiTheme =>
+  partialTheme as UseEuiTheme;

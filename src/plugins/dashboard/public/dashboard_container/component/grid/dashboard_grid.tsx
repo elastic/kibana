@@ -18,6 +18,7 @@ import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layo
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
@@ -25,7 +26,13 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
-export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
+export const DashboardGrid = ({
+  dashboardContainer,
+  viewportWidth,
+}: {
+  dashboardContainer?: HTMLElement;
+  viewportWidth: number;
+}) => {
   const dashboardApi = useDashboardApi();
 
   const [animatePanelTransforms, expandedPanelId, focusedPanelId, panels, useMargins, viewMode] =
@@ -51,6 +58,8 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     }
   }, [expandedPanelId]);
 
+  const appFixedViewport = useAppFixedViewport();
+
   const panelsInOrder: string[] = useMemo(() => {
     return Object.keys(panels).sort((embeddableIdA, embeddableIdB) => {
       const panelA = panels[embeddableIdA];
@@ -72,6 +81,8 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       const type = panels[embeddableId].type;
       return (
         <DashboardGridItem
+          appFixedViewport={appFixedViewport}
+          dashboardContainer={dashboardContainer}
           data-grid={panels[embeddableId].gridData}
           key={embeddableId}
           id={embeddableId}
@@ -82,7 +93,14 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         />
       );
     });
-  }, [expandedPanelId, panels, panelsInOrder, focusedPanelId]);
+  }, [
+    appFixedViewport,
+    dashboardContainer,
+    expandedPanelId,
+    panels,
+    panelsInOrder,
+    focusedPanelId,
+  ]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {

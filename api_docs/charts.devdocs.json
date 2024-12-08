@@ -2221,22 +2221,6 @@
       "children": [
         {
           "parentPluginId": "charts",
-          "id": "def-public.ChartsPluginSetup.legacyColors",
-          "type": "Object",
-          "tags": [],
-          "label": "legacyColors",
-          "description": [],
-          "signature": [
-            "{ readonly seedColors: string[]; readonly mappedColors: ",
-            "MappedColors",
-            "; createColorLookupFunction: (arrayOfStringsOrNumbers?: (string | number)[] | undefined, colorMapping?: Partial<Record<string, string>>) => (value: string | number) => any; }"
-          ],
-          "path": "src/plugins/charts/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "charts",
           "id": "def-public.ChartsPluginSetup.theme",
           "type": "Object",
           "tags": [],

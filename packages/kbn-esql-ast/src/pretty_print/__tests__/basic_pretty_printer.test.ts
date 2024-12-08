@@ -78,15 +78,6 @@ describe('single line query', () => {
       });
     });
 
-    describe('SHOW', () => {
-      /** @todo Enable once show command args are parsed as columns.  */
-      test.skip('info page', () => {
-        const { text } = reprint('SHOW info');
-
-        expect(text).toBe('SHOW info');
-      });
-    });
-
     describe('STATS', () => {
       test('with aggregates assignment', () => {
         const { text } = reprint('FROM a | STATS var = agg(123, fn(true))');
@@ -98,6 +89,64 @@ describe('single line query', () => {
         const { text } = reprint('FROM a | STATS a(1), b(2) by asdf');
 
         expect(text).toBe('FROM a | STATS A(1), B(2) BY asdf');
+      });
+    });
+
+    describe('GROK', () => {
+      test('two basic arguments', () => {
+        const { text } = reprint('FROM search-movies | GROK Awards "text"');
+
+        expect(text).toBe('FROM search-movies | GROK Awards "text"');
+      });
+    });
+
+    describe('DISSECT', () => {
+      test('two basic arguments', () => {
+        const { text } = reprint('FROM index | DISSECT input "pattern"');
+
+        expect(text).toBe('FROM index | DISSECT input "pattern"');
+      });
+
+      test('with APPEND_SEPARATOR option', () => {
+        const { text } = reprint(
+          'FROM index | DISSECT input "pattern" APPEND_SEPARATOR="<separator>"'
+        );
+
+        expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR = "<separator>"');
+      });
+    });
+
+    describe('JOIN', () => {
+      test('example from docs', () => {
+        const { text } = reprint(`
+          FROM employees
+            | EVAL language_code = languages
+            | LOOKUP JOIN languages_lookup ON language_code
+            | WHERE emp_no < 500
+            | KEEP emp_no, language_name
+            | SORT emp_no
+            | LIMIT 10
+        `);
+
+        expect(text).toBe(
+          'FROM employees | EVAL language_code = languages | LOOKUP JOIN languages_lookup ON language_code | WHERE emp_no < 500 | KEEP emp_no, language_name | SORT emp_no | LIMIT 10'
+        );
+      });
+
+      test('supports aliases', () => {
+        const { text } = reprint(`
+          FROM employees | LEFT JOIN languages_lookup AS something ON language_code`);
+
+        expect(text).toBe(
+          'FROM employees | LEFT JOIN languages_lookup AS something ON language_code'
+        );
+      });
+
+      test('supports multiple conditions', () => {
+        const { text } = reprint(`
+          FROM employees | LEFT JOIN a ON b, c, d.e.f`);
+
+        expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
       });
     });
   });

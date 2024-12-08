@@ -14,16 +14,9 @@ import { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
-
-const unifiedSearch = {
-  ui: {
-    SearchBar: () => <div className="searchBar" />,
-    AggregateQuerySearchBar: () => <div className="searchBar" />,
-  },
-} as unknown as UnifiedSearchPublicPluginStart;
+import { unifiedSearchMock } from '../mocks';
 
 describe('TopNavMenu', () => {
   const WRAPPER_SELECTOR = '.kbnTopNavMenu__wrapper';
@@ -97,7 +90,7 @@ describe('TopNavMenu', () => {
 
   it('Should render search bar', () => {
     const component = mountWithIntl(
-      <TopNavMenu appName={'test'} showSearchBar={true} unifiedSearch={unifiedSearch} />
+      <TopNavMenu appName={'test'} showSearchBar={true} unifiedSearch={unifiedSearchMock} />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
@@ -110,7 +103,7 @@ describe('TopNavMenu', () => {
         appName={'test'}
         config={menuItems}
         showSearchBar={true}
-        unifiedSearch={unifiedSearch}
+        unifiedSearch={unifiedSearchMock}
       />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
@@ -124,7 +117,7 @@ describe('TopNavMenu', () => {
         appName={'test'}
         config={menuItems}
         showSearchBar={true}
-        unifiedSearch={unifiedSearch}
+        unifiedSearch={unifiedSearchMock}
         className={'myCoolClass'}
       />
     );
@@ -172,7 +165,7 @@ describe('TopNavMenu', () => {
           appName={'test'}
           config={menuItems}
           showSearchBar={true}
-          unifiedSearch={unifiedSearch}
+          unifiedSearch={unifiedSearchMock}
           setMenuMountPoint={setMountPoint}
         />
       );
@@ -195,7 +188,7 @@ describe('TopNavMenu', () => {
           appName={'test'}
           badges={badges}
           showSearchBar={true}
-          unifiedSearch={unifiedSearch}
+          unifiedSearch={unifiedSearchMock}
           setMenuMountPoint={setMountPoint}
         />
       );

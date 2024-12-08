@@ -20,14 +20,15 @@ import {
   type GetTimelineResponse,
 } from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
-import type { ResolvedTimeline, TimelineResponse } from '../../../../../../common/api/timeline';
 
 export const getTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       path: TIMELINE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -39,26 +40,33 @@ export const getTimelineRoute = (router: SecuritySolutionPluginRouter) => {
         },
       },
       async (context, request, response): Promise<IKibanaResponse<GetTimelineResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const query = request.query ?? {};
           const { template_timeline_id: templateTimelineId, id } = query;
 
-          let res: TimelineResponse | ResolvedTimeline | null = null;
-
           if (templateTimelineId != null && id == null) {
-            res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
+            const timeline = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
+            if (timeline) {
+              return response.ok({ body: timeline });
+            }
           } else if (templateTimelineId == null && id != null) {
-            res = await getTimelineOrNull(frameworkRequest, id);
+            const timelineOrNull = await getTimelineOrNull(frameworkRequest, id);
+            if (timelineOrNull) {
+              return response.ok({ body: timelineOrNull });
+            }
           } else {
             throw new Error('please provide id or template_timeline_id');
           }
 
-          return response.ok({ body: res ? { data: { getOneTimeline: res } } : {} });
+          return siemResponse.error({
+            statusCode: 404,
+            body: 'Could not find timeline',
+          });
         } catch (err) {
           const error = transformError(err);
-          const siemResponse = buildSiemResponse(response);
-
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,

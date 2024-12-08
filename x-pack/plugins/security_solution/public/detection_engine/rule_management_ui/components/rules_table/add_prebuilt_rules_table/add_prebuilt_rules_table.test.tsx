@@ -14,6 +14,7 @@ import { useUserData } from '../../../../../detections/components/user_info';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock components not needed in this test suite
 jest.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => ({
@@ -109,10 +110,12 @@ describe('AddPrebuiltRulesTable', () => {
     ]);
 
     render(
-      <AddPrebuiltRulesTableContextProvider>
-        <AddPrebuiltRulesHeaderButtons />
-        <AddPrebuiltRulesTable />
-      </AddPrebuiltRulesTableContextProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installAllButton = screen.getByTestId('installAllRulesButton');
@@ -132,10 +135,12 @@ describe('AddPrebuiltRulesTable', () => {
     (useIsUpgradingSecurityPackages as jest.Mock).mockReturnValueOnce(true);
 
     render(
-      <AddPrebuiltRulesTableContextProvider>
-        <AddPrebuiltRulesHeaderButtons />
-        <AddPrebuiltRulesTable />
-      </AddPrebuiltRulesTableContextProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installAllButton = screen.getByTestId('installAllRulesButton');
@@ -153,10 +158,12 @@ describe('AddPrebuiltRulesTable', () => {
     ]);
 
     render(
-      <AddPrebuiltRulesTableContextProvider>
-        <AddPrebuiltRulesHeaderButtons />
-        <AddPrebuiltRulesTable />
-      </AddPrebuiltRulesTableContextProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installAllButton = screen.getByTestId('installAllRulesButton');
@@ -198,9 +205,11 @@ describe('AddPrebuiltRulesTable', () => {
       });
 
       const { findByText } = render(
-        <AddPrebuiltRulesTableContextProvider>
-          <AddPrebuiltRulesTable />
-        </AddPrebuiltRulesTableContextProvider>
+        <QueryClientProvider client={new QueryClient()}>
+          <AddPrebuiltRulesTableContextProvider>
+            <AddPrebuiltRulesTable />
+          </AddPrebuiltRulesTableContextProvider>
+        </QueryClientProvider>
       );
 
       expect(await findByText('All Elastic rules have been installed')).toBeInTheDocument();
@@ -245,9 +254,11 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     render(
-      <AddPrebuiltRulesTableContextProvider>
-        <AddPrebuiltRulesTable />
-      </AddPrebuiltRulesTableContextProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installRuleButton = screen.queryByTestId(`installSinglePrebuiltRuleButton-${id}`);
@@ -293,9 +304,11 @@ describe('AddPrebuiltRulesTable', () => {
     });
 
     render(
-      <AddPrebuiltRulesTableContextProvider>
-        <AddPrebuiltRulesTable />
-      </AddPrebuiltRulesTableContextProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
+      </QueryClientProvider>
     );
 
     const installRuleButton = screen.queryByTestId(`installSinglePrebuiltRuleButton-${id}`);

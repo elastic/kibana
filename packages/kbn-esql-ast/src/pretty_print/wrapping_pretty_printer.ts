@@ -20,6 +20,7 @@ import {
 } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
 import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
@@ -259,6 +260,8 @@ export class WrappingPrettyPrinter {
       }
     }
 
+    const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
     if (!oneArgumentPerLine) {
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
@@ -271,7 +274,8 @@ export class WrappingPrettyPrinter {
         if (formattedArgLength > largestArg) {
           largestArg = formattedArgLength;
         }
-        let separator = txt ? ',' : '';
+
+        let separator = txt ? (commaBetweenArgs ? ',' : '') : '';
         let fragment = '';
 
         if (needsWrap) {
@@ -329,7 +333,7 @@ export class WrappingPrettyPrinter {
         const arg = ctx.visitExpression(args[i], {
           indent,
           remaining: this.opts.wrap - indent.length,
-          suffix: isLastArg ? '' : ',',
+          suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
         });
         const separator = isFirstArg ? '' : '\n';
         const indentation = arg.indented ? '' : indent;
@@ -423,10 +427,17 @@ export class WrappingPrettyPrinter {
     return { txt, indented };
   }
 
-  protected readonly visitor = new Visitor()
+  protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
       const txt = ctx.node.text ?? '<EXPRESSION>';
       return { txt };
+    })
+
+    .on('visitIdentifierExpression', (ctx, inp: Input) => {
+      const formatted = LeafPrinter.identifier(ctx.node);
+      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
+
+      return { txt, indented };
     })
 
     .on('visitSourceExpression', (ctx, inp: Input): Output => {
@@ -557,15 +568,23 @@ export class WrappingPrettyPrinter {
         indent: inp.indent,
         remaining: inp.remaining - option.length - 1,
       });
-      const argsFormatted = args.txt ? ` ${args.txt}` : '';
-      const txt = `${option}${argsFormatted}`;
+      const argsFormatted = args.txt ? `${args.txt[0] === '\n' ? '' : ' '}${args.txt}` : '';
+      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' =' : '';
+      const txt = `${option}${separator}${argsFormatted}`;
 
       return { txt, lines: args.lines };
     })
 
     .on('visitCommand', (ctx, inp: Input): Output => {
       const opts = this.opts;
-      const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
+      const node = ctx.node;
+      let cmd = opts.lowercaseCommands ? node.name : node.name.toUpperCase();
+
+      if (node.commandType) {
+        const type = opts.lowercaseCommands ? node.commandType : node.commandType.toUpperCase();
+        cmd = `${type} ${cmd}`;
+      }
+
       const args = this.printArguments(ctx, {
         indent: inp.indent,
         remaining: inp.remaining - cmd.length - 1,
@@ -673,6 +692,6 @@ export class WrappingPrettyPrinter {
     });
 
   public print(query: ESQLAstQueryExpression) {
-    return this.visitor.visitQuery(query);
+    return this.visitor.visitQuery(query, undefined);
   }
 }

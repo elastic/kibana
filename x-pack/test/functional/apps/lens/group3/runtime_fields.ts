@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should be able to add runtime field and use it', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       await lens.switchToVisualization('lnsDatatable');
       await retry.try(async () => {
         await dataViews.clickAddFieldFromSearchBar();

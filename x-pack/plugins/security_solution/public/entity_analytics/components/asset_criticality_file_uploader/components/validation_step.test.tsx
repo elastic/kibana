@@ -20,7 +20,7 @@ jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
     services: {
       telemetry: {
-        reportAssetCriticalityCsvImported: jest.fn(),
+        reportEvent: jest.fn(),
       },
     },
   }),

@@ -119,6 +119,7 @@ export const renderApp = (
     history,
     indexMappingComponent,
     isSidebarEnabled,
+    kibanaVersion,
     lens,
     ml,
     navigateToUrl,
@@ -128,7 +129,6 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
-    searchPlayground: plugins.searchPlayground,
     searchInferenceEndpoints: plugins.searchInferenceEndpoints,
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,

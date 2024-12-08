@@ -647,6 +647,11 @@ function i (obj, showHidden, depth) {
       return stylize('null', 'null');
     }
 
+    // format sets like arrays
+    if (value instanceof Set) {
+      value = Array.from(value)
+    }
+
     if (isDOMElement(value)) {
       return getOuterHTML(value);
     }
@@ -930,6 +935,10 @@ expect.eql = function eql(actual, expected) {
   // to determine equivalence.
   } else if (isRegExp(actual) && isRegExp(expected)) {
     return regExpEquiv(actual, expected);
+  // If both are Sets, they should be treated equal if they have the same
+  // entries, independent of the ordering
+  } else if (actual instanceof Set && expected instanceof Set) {
+    return actual.size === expected.size && actual.difference(expected).size === 0;
   // 7.4. For all other Object pairs, including Array objects, equivalence is
   // determined by having the same number of owned properties (as verified
   // with Object.prototype.hasOwnProperty.call), the same set of keys

@@ -69,6 +69,7 @@ describe('update timelines', () => {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
             persistTimeline: mockPersistTimeline.mockReturnValue({
               timeline: updateTimelineWithTimelineId.timeline,
+              code: 200,
             }),
           };
         });
@@ -177,6 +178,7 @@ describe('update timelines', () => {
             }),
             persistTimeline: mockPersistTimeline.mockReturnValue({
               timeline: updateTemplateTimelineWithTimelineId.timeline,
+              code: 200,
             }),
           };
         });

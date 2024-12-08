@@ -1869,6 +1869,61 @@
           }
         }
       }
+    },
+    "/api/cases/{caseId}/files": {
+      "post": {
+        "summary": "Attach a file to a case",
+        "operationId": "addCaseFileDefaultSpace",
+        "description": "Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:\n- The `Content-Type: multipart/form-data` HTTP header.\n- The location of the file that is being uploaded.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/case_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/add_case_file_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/case_response_properties"
+                },
+                "examples": {
+                  "addCaseFileResponse": {
+                    "$ref": "#/components/examples/add_comment_response"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/4xx_response"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4796,6 +4851,25 @@
               "severity"
             ],
             "example": "create_case"
+          }
+        }
+      },
+      "add_case_file_request": {
+        "title": "Add case file request properties",
+        "required": [
+          "file"
+        ],
+        "description": "Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.",
+        "type": "object",
+        "properties": {
+          "file": {
+            "description": "The file being attached to the case.",
+            "type": "string",
+            "format": "binary"
+          },
+          "filename": {
+            "description": "The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**",
+            "type": "string"
           }
         }
       }
