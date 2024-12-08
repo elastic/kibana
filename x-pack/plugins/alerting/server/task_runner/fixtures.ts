@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
@@ -408,14 +408,20 @@ export const generateEnqueueFunctionInput = ({
   isBulk = false,
   isResolved,
   foo,
+  consumer,
   actionTypeId,
+  priority,
+  apiKeyId,
 }: {
   uuid?: string;
   id: string;
   isBulk?: boolean;
   isResolved?: boolean;
   foo?: boolean;
+  consumer?: string;
   actionTypeId?: string;
+  priority?: TaskPriority;
+  apiKeyId?: string;
 }) => {
   const input = {
     actionTypeId: actionTypeId || 'action',
@@ -427,7 +433,7 @@ export const generateEnqueueFunctionInput = ({
       ...(isResolved !== undefined ? { isResolved } : {}),
       ...(foo !== undefined ? { foo } : {}),
     },
-    consumer: 'bar',
+    consumer: consumer ?? 'bar',
     relatedSavedObjects: [
       {
         id: '1',
@@ -444,6 +450,8 @@ export const generateEnqueueFunctionInput = ({
       type: 'SAVED_OBJECT',
     },
     spaceId: 'default',
+    ...(priority && { priority }),
+    ...(apiKeyId && { apiKeyId }),
   };
   return isBulk ? [input] : input;
 };

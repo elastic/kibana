@@ -73,7 +73,11 @@ export async function getBackfill(context: RulesClientContext, id: string): Prom
       })
     );
 
-    return transformAdHocRunToBackfillResult(result) as Backfill;
+    const actionsClient = await context.getActionsClient();
+    return transformAdHocRunToBackfillResult({
+      adHocRunSO: result,
+      isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    }) as Backfill;
   } catch (err) {
     const errorMessage = `Failed to get backfill by id: ${id}`;
     context.logger.error(`${errorMessage} - ${err}`);
