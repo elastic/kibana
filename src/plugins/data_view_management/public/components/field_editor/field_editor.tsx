@@ -783,11 +783,12 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     );
   };
 
-  deleteField = () => {
+  deleteField = async () => {
     const { redirectAway, indexPatternService } = this.props.services;
     const { indexPattern } = this.props;
     const { spec } = this.state;
     indexPattern.removeScriptedField(spec.name);
+    (await indexPatternService.getDataViewLazy(indexPattern.id!)).removeScriptedField(spec.name);
     indexPatternService.updateSavedObject(indexPattern).then(() => {
       const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
         defaultMessage: "Deleted ''{fieldName}''",
@@ -825,19 +826,24 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     }
 
     const { redirectAway, indexPatternService } = this.props.services;
+    const dataViewLazy = await indexPatternService.getDataViewLazy(indexPattern.id!);
 
     let oldField: DataViewField['spec'];
     indexPattern.upsertScriptedField(field);
+    dataViewLazy.upsertScriptedField(field);
 
     if (fieldFormatId) {
       indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
+      dataViewLazy.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
     } else {
       indexPattern.deleteFieldFormat(field.name);
+      dataViewLazy.deleteFieldFormat(field.name);
     }
 
     if (field.customLabel !== customLabel) {
       field.customLabel = customLabel;
       indexPattern.setFieldCustomLabel(field.name, customLabel);
+      dataViewLazy.setFieldCustomLabel(field.name, customLabel);
     }
 
     return indexPatternService
@@ -853,8 +859,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       .catch(() => {
         if (oldField) {
           indexPattern.fields.update(oldField);
+          dataViewLazy.upsertScriptedField(oldField);
         } else {
           indexPattern.fields.remove(field);
+          dataViewLazy.removeScriptedField(field.name);
         }
       });
   };

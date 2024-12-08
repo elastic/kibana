@@ -23,6 +23,7 @@ import {
   DataViewsPublicPluginStart,
   INDEX_PATTERN_TYPE,
   DataViewField,
+  DataViewLazy,
   DataView,
 } from '@kbn/data-views-plugin/public';
 
@@ -75,7 +76,8 @@ export interface DataViewMgmtServiceConstructorArgs {
 }
 
 export interface DataViewMgmtState {
-  dataView?: DataView;
+  dataView?: DataViewLazy;
+  dataViewExternal?: DataView;
   allowedTypes: SavedObjectManagementTypeInfo[];
   relationships: SavedObjectRelationWithTitle[];
   fields: DataViewField[];
@@ -168,7 +170,7 @@ export class DataViewMgmtService {
       })
     );
 
-  private getTags = async (dataView: DataView) => {
+  private getTags = async (dataView: DataViewLazy) => {
     if (dataView) {
       const defaultIndex = await this.services.uiSettings.get('defaultIndex');
       const tags = getTags(
@@ -185,7 +187,7 @@ export class DataViewMgmtService {
   async updateScriptedFields() {
     const dataView = this.state$.getValue().dataView;
     if (dataView) {
-      const scriptedFieldRecords = dataView.getScriptedFields();
+      const scriptedFieldRecords = dataView.getScriptedFields({ fieldName: ['*'] });
       const scriptedFields = Object.values(scriptedFieldRecords);
 
       const scriptedFieldLangs = Array.from(
@@ -204,15 +206,14 @@ export class DataViewMgmtService {
     }
   }
 
-  async setDataView(dataView: DataView) {
+  async setDataView(dataViewId: string) {
     this.updateState({ isRefreshing: true });
-
-    const fieldRecords = dataView.fields
-      .filter((field) => !field.scripted)
-      .reduce((acc, field) => {
-        acc[field.name] = field;
-        return acc;
-      }, {} as Record<string, DataViewField>);
+    // todo this should probably load the data view here
+    const dataView = await this.services.dataViews.getDataViewLazy(dataViewId);
+    const dataViewLegacy = await this.services.dataViews.get(dataViewId);
+    const fieldRecords = (
+      await dataView.getFields({ scripted: false, fieldName: ['*'] })
+    ).getFieldMapSorted();
 
     const fields = Object.values(fieldRecords);
     const indexedFieldTypes = new Set<string>();
@@ -239,13 +240,14 @@ export class DataViewMgmtService {
 
     this.updateState({
       dataView,
+      dataViewExternal: dataViewLegacy,
       fields,
       indexedFieldTypes: Array.from(indexedFieldTypes),
       fieldConflictCount: fields.filter((field) => field.type === 'conflict').length,
       tags: await this.getTags(dataView),
       isRefreshing: false,
       conflictFieldsUrl: this.getConflictFieldsKbnUrl(dataView.id!),
-      scriptedFields: dataView.getScriptedFields(),
+      scriptedFields: Object.values(dataView.getScriptedFields({ fieldName: ['*'] })),
     });
 
     this.updateScriptedFields();
@@ -253,9 +255,9 @@ export class DataViewMgmtService {
 
   async refreshFields() {
     const dataView = this.state$.getValue().dataView;
-    if (dataView) {
-      await this.services.dataViews.refreshFields(dataView, undefined, true);
-      return this.setDataView(dataView);
+    if (dataView?.id) {
+      await this.services.dataViews.get(dataView.id, undefined, true);
+      return this.setDataView(dataView.id);
     }
   }
 
