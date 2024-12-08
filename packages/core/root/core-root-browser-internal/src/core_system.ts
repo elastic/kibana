@@ -341,6 +341,7 @@ export class CoreSystem {
 
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
+        history: application.history,
       });
 
       const chrome = await this.chrome.start({
