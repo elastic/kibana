@@ -42,7 +42,6 @@ export interface RecalledEntry {
   id: string;
   text: string;
   score: number | null;
-  is_correction?: boolean;
   labels?: Record<string, string>;
 }
 
@@ -87,7 +86,7 @@ export class KnowledgeBaseService {
     user?: { name: string };
   }): Promise<RecalledEntry[]> {
     const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
+      Pick<KnowledgeBaseEntry, 'text' | 'labels' | 'title'> & { doc_id?: string }
     >({
       index: [resourceNames.aliases.kb],
       query: {
@@ -113,13 +112,12 @@ export class KnowledgeBaseService {
       },
       size: 20,
       _source: {
-        includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
+        includes: ['text', 'labels', 'doc_id', 'title'],
       },
     });
 
     return response.hits.hits.map((hit) => ({
       text: hit._source?.text!,
-      is_correction: hit._source?.is_correction,
       labels: hit._source?.labels,
       title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
       score: hit._score!,
@@ -292,7 +290,6 @@ export class KnowledgeBaseService {
             'title',
             'doc_id',
             'text',
-            'is_correction',
             'labels',
             'confidence',
             'public',
