@@ -24,9 +24,9 @@ export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
       borderColor: euiTheme.border.color,
     },
     emptyButton: {
-      backgroundColor: euiTheme.colors.emptyShade,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
       border: `${euiTheme.border.thin}`,
-      color: `${euiTheme.colors.text}`,
+      color: `${euiTheme.colors.textParagraph}`,
     },
     buttonPositions: {
       left: {
