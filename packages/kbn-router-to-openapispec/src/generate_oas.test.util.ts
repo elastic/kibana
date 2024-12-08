@@ -36,6 +36,7 @@ export const getRouterDefaults = (bodySchema?: RuntimeSchema): RouterRoute => ({
     tags: ['foo', 'oas-tag:bar'],
     summary: 'route summary',
     description: 'route description',
+    access: 'public',
   },
   validationSchemas: {
     request: {
@@ -100,7 +101,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): Versione
           },
           response: {
             [200]: {
-              description: 'OK response oas-test-version-1',
+              description: 'OK response 2023-10-31',
               body: () =>
                 schema.object(
                   { fooResponseWithDescription: schema.string() },
@@ -109,7 +110,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): Versione
             },
           },
         },
-        version: 'oas-test-version-1',
+        version: '2023-10-31',
       },
     },
     {
@@ -119,14 +120,14 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): Versione
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
             [200]: {
-              description: 'OK response oas-test-version-2',
+              description: 'OK response 9999-99-99',
               body: () => schema.stream({ meta: { description: 'stream response' } }),
               bodyContentType: 'application/octet-stream',
             },
             unsafe: { body: true },
           },
         },
-        version: 'oas-test-version-2',
+        version: '9999-99-99',
       },
     },
   ],

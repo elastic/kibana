@@ -134,7 +134,7 @@ describe('prepareRoutes', () => {
     {
       input: [{ path: '/api/foo', options: { access: internal } }],
       output: [{ path: '/api/foo', options: { access: internal } }],
-      filters: {},
+      filters: { access: internal },
     },
     {
       input: [
@@ -142,7 +142,7 @@ describe('prepareRoutes', () => {
         { path: '/api/bar', options: { access: internal } },
       ],
       output: [{ path: '/api/bar', options: { access: internal } }],
-      filters: { pathStartsWith: ['/api/bar'] },
+      filters: { pathStartsWith: ['/api/bar'], access: internal },
     },
     {
       input: [
