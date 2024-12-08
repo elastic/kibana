@@ -50,9 +50,7 @@ export function useFetchEntities({
       });
     },
     refetchOnWindowFocus: false,
-    onError: (error: Error) => {
-      // ignore error
-    },
+    retry: false,
     enabled: Boolean(investigationId && (serviceName || hostName || containerId)),
   });
 

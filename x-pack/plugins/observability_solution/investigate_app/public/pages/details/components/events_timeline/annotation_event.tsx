@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { EventSchema } from '@kbn/investigation-shared';
+import { AnnotationEventResponse } from '@kbn/investigation-shared';
+import moment from 'moment';
+import React from 'react';
 
-export function AnnotationEvent({ event }: { event: EventSchema }) {
+export function AnnotationEvent({ event }: { event: AnnotationEventResponse }) {
   const timestamp = event.timestamp;
 
   return (
