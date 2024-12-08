@@ -101,13 +101,13 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, i18n, theme } = deps;
+  const { dataViews } = deps;
   const sections: Section[] = ['rules', 'logs'];
 
   const sectionsRegex = sections.join('|');
   setDataViewsService(dataViews);
   return (
-    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+    <KibanaRenderContextProvider {...deps}>
       <KibanaContextProvider services={{ ...deps }}>
         <Router history={deps.history}>
           <QueryClientProvider client={queryClient}>
