@@ -8,7 +8,7 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { buildEsQuery, Filter, Query } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { JsonValue } from '@kbn/utility-types';
@@ -17,6 +17,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { LogEntryCursor } from '../../../common/log_entry';
 import { defaultLogViewsStaticConfig, LogViewReference } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
@@ -297,9 +298,9 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   );
 };
 
-const LogStreamContainer = euiStyled.div`
+const LogStreamContainer = styled.div`
   display: flex;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  background-color: ${euiThemeVars.euiColorEmptyShade};
 `;
 
 function convertLogColumnDefinitionToLogSourceColumnDefinition(
