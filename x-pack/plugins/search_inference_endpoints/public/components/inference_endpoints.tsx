@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
+import { AIConnectorFlyoutWrapper } from './ai_connector_flyout_wrapper';
 
 export const InferenceEndpoints: React.FC = () => {
   const { data } = useQueryInferenceEndpoints();
+  const [isAIConnectorFlyoutOpen, setIsAIConnectorFlyoutOpen] = useState<boolean>(false);
 
   const inferenceEndpoints = data || [];
 
   return (
     <>
-      <InferenceEndpointsHeader />
+      <InferenceEndpointsHeader setIsAIConnectorFlyoutOpen={setIsAIConnectorFlyoutOpen} />
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
         <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
+      {isAIConnectorFlyoutOpen && (
+        <AIConnectorFlyoutWrapper setIsAIConnectorFlyoutOpen={setIsAIConnectorFlyoutOpen} />
+      )}
     </>
   );
 };

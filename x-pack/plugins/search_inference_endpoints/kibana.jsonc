@@ -27,7 +27,9 @@
       "serverless"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "esUiShared",
+      "triggersActionsUi"
     ]
   }
 }

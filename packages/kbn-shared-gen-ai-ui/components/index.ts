@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './connector_configuration';
-export * from './connector_configuration_field';
+export * from './inference_api_connector_fields';
