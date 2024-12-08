@@ -7256,10 +7256,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-gen-ai-ui@link:packages/kbn-shared-gen-ai-ui":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-svg@link:packages/kbn-shared-svg":
   version "0.0.0"
   uid ""
