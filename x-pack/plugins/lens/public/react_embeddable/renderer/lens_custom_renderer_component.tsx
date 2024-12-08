@@ -112,7 +112,7 @@ export function LensRenderer({
   const panelProps: PanelProps = useMemo(() => {
     return {
       hideInspector: !showInspector,
-      hideHeader: showPanelChrome,
+      hideHeader: props.hidePanelTitles,
       showNotifications: false,
       showShadow: false,
       showBadges: false,
@@ -124,7 +124,7 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, showPanelChrome, withDefaultActions, extraActions, lensApi]);
+  }, [showInspector, withDefaultActions, extraActions, lensApi, props.hidePanelTitles]);
 
   return (
     <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
