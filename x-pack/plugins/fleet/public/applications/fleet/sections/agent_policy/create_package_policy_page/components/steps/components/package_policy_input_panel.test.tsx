@@ -5,11 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
-import type { TestRenderer } from '../../../../../../../../mock';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
 import type {
@@ -315,8 +313,6 @@ describe('PackagePolicyInputPanel', () => {
     },
   };
 
-  let testRenderer: TestRenderer;
-  let renderResult: ReturnType<typeof testRenderer.render>;
   const packagePolicyInput = {
     id: 'input-1',
     type: 'logfile',
@@ -335,11 +331,14 @@ describe('PackagePolicyInputPanel', () => {
       },
     ],
   } as NewPackagePolicyInput;
+
   const render = (
     packageInfo: PackageInfo,
     packageInputStreams: RegistryStreamWithDataStream[]
   ) => {
-    renderResult = testRenderer.render(
+    const testRenderer = createFleetTestRendererMock();
+
+    return testRenderer.render(
       <PackagePolicyInputPanel
         packageInfo={packageInfo}
         packageInput={mockPackageInput}
@@ -350,12 +349,11 @@ describe('PackagePolicyInputPanel', () => {
       />
     );
   };
-  beforeEach(() => {
-    testRenderer = createFleetTestRendererMock();
-  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
+
   describe('When agentless is enabled', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
@@ -366,25 +364,15 @@ describe('PackagePolicyInputPanel', () => {
     });
 
     it('should render inputs specific to env', async () => {
-      render(mockPackageInfo, mockPackageInputStreams);
-      await waitFor(async () => {
-        expect(
-          await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(
-          await renderResult.findByText('Collect sample logs from instances')
-        ).toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(await renderResult.findByText('Sample logs on Agentless')).toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(
-          await renderResult.queryByText('Sample logs hidden in agentless')
-        ).not.toBeInTheDocument();
-      });
+      const renderResult = render(mockPackageInfo, mockPackageInputStreams);
+
+      expect(
+        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
+
+      expect(renderResult.getByText('Collect sample logs from instances')).toBeInTheDocument();
+      expect(renderResult.getByText('Sample logs on Agentless')).toBeInTheDocument();
+      expect(renderResult.queryByText('Sample logs hidden in agentless')).not.toBeInTheDocument();
     });
   });
 
@@ -398,25 +386,15 @@ describe('PackagePolicyInputPanel', () => {
     });
 
     it('should render inputs specific to the env', async () => {
-      render(mockPackageInfo, mockPackageInputStreams);
-      await waitFor(async () => {
-        expect(
-          await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(
-          await renderResult.findByText('Collect sample logs from instances')
-        ).toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(await renderResult.queryByText('Sample logs on Agentless')).not.toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(
-          await renderResult.queryByText('Sample logs hidden in agentless')
-        ).toBeInTheDocument();
-      });
+      const renderResult = render(mockPackageInfo, mockPackageInputStreams);
+
+      expect(
+        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
+
+      expect(renderResult.getByText('Collect sample logs from instances')).toBeInTheDocument();
+      expect(renderResult.queryByText('Sample logs on Agentless')).not.toBeInTheDocument();
+      expect(renderResult.getByText('Sample logs hidden in agentless')).toBeInTheDocument();
     });
 
     it('should render inputs when hide_in_deployment_modes is not present', async () => {
@@ -506,19 +484,12 @@ describe('PackagePolicyInputPanel', () => {
           },
         ],
       } as unknown as PackageInfo;
-      render(packageInfo, packageInputStreams);
 
-      await waitFor(async () => {
-        expect(
-          await renderResult.findByText('Collect sample logs from instances')
-        ).toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(await renderResult.findByText('Sample logs')).toBeInTheDocument();
-      });
-      await waitFor(async () => {
-        expect(await renderResult.findByText('Collect sample logs')).toBeInTheDocument();
-      });
+      const renderResult = render(packageInfo, packageInputStreams);
+
+      expect(renderResult.getByText('Collect sample logs from instances')).toBeInTheDocument();
+      expect(renderResult.getByText('Sample logs')).toBeInTheDocument();
+      expect(renderResult.getByText('Collect sample logs')).toBeInTheDocument();
     });
   });
 });

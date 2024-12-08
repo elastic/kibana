@@ -36,7 +36,7 @@ function renderInput(
 test('it should allow to add a new host', async () => {
   const { utils, mockOnChange } = renderInput();
 
-  const addRowEl = await utils.findByText('Add row');
+  const addRowEl = await utils.getByText('Add row');
   fireEvent.click(addRowEl);
   expect(mockOnChange).toHaveBeenCalledWith(['http://host1.com', '']);
 });
