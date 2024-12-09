@@ -9,7 +9,7 @@
       "packages/ml/aiops_log_rate_analysis",
       "plugins/aiops"
     ],
-    "xpack.aiAssistant": "packages/kbn-ai-assistant",
+    "xpack.aiAssistant": "platform/packages/shared/kbn-ai-assistant",
     "xpack.alerting": "plugins/alerting",
     "xpack.eventLog": "plugins/event_log",
     "xpack.stackAlerts": "plugins/stack_alerts",
