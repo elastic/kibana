@@ -7300,7 +7300,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-mocks@link:packages/shared-ux/file/mocks":
+"@kbn/shared-ux-file-mocks@link:src/platform/packages/shared/shared-ux/file/mocks":
   version "0.0.0"
   uid ""
 
