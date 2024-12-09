@@ -21,6 +21,7 @@ import {
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
+  UnifiedChatCompleteParamsSchema,
 } from '../../../common/inference/schema';
 import {
   Config,
@@ -34,6 +35,8 @@ import {
   SparseEmbeddingResponse,
   TextEmbeddingParams,
   TextEmbeddingResponse,
+  UnifiedChatCompleteParams,
+  UnifiedChatCompleteResponse,
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 
@@ -64,6 +67,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       name: SUB_ACTION.COMPLETION,
       method: 'performApiCompletion',
       schema: ChatCompleteParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.UNIFIED_COMPLETION,
+      method: 'performApiUnifiedCompletion',
+      schema: UnifiedChatCompleteParamsSchema,
     });
 
     this.registerSubAction({
@@ -106,6 +115,23 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       signal
     );
     return response.completion!;
+  }
+
+  /**
+   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * @param input the text on which you want to perform the inference task.
+   * @signal abort signal
+   */
+  public async performApiUnifiedCompletion(
+    params: UnifiedChatCompleteParams & { signal?: AbortSignal }
+  ): Promise<UnifiedChatCompleteResponse> {
+    const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>({
+      method: 'POST',
+      path: `_inference/completion/${this.inferenceId}/_unified`,
+      body: params.body,
+    });
+
+    return response;
   }
 
   /**
