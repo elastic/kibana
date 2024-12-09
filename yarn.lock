@@ -5884,7 +5884,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-types@link:packages/home/sample_data_types":
+"@kbn/home-sample-data-types@link:src/platform/packages/shared/home/sample_data_types":
   version "0.0.0"
   uid ""
 
