@@ -10,9 +10,9 @@
 import { DashboardCapabilities } from '../common/types';
 
 export const capabilitiesProvider = (): {
-  dashboard: DashboardCapabilities;
+  dashboard_v2: DashboardCapabilities;
 } => ({
-  dashboard: {
+  dashboard_v2: {
     createNew: true,
     show: true,
     showWriteControls: true,

@@ -8,7 +8,7 @@
  */
 
 export const capabilitiesProvider = () => ({
-  visualize: {
+  visualize_v2: {
     show: true,
     createShortUrl: true,
     delete: true,
