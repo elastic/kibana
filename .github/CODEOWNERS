@@ -625,6 +625,7 @@ src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
+src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/embeddable @elastic/kibana-presentation
@@ -676,7 +677,6 @@ src/plugins/kibana_overview @elastic/appex-sharedux
 src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
-src/plugins/links @elastic/kibana-presentation
 src/plugins/management @elastic/kibana-management
 src/plugins/maps_ems @elastic/kibana-presentation
 src/plugins/navigation @elastic/appex-sharedux
