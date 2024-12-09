@@ -6888,7 +6888,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-tagging-oss-plugin@link:src/plugins/saved_objects_tagging_oss":
+"@kbn/saved-objects-tagging-oss-plugin@link:src/platform/plugins/shared/saved_objects_tagging_oss":
   version "0.0.0"
   uid ""
 
