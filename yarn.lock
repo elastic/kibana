@@ -5844,7 +5844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/guided-onboarding-plugin@link:src/plugins/guided_onboarding":
+"@kbn/guided-onboarding-plugin@link:src/platform/plugins/shared/guided_onboarding":
   version "0.0.0"
   uid ""
 

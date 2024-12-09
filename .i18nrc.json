@@ -62,7 +62,7 @@
     "generateCsv": "src/platform/packages/private/kbn-generate-csv",
     "grouping": "packages/kbn-grouping/src",
     "alertsGrouping": "packages/kbn-alerts-grouping",
-    "guidedOnboarding": "src/plugins/guided_onboarding",
+    "guidedOnboarding": "src/platform/plugins/shared/guided_onboarding",
     "guidedOnboardingPackage": "src/platform/packages/shared/kbn-guided-onboarding",
     "home": "src/plugins/home",
     "homePackages": "packages/home",
