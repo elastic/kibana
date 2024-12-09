@@ -11,6 +11,37 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
   defaultMessage: 'Overview',
 });
 
+export const WORKFLOW_INSIGHTS = {
+  title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.sectionTitle', {
+    defaultMessage: 'Issues',
+  }),
+  titleRight: i18n.translate(
+    'xpack.securitySolution.endpointDetails.workflowInsights.extraAction',
+    {
+      defaultMessage: 'Last scans: ',
+    }
+  ),
+  scan: {
+    title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.title', {
+      defaultMessage: 'AI-Powered issue scan',
+    }),
+    button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
+      defaultMessage: 'Scan',
+    }),
+  },
+  issues: {
+    title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
+      defaultMessage: 'Issues',
+    }),
+    emptyResults: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
+      {
+        defaultMessage: 'No issues had been found',
+      }
+    ),
+  },
+};
+
 export const ACTIVITY_LOG = {
   tabTitle: i18n.translate('xpack.securitySolution.endpointDetails.responseActionsHistory', {
     defaultMessage: 'Response actions history',

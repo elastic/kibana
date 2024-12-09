@@ -42,17 +42,12 @@
       "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
       "max_concurrent_shard_requests": "",
-      "min_compatible_shard_node": "",
       "preference": "",
       "pre_filter_shard_size": [
         "1"
       ],
       "request_cache": "__flag__",
       "routing": "",
-      "scroll": [
-        "-1",
-        "0"
-      ],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"

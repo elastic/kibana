@@ -10,7 +10,7 @@ import { LinkCard } from '../common/link_card';
 import demoImage from './images/demo_card.png';
 import darkDemoImage from './images/demo_card_dark.png';
 import * as i18n from './translations';
-import { OnboardingHeaderCardId } from '../../../constants';
+import { OnboardingHeaderCardId } from '../../constants';
 
 export const DemoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) => {
   return (

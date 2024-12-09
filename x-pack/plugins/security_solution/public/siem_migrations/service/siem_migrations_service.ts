@@ -6,12 +6,13 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { StartPluginsDependencies } from '../../types';
 import { SiemRulesMigrationsService } from '../rules/service/rule_migrations_service';
 
 export class SiemMigrationsService {
   public rules: SiemRulesMigrationsService;
 
-  constructor(coreStart: CoreStart) {
-    this.rules = new SiemRulesMigrationsService(coreStart);
+  constructor(coreStart: CoreStart, plugins: StartPluginsDependencies) {
+    this.rules = new SiemRulesMigrationsService(coreStart, plugins);
   }
 }

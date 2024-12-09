@@ -48,7 +48,6 @@
     "@kbn/presentation-containers",
     "@kbn/observability-ai-server",
     "@kbn/charts-plugin",
-    "@kbn/observability-alerting-rule-utils",
     "@kbn/observability-shared-plugin",
     "@kbn/core-security-common",
     "@kbn/deeplinks-observability",

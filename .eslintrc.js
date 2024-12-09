@@ -2029,6 +2029,13 @@ module.exports = {
         '@kbn/imports/uniform_imports': 'off',
       },
     },
+    {
+      files: ['packages/kbn-dependency-ownership/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
+      },
+    },
   ],
 };
 

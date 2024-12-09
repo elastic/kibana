@@ -72,7 +72,10 @@ export function registerAssistantFunctions({
       ruleDataClient,
       plugins,
       getApmIndices: async () => {
-        const apmIndices = await plugins.apmDataAccess.setup.getApmIndices();
+        const coreContext = await resources.context.core;
+        const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
+          coreContext.savedObjects.client
+        );
         return apmIndices;
       },
     };

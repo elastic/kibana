@@ -9,10 +9,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type {
-  PluginSetupContract as AlertingPluginSetup,
-  PluginStartContract as AlertingPluginStart,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
@@ -49,7 +46,7 @@ export interface ObservabilityAIAssistantAppServerSetup {}
 export interface ObservabilityAIAssistantAppPluginStartDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantServerStart;
   ruleRegistry: RuleRegistryPluginStartContract;
-  alerting: AlertingPluginStart;
+  alerting: AlertingServerStart;
   licensing: LicensingPluginStart;
   actions: ActionsPluginStart;
   security: SecurityPluginStart;
@@ -68,7 +65,7 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   licensing: LicensingPluginSetup;
   actions: ActionsPluginSetup;
   security: SecurityPluginSetup;

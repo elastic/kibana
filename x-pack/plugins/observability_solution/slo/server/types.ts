@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -34,7 +34,7 @@ export interface SLOServerStart {
 }
 
 export interface SLOPluginSetupDependencies {
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
@@ -47,7 +47,7 @@ export interface SLOPluginSetupDependencies {
 }
 
 export interface SLOPluginStartDependencies {
-  alerting: PluginStartContract;
+  alerting: AlertingServerStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;

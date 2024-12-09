@@ -111,6 +111,7 @@ describe.skip('When using processes action from response actions console', () =>
                     ...getEndpointAuthzInitialState(),
                     loading: false,
                   },
+                  platform: 'linux',
                 }),
               },
             };

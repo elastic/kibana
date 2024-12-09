@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { RuleMigrationResource } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   UpsertRuleMigrationResourcesRequestBody,
   UpsertRuleMigrationResourcesRequestParams,
@@ -15,6 +14,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
 import { withLicense } from '../util/with_license';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
@@ -49,7 +49,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-            const ruleMigrations = resources.map<RuleMigrationResource>((resource) => ({
+            const ruleMigrations = resources.map<CreateRuleMigrationResourceInput>((resource) => ({
               migration_id: migrationId,
               ...resource,
             }));
