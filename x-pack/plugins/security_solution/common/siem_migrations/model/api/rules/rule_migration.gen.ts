@@ -59,6 +59,8 @@ export type GetRuleMigrationRequestQuery = z.infer<typeof GetRuleMigrationReques
 export const GetRuleMigrationRequestQuery = z.object({
   page: z.coerce.number().optional(),
   per_page: z.coerce.number().optional(),
+  sort_field: NonEmptyString.optional(),
+  sort_direction: z.enum(['asc', 'desc']).optional(),
   search_term: z.string().optional(),
 });
 export type GetRuleMigrationRequestQueryInput = z.input<typeof GetRuleMigrationRequestQuery>;
@@ -154,7 +156,13 @@ export type InstallMigrationRulesRequestParamsInput = z.input<
 >;
 
 export type InstallMigrationRulesRequestBody = z.infer<typeof InstallMigrationRulesRequestBody>;
-export const InstallMigrationRulesRequestBody = z.array(NonEmptyString);
+export const InstallMigrationRulesRequestBody = z.object({
+  ids: z.array(NonEmptyString),
+  /**
+   * Indicates whether installed rules should be enabled
+   */
+  enabled: z.boolean().optional(),
+});
 export type InstallMigrationRulesRequestBodyInput = z.input<
   typeof InstallMigrationRulesRequestBody
 >;
