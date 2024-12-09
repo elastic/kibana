@@ -223,8 +223,7 @@ export const canFetchPackageAndAgentPolicies = (capabilities: Capabilities): boo
 
   const fleetv2 = capabilities.fleetv2;
   const canReadFleetAgentPolicies = Boolean(
-    fleetv2?.read &&
-      (fleetv2?.agent_policies_read === true || fleetv2?.agent_policies_read === undefined)
+    fleetv2?.read && (fleetv2?.agent_policies_read ?? true)
   );
 
   const canReadIntegrations = Boolean(capabilities.fleet?.read);
