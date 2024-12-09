@@ -11,9 +11,16 @@ import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { IntegrationsCardGridTabs } from './integration_card_grid_tabs';
 import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
 import type { IntegrationCardMetadata } from './types';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> = React.memo(
   ({ checkCompleteMetadata }) => {
+    const { fleet } = useKibana().services;
+
+    if (!fleet) {
+      return null;
+    }
+
     if (!checkCompleteMetadata) {
       return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
     }
@@ -24,6 +31,7 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
         <IntegrationsCardGridTabs
           isAgentRequired={isAgentRequired}
           installedIntegrationsCount={installedIntegrationsCount}
+          fleet={fleet}
         />
       </OnboardingCardContentPanel>
     );

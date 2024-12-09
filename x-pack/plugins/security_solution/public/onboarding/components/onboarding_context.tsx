@@ -46,8 +46,8 @@ export const OnboardingContextProvider: React.FC<
     [spaceId, telemetry, config]
   );
 
-  return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
-});
+    return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
+  });
 OnboardingContextProvider.displayName = 'OnboardingContextProvider';
 
 export const useOnboardingContext = () => {

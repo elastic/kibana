@@ -6,8 +6,7 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, useLocation, useParams, useHistory } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { useLocation, useParams, useHistory } from 'react-router-dom';
 
 import styled from 'styled-components';
 import {
@@ -47,7 +46,6 @@ import {
   useIntegrationsStateContext,
   useGetSettingsQuery,
 } from '../../../../hooks';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 import {
   useGetPackageInfoByKeyQuery,
@@ -67,8 +65,6 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { PermissionsError } from '../../../../../fleet/layouts';
-
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -80,13 +76,7 @@ import {
   LoadingIconPanel,
   AddIntegrationButton,
 } from './components';
-import { AssetsPage } from './assets';
-import { OverviewPage } from './overview';
-import { PackagePoliciesPage } from './policies';
-import { SettingsPage } from './settings';
-import { CustomViewPage } from './custom';
-import { DocumentationPage, hasDocumentation } from './documentation';
-import { Configs } from './configs';
+import { hasDocumentation } from './documentation';
 
 import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
