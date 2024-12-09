@@ -5804,7 +5804,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-bar-plugin@link:x-pack/plugins/global_search_bar":
+"@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
 
