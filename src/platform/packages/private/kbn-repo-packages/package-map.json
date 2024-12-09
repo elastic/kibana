@@ -4013,7 +4013,7 @@
   ],
   [
     "@kbn/utils",
-    "packages/kbn-utils"
+    "src/platform/packages/shared/kbn-utils"
   ],
   [
     "@kbn/ux-plugin",
