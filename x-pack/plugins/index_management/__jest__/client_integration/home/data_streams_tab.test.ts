@@ -557,8 +557,10 @@ describe('Data Streams tab', () => {
           testBed.component.update();
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
-            expect.objectContaining({ body: JSON.stringify({ dataRetention: '7h' }) })
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({
+              body: JSON.stringify({ dataRetention: '7h', dataStreams: ['dataStream1'] }),
+            })
           );
         });
 
@@ -583,8 +585,10 @@ describe('Data Streams tab', () => {
           testBed.component.update();
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
-            expect.objectContaining({ body: JSON.stringify({ enabled: false }) })
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({
+              body: JSON.stringify({ enabled: false, dataStreams: ['dataStream1'] }),
+            })
           );
         });
 
@@ -609,8 +613,8 @@ describe('Data Streams tab', () => {
           testBed.component.update();
 
           expect(httpSetup.put).toHaveBeenLastCalledWith(
-            `${API_BASE_PATH}/data_streams/dataStream1/data_retention`,
-            expect.objectContaining({ body: JSON.stringify({}) })
+            `${API_BASE_PATH}/data_streams/data_retention`,
+            expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
           );
         });
       });
@@ -1028,17 +1032,20 @@ describe('Data Streams tab', () => {
 
       test('displays/hides delete action depending on data streams privileges', async () => {
         const {
-          actions: { selectDataStream },
+          actions: { selectDataStream, clickManageDataStreamsButton },
           find,
         } = testBed;
 
         selectDataStream('dataStreamNoDelete', true);
+        clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
         selectDataStream('dataStreamWithDelete', true);
+        clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeFalsy();
 
         selectDataStream('dataStreamNoDelete', false);
+        clickManageDataStreamsButton();
         expect(find('deleteDataStreamsButton').exists()).toBeTruthy();
       });
 
