@@ -23,8 +23,7 @@ const params = {
     /**
      * @deprecated since version 8.1.0
      */
-    // TODO: do not commit this change
-    includeComments: schema.boolean({ defaultValue: false, meta: { deprecated: true } }),
+    includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
   }),
 };
 

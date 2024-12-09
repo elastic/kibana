@@ -20,8 +20,6 @@ import { useCaseViewParams } from '../../common/navigation';
 import { useUserActionsHandler } from './use_user_actions_handler';
 
 const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
-  border: 1px dotted red;
-
   & .userAction__comment.outlined .euiCommentEvent {
     outline: solid 5px ${euiTheme.colors.lightShade};
     margin: 0.5em;

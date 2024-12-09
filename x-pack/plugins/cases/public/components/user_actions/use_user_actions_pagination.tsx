@@ -30,7 +30,6 @@ export const useUserActionsPagination = ({
     isFetchingNextPage,
   } = useInfiniteFindCaseUserActions(caseId, userActivityQueryParams, true);
 
-  console.log({ caseInfiniteUserActionsData });
   const showBottomList = lastPage > 1;
 
   const infiniteCaseUserActions = useMemo<UserActionUI[]>(() => {
