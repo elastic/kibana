@@ -19,6 +19,8 @@ import {
   SIEM_RULE_MIGRATION_START_PATH,
   SIEM_RULE_MIGRATION_STATS_PATH,
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
+  SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
+  SIEM_RULE_MIGRATION_RESOURCES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -30,6 +32,9 @@ import type {
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
   GetRuleMigrationStatsResponse,
+  GetRuleMigrationResourcesMissingResponse,
+  UpsertRuleMigrationResourcesRequestBody,
+  UpsertRuleMigrationResourcesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface GetRuleMigrationStatsParams {
@@ -80,6 +85,43 @@ export const createRuleMigration = async ({
 }: CreateRuleMigrationParams): Promise<CreateRuleMigrationResponse> => {
   return KibanaServices.get().http.post<CreateRuleMigrationResponse>(
     `${SIEM_RULE_MIGRATIONS_PATH}${migrationId ? `/${migrationId}` : ''}`,
+    { body: JSON.stringify(body), version: '1', signal }
+  );
+};
+
+export interface GetRuleMigrationMissingResourcesParams {
+  /** `id` of the migration to start */
+  migrationId: string;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Starts a new migration with the provided rules. */
+export const getMissingResources = async ({
+  migrationId,
+  signal,
+}: GetRuleMigrationMissingResourcesParams): Promise<GetRuleMigrationResourcesMissingResponse> => {
+  return KibanaServices.get().http.get<GetRuleMigrationResourcesMissingResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH, { migration_id: migrationId }),
+    { version: '1', signal }
+  );
+};
+
+export interface UpsertResourcesParams {
+  /** Optional `id` of migration to add the rules to. */
+  migrationId: string;
+  /** The body containing the `connectorId` to use for the migration */
+  body: UpsertRuleMigrationResourcesRequestBody;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Starts a new migration with the provided rules. */
+export const upsertMigrationResources = async ({
+  migrationId,
+  body,
+  signal,
+}: UpsertResourcesParams): Promise<UpsertRuleMigrationResourcesResponse> => {
+  return KibanaServices.get().http.post<UpsertRuleMigrationResourcesResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_RESOURCES_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );
 };

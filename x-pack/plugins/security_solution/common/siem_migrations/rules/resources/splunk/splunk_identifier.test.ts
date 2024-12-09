@@ -21,6 +21,26 @@ describe('splResourceIdentifier', () => {
     ]);
   });
 
+  it('should extract macros with double quotes parameters correctly', () => {
+    const query = '| `macro_one("90","2")` | `macro_two("20")`';
+
+    const result = splResourceIdentifier(query);
+    expect(result).toEqual([
+      { type: 'macro', name: 'macro_one(2)' },
+      { type: 'macro', name: 'macro_two(1)' },
+    ]);
+  });
+
+  it('should extract macros with single quotes parameters correctly', () => {
+    const query = "| `macro_one('90','2')` | `macro_two('20')`";
+
+    const result = splResourceIdentifier(query);
+    expect(result).toEqual([
+      { type: 'macro', name: 'macro_one(2)' },
+      { type: 'macro', name: 'macro_two(1)' },
+    ]);
+  });
+
   it('should extract lookup tables correctly', () => {
     const query =
       'search ... | lookup my_lookup_table field AS alias OUTPUT new_field | lookup other_lookup_list | lookup third_lookup';
@@ -104,7 +124,7 @@ describe('splResourceIdentifier', () => {
 
   it('should ignore macros or lookup tables inside comments wrapped by ```', () => {
     const query =
-      '`macro_one` | ```this is a comment with `macro_two` and lookup another_table``` lookup my_lookup_table';
+      '`macro_one` ```this is a comment with `macro_two` and lookup another_table``` | lookup my_lookup_table ```this is another comment```';
 
     const result = splResourceIdentifier(query);
     expect(result).toEqual([

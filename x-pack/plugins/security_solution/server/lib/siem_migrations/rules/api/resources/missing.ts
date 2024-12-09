@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { RuleMigrationResourceData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   GetRuleMigrationResourcesMissingRequestParams,
   type GetRuleMigrationResourcesMissingResponse,
@@ -47,7 +48,13 @@ export const registerSiemRuleMigrationsResourceGetMissingRoute = (
 
             const options = { filters: { hasContent: false } };
             const batches = ruleMigrationsClient.data.resources.searchBatches(migrationId, options);
-            const missingResources = await batches.all(); // TODO: return only type and name
+
+            const missingResources: RuleMigrationResourceData[] = [];
+            let results = await batches.next();
+            while (results.length) {
+              missingResources.push(...results.map(({ type, name }) => ({ type, name })));
+              results = await batches.next();
+            }
 
             return res.ok({ body: missingResources });
           } catch (err) {

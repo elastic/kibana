@@ -461,7 +461,7 @@ paths:
           required: true
           schema:
             description: The migration id to attach the resources
-            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates missing migration resources have been retrieved correctly
@@ -471,4 +471,4 @@ paths:
                 type: array
                 description: The identified resources missing
                 items:
-                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'

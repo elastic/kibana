@@ -40,10 +40,10 @@ export const splResourceIdentifier: ResourceIdentifier = (input) => {
 };
 
 // Comments should be removed before processing the query to avoid matching macro and list names inside them
-const commentRegex = /```.*```/g;
+const commentRegex = /```.*?```/g;
 // Literal strings should be replaced with a placeholder to avoid matching macro and list names inside them
-const doubleQuoteStrRegex = /".*"/g;
-const singleQuoteStrRegex = /'.*'/g;
+const doubleQuoteStrRegex = /".*?"/g;
+const singleQuoteStrRegex = /'.*?'/g;
 // lookup operator can have modifiers like local=true or update=false before the lookup name, we need to remove them
 const lookupModifiers = /\blookup\b\s+((local|update)=\s*(?:true|false)\s*)+/gi;
 

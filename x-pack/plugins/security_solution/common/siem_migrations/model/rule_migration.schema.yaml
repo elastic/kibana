@@ -278,7 +278,6 @@ components:
       required:
         - type
         - name
-        - content
       properties:
         type:
           $ref: '#/components/schemas/RuleMigrationResourceType'

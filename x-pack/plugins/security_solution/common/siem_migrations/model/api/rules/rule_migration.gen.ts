@@ -118,7 +118,7 @@ export type GetRuleMigrationResourcesMissingRequestParamsInput = z.input<
 export type GetRuleMigrationResourcesMissingResponse = z.infer<
   typeof GetRuleMigrationResourcesMissingResponse
 >;
-export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResource);
+export const GetRuleMigrationResourcesMissingResponse = z.array(RuleMigrationResourceData);
 
 export type GetRuleMigrationStatsRequestParams = z.infer<typeof GetRuleMigrationStatsRequestParams>;
 export const GetRuleMigrationStatsRequestParams = z.object({

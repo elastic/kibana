@@ -34,13 +34,13 @@ export class RuleResourceRetriever {
     const batches = this.dataClient.resources.searchBatches(this.migrationId, options);
 
     const existingRuleResources: ExistingResources = { macro: {}, list: {} };
-    let resources = await batches.next();
-    while (resources.length > 0) {
+    let resources;
+    do {
+      resources = await batches.next();
       resources.forEach((resource) => {
         existingRuleResources[resource.type][resource.name] = resource;
       });
-      resources = await batches.next();
-    }
+    } while (resources.length > 0);
 
     this.existingResources = existingRuleResources;
   }

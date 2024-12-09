@@ -92,6 +92,8 @@ export class RuleMigrationsTaskClient {
     const resourceRetriever = new RuleResourceRetriever(migrationId, this.data);
     const integrationRetriever = new IntegrationRetriever(this.data);
 
+    await resourceRetriever.initialize();
+
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
       signal: abortController.signal,
