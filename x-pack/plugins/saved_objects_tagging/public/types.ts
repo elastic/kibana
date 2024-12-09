@@ -12,5 +12,5 @@ export type SavedObjectTaggingPluginStart = SavedObjectsTaggingApi;
 
 export type StartServices = Pick<
   CoreStart,
-  'overlays' | 'notifications' | 'analytics' | 'i18n' | 'theme'
+  'overlays' | 'notifications' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
 >;

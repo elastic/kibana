@@ -12,14 +12,9 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 describe('context api', function () {
-  test('createSearchSource when useFieldsApi is true', () => {
+  test('createSearchSource', () => {
     const newSearchSource = createSearchSourceMock({ index: dataViewMock });
-    const searchSource = updateSearchSource(newSearchSource, dataViewMock, [], true);
-    expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
-  });
-  test('createSearchSource when useFieldsApi is false', () => {
-    const newSearchSource = createSearchSourceMock({ index: dataViewMock });
-    const searchSource = updateSearchSource(newSearchSource, dataViewMock, [], false);
+    const searchSource = updateSearchSource(newSearchSource, dataViewMock, []);
     expect(searchSource.getSearchRequestBody()).toMatchSnapshot();
   });
 });

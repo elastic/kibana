@@ -304,4 +304,20 @@ export function registerPolicyRoutes({
       return res.ok({ body: response });
     })
   );
+
+  // Get snapshot lifecycle management status
+  router.get(
+    { path: addBasePath('policies/slm_status'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+
+      try {
+        const response = await clusterClient.asCurrentUser.slm.getStatus();
+
+        return res.ok({ body: response });
+      } catch (e) {
+        return handleEsError({ error: e, response: res });
+      }
+    })
+  );
 }

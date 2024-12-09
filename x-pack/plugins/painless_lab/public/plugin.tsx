@@ -51,16 +51,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       mount: async ({ element }) => {
         const [core] = await getStartServices();
 
-        const {
-          notifications,
-          docLinks,
-          chrome,
-          settings,
-          analytics,
-          i18n: i18nStart,
-          theme,
-        } = core;
-        const startServices = { analytics, i18n: i18nStart, theme };
+        const { notifications, docLinks, chrome, settings, ...startServices } = core;
 
         const license = await firstValueFrom(licensing.license$);
         const licenseStatus = checkLicenseStatus(license);

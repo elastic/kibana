@@ -71,7 +71,6 @@ export class DataPublicPlugin
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
     {
-      bfetch,
       expressions,
       uiActions,
       usageCollection,
@@ -85,7 +84,6 @@ export class DataPublicPlugin
     setTheme(core.theme);
 
     const searchService = this.searchService.setup(core, {
-      bfetch,
       usageCollection,
       expressions,
       management,

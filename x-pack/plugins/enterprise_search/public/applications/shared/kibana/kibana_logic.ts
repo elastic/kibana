@@ -30,7 +30,6 @@ import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors';
 import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
-import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -68,7 +67,6 @@ export interface KibanaLogicProps {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -103,7 +101,6 @@ export interface KibanaValues {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
-  searchPlayground: SearchPlaygroundPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -150,7 +147,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
-    searchPlayground: [props.searchPlayground || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],

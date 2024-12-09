@@ -13,6 +13,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 import { setupPublicBaseUrlConfigWarning } from './public_base_url';
 
@@ -22,12 +23,8 @@ describe('publicBaseUrl warning', () => {
   const i18nStart = i18nServiceMock.createStartContract();
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();
   const theme = themeServiceMock.createStartContract();
-  const startServices = {
-    notifications,
-    analytics,
-    i18n: i18nStart,
-    theme,
-  };
+  const userProfile = userProfileServiceMock.createStart();
+  const startServices = { notifications, analytics, i18n: i18nStart, theme, userProfile };
   const addWarningToastSpy = jest.spyOn(notifications.toasts, 'addWarning');
 
   beforeEach(() => {

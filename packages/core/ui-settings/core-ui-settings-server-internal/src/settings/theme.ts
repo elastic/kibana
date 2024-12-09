@@ -65,6 +65,12 @@ export const getThemeSettings = (
           defaultMessage: `Sync with system`,
         }),
       },
+      deprecation: {
+        message: i18n.translate('core.ui_settings.params.darkModeDeprecation', {
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 10.0.',
+        }),
+        docLinksKey: 'generalSettings',
+      },
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('enabled'),

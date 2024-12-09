@@ -133,7 +133,7 @@ describe('generateSideNavItems', () => {
       },
       {
         deepLink: {
-          link: 'enterpriseSearchApplications:playground',
+          link: 'searchPlayground',
         },
         id: 'unit-test-missing',
       },
