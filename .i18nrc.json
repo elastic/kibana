@@ -146,7 +146,7 @@
     "visTypeXy": "src/platform/plugins/private/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
     "visualizationUiComponents": "src/platform/packages/shared/kbn-visualization-ui-components",
-    "visualizationUtils": "packages/kbn-visualization-utils",
+    "visualizationUtils": "src/platform/packages/shared/kbn-visualization-utils",
     "unifiedDocViewer": ["src/plugins/unified_doc_viewer", "packages/kbn-unified-doc-viewer"],
     "unifiedSearch": "src/platform/plugins/shared/unified_search",
     "unifiedFieldList": "packages/kbn-unified-field-list",
