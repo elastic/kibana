@@ -8,7 +8,6 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { EntityV2 } from '@kbn/entities-schema';
-import { uniq, without } from 'lodash';
 import {
   ReadSourceDefinitionOptions,
   readSourceDefinitions,
@@ -95,9 +94,9 @@ export class EntityClient {
 
     const results = await Promise.allSettled(searches);
     const entities = (
-      results.filter((result) => result.status === 'fulfilled') as PromiseFulfilledResult<
-        EntityV2[]
-      >[]
+      results.filter((result) => result.status === 'fulfilled') as Array<
+        PromiseFulfilledResult<EntityV2[]>
+      >
     ).flatMap((result) => result.value);
     const errors = (
       results.filter((result) => result.status === 'rejected') as PromiseRejectedResult[]
