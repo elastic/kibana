@@ -3576,7 +3576,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -3640,6 +3640,14 @@
             "section": "def-public.HasTimeRange",
             "text": "HasTimeRange"
           },
+          " & ",
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.HasInspectorAdapters",
+            "text": "HasInspectorAdapters"
+          },
           " & Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -3673,7 +3681,7 @@
         "signature": [
           "Omit<",
           "SearchEmbeddableState",
-          ", \"rows\" | \"searchSource\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
+          ", \"rows\" | \"searchSource\" | \"inspectorAdapters\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
           "SerializableSavedSearch",
           ", \"serializedSearchSource\"> & ",
           {

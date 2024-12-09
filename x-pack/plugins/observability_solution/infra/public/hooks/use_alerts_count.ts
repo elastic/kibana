@@ -12,17 +12,19 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/const
 import { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ValidFeatureId } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 
 import { InfraClientCoreStart } from '../types';
 
 interface UseAlertsCountProps {
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   query?: estypes.QueryDslQueryContainer;
 }
 
 interface FetchAlertsCountParams {
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   query?: estypes.QueryDslQueryContainer;
   http: HttpSetup;
   signal: AbortSignal;
@@ -35,7 +37,7 @@ export interface AlertsCount {
 
 const ALERT_STATUS = 'kibana.alert.status';
 
-export function useAlertsCount({ featureIds, query }: UseAlertsCountProps) {
+export function useAlertsCount({ ruleTypeIds, consumers, query }: UseAlertsCountProps) {
   const { http } = useKibana<InfraClientCoreStart>().services;
 
   const abortCtrlRef = useRef(new AbortController());
@@ -45,13 +47,14 @@ export function useAlertsCount({ featureIds, query }: UseAlertsCountProps) {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
       return fetchAlertsCount({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         query,
         http,
         signal: abortCtrlRef.current.signal,
       });
     },
-    [featureIds, query, http],
+    [ruleTypeIds, query, http],
     { loading: true }
   );
 
@@ -70,7 +73,8 @@ export function useAlertsCount({ featureIds, query }: UseAlertsCountProps) {
 }
 
 async function fetchAlertsCount({
-  featureIds,
+  ruleTypeIds,
+  consumers,
   http,
   query,
   signal,
@@ -84,7 +88,8 @@ async function fetchAlertsCount({
             terms: { field: ALERT_STATUS },
           },
         },
-        feature_ids: featureIds,
+        rule_type_ids: ruleTypeIds,
+        consumers,
         query,
         size: 0,
       }),

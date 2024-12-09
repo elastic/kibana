@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_series_storage';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useExpViewTimeRange } from './use_time_range';
 import { ReportTypes } from '../configurations/constants';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -43,9 +43,14 @@ const mockMultipleSeries = [
 describe('useExpViewTimeRange', function () {
   const storage = createKbnUrlStateStorage({ useHash: false });
 
-  function Wrapper({ children }: { children: JSX.Element }) {
-    return <UrlStorageContextProvider storage={storage}>{children}</UrlStorageContextProvider>;
+  function Wrapper({ children }: React.PropsWithChildren) {
+    return (
+      <UrlStorageContextProvider storage={storage}>
+        {React.createElement(React.Fragment, {}, children)}
+      </UrlStorageContextProvider>
+    );
   }
+
   it('should return expected result when there is one series', async function () {
     await storage.set(allSeriesKey, mockSingleSeries);
     await storage.set(reportTypeKey, ReportTypes.KPI);
