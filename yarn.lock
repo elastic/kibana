@@ -8782,15 +8782,15 @@
   dependencies:
     lodash.isempty "4.4.0"
 
-"@openfeature/server-sdk@^1.16.1":
-  version "1.16.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.16.1.tgz#2f32aeca5ff8d5e97deb2ee8a72daae38cc40461"
-  integrity sha512-5xcsuQTyomKFSs+VbW1fGZATGFE1mLewHZ220IRzLtlSeNNRoRIpYMtkxn7N9dG9k+rqikv+SrVD0/LoPDJiqg==
+"@openfeature/server-sdk@^1.16.2":
+  version "1.16.2"
+  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.16.2.tgz#37fd94e6e9f8c4289f5ac2d42db800e466a93594"
+  integrity sha512-bGK3Lgf9JY06s1vJkBs1PgSH+taxrwBx/SJFTNWAmA5TfV3c5SgLCGlU2xYEda5Ba3885ly+foWeRJrXdZGQ+g==
 
-"@openfeature/web-sdk@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.3.1.tgz#001bfdcb5cb38b760670a319d66cf3d0febf2b6d"
-  integrity sha512-KpsekYseZ0zQcDa/WzylqBA5SOxS4xv2goEZl2SB4nd6lEJMTEW2qOkXPhJiV3qXAt8bcrv+Yr0sbCwJ+u+U/Q==
+"@openfeature/web-sdk@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.3.2.tgz#c7f5b5b2adc08d1168022d3975f3f5ec771706ab"
+  integrity sha512-DY7JwA4Pakczq/s6em8hsLuCL8xYfKeyzb9F18gM3Eh0OStUxrUsKfDKuAk1h9l810W1hoA1AVmvPSsQDHItxw==
 
 "@opentelemetry/api-metrics@0.31.0", "@opentelemetry/api-metrics@^0.31.0":
   version "0.31.0"
