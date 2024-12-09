@@ -12,7 +12,7 @@
     "bfetchError": "packages/kbn-bfetch-error",
     "cases": ["packages/kbn-cases-components"],
     "cellActions": "packages/kbn-cell-actions",
-    "charts": "src/plugins/charts",
+    "charts": "src/platform/plugins/shared/charts",
     "console": "src/plugins/console",
     "contentManagement": "packages/content-management",
     "core": ["src/core", "packages/core"],
