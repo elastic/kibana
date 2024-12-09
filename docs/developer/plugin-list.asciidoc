@@ -278,7 +278,7 @@ It also provides a stateful version of it on the start contract.
 Content is fetched from the remote (https://feeds.elastic.co) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
 
-|{kib-repo}blob/{branch}/src/plugins/no_data_page/README.md[noDataPage]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/no_data_page/README.md[noDataPage]
 |Helps to globally configure the no data page components
 
 

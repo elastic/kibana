@@ -627,6 +627,7 @@ src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
+src/platform/plugins/private/no_data_page @elastic/appex-sharedux
 src/platform/plugins/shared/bfetch @elastic/appex-sharedux
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/esql @elastic/kibana-esql
@@ -680,7 +681,6 @@ src/plugins/links @elastic/kibana-presentation
 src/plugins/management @elastic/kibana-management
 src/plugins/maps_ems @elastic/kibana-presentation
 src/plugins/newsfeed @elastic/kibana-core
-src/plugins/no_data_page @elastic/appex-sharedux
 src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 src/plugins/saved_objects @elastic/appex-sharedux

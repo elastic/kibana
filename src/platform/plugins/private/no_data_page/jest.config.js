@@ -9,9 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/no_data_page'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/no_data_page',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/private/no_data_page'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/no_data_page',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/no_data_page/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/src/platform/plugins/private/no_data_page/{common,public,server}/**/*.{ts,tsx}'],
 };
