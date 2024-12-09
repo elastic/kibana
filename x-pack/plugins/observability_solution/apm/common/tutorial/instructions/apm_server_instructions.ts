@@ -137,7 +137,7 @@ PowerShell.\n5. From the PowerShell prompt, run the following commands to instal
           apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
         },
       }),
-      commands: [`cd 'C:\\Program Files\\APM-Server'`, `.\\install-service-apm-server.ps1`],
+      commands: [`cd 'C:\\Program Files\\APM-Server'`, `.\\install-service.ps1`],
       textPost: i18n.translate('xpack.apm.tutorial.windowsServerInstructions.textPost', {
         defaultMessage:
           'Note: If script execution is disabled on your system, \
@@ -145,7 +145,7 @@ you need to set the execution policy for the current session \
 to allow the script to run. For example: {command}.',
         values: {
           command:
-            '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`',
+            '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service.ps1`',
         },
       }),
     },
