@@ -38,7 +38,7 @@ export interface CreatePackagePolicyParams {
   from: EditPackagePolicyFrom;
   queryParamsPolicyId?: string;
   prerelease: boolean;
-  onAddAgent?: (params: { selectedAgentPolicies: AgentPolicy[] }) => void;
-  onCancel?: () => void;
+  onAddAgent: (param?: { selectedAgentPolicies: AgentPolicy[] }) => void;
+  onCancel: () => void;
   withHeader?: boolean;
 }

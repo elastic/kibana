@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DASHBOARD_APP_ID, createDashboardEditUrl } from '@kbn/dashboard-plugin/public';
 
-import { useIntraAppState, useLink, useStartServices } from '../../../../../hooks';
+import { useIntraAppState, useStartServices } from '../../../../../hooks';
 
 import {
   ConfirmIncomingDataWithPreview,
@@ -98,7 +98,7 @@ export const ConfirmDataStepFromOnboardingHub: React.FC<EmbeddedIntegrationSteps
 
   const handleAddAnotherIntegration = () => {
     // Close the modal
-    onCancel?.();
+    onCancel();
   };
 
   const viewKubernetesMetricsDashboards = useCallback(() => {

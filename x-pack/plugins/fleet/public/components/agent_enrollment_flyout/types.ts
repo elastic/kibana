@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EditPackagePolicyFrom } from '../../applications/fleet/sections/agent_policy/create_package_policy_page/types';
 import type { AgentPolicy, DownloadSource, FleetProxy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
@@ -94,4 +95,5 @@ export interface InstructionProps extends BaseProps {
   downloadSourceProxy?: FleetProxy;
   hasIncomingDataStep?: boolean;
   handleAddFleetServer?: () => void;
+  from?: EditPackagePolicyFrom;
 }

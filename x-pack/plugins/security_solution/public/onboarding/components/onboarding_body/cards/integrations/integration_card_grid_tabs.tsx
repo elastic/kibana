@@ -76,12 +76,13 @@ const FleetIntegrationsStateContextProvider = lazy(async () => ({
     .then((pkg) => pkg.FleetIntegrationsStateContextProvider),
 }));
 
-const integrationStepMap = {
-  0: 'Add integration',
-  1: 'Install Elastic Agent',
-  2: 'Add Fleet server',
-  3: 'Confirm incoming data',
-};
+const integrationStepMap = [
+  'Add integration',
+  'Check fleet server requirement',
+  'Add Fleet server',
+  'Install Elastic Agent',
+  'Confirm incoming data',
+];
 
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
@@ -108,18 +109,19 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     );
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [integrationName, setIntegrationName] = useState();
+    const [integrationName, setIntegrationName] = useState<string>();
     const [modalView, setModalView] = useState<'overview' | 'configure-integration' | 'add-agent'>(
       'overview'
     );
-    const [integrationStep, setIntegrationStep] = useState(0);
+    const [integrationStep, onStepNext] = useState(0);
     const onAddIntegrationPolicyClick = useCallback(() => {
       setModalView('configure-integration');
     }, []);
     const closeModal = useCallback(() => {
       setIsModalVisible(false);
       setModalView('overview');
-      setIntegrationStep(0);
+      setSelectedDetailsTab('overview');
+      onStepNext(0);
     }, []);
     const onCardClicked = useCallback((name: string) => {
       setIsModalVisible(true);
@@ -294,9 +296,8 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
                     <CreatePackagePolicyPage
                       useMultiPageLayoutProp={true}
                       originFrom="onboarding-hub"
-                      propPolicyId=""
                       integrationName={integrationName}
-                      setIntegrationStep={setIntegrationStep}
+                      onStepNext={onStepNext}
                       onCancel={closeModal}
                       handleViewAssets={handleViewAssets}
                     />

@@ -161,7 +161,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
-  hasIncomingDataStep = true,
+  from,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -274,7 +274,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         })
       );
     }
-    if (selectedPolicy && hasIncomingDataStep) {
+    if (selectedPolicy && from !== 'onboarding-hub') {
       steps.push(
         IncomingDataConfirmationStep({
           agentIds: enrolledAgentIds,
@@ -298,7 +298,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     selectionType,
     cloudSecurityIntegration,
     apiKeyData,
-    hasIncomingDataStep,
+    from,
     mode,
     setMode,
     enrollToken,
