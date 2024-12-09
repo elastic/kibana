@@ -7248,7 +7248,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/share-plugin@link:src/plugins/share":
+"@kbn/share-plugin@link:src/platform/plugins/shared/share":
   version "0.0.0"
   uid ""
 

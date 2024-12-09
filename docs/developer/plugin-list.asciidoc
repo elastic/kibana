@@ -315,7 +315,7 @@ oss plugins.
 |The service exposed by this plugin informs consumers whether they should optimize for non-interactivity. In this way plugins can avoid loading unnecessary code, data or other services.
 
 
-|{kib-repo}blob/{branch}/src/plugins/share/README.mdx[share]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/share/README.mdx[share]
 |The share plugin contains various utilities for displaying sharing context menu,
 generating deep links to other apps using locators, and creating short URLs.
 
