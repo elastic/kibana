@@ -1282,7 +1282,7 @@ describe('ConfigureCases', () => {
       expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
     });
 
-    it('opens fly out for when click on add field', async () => {
+    it('opens fly out for when click on add observable type', async () => {
       appMockRender.render(<ConfigureCases />);
 
       await userEvent.click(screen.getByTestId('add-observable-type'));
@@ -1302,6 +1302,30 @@ describe('ConfigureCases', () => {
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('common-flyout-cancel'));
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
+
+    it('closes fly out and updates the data when click on save', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('observable-type-label-input'));
+      await userEvent.paste('added');
+
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith(
+          expect.objectContaining({
+            observableTypes: [expect.objectContaining({ key: expect.any(String), label: 'added' })],
+          })
+        );
+      });
 
       expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
