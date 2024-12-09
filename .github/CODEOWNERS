@@ -639,6 +639,7 @@ src/platform/plugins/shared/data @elastic/kibana-visualizations @elastic/kibana-
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/expressions @elastic/kibana-visualizations
+src/platform/plugins/shared/unified_search @elastic/kibana-visualizations
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
@@ -698,7 +699,6 @@ src/plugins/ui_actions @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
 src/plugins/unified_doc_viewer @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
-src/plugins/unified_search @elastic/kibana-visualizations
 src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/usage_collection @elastic/kibana-core
 src/plugins/vis_default_editor @elastic/kibana-visualizations
