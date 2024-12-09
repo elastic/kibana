@@ -83,7 +83,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('has created a valid simple alert with expected parameters', async () => {
       let alert: any;
       await retry.tryForTime(15000, async () => {
-        const apiResponse = await supertest.get(`/api/alerts/_find?search=Simple status alert`);
+        const apiResponse = await supertest.get(
+          `/api/alerting/rules/_find?search=Simple status alert`
+        );
         const alertsFromThisTest = apiResponse.body.data.filter(({ params }: { params: any }) =>
           params.search.includes(monitorId)
         );
