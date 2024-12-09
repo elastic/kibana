@@ -236,6 +236,34 @@ describe('Rule Definition', () => {
     expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
   });
 
+  test('Hides consumer selection if there are irrelevant consumers and only 1 consumer to select', () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelect: true,
+      validConsumers: ['logs', 'observability'],
+    });
+
+    render(<RuleDefinition />);
+
+    expect(screen.queryByTestId('ruleConsumerSelection')).not.toBeInTheDocument();
+  });
+
   test('Hides consumer selection if valid consumers contain observability', () => {
     useRuleFormState.mockReturnValue({
       plugins,
