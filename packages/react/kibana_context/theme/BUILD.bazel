@@ -25,7 +25,7 @@ BUNDLER_DEPS = [
   "@npm//react",
   "@npm//tslib",
   "@npm//react-use",
-  "//packages/react/kibana_context/common",
+  "//src/platform/packages/shared/react/kibana_context/common",
   "//packages/react/kibana_context/root",
 ]
 
