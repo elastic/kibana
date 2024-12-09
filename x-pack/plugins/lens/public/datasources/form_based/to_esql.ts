@@ -101,24 +101,26 @@ export function getESQLForLayer(
 
       if (!def.toESQL) return undefined;
 
-      let metricESQL =
-        `${esAggsId} = ` +
-        def.toESQL!(
-          {
-            ...col,
-            timeShift: resolveTimeShift(
-              col.timeShift,
-              absDateRange,
-              histogramBarsTarget,
-              hasDateHistogram
-            ),
-          },
-          wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
-          indexPattern,
-          layer,
-          uiSettings,
-          dateRange
-        );
+      let metricESQL = def.toESQL!(
+        {
+          ...col,
+          timeShift: resolveTimeShift(
+            col.timeShift,
+            absDateRange,
+            histogramBarsTarget,
+            hasDateHistogram
+          ),
+        },
+        wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
+        indexPattern,
+        layer,
+        uiSettings,
+        dateRange
+      );
+
+      if (!metricESQL) return undefined;
+
+      metricESQL = `${esAggsId} = ` + metricESQL;
 
       if (wrapInFilter || wrapInTimeFilter) {
         const conditions: string[] = [];
@@ -163,12 +165,28 @@ export function getESQLForLayer(
         const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
         const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
+        const cleanInterval = (i: string) => {
+          switch (i) {
+            case 'd':
+              return '1d';
+            case 'h':
+              return '1h';
+            case 'm':
+              return '1m';
+            case 's':
+              return '1s';
+            case 'ms':
+              return '1ms';
+            default:
+              return i;
+          }
+        };
         esAggsId = dateHistogramColumn.sourceField;
         const kibanaInterval =
           dateHistogramColumn.params?.interval === 'auto'
             ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
             : dateHistogramColumn.params?.interval || '1h';
-        const esInterval = convertIntervalToEsInterval(kibanaInterval);
+        const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
         interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
       }
 

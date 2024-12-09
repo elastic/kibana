@@ -50,9 +50,13 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
             ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
             sourceParams: {
               ...(column.meta?.sourceParams ?? {}),
-              sourceField: originalColumn.sourceField,
-              operationType: originalColumn.operationType,
-              interval: originalColumn.interval,
+              ...('sourceField' in originalColumn
+                ? { sourceField: originalColumn.sourceField }
+                : {}),
+              ...('operationType' in originalColumn
+                ? { operationType: originalColumn.operationType }
+                : {}),
+              ...('interval' in originalColumn ? { interval: originalColumn.interval } : {}),
             },
           },
         };

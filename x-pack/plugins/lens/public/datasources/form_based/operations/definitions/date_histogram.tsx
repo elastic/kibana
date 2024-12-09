@@ -109,7 +109,7 @@ function getTimeZoneAndInterval(
   return { usedField, timeZone, interval };
 }
 
-function mapToEsqlInterval(dateRange: DateRange, _interval: string) {
+export function mapToEsqlInterval(dateRange: DateRange, _interval: string) {
   if (_interval !== 'm' && _interval.endsWith('m')) {
     return _interval.replace('m', ' minutes');
   }

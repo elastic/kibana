@@ -173,7 +173,8 @@ function getExpressionForLayer(
 
     // esql mode variables
     const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
-    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
+    const canUseESQL =
+      !searchSessionId && lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
     const esqlLayer =
       canUseESQL &&
       getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
