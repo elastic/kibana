@@ -875,6 +875,7 @@ x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
+x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
@@ -991,7 +992,6 @@ x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
-x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/test
