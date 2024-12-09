@@ -127,7 +127,7 @@ describe('When the tabular page is loaded', () => {
   it('should only disable delete action for preconfigured endpoints', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    const deleteActions = screen.getAllByTestId('inferenceUIDeleteAction');
+    const deleteActions = screen.getAllByTestId(/inferenceUIDeleteAction/);
 
     expect(deleteActions[0]).toBeDisabled();
     expect(deleteActions[1]).toBeDisabled();
