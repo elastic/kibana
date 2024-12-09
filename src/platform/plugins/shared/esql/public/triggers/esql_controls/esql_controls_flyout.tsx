@@ -38,6 +38,8 @@ import {
   getESQLResults,
 } from '@kbn/esql-utils';
 import { type ESQLColumn, parse, walk } from '@kbn/esql-ast';
+import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
+import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { esqlVariablesService } from '../../../common';
@@ -317,12 +319,14 @@ export function ESQLControlsFlyout({
 
   useEffect(() => {
     if (controlType === EsqlControlType.FIELDS && !availableFieldsOptions.length) {
-      const indexPattern = getIndexPatternFromESQLQuery(queryString);
-      if (!indexPattern) {
-        return;
-      }
+      // get the valid query until the prev command and get the columns
+      const { root } = parse(queryString);
+      const queryForFields = getQueryForFields(
+        buildQueryUntilPreviousCommand(root.commands, queryString),
+        root.commands
+      );
       getESQLQueryColumnsRaw({
-        esqlQuery: `from ${indexPattern}`,
+        esqlQuery: queryForFields,
         search,
       }).then((columns) => {
         setAvailableFieldsOptions(
