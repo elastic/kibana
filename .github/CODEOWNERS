@@ -867,6 +867,7 @@ x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
+x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/plugins/actions @elastic/response-ops
@@ -902,7 +903,6 @@ x-pack/plugins/features @elastic/kibana-core
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
 x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 x-pack/plugins/fleet @elastic/fleet
-x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/grokdebugger @elastic/kibana-management
 x-pack/plugins/index_lifecycle_management @elastic/kibana-management
