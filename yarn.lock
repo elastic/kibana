@@ -4244,7 +4244,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-plugin@link:src/plugins/content_management":
+"@kbn/content-management-plugin@link:src/platform/plugins/shared/content_management":
   version "0.0.0"
   uid ""
 

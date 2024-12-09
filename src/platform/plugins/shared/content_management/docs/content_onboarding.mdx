@@ -236,7 +236,7 @@ Once we have all our TS types defined and our CM ServicesDefinition map, we can 
 /**
  * Import the map of CM services definitions that we created earlier.
  */
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
+import { cmServicesDefinition } from '../../../../common/content_management/cm_services';
 
 /**
  * It is a good practice to not directly exposes the SO document fields, specially the "attributes" object.
@@ -465,7 +465,7 @@ This step is optional but it is recommended. Indeed, we could access the CM publ
 
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 
-import type { MapGetIn, MapGetOut, MapCreateIn, MapCreateOut, ... } from '../../common/content_management';
+import type { MapGetIn, MapGetOut, MapCreateIn, MapCreateOut, ... } from '../../../../common/content_management';
 import { getContentManagement } from '../kibana_services';
 
 const get = async (id: string) => {

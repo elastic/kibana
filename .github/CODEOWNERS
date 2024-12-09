@@ -625,6 +625,7 @@ src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/shared/bfetch @elastic/appex-sharedux
+src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
@@ -638,7 +639,6 @@ src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
 src/plugins/console @elastic/kibana-management
-src/plugins/content_management @elastic/appex-sharedux
 src/plugins/controls @elastic/kibana-presentation
 src/plugins/custom_integrations @elastic/fleet
 src/plugins/dashboard @elastic/kibana-presentation
