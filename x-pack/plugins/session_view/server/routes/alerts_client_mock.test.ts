@@ -13,7 +13,6 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
 import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -23,11 +22,6 @@ import {
   ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
-
-export const alertingAuthMock = alertingAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-
-const DEFAULT_SPACE = 'test_default_space_id';
 
 const getResponse = async () => {
   return {
@@ -56,73 +50,62 @@ const getResponse = async () => {
   };
 };
 
-const esClientMock = elasticsearchServiceMock.createElasticsearchClient(getResponse());
-const getAlertIndicesAliasMock = jest.fn();
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
-  logger: loggingSystemMock.create().get(),
-  authorization: alertingAuthMock,
-  auditLogger,
-  ruleDataService: ruleDataServiceMock.create(),
-  esClient: esClientMock,
-  getRuleType: jest.fn(),
-  getRuleList: jest.fn(),
-  getAlertIndicesAlias: getAlertIndicesAliasMock,
-};
+const createAlertsClientParams = () => {
+  const getAlertIndicesAliasMock = jest.fn();
+  const alertingAuthMock = alertingAuthorizationMock.create();
 
-export function getAlertsClientMockInstance(esClient?: ElasticsearchClient) {
-  esClient = esClient || elasticsearchServiceMock.createElasticsearchClient(getResponse());
-
-  const alertsClient = new AlertsClient({ ...alertsClientParams, esClient });
-
-  return alertsClient;
-}
-
-export function resetAlertingAuthMock() {
-  alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
-  // @ts-expect-error
-  alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
-    Promise.resolve({ filter: [] })
-  );
-  // @ts-expect-error
-  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
-    const authorizedRuleTypes = new Set();
-    authorizedRuleTypes.add({ producer: 'apm' });
-    return Promise.resolve({ authorizedRuleTypes });
-  });
-  // @ts-expect-error
-  alertingAuthMock.getAuthorizedRuleTypes.mockImplementation(async () => {
-    const authorizedRuleTypes = [
+  const authorizedRuleTypes = new Map([
+    [
+      'apm.error_rate',
       {
         producer: 'apm',
         id: 'apm.error_rate',
         alerts: {
           context: 'observability.apm',
         },
+        authorizedConsumers: {},
       },
-    ];
-    return Promise.resolve(authorizedRuleTypes);
+    ],
+  ]);
+
+  alertingAuthMock.getSpaceId.mockImplementation(() => 'test_default_space_id');
+  alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
+    hasAllRequested: true,
+    authorizedRuleTypes,
   });
+
+  alertingAuthMock.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(authorizedRuleTypes);
   getAlertIndicesAliasMock.mockReturnValue(['.alerts-observability.apm-default']);
 
-  alertingAuthMock.ensureAuthorized.mockImplementation(
-    // @ts-expect-error
-    async ({
-      ruleTypeId,
-      consumer,
-      operation,
-      entity,
-    }: {
-      ruleTypeId: string;
-      consumer: string;
-      operation: string;
-      entity: typeof AlertingAuthorizationEntity.Alert;
-    }) => {
-      if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
-        return Promise.resolve();
-      }
-      return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  alertingAuthMock.ensureAuthorized.mockImplementation(async ({ ruleTypeId, consumer }) => {
+    if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
+      return Promise.resolve();
     }
-  );
+    return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  });
+
+  const auditLogger = auditLoggerMock.create();
+  const esClientMock = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+  const alertsClientParams: jest.Mocked<ConstructorOptions> = {
+    logger: loggingSystemMock.create().get(),
+    authorization: alertingAuthMock,
+    auditLogger,
+    ruleDataService: ruleDataServiceMock.create(),
+    esClient: esClientMock,
+    getRuleType: jest.fn(),
+    getRuleList: jest.fn(),
+    getAlertIndicesAlias: getAlertIndicesAliasMock,
+  };
+
+  return alertsClientParams;
+};
+
+export function getAlertsClientMockInstance(esClient?: ElasticsearchClient) {
+  esClient = esClient || elasticsearchServiceMock.createElasticsearchClient(getResponse());
+
+  const alertsClient = new AlertsClient({ ...createAlertsClientParams(), esClient });
+
+  return alertsClient;
 }
 
 // this is only here because the above imports complain if they aren't declared as part of a test file.

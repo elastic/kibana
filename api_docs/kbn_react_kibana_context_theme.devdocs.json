@@ -29,7 +29,7 @@
           "\nA Kibana-specific theme provider that uses the Kibana theme service to customize the EUI theme.\n\nIf the theme provider is missing a parent EuiProvider, one will automatically be rendered instead."
         ],
         "signature": [
-          "({ theme, children, ...props }: ",
+          "({ theme, userProfile, children, ...props }: ",
           {
             "pluginId": "@kbn/react-kibana-context-theme",
             "scope": "common",
@@ -85,7 +85,15 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          ") => React.JSX.Element"
+          ", userProfile?: ",
+          {
+            "pluginId": "@kbn/core-user-profile-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+            "section": "def-public.UserProfileService",
+            "text": "UserProfileService"
+          },
+          " | undefined) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/theme/with_theme.tsx",
         "deprecated": false,
@@ -130,6 +138,28 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-common.wrapWithTheme.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              " | undefined"
+            ],
+            "path": "packages/react/kibana_context/theme/with_theme.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -219,6 +249,30 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               }
+            ],
+            "path": "packages/react/kibana_context/theme/theme_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-common.KibanaThemeProviderProps.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "The `UserProfileService` start API."
+            ],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              ", \"getUserProfile$\"> | undefined"
             ],
             "path": "packages/react/kibana_context/theme/theme_provider.tsx",
             "deprecated": false,

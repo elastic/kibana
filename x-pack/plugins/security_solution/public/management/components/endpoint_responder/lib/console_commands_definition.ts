@@ -153,6 +153,8 @@ export interface GetEndpointConsoleCommandsOptions {
   /** Applicable only for Endpoint Agents */
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
+  /** Host's platform: windows, linux, macos */
+  platform: string;
 }
 
 export const getEndpointConsoleCommands = ({
@@ -160,6 +162,7 @@ export const getEndpointConsoleCommands = ({
   agentType,
   endpointCapabilities,
   endpointPrivileges,
+  platform,
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
 
@@ -523,7 +526,7 @@ export const getEndpointConsoleCommands = ({
 
   switch (agentType) {
     case 'sentinel_one':
-      return adjustCommandsForSentinelOne({ commandList: consoleCommands });
+      return adjustCommandsForSentinelOne({ commandList: consoleCommands, platform });
     case 'crowdstrike':
       return adjustCommandsForCrowdstrike({ commandList: consoleCommands });
     default:
@@ -543,8 +546,10 @@ const disableCommand = (command: CommandDefinition, agentType: ResponseActionAge
 /** @private */
 const adjustCommandsForSentinelOne = ({
   commandList,
+  platform,
 }: {
   commandList: CommandDefinition[];
+  platform: string;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
@@ -580,6 +585,28 @@ const adjustCommandsForSentinelOne = ({
       )
     ) {
       disableCommand(command, 'sentinel_one');
+    } else {
+      // processes is not currently supported for Windows hosts
+      if (command.name === 'processes' && platform.toLowerCase() === 'windows') {
+        const message = i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.sentineloneProcessesWindowRestriction',
+          {
+            defaultMessage:
+              'Processes command is not currently supported for SentinelOne hosts running on Windows',
+          }
+        );
+
+        command.helpDisabled = true;
+        command.about = getCommandAboutInfo({
+          aboutInfo: command.about,
+          isSupported: false,
+          dataTestSubj: 'sentineloneProcessesWindowsWarningTooltip',
+          tooltipContent: message,
+        });
+        command.validate = () => {
+          return message;
+        };
+      }
     }
 
     return command;

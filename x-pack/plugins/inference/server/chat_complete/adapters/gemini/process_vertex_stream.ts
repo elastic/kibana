@@ -18,18 +18,6 @@ export function processVertexStream() {
   return (source: Observable<GenerateContentResponseChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext(value: GenerateContentResponseChunk) {
-        // completion: only present on last chunk
-        if (value.usageMetadata) {
-          subscriber.next({
-            type: ChatCompletionEventType.ChatCompletionTokenCount,
-            tokens: {
-              prompt: value.usageMetadata.promptTokenCount,
-              completion: value.usageMetadata.candidatesTokenCount,
-              total: value.usageMetadata.totalTokenCount,
-            },
-          });
-        }
-
         const contentPart = value.candidates?.[0].content.parts[0];
         const completion = contentPart?.text;
         const toolCall = contentPart?.functionCall;
@@ -47,6 +35,19 @@ export function processVertexStream() {
                   },
                 ]
               : [],
+          });
+        }
+
+        // 'usageMetadata' can be present as an empty object on chunks
+        // only the last chunk will have its fields populated
+        if (value.usageMetadata?.totalTokenCount) {
+          subscriber.next({
+            type: ChatCompletionEventType.ChatCompletionTokenCount,
+            tokens: {
+              prompt: value.usageMetadata.promptTokenCount,
+              completion: value.usageMetadata.candidatesTokenCount,
+              total: value.usageMetadata.totalTokenCount,
+            },
           });
         }
       }
