@@ -9,7 +9,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/private/kbn-random-sampling'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/packages/private/kbn-random-sampling',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/packages/private/kbn-random-sampling',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/packages/private/kbn-random-sampling/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/packages/private/kbn-random-sampling/public/**/*.{ts,tsx}',
+  ],
 };
