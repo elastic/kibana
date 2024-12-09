@@ -20,7 +20,7 @@ import {
   findSloDefinitionsParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
-  getSLOInstancesParamsSchema,
+  getSLOGroupingsParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   putSLOServerlessSettingsParamsSchema,
@@ -49,7 +49,7 @@ import { FindSLODefinitions } from '../../services/find_slo_definitions';
 import { getBurnRates } from '../../services/get_burn_rates';
 import { getGlobalDiagnosis } from '../../services/get_diagnosis';
 import { GetPreviewData } from '../../services/get_preview_data';
-import { GetSLOInstances } from '../../services/get_slo_instances';
+import { GetSLOGroupings } from '../../services/get_slo_groupings';
 import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
 import { GetSLOsOverview } from '../../services/get_slos_overview';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
@@ -598,24 +598,32 @@ const fetchHistoricalSummary = createSloServerRoute({
   },
 });
 
-const getSLOInstancesRoute = createSloServerRoute({
-  endpoint: 'GET /internal/observability/slos/{id}/_instances',
+const getSLOGroupingsRoute = createSloServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_groupings',
   options: { access: 'internal' },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: getSLOInstancesParamsSchema,
-  handler: async ({ context, params, logger, plugins }) => {
+  params: getSLOGroupingsParamsSchema,
+  handler: async ({ context, params, request, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
-
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const getSLOInstances = new GetSLOInstances(repository, esClient);
+    const [spaceId, settings] = await Promise.all([
+      getSpaceId(plugins, request),
+      getSloSettings(soClient),
+    ]);
 
-    return await executeWithErrorHandler(() => getSLOInstances.execute(params.path.id));
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const definitionClient = new SloDefinitionClient(repository, esClient, logger);
+
+    const getSLOGroupings = new GetSLOGroupings(definitionClient, esClient, settings, spaceId);
+
+    return await executeWithErrorHandler(() =>
+      getSLOGroupings.execute(params.path.id, params.query)
+    );
   },
 });
 
@@ -819,7 +827,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getDiagnosisRoute,
     ...getSloBurnRates,
     ...getPreviewData,
-    ...getSLOInstancesRoute,
+    ...getSLOGroupingsRoute,
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
