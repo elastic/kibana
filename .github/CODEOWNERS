@@ -545,7 +545,6 @@ packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/kbn-zod @elastic/kibana-core
 packages/kbn-zod-helpers @elastic/security-detection-rule-management
-packages/presentation/presentation_publishing @elastic/kibana-presentation
 packages/react/kibana_context/common @elastic/appex-sharedux
 packages/react/kibana_context/render @elastic/appex-sharedux
 packages/react/kibana_context/root @elastic/appex-sharedux
@@ -624,6 +623,7 @@ src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/packages/shared/presentation/presentation_containers @elastic/kibana-presentation
+src/platform/packages/shared/presentation/presentation_publishing @elastic/kibana-presentation
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
