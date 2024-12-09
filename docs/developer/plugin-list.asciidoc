@@ -960,7 +960,7 @@ For adding localizations and instrument a ui to support translated content, see 
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/upgrade_assistant/README.md[upgradeAssistant]
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
