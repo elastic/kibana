@@ -7,8 +7,11 @@ Check the [overview guidelines](https://www.elastic.co/guide/en/integrations-dev
 
 ## Datastreams
 
-Provide a high-level overview of the kind of data that is collected by the integration. 
-Check the [datastreams guidelines](https://www.elastic.co/guide/en/integrations-developer/current/documentation-guidelines.html#idg-docs-guidelines-datastreams) for more information.
+{% for datastream in datastreams %}
+### {{ datastream.title }}
+
+{{ datastream.description }}
+{% endfor %}
 
 ## Requirements
 
