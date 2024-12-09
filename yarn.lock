@@ -6908,6 +6908,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-info@link:packages/kbn-scout-info":
+  version "0.0.0"
+  uid ""
+
+"@kbn/scout-reporting@link:packages/kbn-scout-reporting":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout@link:packages/kbn-scout":
   version "0.0.0"
   uid ""

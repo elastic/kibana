@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as cli from './src/cli';
-export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
-export type {
-  ScoutPage,
-  ScoutPlaywrightOptions,
-  ScoutTestOptions,
-  PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  EsArchiverFixture,
-} from './src/playwright';
-
-export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
+export { initializeReportDatastream } from './initialize_report_datastream';
+export { uploadEvents } from './upload_events';
