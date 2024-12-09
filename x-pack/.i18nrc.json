@@ -125,7 +125,7 @@
     ],
     "xpack.rollupJobs": [
       "platform/packages/private/rollup",
-      "plugins/rollup"
+      "platform/plugins/private/rollup"
     ],
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",

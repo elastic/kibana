@@ -6800,7 +6800,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rollup-plugin@link:x-pack/plugins/rollup":
+"@kbn/rollup-plugin@link:x-pack/platform/plugins/private/rollup":
   version "0.0.0"
   uid ""
 
