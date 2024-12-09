@@ -7336,7 +7336,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown-types@link:packages/shared-ux/markdown/types":
+"@kbn/shared-ux-markdown-types@link:src/platform/packages/shared/shared-ux/markdown/types":
   version "0.0.0"
   uid ""
 
