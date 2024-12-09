@@ -15,7 +15,9 @@ import { type GlobalVisitorContext, SharedData } from './global_visitor_context'
 import { children, firstItem, singleItems } from './utils';
 import type {
   ESQLAstCommand,
+  ESQLAstExpression,
   ESQLAstItem,
+  ESQLAstJoinCommand,
   ESQLAstNodeWithArgs,
   ESQLAstNodeWithChildren,
   ESQLAstRenameExpression,
@@ -23,12 +25,12 @@ import type {
   ESQLCommandOption,
   ESQLDecimalLiteral,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLInlineCast,
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
   ESQLOrderExpression,
-  ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -86,7 +88,7 @@ export class VisitorContext<
     const node = this.node;
 
     if (!isNodeWithArgs(node)) {
-      throw new Error('Node does not have arguments');
+      return;
     }
 
     for (const arg of singleItems(node.args)) {
@@ -467,6 +469,12 @@ export class MvExpandCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
+// <LOOKUP | LEFT | RIGHT> JOIN <target> ON <condition>
+export class JoinCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
+
 // Expressions -----------------------------------------------------------------
 
 export class ExpressionVisitorContext<
@@ -541,7 +549,7 @@ export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {
-  public value(): ESQLSingleAstItem {
+  public value(): ESQLAstExpression {
     this.ctx.assertMethodExists('visitExpression');
 
     const value = firstItem([this.node.value])!;
@@ -567,3 +575,8 @@ export class OrderExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLOrderExpression> {}
+
+export class IdentifierExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLIdentifier> {}

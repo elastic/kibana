@@ -32,10 +32,15 @@ export const MockRuleMigrationsDataResourcesClient = jest
   .fn()
   .mockImplementation(() => mockRuleMigrationsDataResourcesClient);
 
+export const mockRuleMigrationsDataIntegrationsClient = {
+  retrieveIntegrations: jest.fn().mockResolvedValue([]),
+};
+
 // Rule migrations data client
 export const mockRuleMigrationsDataClient = {
   rules: mockRuleMigrationsDataRulesClient,
   resources: mockRuleMigrationsDataResourcesClient,
+  integrations: mockRuleMigrationsDataIntegrationsClient,
 };
 
 export const MockRuleMigrationsDataClient = jest

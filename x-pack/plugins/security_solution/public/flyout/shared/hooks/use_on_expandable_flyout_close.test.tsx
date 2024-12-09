@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import { useOnExpandableFlyoutClose } from './use_on_expandable_flyout_close';
 import { Flyouts } from '../../document_details/shared/constants/flyouts';

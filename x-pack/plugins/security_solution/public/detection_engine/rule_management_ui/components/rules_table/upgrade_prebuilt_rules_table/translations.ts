@@ -78,3 +78,18 @@ export const UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION = i18n.translate(
     defaultMessage: 'View the latest rule changes in JSON format.',
   }
 );
+
+export const RULE_TYPE_CHANGE_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutTitle',
+  {
+    defaultMessage: 'Rule type change',
+  }
+);
+
+export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutDescription',
+  {
+    defaultMessage:
+      'Your customization will be lost at update. Please take note of your customization or clone this rule before updating.',
+  }
+);

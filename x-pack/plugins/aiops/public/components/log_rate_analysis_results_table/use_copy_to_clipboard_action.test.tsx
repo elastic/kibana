@@ -7,8 +7,7 @@
 
 import type { ReactElement } from 'react';
 import userEvent from '@testing-library/user-event';
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 

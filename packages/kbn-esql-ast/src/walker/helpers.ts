@@ -7,11 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLProperNode } from '../types';
+import {
+  ESQLAstCommand,
+  ESQLAstQueryExpression,
+  ESQLColumn,
+  ESQLCommandMode,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLIdentifier,
+  ESQLInlineCast,
+  ESQLList,
+  ESQLLiteral,
+  ESQLOrderExpression,
+  ESQLProperNode,
+  ESQLSource,
+  ESQLTimeInterval,
+  ESQLUnknownItem,
+} from '../types';
+
+export type NodeMatchKeys =
+  | keyof ESQLAstCommand
+  | keyof ESQLAstQueryExpression
+  | keyof ESQLFunction
+  | keyof ESQLCommandOption
+  | keyof ESQLSource
+  | keyof ESQLColumn
+  | keyof ESQLTimeInterval
+  | keyof ESQLList
+  | keyof ESQLLiteral
+  | keyof ESQLIdentifier
+  | keyof ESQLCommandMode
+  | keyof ESQLInlineCast
+  | keyof ESQLOrderExpression
+  | keyof ESQLUnknownItem;
 
 export type NodeMatchTemplateKey<V> = V | V[] | RegExp;
+
 export type NodeMatchTemplate = {
-  [K in keyof ESQLProperNode]?: NodeMatchTemplateKey<ESQLProperNode[K]>;
+  [K in NodeMatchKeys]?: K extends keyof ESQLProperNode
+    ? NodeMatchTemplateKey<ESQLProperNode[K]>
+    : NodeMatchTemplateKey<unknown>;
 };
 
 /**

@@ -14,10 +14,11 @@ import {
   PluginInitializerContext,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { mapValues } from 'lodash';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -61,6 +62,11 @@ export class SLOPlugin
 
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
+    const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [sloFeatureId, ALERTING_FEATURE_ID],
+    }));
+
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.slo.featureRegistry.linkSloTitle', {
@@ -71,7 +77,7 @@ export class SLOPlugin
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: sloRuleTypes,
+      alerting: alertingFeatures,
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -83,10 +89,10 @@ export class SLOPlugin
           },
           alerting: {
             rule: {
-              all: sloRuleTypes,
+              all: alertingFeatures,
             },
             alert: {
-              all: sloRuleTypes,
+              all: alertingFeatures,
             },
           },
           ui: ['read', 'write'],
@@ -101,10 +107,10 @@ export class SLOPlugin
           },
           alerting: {
             rule: {
-              read: sloRuleTypes,
+              read: alertingFeatures,
             },
             alert: {
-              read: sloRuleTypes,
+              read: alertingFeatures,
             },
           },
           ui: ['read'],

@@ -40,6 +40,7 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./throughput'));
     loadTestFile(require.resolve('./time_range_metadata'));
+    loadTestFile(require.resolve('./traces'));
     loadTestFile(require.resolve('./transactions'));
   });
 }

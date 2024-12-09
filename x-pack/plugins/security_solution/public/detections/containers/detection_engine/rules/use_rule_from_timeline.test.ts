@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
@@ -116,10 +116,11 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('does not reset timeline sourcerer if it originally had same data view as the timeline used in the rule', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+      const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitForNextUpdate();
-      expect(setRuleQuery).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(setRuleQuery).toHaveBeenCalled();
+      });
     });
   });
 
@@ -146,9 +147,9 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('if timeline id in URL, set active timeline data view to from timeline data view', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+      const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitForNextUpdate();
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(setRuleQuery).toHaveBeenCalled();
 
       expect(mockDispatch).toHaveBeenCalledTimes(2);
@@ -166,9 +167,9 @@ describe('useRuleFromTimeline', () => {
       (useGetInitialUrlParamValue as jest.Mock)
         .mockReturnValueOnce(() => timelineId)
         .mockReturnValue(() => undefined);
-      const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+      const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitForNextUpdate();
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current.loading).toEqual(false);
       expect(setRuleQuery).toHaveBeenCalledWith({
         index: ['awesome-*'],
@@ -235,9 +236,9 @@ describe('useRuleFromTimeline', () => {
       (useGetInitialUrlParamValue as jest.Mock)
         .mockReturnValueOnce(() => undefined)
         .mockReturnValue(() => timelineId);
-      const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+      const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
-      await waitForNextUpdate();
+      await waitFor(() => new Promise((resolve) => resolve(null)));
       expect(result.current.loading).toEqual(false);
       expect(setRuleQuery).toHaveBeenCalledWith({
         index: ['awesome-*'],
@@ -327,16 +328,17 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('resets timeline sourcerer if it originally had different data view from the timeline used in the rule', async () => {
-      const { waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
-      await waitForNextUpdate();
-      expect(setRuleQuery).toHaveBeenCalled();
-      expect(mockDispatch).toHaveBeenNthCalledWith(2, {
-        type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
-        payload: {
-          id: 'timeline',
-          selectedDataViewId: 'security-solution',
-          selectedPatterns: ['auditbeat-*'],
-        },
+      renderHook(() => useRuleFromTimeline(setRuleQuery));
+      await waitFor(() => {
+        expect(setRuleQuery).toHaveBeenCalled();
+        expect(mockDispatch).toHaveBeenNthCalledWith(2, {
+          type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+          payload: {
+            id: 'timeline',
+            selectedDataViewId: 'security-solution',
+            selectedPatterns: ['auditbeat-*'],
+          },
+        });
       });
     });
   });

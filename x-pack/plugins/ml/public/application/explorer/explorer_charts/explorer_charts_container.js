@@ -100,6 +100,7 @@ function ExplorerChartContainer({
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
+  showFilterIcons,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
   const [mapsLink, setMapsLink] = useState('');
@@ -258,6 +259,7 @@ function ExplorerChartContainer({
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
             onSelectEntity={onSelectEntity}
+            showFilterIcons={showFilterIcons}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -394,6 +396,7 @@ export const ExplorerChartsContainerUI = ({
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
+  showFilterIcons = true,
 }) => {
   const {
     services: { embeddable: embeddablePlugin, maps: mapsPlugin },
@@ -460,6 +463,7 @@ export const ExplorerChartsContainerUI = ({
                   tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                   showSelectedInterval={showSelectedInterval}
                   chartsService={chartsService}
+                  showFilterIcons={showFilterIcons}
                 />
               </EuiFlexItem>
             );

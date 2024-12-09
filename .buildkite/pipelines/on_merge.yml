@@ -17,12 +17,12 @@ steps:
   - wait
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
-    label: Build Kibana Distribution and Plugins
+    label: Build Kibana Distribution
     agents:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-16
+      machineType: n2-standard-8
       preemptible: true
     key: build
     timeout_in_minutes: 60
@@ -166,6 +166,28 @@ steps:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
     retry:
       automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/ftr_configs.sh
+    env:
+      FTR_CONFIG: "x-pack/test/functional_gen_ai/inference/config.ts"
+      FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
+      FTR_GEN_AI: "1"
+    label: AppEx AI-Infra Inference APIs FTR tests
+    key: ai-infra-gen-ai-inference-api
+    timeout_in_minutes: 50
+    parallelism: 1
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 

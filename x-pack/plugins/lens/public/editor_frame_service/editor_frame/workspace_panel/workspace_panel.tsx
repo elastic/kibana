@@ -248,7 +248,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const removeExpressionBuildErrorsRef = useRef<() => void>();
 
   const onData$ = useCallback(
-    (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+    (_data: unknown, adapters?: DefaultInspectorAdapters) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
 
@@ -283,10 +283,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           dispatchLens(
             onActiveDataChange({
               activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], _index, tables) => ({
-                  ...acc,
-                  [tables.length === 1 ? defaultLayerId : key]: value,
-                }),
+                (acc, [key, value], _index, tables) => {
+                  const id = tables.length === 1 ? defaultLayerId : key;
+                  acc[id] = value as Datatable;
+                  return acc;
+                },
                 {}
               ),
             })
@@ -723,7 +724,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
   onRender$: () => void;
-  onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onData$: (data: unknown, adapters?: DefaultInspectorAdapters) => void;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
@@ -785,7 +786,7 @@ export const VisualizationWrapper = ({
         // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}
-        inspectorAdapters={lensInspector.adapters}
+        inspectorAdapters={lensInspector.getInspectorAdapters()}
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {

@@ -29,7 +29,7 @@ image:images/discover-customize-table.png[Options to customize the table in Disc
 [[document-explorer-columns]]
 ==== Reorder and resize the columns
 
-* To move a single column, open the column's contextual options, and select *Move left* or *Move right* in the available options.
+* To move a single column, drag its header and drop it to the position you want. You can also open the column's contextual options, and select *Move left* or *Move right* in the available options.
 
 * To move multiple columns, click *Columns*.
 In the pop-up, drag the column names to their new order.

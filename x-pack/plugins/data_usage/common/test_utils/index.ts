@@ -7,4 +7,3 @@
 
 export { TestProvider } from './test_provider';
 export { dataUsageTestQueryClientOptions } from './test_query_client_options';
-export { timeXMinutesAgo } from './time_ago';
