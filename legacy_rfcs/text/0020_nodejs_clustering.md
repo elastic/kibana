@@ -571,7 +571,7 @@ Kibana instance, only one worker should have polling enabled.
 #### Reporting
 
 We will probably want to restrict to a single headless per Kibana instance. For that, we will have to change the logic 
-in [createQueueFactory](https://github.com/elastic/kibana/blob/4584a8b570402aa07832cf3e5b520e5d2cfa7166/x-pack/plugins/reporting/server/lib/create_queue.ts#L60-L64) 
+in [createQueueFactory](https://github.com/elastic/kibana/blob/4584a8b570402aa07832cf3e5b520e5d2cfa7166/x-pack/platform/plugins/private/reporting/server/lib/create_queue.ts#L60-L64) 
 to only have the 'main' worker be polling for reporting tasks.
 
 #### Telemetry

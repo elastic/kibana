@@ -868,6 +868,7 @@ x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
+x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
@@ -954,7 +955,6 @@ x-pack/plugins/observability_solution/ux @elastic/obs-ux-infra_services-team
 x-pack/plugins/osquery @elastic/security-defend-workflows
 x-pack/plugins/painless_lab @elastic/kibana-management
 x-pack/plugins/remote_clusters @elastic/kibana-management
-x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/plugins/rollup @elastic/kibana-management
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/runtime_fields @elastic/kibana-management

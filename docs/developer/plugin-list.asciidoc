@@ -795,7 +795,7 @@ Elastic.
 |This plugin helps users manage their remote clusters, which enable cross-cluster search and cross-cluster replication.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/reporting/README.md[reporting]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/reporting/README.md[reporting]
 |An awesome Kibana reporting plugin
 
 
