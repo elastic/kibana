@@ -43,7 +43,9 @@ export const deleteListItem = async ({
       const checkIfListItemDeleted = async (): Promise<void> => {
         const deletedListItem = await getListItem({ esClient, id, listItemIndex });
         if (deletedListItem !== null) {
-          throw Error('List item was deleted, but the change was not propagated in the expected time interval.');
+          throw Error(
+            'List item was deleted, but the change was not propagated in the expected time interval.'
+          );
         }
       };
 
