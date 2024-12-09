@@ -570,7 +570,7 @@
     "@kbn/i18n": "link:packages/kbn-i18n",
     "@kbn/i18n-react": "link:packages/kbn-i18n-react",
     "@kbn/iframe-embedded-plugin": "link:x-pack/test/functional_embedded/plugins/iframe_embedded",
-    "@kbn/image-embeddable-plugin": "link:src/plugins/image_embeddable",
+    "@kbn/image-embeddable-plugin": "link:src/platform/plugins/private/image_embeddable",
     "@kbn/index-adapter": "link:packages/kbn-index-adapter",
     "@kbn/index-lifecycle-management-common-shared": "link:x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared",
     "@kbn/index-lifecycle-management-plugin": "link:x-pack/plugins/index_lifecycle_management",

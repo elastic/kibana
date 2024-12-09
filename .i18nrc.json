@@ -74,7 +74,7 @@
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
     "interactiveSetup": "src/plugins/interactive_setup",
     "interpreter": "src/legacy/core_plugins/interpreter",
-    "imageEmbeddable": "src/plugins/image_embeddable",
+    "imageEmbeddable": "src/platform/plugins/private/image_embeddable",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbn-esql-validation-autocomplete": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src",
     "kbnConfig": "packages/kbn-config/src",

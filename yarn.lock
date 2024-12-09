@@ -5900,7 +5900,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/image-embeddable-plugin@link:src/plugins/image_embeddable":
+"@kbn/image-embeddable-plugin@link:src/platform/plugins/private/image_embeddable":
   version "0.0.0"
   uid ""
 

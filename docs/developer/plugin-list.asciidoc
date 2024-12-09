@@ -220,7 +220,7 @@ for use in their own application.
 |Moves the legacy ui/registry/feature_catalogue module for registering "features" that should be shown in the home page's feature catalogue to a service within a "home" plugin. The feature catalogue refered to here should not be confused with the "feature" plugin for registering features used to derive UI capabilities for feature controls.
 
 
-|{kib-repo}blob/{branch}/src/plugins/image_embeddable/README.md[imageEmbeddable]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/image_embeddable/README.md[imageEmbeddable]
 |This plugin contains image embeddable. Image embeddable allows to embed images into the dashboard.
 Images can be added either by URL or by uploading the image file via file service.
 
