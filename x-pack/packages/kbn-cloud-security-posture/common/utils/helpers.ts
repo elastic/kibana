@@ -113,6 +113,7 @@ export const buildEntityAlertsQuery = (
   sortField?: string,
   sortDirection?: string
 ) => {
+  console.log(sortField +" : "+sortDirection)
   return {
     size: size || 0,
     _source: false,

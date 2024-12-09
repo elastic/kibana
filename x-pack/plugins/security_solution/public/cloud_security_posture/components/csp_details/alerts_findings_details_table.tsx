@@ -84,7 +84,6 @@ export const AlertsDetailsTable = memo(
       else if (name === 'severity') return 'kibana.alert.severity';
       else return 'kibana.alert.workflow_status';
     };
-    console.log(formatName(sortField) + ' : ' + sortDirection);
     const sorting: EuiTableSortingType<ContextualFlyoutAlertsField> = {
       sort: {
         field: sortField,
@@ -93,9 +92,7 @@ export const AlertsDetailsTable = memo(
     };
 
     const obj: { [key: string]: string } = {};
-    obj[formatName(sortField)] = sortDirection;
-console.log(sortField)
-console.log(sortDirection)
+
     const alertsPagination = (alerts: ContextualFlyoutAlertsField[]) => {
       let pageOfItems;
 
@@ -160,18 +157,7 @@ console.log(sortDirection)
       isCurrentFilter: currentFilter === key,
       reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         setCurrentFilter('');
-        setQuery(
-          buildEntityAlertsQuery(
-            field,
-            to,
-            from,
-            value,
-            500,
-            '',
-            formatName(sortField),
-            sortDirection
-          )
-        );
+        setQuery(buildEntityAlertsQuery(field, to, from, value, 500, ''));
         event?.stopPropagation();
       },
     }));
@@ -198,30 +184,61 @@ console.log(sortDirection)
       pageSizeOptions: [10, 25, 100],
     };
 
-    const onTableChange = ({ page, sort }: Criteria<ContextualFlyoutAlertsField>) => {
-      if (page) {
-        const { index, size } = page;
-        setPageIndex(index);
-        setPageSize(size);
-      }
-      if (sort) {
-        const { field: fieldSort, direction } = sort;
-        setSortField(fieldSort);
-        setSortDirection(direction);
-        setQuery(
-          buildEntityAlertsQuery(
-            field,
-            to,
-            from,
-            value,
-            500,
-            '',
-            formatName(sortField),
-            sortDirection
-          )
-        );
-      }
-    };
+    const onTableChange = useCallback(
+      ({ page, sort }: Criteria<ContextualFlyoutAlertsField>) => {
+        if (page) {
+          const { index, size } = page;
+          setPageIndex(index);
+          setPageSize(size);
+        }
+        if (sort) {
+          const { field: fieldSort, direction } = sort;
+          setSortField(fieldSort);
+          setSortDirection(direction);
+          // obj[formatName(fieldSort)] = direction;
+          // console.log(fieldSort)
+          // console.log(direction)
+          setQuery(
+            buildEntityAlertsQuery(
+              field,
+              to,
+              from,
+              value,
+              500,
+              '',
+              formatName(sortField),
+              sortDirection
+            )
+          );
+        }
+      },
+      [field, from, setQuery, sortDirection, sortField, to, value]
+    );
+
+    // const onTableChange = ({ page, sort }: Criteria<ContextualFlyoutAlertsField>) => {
+    //   if (page) {
+    //     const { index, size } = page;
+    //     setPageIndex(index);
+    //     setPageSize(size);
+    //   }
+    //   if (sort) {
+    //     const { field: fieldSort, direction } = sort;
+    //     setSortField(fieldSort);
+    //     setSortDirection(direction);
+    //     setQuery(
+    //       buildEntityAlertsQuery(
+    //         field,
+    //         to,
+    //         from,
+    //         value,
+    //         500,
+    //         '',
+    //         formatName(sortField),
+    //         sortDirection
+    //       )
+    //     );
+    //   }
+    // };
 
     const { openPreviewPanel } = useExpandableFlyoutApi();
 
