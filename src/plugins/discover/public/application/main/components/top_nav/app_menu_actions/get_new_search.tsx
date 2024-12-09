@@ -19,11 +19,8 @@ export const getNewSearchAppMenuItem = ({
     id: AppMenuActionId.new,
     type: AppMenuActionType.primary,
     controlProps: {
-      label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
-        defaultMessage: 'New',
-      }),
-      description: i18n.translate('discover.localMenu.newSearchDescription', {
-        defaultMessage: 'New Search',
+      label: i18n.translate('discover.localMenu.localMenu.newDiscoverSessionTitle', {
+        defaultMessage: 'New Discover Session',
       }),
       iconType: 'plus',
       testId: 'discoverNewButton',

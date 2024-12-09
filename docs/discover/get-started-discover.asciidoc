@@ -293,24 +293,24 @@ Learn more about how to use ES|QL queries in <<try-esql, Using ES|QL>>.
 
 [float]
 [[save-discover-search]]
-==== Save your search for later use
+==== Save your Discover Session for later use
 
-Save your search so you can use it later, generate a CSV report, or use it to create visualizations, dashboards, and Canvas workpads.
-Saving a search saves the query text, filters,
+Save your Discover Session so you can use it later, generate a CSV report, or use it to create visualizations, dashboards, and Canvas workpads.
+Saving a Discover Session saves the query text, filters,
 and current view of *Discover*, including the columns selected in
 the document table, the sort order, and the {data-source}.
 
 . In the application menu bar, click **Save**.
 
-. Give your search a title and a description.
+. Give your session a title and a description.
 
-. Optionally store <<managing-tags,tags>> and the time range with the search.
+. Optionally store <<managing-tags,tags>> and the time range with the session.
 
 . Click **Save**.
 
 [float]
 [[share-your-findings]]
-==== Share your search
+==== Share your Discover Session
 
 To share your search and **Discover** view with a larger audience, click *Share* in the application menu bar.
 For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.

@@ -124,7 +124,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
     class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
-      The saved search associated with this object no longer exists.
+      The Discover Session associated with this object no longer exists.
     </div>
     <div>
       If you know what this error means, you can use the 
