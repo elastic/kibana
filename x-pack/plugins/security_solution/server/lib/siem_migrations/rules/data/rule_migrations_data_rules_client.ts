@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   AggregationsAggregationContainer,
   AggregationsFilterAggregate,
@@ -16,10 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredRuleMigration } from '../types';
-import {
-  SiemMigrationRuleTranslationResult,
-  SiemMigrationStatus,
-} from '../../../../../common/siem_migrations/constants';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type {
   ElasticRule,
   RuleMigration,
@@ -27,6 +23,8 @@ import type {
   RuleMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { getSortingOptions, type RuleMigrationSort } from './sort';
+import { conditions as searchConditions } from './search';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -45,10 +43,6 @@ export interface RuleMigrationFilters {
   installable?: boolean;
   prebuilt?: boolean;
   searchTerm?: string;
-}
-export interface RuleMigrationSort {
-  sortField?: string;
-  sortDirection?: estypes.SortOrder;
 }
 export interface RuleMigrationGetOptions {
   filters?: RuleMigrationFilters;
@@ -250,8 +244,8 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const query = this.getFilterQuery(migrationId);
 
     const aggregations = {
-      prebuilt: { filter: conditions.isPrebuilt() },
-      installable: { filter: { bool: { must: conditions.isInstallable() } } },
+      prebuilt: { filter: searchConditions.isPrebuilt() },
+      installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
     };
     const result = await this.esClient
       .search({ index, query, aggregations, _source: false })
@@ -363,133 +357,14 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       filter.push({ terms: { _id: ids } });
     }
     if (installable) {
-      filter.push(...conditions.isInstallable());
+      filter.push(...searchConditions.isInstallable());
     }
     if (prebuilt) {
-      filter.push(conditions.isPrebuilt());
+      filter.push(searchConditions.isPrebuilt());
     }
     if (searchTerm?.length) {
-      filter.push(conditions.matchTitle(searchTerm));
+      filter.push(searchConditions.matchTitle(searchTerm));
     }
     return { bool: { filter } };
   }
 }
-
-const conditions = {
-  isFullyTranslated(): QueryDslQueryContainer {
-    return { term: { translation_result: SiemMigrationRuleTranslationResult.FULL } };
-  },
-  isNotInstalled(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
-      },
-    };
-  },
-  isPrebuilt(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
-      },
-    };
-  },
-  matchTitle(title: string): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { match: { 'elastic_rule.title': title } },
-      },
-    };
-  },
-  isInstallable(): QueryDslQueryContainer[] {
-    return [this.isFullyTranslated(), this.isNotInstalled()];
-  },
-};
-
-const missing = (direction: estypes.SortOrder = 'asc') =>
-  direction === 'desc' ? '_last' : '_first';
-
-const sortingOptions = {
-  author(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
-    return {
-      'elastic_rule.prebuilt_rule_id': {
-        order: direction,
-        nested: { path: 'elastic_rule' },
-        missing: missing(direction),
-      },
-    };
-  },
-  severity(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
-    const field = 'elastic_rule.severity';
-    return {
-      _script: {
-        order: direction,
-        type: 'number',
-        script: {
-          source: `
-          if (doc.containsKey('${field}') && !doc['${field}'].empty) {
-            def value = doc['${field}'].value.toLowerCase();
-            if (value == 'critical') { return 3 }
-            if (value == 'high') { return 2 }
-            if (value == 'medium') { return 1 }
-            if (value == 'low') { return 0 }
-          }
-          return -1;
-          `,
-          lang: 'painless',
-        },
-        nested: { path: 'elastic_rule' },
-      },
-    };
-  },
-  status(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
-    const field = 'translation_result';
-    return {
-      _script: {
-        order: direction,
-        type: 'number',
-        script: {
-          source: `
-          if (doc.containsKey('${field}') && !doc['${field}'].empty) {
-            def value = doc['${field}'].value.toLowerCase();
-            if (value == 'full') { return 2 }
-            if (value == 'partial') { return 1 }
-            if (value == 'untranslatable') { return 0 }
-          }
-          return -1;
-          `,
-          lang: 'painless',
-        },
-      },
-    };
-  },
-  updated(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
-    return { updated_at: direction };
-  },
-  name(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
-    return { 'elastic_rule.title.keyword': { order: direction, nested: { path: 'elastic_rule' } } };
-  },
-};
-
-const DEFAULT_SORTING: estypes.Sort = [
-  sortingOptions.status('desc'),
-  sortingOptions.author('desc'),
-  sortingOptions.severity(),
-  sortingOptions.updated(),
-];
-
-const getSortingOptions = (sort?: RuleMigrationSort): estypes.Sort => {
-  if (!sort?.sortField) {
-    return DEFAULT_SORTING;
-  }
-  const sortingOptionsMap: { [key: string]: estypes.Sort } = {
-    'elastic_rule.title': sortingOptions.name(sort.sortDirection),
-    'elastic_rule.severity': sortingOptions.severity(sort.sortDirection),
-    'elastic_rule.prebuilt_rule_id': sortingOptions.author(sort.sortDirection),
-    translation_result: sortingOptions.status(sort.sortDirection),
-    updated_at: sortingOptions.updated(sort.sortDirection),
-  };
-  return sortingOptionsMap[sort.sortField] ?? DEFAULT_SORTING;
-};
