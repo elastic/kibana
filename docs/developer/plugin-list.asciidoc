@@ -739,7 +739,7 @@ Elastic.
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.mdx[notifications]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/notifications/README.mdx[notifications]
 |The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 

@@ -6436,7 +6436,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/notifications-plugin@link:x-pack/plugins/notifications":
+"@kbn/notifications-plugin@link:x-pack/platform/plugins/shared/notifications":
   version "0.0.0"
   uid ""
 
