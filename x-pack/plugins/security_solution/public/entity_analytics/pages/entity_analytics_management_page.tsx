@@ -13,7 +13,7 @@ import {
   EuiHorizontalRule,
   EuiButton,
   EuiText,
-  EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
@@ -27,11 +27,13 @@ import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useScheduleNowRiskEngineMutation } from '../api/hooks/use_schedule_now_risk_engine_mutation';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
-import { VerticalSeparator } from '../components/styled_vertical_seperator';
+import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_page_styles';
 
 const TEN_SECONDS = 10000;
 
 export const EntityAnalyticsManagementPage = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
   const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
   const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30m');
@@ -101,16 +103,20 @@ export const EntityAnalyticsManagementPage = () => {
       <EuiPageHeader
         pageTitle={
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            {/* Page Title */}
             <EuiFlexItem data-test-subj="entityAnalyticsManagementPageTitle" grow={false}>
               {ENTITY_ANALYTICS_RISK_SCORE}
             </EuiFlexItem>
 
+            {/* Controls Section */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                {/* Run Engine Button */}
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                {/* Run Engine Section */}
                 {runEngineEnabled && (
-                  <EuiFlexItem grow={false}>
+                  <>
+                    {/* Run Engine Button */}
                     <EuiButton
+                      css={styles.ButtonStyle}
                       size="s"
                       iconType="play"
                       isLoading={isLoading}
@@ -118,28 +124,23 @@ export const EntityAnalyticsManagementPage = () => {
                     >
                       {i18n.RUN_RISK_SCORE_ENGINE}
                     </EuiButton>
-                  </EuiFlexItem>
-                )}
-                <EuiSpacer size="s" />
-                {/* Vertical Line */}
-                {runEngineEnabled && (
-                  <EuiFlexItem grow={false}>
-                    <VerticalSeparator />
-                  </EuiFlexItem>
-                )}
-                <EuiSpacer size="s" />
-                {/* Text: "Next engine run in {} minutes" */}
-                {runEngineEnabled && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" color="subdued">
-                      {` ${countDownText}`}
-                    </EuiText>
-                  </EuiFlexItem>
+
+                    {/* Vertical Line */}
+                    <styles.VerticalSeparator />
+
+                    {/* Countdown Text */}
+                    <div>
+                      <EuiText size="s" color="subdued">
+                        {countDownText}
+                      </EuiText>
+                    </div>
+                  </>
                 )}
 
-                <EuiFlexItem grow={false}>
+                {/* Risk Score Enable Section */}
+                <div css={styles.ToggleStyle}>
                   <RiskScoreEnableSection privileges={privileges} />
-                </EuiFlexItem>
+                </div>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

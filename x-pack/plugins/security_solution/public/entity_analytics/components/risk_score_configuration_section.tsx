@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiSuperDatePicker,
   EuiButton,
@@ -17,12 +16,13 @@ import {
   EuiBottomBar,
   EuiButtonEmpty,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
-import { VerticalSeparator } from './styled_vertical_seperator';
+import { getEntityAnalyticsRiskScorePageStyles } from './risk_score_page_styles';
 
 export const RiskScoreConfigurationSection = ({
   includeClosedAlerts,
@@ -37,6 +37,8 @@ export const RiskScoreConfigurationSection = ({
   to: string;
   onDateChange: ({ start, end }: { start: string; end: string }) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const [start, setFrom] = useState(from);
   const [end, setTo] = useState(to);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,18 +128,16 @@ export const RiskScoreConfigurationSection = ({
   return (
     <>
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
+        <div css={styles.ToggleStyle}>
           <EuiSwitch
             label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
             checked={includeClosedAlerts}
             onChange={handleToggle}
             data-test-subj="includeClosedAlertsSwitch"
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <VerticalSeparator />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        </div>
+        <styles.VerticalSeparator />
+        <div css={styles.DatePickerStyle}>
           <EuiSuperDatePicker
             start={start}
             end={end}
@@ -146,20 +146,14 @@ export const RiskScoreConfigurationSection = ({
             compressed={false}
             showUpdateButton={false}
           />
-        </EuiFlexItem>
+        </div>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{i18n.RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION}</p>
       </EuiText>
       {showBar && (
-        <EuiBottomBar
-          paddingSize="s"
-          position="fixed"
-          css={css`
-            margin-left: 15.67vw;
-          `}
-        >
+        <EuiBottomBar paddingSize="s" position="fixed">
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
