@@ -21,7 +21,6 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 
-import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import {
   coreServices,
   dataService,
@@ -38,7 +37,11 @@ function generateId() {
   return uuidv4();
 }
 
-export const DashboardAppNoDataPage = ({ hideNoDataPage }: { hideNoDataPage: () => void }) => {
+export const DashboardAppNoDataPage = ({
+  onDataViewCreated,
+}: {
+  onDataViewCreated: () => void;
+}) => {
   const analyticsServices = {
     coreStart: coreServices,
     dataViews: dataService.dataViews,
@@ -118,7 +121,6 @@ export const DashboardAppNoDataPage = ({ hideNoDataPage }: { hideNoDataPage: () 
             },
             path: '#/create',
           });
-          hideNoDataPage();
         }
       } catch (error) {
         if (error.name !== 'AbortError') {
@@ -131,7 +133,7 @@ export const DashboardAppNoDataPage = ({ hideNoDataPage }: { hideNoDataPage: () 
         }
       }
     }
-  }, [abortController, lensHelpersAsync.value, hideNoDataPage]);
+  }, [abortController, lensHelpersAsync.value]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
@@ -143,21 +145,14 @@ export const DashboardAppNoDataPage = ({ hideNoDataPage }: { hideNoDataPage: () 
 
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-      <AnalyticsNoDataPage onDataViewCreated={hideNoDataPage} onTryESQL={onTryESQL} />
+      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };
 
 export const isDashboardAppInNoDataState = async () => {
   const hasUserDataView = await dataService.dataViews.hasData.hasUserDataView().catch(() => false);
-
   if (hasUserDataView) return false;
-
-  // consider has data if there is an incoming embeddable
-  const hasIncomingEmbeddable = embeddableService
-    .getStateTransfer()
-    .getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false);
-  if (hasIncomingEmbeddable) return false;
 
   // consider has data if there is unsaved dashboard with edits
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
