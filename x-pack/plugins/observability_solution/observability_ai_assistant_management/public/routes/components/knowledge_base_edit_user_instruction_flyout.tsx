@@ -31,7 +31,6 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
   const { mutateAsync: createEntry, isLoading: isSaving } = useCreateKnowledgeBaseUserInstruction();
   const [newEntryText, setNewEntryText] = useState('');
   const [newEntryId, setNewEntryId] = useState<string>();
-  const isSubmitDisabled = newEntryText.trim() === '';
 
   useEffect(() => {
     const userInstruction = userInstructions?.find((entry) => !entry.public);
@@ -118,7 +117,6 @@ export function KnowledgeBaseEditUserInstructionFlyout({ onClose }: { onClose: (
               fill
               isLoading={isSaving}
               onClick={handleSubmit}
-              isDisabled={isSubmitDisabled}
             >
               {i18n.translate(
                 'xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.saveButtonLabel',

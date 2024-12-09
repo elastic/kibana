@@ -12,7 +12,8 @@ import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
 
-describe('Create ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200827
+describe.skip('Create ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {

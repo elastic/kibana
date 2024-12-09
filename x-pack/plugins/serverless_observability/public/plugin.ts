@@ -59,7 +59,7 @@ export class ServerlessObservabilityPlugin
           observabilityAiAssistantManagement: {
             category: appCategories.OTHER,
             title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
-              defaultMessage: 'AI Assistant for Observability and Search Settings',
+              defaultMessage: 'AI Assistant Settings',
             }),
             description: i18n.translate(
               'xpack.serverlessObservability.aiAssistantManagementDescription',

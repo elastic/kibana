@@ -27,6 +27,13 @@ xpack.features.overrides:
   stackAlerts:
     name: "Alerts"
     category: "enterpriseSearch"
+  ### Observability AI Assistant feature is moved to Search and renamed
+  observabilityAIAssistant:
+    name: "AI Assistant"
+    category: "enterpriseSearch"
+  ### AI Assistant enables the Inventory feature, moving to Search
+  inventory:
+    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
@@ -94,7 +101,6 @@ xpack.observabilityAIAssistant.enabled: true
 xpack.searchAssistant.enabled: true
 xpack.searchAssistant.ui.enabled: true
 xpack.observabilityAIAssistant.scope: "search"
-xpack.observabilityAIAssistant.enableKnowledgeBase: false
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
 xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
 xpack.observabilityAiAssistantManagement.spacesEnabled: false

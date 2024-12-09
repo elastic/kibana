@@ -80,6 +80,7 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
   featureSet: {
     mlSnapshots: true,
     migrateSystemIndices: true,
+    migrateDataStreams: true,
     reindexCorrectiveActions: true,
   },
   kibanaVersionInfo: {

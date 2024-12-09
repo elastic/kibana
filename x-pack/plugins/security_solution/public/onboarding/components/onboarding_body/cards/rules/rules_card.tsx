@@ -16,10 +16,19 @@ import { CardCallOut } from '../common/card_callout';
 import rulesImageSrc from './images/rules.png';
 import * as i18n from './translations';
 
-export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
+export const RulesCard: OnboardingCardComponent = ({
+  isCardComplete,
+  setExpandedCardId,
+  isCardAvailable,
+}) => {
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
+  );
+
+  const isIntegrationsCardAvailable = useMemo(
+    () => isCardAvailable(OnboardingCardId.integrations),
+    [isCardAvailable]
   );
 
   const expandIntegrationsCard = useCallback(() => {
@@ -38,7 +47,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
           <EuiText data-test-subj="rulesCardDescription" size="s" color="subdued">
             {i18n.RULES_CARD_DESCRIPTION}
           </EuiText>
-          {!isIntegrationsCardComplete && (
+          {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
@@ -63,7 +72,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
           <SecuritySolutionLinkButton
             deepLinkId={SecurityPageName.rules}
             fill
-            isDisabled={!isIntegrationsCardComplete}
+            isDisabled={isIntegrationsCardAvailable && !isIntegrationsCardComplete}
           >
             {i18n.RULES_CARD_ADD_RULES_BUTTON}
           </SecuritySolutionLinkButton>
