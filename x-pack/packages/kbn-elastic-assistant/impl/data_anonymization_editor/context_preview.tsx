@@ -5,36 +5,23 @@
  * 2.0.
  */
 
-import React, { useMemo, PropsWithChildren } from 'react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiText } from '@elastic/eui';
 import { getAnonymizedValue } from '@kbn/elastic-assistant-common';
 import { getAnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_data';
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
 import { css } from '@emotion/react';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import styled from '@emotion/styled';
 import { SelectedPromptContext } from '../assistant/prompt_context/types';
 
-const Strong = ({
-  children,
-  showRealValues,
-  onClick,
-}: PropsWithChildren<{ showRealValues: boolean; onClick: () => void }>) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
-    <strong
-      css={css`
-        color: ${showRealValues ? euiTheme.colors.success : euiTheme.colors.accent};
-        cursor: pointer;
-      `}
-      onClick={onClick}
-    >
-      {children}
-    </strong>
-  );
-};
-
+const Strong = styled.strong<{ showRealValues: boolean }>`
+  color: ${(props) =>
+    props.showRealValues
+      ? props.theme.euiTheme.colors.success
+      : props.theme.euiTheme.colors.accent};
+  cursor: pointer;
+`;
 export interface Props {
   selectedPromptContext: SelectedPromptContext;
   showRealValues: boolean;

@@ -7,25 +7,16 @@
 
 import { EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
+import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { EMPTY_PROMPT } from './translations';
 
-const Strong = (props: PropsWithChildren) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <strong
-      css={css`
-        margin-right: ${euiTheme.size.s};
-      `}
-    >
-      {props.children}
-    </strong>
-  );
-};
+const Strong = styled.strong`
+  margin-right: ${(props) => props.theme.euiTheme.size.s};
+`;
 
 interface GetOptionFromPromptProps extends PromptResponse {
   content: string;
