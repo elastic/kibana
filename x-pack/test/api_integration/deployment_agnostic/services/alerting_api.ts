@@ -1124,17 +1124,17 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       });
     },
 
-    async findInRules(roleAuthc: RoleCredentials, ruleId: string) {
+    async findInRules(roleAuthc: RoleCredentials, ruleId: string, spaceId?: string) {
       const response = await supertestWithoutAuth
-        .get('/api/alerting/rules/_find')
+        .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rules/_find`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },
 
-    async searchRules(roleAuthc: RoleCredentials, filter: string) {
+    async searchRules(roleAuthc: RoleCredentials, filter: string, spaceId?: string) {
       return supertestWithoutAuth
-        .get('/api/alerting/rules/_find')
+        .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rules/_find`)
         .query({ filter })
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
