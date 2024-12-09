@@ -69,7 +69,9 @@ describe('createDataStream', () => {
     pipeline: firstDataStreamPipeline,
     samplesFormat: { name: 'ndjson', multiline: false },
     celInput: {
+      url: 'https://sample.com',
       program: 'line1\nline2',
+      authType: 'basic',
       stateSettings: { setting1: 100, setting2: '' },
       redactVars: ['setting2'],
     },
@@ -123,9 +125,12 @@ describe('createDataStream', () => {
       package_name: packageName,
       data_stream_name: firstDatastreamName,
       multiline_ndjson: celDataStream.samplesFormat.multiline,
+      url: celDataStream.celInput?.url,
       program: celDataStream.celInput?.program.split('\n'),
+      auth: celDataStream.celInput?.authType,
       state: celDataStream.celInput?.stateSettings,
       redact: celDataStream.celInput?.redactVars,
+      showAll: false,
     };
 
     // // Manifest files

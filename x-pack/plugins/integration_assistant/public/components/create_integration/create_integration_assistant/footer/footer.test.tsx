@@ -13,16 +13,12 @@ import { ActionsProvider } from '../state';
 import { mockActions } from '../mocks/state';
 import { mockReportEvent } from '../../../../services/telemetry/mocks/service';
 import { TelemetryEventType } from '../../../../services/telemetry/types';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 const mockNavigate = jest.fn();
 jest.mock('../../../../common/hooks/use_navigate', () => ({
   ...jest.requireActual('../../../../common/hooks/use_navigate'),
   useNavigate: () => mockNavigate,
 }));
-
-jest.mock('../../../../services');
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
@@ -33,21 +29,14 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 describe('Footer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      generateCel: false,
-    } as never);
   });
 
   describe('when rendered', () => {
     let result: RenderResult;
     beforeEach(() => {
-      result = render(
-        <Footer currentStep={1} isGenerating={false} hasCelInput={false} isNextStepEnabled />,
-        {
-          wrapper,
-        }
-      );
+      result = render(<Footer currentStep={1} isGenerating={false} isNextStepEnabled />, {
+        wrapper,
+      });
     });
     it('should render footer buttons component', () => {
       expect(result.queryByTestId('buttonsFooter')).toBeInTheDocument();
@@ -69,12 +58,9 @@ describe('Footer', () => {
   describe('when step is 1', () => {
     let result: RenderResult;
     beforeEach(() => {
-      result = render(
-        <Footer currentStep={1} isGenerating={false} hasCelInput={false} isNextStepEnabled />,
-        {
-          wrapper,
-        }
-      );
+      result = render(<Footer currentStep={1} isGenerating={false} isNextStepEnabled />, {
+        wrapper,
+      });
     });
 
     describe('when next button is clicked', () => {
@@ -118,12 +104,9 @@ describe('Footer', () => {
   describe('when step is 2', () => {
     let result: RenderResult;
     beforeEach(() => {
-      result = render(
-        <Footer currentStep={2} isGenerating={false} hasCelInput={false} isNextStepEnabled />,
-        {
-          wrapper,
-        }
-      );
+      result = render(<Footer currentStep={2} isGenerating={false} isNextStepEnabled />, {
+        wrapper,
+      });
     });
 
     describe('when next button is clicked', () => {
@@ -168,12 +151,9 @@ describe('Footer', () => {
     describe('when it is not generating', () => {
       let result: RenderResult;
       beforeEach(() => {
-        result = render(
-          <Footer currentStep={3} isGenerating={false} hasCelInput={false} isNextStepEnabled />,
-          {
-            wrapper,
-          }
-        );
+        result = render(<Footer currentStep={3} isGenerating={false} isNextStepEnabled />, {
+          wrapper,
+        });
       });
 
       describe('when next button is clicked', () => {
@@ -217,12 +197,9 @@ describe('Footer', () => {
     describe('when it is generating', () => {
       let result: RenderResult;
       beforeEach(() => {
-        result = render(
-          <Footer currentStep={3} isGenerating={true} hasCelInput={false} isNextStepEnabled />,
-          {
-            wrapper,
-          }
-        );
+        result = render(<Footer currentStep={3} isGenerating={true} isNextStepEnabled />, {
+          wrapper,
+        });
       });
 
       it('should render the loader', () => {
@@ -234,12 +211,9 @@ describe('Footer', () => {
   describe('when step is 4', () => {
     let result: RenderResult;
     beforeEach(() => {
-      result = render(
-        <Footer currentStep={4} isGenerating={false} hasCelInput={false} isNextStepEnabled />,
-        {
-          wrapper,
-        }
-      );
+      result = render(<Footer currentStep={4} isGenerating={false} isNextStepEnabled />, {
+        wrapper,
+      });
     });
 
     describe('when next button is clicked', () => {
@@ -283,7 +257,7 @@ describe('Footer', () => {
   describe('when next step is disabled', () => {
     let result: RenderResult;
     beforeEach(() => {
-      result = render(<Footer currentStep={1} isGenerating={false} hasCelInput={false} />, {
+      result = render(<Footer currentStep={1} isGenerating={false} />, {
         wrapper,
       });
     });
