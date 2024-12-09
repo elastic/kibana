@@ -13,11 +13,14 @@ import {
   TINY_ELSER,
   deleteInferenceEndpoint,
 } from './helpers';
+import { ForbiddenApiError } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+
+  const KNOWLEDGE_BASE_STATUS_API_URL = '/internal/observability_ai_assistant/kb/status';
 
   describe('/internal/observability_ai_assistant/kb/status', () => {
     beforeEach(async () => {
@@ -41,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('returns correct status after knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient
-        .editor({ endpoint: 'GET /internal/observability_ai_assistant/kb/status' })
+        .editor({ endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}` })
         .expect(200);
 
       expect(res.body.ready).to.be(true);
@@ -54,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const res = await observabilityAIAssistantAPIClient
         .editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
         })
         .expect(200);
 
@@ -70,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const res = await observabilityAIAssistantAPIClient
         .editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
         })
         .expect(200);
 
@@ -79,6 +82,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(res.body.errorMessage).to.include.string(
         'Inference endpoint not found [obs_ai_assistant_kb_inference]'
       );
+    });
+
+    describe('security roles and access privileges', () => {
+      it('should deny access for users without the ai_assistant privilege', async () => {
+        try {
+          await observabilityAIAssistantAPIClient.unauthorizedUser({
+            endpoint: `GET ${KNOWLEDGE_BASE_STATUS_API_URL}`,
+          });
+          throw new ForbiddenApiError('Expected unauthorizedUser() to throw a 403 Forbidden error');
+        } catch (e) {
+          expect(e.status).to.be(403);
+        }
+      });
     });
   });
 }
