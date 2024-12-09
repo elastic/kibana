@@ -7404,7 +7404,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-solution-nav@link:packages/shared-ux/page/solution_nav":
+"@kbn/shared-ux-page-solution-nav@link:src/platform/packages/shared/shared-ux/page/solution_nav":
   version "0.0.0"
   uid ""
 
