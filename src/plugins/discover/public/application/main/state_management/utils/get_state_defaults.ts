@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -27,12 +26,6 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
-  }
-  if (
-    uiSettings.get(SEARCH_FIELDS_FROM_SOURCE) &&
-    isEqual(uiSettings.get(DEFAULT_COLUMNS_SETTING), [])
-  ) {
-    return ['_source'];
   }
   return [...uiSettings.get(DEFAULT_COLUMNS_SETTING)];
 }
