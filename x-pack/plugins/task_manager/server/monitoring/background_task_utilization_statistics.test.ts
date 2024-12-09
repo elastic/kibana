@@ -425,7 +425,10 @@ describe('Task Run Statistics', () => {
     });
 
     test('returns a running count of load', async () => {
-      const loads = [40, 80, 100, 100, 10, 10, 60, 40];
+      const loads = [
+        40, 80, 100, 100, 10, 10, 60, 40, 40, 80, 100, 100, 10, 10, 60, 40, 40, 80, 100, 100, 10,
+        10, 60, 40, 40, 80, 100, 100, 10, 10, 60, 40, 30,
+      ];
       const events$ = new Subject<TaskLifecycleEvent>();
       const taskPollingLifecycle = taskPollingLifecycleMock.create({
         events$: events$ as Observable<TaskLifecycleEvent>,
@@ -434,7 +437,7 @@ describe('Task Run Statistics', () => {
       const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
         taskPollingLifecycle,
         new AdHocTaskCounter(),
-        pollInterval
+        500
       );
 
       function expectWindowEqualsUpdate(
@@ -461,10 +464,36 @@ describe('Task Run Statistics', () => {
           expectWindowEqualsUpdate(taskStats[2], loads.slice(0, 3));
           expectWindowEqualsUpdate(taskStats[3], loads.slice(0, 4));
           expectWindowEqualsUpdate(taskStats[4], loads.slice(0, 5));
-          // from the 6th value, begin to drop old values as our window is 5
-          expectWindowEqualsUpdate(taskStats[5], loads.slice(1, 6));
-          expectWindowEqualsUpdate(taskStats[6], loads.slice(2, 7));
-          expectWindowEqualsUpdate(taskStats[7], loads.slice(3, 8));
+          expectWindowEqualsUpdate(taskStats[5], loads.slice(0, 6));
+          expectWindowEqualsUpdate(taskStats[6], loads.slice(0, 7));
+          expectWindowEqualsUpdate(taskStats[7], loads.slice(0, 8));
+          expectWindowEqualsUpdate(taskStats[8], loads.slice(0, 9));
+          expectWindowEqualsUpdate(taskStats[9], loads.slice(0, 10));
+          expectWindowEqualsUpdate(taskStats[10], loads.slice(0, 11));
+          expectWindowEqualsUpdate(taskStats[11], loads.slice(0, 12));
+          expectWindowEqualsUpdate(taskStats[12], loads.slice(0, 13));
+          expectWindowEqualsUpdate(taskStats[13], loads.slice(0, 14));
+          expectWindowEqualsUpdate(taskStats[14], loads.slice(0, 15));
+          expectWindowEqualsUpdate(taskStats[15], loads.slice(0, 16));
+          expectWindowEqualsUpdate(taskStats[16], loads.slice(0, 17));
+          expectWindowEqualsUpdate(taskStats[17], loads.slice(0, 18));
+          expectWindowEqualsUpdate(taskStats[18], loads.slice(0, 19));
+          expectWindowEqualsUpdate(taskStats[19], loads.slice(0, 20));
+          expectWindowEqualsUpdate(taskStats[20], loads.slice(0, 21));
+          expectWindowEqualsUpdate(taskStats[21], loads.slice(0, 22));
+          expectWindowEqualsUpdate(taskStats[22], loads.slice(0, 23));
+          expectWindowEqualsUpdate(taskStats[23], loads.slice(0, 24));
+          expectWindowEqualsUpdate(taskStats[24], loads.slice(0, 25));
+          expectWindowEqualsUpdate(taskStats[25], loads.slice(0, 26));
+          expectWindowEqualsUpdate(taskStats[26], loads.slice(0, 27));
+          expectWindowEqualsUpdate(taskStats[27], loads.slice(0, 28));
+          expectWindowEqualsUpdate(taskStats[28], loads.slice(0, 29));
+          expectWindowEqualsUpdate(taskStats[29], loads.slice(0, 30));
+          // from the 31st value, begin to drop old values as our window is 30
+          expectWindowEqualsUpdate(taskStats[30], loads.slice(1, 31));
+          expectWindowEqualsUpdate(taskStats[31], loads.slice(2, 32));
+          expectWindowEqualsUpdate(taskStats[32], loads.slice(3, 33));
+
           resolve();
         });
 
