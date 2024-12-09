@@ -18,11 +18,16 @@ import { ToolingLog } from '@kbn/tooling-log';
 import projectTemplate from './project.template.json';
 
 function generateProjectConfig(
-  tsConfig: { include?: string[]; exclude?: string[]; kbn_references?: [] },
   template: string,
   pkg: Package,
+  configs: {
+    tsConfig: { include?: string[]; exclude?: string[]; kbn_references?: [] };
+    jestConfig?: any;
+  },
   { implicitDependencies }: { implicitDependencies?: boolean } = { implicitDependencies: true }
 ) {
+  const { tsConfig, jestConfig } = configs;
+
   const tsInclude = (tsConfig.include || []).map((e) => `{projectRoot}/${e}`);
   const tsExclude = (tsConfig.exclude || []).map((e) => `!{projectRoot}/${e}`);
   const src = tsInclude
@@ -40,6 +45,11 @@ function generateProjectConfig(
     // TODO: some dependencies are referenced as objects
     projectConfig.implicitDependencies = dependencies.filter((e) => typeof e === 'string');
   }
+
+  if (!jestConfig) {
+    delete projectConfig.targets.jest;
+  }
+
   return projectConfig;
 }
 
@@ -73,10 +83,24 @@ export function regenerateNxProjects() {
         // eslint-disable-next-line no-eval
         const tsConfig = eval('0,' + fs.readFileSync(tsConfigPath, 'utf8'));
 
+        const jestConfigPath = path.resolve(pkg.normalizedRepoRelativeDir, 'jest.config.js');
+        const jestConfig = await tryDo(
+          async () => (fs.existsSync(jestConfigPath) ? await import(jestConfigPath) : undefined),
+          undefined
+        );
+        if (!jestConfig) {
+          log.warning(`No jest.config.js found for ${pkg.name} @ ${jestConfigPath}`);
+        }
+
         log.verbose(`Generating project configuration for ${pkg.name}`);
-        const projectConfig = generateProjectConfig(tsConfig, template, pkg, {
-          implicitDependencies,
-        });
+        const projectConfig = generateProjectConfig(
+          template,
+          pkg,
+          { tsConfig, jestConfig },
+          {
+            implicitDependencies,
+          }
+        );
         const targetPath = path.resolve(pkg.normalizedRepoRelativeDir, 'project.json');
 
         log.verbose(`Writing project configuration to ${targetPath}`);
@@ -168,4 +192,12 @@ function filterPackages(allPackages: any[], filter: string | string[]) {
     }
     return false;
   });
+}
+
+async function tryDo(fn: () => any, fallback: any) {
+  try {
+    return await fn();
+  } catch (e) {
+    return fallback;
+  }
 }

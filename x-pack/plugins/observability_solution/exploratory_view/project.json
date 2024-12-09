@@ -21,6 +21,15 @@
       "outputs": [
         "{projectRoot}/target"
       ]
+    },
+    "jest": {
+      "outputs": [
+        "{projectRoot}/coverage"
+      ],
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js",
+        "passWithNoTests": true
+      }
     }
   },
   "projectType": "application",

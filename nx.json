@@ -4,7 +4,6 @@
   "cli": {
     "packageManager": "yarn"
   },
-  "parallel": 5,
   "useDaemonProcess": true,
   "tasksRunnerOptions": {
     "default": {
@@ -20,6 +19,11 @@
   "plugins": [
   ],
   "namedInputs": {
+    "global:ignoreConfigs": [
+      "!{workspaceRoot}/nx.json",
+      "!{workspaceRoot}/package.json",
+      "!{workspaceRoot}/yarn.lock"
+    ],
     "global:tsConfigs": [
       "{projectRoot}/tsconfig.json",
       "{projectRoot}/tsconfig.type_check.json",
@@ -56,6 +60,18 @@
         "{projectRoot}/target"
       ],
       "options": {
+      },
+      "cache": true
+    },
+    "jest": {
+      "executor": "@nx/jest:jest",
+      "inputs": [
+        "src",
+        "global:ignoreConfigs"
+      ],
+      "options": {
+        "passWithNoTests": true,
+        "runInBand": true
       },
       "cache": true
     }
