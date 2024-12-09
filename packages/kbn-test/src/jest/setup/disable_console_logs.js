@@ -8,6 +8,6 @@
  */
 
 // on CI these logs just muddy up the console and produce a ton of unnecessary noise
-console.log = () => {};
-console.error = () => {};
-console.warn = () => {};
+// console.log = () => {};
+// console.error = () => {};
+// console.warn = () => {};
