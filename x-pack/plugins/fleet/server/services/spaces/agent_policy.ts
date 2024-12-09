@@ -23,8 +23,9 @@ import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { packagePolicyService } from '../package_policy';
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
-import { isSpaceAwarenessEnabled } from './helpers';
 import type { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
+
+import { isSpaceAwarenessEnabled } from './helpers';
 
 export async function updateAgentPolicySpaces({
   agentPolicyId,

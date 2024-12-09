@@ -6,11 +6,10 @@
  */
 
 import { renderHook, act, type RenderHookResult } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
 import { useCompletedCards } from './use_completed_cards';
 import type { OnboardingGroupConfig } from '../../../types';
 import type { OnboardingCardId } from '../../../constants';
-import { mockReportCardComplete } from '../../__mocks__/onboarding_context_mocks';
+import { mockReportCardComplete } from '../../__mocks__/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const defaultStoredCompletedCardIds: OnboardingCardId[] = [];
@@ -20,8 +19,8 @@ const mockUseStoredCompletedCardIds = jest.fn(() => [
   defaultStoredCompletedCardIds,
   mockSetStoredCompletedCardIds,
 ]);
-jest.mock('../../../hooks/use_stored_state', () => ({
-  ...jest.requireActual('../../../hooks/use_stored_state'),
+jest.mock('../../hooks/use_stored_state', () => ({
+  ...jest.requireActual('../../hooks/use_stored_state'),
   useStoredCompletedCardIds: () => mockUseStoredCompletedCardIds(),
 }));
 
@@ -99,6 +98,8 @@ const mockFailureCardsGroupConfig = [
   },
 ] as unknown as OnboardingGroupConfig[];
 
+const flushPromises = () => new Promise(setImmediate);
+
 describe('useCompletedCards Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -114,11 +115,7 @@ describe('useCompletedCards Hook', () => {
         services: { notifications: { toasts: { addError: mockAddError } } },
       });
       renderResult = renderHook(useCompletedCards, { initialProps: mockFailureCardsGroupConfig });
-      await act(async () => {
-        await waitFor(() => {
-          expect(mockSetStoredCompletedCardIds).toHaveBeenCalledTimes(0); // number of completed cards
-        });
-      });
+      await act(flushPromises);
     });
 
     describe('when a the auto check is called', () => {
@@ -158,11 +155,7 @@ describe('useCompletedCards Hook', () => {
     >;
     beforeEach(async () => {
       renderResult = renderHook(useCompletedCards, { initialProps: mockCardsGroupConfig });
-      await act(async () => {
-        await waitFor(() => {
-          expect(mockSetStoredCompletedCardIds).toHaveBeenCalledTimes(4); // number of completed cards
-        });
-      });
+      await act(flushPromises);
     });
 
     it('should set the correct completed card ids', async () => {
@@ -258,12 +251,8 @@ describe('useCompletedCards Hook', () => {
       beforeEach(async () => {
         jest.clearAllMocks();
         cardIncomplete.checkComplete.mockResolvedValueOnce(true);
-        await act(async () => {
-          renderResult.result.current.checkCardComplete(cardIncomplete.id);
-          await waitFor(() => {
-            expect(mockSetStoredCompletedCardIds).toHaveBeenCalledTimes(1);
-          });
-        });
+        renderResult.result.current.checkCardComplete(cardIncomplete.id);
+        await act(flushPromises);
       });
 
       it('should set the correct completed card ids', async () => {

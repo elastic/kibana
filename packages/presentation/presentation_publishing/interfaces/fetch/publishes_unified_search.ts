@@ -32,6 +32,7 @@ export interface PublishesFilters {
 export type PublishesUnifiedSearch = PublishesTimeRange &
   PublishesFilters & {
     isCompatibleWithUnifiedSearch?: () => boolean;
+    canEditUnifiedSearch?: () => boolean;
     query$: PublishingSubject<Query | AggregateQuery | undefined>;
   };
 

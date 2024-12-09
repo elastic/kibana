@@ -42,7 +42,7 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { DiscoverAppLocator } from '../common';
 import { DiscoverCustomizationContext } from './customizations';
 import { type DiscoverContainerProps } from './components/discover_container';

@@ -93,7 +93,6 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../config';
 import { SearchSessionService } from './session';
-import { registerBsearchRoute } from './routes/bsearch';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
@@ -207,12 +206,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.registerSearchStrategy(
       SQL_SEARCH_STRATEGY,
       sqlSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
-    );
-
-    registerBsearchRoute(
-      bfetch,
-      (request: KibanaRequest) => this.asScoped(request),
-      core.executionContext
     );
 
     core.savedObjects.registerType(searchTelemetry);

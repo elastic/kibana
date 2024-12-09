@@ -6,9 +6,9 @@
  */
 import { useCallback, useMemo } from 'react';
 import type { InventoryEntity } from '../../common/entities';
-import { useKibana } from './use_kibana';
-import { useFetchEntityDefinition } from './use_fetch_entity_definition';
 import { useAdHocDataView } from './use_adhoc_data_view';
+import { useFetchEntityDefinition } from './use_fetch_entity_definition';
+import { useKibana } from './use_kibana';
 
 export const useDiscoverRedirect = (entity: InventoryEntity) => {
   const {

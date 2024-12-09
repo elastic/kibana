@@ -6,22 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentImagePanel } from '../common/card_content_image_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
+import { CardSubduedText } from '../common/card_subdued_text';
 import dashboardsImageSrc from './images/dashboards.png';
 import * as i18n from './translations';
 
@@ -29,13 +21,16 @@ export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
   setComplete,
   setExpandedCardId,
+  isCardAvailable,
 }) => {
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
-
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
+  );
+
+  const isIntegrationsCardAvailable = useMemo(
+    () => isCardAvailable(OnboardingCardId.integrations),
+    [isCardAvailable]
   );
 
   const expandIntegrationsCard = useCallback(() => {
@@ -54,14 +49,10 @@ export const DashboardsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText
-            data-test-subj="dashboardsDescription"
-            size="s"
-            color={isDarkMode ? 'text' : 'subdued'}
-          >
+          <CardSubduedText data-test-subj="dashboardsDescription" size="s">
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
-          </EuiText>
-          {!isIntegrationsCardComplete && (
+          </CardSubduedText>
+          {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
@@ -92,7 +83,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
             cardId={OnboardingCardId.dashboards}
             deepLinkId={SecurityPageName.dashboards}
             fill
-            isDisabled={!isIntegrationsCardComplete}
+            isDisabled={isIntegrationsCardAvailable && !isIntegrationsCardComplete}
           >
             {i18n.DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON}
           </CardLinkButton>
