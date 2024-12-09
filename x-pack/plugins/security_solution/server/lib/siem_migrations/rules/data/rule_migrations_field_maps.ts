@@ -23,7 +23,8 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   'original_rule.description': { type: 'text', required: false },
   'original_rule.query': { type: 'text', required: true },
   'original_rule.query_language': { type: 'keyword', required: true },
-  'original_rule.mitre_attack_ids': { type: 'keyword', array: true, required: false },
+  'original_rule.annotations': { type: 'nested', required: false },
+  'original_rule.annotations.mitre_attack': { type: 'keyword', array: true, required: false },
   elastic_rule: { type: 'nested', required: false },
   'elastic_rule.title': { type: 'text', required: true },
   'elastic_rule.integration_ids': { type: 'keyword', array: true, required: false },
@@ -60,4 +61,13 @@ export const integrationsFieldMap: FieldMap = {
   'data_streams.title': { type: 'text', required: true },
   'data_streams.index_pattern': { type: 'keyword', required: true },
   elser_embeddings: { type: 'semantic_text', required: true },
+};
+
+export const prebuiltRulesFieldMap: FieldMap = {
+  '@timestamp': { type: 'date', required: true },
+  name: { type: 'text', required: true },
+  description: { type: 'text', required: true },
+  elser_embedding: { type: 'semantic_text', required: true },
+  rule_id: { type: 'keyword', required: true },
+  mitre_attack_ids: { type: 'keyword', array: true, required: false },
 };
