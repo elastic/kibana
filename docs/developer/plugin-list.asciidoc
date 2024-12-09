@@ -268,7 +268,7 @@ management section itself.
 |Utility plugin:
 
 
-|{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/navigation/README.md[navigation]
 |The navigation plugins exports the TopNavMenu component.
 It also provides a stateful version of it on the start contract.
 
