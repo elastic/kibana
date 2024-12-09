@@ -7448,7 +7448,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-table-persist@link:packages/shared-ux/table_persist":
+"@kbn/shared-ux-table-persist@link:src/platform/packages/private/shared-ux/table_persist":
   version "0.0.0"
   uid ""
 
