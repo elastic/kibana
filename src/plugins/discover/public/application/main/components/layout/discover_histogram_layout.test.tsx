@@ -65,12 +65,6 @@ const mountComponent = async ({
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
 
   let services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  services.data.query.timefilter.timefilter.getTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
     query: '',
@@ -86,6 +80,8 @@ const mountComponent = async ({
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
+    timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    timeRangeRelative: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
   }) as DataMain$;
 
   const documents$ = new BehaviorSubject({
