@@ -31,3 +31,6 @@ set <<telemetry-allowChangingOptInStatus, `telemetry.allowChangingOptInStatus`>>
   If the server fails to connect to our endpoint at https://telemetry.elastic.co/, it assumes
   it is behind a firewall and falls back to `'browser'` to send it from users' browsers
   when they are navigating through {kib}. *Default: `'server'`.*
+
+`xpack.apm.telemetryCollectionEnabled`::
+  Collects information about APM data/API performance, set to `fasle` to specifically disable APM's collector. *Default: `'true'`.*
