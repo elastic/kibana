@@ -3840,7 +3840,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/advanced-settings-plugin@link:src/plugins/advanced_settings":
+"@kbn/advanced-settings-plugin@link:src/platform/plugins/private/advanced_settings":
   version "0.0.0"
   uid ""
 
