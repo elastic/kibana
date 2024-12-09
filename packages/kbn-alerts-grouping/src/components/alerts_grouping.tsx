@@ -74,6 +74,8 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
     renderGroupPanel,
     getGroupStats,
     children,
+    initialGroupings,
+    onGroupingsChange,
   } = props;
   const { dataViews, notifications, http } = services;
   const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
@@ -117,6 +119,21 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     onOptionsChange,
   });
+
+  useEffect(() => {
+    if (initialGroupings?.activeGroups?.length) {
+      updateGrouping(initialGroupings);
+      setSelectedGroups(initialGroupings.activeGroups);
+    }
+    // we only want on first render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    onGroupingsChange?.({
+      activeGroups: selectedGroups,
+    });
+  }, [selectedGroups, onGroupingsChange]);
 
   useEffect(() => {
     // The `none` grouping is managed from the internal selector state

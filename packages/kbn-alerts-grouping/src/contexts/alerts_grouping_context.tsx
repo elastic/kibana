@@ -69,6 +69,7 @@ export const useAlertsGroupingState = (groupingId: string) => {
     () => groupingState[groupingId] ?? { activeGroups: ['none'] },
     [groupingState, groupingId]
   );
+
   return {
     grouping,
     updateGrouping,
