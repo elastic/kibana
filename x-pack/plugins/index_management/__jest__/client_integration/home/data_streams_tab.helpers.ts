@@ -213,7 +213,7 @@ export const setup = async (
 
   const clickManageDataStreamsButton = () => {
     testBed.find('dataStreamActionsPopoverButton').simulate('click');
-  }
+  };
 
   const findDetailPanel = () => {
     const { find } = testBed;
