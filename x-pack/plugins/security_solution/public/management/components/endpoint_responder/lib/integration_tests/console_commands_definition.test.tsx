@@ -46,6 +46,7 @@ describe('When displaying Endpoint Response Actions', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionUploadEnabled: true,
+        crowdstrikeRunScriptEnabled: true,
       });
       commands = getEndpointConsoleCommands({
         agentType: 'endpoint',
@@ -73,7 +74,9 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      const expectedCommands: string[] = [...CONSOLE_RESPONSE_ACTION_COMMANDS];
+      const expectedCommands: string[] = [
+        ...CONSOLE_RESPONSE_ACTION_COMMANDS.filter((command) => command !== 'runscript'),
+      ];
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');
 
