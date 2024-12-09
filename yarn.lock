@@ -6628,7 +6628,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-common@link:x-pack/packages/ai-infra/product-doc-common":
+"@kbn/product-doc-common@link:x-pack/platform/packages/shared/ai-infra/product-doc-common":
   version "0.0.0"
   uid ""
 
