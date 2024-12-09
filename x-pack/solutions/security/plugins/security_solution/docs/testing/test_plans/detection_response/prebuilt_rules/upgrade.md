@@ -2,7 +2,11 @@
 
 This is a test plan for the workflow of upgrading prebuilt rules.
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+=======
+Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/kibana/issues/174168) epic.
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 ## Table of Contents
 
@@ -12,6 +16,8 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
   - [Assumptions](#assumptions)
   - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
+<<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
   - [Scenarios](#scenarios)
       - [Rule installation and upgrade notifications on the Rule Management page](#rule-installation-and-upgrade-notifications-on-the-rule-management-page)
           - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
@@ -65,6 +71,89 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
       - [Authorization / RBAC](#authorization-rbac)
           - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
 
+========
+- [Scenarios](#scenarios)
+  - [Package installation](#package-installation)
+    - [**Scenario: Package is installed via Fleet**](#scenario-package-is-installed-via-fleet)
+    - [**Scenario: Package is installed via bundled Fleet package in Kibana**](#scenario-package-is-installed-via-bundled-fleet-package-in-kibana)
+    - [**Scenario: Large package can be installed on a small Kibana instance**](#scenario-large-package-can-be-installed-on-a-small-kibana-instance)
+  - [Rule installation and upgrade via the Prebuilt rules API](#rule-installation-and-upgrade-via-the-prebuilt-rules-api)
+    - [**Scenario: API can install all prebuilt rules**](#scenario-api-can-install-all-prebuilt-rules)
+    - [**Scenario: API can install prebuilt rules that are not yet installed**](#scenario-api-can-install-prebuilt-rules-that-are-not-yet-installed)
+    - [**Scenario: API can upgrade prebuilt rules that are outdated**](#scenario-api-can-upgrade-prebuilt-rules-that-are-outdated)
+    - [**Scenario: API does not install or upgrade prebuilt rules if they are up to date**](#scenario-api-does-not-install-or-upgrade-prebuilt-rules-if-they-are-up-to-date)
+  - [Scenarios for the real package](#scenarios-for-the-real-package)
+    - [**Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package**](#scenario-user-can-install-prebuilt-rules-from-scratch-then-install-new-rules-and-upgrade-existing-rules-from-the-new-package)
+  - [Rule installation and upgrade notifications on the Rule Management page](#rule-installation-and-upgrade-notifications-on-the-rule-management-page)
+    - [**Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**](#scenario-user-is-not-notified-when-no-prebuilt-rules-are-installed-and-there-are-no-prebuilt-rules-assets)
+    - [**Scenario: User is NOT notified when all prebuilt rules are installed and up to date**](#scenario-user-is-not-notified-when-all-prebuilt-rules-are-installed-and-up-to-date)
+    - [**Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**](#scenario-user-is-notified-when-no-prebuilt-rules-are-installed-and-there-are-rules-available-to-install)
+    - [**Scenario: User is notified when some prebuilt rules can be installed**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-installed)
+    - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
+    - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
+    - [**Scenario: User is notified after a prebuilt rule gets deleted**](#scenario-user-is-notified-after-a-prebuilt-rule-gets-deleted)
+  - [Rule installation workflow: base cases](#rule-installation-workflow-base-cases)
+    - [**Scenario: User can install prebuilt rules one by one**](#scenario-user-can-install-prebuilt-rules-one-by-one)
+    - [**Scenario: User can install multiple prebuilt rules selected on the page**](#scenario-user-can-install-multiple-prebuilt-rules-selected-on-the-page)
+    - [**Scenario: User can install all available prebuilt rules at once**](#scenario-user-can-install-all-available-prebuilt-rules-at-once)
+    - [**Scenario: Empty screen is shown when all prebuilt rules are installed**](#scenario-empty-screen-is-shown-when-all-prebuilt-rules-are-installed)
+    - [**Scenario: User can preview rules available for installation**](#scenario-user-can-preview-rules-available-for-installation)
+    - [**Scenario: User can install a rule using the rule preview**](#scenario-user-can-install-a-rule-using-the-rule-preview)
+    - [**Scenario: User can see correct rule information in preview before installing**](#scenario-user-can-see-correct-rule-information-in-preview-before-installing)
+    - [**Scenario: Tabs and sections without content should be hidden in preview before installing**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-installing)
+  - [Rule installation workflow: filtering, sorting, pagination](#rule-installation-workflow-filtering-sorting-pagination)
+  - [Rule installation workflow: misc cases](#rule-installation-workflow-misc-cases)
+    - [**Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**](#scenario-user-opening-the-add-rules-page-sees-a-loading-skeleton-until-the-package-installation-is-completed)
+    - [**Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**](#scenario-user-can-navigate-from-the-add-rules-page-to-the-rule-management-page-via-breadcrumbs)
+=======
+- [Scenarios](#scenarios)
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
+  - [Rule upgrade workflow: base cases](#rule-upgrade-workflow-base-cases)
+    - [**Scenario: User can upgrade prebuilt rules one by one**](#scenario-user-can-upgrade-prebuilt-rules-one-by-one)
+    - [**Scenario: User can upgrade multiple prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-prebuilt-rules-selected-on-the-page)
+    - [**Scenario: User can upgrade all available prebuilt rules at once**](#scenario-user-can-upgrade-all-available-prebuilt-rules-at-once)
+    - [**Scenario: User can preview rules available for upgrade**](#scenario-user-can-preview-rules-available-for-upgrade)
+    - [**Scenario: User can upgrade a rule using the rule preview**](#scenario-user-can-upgrade-a-rule-using-the-rule-preview)
+    - [**Scenario: User can see correct rule information in preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-preview-before-upgrading)
+    - [**Scenario: Tabs and sections without content should be hidden in preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-upgrading)
+  - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
+  - [Rule upgrade workflow: viewing rule changes in JSON diff view](#rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
+    - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
+    - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
+    - [**Scenario: Rule actions and exception lists should not be shown as modified**](#scenario-rule-actions-and-exception-lists-should-not-be-shown-as-modified)
+    - [**Scenario: Dynamic properties should not be included in preview**](#scenario-dynamic-properties-should-not-be-included-in-preview)
+    - [**Scenario: Technical properties should not be included in preview**](#scenario-technical-properties-should-not-be-included-in-preview)
+    - [**Scenario: Properties with semantically equal values should not be shown as modified**](#scenario-properties-with-semantically-equal-values-should-not-be-shown-as-modified)
+    - [**Scenario: Unchanged sections of a rule should be hidden by default**](#scenario-unchanged-sections-of-a-rule-should-be-hidden-by-default)
+    - [**Scenario: Properties should be sorted alphabetically**](#scenario-properties-should-be-sorted-alphabetically)
+  - [Rule upgrade workflow: viewing rule changes in per-field diff view](#rule-upgrade-workflow-viewing-rule-changes-in-per-field-diff-view)
+    - [**Scenario: User can see changes in a side-by-side per-field diff view**](#scenario-user-can-see-changes-in-a-side-by-side-per-field-diff-view)
+    - [**Scenario: Field groupings should be rendered together in the same accordion panel**](#scenario-field-groupings-should-be-rendered-together-in-the-same-accordion-panel)
+    - [**Scenario: Undefined values are displayed with empty diffs**](#scenario-undefined-values-are-displayed-with-empty-diffs)
+    - [**Scenario: Field diff components have the same grouping and order as in rule details overview**](#scenario-field-diff-components-have-the-same-grouping-and-order-as-in-rule-details-overview)
+  - [Rule upgrade workflow: preserving rule bound data](#rule-upgrade-workflow-preserving-rule-bound-data)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-the-same-rule-type)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-a-different-rule-type)
+  - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
+    - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
+  - [Error handling](#error-handling)
+    - [**Scenario: Error is handled when any operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-operation-on-prebuilt-rules-fails)
+  - [Authorization / RBAC](#authorization--rbac)
+    - [**Scenario: User with read privileges on Security Solution cannot install prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-install-prebuilt-rules)
+    - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
+  - [Kibana upgrade](#kibana-upgrade)
+    - [**Scenario: User can use prebuilt rules after upgrading Kibana from version A to B**](#scenario-user-can-use-prebuilt-rules-after-upgrading-kibana-from-version-a-to-b)
+>>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation_and_upgrade.md
+=======
+  - [Rule upgrade via the Prebuilt rules API](#rule-installation-and-upgrade-via-the-prebuilt-rules-api)
+    - [**Scenario: API can upgrade prebuilt rules that are outdated**](#scenario-api-can-upgrade-prebuilt-rules-that-are-outdated)
+    - [**Scenario: API does not upgrade prebuilt rules if they are up to date**](#scenario-api-does-not-install-or-upgrade-prebuilt-rules-if-they-are-up-to-date)
+  - [Error handling](#error-handling)
+    - [**Scenario: Error is handled when any operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-operation-on-prebuilt-rules-fails)
+  - [Authorization / RBAC](#authorization--rbac)
+    - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 ## Useful information
 
@@ -238,9 +327,15 @@ And user should see a CTA to upgrade prebuilt rules
 And user should see the number of rules available to upgrade (Z)
 ```
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 ### Rule upgrade workflow: individual updates from Rule Updates table
 
 #### **Scenario: User can upgrade conflict-free prebuilt rules one by one**
+=======
+### Rule upgrade workflow: base cases
+
+#### **Scenario: User can upgrade prebuilt rules one by one**
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 **Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
 
@@ -256,6 +351,7 @@ And the upgraded rule should be removed from the table
 And user should see the number of rules available to upgrade decreased by 1
 ```
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 #### **Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**
 
 **Automation**: 1 e2e test with mock rules
@@ -274,16 +370,27 @@ And there should be a message/tooltip indicating why the rule cannot be upgraded
 ### Rule upgrade workflow: bulk updates from Rule Updates table
 
 #### **Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**
+=======
+#### **Scenario: User can upgrade multiple prebuilt rules selected on the page**
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 **Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 And user opens the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
 When user selects Z (where Z < Y) rules, which have no upgrade conflicts
 Then user should see a CTA to upgrade <Z> rules
+=======
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then Y rules available for upgrade should be displayed in the table
+When user selects <Z> rules
+Then user should see a CTA to upgrade <Z> number of rules
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 When user clicks the CTA
 Then success message should be displayed after upgrade
 And all the <Z> upgraded rules should be removed from the table
@@ -295,6 +402,7 @@ Examples:
   | all rules on the page, e.g. 12  |
 ```
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 #### **Scenario: User cannot upgrade selected prebuilt rules with conflicts**
 
 **Automation**: 1 e2e test with mock rules
@@ -318,13 +426,19 @@ Examples:
 ```
 
 #### **Scenario: User can upgrade all available conflict-free prebuilt rules at once**
+=======
+#### **Scenario: User can upgrade all available prebuilt rules at once**
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 **Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/\* endpoints in integration.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
 And for Y of the installed rules there are new versions available
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 And those Y new versions don't have conflicts with the current versions
+=======
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 And user is on the Rule Management page
 When user opens the Rule Updates table
 Then Y rules available for upgrade should be displayed in the table
@@ -332,6 +446,7 @@ When user upgrades all rules
 Then success message should be displayed after upgrade
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 ```
 
 #### **Scenario: User cannot upgrade all prebuilt rules at once if they have upgrade conflicts**
@@ -451,6 +566,11 @@ And all X upgraded rules should be removed from the table
 
 ### Rule upgrade workflow: rule previews
 
+=======
+And user should NOT see the Rule Updates table
+```
+
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 #### **Scenario: User can preview rules available for upgrade**
 
 ```Gherkin
@@ -522,9 +642,13 @@ And the Investigation Guide tab should NOT be displayed
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 ### MILESTONE 2 (Legacy) - Rule upgrade workflow: viewing rule changes in JSON diff view
 
 > These flow were created for Milestone 2 of the Prebuilt Rules Customization epic, before users could customize prebuilt rules. This section should be deleted once Milestone 3 goes live.
+=======
+### Rule upgrade workflow: viewing rule changes in JSON diff view
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 #### **Scenario: User can see changes in a side-by-side JSON diff view**
 
@@ -670,9 +794,13 @@ When a user expands all hidden sections
 Then all properties of the rule should be sorted alphabetically
 ```
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 ### MILESTONE 2 (Legacy) - Rule upgrade workflow: viewing rule changes in per-field diff view
 
 > These flow were created for Milestone 2 of the Prebuilt Rules Customization epic, before users could customize prebuilt rules. This section should be deleted once Milestone 3 goes live.
+=======
+### Rule upgrade workflow: viewing rule changes in per-field diff view
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 #### **Scenario: User can see changes in a side-by-side per-field diff view**
 
@@ -810,7 +938,11 @@ Then user should NOT see the Rule Updates tab until the package installation is 
 
 ### Error handling
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 #### **Scenario: Error is handled when any upgrade operation on prebuilt rules fails**
+=======
+#### **Scenario: Error is handled when any operation on prebuilt rules fails**
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
 
 **Automation**: e2e test with mock rules
 
@@ -821,6 +953,12 @@ Then user should see an error message
 
 Examples:
   | operation             |
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
+=======
+  | installing all        |
+  | installing selected   |
+  | installing individual |
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/upgrade.md
   | upgrading all         |
   | upgrading selected    |
   | upgrading individual  |

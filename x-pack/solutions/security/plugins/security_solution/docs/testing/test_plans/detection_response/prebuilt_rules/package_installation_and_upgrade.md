@@ -4,7 +4,11 @@ This is a test plan for the workflows of installing and updating the Prebuilt Ru
 
 > For the test plans for installing and upgrading prebuilt rules, see [Installation of Prebuilt Rules](./installation.md) and [Upgrade of Prebuilt Rules](./upgrade.md).
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+=======
+Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/kibana/issues/174168) epic.
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 ## Table of Contents
 
@@ -28,7 +32,11 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
 
 ### Tickets
 
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 - [Rule Immutability/Customization epic](https://github.com/elastic/security-team/issues/1974)(internal)
+=======
+- [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 **Milestone 3 - Prebuilt Rules Customization:**
 - [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
@@ -84,8 +92,13 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
 **Automation**: 2 e2e tests that install the real package.
 
 ```Gherkin
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Given the prebuilt rules package is not installed
 When user opens any Security Solution page
+=======
+Given the package is not installed
+When user opens the Rule Management page
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Then the package gets installed in the background from EPR
 ```
 
@@ -96,11 +109,19 @@ Then the package gets installed in the background from EPR
 ```Gherkin
 Given the package is not installed
 And user is in an air-gapped environment
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user opens any Security Solution page
 Then the package gets installed in the background from packages bundled into Kibana
 ```
 
 #### **Scenario: Large package can be installed on a memory restricted Kibana instance**
+=======
+When user opens the Rule Management page
+Then the package gets installed in the background from packages bundled into Kibana
+```
+
+#### **Scenario: Large package can be installed on a small Kibana instance**
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 **Automation**: 1 integration test.
 
@@ -108,7 +129,11 @@ Then the package gets installed in the background from packages bundled into Kib
 Given the package is not installed
 And the package contains the largest amount of historical rule versions (15000)
 And the Kibana instance has a memory heap size of 700 Mb (see note below)
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user opens any Security Solution page
+=======
+When user opens the Rule Management page
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Then the package is installed without Kibana crashing with an Out Of Memory error
 ```
 
@@ -121,8 +146,13 @@ Then the package is installed without Kibana crashing with an Out Of Memory erro
 **Automation**: 1 integration test with real packages.
 
 ```Gherkin
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Given there are two package versions: A and B where A < B
 And the package of A version is installed
+=======
+Given there are two package versions: N-1 and N
+And the package of N-1 version is installed
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user calls the status endpoint
 Then it should return a 200 response with some number of rules to install and 0 rules to upgrade
 When user calls the installation/_review endpoint
@@ -130,7 +160,11 @@ Then it should return a 200 response matching the response of the status endpoin
 When user calls the installation/_perform_ endpoint
 Then it should return a 200 response matching the response of the status endpoint
 And rules returned in this response should exist as alert saved objects
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 When user installs version B of the package
+=======
+When user installs the package of N version
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 Then it should be installed successfully
 When user calls the status endpoint
 Then it should return a 200 response with some number of new rules to install and some number of rules to upgrade
@@ -152,11 +186,19 @@ Then rules returned in this response should exist as alert saved objects
 
 ```Gherkin
 Given user is upgrading Kibana from version <A> to version <B>
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 And the <A> version Kibana instance has already installed prebuilt rules
 When the Kibana upgrade is complete
 Then user should be able to install new prebuilt rules
 And delete installed prebuilt rules
 And upgrade installed prebuilt rules that have newer versions in Kibana version <B>
+=======
+And the <A> instance contains already installed prebuilt rules
+When the upgrade is complete
+Then user should be able to install new prebuilt rules
+And delete installed prebuilt rules
+And upgrade installed prebuilt rules that have newer versions in <B>
+>>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/package_installation_and_upgrade.md
 
 Examples:
   | A      | B     |
