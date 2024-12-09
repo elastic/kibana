@@ -12,18 +12,20 @@ import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objec
 import { finalizeSignalsMigrationRoute } from './finalize_signals_migration_route';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../migrations/get_migration_saved_objects_by_id');
 
 describe('finalizing signals migrations', () => {
   let server: ReturnType<typeof serverMock.create>;
+  const docLinks = docLinksServiceMock.createSetupContract();
 
   beforeEach(() => {
     server = serverMock.create();
 
     const ruleDataPluginServiceMock =
       ruleDataServiceMock.create() as unknown as RuleDataPluginService;
-    finalizeSignalsMigrationRoute(server.router, ruleDataPluginServiceMock);
+    finalizeSignalsMigrationRoute(server.router, ruleDataPluginServiceMock, docLinks);
   });
 
   it('returns an empty array error if no migrations exists', async () => {
