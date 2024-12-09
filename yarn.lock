@@ -7420,7 +7420,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-not-found@link:packages/shared-ux/prompt/not_found":
+"@kbn/shared-ux-prompt-not-found@link:src/platform/packages/shared/shared-ux/prompt/not_found":
   version "0.0.0"
   uid ""
 
