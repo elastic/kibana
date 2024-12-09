@@ -9,7 +9,7 @@
 
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
-import { SEARCH_FIELDS_FROM_SOURCE, DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
+import { DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
 
 /**
  * Makes sure the current state is not referencing the source column when using the fields api
@@ -23,33 +23,18 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
   if (!state.columns) {
     return state;
   }
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
 
-  if (useNewFieldsApi) {
-    // if fields API is used, filter out the source column
-    let cleanedColumns = state.columns.filter((column) => column !== '_source');
-    if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
-      cleanedColumns = defaultColumns;
-      // defaultColumns could still contain _source
-      cleanedColumns = cleanedColumns.filter((column) => column !== '_source');
-    }
-    return {
-      ...state,
-      columns: cleanedColumns,
-    };
-  } else if (state.columns.length === 0) {
-    // if _source fetching is used and there are no column, switch back to default columns
-    // this can happen if the fields API was previously used
-    const columns = defaultColumns;
-    if (columns.length === 0) {
-      columns.push('_source');
-    }
-    return {
-      ...state,
-      columns: [...columns],
-    };
+  // filter out the source column
+  let cleanedColumns = state.columns.filter((column) => column !== '_source');
+  if (cleanedColumns.length === 0 && !isEqual(defaultColumns, ['_source'])) {
+    cleanedColumns = defaultColumns;
+    // defaultColumns could still contain _source
+    cleanedColumns = cleanedColumns.filter((column) => column !== '_source');
   }
 
-  return state;
+  return {
+    ...state,
+    columns: cleanedColumns,
+  };
 }
