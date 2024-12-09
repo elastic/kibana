@@ -369,6 +369,10 @@ export async function validateAncestorFields(
   });
   for (const ancestor of ancestors) {
     for (const field of fields) {
+      if (field.type === 'alias') {
+        // TODO: validate whether field under alias_path has the same type as an ancestor field definition of the current field
+        continue;
+      }
       if (
         ancestor.definition.fields.some(
           (ancestorField) => ancestorField.type !== field.type && ancestorField.name === field.name
@@ -455,7 +459,7 @@ export async function syncStream({
     });
     return;
   }
-  const componentTemplate = generateLayer(definition.id, definition);
+  const componentTemplate = generateLayer(definition.id, definition, rootDefinition);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
