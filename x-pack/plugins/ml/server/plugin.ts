@@ -26,6 +26,7 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
@@ -142,7 +143,10 @@ export class MlServerPlugin
       management: {
         insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
-      alerting: Object.values(ML_ALERT_TYPES),
+      alerting: Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
+        ruleTypeId,
+        consumers: [PLUGIN_ID, ALERTING_FEATURE_ID],
+      })),
       privileges: {
         all: admin,
         read: user,
@@ -222,7 +226,8 @@ export class MlServerPlugin
       getDataViews,
       () => this.auditService,
       () => this.isMlReady,
-      this.compatibleModuleType
+      this.compatibleModuleType,
+      this.enabledFeatures
     );
 
     const routeInit: RouteInitialization = {

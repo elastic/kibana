@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCheckbox,
@@ -37,7 +36,7 @@ const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
 export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
-> = ({ actionParams, editAction, errors, index, producerId, featureId }) => {
+> = ({ actionParams, editAction, errors, index, producerId, featureId, ruleTypeId }) => {
   const {
     cloud,
     data: { dataViews: dataViewsService },
@@ -58,9 +57,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     http,
     toasts,
     dataViewsService,
-    featureIds: producerId
-      ? [producerId as Exclude<ValidFeatureId, typeof AlertConsumers.SIEM>]
-      : [],
+    ruleTypeIds: ruleTypeId ? [ruleTypeId] : [],
   });
 
   const { data: configurations, isLoading: isLoadingCaseConfiguration } =

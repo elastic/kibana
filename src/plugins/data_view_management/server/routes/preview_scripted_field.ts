@@ -14,6 +14,12 @@ export function registerPreviewScriptedFieldRoute(router: IRouter): void {
   router.post(
     {
       path: '/internal/index-pattern-management/preview_scripted_field',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by Elasticsearch',
+        },
+      },
       validate: {
         body: schema.object({
           index: schema.string(),
