@@ -555,7 +555,7 @@
     "@kbn/grid-layout": "link:packages/kbn-grid-layout",
     "@kbn/grokdebugger-plugin": "link:x-pack/plugins/grokdebugger",
     "@kbn/grouping": "link:packages/kbn-grouping",
-    "@kbn/guided-onboarding": "link:packages/kbn-guided-onboarding",
+    "@kbn/guided-onboarding": "link:src/platform/packages/shared/kbn-guided-onboarding",
     "@kbn/guided-onboarding-example-plugin": "link:examples/guided_onboarding_example",
     "@kbn/guided-onboarding-plugin": "link:src/plugins/guided_onboarding",
     "@kbn/handlebars": "link:packages/kbn-handlebars",
