@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { v4 as uuidv4 } from 'uuid';
 import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
@@ -26,7 +23,6 @@ import {
   RISK_ENGINE_SCHEDULE_NOW_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 
@@ -395,103 +391,6 @@ export const updateRiskEngineConfigSO = async ({
   }
 };
 
-export const legacyTransformIds = [
-  'ml_hostriskscore_pivot_transform_default',
-  'ml_hostriskscore_latest_transform_default',
-  'ml_userriskscore_pivot_transform_default',
-  'ml_userriskscore_latest_transform_default',
-];
-
-export const clearLegacyTransforms = async ({
-  es,
-  log,
-}: {
-  es: Client;
-  log: ToolingLog;
-}): Promise<void> => {
-  try {
-    await removeLegacyTransforms({
-      namespace: 'default',
-      esClient: es,
-    });
-  } catch (e) {
-    log.warning(`Error deleting legacy transforms: ${e.message}`);
-  }
-};
-
-export const clearLegacyDashboards = async ({
-  supertest,
-  log,
-}: {
-  supertest: SuperTest.Agent;
-  log: ToolingLog;
-}): Promise<void> => {
-  try {
-    await supertest
-      .post(
-        '/internal/risk_score/prebuilt_content/saved_objects/_bulk_delete/hostRiskScoreDashboards'
-      )
-      .set('kbn-xsrf', 'true')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send();
-
-    await supertest
-      .post(
-        '/internal/risk_score/prebuilt_content/saved_objects/_bulk_delete/userRiskScoreDashboards'
-      )
-      .set('kbn-xsrf', 'true')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send();
-  } catch (e) {
-    log.warning(`Error deleting legacy dashboards: ${e.message}`);
-  }
-};
-
-export const createLegacyTransforms = async ({ es }: { es: Client }): Promise<void> => {
-  const transforms = legacyTransformIds.map((transform) =>
-    es.transform.putTransform({
-      transform_id: transform,
-      source: {
-        index: ['.alerts-security.alerts-default'],
-      },
-      dest: {
-        index: 'ml_host_risk_score_default',
-      },
-      pivot: {
-        group_by: {
-          'host.name': {
-            terms: {
-              field: 'host.name',
-            },
-          },
-        },
-        aggregations: {
-          '@timestamp': {
-            max: {
-              field: '@timestamp',
-            },
-          },
-        },
-      },
-      settings: {},
-    })
-  );
-
-  await Promise.all(transforms);
-};
-
-export const getLegacyRiskScoreDashboards = async ({
-  kibanaServer,
-}: {
-  kibanaServer: KbnClient;
-}) => {
-  const savedObejectLens = await kibanaServer.savedObjects.find({
-    type: 'lens',
-  });
-
-  return savedObejectLens?.saved_objects.filter((s) => s?.attributes?.title?.includes('Risk'));
-};
-
 const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
   if (response.status !== statusCode) {
     throw new Error(
@@ -647,41 +546,3 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
     return response;
   },
 });
-
-export const installLegacyRiskScore = async ({ supertest }: { supertest: SuperTest.Agent }) => {
-  await supertest
-    .post('/internal/risk_score')
-    .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .send({ riskScoreEntity: 'host' })
-    .expect(200);
-
-  await supertest
-    .post('/internal/risk_score')
-    .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .send({ riskScoreEntity: 'user' })
-    .expect(200);
-
-  await supertest
-    .post(
-      '/internal/risk_score/prebuilt_content/saved_objects/_bulk_create/hostRiskScoreDashboards'
-    )
-    .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .send()
-    .expect(200);
-
-  await supertest
-    .post(
-      '/internal/risk_score/prebuilt_content/saved_objects/_bulk_create/userRiskScoreDashboards'
-    )
-    .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .send()
-    .expect(200);
-};

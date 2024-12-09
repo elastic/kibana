@@ -15,7 +15,6 @@ export const relatedHostsRequestOptionsSchema = requestBasicOptionsSchema.extend
   skip: z.boolean().optional(),
   from: z.string(),
   inspect,
-  isNewRiskScoreModuleInstalled: z.boolean().default(false),
   factoryQueryType: z.literal(RelatedEntitiesQueries.relatedHosts),
 });
 

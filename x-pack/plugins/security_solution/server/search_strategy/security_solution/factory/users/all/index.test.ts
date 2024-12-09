@@ -114,10 +114,10 @@ describe('allHosts search strategy', () => {
       await allUsers.parse({ ...mockOptions, pagination }, mockSearchStrategyResponse, mockedDeps);
 
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
-        defaultIndex: ['ml_user_risk_score_latest_test-space'],
+        defaultIndex: ['risk-score.risk-score-latest-test-space'],
         filterQuery: { terms: { 'user.name': userName } },
         riskScoreEntity: RiskScoreEntity.user,
-        factoryQueryType: expect.stringContaining('RiskScore'),
+        factoryQueryType: 'usersRiskScore',
       });
     });
 
