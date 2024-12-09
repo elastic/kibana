@@ -986,6 +986,8 @@
       "@kbn/gen-ai-functional-testing/*": ["packages/kbn-gen-ai-functional-testing/*"],
       "@kbn/gen-ai-streaming-response-example-plugin": ["x-pack/examples/gen_ai_streaming_response_example"],
       "@kbn/gen-ai-streaming-response-example-plugin/*": ["x-pack/examples/gen_ai_streaming_response_example/*"],
+      "@kbn/genai-common": ["x-pack/packages/kbn-genai-common"],
+      "@kbn/genai-common/*": ["x-pack/packages/kbn-genai-common/*"],
       "@kbn/generate": ["packages/kbn-generate"],
       "@kbn/generate/*": ["packages/kbn-generate/*"],
       "@kbn/generate-console-definitions": ["packages/kbn-generate-console-definitions"],

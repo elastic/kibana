@@ -40,6 +40,13 @@ export const API_DOCUMENTATION_LINK = i18n.translate(
   }
 );
 
+export const ADD_ENDPOINT_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.addConnectorButtonLabel',
+  {
+    defaultMessage: 'Add endpoint',
+  }
+);
+
 export const ERROR_TITLE = i18n.translate('xpack.searchInferenceEndpoints.inferenceId.errorTitle', {
   defaultMessage: 'Error adding inference endpoint',
 });

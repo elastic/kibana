@@ -8,6 +8,7 @@
 export enum APIRoutes {
   GET_INFERENCE_ENDPOINTS = '/internal/inference_endpoints/endpoints',
   DELETE_INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
+  GET_INFERENCE_SERVICES = 'internal/inference_endpoints/_inference/_services',
 }
 
 export interface SearchInferenceEndpointsConfigType {
@@ -22,3 +23,5 @@ export enum TaskTypes {
   sparse_embedding = 'sparse_embedding',
   text_embedding = 'text_embedding',
 }
+
+export type { InferenceProvider } from '@kbn/genai-common';
