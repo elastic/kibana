@@ -1285,7 +1285,9 @@
             "section": "def-common.DashboardContainerInput",
             "text": "DashboardContainerInput"
           },
-          ", \"executionContext\" | \"panels\" | \"controlGroupInput\">> & { dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; panels?: (Omit<Readonly<{ id?: string | undefined; version?: string | undefined; title?: string | undefined; panelRefName?: string | undefined; } & { type: string; panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}>; gridData: Readonly<{} & { i: string; y: number; w: number; h: number; x: number; }>; panelIndex: string; }>, \"panelConfig\"> & { panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}> & { [key: string]: any; }; } & ",
+          ", \"executionContext\" | \"panels\" | \"controlGroupInput\">> & { dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; panels?: (Omit<Readonly<{ id?: string | undefined; version?: string | undefined; title?: string | undefined; panelRefName?: string | undefined; panelIndex?: string | undefined; } & { type: string; panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}>; gridData: Readonly<{ i?: string | undefined; } & { y: number; w: number; h: number; x: number; }>; }>, \"panelConfig\"> & { panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}> & { [key: string]: any; }; gridData: ",
+          "GridData",
+          "; } & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1532,7 +1534,7 @@
             "section": "def-common.ControlLabelPosition",
             "text": "ControlLabelPosition"
           },
-          "; autoApplySelections: boolean; ignoreParentSettings: Readonly<{} & { ignoreFilters: boolean; ignoreQuery: boolean; ignoreTimerange: boolean; ignoreValidations: boolean; }>; controls: Readonly<{ controlConfig?: Record<string, any> | undefined; } & { id: string; type: string; order: number; grow: boolean; width: ",
+          "; autoApplySelections: boolean; ignoreParentSettings: Readonly<{} & { ignoreFilters: boolean; ignoreQuery: boolean; ignoreTimerange: boolean; ignoreValidations: boolean; }>; controls: Readonly<{ id?: string | undefined; controlConfig?: Record<string, any> | undefined; } & { type: string; order: number; grow: boolean; width: ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -1572,7 +1574,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & {}> | undefined; } & {}>; timeRestore: boolean; panels: Readonly<{ id?: string | undefined; version?: string | undefined; title?: string | undefined; panelRefName?: string | undefined; } & { type: string; panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}>; gridData: Readonly<{} & { i: string; y: number; w: number; h: number; x: number; }>; panelIndex: string; }>[]; }>, \"panels\"> & { panels: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & {}> | undefined; } & {}>; timeRestore: boolean; panels: Readonly<{ id?: string | undefined; version?: string | undefined; title?: string | undefined; panelRefName?: string | undefined; panelIndex?: string | undefined; } & { type: string; panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}>; gridData: Readonly<{ i?: string | undefined; } & { y: number; w: number; h: number; x: number; }>; }>[]; }>, \"panels\"> & { panels: ",
           "DashboardPanel",
           "[]; }"
         ],
@@ -1661,7 +1663,9 @@
             "section": "def-common.DashboardPanelMap",
             "text": "DashboardPanelMap"
           },
-          ", removeLegacyVersion?: boolean | undefined) => { panelRefName?: string | undefined; id?: string | undefined; title?: string | undefined; type: string; gridData: Readonly<{} & { i: string; y: number; w: number; h: number; x: number; }>; panelIndex: string; panelConfig: _.Omit<Partial<",
+          ", removeLegacyVersion?: boolean | undefined) => { panelRefName?: string | undefined; id?: string | undefined; title?: string | undefined; type: string; gridData: ",
+          "GridData",
+          "; panelIndex: string; panelConfig: _.Omit<Partial<",
           {
             "pluginId": "embeddable",
             "scope": "common",
@@ -2545,12 +2549,12 @@
           {
             "parentPluginId": "dashboard",
             "id": "def-common.DashboardPanelState.gridData",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "gridData",
             "description": [],
             "signature": [
-              "{ readonly i: string; readonly y: number; readonly w: number; readonly h: number; readonly x: number; }"
+              "Omit<Readonly<{ i?: string | undefined; } & { y: number; w: number; h: number; x: number; }>, \"i\"> & { readonly i: string; }"
             ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,

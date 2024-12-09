@@ -12,6 +12,7 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
+import type { MlFeatures } from '../../../common/constants/app';
 import type {
   MlInferTrainedModelRequest,
   MlStopTrainedModelDeploymentRequest,
@@ -59,7 +60,8 @@ export interface TrainedModelsProvider {
 
 export function getTrainedModelsProvider(
   getGuards: GetGuards,
-  cloud: CloudSetup
+  cloud: CloudSetup,
+  enabledFeatures: MlFeatures
 ): TrainedModelsProvider {
   return {
     trainedModelsProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
@@ -134,7 +136,9 @@ export function getTrainedModelsProvider(
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ scopedClient, mlClient }) => {
-              return modelsProvider(scopedClient, mlClient, cloud).getELSER(params);
+              return modelsProvider(scopedClient, mlClient, cloud, enabledFeatures).getELSER(
+                params
+              );
             });
         },
         async getCuratedModelConfig(...params: GetCuratedModelConfigParams) {
@@ -142,7 +146,12 @@ export function getTrainedModelsProvider(
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ scopedClient, mlClient }) => {
-              return modelsProvider(scopedClient, mlClient, cloud).getCuratedModelConfig(...params);
+              return modelsProvider(
+                scopedClient,
+                mlClient,
+                cloud,
+                enabledFeatures
+              ).getCuratedModelConfig(...params);
             });
         },
         async installElasticModel(modelId: string) {
@@ -150,10 +159,12 @@ export function getTrainedModelsProvider(
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ scopedClient, mlClient, mlSavedObjectService }) => {
-              return modelsProvider(scopedClient, mlClient, cloud).installElasticModel(
-                modelId,
-                mlSavedObjectService
-              );
+              return modelsProvider(
+                scopedClient,
+                mlClient,
+                cloud,
+                enabledFeatures
+              ).installElasticModel(modelId, mlSavedObjectService);
             });
         },
       };

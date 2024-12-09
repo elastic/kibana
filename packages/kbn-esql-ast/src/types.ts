@@ -9,7 +9,7 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
+export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand | ESQLAstJoinCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -76,6 +76,13 @@ export interface ESQLAstNodeFormatting {
 
 export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   type: 'command';
+
+  /**
+   * The subtype of the command. For example, the `JOIN` command can be: (1)
+   * LOOKUP JOIN, (2) LEFT JOIN, (3) RIGHT JOIN.
+   */
+  commandType?: string;
+
   args: ESQLAstItem[];
 }
 
@@ -83,6 +90,10 @@ export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
   sources: ESQLSource[];
   aggregates?: ESQLAstField[];
   grouping?: ESQLAstField[];
+}
+
+export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
+  commandType: 'lookup' | 'left' | 'right';
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
@@ -192,12 +203,14 @@ export type BinaryExpressionOperator =
   | BinaryExpressionArithmeticOperator
   | BinaryExpressionAssignmentOperator
   | BinaryExpressionComparisonOperator
-  | BinaryExpressionRegexOperator;
+  | BinaryExpressionRegexOperator
+  | BinaryExpressionRenameOperator;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
 export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
+export type BinaryExpressionRenameOperator = 'as';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =

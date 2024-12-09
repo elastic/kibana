@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
+import { BehaviorSubject, type Subscription } from 'rxjs';
+
+import {
+  type CoreSetup,
   Plugin,
-  CoreStart,
-  AppMountParameters,
-  PluginInitializerContext,
+  type CoreStart,
+  type AppMountParameters,
+  type PluginInitializerContext,
+  DEFAULT_APP_CATEGORIES,
+  AppUpdater,
+  AppStatus,
 } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import { docLinks } from '../common/doc_links';
-import { PlaygroundHeaderDocs } from './components/playground_header_docs';
-import { Playground, getPlaygroundProvider } from './embeddable';
 import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -29,6 +32,8 @@ export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>
 {
   private config: SearchPlaygroundConfigType;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private licenseSubscription: Subscription | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchPlaygroundConfigType>();
@@ -43,12 +48,17 @@ export class SearchPlaygroundPlugin
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: 'logoEnterpriseSearch',
+      status: AppStatus.inaccessible,
       title: PLUGIN_NAME,
+      updater$: this.appUpdater$,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
 
         coreStart.chrome.docTitle.change(PLUGIN_NAME);
+        depsStart.searchNavigation?.handleOnAppMount();
 
         const startDeps: AppPluginStartDependencies = {
           ...depsStart,
@@ -57,6 +67,8 @@ export class SearchPlaygroundPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
+      visibleIn: ['sideNav', 'globalSearch'],
+      order: 2,
     });
 
     registerLocators(deps.share);
@@ -64,14 +76,29 @@ export class SearchPlaygroundPlugin
     return {};
   }
 
-  public start(core: CoreStart, deps: AppPluginStartDependencies): SearchPlaygroundPluginStart {
+  public start(
+    core: CoreStart,
+    { licensing }: AppPluginStartDependencies
+  ): SearchPlaygroundPluginStart {
     docLinks.setDocLinks(core.docLinks.links);
-    return {
-      PlaygroundProvider: getPlaygroundProvider(core, deps),
-      Playground,
-      PlaygroundHeaderDocs,
-    };
+
+    this.licenseSubscription = licensing.license$.subscribe((license) => {
+      const status: AppStatus =
+        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
+
+      this.appUpdater$.next(() => ({
+        status,
+      }));
+    });
+    return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
+    }
+  }
 }

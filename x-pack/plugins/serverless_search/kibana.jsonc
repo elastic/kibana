@@ -35,6 +35,7 @@
       "indexManagement",
       "searchConnectors",
       "searchInferenceEndpoints",
+      "searchPlayground",
       "usageCollection"
     ],
     "requiredBundles": ["kibanaReact"]

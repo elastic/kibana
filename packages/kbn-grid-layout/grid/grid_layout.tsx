@@ -21,7 +21,7 @@ import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
 
-interface GridLayoutProps {
+export interface GridLayoutProps {
   layout: GridLayoutData;
   gridSettings: GridSettings;
   renderPanelContents: (panelId: string) => React.ReactNode;
@@ -121,11 +121,6 @@ export const GridLayout = ({
           rowIndex={rowIndex}
           renderPanelContents={renderPanelContents}
           gridLayoutStateManager={gridLayoutStateManager}
-          toggleIsCollapsed={() => {
-            const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-            newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
-            gridLayoutStateManager.gridLayout$.next(newLayout);
-          }}
           setInteractionEvent={(nextInteractionEvent) => {
             if (!nextInteractionEvent) {
               gridLayoutStateManager.activePanel$.next(undefined);

@@ -17,14 +17,14 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import { useMlKibana } from '../../contexts/kibana';
-import type { ModelItem } from '../models_list';
 import { ProcessorsStats } from './expanded_row';
 
-export type IngestStatsResponse = Exclude<ModelItem['stats'], undefined>['ingest'];
+export type IngestStatsResponse = Exclude<TrainedModelItem['stats'], undefined>['ingest'];
 
 interface ModelPipelinesProps {
-  pipelines: ModelItem['pipelines'];
+  pipelines: TrainedModelItem['pipelines'];
   ingestStats: IngestStatsResponse;
 }
 

@@ -16,21 +16,10 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../json_code_editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { setUnifiedDocViewerServices } from '../../plugin';
-import type { UnifiedDocViewerServices } from '../../types';
 
 const mockDataView = {
   getComputedFields: () => [],
 } as never;
-setUnifiedDocViewerServices({
-  uiSettings: {
-    get: (key: string) => {
-      if (key === 'discover:useNewFieldsApi') {
-        return true;
-      }
-    },
-  },
-} as UnifiedDocViewerServices);
 
 describe('Source Viewer component', () => {
   test('renders loading state', () => {

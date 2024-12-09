@@ -99,7 +99,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ application, docLinks, http, notifications, uiSettings, analytics, i18n, theme, }: ",
+              "({ application, docLinks, http, notifications, uiSettings, ...startDeps }: ",
               {
                 "pluginId": "@kbn/core-apps-browser-internal",
                 "scope": "public",
@@ -118,7 +118,7 @@
                 "id": "def-public.CoreAppsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n    analytics,\n    i18n,\n    theme,\n  }",
+                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n    ...startDeps\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -408,6 +408,26 @@
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
                 "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
+              }
+            ],
+            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
               }
             ],
             "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",

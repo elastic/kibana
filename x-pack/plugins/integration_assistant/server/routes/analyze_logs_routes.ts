@@ -106,11 +106,21 @@ export function registerAnalyzeLogsRoutes(
 
           switch (graphLogFormat) {
             case 'unsupported':
-              throw new UnsupportedLogFormatError(
-                GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT
-              );
+              throw new UnsupportedLogFormatError({
+                message: GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT,
+              });
             case 'cef':
               throw new CefError(GenerationErrorCode.CEF_ERROR);
+            case 'leef':
+              throw new UnsupportedLogFormatError({
+                message: GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT,
+                logFormat: 'Log Event Extended Format (LEEF)',
+              });
+            case 'fix':
+              throw new UnsupportedLogFormatError({
+                message: GenerationErrorCode.UNSUPPORTED_LOG_SAMPLES_FORMAT,
+                logFormat: 'Financial Information eXchange (FIX)',
+              });
           }
 
           return res.ok({ body: AnalyzeLogsResponse.parse(graphResults) });

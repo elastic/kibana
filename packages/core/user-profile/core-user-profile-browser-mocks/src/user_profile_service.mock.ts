@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type {
   UserProfileServiceSetup,
   UserProfileServiceStart,
@@ -26,7 +27,7 @@ const createSetupMock = () => {
 
 const createStartMock = () => {
   const mock: jest.Mocked<UserProfileServiceStart> = {
-    getUserProfile$: jest.fn(),
+    getUserProfile$: jest.fn().mockReturnValue(of(null)),
     getCurrent: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),
@@ -47,7 +48,7 @@ const createInternalSetupMock = () => {
 
 const createInternalStartMock = () => {
   const mock: jest.Mocked<InternalUserProfileServiceStart> = {
-    getUserProfile$: jest.fn(),
+    getUserProfile$: jest.fn().mockReturnValue(of(null)),
     getCurrent: jest.fn(),
     bulkGet: jest.fn(),
     suggest: jest.fn(),

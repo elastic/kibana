@@ -297,7 +297,13 @@ export const EditorFooter = memo(function EditorFooter({
                     />
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon iconType="documentation" onClick={toggleLanguageComponent} />
+                    <EuiButtonIcon
+                      iconType="documentation"
+                      onClick={toggleLanguageComponent}
+                      aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                        defaultMessage: 'Open documentation',
+                      })}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

@@ -21,6 +21,7 @@ export {
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
+  ES_SEARCH_PLAYGROUND_ID,
 } from './constants';
 
 export type {

@@ -30,6 +30,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-mount",
     "@kbn/content-management-user-profiles",
+    "@kbn/core-user-profile-browser",
   ],
   "exclude": [
     "target/**/*"

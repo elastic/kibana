@@ -37,15 +37,6 @@ to enable the {kib} server to have screenshotting capabilities.
 === Grant users access to reporting
 When security is enabled, you grant users access to {report-features} with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
 
-. Enable application privileges in Reporting. To enable, turn off the default user access control features in `kibana.yml`:
-+
-[source,yaml]
-------------------------------------
-xpack.reporting.roles.enabled: false
-------------------------------------
-+
-NOTE: If you use the default settings, you can still create a custom role that grants reporting privileges. The default role is `reporting_user`. This behavior is being deprecated and does not allow application-level access controls for {report-features}, and does not allow API keys or authentication tokens to authorize report generation. Refer to <<reporting-advanced-settings, reporting security settings>> for information and caveats about the deprecated access control features.
-
 . Create the reporting role.
 
 .. Go to the *Roles* management page using the navigation menu or the 
@@ -79,7 +70,7 @@ NOTE: If you have a Basic license, sub-feature privileges are unavailable. For d
 [role="screenshot"]
 image::user/reporting/images/kibana-privileges-with-reporting.png["Kibana privileges with Reporting options, Gold or higher license"]
 +
-NOTE: If the *Reporting* options for application features are unavailable, and the cluster license is higher than Basic, contact your administrator, or <<reporting-advanced-settings,check that `xpack.reporting.roles.enabled` is set to `false` in kibana.yml>>.
+NOTE: If the *Reporting* options for application features are unavailable, and the cluster license is higher than Basic, contact your administrator.
 
 .. Click *Add {kib} privilege*.
 
@@ -101,7 +92,7 @@ Granting the privilege to generate reports also grants the user the privilege to
 [float]
 [[reporting-roles-user-api]]
 ==== Grant access with the role API
-With <<grant-user-access,{kib} application privileges>> enabled in Reporting, you can also use the {api-kibana}/group/endpoint-roles[role APIs] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
+With <<grant-user-access,{kib} application privileges>>, you can use the {api-kibana}/group/endpoint-roles[role APIs] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
 
 NOTE: This API request needs to be run against the <<api,Kibana API endpoint>>.
 

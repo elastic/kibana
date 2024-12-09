@@ -37,10 +37,6 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  /**
-   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
-   */
-  usesUiCapabilities: () => boolean;
 }
 
 /**

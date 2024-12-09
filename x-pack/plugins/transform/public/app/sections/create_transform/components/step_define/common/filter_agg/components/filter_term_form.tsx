@@ -6,7 +6,14 @@
  */
 
 import { debounce } from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ComponentProps,
+} from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -23,6 +30,11 @@ import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { useToastNotifications } from '../../../../../../../app_dependencies';
 
 import type { FilterAggConfigTerm } from '../types';
+
+// The config prop of the component, to be used for the `updateConfig` function.
+type FilterRangeFormConfig = ComponentProps<
+  Exclude<FilterAggConfigTerm['aggTypeConfig']['FilterAggFormComponent'], undefined>
+>['config'];
 
 /**
  * Form component for the term filter aggregation.
@@ -51,7 +63,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   }, []);
 
   const updateConfig = useCallback(
-    (update: any) => {
+    (update: FilterRangeFormConfig) => {
       onChange({
         config: {
           ...config,

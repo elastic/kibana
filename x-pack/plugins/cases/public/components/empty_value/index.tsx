@@ -7,14 +7,11 @@
 
 import { get, isString } from 'lodash/fp';
 import React from 'react';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import type { UseEuiTheme } from '@elastic/eui';
 
 import * as i18n from './translations';
 
-const emptyWrapperCss = css`
-  color: ${euiThemeVars.euiColorMediumShade};
-`;
+const emptyWrapperCss = ({ euiTheme }: UseEuiTheme) => ({ color: euiTheme.colors.mediumShade });
 
 export const getEmptyValue = () => '—';
 export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;

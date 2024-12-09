@@ -196,6 +196,7 @@ export const getSearchEmbeddableFactory = ({
               savedObjectId: savedObjectId$.getValue(),
               discoverServices,
             }),
+          getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         },
         {
           ...titleComparators,

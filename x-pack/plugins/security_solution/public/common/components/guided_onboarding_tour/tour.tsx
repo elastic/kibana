@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactChild } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
@@ -39,7 +39,7 @@ const initialState: TourContextValue = {
 
 const TourContext = createContext<TourContextValue>(initialState);
 
-export const RealTourContextProvider = ({ children }: { children: ReactChild }) => {
+export const RealTourContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { guidedOnboarding } = useKibana().services;
   const [hidden, setHidden] = useState(false);
 
@@ -131,7 +131,7 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
 };
 
-export const TourContextProvider = ({ children }: { children: ReactChild }) => {
+export const TourContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
 
   const ContextProvider = useMemo(

@@ -23,7 +23,6 @@ export async function fetchAnchor(
   dataView: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
-  useNewFieldsApi: boolean = false,
   services: DiscoverServices
 ): Promise<{
   anchorRow: DataTableRecord;
@@ -35,7 +34,7 @@ export async function fetchAnchor(
     query: { query: '', language: 'kuery' },
   });
 
-  updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, dataView);
+  updateSearchSource(searchSource, anchorId, sort, dataView);
 
   const adapter = new RequestAdapter();
   const { rawResponse } = await lastValueFrom(
@@ -75,7 +74,6 @@ export function updateSearchSource(
   searchSource: ISearchSource,
   anchorId: string,
   sort: EsQuerySortValue[],
-  useNewFieldsApi: boolean,
   dataView: DataView
 ) {
   searchSource
@@ -97,9 +95,9 @@ export function updateSearchSource(
     })
     .setField('sort', sort)
     .setField('trackTotalHits', false);
-  if (useNewFieldsApi) {
-    searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
-  }
+
+  searchSource.removeField('fieldsFromSource');
+  searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
+
   return searchSource;
 }

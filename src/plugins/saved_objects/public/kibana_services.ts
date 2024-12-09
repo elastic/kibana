@@ -17,3 +17,4 @@ export function setStartServices(core: CoreStart) {
 export const getAnalytics = () => coreStart.analytics;
 export const getI18n = () => coreStart.i18n;
 export const getTheme = () => coreStart.theme;
+export const getUserProfile = () => coreStart.userProfile;
