@@ -23,6 +23,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Graph, type NodeViewModel } from '../../..';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
 import { useFetchGraphData } from '../../hooks/use_fetch_graph_data';
+import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 
 const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
 
@@ -202,6 +203,7 @@ export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
     return (
       <>
         <EuiFlexGroup
+          data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
           direction="column"
           gutterSize="none"
           css={css`

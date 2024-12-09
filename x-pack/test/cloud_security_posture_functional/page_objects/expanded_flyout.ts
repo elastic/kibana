@@ -11,12 +11,12 @@ import type { FilterBarService } from '@kbn/test-suites-src/functional/services/
 import { FtrService } from '../../functional/ftr_provider_context';
 
 const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink';
-const GRAPH_VISUALIZATION_TEST_ID = 'securitySolutionFlyoutGraphVisualization';
 const NODE_EXPAND_BUTTON_TEST_ID = 'nodeExpandButton';
-const GRAPH_NODE_EXPAND_POPOVER_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}GraphNodeExpandPopover`;
-const GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}ExploreRelatedEntities`;
-const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}ShowActionsByEntity`;
-const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}ShowActionsOnEntity`;
+const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityGraphGraphInvestigation';
+const GRAPH_NODE_EXPAND_POPOVER_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphNodeExpandPopover`;
+const GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ExploreRelatedEntities`;
+const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowActionsByEntity`;
+const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}ShowActionsOnEntity`;
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
 export class ExpandedFlyout extends FtrService {
@@ -29,12 +29,12 @@ export class ExpandedFlyout extends FtrService {
   }
 
   async waitGraphIsLoaded(): Promise<void> {
-    await this.testSubjects.existOrFail(GRAPH_VISUALIZATION_TEST_ID, { timeout: 10000 });
+    await this.testSubjects.existOrFail(GRAPH_INVESTIGATION_TEST_ID, { timeout: 10000 });
   }
 
   async assertGraphNodesNumber(expected: number): Promise<void> {
     await this.waitGraphIsLoaded();
-    const graph = await this.testSubjects.find(GRAPH_VISUALIZATION_TEST_ID);
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
     await graph.scrollIntoView();
     const nodes = await graph.findAllByCssSelector('.react-flow__nodes .react-flow__node');
     expect(nodes.length).to.be(expected);
@@ -42,7 +42,7 @@ export class ExpandedFlyout extends FtrService {
 
   async selectNode(nodeId: string): Promise<WebElementWrapper> {
     await this.waitGraphIsLoaded();
-    const graph = await this.testSubjects.find(GRAPH_VISUALIZATION_TEST_ID);
+    const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
     await graph.scrollIntoView();
     const nodes = await graph.findAllByCssSelector(
       `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
@@ -97,13 +97,13 @@ export class ExpandedFlyout extends FtrService {
   }
 
   async clearAllFilters(): Promise<void> {
-    await this.testSubjects.click(`${GRAPH_VISUALIZATION_TEST_ID} > showQueryBarMenu`);
+    await this.testSubjects.click(`${GRAPH_INVESTIGATION_TEST_ID} > showQueryBarMenu`);
     await this.testSubjects.click('filter-sets-removeAllFilters');
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async addFilter(filter: Filter): Promise<void> {
-    await this.testSubjects.click(`${GRAPH_VISUALIZATION_TEST_ID} > addFilter`);
+    await this.testSubjects.click(`${GRAPH_INVESTIGATION_TEST_ID} > addFilter`);
     await this.filterBar.createFilter(filter);
     await this.testSubjects.scrollIntoView('saveFilter');
     await this.testSubjects.clickWhenNotDisabled('saveFilter');
