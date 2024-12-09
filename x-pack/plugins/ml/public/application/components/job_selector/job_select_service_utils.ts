@@ -86,7 +86,7 @@ export function getTimeRangeFromSelection(jobs: MlJobWithTimeRange[], selection:
   if (jobs.length > 0) {
     const times: number[] = [];
     jobs.forEach((job) => {
-      if (selection.includes(job.job_id)) {
+      if (selection.includes(job.job_id) || selection.some((s) => job.groups?.includes(s))) {
         if (job.timeRange.from !== undefined) {
           times.push(job.timeRange.from);
         }
