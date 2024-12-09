@@ -147,7 +147,6 @@ export const setEndpointSubFeaturePrivilege = (
   feature: EndpointSubFeaturePrivilegeId,
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
-  console.log({ feature, privilege });
   return getEndpointSecurityFeaturePrivileges()
     .findByTestSubj(`securitySolution_siemV2_${feature}_privilegeGroup`)
     .find(`button[title="${privilegeMapToTitle[privilege]}"]`)
