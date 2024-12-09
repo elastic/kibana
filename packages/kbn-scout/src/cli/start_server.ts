@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { run } from '@kbn/dev-cli-runner';
-
+import { Command } from '@kbn/dev-cli-runner';
 import { initLogsDir } from '@kbn/test';
 
 import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers';
@@ -16,19 +15,16 @@ import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers'
 /**
  * Start servers
  */
-export function startServersCli() {
-  run(
-    async ({ flagsReader: flags, log }) => {
-      const options = parseServerFlags(flags);
+export const startServer: Command<void> = {
+  name: 'start-server',
+  description: 'Start Elasticsearch & Kibana for testing purposes',
+  flags: SERVER_FLAG_OPTIONS,
+  run: async ({ flagsReader, log }) => {
+    const options = parseServerFlags(flagsReader);
 
-      if (options.logsDir) {
-        initLogsDir(log, options.logsDir);
-      }
-
-      await startServers(log, options);
-    },
-    {
-      flags: SERVER_FLAG_OPTIONS,
+    if (options.logsDir) {
+      await initLogsDir(log, options.logsDir);
     }
-  );
-}
+    await startServers(log, options);
+  },
+};
