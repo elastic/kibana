@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
 
       await testSubjects.existOrFail('noDataViewsPrompt');
-      
+
       await testSubjects.click('tryESQLLink');
       await PageObjects.dashboard.waitForRenderComplete();
 
