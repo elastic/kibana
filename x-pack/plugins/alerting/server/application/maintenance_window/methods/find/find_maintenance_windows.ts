@@ -6,12 +6,38 @@
  */
 
 import Boom from '@hapi/boom';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, KueryNode } from '@kbn/es-query';
 import { MaintenanceWindowClientContext, MaintenanceWindowStatus } from '../../../../../common';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
-import type { FindMaintenanceWindowsResult, FindMaintenanceWindowsParams } from './types';
+import type {
+  FindMaintenanceWindowsResult,
+  FindMaintenanceWindowsParams,
+  MaintenanceWindowsStatus,
+} from './types';
 import { findMaintenanceWindowsParamsSchema } from './schemas';
+
+export const getStatusFilter = (statuses?: MaintenanceWindowsStatus[]): KueryNode | string => {
+  if (!statuses || statuses.length === 0) return '';
+
+  const statusToQueryMapping = {
+    [MaintenanceWindowStatus.Running]: '(maintenance-window.attributes.events: "now")',
+    [MaintenanceWindowStatus.Upcoming]:
+      '(not (maintenance-window.attributes.events: "now") and maintenance-window.attributes.events >= "now")',
+    [MaintenanceWindowStatus.Finished]:
+      '(not (maintenance-window.attributes.events >= "now" or maintenance-window.attributes.expirationDate < "now"))',
+    [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")',
+  };
+
+  const fullQuery = statuses
+    ?.slice(1)
+    .reduce(
+      (acc, currentStatusFilter) => acc + ` or ${statusToQueryMapping[currentStatusFilter] || ''}`,
+      statusToQueryMapping[statuses[0]] || ''
+    );
+
+  return fullQuery ? fromKueryExpression(fullQuery) : '';
+};
 
 export async function findMaintenanceWindows(
   context: MaintenanceWindowClientContext,
@@ -26,26 +52,21 @@ export async function findMaintenanceWindows(
   } catch (error) {
     throw Boom.badRequest(`Error validating find maintenance windows data - ${error.message}`);
   }
-  
-  const statusToQueryMapping = {
-    [MaintenanceWindowStatus.Running]: '(maintenance-window.attributes.events: "now")',
-    [MaintenanceWindowStatus.Upcoming]: '(not (maintenance-window.attributes.events: "now") and maintenance-window.attributes.events >= "now")',
-    [MaintenanceWindowStatus.Finished]: '(not (maintenance-window.attributes.events >= "now" or maintenance-window.attributes.expirationDate < "now"))',
-    [MaintenanceWindowStatus.Archived]: '(maintenance-window.attributes.expirationDate < "now")'
-  }
 
-  let fullQuery = '';
-  if (params?.statuses && params?.statuses?.length > 0) {
-    fullQuery = params?.statuses?.slice(1).reduce( (acc, currentStatusFilter) => acc + ` or ${statusToQueryMapping[currentStatusFilter]}`, statusToQueryMapping[params.statuses[0]])
-  }
+  const filter = getStatusFilter(params?.statuses);
 
-  const filter = params?.statuses ? fromKueryExpression(fullQuery): '';
-  
   try {
     const result = await findMaintenanceWindowSo({
       savedObjectsClient,
       ...(params
-        ? { savedObjectsFindOptions: { page: params.page, perPage: params.perPage, search: params.search, filter } }
+        ? {
+            savedObjectsFindOptions: {
+              ...(params.page ? { page: params.page } : {}),
+              ...(params.perPage ? { perPage: params.perPage } : {}),
+              ...(params.search ? { search: params.search } : {}),
+              ...(filter ? { filter } : {}),
+            },
+          }
         : {}),
     });
 

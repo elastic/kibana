@@ -31,12 +31,12 @@ import {
   MAINTENANCE_WINDOW_FEATURE_ID,
   MAINTENANCE_WINDOW_DEEP_LINK_IDS,
   MAINTENANCE_WINDOW_DEFAULT_SEARCH_PAGE_SIZE,
-  MaintenanceWindowStatus
+  MaintenanceWindowStatus,
 } from '../../../common';
 
 interface FilterOptions {
   searchText: string;
-  selectedStatuses: MaintenanceWindowStatus[]
+  selectedStatuses: MaintenanceWindowStatus[];
 }
 
 export const MaintenanceWindowsPage = React.memo(() => {
@@ -53,10 +53,10 @@ export const MaintenanceWindowsPage = React.memo(() => {
 
   // move to the list component
   const [inputText, setInputText] = useState<string>('');
-  const [selectedStatuses, setSelectedStatuses] = useState<MaintenanceWindowStatus[]>([])
+  const [selectedStatuses, setSelectedStatuses] = useState<MaintenanceWindowStatus[]>([]);
   const [searchText, setSearchText] = useState<string>('');
 
-  console.log('selectedStatuses', selectedStatuses)
+  console.log('selectedStatuses', selectedStatuses);
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
   const { isLoading, isInitialLoading, data, refetch } = useFindMaintenanceWindows({
@@ -66,7 +66,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
     searchText,
     selectedStatuses,
   });
-
 
   const { maintenanceWindows, total } = data;
 
@@ -79,7 +78,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const refreshData = useCallback(() => refetch(), [refetch]);
   const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
   const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
-  const isFiltered = searchText === '' && selectedStatuses.length === 0
+  const isFiltered = searchText === '' && selectedStatuses.length === 0;
 
   const showEmptyPrompt =
     !isLoading &&
@@ -87,7 +86,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
     isFiltered &&
     showWindowMaintenance &&
     writeWindowMaintenance;
-  
+
   const readOnly = showWindowMaintenance && !writeWindowMaintenance;
 
   // if the user is read only then display the glasses badge in the global navigation header
@@ -110,27 +109,33 @@ export const MaintenanceWindowsPage = React.memo(() => {
     };
   }, [setBadge, chrome]);
 
-  const onPageChange = useCallback(({ page: { index, size } }: { page: { index: number, size: number } }) => {
-    setPage(index + 1);
-    setPerPage(size);
-  }, [])
+  const onPageChange = useCallback(
+    ({ page: { index, size } }: { page: { index: number; size: number } }) => {
+      setPage(index + 1);
+      setPerPage(size);
+    },
+    []
+  );
 
   const onSelectedStatusesChange = useCallback((statuses: MaintenanceWindowStatus[]) => {
     setSelectedStatuses(statuses);
-  }, [])
+  }, []);
 
   const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
     if (e.target.value === '') {
-      setSearchText(e.target.value)
+      setSearchText(e.target.value);
     }
   }, []);
 
-  const onSearchKeyup = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      setSearchText(inputText)
-    }
-  }, [inputText]);
+  const onSearchKeyup = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        setSearchText(inputText);
+      }
+    },
+    [inputText]
+  );
 
   if (isInitialLoading) {
     return <CenterJustifiedSpinner />;

@@ -14,7 +14,7 @@ const statusSchema = schema.oneOf([
   schema.literal('running'),
   schema.literal('finished'),
   schema.literal('upcoming'),
-  schema.literal('archived')
+  schema.literal('archived'),
 ]);
 
 export const findMaintenanceWindowsRequestQuerySchema = schema.object(
@@ -37,18 +37,15 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The number of maintenance windows to return per page.',
       },
     }),
-    search: schema.maybe(schema.string({
-      meta: {
-        description: 'An Elasticsearch simple_query_string query that filters the objects in the response.',
-      },
-    })),
-    statuses: schema.maybe(
-      schema.oneOf([
-        statusSchema,
-      schema.arrayOf(
-        statusSchema
-      )])
-    )
+    search: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'An Elasticsearch simple_query_string query that filters the objects in the response.',
+        },
+      })
+    ),
+    statuses: schema.maybe(schema.oneOf([statusSchema, schema.arrayOf(statusSchema)])),
   },
   {
     validate: (params) => {

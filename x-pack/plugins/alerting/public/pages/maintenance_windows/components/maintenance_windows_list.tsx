@@ -16,7 +16,7 @@ import {
   EuiButton,
   EuiBasicTable,
   EuiFieldSearch,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SortDirection } from '../types';
@@ -43,12 +43,12 @@ interface MaintenanceWindowsListProps {
   page: number;
   perPage: number;
   total: number;
-  onPageChange: ({ page: { index, size } }: { page: { index: number, size: number } }) => void;
+  onPageChange: ({ page: { index, size } }: { page: { index: number; size: number } }) => void;
   inputText: string;
   onSearchKeyup: (e: any) => void;
   onSelectedStatusesChange: (statuses: MaintenanceWindowStatus[]) => void;
-  selectedStatuses: MaintenanceWindowStatus[]
-  onSearchChange: (e: any) => void
+  selectedStatuses: MaintenanceWindowStatus[];
+  onSearchChange: (e: any) => void;
 }
 
 const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
@@ -123,9 +123,8 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     selectedStatuses,
     onSelectedStatusesChange,
     onSearchKeyup,
-    onSearchChange
+    onSearchChange,
   }) => {
-
     const { euiTheme } = useEuiTheme();
 
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
@@ -171,7 +170,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         }
       `;
     }, [euiTheme.colors.highlight]);
-    useEffect(() => console.log('HERE2'), [])
+    useEffect(() => console.log('HERE2'), []);
     const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
         {
@@ -218,8 +217,8 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
 
     return (
       <>
-      <EuiFlexItem grow={false}>
-          <EuiFlexGroup >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFieldSearch
                 data-test-subj="maintenance-window-search"
@@ -233,7 +232,10 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <StatusFilter selectedStatuses={selectedStatuses} onChange={onSelectedStatusesChange} />
+              <StatusFilter
+                selectedStatuses={selectedStatuses}
+                onChange={onSelectedStatusesChange}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

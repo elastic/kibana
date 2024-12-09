@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findMaintenanceWindows } from './find_maintenance_windows';
+import { findMaintenanceWindows, getStatusFilter } from './find_maintenance_windows';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -95,10 +95,26 @@ describe('MaintenanceWindowClient - find', () => {
       per_page: 5,
     } as unknown as SavedObjectsFindResponse);
 
-    const result = await findMaintenanceWindows(mockContext, {});
+    const result = await findMaintenanceWindows(mockContext, { statuses: ['running'] });
 
-    expect(spy).toHaveBeenCalledWith({});
+    expect(spy).toHaveBeenCalledWith({ statuses: ['running'] });
     expect(savedObjectsClient.find).toHaveBeenLastCalledWith({
+      filter: {
+        arguments: [
+          {
+            isQuoted: false,
+            type: 'literal',
+            value: 'maintenance-window.attributes.events',
+          },
+          {
+            isQuoted: true,
+            type: 'literal',
+            value: 'now',
+          },
+        ],
+        function: 'is',
+        type: 'function',
+      },
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
     });
 
@@ -107,5 +123,163 @@ describe('MaintenanceWindowClient - find', () => {
     expect(result.data[1].id).toEqual('test-2');
     expect(result.page).toEqual(1);
     expect(result.perPage).toEqual(5);
+  });
+});
+
+describe('getStatusFilter', () => {
+  it('return proper filter for running status', () => {
+    expect(getStatusFilter(['running'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "isQuoted": false,
+            "type": "literal",
+            "value": "maintenance-window.attributes.events",
+          },
+          Object {
+            "isQuoted": true,
+            "type": "literal",
+            "value": "now",
+          },
+        ],
+        "function": "is",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return proper filter for upcomimg status', () => {
+    expect(getStatusFilter(['upcoming'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "maintenance-window.attributes.events",
+                  },
+                  Object {
+                    "isQuoted": true,
+                    "type": "literal",
+                    "value": "now",
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "not",
+            "type": "function",
+          },
+          Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "maintenance-window.attributes.events",
+              },
+              "gte",
+              Object {
+                "isQuoted": true,
+                "type": "literal",
+                "value": "now",
+              },
+            ],
+            "function": "range",
+            "type": "function",
+          },
+        ],
+        "function": "and",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return proper filter for fininshed status', () => {
+    expect(getStatusFilter(['finished'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "maintenance-window.attributes.events",
+                  },
+                  "gte",
+                  Object {
+                    "isQuoted": true,
+                    "type": "literal",
+                    "value": "now",
+                  },
+                ],
+                "function": "range",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "maintenance-window.attributes.expirationDate",
+                  },
+                  "lt",
+                  Object {
+                    "isQuoted": true,
+                    "type": "literal",
+                    "value": "now",
+                  },
+                ],
+                "function": "range",
+                "type": "function",
+              },
+            ],
+            "function": "or",
+            "type": "function",
+          },
+        ],
+        "function": "not",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return proper filter for archived status', () => {
+    expect(getStatusFilter(['archived'])).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "isQuoted": false,
+            "type": "literal",
+            "value": "maintenance-window.attributes.expirationDate",
+          },
+          "lt",
+          Object {
+            "isQuoted": true,
+            "type": "literal",
+            "value": "now",
+          },
+        ],
+        "function": "range",
+        "type": "function",
+      }
+    `);
+  });
+
+  it('return empty string if status does not exist', () => {
+    expect(getStatusFilter(['weird' as any])).toMatchInlineSnapshot(`""`);
+  });
+
+  it('return empty string if pass empty arguments', () => {
+    expect(getStatusFilter()).toMatchInlineSnapshot(`""`);
+  });
+
+  it('return empty string if pass empty array', () => {
+    expect(getStatusFilter([])).toMatchInlineSnapshot(`""`);
   });
 });

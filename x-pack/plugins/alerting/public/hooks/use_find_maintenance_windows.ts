@@ -19,9 +19,7 @@ interface UseFindMaintenanceWindowsProps {
   selectedStatuses: MaintenanceWindowStatus[];
 }
 
-export const useFindMaintenanceWindows = (
-  params: UseFindMaintenanceWindowsProps
-) => {
+export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps) => {
   const { enabled = true, page, perPage, searchText, selectedStatuses } = params;
 
   const {
@@ -30,20 +28,18 @@ export const useFindMaintenanceWindows = (
   } = useKibana().services;
 
   const queryFn = () => {
-    // remove http from params
     return findMaintenanceWindows({
       http,
       page,
       perPage,
       searchText,
-      selectedStatuses
+      selectedStatuses,
     });
   };
 
   const onErrorFn = (error: Error) => {
     if (error) {
       toasts.addDanger(
-        // move to translate file
         i18n.translate('xpack.alerting.maintenanceWindowsListFailure', {
           defaultMessage: 'Unable to load maintenance windows.',
         })
@@ -56,16 +52,10 @@ export const useFindMaintenanceWindows = (
     ...(page ? [page] : []),
     ...(perPage ? [perPage] : []),
     ...(searchText ? [searchText] : []),
-    ...(selectedStatuses ? [selectedStatuses] : [])
+    ...(selectedStatuses ? [selectedStatuses] : []),
   ];
 
-  const {
-    isLoading,
-    isFetching,
-    isInitialLoading,
-    data,
-    refetch,
-  } = useQuery({
+  const { isLoading, isFetching, isInitialLoading, data, refetch } = useQuery({
     queryKey,
     queryFn,
     onError: onErrorFn,
