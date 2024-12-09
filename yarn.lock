@@ -7452,7 +7452,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-utility@link:packages/kbn-shared-ux-utility":
+"@kbn/shared-ux-utility@link:src/platform/packages/shared/kbn-shared-ux-utility":
   version "0.0.0"
   uid ""
 
