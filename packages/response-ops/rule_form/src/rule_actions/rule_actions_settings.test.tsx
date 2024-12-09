@@ -11,8 +11,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RuleActionsSettings } from './rule_actions_settings';
 import { getAction } from '../common/test_utils/actions_test_utils';
-import { RuleTypeModel } from '../common';
-import { RuleType } from '@kbn/alerting-types';
+import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
+import { RuleNotifyWhen, RuleType } from '@kbn/alerting-types';
 import userEvent from '@testing-library/user-event';
 import type { RuleActionsNotifyWhenProps } from './rule_actions_notify_when';
 import type { RuleActionsAlertsFilterProps } from './rule_actions_alerts_filter';
@@ -24,6 +24,7 @@ jest.mock('./rule_actions_notify_when', () => ({
     showMinimumThrottleWarning,
     onChange,
     onUseDefaultMessage,
+    frequency,
   }: RuleActionsNotifyWhenProps) => (
     <div>
       RuleActionsNotifyWhen
@@ -38,7 +39,7 @@ jest.mock('./rule_actions_notify_when', () => ({
           })
         }
       >
-        RuleActionsNotifyWhenOnChange
+        {frequency?.notifyWhen}
       </button>
       <button onClick={onUseDefaultMessage}>RuleActionsNotifyWhenOnUseDefaultMessage</button>
     </div>
@@ -151,6 +152,8 @@ describe('ruleActionsSettings', () => {
       formData: {
         consumer: 'stackAlerts',
         schedule: { interval: '5m' },
+        notifyWhen: null,
+        throttle: null,
       },
       actionErrors: {},
       validConsumers: ['stackAlerts', 'logs'],
@@ -282,7 +285,7 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    await userEvent.click(screen.getByText('RuleActionsNotifyWhenOnChange'));
+    await userEvent.click(screen.getByText('onActionGroupChange'));
 
     expect(mockOnNotifyWhenChange).toHaveBeenLastCalledWith({
       notifyWhen: 'onActionGroupChange',
@@ -293,6 +296,46 @@ describe('ruleActionsSettings', () => {
     await userEvent.click(screen.getByText('RuleActionsNotifyWhenOnUseDefaultMessage'));
 
     expect(mockOnUseDefaultMessageChange).toHaveBeenCalled();
+  });
+
+  test('should render notify when with rule level notify when value', async () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        settings: {},
+      },
+      formData: {
+        consumer: 'stackAlerts',
+        schedule: { interval: '5m' },
+        notifyWhen: RuleNotifyWhen.THROTTLE,
+        throttle: '9d',
+      },
+      actionErrors: {},
+      validConsumers: ['stackAlerts', 'logs'],
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
+    render(
+      <RuleActionsSettings
+        action={getAction('1')}
+        onUseDefaultMessageChange={mockOnUseDefaultMessageChange}
+        onNotifyWhenChange={mockOnNotifyWhenChange}
+        onActionGroupChange={mockOnActionGroupChange}
+        onAlertsFilterChange={mockOnAlertsFilterChange}
+        onTimeframeChange={mockOnTimeframeChange}
+      />
+    );
+
+    expect(screen.getByText('RuleActionsNotifyWhen')).toBeInTheDocument();
+    expect(screen.getByText(RuleNotifyWhen.THROTTLE)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText(RuleNotifyWhen.THROTTLE));
+
+    expect(mockOnNotifyWhenChange).toHaveBeenLastCalledWith({
+      notifyWhen: 'onActionGroupChange',
+      summary: true,
+      throttle: '5m',
+    });
   });
 
   test('should allow for selecting of action groups', async () => {
