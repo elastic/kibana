@@ -79,7 +79,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.global.channel',
       {
         defaultMessage:
-          'The release channel to use for receiving global artifacts. By default, staged roll-out is applied. Set to rapid to receive candidate artifacts as soon as available. Set to stable to only receive stable artifacts. Default: default',
+          'The release channel to use for receiving global artifacts. The "default" is staged roll-out. Set to "rapid" to receive candidate artifacts as soon as available. Set to "stable" to only receive stable artifacts. Default: default',
       }
     ),
   },
@@ -305,7 +305,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.global.channel',
       {
         defaultMessage:
-          'The release channel to use for receiving global artifacts. By default, staged roll-out is applied. Set to rapid to receive candidate artifacts as soon as available. Set to stable to only receive stable artifacts. Default: default',
+          'The release channel to use for receiving global artifacts. The "default" is staged roll-out. Set to "rapid" to receive candidate artifacts as soon as available. Set to "stable" to only receive stable artifacts. Default: default',
       }
     ),
   },
@@ -541,7 +541,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.global.channel',
       {
         defaultMessage:
-          'The release channel to use for receiving global artifacts. By default, staged roll-out is applied. Set to rapid to receive candidate artifacts as soon as available. Set to stable to only receive stable artifacts. Default: default',
+          'The release channel to use for receiving global artifacts. The "default" is staged roll-out. Set to "rapid" to receive candidate artifacts as soon as available. Set to "stable" to only receive stable artifacts. Default: default',
       }
     ),
   },
