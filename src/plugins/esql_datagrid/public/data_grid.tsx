@@ -216,7 +216,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       showTimeCol
-      useNewFieldsApi
       enableComparisonMode
       sort={sortOrder}
       ariaLabelledBy="esqlDataGrid"
