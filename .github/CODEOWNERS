@@ -557,7 +557,6 @@ packages/response-ops/rule_params @elastic/response-ops
 packages/serverless/project_switcher @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
-packages/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 packages/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
@@ -622,6 +621,7 @@ src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
 src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
+src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
