@@ -6,7 +6,7 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import type { RuleMigrationResources } from '../../../../../util/rule_resource_retriever';
+import type { RuleMigrationResources } from '../../../retrievers/rule_resource_retriever';
 
 interface ResourceContext {
   macros: string;

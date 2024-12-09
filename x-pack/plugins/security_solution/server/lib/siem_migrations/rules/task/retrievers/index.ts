@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const TOOL_USE_START = '<|tool_use_start|>';
-export const TOOL_USE_END = '<|tool_use_end|>';
+export { RuleMigrationsRetriever } from './rule_migrations_retriever';

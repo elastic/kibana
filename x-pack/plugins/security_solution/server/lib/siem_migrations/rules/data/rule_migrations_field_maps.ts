@@ -62,3 +62,12 @@ export const integrationsFieldMap: FieldMap = {
   'data_streams.index_pattern': { type: 'keyword', required: true },
   elser_embeddings: { type: 'semantic_text', required: true },
 };
+
+export const prebuiltRulesFieldMap: FieldMap = {
+  '@timestamp': { type: 'date', required: true },
+  name: { type: 'text', required: true },
+  description: { type: 'text', required: true },
+  elser_embedding: { type: 'semantic_text', required: true },
+  rule_id: { type: 'keyword', required: true },
+  mitre_attack_ids: { type: 'keyword', array: true, required: false },
+};
