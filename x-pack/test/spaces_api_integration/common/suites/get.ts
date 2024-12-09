@@ -92,6 +92,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
           'securitySolutionCasesV2',
           'securitySolutionTimeline',
           'securitySolutionNotes',
+          'siem',
           'siemV2',
           'slo',
           'uptime',
