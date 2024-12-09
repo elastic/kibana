@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
-  const log = getService('log');
 
   describe('telemetry', () => {
     describe('context', () => {
