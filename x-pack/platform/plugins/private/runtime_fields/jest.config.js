@@ -9,7 +9,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/private/runtime_fields'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/runtime_fields',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/runtime_fields',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/private/runtime_fields/public/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/platform/plugins/private/runtime_fields/public/**/*.{ts,tsx}',
+  ],
 };
