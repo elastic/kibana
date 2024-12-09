@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   AggregationsAggregationContainer,
   AggregationsFilterAggregate,
@@ -45,8 +46,13 @@ export interface RuleMigrationFilters {
   prebuilt?: boolean;
   searchTerm?: string;
 }
+export interface RuleMigrationSort {
+  sortField?: string;
+  sortDirection?: estypes.SortOrder;
+}
 export interface RuleMigrationGetOptions {
   filters?: RuleMigrationFilters;
+  sort?: RuleMigrationSort;
   from?: number;
   size?: number;
 }
@@ -120,13 +126,19 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Retrieves an array of rule documents of a specific migrations */
   async get(
     migrationId: string,
-    { filters = {}, from, size }: RuleMigrationGetOptions = {}
+    { filters = {}, sort = {}, from, size }: RuleMigrationGetOptions = {}
   ): Promise<{ total: number; data: StoredRuleMigration[] }> {
     const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId, { ...filters });
 
     const result = await this.esClient
-      .search<RuleMigration>({ index, query, sort: '_doc', from, size })
+      .search<RuleMigration>({
+        index,
+        query,
+        sort: sort.sortField ? getSortingOptions(sort) : undefined,
+        from,
+        size,
+      })
       .catch((error) => {
         this.logger.error(`Error searching rule migrations: ${error.message}`);
         throw error;
@@ -394,4 +406,90 @@ const conditions = {
   isInstallable(): QueryDslQueryContainer[] {
     return [this.isFullyTranslated(), this.isNotInstalled()];
   },
+};
+
+const missing = (direction: estypes.SortOrder = 'asc') =>
+  direction === 'desc' ? '_last' : '_first';
+
+const sortingOptions = {
+  author(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
+    return {
+      'elastic_rule.prebuilt_rule_id': {
+        order: direction,
+        nested: { path: 'elastic_rule' },
+        missing: missing(direction),
+      },
+    };
+  },
+  severity(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
+    const field = 'elastic_rule.severity';
+    return {
+      _script: {
+        order: direction,
+        type: 'number',
+        script: {
+          source: `
+          if (doc.containsKey('${field}') && !doc['${field}'].empty) {
+            def value = doc['${field}'].value.toLowerCase();
+            if (value == 'critical') { return 3 }
+            if (value == 'high') { return 2 }
+            if (value == 'medium') { return 1 }
+            if (value == 'low') { return 0 }
+          }
+          return -1;
+          `,
+          lang: 'painless',
+        },
+        nested: { path: 'elastic_rule' },
+      },
+    };
+  },
+  status(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
+    const field = 'translation_result';
+    return {
+      _script: {
+        order: direction,
+        type: 'number',
+        script: {
+          source: `
+          if (doc.containsKey('${field}') && !doc['${field}'].empty) {
+            def value = doc['${field}'].value.toLowerCase();
+            if (value == 'full') { return 2 }
+            if (value == 'partial') { return 1 }
+            if (value == 'untranslatable') { return 0 }
+          }
+          return -1;
+          `,
+          lang: 'painless',
+        },
+      },
+    };
+  },
+  updated(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
+    return { updated_at: direction };
+  },
+  name(direction: estypes.SortOrder = 'asc'): estypes.SortCombinations {
+    return { 'elastic_rule.title.keyword': { order: direction, nested: { path: 'elastic_rule' } } };
+  },
+};
+
+const DEFAULT_SORTING: estypes.Sort = [
+  sortingOptions.status('desc'),
+  sortingOptions.author('desc'),
+  sortingOptions.severity(),
+  sortingOptions.updated(),
+];
+
+const getSortingOptions = (sort?: RuleMigrationSort): estypes.Sort => {
+  if (!sort?.sortField) {
+    return DEFAULT_SORTING;
+  }
+  const sortingOptionsMap: { [key: string]: estypes.Sort } = {
+    'elastic_rule.title': sortingOptions.name(sort.sortDirection),
+    'elastic_rule.severity': sortingOptions.severity(sort.sortDirection),
+    'elastic_rule.prebuilt_rule_id': sortingOptions.author(sort.sortDirection),
+    translation_result: sortingOptions.status(sort.sortDirection),
+    updated_at: sortingOptions.updated(sort.sortDirection),
+  };
+  return sortingOptionsMap[sort.sortField] ?? DEFAULT_SORTING;
 };
