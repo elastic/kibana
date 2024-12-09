@@ -991,7 +991,7 @@ x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/plugins/transform @elastic/ml-ui
 x-pack/plugins/translations @elastic/kibana-localization
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
-x-pack/plugins/upgrade_assistant @elastic/kibana-core
+x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
