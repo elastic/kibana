@@ -50,7 +50,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
               migration_id: migrationId,
               original_rule: originalRule,
             }));
-            await ruleMigrationsClient.data.integrations.create();
+
             await ruleMigrationsClient.data.rules.create(ruleMigrations);
 
             return res.ok({ body: { migration_id: migrationId } });

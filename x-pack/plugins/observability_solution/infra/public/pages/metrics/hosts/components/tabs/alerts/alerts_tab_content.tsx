@@ -6,11 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import {
-  AlertConsumers,
-  INFRA_RULE_TYPE_IDS,
-  OBSERVABILITY_RULE_TYPE_IDS,
-} from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
@@ -47,11 +43,7 @@ export const AlertsTabContent = () => {
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
-
-  const hostsWithAlertsKuery = hostNodes
-    .filter((host) => host.alertsCount)
-    .map((host) => `"${host.name}"`)
-    .join(' OR ');
+  const hostNamesKuery = hostNodes.map((host) => `host.name: "${host.name}"`).join(' OR ');
 
   return (
     <HeightRetainer>
@@ -73,7 +65,7 @@ export const AlertsTabContent = () => {
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
                 data-test-subj="infraHostAlertsTabAlertsShowAllButton"
-                kuery={`${hostsWithAlertsKuery}`}
+                kuery={hostNamesKuery}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -146,7 +138,7 @@ const MemoAlertSummaryWidget = React.memo(
     return (
       <AlertSummaryWidget
         chartProps={chartProps}
-        ruleTypeIds={INFRA_RULE_TYPE_IDS}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
         consumers={INFRA_ALERT_CONSUMERS}
         filter={alertsQuery}
         fullSize

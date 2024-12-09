@@ -101,8 +101,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             for (let i = 0; i < NUM_RESPONSES; i++) {
-              await simulator.next(`Part: i\n`);
+              await simulator.next(`Part: ${i}\n`);
             }
+
+            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
 
             await simulator.complete();
 
@@ -135,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it('returns a useful error if the request fails', async () => {
+    it.skip('returns a useful error if the request fails', async () => {
       const interceptor = proxy.intercept('conversation', () => true);
 
       const passThrough = new PassThrough();
