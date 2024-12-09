@@ -35,7 +35,7 @@ export const HostKpiCharts = ({
   const charts = useHostKpiCharts({
     dataViewId: dataView?.id,
     getSubtitle,
-    seriesColor: euiTheme.colors.lightestShade,
+    seriesColor: euiTheme.colors.backgroundLightText,
   });
 
   return (
