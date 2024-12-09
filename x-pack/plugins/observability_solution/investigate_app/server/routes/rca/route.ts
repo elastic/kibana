@@ -61,48 +61,44 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
     const start = datemath.parse(rangeFrom)?.valueOf()!;
     const end = datemath.parse(rangeTo)?.valueOf()!;
 
-    const [coreEsClient, soClient] = await Promise.all([
-      (await requestContext.core).elasticsearch.client.asCurrentUser,
-      (await requestContext.core).savedObjects.client,
-    ]);
+    const coreContext = await requestContext.core;
+
+    const coreEsClient = coreContext.elasticsearch.client.asCurrentUser;
+    const soClient = coreContext.savedObjects.client;
+    const uiSettingsClient = coreContext.uiSettings.client;
 
     const repository = investigationRepositoryFactory({ soClient, logger });
 
-    const investigation = await repository.findById(investigationId);
+    const esClient = createObservabilityEsClient({
+      client: coreEsClient,
+      logger,
+      plugin: 'investigateApp',
+    });
 
     const [
+      investigation,
       rulesClient,
       alertsClient,
-      sloClient,
       inferenceClient,
-      spaceId = 'default',
-      esClient,
-      apmIndices,
       observabilityAIAssistantClient,
+      spaceId = 'default',
+      apmIndices,
+      logSources,
+      sloSummaryIndices,
     ] = await Promise.all([
+      repository.findById(investigationId),
       (await plugins.alerting.start()).getRulesClientWithRequest(request),
       (await plugins.ruleRegistry.start()).getRacClientWithRequest(request),
-      (await plugins.slo.start()).getSloClientWithRequest(request),
       (await plugins.inference.start()).getClient({ request }),
-      (await plugins.spaces?.start())?.spacesService.getSpaceId(request),
-      createObservabilityEsClient({
-        client: coreEsClient,
-        logger,
-        plugin: 'investigateApp',
-      }),
-      plugins.apmDataAccess.setup.getApmIndices(),
       plugins
         .observabilityAIAssistant!.start()
         .then((observabilityAIAssistantStart) =>
           observabilityAIAssistantStart.service.getClient({ request, scopes: ['observability'] })
         ),
-    ]);
-
-    const [sloSummaryIndices, logSources] = await Promise.all([
-      sloClient.getSummaryIndices(),
-      (
-        await requestContext.core
-      ).uiSettings.client.get(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID) as Promise<string[]>,
+      (await plugins.spaces?.start())?.spacesService.getSpaceId(request),
+      plugins.apmDataAccess.setup.getApmIndices(soClient),
+      uiSettingsClient.get(OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID) as Promise<string[]>,
+      (await plugins.slo.start()).getSloClientWithRequest(request).getSummaryIndices(),
     ]);
 
     const next$ = runRootCauseAnalysis({

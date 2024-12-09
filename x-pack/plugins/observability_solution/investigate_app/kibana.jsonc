@@ -31,12 +31,14 @@
       "apmDataAccess",
       "usageCollection"
     ],
+    "optionalPlugins": [
+      "observabilityAIAssistant",
+      "observabilityAIAssistantApp"
+    ],
     "requiredBundles": [
       "esql",
       "kibanaReact",
-      "kibanaUtils",
-      "observabilityAIAssistant",
-      "observabilityAIAssistantApp",
+      "kibanaUtils"
     ],
     "extraPublicDirs": []
   }

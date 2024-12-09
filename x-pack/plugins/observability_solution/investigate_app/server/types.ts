@@ -10,10 +10,7 @@ import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import type {
-  PluginStartContract as AlertingPluginStart,
-  PluginSetupContract as AlertingPluginSetup,
-} from '@kbn/alerting-plugin/server/plugin';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { SLOServerStart, SLOServerSetup } from '@kbn/slo-plugin/server';
 import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -35,7 +32,7 @@ export interface InvestigateAppSetupDependencies {
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   slo: SLOServerSetup;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
@@ -46,7 +43,7 @@ export interface InvestigateAppSetupDependencies {
 export interface InvestigateAppStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   slo: SLOServerStart;
-  alerting: AlertingPluginStart;
+  alerting: AlertingServerStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
