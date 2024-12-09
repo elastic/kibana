@@ -34,6 +34,9 @@ describe('robust field access', () => {
     it('returns undefined if the key does not exist', () => {
       expect(robustGet({ key: 'a.b.c', document: { a: { b: 'my-value' } } })).toEqual(undefined);
     });
+    it('returns an array if the key exists', () => {
+      expect(robustGet({ key: 'a.b', document: { a: { b: ['my-value'] } } })).toEqual(['my-value']);
+    });
   });
 
   describe('set', () => {
