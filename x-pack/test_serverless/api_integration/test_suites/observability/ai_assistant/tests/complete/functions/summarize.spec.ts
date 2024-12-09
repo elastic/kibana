@@ -61,7 +61,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           arguments: JSON.stringify({
             id: 'my-id',
             text: 'Hello world',
-            is_correction: false,
             confidence: 1,
             public: false,
           }),
