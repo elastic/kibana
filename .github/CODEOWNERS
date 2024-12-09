@@ -261,7 +261,6 @@ packages/core/user-profile/core-user-profile-server-mocks @elastic/kibana-core
 packages/core/user-settings/core-user-settings-server @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
-packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/kibana-management
 packages/deeplinks/fleet @elastic/fleet
 packages/deeplinks/management @elastic/kibana-management
@@ -270,7 +269,6 @@ packages/deeplinks/observability @elastic/obs-ux-management-team
 packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/security @elastic/security-solution
 packages/deeplinks/shared @elastic/appex-sharedux
-packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/default-nav/devtools @elastic/kibana-management
 packages/default-nav/management @elastic/kibana-management
 packages/default-nav/ml @elastic/ml-ui
@@ -319,7 +317,6 @@ packages/kbn-coloring @elastic/kibana-visualizations
 packages/kbn-config @elastic/kibana-core
 packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
-packages/kbn-content-management-utils @elastic/kibana-data-discovery
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 packages/kbn-custom-icons @elastic/obs-ux-logs-team
@@ -327,8 +324,6 @@ packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-data-stream-adapter @elastic/security-threat-hunting
-packages/kbn-data-view-utils @elastic/kibana-data-discovery
-packages/kbn-datemath @elastic/kibana-data-discovery
 packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-dev-cli-errors @elastic/kibana-operations
@@ -336,7 +331,6 @@ packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
 packages/kbn-dev-utils @elastic/kibana-operations
 packages/kbn-discover-contextual-components @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
-packages/kbn-discover-utils @elastic/kibana-data-discovery
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
@@ -344,7 +338,6 @@ packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-es-errors @elastic/kibana-core
-packages/kbn-es-query @elastic/kibana-data-discovery
 packages/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
@@ -357,8 +350,6 @@ packages/kbn-event-annotation-components @elastic/kibana-visualizations
 packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-field-types @elastic/kibana-data-discovery
-packages/kbn-field-utils @elastic/kibana-data-discovery
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 packages/kbn-formatters @elastic/obs-ux-logs-team
@@ -433,7 +424,6 @@ packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
-packages/kbn-react-field @elastic/kibana-data-discovery
 packages/kbn-react-hooks @elastic/obs-ux-logs-team
 packages/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 packages/kbn-recently-accessed @elastic/appex-sharedux
@@ -455,7 +445,6 @@ packages/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
-packages/kbn-resizable-layout @elastic/kibana-data-discovery
 packages/kbn-rison @elastic/kibana-operations
 packages/kbn-router-to-openapispec @elastic/kibana-core
 packages/kbn-router-utils @elastic/obs-ux-logs-team
@@ -472,10 +461,7 @@ packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-keys-server @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
 packages/kbn-search-connectors @elastic/search-kibana
-packages/kbn-search-errors @elastic/kibana-data-discovery
 packages/kbn-search-index-documents @elastic/search-kibana
-packages/kbn-search-response-warnings @elastic/kibana-data-discovery
-packages/kbn-search-types @elastic/kibana-data-discovery
 packages/kbn-security-hardening @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
@@ -531,10 +517,6 @@ packages/kbn-ui-actions-browser @elastic/appex-sharedux
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
-packages/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
-packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
-packages/kbn-unified-field-list @elastic/kibana-data-discovery
-packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 packages/kbn-unsaved-changes-prompt @elastic/kibana-management
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-user-profile-components @elastic/kibana-security
@@ -620,14 +602,43 @@ packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
+src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
+src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
+src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
+src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
+src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-search-types @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
+src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
+src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
+src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
+src/platform/plugins/shared/data_view_management @elastic/kibana-data-discovery
+src/platform/plugins/shared/data_views @elastic/kibana-data-discovery
+src/platform/plugins/shared/discover @elastic/kibana-data-discovery
+src/platform/plugins/shared/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
+src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
+src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
+src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
+src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
+src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
@@ -646,13 +657,7 @@ src/plugins/controls @elastic/kibana-presentation
 src/plugins/custom_integrations @elastic/fleet
 src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
-src/plugins/data_view_editor @elastic/kibana-data-discovery
-src/plugins/data_view_field_editor @elastic/kibana-data-discovery
-src/plugins/data_view_management @elastic/kibana-data-discovery
-src/plugins/data_views @elastic/kibana-data-discovery
 src/plugins/dev_tools @elastic/kibana-management
-src/plugins/discover @elastic/kibana-data-discovery
-src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 src/plugins/embeddable @elastic/kibana-presentation
 src/plugins/es_ui_shared @elastic/kibana-management
 src/plugins/event_annotation @elastic/kibana-visualizations
@@ -664,7 +669,6 @@ src/plugins/expression_repeat_image @elastic/kibana-presentation
 src/plugins/expression_reveal_image @elastic/kibana-presentation
 src/plugins/expression_shape @elastic/kibana-presentation
 src/plugins/expressions @elastic/kibana-visualizations
-src/plugins/field_formats @elastic/kibana-data-discovery
 src/plugins/files @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/ftr_apis @elastic/kibana-core
@@ -687,10 +691,8 @@ src/plugins/no_data_page @elastic/appex-sharedux
 src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 src/plugins/saved_objects @elastic/appex-sharedux
-src/plugins/saved_objects_finder @elastic/kibana-data-discovery
 src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux
-src/plugins/saved_search @elastic/kibana-data-discovery
 src/plugins/screenshot_mode @elastic/appex-sharedux
 src/plugins/share @elastic/appex-sharedux
 src/plugins/telemetry @elastic/kibana-core
@@ -698,8 +700,6 @@ src/plugins/telemetry_collection_manager @elastic/kibana-core
 src/plugins/telemetry_management_section @elastic/kibana-core
 src/plugins/ui_actions @elastic/appex-sharedux
 src/plugins/ui_actions_enhanced @elastic/appex-sharedux
-src/plugins/unified_doc_viewer @elastic/kibana-data-discovery
-src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 src/plugins/url_forwarding @elastic/kibana-visualizations
 src/plugins/usage_collection @elastic/kibana-core
@@ -867,6 +867,7 @@ x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/packages/security/ui_components @elastic/kibana-security
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
+x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-data-discovery
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
@@ -891,7 +892,6 @@ x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/plugins/data_visualizer @elastic/ml-ui
-x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/plugins/elastic_assistant @elastic/security-generative-ai
