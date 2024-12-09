@@ -35,7 +35,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
 
-    describe('create and configure connector', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/203462
+    describe.skip('create and configure connector', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('zoom');
