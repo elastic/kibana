@@ -48,7 +48,7 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
           <ExpandPopoverListItem
             iconType="users"
             label={i18n.translate(
-              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsByEntity',
+              'cloudSecurityPosture.graph.graphNodeExpandPopover.showActionsByEntity',
               { defaultMessage: 'Show actions by this entity' }
             )}
             onClick={onShowActionsByEntityClick}
@@ -57,7 +57,7 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
           <ExpandPopoverListItem
             iconType="storage"
             label={i18n.translate(
-              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showActionsOnEntity',
+              'cloudSecurityPosture.graph.graphNodeExpandPopover.showActionsOnEntity',
               { defaultMessage: 'Show actions on this entity' }
             )}
             onClick={onShowActionsOnEntityClick}
@@ -66,7 +66,7 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
           <ExpandPopoverListItem
             iconType="visTagCloud"
             label={i18n.translate(
-              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showRelatedEvents',
+              'cloudSecurityPosture.graph.graphNodeExpandPopover.showRelatedEvents',
               { defaultMessage: 'Show related events' }
             )}
             onClick={onExploreRelatedEntitiesClick}
