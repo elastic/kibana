@@ -80,14 +80,14 @@ const baseNavItems = [
       },
       {
         'data-test-subj': 'searchSideNav-SearchApplications',
-        href: '/app/enterprise_search/applications/search_applications',
+        href: '/app/elasticsearch/applications/search_applications',
         id: 'searchApplications',
         items: undefined,
         name: 'Search Applications',
       },
       {
         'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-        href: '/app/enterprise_search/analytics',
+        href: '/app/elasticsearch/analytics',
         id: 'analyticsCollections',
         items: undefined,
         name: 'Behavioral Analytics',
@@ -195,12 +195,12 @@ const mockNavLinks = [
   {
     id: 'enterpriseSearchApplications:searchApplications',
     title: 'Search Applications',
-    url: '/app/enterprise_search/applications/search_applications',
+    url: '/app/elasticsearch/applications/search_applications',
   },
   {
     id: 'enterpriseSearchAnalytics',
     title: 'Behavioral Analytics',
-    url: '/app/enterprise_search/analytics',
+    url: '/app/elasticsearch/analytics',
   },
   {
     id: 'searchInferenceEndpoints:inferenceEndpoints',
@@ -387,17 +387,17 @@ describe('useEnterpriseSearchApplicationNav', () => {
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
     expect(engineItem).toMatchInlineSnapshot(`
       Object {
-        "href": "/app/enterprise_search/applications/search_applications/my-test-engine",
+        "href": "/app/elasticsearch/applications/search_applications/my-test-engine",
         "id": "searchApplicationId",
         "items": Array [
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/docs_explorer",
+            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/docs_explorer",
             "id": "enterpriseSearchApplicationDocsExplorer",
             "items": undefined,
             "name": "Docs Explorer",
           },
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/content",
             "iconToString": undefined,
             "id": "enterpriseSearchApplicationsContent",
             "items": undefined,
@@ -410,7 +410,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             "nameToString": "Content",
           },
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/connect",
+            "href": "/app/elasticsearch/applications/search_applications/my-test-engine/connect",
             "id": "enterpriseSearchApplicationConnect",
             "items": undefined,
             "name": "Connect",
@@ -448,7 +448,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     // @ts-ignore
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
     expect(engineItem).toEqual({
-      href: `/app/enterprise_search/applications/search_applications/${engineName}`,
+      href: `/app/elasticsearch/applications/search_applications/${engineName}`,
       id: 'searchApplicationId',
       name: engineName,
     });
@@ -470,7 +470,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
 
     expect(engineItem).toMatchInlineSnapshot(`
       Object {
-        "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+        "href": "/app/elasticsearch/applications/search_applications/my-test-engine/content",
         "iconToString": "warning",
         "id": "enterpriseSearchApplicationsContent",
         "items": undefined,
@@ -535,24 +535,24 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
     expect(analyticsNav).not.toBeUndefined();
     expect(analyticsNav).toEqual({
       'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-      href: '/app/enterprise_search/analytics',
+      href: '/app/elasticsearch/analytics',
       id: 'analyticsCollections',
       items: [
         {
           id: 'analyticsCollection',
           items: [
             {
-              href: '/app/enterprise_search/analytics/overview-path',
+              href: '/app/elasticsearch/analytics/overview-path',
               id: 'analyticsCollectionOverview',
               name: 'Overview',
             },
             {
-              href: '/app/enterprise_search/analytics/explorer-path',
+              href: '/app/elasticsearch/analytics/explorer-path',
               id: 'analyticsCollectionExplorer',
               name: 'Explorer',
             },
             {
-              href: '/app/enterprise_search/analytics/integration-path',
+              href: '/app/elasticsearch/analytics/integration-path',
               id: 'analyticsCollectionIntegration',
               name: 'Integration',
             },
