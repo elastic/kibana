@@ -1545,7 +1545,7 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      // TODO: RUNSCRIPT does not have a corresponding action in the API yet
+      // TODO this is a EUI issue where it dynamically render the list and the length is not accurate - I'll try to adjust in the following PR when there is time
       const TEMPORARY_LENGTH = RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1;
       expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(TEMPORARY_LENGTH);
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([

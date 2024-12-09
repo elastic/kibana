@@ -22,7 +22,7 @@ describe(
         // how to enable experimental features in the Cypress tests.
         // kbnServerArgs: [
         //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        //     'crowdstrikeRunScriptEnabled',
+        //     'featureFlagName',
         //   ])}`,
         // ],
       },
