@@ -190,11 +190,7 @@ const mockNavLinks = [
   {
     id: 'searchPlayground',
     title: 'Playground',
-<<<<<<< HEAD
     url: '/app/search_playground',
-=======
-    url: '/app/elasticsearch/applications/playground',
->>>>>>> 092aac6a61e (Update enterprise_search URLs to elasticsearch)
   },
   {
     id: 'enterpriseSearchApplications:searchApplications',
