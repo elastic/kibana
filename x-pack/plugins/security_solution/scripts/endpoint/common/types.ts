@@ -14,8 +14,12 @@ export interface HostVm {
   exec: (command: string) => Promise<HostVmExecResponse>;
   mount: (localDir: string, hostVmDir: string) => Promise<HostVmMountResponse>;
   unmount: (hostVmDir: string) => Promise<void>;
-  /** Uploads/copies a file from the local machine to the VM */
+  /** @deprecated use `upload` */
   transfer: (localFilePath: string, destFilePath: string) => Promise<HostVmTransferResponse>;
+  /** Uploads/copies a file from the local machine to the VM */
+  upload: (localFilePath: string, destFilePath: string) => Promise<HostVmTransferResponse>;
+  /** Downloads a file from the host VM to the local machine */
+  download: (vmFilePath: string, localFilePath: string) => Promise<HostVmTransferResponse>;
   destroy: () => Promise<void>;
   info: () => string;
   stop: () => void;
@@ -33,8 +37,8 @@ export interface HostVmMountResponse {
   unmount: () => Promise<void>;
 }
 export interface HostVmTransferResponse {
-  /** The file path of the file on the host vm */
+  /** The path of the file that was either uploaded to the host VM or downloaded to the local machine from the VM */
   filePath: string;
-  /** Delete the file from the host VM */
+  /** Delete the file from the host VM or from the local machine depending on what client method was used */
   delete: () => Promise<HostVmExecResponse>;
 }

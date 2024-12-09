@@ -56,12 +56,14 @@ import type {
   DeleteAgentPolicyResponse,
   EnrollmentAPIKey,
   GenerateServiceTokenResponse,
+  GetActionStatusResponse,
   GetAgentsRequest,
   GetEnrollmentAPIKeysResponse,
   GetOutputsResponse,
   PostAgentUnenrollResponse,
   UpdateAgentPolicyRequest,
   UpdateAgentPolicyResponse,
+  PostNewAgentActionResponse,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
 import axios from 'axios';
@@ -1498,4 +1500,93 @@ export const updateAgentPolicy = async (
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data.item);
+};
+
+/**
+ * Sets the log level on a Fleet agent and waits a bit of time to allow it for to
+ * complete (but does not error if it does not complete)
+ *
+ * @param kbnClient
+ * @param agentId
+ * @param logLevel
+ * @param log
+ */
+export const setAgentLoggingLevel = async (
+  kbnClient: KbnClient,
+  agentId: string,
+  logLevel: 'debug' | 'info' | 'warning' | 'error',
+  log: ToolingLog = createToolingLogger()
+): Promise<PostNewAgentActionResponse> => {
+  log.debug(`Setting fleet agent [${agentId}] logging level to [${logLevel}]`);
+
+  const response = await kbnClient
+    .request<PostNewAgentActionResponse>({
+      method: 'POST',
+      path: `/api/fleet/agents/${agentId}/actions`,
+      body: { action: { type: 'SETTINGS', data: { log_level: logLevel } } },
+      headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+    })
+    .then((res) => res.data);
+
+  // Wait to see if the action completes, but don't `throw` if it does not
+  await waitForFleetAgentActionToComplete(kbnClient, response.item.id)
+    .then(() => {
+      log.debug(`Fleet action to set agent [${agentId}] logging level to [${logLevel}] completed!`);
+    })
+    .catch((err) => {
+      log.debug(err.message);
+    });
+
+  return response;
+};
+
+/**
+ * Retrieve fleet agent action statuses
+ * @param kbnClient
+ */
+export const fetchFleetAgentActionStatus = async (
+  kbnClient: KbnClient
+): Promise<GetActionStatusResponse> => {
+  return kbnClient
+    .request<GetActionStatusResponse>({
+      method: 'GET',
+      path: agentRouteService.getActionStatusPath(),
+      query: { perPage: 1000 },
+      headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+    })
+    .then((response) => response.data);
+};
+
+/**
+ * Check and wait until a Fleet Agent action is complete.
+ * @param kbnClient
+ * @param actionId
+ * @param timeout
+ *
+ * @throws
+ */
+export const waitForFleetAgentActionToComplete = async (
+  kbnClient: KbnClient,
+  actionId: string,
+  timeout: number = 20_000
+): Promise<void> => {
+  await pRetry(
+    async (attempts) => {
+      const { items: actionList } = await fetchFleetAgentActionStatus(kbnClient);
+      const actionInfo = actionList.find((action) => action.actionId === actionId);
+
+      if (!actionInfo) {
+        throw new Error(
+          `Fleet Agent action id [${actionId}] was not found in list of actions retrieved from fleet!`
+        );
+      }
+
+      if (actionInfo.status === 'IN_PROGRESS') {
+        throw new Error(
+          `Fleet agent action id [${actionId}] remains in progress after [${attempts}] attempts to check its status`
+        );
+      }
+    },
+    { maxTimeout: 2_000, maxRetryTime: timeout }
+  );
 };
