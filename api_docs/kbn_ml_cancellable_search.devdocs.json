@@ -35,7 +35,15 @@
             "section": "def-public.DataPublicPluginStart",
             "text": "DataPublicPluginStart"
           },
-          ") => { runRequest: <RequestBody, ResponseType extends ",
+          ") => { runRequest: <RequestBody extends ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchRequest",
+            "text": "IKibanaSearchRequest"
+          },
+          "<any>, ResponseType extends ",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -95,7 +103,15 @@
             "label": "runRequest",
             "description": [],
             "signature": [
-              "<RequestBody, ResponseType extends ",
+              "<RequestBody extends ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IKibanaSearchRequest",
+                "text": "IKibanaSearchRequest"
+              },
+              "<any>, ResponseType extends ",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
