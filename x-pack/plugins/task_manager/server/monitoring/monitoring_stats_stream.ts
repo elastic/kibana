@@ -17,12 +17,6 @@ import {
   WorkloadStat,
 } from './workload_statistics';
 import {
-  EphemeralTaskStat,
-  createEphemeralTaskAggregator,
-  SummarizedEphemeralTaskStat,
-  summarizeEphemeralStat,
-} from './ephemeral_task_statistics';
-import {
   createTaskRunAggregator,
   summarizeTaskRunStat,
   TaskRunStat,
@@ -45,7 +39,6 @@ export interface MonitoringStats {
     configuration?: MonitoredStat<ConfigStat>;
     workload?: MonitoredStat<WorkloadStat>;
     runtime?: MonitoredStat<TaskRunStat>;
-    ephemeral?: MonitoredStat<EphemeralTaskStat>;
     utilization?: MonitoredStat<BackgroundTaskUtilizationStat>;
   };
 }
@@ -72,7 +65,6 @@ export interface RawMonitoringStats {
     configuration?: RawMonitoredStat<ConfigStat>;
     workload?: RawMonitoredStat<SummarizedWorkloadStat>;
     runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
-    ephemeral?: RawMonitoredStat<SummarizedEphemeralTaskStat>;
     capacity_estimation?: RawMonitoredStat<CapacityEstimationStat>;
   };
 }
@@ -86,7 +78,6 @@ export function createAggregators({
   taskDefinitions,
   adHocTaskCounter,
   taskPollingLifecycle,
-  ephemeralTaskLifecycle,
 }: CreateMonitoringStatsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [
     createConfigurationAggregator(config, managedConfig),
@@ -108,15 +99,6 @@ export function createAggregators({
         adHocTaskCounter,
         config.poll_interval,
         config.worker_utilization_running_average_window
-      )
-    );
-  }
-  if (ephemeralTaskLifecycle && ephemeralTaskLifecycle.enabled) {
-    aggregators.push(
-      createEphemeralTaskAggregator(
-        ephemeralTaskLifecycle,
-        config.monitored_stats_running_average_window,
-        managedConfig.startingCapacity
       )
     );
   }
@@ -156,7 +138,7 @@ export function summarizeMonitoringStats(
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     last_update,
-    stats: { runtime, workload, configuration, ephemeral, utilization },
+    stats: { runtime, workload, configuration, utilization },
   }: MonitoringStats,
   config: TaskManagerConfig,
   assumedKibanaInstances: number
@@ -185,14 +167,6 @@ export function summarizeMonitoringStats(
             workload: {
               timestamp: workload.timestamp,
               ...summarizeWorkloadStat(workload.value),
-            },
-          }
-        : {}),
-      ...(ephemeral
-        ? {
-            ephemeral: {
-              timestamp: ephemeral.timestamp,
-              ...summarizeEphemeralStat(ephemeral.value),
             },
           }
         : {}),

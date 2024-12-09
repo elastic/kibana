@@ -17,24 +17,12 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
-import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
-import type { EphemeralTaskLifecycle as EphemeralTaskLifecycleClass } from './ephemeral_task_lifecycle';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
   return {
     TaskPollingLifecycle: jest.fn().mockImplementation(() => {
       return mockTaskPollingLifecycle;
-    }),
-  };
-});
-
-let mockEphemeralTaskLifecycle = ephemeralTaskLifecycleMock.create({});
-jest.mock('./ephemeral_task_lifecycle', () => {
-  return {
-    EphemeralTaskLifecycle: jest.fn().mockImplementation(() => {
-      return mockEphemeralTaskLifecycle;
     }),
   };
 });
@@ -69,10 +57,6 @@ const pluginInitializerContextParams = {
     },
     custom: {},
   },
-  ephemeral_tasks: {
-    enabled: false,
-    request_capacity: 10,
-  },
   unsafe: {
     exclude_task_types: [],
     authenticate_background_task_utilization: true,
@@ -94,8 +78,6 @@ describe('TaskManagerPlugin', () => {
   beforeEach(() => {
     mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
     (TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).mockClear();
-    mockEphemeralTaskLifecycle = ephemeralTaskLifecycleMock.create({});
-    (EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>).mockClear();
   });
 
   describe('setup', () => {
@@ -164,9 +146,6 @@ describe('TaskManagerPlugin', () => {
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
-      expect(
-        EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>
-      ).toHaveBeenCalledTimes(1);
     });
 
     test('should not initialize task polling lifecycle if node.roles.backgroundTasks is false', async () => {
@@ -181,9 +160,6 @@ describe('TaskManagerPlugin', () => {
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
-      expect(
-        EphemeralTaskLifecycle as jest.Mock<EphemeralTaskLifecycleClass>
-      ).not.toHaveBeenCalled();
     });
   });
 

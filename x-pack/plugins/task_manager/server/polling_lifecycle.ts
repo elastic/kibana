@@ -26,7 +26,6 @@ import {
   asTaskPollingCycleEvent,
   TaskManagerStat,
   asTaskManagerStatEvent,
-  EphemeralTaskRejectedDueToCapacity,
   TaskManagerMetric,
 } from './task_events';
 import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
@@ -71,8 +70,7 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat
-  | TaskManagerMetric
-  | EphemeralTaskRejectedDueToCapacity;
+  | TaskManagerMetric;
 
 /**
  * The public interface into the task manager system.
