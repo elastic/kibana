@@ -6,14 +6,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
-import { VersionsPicker } from '../versions_picker/versions_picker';
-import type { Version } from '../versions_picker/constants';
-import { SelectedVersions } from '../versions_picker/constants';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { VersionsPicker } from './versions_picker/versions_picker';
+import type { Version } from './versions_picker/constants';
+import { SelectedVersions } from './versions_picker/constants';
 import { pickFieldValueForVersion } from './utils';
-import type {
-  DiffableAllFields,
-  ThreeWayDiff,
+import {
+  type DiffableAllFields,
+  type ThreeWayDiff,
+  ThreeWayDiffOutcome,
 } from '../../../../../../../common/api/detection_engine';
 import { getSubfieldChanges } from './get_subfield_changes';
 import { SubfieldChanges } from './subfield_changes';
@@ -39,26 +40,37 @@ export function ComparisonSide<FieldName extends keyof DiffableAllFields>({
   const [oldVersionType, newVersionType] = selectedVersions.split('_') as [Version, Version];
 
   const oldFieldValue = pickFieldValueForVersion(oldVersionType, fieldThreeWayDiff, resolvedValue);
-
   const newFieldValue = pickFieldValueForVersion(newVersionType, fieldThreeWayDiff, resolvedValue);
-
   const subfieldChanges = getSubfieldChanges(fieldName, oldFieldValue, newFieldValue);
+
+  const isBaseVersionDifferentFromCurrent = [
+    ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+    ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+    ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+  ].includes(fieldThreeWayDiff.diff_outcome);
+
+  const shouldShowBaseVersion =
+    fieldThreeWayDiff.has_base_version && isBaseVersionDifferentFromCurrent;
 
   return (
     <>
       <SideHeader>
         <EuiFlexGroup direction="row" alignItems="center">
-          <EuiTitle size="xxs">
-            <h3>
-              {i18n.TITLE}
-              <ComparisonSideHelpInfo />
-            </h3>
-          </EuiTitle>
-          <VersionsPicker
-            hasBaseVersion={fieldThreeWayDiff.has_base_version}
-            selectedVersions={selectedVersions}
-            onChange={setSelectedVersions}
-          />
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h3>
+                {i18n.TITLE}
+                <ComparisonSideHelpInfo shouldShowBaseVersion={shouldShowBaseVersion} />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <VersionsPicker
+              shouldShowBaseVersion={shouldShowBaseVersion}
+              selectedVersions={selectedVersions}
+              onChange={setSelectedVersions}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </SideHeader>
       <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
