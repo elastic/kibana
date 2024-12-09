@@ -7308,7 +7308,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-types@link:packages/shared-ux/file/types":
+"@kbn/shared-ux-file-types@link:src/platform/packages/shared/shared-ux/file/types":
   version "0.0.0"
   uid ""
 
