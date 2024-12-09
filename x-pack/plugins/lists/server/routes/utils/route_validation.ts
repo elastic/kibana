@@ -32,7 +32,7 @@ type RequestValidationResult<T> =
     };
 
 /**
- * Copied from x-pack/plugins/security_solution/server/utils/build_validation/route_validation.ts
+ * Copied from x-pack/solutions/security/plugins/security_solution/server/utils/build_validation/route_validation.ts
  * This really should be in @kbn/securitysolution-io-ts-utils rather than copied yet again, however, this has types
  * from a lot of places such as RouteValidationResultFactory from core/server which in turn can pull in @kbn/schema
  * which cannot work on the front end and @kbn/securitysolution-io-ts-utils works on both front and backend.
