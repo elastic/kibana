@@ -6,16 +6,10 @@
  */
 
 import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
-import type {
-  ElasticRule,
-  RuleMigration,
-  RuleMigrationTaskStats,
-} from '../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/model/rule_migration.gen';
 
 export interface RuleMigrationStats extends RuleMigrationTaskStats {
   status: SiemMigrationTaskStatus;
   /** The sequential number of the migration */
   number: number;
 }
-
-export type TranslatedRuleMigration = RuleMigration & { elastic_rule: ElasticRule };

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
-import type { TranslatedRuleMigration } from '../../types';
 
 const Author = ({ isPrebuiltRule }: { isPrebuiltRule: boolean }) => {
   return (
@@ -30,8 +30,8 @@ export const createAuthorColumn = (): TableColumn => {
   return {
     field: 'elastic_rule.prebuilt_rule_id',
     name: i18n.COLUMN_AUTHOR,
-    render: (value: TranslatedRuleMigration['elastic_rule']['prebuilt_rule_id']) => {
-      return <Author isPrebuiltRule={!!value} />;
+    render: (_, rule: RuleMigration) => {
+      return <Author isPrebuiltRule={!!rule.elastic_rule?.prebuilt_rule_id} />;
     },
     sortable: true,
     width: '10%',
