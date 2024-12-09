@@ -374,6 +374,10 @@ export const usePageUrlState = <T extends PageUrlState>(
   return useUrlStateService<'_a', T['pageUrlState']>('_a', { pageKey, defaultState });
 };
 
+/**
+ * Global state type, to add more state types, add them here
+ */
+
 export interface GlobalState {
   ml: {
     jobIds: string[];
