@@ -7368,7 +7368,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-mocks@link:packages/shared-ux/page/kibana_template/mocks":
+"@kbn/shared-ux-page-kibana-template-mocks@link:src/platform/packages/shared/shared-ux/page/kibana_template/mocks":
   version "0.0.0"
   uid ""
 
