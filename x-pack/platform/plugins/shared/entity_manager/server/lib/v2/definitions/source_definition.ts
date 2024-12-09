@@ -5,26 +5,48 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
-import { EntitySourceDefinition, StoredEntitySourceDefinition } from '../types';
+import {
+  EntitySourceDefinition,
+  InternalClusterClient,
+  StoredEntitySourceDefinition,
+} from '../types';
 import { SourceAs, runESQLQuery } from '../run_esql_query';
 import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
+import { readTypeDefinitions } from './type_definition';
+import { UnknownEntityType } from '../errors/unknown_entity_type';
 
-export async function storeSourceDefinition(
-  source: EntitySourceDefinition,
-  clusterClient: IScopedClusterClient,
-  logger: Logger
-): Promise<EntitySourceDefinition> {
+interface StoreSourceDefinitionOptions {
+  source: EntitySourceDefinition;
+  clusterClient: InternalClusterClient;
+  logger: Logger;
+  replace?: boolean;
+}
+
+export async function storeSourceDefinition({
+  source,
+  clusterClient,
+  logger,
+  replace = false,
+}: StoreSourceDefinitionOptions): Promise<EntitySourceDefinition> {
   const esClient = clusterClient.asInternalUser;
+
+  const types = await readTypeDefinitions(clusterClient, logger);
+  if (!types.some((type) => type.id === source.type_id)) {
+    throw new UnknownEntityType(
+      `Type with ID ${source.type_id} not found, cannot attach source with ID ${source.id}`
+    );
+  }
 
   const sources = await runESQLQuery('fetch source definition for conflict check', {
     esClient,
-    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "source" AND _id == "source:${source.id}" | KEEP _id`,
+    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "source" AND _id == "${source.type_id}:${source.id}" | KEEP _id`,
     logger,
   });
 
-  if (sources.length !== 0) {
+  if (sources.length !== 0 && replace === false) {
+    logger.debug(`Entity source definition with ID ${source.id} already exists`);
     throw new EntityDefinitionConflict('source', source.id);
   }
 
@@ -34,10 +56,12 @@ export async function storeSourceDefinition(
     source,
   };
 
+  logger.debug(`Installing entity source definition ${source.id} for type ${source.type_id}`);
   await esClient.index({
     index: DEFINITIONS_ALIAS,
-    id: `source:${definition.source.id}`,
+    id: `${source.type_id}:${definition.source.id}`,
     document: definition,
+    refresh: true,
   });
 
   return definition.source;
@@ -48,7 +72,7 @@ export interface ReadSourceDefinitionOptions {
 }
 
 export async function readSourceDefinitions(
-  clusterClient: IScopedClusterClient,
+  clusterClient: InternalClusterClient,
   logger: Logger,
   options?: ReadSourceDefinitionOptions
 ): Promise<EntitySourceDefinition[]> {
