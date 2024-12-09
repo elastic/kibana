@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Filter panel', () => {
     before(async () => {
       await common.navigateToApp('discover');
+      await discover.selectIndexPattern('Kibana Sample Data Flights');
     });
 
     it('a11y test on add filter panel', async () => {
