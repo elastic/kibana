@@ -864,6 +864,7 @@ x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
+x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
@@ -896,7 +897,6 @@ x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/plugins/data_visualizer @elastic/ml-ui
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
-x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation

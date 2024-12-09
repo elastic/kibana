@@ -7792,7 +7792,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/url-drilldown-plugin@link:x-pack/plugins/drilldowns/url_drilldown":
+"@kbn/url-drilldown-plugin@link:x-pack/platform/plugins/private/drilldowns/url_drilldown":
   version "0.0.0"
   uid ""
 
