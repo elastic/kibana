@@ -30,6 +30,10 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
+  semantic_query: Annotation<string>({
+    reducer: (current, value) => value ?? current,
+    default: () => '',
+  }),
   elastic_rule: Annotation<ElasticRule>({
     reducer: (state, action) => ({ ...state, ...action }),
     default: () => ({} as ElasticRule),
