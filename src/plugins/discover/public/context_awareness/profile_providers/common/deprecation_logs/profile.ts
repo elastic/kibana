@@ -13,7 +13,6 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { type DataSourceProfileProvider } from '../../../profiles';
 import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
-import { index } from 'd3-array';
 
 export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -43,7 +42,7 @@ export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfil
       indexPattern = params.dataView.getIndexPattern();
     }
 
-    if (!indexPattern || !indexPattern.startsWith('.logs-deprecation') || indexPattern.includes(",")) {
+    if (!checkAllIndicesInPatternAreDeprecationLogs(indexPattern)) {
       return { isMatch: false };
     }
 
@@ -56,3 +55,15 @@ export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfil
     };
   },
 });
+
+const checkAllIndicesInPatternAreDeprecationLogs = (indexPattern: string | undefined): boolean => {
+  if (!indexPattern) {
+    return false;
+  }
+  const indexPatternArray = indexPattern.split(',');
+  const result = indexPatternArray.reduce(
+    (acc, val) => acc && val.startsWith('.logs-deprecation'),
+    true
+  );
+  return result;
+}

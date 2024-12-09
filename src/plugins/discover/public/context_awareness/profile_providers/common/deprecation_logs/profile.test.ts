@@ -21,7 +21,8 @@ import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
 describe('deprecationLogsProfileProvider', () => {
   const deprecationLogsProfileProvider = createDeprecationLogsDocumentProfileProvider();
   const VALID_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
-  const MIXED_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default,metrics-*';
+  const VALID_MIXED_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default,.logs-deprecation.abc,.logs-deprecation.def';
+  const INVALID_MIXED_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
     profileId: DEPRECATION_LOGS_PROFILE_ID,
@@ -47,18 +48,30 @@ describe('deprecationLogsProfileProvider', () => {
     expect(result).toEqual(RESOLUTION_MATCH);
   });
 
-  it('should NOT match data view sources with a mixed or not allowed index pattern', () => {
-    const resultWithInvalid = deprecationLogsProfileProvider.resolve({
+  it('should match data view sources with a mixed pattern containing allowed index patterns', () => {
+    const result = deprecationLogsProfileProvider.resolve({
+      rootContext: ROOT_CONTEXT,
+      dataSource: createDataViewDataSource({ dataViewId: VALID_MIXED_INDEX_PATTERN }),
+      dataView: createStubIndexPattern({ spec: { title: VALID_MIXED_INDEX_PATTERN } }),
+    });
+    expect(result).toEqual(RESOLUTION_MATCH);
+  });
+
+  it('should NOT match data view sources with not allowed index pattern', () => {
+    const result = deprecationLogsProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,
       dataSource: createDataViewDataSource({ dataViewId: INVALID_INDEX_PATTERN }),
       dataView: createStubIndexPattern({ spec: { title: INVALID_INDEX_PATTERN } }),
     });
-    expect(resultWithInvalid).toEqual(RESOLUTION_MISMATCH);
-    const resultWithMixed = deprecationLogsProfileProvider.resolve({
+    expect(result).toEqual(RESOLUTION_MISMATCH);
+  });
+  
+  it('should NOT match data view sources with a mixed pattern containing not allowed index patterns', () => {
+    const result = deprecationLogsProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,
-      dataSource: createDataViewDataSource({ dataViewId: MIXED_INDEX_PATTERN }),
-      dataView: createStubIndexPattern({ spec: { title: MIXED_INDEX_PATTERN } }),
+      dataSource: createDataViewDataSource({ dataViewId: INVALID_MIXED_INDEX_PATTERN }),
+      dataView: createStubIndexPattern({ spec: { title: INVALID_MIXED_INDEX_PATTERN } }),
     });
-    expect(resultWithMixed).toEqual(RESOLUTION_MISMATCH);
+    expect(result).toEqual(RESOLUTION_MISMATCH);
   });
 });
