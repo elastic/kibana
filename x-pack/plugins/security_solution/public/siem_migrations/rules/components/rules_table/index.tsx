@@ -187,12 +187,15 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const ruleActionsFactory = useCallback(
       (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
-        const canPreviewedRuleBeInstalled = !isLoading;
+        const canMigrationRuleBeInstalled =
+          !isLoading &&
+          !ruleMigration.elastic_rule?.id &&
+          ruleMigration.translation_result === SiemMigrationRuleTranslationResult.FULL;
         return (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButton
-                disabled={!canPreviewedRuleBeInstalled}
+                disabled={!canMigrationRuleBeInstalled}
                 onClick={() => {
                   installSingleRule(ruleMigration);
                   closeRulePreview();
@@ -204,7 +207,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
-                disabled={!canPreviewedRuleBeInstalled}
+                disabled={!canMigrationRuleBeInstalled}
                 onClick={() => {
                   installSingleRule(ruleMigration, true);
                   closeRulePreview();
