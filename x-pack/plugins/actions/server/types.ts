@@ -40,7 +40,7 @@ export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
-import type { ActionExecutionSource } from './lib';
+import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';
 export { ActionExecutionSourceType } from './lib';
 import { ConnectorUsageCollector } from './usage';
 export { ConnectorUsageCollector } from './usage';
@@ -197,6 +197,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
+  isEdrActionType?: boolean;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
@@ -208,7 +209,10 @@ export interface ActionType<
    * It only works with system actions and only when executing an action.
    * For all other scenarios they will be ignored
    */
-  getKibanaPrivileges?: (args?: { params?: Params }) => string[];
+  getKibanaPrivileges?: (args?: {
+    params?: Params;
+    source?: ActionExecutionSourceType;
+  }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
   getService?: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
