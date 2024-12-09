@@ -11,7 +11,7 @@ import { XJsonLang } from '@kbn/monaco';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 
 export const JsonTab = ({ data }: { data: CspFinding }) => (
-  <div style={{ position: 'absolute', inset: 0 }}>
+  <div css={{ position: 'absolute', inset: 0 }}>
     <CodeEditor
       isCopyable
       allowFullScreen

@@ -57,7 +57,7 @@ export const RadioGroup = ({
             key={option.id}
             content={option.tooltip}
             anchorProps={{
-              style: {
+              css: {
                 flex: '1 1 0',
               },
             }}
@@ -65,9 +65,8 @@ export const RadioGroup = ({
             <EuiButton
               disabled={option.disabled || disabled}
               style={{
-                border: `1px solid ${
-                  isChecked ? euiTheme.colors.primary : euiTheme.colors.lightShade
-                }`,
+                borderColor: isChecked ? euiTheme.colors.primary : euiTheme.colors.lightShade,
+                height: size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl,
               }}
               // Use empty string to fallback to no color
               // @ts-ignore
@@ -76,13 +75,13 @@ export const RadioGroup = ({
               iconType={option.icon}
               iconSide="right"
               contentProps={{
-                style: {
+                css: {
                   justifyContent: 'flex-start',
                 },
               }}
               css={css`
+                border: 1px solid;
                 width: 100%;
-                height: ${size === 's' ? euiTheme.size.xxl : euiTheme.size.xxxl};
                 svg,
                 img {
                   margin-left: auto;
