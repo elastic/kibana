@@ -9,12 +9,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../',
-  roots: ['<rootDir>/src/plugins/chart_expressions/expression_tagcloud'],
+  rootDir: '../../../../../../',
+  roots: ['<rootDir>/src/platform/plugins/shared/chart_expressions/expression_tagcloud'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/plugins/chart_expressions/expression_tagcloud',
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/chart_expressions/expression_tagcloud',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/chart_expressions/expression_tagcloud/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/chart_expressions/expression_tagcloud/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
