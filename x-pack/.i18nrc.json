@@ -151,7 +151,7 @@
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
     "xpack.sessionView": "plugins/session_view",
     "xpack.streams": [
-      "plugins/streams_app"
+      "solutions/observability/plugins/streams_app"
     ],
     "xpack.slo": "plugins/observability_solution/slo",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
