@@ -72,6 +72,8 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { NEW_TERMS_FIELDS_LABEL } from '../../../rule_creation/components/new_terms_fields_edit/translations';
+import { HISTORY_WINDOW_START_LABEL } from '../../../rule_creation/components/history_window_start_edit/translations';
 import type { FieldValueQueryBar } from '../query_bar_field';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
@@ -341,6 +343,9 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
+  } else if (field === 'newTermsFields') {
+    const values: string[] = get(field, data);
+    return buildStringArrayDescription(NEW_TERMS_FIELDS_LABEL, field, values);
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
@@ -357,6 +362,9 @@ export const getDescriptionItem = (
   } else if (field === 'maxSignals') {
     const value: number | undefined = get(field, data);
     return value ? [{ title: label, description: value }] : [];
+  } else if (field === 'historyWindowSize') {
+    const value: number = get(field, data);
+    return value ? [{ title: HISTORY_WINDOW_START_LABEL, description: value }] : [];
   }
 
   const description: string = get(field, data);
