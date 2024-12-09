@@ -102,7 +102,12 @@ export function mlSavedObjectServiceFactory(
     return jobs.saved_objects;
   }
 
-  async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
+  async function _createJob(
+    jobType: JobType,
+    jobId: string,
+    datafeedId?: string,
+    addToAllSpaces = false
+  ) {
     await isMlReady();
 
     const job: JobObject = {
@@ -133,6 +138,7 @@ export function mlSavedObjectServiceFactory(
 
     await savedObjectsClient.create<JobObject>(ML_JOB_SAVED_OBJECT_TYPE, job, {
       id,
+      ...(addToAllSpaces ? { initialNamespaces: ['*'] } : {}),
     });
     _clearSavedObjectsClientCache();
   }
@@ -182,8 +188,12 @@ export function mlSavedObjectServiceFactory(
     _clearSavedObjectsClientCache();
   }
 
-  async function createAnomalyDetectionJob(jobId: string, datafeedId?: string) {
-    await _createJob('anomaly-detector', jobId, datafeedId);
+  async function createAnomalyDetectionJob(
+    jobId: string,
+    datafeedId?: string,
+    addToAllSpaces = false
+  ) {
+    await _createJob('anomaly-detector', jobId, datafeedId, addToAllSpaces);
   }
 
   async function deleteAnomalyDetectionJob(jobId: string) {
@@ -194,8 +204,8 @@ export function mlSavedObjectServiceFactory(
     await _forceDeleteJob('anomaly-detector', jobId, namespace);
   }
 
-  async function createDataFrameAnalyticsJob(jobId: string) {
-    await _createJob('data-frame-analytics', jobId);
+  async function createDataFrameAnalyticsJob(jobId: string, addToAllSpaces = false) {
+    await _createJob('data-frame-analytics', jobId, undefined, addToAllSpaces);
   }
 
   async function deleteDataFrameAnalyticsJob(jobId: string) {
@@ -441,8 +451,12 @@ export function mlSavedObjectServiceFactory(
     return modelObject;
   }
 
-  async function createTrainedModel(modelId: string, job: TrainedModelJob | null) {
-    await _createTrainedModel(modelId, job);
+  async function createTrainedModel(
+    modelId: string,
+    job: TrainedModelJob | null,
+    addToAllSpaces = false
+  ) {
+    await _createTrainedModel(modelId, job, addToAllSpaces);
   }
 
   async function bulkCreateTrainedModel(models: TrainedModelObject[], namespaceFallback?: string) {
@@ -486,7 +500,11 @@ export function mlSavedObjectServiceFactory(
     return models.saved_objects;
   }
 
-  async function _createTrainedModel(modelId: string, job: TrainedModelJob | null) {
+  async function _createTrainedModel(
+    modelId: string,
+    job: TrainedModelJob | null,
+    addToAllSpaces = false
+  ) {
     await isMlReady();
 
     const modelObject: TrainedModelObject = {
@@ -513,7 +531,7 @@ export function mlSavedObjectServiceFactory(
       // the saved object may exist if a previous job with the same ID has been deleted.
       // if not, this error will be throw which we ignore.
     }
-    let initialNamespaces;
+    let initialNamespaces = addToAllSpaces ? ['*'] : undefined;
     // if a job exists for this model, ensure the initial namespaces for the model
     // are the same as the job
     if (job !== null) {
@@ -522,7 +540,9 @@ export function mlSavedObjectServiceFactory(
         job.job_id
       );
 
-      initialNamespaces = existingJobObject?.namespaces ?? undefined;
+      if (existingJobObject?.namespaces !== undefined) {
+        initialNamespaces = existingJobObject?.namespaces;
+      }
     }
 
     await savedObjectsClient.create<TrainedModelObject>(

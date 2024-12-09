@@ -34,7 +34,7 @@ export function syncSavedObjectsFactory(
 ) {
   const { checkStatus } = checksFactory(client, mlSavedObjectService);
 
-  async function syncSavedObjects(simulate: boolean = false) {
+  async function syncSavedObjects(simulate: boolean = false, addToAllSpaces = false) {
     const results: SyncSavedObjectResponse = {
       savedObjectsCreated: {},
       savedObjectsDeleted: {},
@@ -71,7 +71,11 @@ export function syncSavedObjectsFactory(
           const datafeedId = job.datafeedId;
           tasks.push(async () => {
             try {
-              await mlSavedObjectService.createAnomalyDetectionJob(jobId, datafeedId ?? undefined);
+              await mlSavedObjectService.createAnomalyDetectionJob(
+                jobId,
+                datafeedId ?? undefined,
+                addToAllSpaces
+              );
               results.savedObjectsCreated[type]![job.jobId] = { success: true };
             } catch (error) {
               results.savedObjectsCreated[type]![job.jobId] = {
@@ -97,7 +101,7 @@ export function syncSavedObjectsFactory(
           const jobId = job.jobId;
           tasks.push(async () => {
             try {
-              await mlSavedObjectService.createDataFrameAnalyticsJob(jobId);
+              await mlSavedObjectService.createDataFrameAnalyticsJob(jobId, addToAllSpaces);
               results.savedObjectsCreated[type]![job.jobId] = {
                 success: true,
               };
@@ -136,11 +140,15 @@ export function syncSavedObjectsFactory(
                   return;
                 }
                 const job = getJobDetailsFromTrainedModel(mod);
-                await mlSavedObjectService.createTrainedModel(modelId, job);
-                if (modelId.startsWith('.')) {
-                  // if the model id starts with a dot, it is an internal model and should be in all spaces
-                  await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
-                }
+                await mlSavedObjectService.createTrainedModel(
+                  modelId,
+                  job,
+                  addToAllSpaces || modelId.startsWith('.')
+                );
+                // if (modelId.startsWith('.')) {
+                //   // if the model id starts with a dot, it is an internal model and should be in all spaces
+                //   await mlSavedObjectService.updateTrainedModelsSpaces([modelId], ['*'], []);
+                // }
                 results.savedObjectsCreated[type]![modelId] = {
                   success: true,
                 };
@@ -344,9 +352,9 @@ export function syncSavedObjectsFactory(
 
     const jobObjects: Array<{ job: JobObject; namespaces: string[] }> = [];
     const datafeeds: Array<{ jobId: string; datafeedId: string }> = [];
-    const types: JobType[] = ['anomaly-detector', 'data-frame-analytics'];
+    const jobTypes: JobType[] = ['anomaly-detector', 'data-frame-analytics'];
 
-    types.forEach((type) => {
+    jobTypes.forEach((type) => {
       status.jobs[type].forEach((job) => {
         if (job.checks.savedObjectExits === false) {
           if (simulate === true) {
