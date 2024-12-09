@@ -38,8 +38,9 @@ export function processVertexStream() {
           });
         }
 
-        // completion: only present on last chunk
-        if (value.usageMetadata) {
+        // 'usageMetadata' can be present as an empty object on chunks
+        // only the last chunk will have its fields populated
+        if (value.usageMetadata?.totalTokenCount) {
           subscriber.next({
             type: ChatCompletionEventType.ChatCompletionTokenCount,
             tokens: {
