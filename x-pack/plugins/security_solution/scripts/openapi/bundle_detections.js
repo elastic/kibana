@@ -20,24 +20,10 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['serverless'],
-      prototypeDocument: {
-        info: {
-          title: 'Security Detections API (Elastic Cloud Serverless)',
-          description:
-            'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the **Detections** page.',
-        },
-        tags: [
-          {
-            name: 'Security Detections API',
-            'x-displayName': 'Security detections',
-            description:
-              'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.\n\
-> warn\n\
-> If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.\n\n\
-> If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.',
-          },
-        ],
-      },
+      prototypeDocument: join(
+        ROOT,
+        'docs/openapi/detections_prototype_serverless.yaml'
+      ),
     },
   });
 
@@ -49,24 +35,10 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['ess'],
-      prototypeDocument: {
-        info: {
-          title: 'Security Detections API (Elastic Cloud and self-hosted)',
-          description:
-            'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
-        },
-        tags: [
-          {
-            name: 'Security Detections API',
-            'x-displayName': 'Security detections',
-            description:
-              'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the **Detections** page.\n\
-> warn\n\
-> If the API key used for authorization has different privileges than the key that created or most recently updated a rule, the rule behavior might change.\n\n\
-> If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.',
-          },
-        ],
-      },
+      prototypeDocument: join(
+        ROOT,
+        'docs/openapi/detections_prototype_ess.yaml'
+      ),
     },
   });
 })();
