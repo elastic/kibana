@@ -318,6 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               FIELD_FORMAT_IDS.STATIC_LOOKUP,
               FIELD_FORMAT_IDS.STRING,
               FIELD_FORMAT_IDS.URL,
+              FIELD_FORMAT_IDS.COLOR,
             ],
             expectFormattedValue: 'yes',
             beforeSave: async () => {
