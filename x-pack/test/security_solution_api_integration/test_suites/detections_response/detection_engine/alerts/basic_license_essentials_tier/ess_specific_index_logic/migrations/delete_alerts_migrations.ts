@@ -13,7 +13,7 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { deleteMigrationsIfExists, getIndexNameFromLoad } from '../../../../../utils';
+import { deleteMigrationsIfExistent, getIndexNameFromLoad } from '../../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await deleteMigrationsIfExists({
+      await deleteMigrationsIfExistent({
         kbnClient,
         ids: [createdMigration.migration_id],
       });
