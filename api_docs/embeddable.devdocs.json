@@ -9033,13 +9033,13 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.openAddPanelFlyout",
+        "id": "def-public.openAddFromLibraryFlyout",
         "type": "Function",
         "tags": [],
-        "label": "openAddPanelFlyout",
+        "label": "openAddFromLibraryFlyout",
         "description": [],
         "signature": [
-          "({ container, onAddPanel, onClose, }: { container: ",
+          "({ container, onClose, }: { container: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
@@ -9047,7 +9047,7 @@
             "section": "def-public.CanAddNewPanel",
             "text": "CanAddNewPanel"
           },
-          "; onAddPanel?: ((id: string) => void) | undefined; onClose?: (() => void) | undefined; }) => ",
+          "; onClose?: (() => void) | undefined; }) => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "public",
@@ -9056,24 +9056,24 @@
             "text": "OverlayRef"
           }
         ],
-        "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
+        "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.openAddPanelFlyout.$1",
+            "id": "def-public.openAddFromLibraryFlyout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  container,\n  onAddPanel,\n  onClose,\n}",
+            "label": "{\n  container,\n  onClose,\n}",
             "description": [],
-            "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
+            "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.container",
+                "id": "def-public.openAddFromLibraryFlyout.$1.container",
                 "type": "Object",
                 "tags": [],
                 "label": "container",
@@ -9087,45 +9087,13 @@
                     "text": "CanAddNewPanel"
                   }
                 ],
-                "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
+                "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.onAddPanel",
-                "type": "Function",
-                "tags": [],
-                "label": "onAddPanel",
-                "description": [],
-                "signature": [
-                  "((id: string) => void) | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "embeddable",
-                    "id": "def-public.openAddPanelFlyout.$1.onAddPanel.$1",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "signature": [
-                      "string"
-                    ],
-                    "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.openAddPanelFlyout.$1.onClose",
+                "id": "def-public.openAddFromLibraryFlyout.$1.onClose",
                 "type": "Function",
                 "tags": [],
                 "label": "onClose",
@@ -9133,7 +9101,7 @@
                 "signature": [
                   "(() => void) | undefined"
                 ],
-                "path": "src/plugins/embeddable/public/add_panel_flyout/open_add_panel_flyout.tsx",
+                "path": "src/plugins/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -9561,6 +9529,39 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.useAddFromLibraryTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "useAddFromLibraryTypes",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "public",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-public.SavedObjectMetaData",
+            "text": "SavedObjectMetaData"
+          },
+          "<",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">[]"
+        ],
+        "path": "src/plugins/embeddable/public/add_from_library/registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -13796,37 +13797,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.ReactEmbeddableSavedObject",
-        "type": "Type",
-        "tags": [],
-        "label": "ReactEmbeddableSavedObject",
-        "description": [],
-        "signature": [
-          "{ onAdd: SOToEmbeddable<TSavedObjectAttributes>; savedObjectMetaData: ",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "public",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-public.SavedObjectMetaData",
-            "text": "SavedObjectMetaData"
-          },
-          "<",
-          {
-            "pluginId": "savedObjectsFinder",
-            "scope": "common",
-            "docId": "kibSavedObjectsFinderPluginApi",
-            "section": "def-common.FinderAttributes",
-            "text": "FinderAttributes"
-          },
-          ">; }"
-        ],
-        "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.SELECT_RANGE_TRIGGER",
         "type": "string",
         "tags": [],
@@ -14361,12 +14331,12 @@
       "children": [
         {
           "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableSetup.registerReactEmbeddableSavedObject",
+          "id": "def-public.EmbeddableSetup.registerAddFromLibraryType",
           "type": "Function",
           "tags": [],
-          "label": "registerReactEmbeddableSavedObject",
+          "label": "registerAddFromLibraryType",
           "description": [
-            "\nRegister an embeddable API saved object with the Add from library flyout.\n"
+            "\nRegister a saved object type with the \"Add from library\" flyout.\n"
           ],
           "signature": [
             "<TSavedObjectAttributes extends ",
@@ -14377,7 +14347,31 @@
               "section": "def-common.FinderAttributes",
               "text": "FinderAttributes"
             },
-            ">({ onAdd, embeddableType, savedObjectType, savedObjectName, getIconForSavedObject, getSavedObjectSubType, getTooltipForSavedObject, }: { onAdd: SOToEmbeddable<TSavedObjectAttributes>; embeddableType: string; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
+            ">({ onAdd, savedObjectType, savedObjectName, getIconForSavedObject, getSavedObjectSubType, getTooltipForSavedObject, }: { onAdd: (container: ",
+            {
+              "pluginId": "@kbn/presentation-containers",
+              "scope": "public",
+              "docId": "kibKbnPresentationContainersPluginApi",
+              "section": "def-public.CanAddNewPanel",
+              "text": "CanAddNewPanel"
+            },
+            ", savedObject: ",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.SavedObjectCommon",
+              "text": "SavedObjectCommon"
+            },
+            "<",
+            {
+              "pluginId": "savedObjectsFinder",
+              "scope": "common",
+              "docId": "kibSavedObjectsFinderPluginApi",
+              "section": "def-common.FinderAttributes",
+              "text": "FinderAttributes"
+            },
+            ">) => void; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
             {
               "pluginId": "savedObjectsFinder",
               "scope": "common",
@@ -14412,13 +14406,37 @@
           "children": [
             {
               "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerReactEmbeddableSavedObject.$1",
+              "id": "def-public.EmbeddableSetup.registerAddFromLibraryType.$1",
               "type": "Object",
               "tags": [],
               "label": "__0",
               "description": [],
               "signature": [
-                "{ onAdd: SOToEmbeddable<TSavedObjectAttributes>; embeddableType: string; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
+                "{ onAdd: (container: ",
+                {
+                  "pluginId": "@kbn/presentation-containers",
+                  "scope": "public",
+                  "docId": "kibKbnPresentationContainersPluginApi",
+                  "section": "def-public.CanAddNewPanel",
+                  "text": "CanAddNewPanel"
+                },
+                ", savedObject: ",
+                {
+                  "pluginId": "savedObjectsFinder",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsFinderPluginApi",
+                  "section": "def-common.SavedObjectCommon",
+                  "text": "SavedObjectCommon"
+                },
+                "<",
+                {
+                  "pluginId": "savedObjectsFinder",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsFinderPluginApi",
+                  "section": "def-common.FinderAttributes",
+                  "text": "FinderAttributes"
+                },
+                ">) => void; savedObjectType: string; savedObjectName: string; getIconForSavedObject: (savedObject: ",
                 {
                   "pluginId": "savedObjectsFinder",
                   "scope": "common",
@@ -14446,86 +14464,9 @@
                 },
                 "<TSavedObjectAttributes>) => string) | undefined; }"
               ],
-              "path": "src/plugins/embeddable/public/lib/embeddable_saved_object_registry/embeddable_saved_object_registry.ts",
+              "path": "src/plugins/embeddable/public/add_from_library/registry.ts",
               "deprecated": false,
               "trackAdoption": false
-            }
-          ]
-        },
-        {
-          "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod",
-          "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "registerSavedObjectToPanelMethod",
-          "description": [],
-          "signature": [
-            "<TSavedObjectAttributes, TByValueAttributes>(savedObjectType: string, method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>) => void"
-          ],
-          "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": true,
-          "trackAdoption": false,
-          "references": [],
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod.$1",
-              "type": "string",
-              "tags": [],
-              "label": "savedObjectType",
-              "description": [],
-              "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod.$2",
-              "type": "Function",
-              "tags": [],
-              "label": "method",
-              "description": [],
-              "signature": [
-                "(savedObject: ",
-                {
-                  "pluginId": "savedObjectsFinder",
-                  "scope": "common",
-                  "docId": "kibSavedObjectsFinderPluginApi",
-                  "section": "def-common.SavedObjectCommon",
-                  "text": "SavedObjectCommon"
-                },
-                "<TSavedObjectAttributes>) => { savedObjectId: string; } | Partial<TByValueAttributes>"
-              ],
-              "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "returnComment": [],
-              "children": [
-                {
-                  "parentPluginId": "embeddable",
-                  "id": "def-public.EmbeddableSetup.registerSavedObjectToPanelMethod.$2.$1",
-                  "type": "Object",
-                  "tags": [],
-                  "label": "savedObject",
-                  "description": [],
-                  "signature": [
-                    {
-                      "pluginId": "@kbn/content-management-utils",
-                      "scope": "server",
-                      "docId": "kibKbnContentManagementUtilsPluginApi",
-                      "section": "def-server.SOWithMetadata",
-                      "text": "SOWithMetadata"
-                    },
-                    "<TSavedObjectAttributes>"
-                  ],
-                  "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                }
-              ]
             }
           ]
         },
@@ -14926,42 +14867,6 @@
         },
         {
           "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableStart.getReactEmbeddableSavedObjects",
-          "type": "Function",
-          "tags": [],
-          "label": "getReactEmbeddableSavedObjects",
-          "description": [
-            "\n"
-          ],
-          "signature": [
-            "<TSavedObjectAttributes extends ",
-            {
-              "pluginId": "savedObjectsFinder",
-              "scope": "common",
-              "docId": "kibSavedObjectsFinderPluginApi",
-              "section": "def-common.FinderAttributes",
-              "text": "FinderAttributes"
-            },
-            ">() => IterableIterator<[string, ",
-            {
-              "pluginId": "embeddable",
-              "scope": "public",
-              "docId": "kibEmbeddablePluginApi",
-              "section": "def-public.ReactEmbeddableSavedObject",
-              "text": "ReactEmbeddableSavedObject"
-            },
-            "<TSavedObjectAttributes>]>"
-          ],
-          "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": [
-            "An iterator over all {@link ReactEmbeddableSavedObject }s that have been registered using {@link registerReactEmbeddableSavedObject }."
-          ]
-        },
-        {
-          "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableStart.getEmbeddableFactory",
           "type": "Function",
           "tags": [
@@ -15187,14 +15092,6 @@
             {
               "plugin": "canvas",
               "path": "x-pack/plugins/canvas/public/components/workpad_header/editor_menu/editor_menu.tsx"
-            },
-            {
-              "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
-            },
-            {
-              "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
             }
           ],
           "children": [],

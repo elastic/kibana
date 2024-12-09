@@ -4678,16 +4678,16 @@
                 "path": "x-pack/plugins/logstash/server/routes/pipelines/list.ts"
               },
               {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/plugins/observability_solution/metrics_data_access/server/routes/metric_indices/index.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
               },
               {
                 "plugin": "infra",
@@ -7300,12 +7300,12 @@
                 "path": "x-pack/plugins/logstash/server/routes/pipelines/delete.ts"
               },
               {
-                "plugin": "metricsDataAccess",
-                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/observability_solution/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "infra",

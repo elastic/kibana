@@ -18,7 +18,6 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SAMPLE_SIZE_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
 import { LocalStorageMock } from '../local_storage_mock';
@@ -38,8 +37,6 @@ export const uiSettingsMock = {
       return 10;
     } else if (key === DEFAULT_COLUMNS_SETTING) {
       return ['default_column'];
-    } else if (key === SEARCH_FIELDS_FROM_SOURCE) {
-      return false;
     } else if (key === SHOW_MULTIFIELDS) {
       return false;
     } else if (key === ROW_HEIGHT_OPTION) {

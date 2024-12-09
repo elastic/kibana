@@ -16,15 +16,10 @@ import * as i18n from './translations';
 
 interface EsqlQueryValidatorFactoryParams {
   queryClient: QueryClient;
-  /**
-   * This is a temporal fix to unlock prebuilt rule customization workflow
-   */
-  skipIdColumnCheck?: boolean;
 }
 
 export function esqlQueryValidatorFactory({
   queryClient,
-  skipIdColumnCheck,
 }: EsqlQueryValidatorFactoryParams): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return async (...args) => {
     const [{ value }] = args;
@@ -48,10 +43,6 @@ export function esqlQueryValidatorFactory({
           code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
           message: i18n.ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR,
         };
-      }
-
-      if (skipIdColumnCheck) {
-        return;
       }
 
       const columns = await fetchEsqlQueryColumns({

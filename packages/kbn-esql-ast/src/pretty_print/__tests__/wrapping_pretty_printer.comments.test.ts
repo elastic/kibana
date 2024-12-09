@@ -497,6 +497,49 @@ ROW 1
     });
   });
 
+  describe('as-expressions', () => {
+    test('JOIN main arguments surrounded in comments', () => {
+      const query = `
+        FROM index | LEFT JOIN
+        /* 1 */
+        // 2
+        /* 3 */
+        // 4
+        /* 5 */ a /* 6 */ AS /* 7 */ b
+        ON c`;
+      const text = reprint(query).text;
+      expect('\n' + text).toBe(`
+FROM index
+  | LEFT JOIN
+      /* 1 */
+      // 2
+      /* 3 */
+      // 4
+      /* 5 */ a /* 6 */ AS
+        /* 7 */ b
+        ON c`);
+    });
+
+    test('JOIN "ON" option argument comments', () => {
+      const query = `
+        FROM index | RIGHT JOIN a AS b ON
+        // c.1
+        /* c.2 */ c /* c.3 */,
+        // d.1
+        /* d.2 */ d /* d.3 */`;
+      const text = reprint(query).text;
+      expect('\n' + text).toBe(`
+FROM index
+  | RIGHT JOIN
+      a AS b
+        ON
+          // c.1
+          /* c.2 */ c, /* c.3 */
+          // d.1
+          /* d.2 */ d /* d.3 */`);
+    });
+  });
+
   describe('function call expressions', () => {
     describe('binary expressions', () => {
       test('first operand surrounded by inline comments', () => {

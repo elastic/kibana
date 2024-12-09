@@ -14,7 +14,7 @@ const reprint = (src: string) => {
   const { root } = parse(src, { withFormatting: true });
   const text = BasicPrettyPrinter.print(root);
 
-  // console.log(JSON.stringify(ast, null, 2));
+  // console.log(JSON.stringify(root.commands, null, 2));
 
   return { text };
 };
@@ -182,5 +182,17 @@ describe('rename expressions', () => {
 
   test('inside rename expression', () => {
     assertPrint('FROM a | RENAME /*I*/ a /*II*/ AS /*III*/ b /*IV*/, c AS d');
+  });
+});
+
+describe('commands', () => {
+  describe('JOIN', () => {
+    test('around JOIN targets', () => {
+      assertPrint('FROM a | LEFT JOIN /*1*/ a /*2*/ AS /*3*/ b /*4*/ ON c');
+    });
+
+    test('around JOIN conditions', () => {
+      assertPrint('FROM a | LEFT JOIN a AS b ON /*1*/ c /*2*/, /*3*/ d /*4*/');
+    });
   });
 });
