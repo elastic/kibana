@@ -113,9 +113,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   });
 
   const isSemanticText = form.getFormData().type === 'semantic_text';
+
   useEffect(() => {
     if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
   }, [createFieldFormRef]);
+
   const submitForm = async (
     e?: React.FormEvent,
     exitAfter: boolean = false,
