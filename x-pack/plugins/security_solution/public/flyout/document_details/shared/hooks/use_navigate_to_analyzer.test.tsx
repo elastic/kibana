@@ -9,15 +9,10 @@ import { renderHook } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useNavigateToAnalyzer } from './use_navigate_to_analyzer';
 import { mockFlyoutApi } from '../mocks/mock_flyout_context';
-import { useWhichFlyout } from './use_which_flyout';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  DocumentDetailsRightPanelKey,
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsAnalyzerPanelKey,
-} from '../constants/panel_keys';
-import { ANALYZE_GRAPH_ID, ANALYZER_PREVIEW_BANNER } from '../../left/components/analyze_graph';
+import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../constants/panel_keys';
+import { ANALYZE_GRAPH_ID } from '../../left/components/analyze_graph';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/lib/kibana');
@@ -25,10 +20,6 @@ jest.mock('./use_which_flyout');
 
 const mockedUseKibana = mockUseKibana();
 (useKibana as jest.Mock).mockReturnValue(mockedUseKibana);
-
-const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
-const FLYOUT_KEY = 'SecuritySolution';
-const TIMELINE_FLYOUT_KEY = 'Timeline';
 
 const eventId = 'eventId1';
 const indexName = 'index1';
@@ -41,7 +32,6 @@ describe('useNavigateToAnalyzer', () => {
   });
 
   it('when isFlyoutOpen is true, should return callback that opens left and preview panels', () => {
-    mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     const hookResult = renderHook(() =>
       useNavigateToAnalyzer({ isFlyoutOpen: true, eventId, indexName, scopeId })
     );
@@ -59,19 +49,9 @@ describe('useNavigateToAnalyzer', () => {
         scopeId,
       },
     });
-
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: DocumentDetailsAnalyzerPanelKey,
-      params: {
-        resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
-        banner: ANALYZER_PREVIEW_BANNER,
-      },
-    });
   });
 
   it('when isFlyoutOpen is false and scopeId is not timeline, should return callback that opens a new flyout', () => {
-    mockUseWhichFlyout.mockReturnValue(null);
-
     const hookResult = renderHook(() =>
       useNavigateToAnalyzer({ isFlyoutOpen: false, eventId, indexName, scopeId })
     );
@@ -97,18 +77,10 @@ describe('useNavigateToAnalyzer', () => {
           scopeId,
         },
       },
-      preview: {
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${FLYOUT_KEY}-${scopeId}`,
-          banner: ANALYZER_PREVIEW_BANNER,
-        },
-      },
     });
   });
 
   it('when isFlyoutOpen is false and scopeId is current timeline, should return callback that opens a new flyout in timeline', () => {
-    mockUseWhichFlyout.mockReturnValue(null);
     const timelineId = 'timeline-1';
     const hookResult = renderHook(() =>
       useNavigateToAnalyzer({ isFlyoutOpen: false, eventId, indexName, scopeId: timelineId })
@@ -133,13 +105,6 @@ describe('useNavigateToAnalyzer', () => {
           id: eventId,
           indexName,
           scopeId: timelineId,
-        },
-      },
-      preview: {
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${TIMELINE_FLYOUT_KEY}-${timelineId}`,
-          banner: ANALYZER_PREVIEW_BANNER,
         },
       },
     });
