@@ -94,7 +94,7 @@ export const QuitGuideModal = ({
           onClick={deactivateGuide}
           isLoading={isLoading}
           fill
-          color="warning"
+          color="primary"
         >
           {i18n.translate('guidedOnboarding.quitGuideModal.quitButtonLabel', {
             defaultMessage: 'Quit guide',
