@@ -7204,7 +7204,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-project-switcher@link:packages/serverless/project_switcher":
+"@kbn/serverless-project-switcher@link:src/platform/packages/private/serverless/project_switcher":
   version "0.0.0"
   uid ""
 
