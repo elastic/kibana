@@ -6720,7 +6720,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-common@link:packages/kbn-reporting/common":
+"@kbn/reporting-common@link:src/platform/packages/private/kbn-reporting/common":
   version "0.0.0"
   uid ""
 
