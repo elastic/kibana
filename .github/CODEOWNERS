@@ -626,6 +626,7 @@ src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-man
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/dev_tools @elastic/kibana-management
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
+src/platform/plugins/shared/management @elastic/kibana-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
@@ -676,7 +677,6 @@ src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 src/plugins/links @elastic/kibana-presentation
-src/plugins/management @elastic/kibana-management
 src/plugins/maps_ems @elastic/kibana-presentation
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
