@@ -15,7 +15,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const panelActions = getService('dashboardPanelActions');
   const monacoEditor = getService('monacoEditor');
-  const PageObjects = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const browser = getService('browser');
+  const log = getService('log');
 
   describe('No Data Views: Try ES|QL', () => {
     before(async () => {
@@ -26,6 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
 
       await testSubjects.existOrFail('noDataViewsPrompt');
+      const url = await browser.getCurrentUrl();
+      await log.info('Current page: ', url);
+
       await testSubjects.click('tryESQLLink');
       await PageObjects.dashboard.waitForRenderComplete();
 
