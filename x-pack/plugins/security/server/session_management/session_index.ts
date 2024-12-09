@@ -830,6 +830,9 @@ export class SessionIndex {
         {
           index: this.aliasName,
           keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+          // @ts-expect-error client support this option, but it is not documented and typed yet, but we need this fix in 8.16.2.
+          // once support added we should remove this expected type error
+          // https://github.com/elastic/elasticsearch-specification/issues/3144
           allow_partial_search_results: true,
         },
         { ignore: [404], meta: true }
@@ -842,6 +845,9 @@ export class SessionIndex {
           {
             index: this.aliasName,
             keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+            // @ts-expect-error client support this option, but it is not documented and typed yet, but we need this fix in 8.16.2.
+            // once support added we should remove this expected type error
+            // https://github.com/elastic/elasticsearch-specification/issues/3144
             allow_partial_search_results: true,
           },
           { meta: true }
