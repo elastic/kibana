@@ -69,7 +69,6 @@ import { FILTER_ACTION } from './explorer_constants';
 // Anomalies Table
 // @ts-ignore
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
 import { useToastNotificationService } from '../services/toast_notification_service';
