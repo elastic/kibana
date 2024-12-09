@@ -11,8 +11,8 @@ import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
 import { AlertsStatusFilter } from './components';
-import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
@@ -161,7 +161,7 @@ export function ObservabilityAlertSearchBar({
       <EuiFlexItem>
         <AlertsSearchBar
           appName={appName}
-          featureIds={observabilityAlertFeatureIds}
+          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           showFilterBar={showFilterBar}

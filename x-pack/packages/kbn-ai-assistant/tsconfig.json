@@ -22,7 +22,6 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/actions-plugin",
     "@kbn/i18n-react",
-    "@kbn/ui-theme",
     "@kbn/core",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/security-plugin",

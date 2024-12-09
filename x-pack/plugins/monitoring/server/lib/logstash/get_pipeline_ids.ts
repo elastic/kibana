@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { LegacyRequest, Bucket, Pipeline } from '../../types';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 interface GetLogstashPipelineIdsParams {

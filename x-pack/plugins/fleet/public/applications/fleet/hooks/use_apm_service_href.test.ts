@@ -20,7 +20,8 @@ jest.mock('../../../hooks/use_locator', () => {
 });
 const apmLocatorMock = useLocatorModule.useLocator('APM_LOCATOR')?.getUrl;
 
-describe('useApmServiceHref hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201876
+describe.skip('useApmServiceHref hook', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

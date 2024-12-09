@@ -34,11 +34,6 @@ jest.mock('../../../common/lib/kibana', () => {
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-  withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {
-    return (props: T) => {
-      return <Component {...props} />;
-    };
-  },
 }));
 
 const renderPreviewLink = (field: string, value: string, dataTestSuj?: string) =>

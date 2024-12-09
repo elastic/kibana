@@ -7,6 +7,7 @@
 
 import { chunk } from 'lodash/fp';
 import { RequestHandler } from '@kbn/core/server';
+import { momentDateParser } from '../../../common/utils';
 import type {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchemaBody,
@@ -36,6 +37,17 @@ export const getUsageMetricsHandler = (
 
       logger.debug(`Retrieving usage metrics`);
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
+
+      // parse date strings to validate
+      const parsedFrom = momentDateParser(from)?.toISOString();
+      const parsedTo = momentDateParser(to)?.toISOString();
+
+      if (!parsedFrom || !parsedTo) {
+        const customErrorMessage = `[request body.${
+          !parsedTo ? 'to' : 'from'
+        }] Invalid date range ${!parsedTo ? to : from} is out of range`;
+        return errorHandler(logger, response, new CustomHttpRequestError(customErrorMessage, 400));
+      }
 
       // redundant check as we don't allow making requests via UI without data streams,
       // but it's here to make sure the request body is validated before requesting metrics from auto-ops
@@ -74,8 +86,8 @@ export const getUsageMetricsHandler = (
 
       const dataUsageService = new DataUsageService(logger);
       const metrics = await dataUsageService.getMetrics({
-        from,
-        to,
+        from: parsedFrom,
+        to: parsedTo,
         metricTypes: formatStringParams(metricTypes) as MetricTypes[],
         dataStreams: formatStringParams(dataStreamsResponse.map((ds) => ds.name)),
       });
