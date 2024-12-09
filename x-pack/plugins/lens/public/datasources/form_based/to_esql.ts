@@ -165,9 +165,9 @@ export function getESQLForLayer(
 
         esAggsId = dateHistogramColumn.sourceField;
         const kibanaInterval =
-          dateHistogramColumn.params.interval === 'auto'
+          dateHistogramColumn.params?.interval === 'auto'
             ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-            : dateHistogramColumn.params.interval;
+            : dateHistogramColumn.params?.interval || '1h';
         const esInterval = convertIntervalToEsInterval(kibanaInterval);
         interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
       }

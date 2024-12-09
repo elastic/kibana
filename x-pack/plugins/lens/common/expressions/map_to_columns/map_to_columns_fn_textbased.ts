@@ -49,7 +49,7 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
               : {}),
             ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
             sourceParams: {
-              ...column.meta.sourceParams,
+              ...(column.meta?.sourceParams ?? {}),
               sourceField: originalColumn.sourceField,
               operationType: originalColumn.operationType,
               interval: originalColumn.interval,
