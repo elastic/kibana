@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
@@ -299,11 +299,11 @@ const stringToNumericTimeRange = (timeRange: StringTimeRange): TimeRange => ({
 
 // This is needed due to the flex-basis: 100% !important; rule that
 // kicks in on small screens via media queries breaking when using direction="column"
-export const ResultsContentPage = euiStyled(EuiPage)`
+export const ResultsContentPage = styled(EuiPage)`
   flex: 1 0 0%;
   flex-direction: column;
 
-  [class*="euiFlexGroup-responsive"] > .euiFlexItem {
+  [class*='euiFlexGroup-responsive'] > .euiFlexItem {
     flex-basis: auto !important;
   }
 `;

@@ -18,9 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useVisibilityState } from '../../hooks/use_visibility_state';
+import { withAttrs } from '../../utils/theme_utils/with_attrs';
 
 interface LogHighlightsMenuProps {
   onChange: (highlightTerms: string[]) => void;
@@ -174,14 +174,17 @@ const goToNextHighlightLabel = i18n.translate(
   }
 );
 
-const ActiveHighlightsIndicator = euiStyled(EuiIcon).attrs(({ theme }) => ({
-  type: 'checkInCircleFilled',
-  size: 'm',
-  color: theme?.eui.euiColorAccent,
-}))`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
-`;
+const ActiveHighlightsIndicator = withAttrs(
+  styled(EuiIcon)`
+    padding-left: ${(props) => props.theme.euiTheme.size.xs};
+  `,
+  ({ theme }) => ({
+    type: 'checkInCircleFilled',
+    size: 'm',
+    color: theme?.euiTheme.colors.accent,
+  })
+);
 
-const LogHighlightsMenuContent = euiStyled.div`
+const LogHighlightsMenuContent = styled.div`
   width: 300px;
 `;

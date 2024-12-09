@@ -8,8 +8,7 @@
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 interface LogCustomizationMenuState {
   isShown: boolean;
@@ -75,6 +74,6 @@ export class LogCustomizationMenu extends React.Component<
   }
 }
 
-const CustomizationMenuContent = euiStyled.div`
+const CustomizationMenuContent = styled.div`
   min-width: 200px;
 `;
