@@ -790,7 +790,7 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "json-stable-stringify",
@@ -837,26 +837,6 @@
       "matchDepNames": [
         "license-checker",
         "@types/license-checker"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "loader-utils",
-      "matchDepNames": [
-        "loader-utils",
-        "@types/loader-utils"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1123,25 +1103,6 @@
       "enabled": true
     },
     {
-      "groupName": "@statoscope/webpack-plugin",
-      "matchDepNames": [
-        "@statoscope/webpack-plugin"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "mocha",
       "matchDepNames": [
         "mocha",
@@ -1355,6 +1316,7 @@
         "clean-webpack-plugin",
         "css-loader",
         "file-loader",
+        "loader-utils",
         "mini-css-extract-plugin",
         "postcss-loader",
         "raw-loader",
@@ -1369,6 +1331,8 @@
         "webpack-merge",
         "webpack-sources",
         "webpack-visualizer-plugin2",
+        "@statoscope/webpack-plugin",
+        "@types/loader-utils",
         "@types/webpack",
         "@types/webpack-bundle-analyzer",
         "@types/webpack-env",
@@ -1387,7 +1351,7 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "yargs",
@@ -1435,7 +1399,8 @@
       "groupName": "package.json/yarn.lock utils",
       "matchDepNames": [
         "@yarnpkg/lockfile",
-        "sort-package-json"
+        "sort-package-json",
+        "yarn-deduplicate"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1548,18 +1513,20 @@
       "enabled": true
     },
     {
-      "groupName": "exit-hook",
+      "groupName": "dnd-kit",
       "matchDepNames": [
-        "exit-hook"
+        "@dnd-kit/core",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
       ],
       "reviewers": [
-        "team:kibana-operations"
+        "team:kibana-presentation"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Operations",
+        "Team:Presentation",
         "backport:all-open",
         "release_note:skip"
       ],
@@ -1567,9 +1534,195 @@
       "enabled": true
     },
     {
-      "groupName": "expect",
+      "groupName": "@elastic/ems client",
       "matchDepNames": [
-        "expect"
+        "@elastic/ems-client"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "loaders.gl",
+      "matchDepNames": [
+        "@loaders.gl/core",
+        "@loaders.gl/json",
+        "@loaders.gl/shapefile"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "mapbox and maplibre",
+      "matchDepNames": [
+        "@mapbox/geojson-rewind",
+        "@mapbox/mapbox-gl-draw",
+        "@mapbox/mapbox-gl-rtl-text",
+        "@mapbox/mapbox-gl-supported",
+        "mapbox-gl-draw-rectangle-mode",
+        "maplibre-gl"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "misc kibana-presentation dependencies",
+      "matchDepNames": [
+        "jsts",
+        "pbf",
+        "@types/flot",
+        "@types/pbf"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "kibana-presentation react dependencies",
+      "matchDepNames": [
+        "react-dropzone",
+        "react-grid-layout",
+        "react-recompose",
+        "react-shortcuts",
+        "redux-thunks",
+        "@types/react-grid-layout",
+        "@types/react-recompose"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "kibana-presentation misc maps dependencies",
+      "matchDepNames": [
+        "bitmap-sdf",
+        "canvg",
+        "wellknown"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "kibana-presentation misc canvas dependencies",
+      "matchDepNames": [
+        "expose-loader",
+        "html-loader",
+        "jsondiffpatch",
+        "null-loader",
+        "object-path-immutable",
+        "postcss-prefix-selector",
+        "safe-squel",
+        "string-replace-loader"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "turf",
+      "matchDepNames": [
+        "@turf/along",
+        "@turf/area",
+        "@turf/bbox",
+        "@turf/bbox-polygon",
+        "@turf/boolean-contains",
+        "@turf/center-of-mass",
+        "@turf/circle",
+        "@turf/distance",
+        "@turf/helpers",
+        "@turf/length"
+      ],
+      "reviewers": [
+        "team:kibana-presentation"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Presentation",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "exit-hook",
+      "matchDepNames": [
+        "exit-hook"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1836,25 +1989,6 @@
       "groupName": "tslib",
       "matchDepNames": [
         "tslib"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "yarn-deduplicate",
-      "matchDepNames": [
-        "yarn-deduplicate"
       ],
       "reviewers": [
         "team:kibana-operations"
