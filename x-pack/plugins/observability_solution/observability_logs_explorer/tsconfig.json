@@ -8,7 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    ".storybook/**/*.tsx"
+    ".storybook/**/*.tsx",
+    "emotion.d.ts",
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -31,7 +32,6 @@
     "@kbn/share-plugin",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-utility",
-    "@kbn/ui-theme",
     "@kbn/xstate-utils",
     "@kbn/router-utils",
     "@kbn/observability-ai-assistant-plugin",
