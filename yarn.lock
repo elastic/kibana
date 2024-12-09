@@ -7224,7 +7224,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-types@link:packages/serverless/types":
+"@kbn/serverless-types@link:src/platform/packages/private/serverless/types":
   version "0.0.0"
   uid ""
 
