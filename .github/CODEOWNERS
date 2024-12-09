@@ -44,7 +44,6 @@ examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 packages/analytics/utils/analytics_collection_utils @elastic/kibana-core
 packages/cloud @elastic/kibana-core
-packages/content-management/favorites/favorites_common @elastic/appex-sharedux
 packages/content-management/favorites/favorites_public @elastic/appex-sharedux
 packages/content-management/favorites/favorites_server @elastic/appex-sharedux
 packages/content-management/tabbed_table_list_view @elastic/appex-sharedux
@@ -611,6 +610,7 @@ packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
+src/platform/packages/private/content-management/favorites/favorites_common @elastic/appex-sharedux
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
