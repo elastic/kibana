@@ -5936,7 +5936,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inference-common@link:x-pack/packages/ai-infra/inference-common":
+"@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
   version "0.0.0"
   uid ""
 

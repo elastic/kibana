@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ai-infra/inference-common'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ai-infra/inference-common'],
 };
