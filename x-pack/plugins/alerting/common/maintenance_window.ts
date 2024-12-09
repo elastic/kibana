@@ -110,3 +110,5 @@ export type MaintenanceWindowDeepLinkIds =
   (typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS)[keyof typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS];
 
 export const MAINTENANCE_WINDOW_DATE_FORMAT = 'MM/DD/YY hh:mm A';
+
+export const MAINTENANCE_WINDOW_DEFAULT_SEARCH_PAGE_SIZE = 10 as const;

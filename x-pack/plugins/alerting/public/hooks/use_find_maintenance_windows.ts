@@ -9,13 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { findMaintenanceWindows } from '../services/maintenance_windows_api/find';
+import { type MaintenanceWindowStatus } from '../../common';
 
 interface UseFindMaintenanceWindowsProps {
   enabled?: boolean;
+  page: number;
+  perPage: number;
+  searchText: string;
+  selectedStatuses: MaintenanceWindowStatus[];
 }
 
-export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps) => {
-  const { enabled = true } = props || {};
+export const useFindMaintenanceWindows = (params: UseFindMaintenanceWindowsProps) => {
+  const { enabled = true, page, perPage, searchText, selectedStatuses } = params;
 
   const {
     http,
@@ -23,7 +28,13 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
   } = useKibana().services;
 
   const queryFn = () => {
-    return findMaintenanceWindows({ http });
+    return findMaintenanceWindows({
+      http,
+      page,
+      perPage,
+      searchText,
+      selectedStatuses,
+    });
   };
 
   const onErrorFn = (error: Error) => {
@@ -36,14 +47,16 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
     }
   };
 
-  const {
-    isLoading,
-    isFetching,
-    isInitialLoading,
-    data = [],
-    refetch,
-  } = useQuery({
-    queryKey: ['findMaintenanceWindows'],
+  const queryKey = [
+    'findMaintenanceWindows',
+    ...(page ? [page] : []),
+    ...(perPage ? [perPage] : []),
+    ...(searchText ? [searchText] : []),
+    ...(selectedStatuses ? [selectedStatuses] : []),
+  ];
+
+  const { isLoading, isFetching, isInitialLoading, data, refetch } = useQuery({
+    queryKey,
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
@@ -53,7 +66,7 @@ export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps
   });
 
   return {
-    maintenanceWindows: data,
+    data: data || { maintenanceWindows: [], total: 0 },
     isLoading: enabled && (isLoading || isFetching),
     isInitialLoading,
     refetch,
