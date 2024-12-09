@@ -9,12 +9,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/src/plugins/ai_assistant_management/selection'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/ai_assistant_management/selection'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/plugins/ai_assistant_management/selection',
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/ai_assistant_management/selection',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/ai_assistant_management/selection/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/ai_assistant_management/selection/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
