@@ -17,7 +17,7 @@ import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis';
 import { ChangePointType } from '@kbn/es-types/src';
 import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_label';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { orderBy, partition, uniqBy } from 'lodash';
+import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
 import { kqlQuery } from '../es/queries/kql_query';
@@ -188,24 +188,21 @@ export async function runCategorizeTextAggregation({
         filter: [query, ...rangeQuery(start, end)],
       },
     },
-    aggs,
-    // until https://github.com/elastic/elasticsearch/issues/110134 is fixed,
-    // we cannot use random sampling
-    // aggregations: {
-    //   sampler: {
-    //     random_sampler: {
-    //       probability: samplingProbability,
-    //     },
-    //     aggs,
-    //   },
-    // },
+    aggregations: {
+      sampler: {
+        random_sampler: {
+          probability: samplingProbability,
+        },
+        aggs,
+      },
+    },
   });
 
   if (!response.aggregations) {
     return [];
   }
 
-  const fieldAggregates = response.aggregations;
+  const fieldAggregates = omit(response.aggregations.sampler, 'seed', 'doc_count', 'probability');
 
   return Object.entries(fieldAggregates).flatMap(([fieldName, aggregate]) => {
     const buckets = aggregate.buckets;
@@ -330,7 +327,7 @@ export async function getLogPatterns({
         },
         samplingProbability,
         useMlStandardTokenizer: false,
-        size: 50,
+        size: 100,
         start,
         end,
         includeChanges,
@@ -341,13 +338,13 @@ export async function getLogPatterns({
         return [];
       }
 
-      const [patternsToExclude, _] = partition(topMessagePatterns, (pattern) => {
+      const patternsToExclude = topMessagePatterns.filter((pattern) => {
         const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
         // elasticsearch will barf because the query is too complex
         return (
           complexity <= 25 &&
-          // anything less than 100 messages should be re-processed with the ml_standard tokenizer
-          pattern.count > 100
+          // anything less than 50 messages should be re-processed with the ml_standard tokenizer
+          pattern.count > 50
         );
       });
 
@@ -361,16 +358,30 @@ export async function getLogPatterns({
           bool: {
             filter: kqlQuery(kuery),
             must_not: [
-              ...patternsToExclude.flatMap((pattern) => {
-                return [
-                  {
-                    regexp: {
-                      [pattern.field]: {
-                        value: pattern.regex,
+              ...patternsToExclude.map((pattern) => {
+                return {
+                  bool: {
+                    filter: [
+                      {
+                        regexp: {
+                          [pattern.field]: {
+                            value: pattern.regex,
+                          },
+                        },
                       },
-                    },
+                      {
+                        match: {
+                          [pattern.field]: {
+                            query: pattern.pattern,
+                            fuzziness: 0,
+                            operator: 'and' as const,
+                            auto_generate_synonyms_phrase_query: false,
+                          },
+                        },
+                      },
+                    ],
                   },
-                ];
+                };
               }),
             ],
           },
