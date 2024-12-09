@@ -7284,7 +7284,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-error-boundary@link:packages/shared-ux/error_boundary":
+"@kbn/shared-ux-error-boundary@link:src/platform/packages/shared/shared-ux/error_boundary":
   version "0.0.0"
   uid ""
 

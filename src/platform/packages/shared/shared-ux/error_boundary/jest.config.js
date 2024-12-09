@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/shared-ux/error_boundary'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/error_boundary'],
 };
