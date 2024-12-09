@@ -8,4 +8,4 @@ To use this package, add the package name ‘@kbn/search-index-documents’ in y
 
 ## Implementation reference
 
-- [x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index/documents.tsx](../../x-pack/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index/documents.tsx)
+- [x-pack/solutions/search/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index/documents.tsx](../../x-pack/solutions/search/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index/documents.tsx)

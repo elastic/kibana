@@ -1588,7 +1588,7 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         'import/order': [
           'error',
@@ -1640,7 +1640,7 @@ module.exports = {
      * Allows snake_case variables in the server, because that's how we return API properties
      */
     {
-      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/server/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/naming-convention': [
           'error',
@@ -1662,8 +1662,8 @@ module.exports = {
     },
     {
       // Source files only - allow `any` in test/mock files
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
+      excludedFiles: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1953,7 +1953,7 @@ module.exports = {
      * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
      */
     {
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
       rules: {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
