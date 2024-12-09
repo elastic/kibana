@@ -1277,6 +1277,31 @@ describe('ConfigureCases', () => {
       expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
       expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
     });
+
+    it('opens fly out for when click on add field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.ADD_OBSERVABLE_TYPE
+      );
+    });
+
+    it('closes fly out for when click on cancel', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('common-flyout-cancel'));
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
   });
 
   describe('rendering with license limitations', () => {
