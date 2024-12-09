@@ -39,20 +39,33 @@ interface Props {
   onClose: () => void;
 }
 
-const useFleetServerTabs = (onClose: () => void) => {
+export const useFleetServerTabs = (
+  onClose: () => void,
+  handleContinueAddingAgentClick?: () => void
+) => {
   const [currentTab, setCurrentTab] = useState('quickStart');
 
   const quickStartTab = {
     id: 'quickStart',
     label: 'Quick Start',
-    content: <QuickStartTab onClose={onClose} />,
+    content: (
+      <QuickStartTab
+        onClose={onClose}
+        handleContinueAddingAgentClick={handleContinueAddingAgentClick}
+      />
+    ),
     'data-test-subj': 'fleetServerFlyoutTab-quickStart',
   };
 
   const advancedTab = {
     id: 'advanced',
     label: 'Advanced',
-    content: <AdvancedTab onClose={onClose} />,
+    content: (
+      <AdvancedTab
+        onClose={onClose}
+        handleContinueAddingAgentClick={handleContinueAddingAgentClick}
+      />
+    ),
     'data-test-subj': 'fleetServerFlyoutTab-advanced',
   };
 
@@ -62,7 +75,7 @@ const useFleetServerTabs = (onClose: () => void) => {
   return { tabs: [quickStartTab, advancedTab], currentTab, setCurrentTab, currentTabContent };
 };
 
-const Header: React.FunctionComponent<{
+export const Header: React.FunctionComponent<{
   isFlyout?: boolean;
   currentTab: string;
   tabs: Array<{ id: string; label: string; content: React.ReactNode }>;

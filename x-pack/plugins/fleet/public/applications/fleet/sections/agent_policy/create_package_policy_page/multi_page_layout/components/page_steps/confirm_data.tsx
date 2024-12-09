@@ -17,6 +17,16 @@ import {
   NotObscuredByBottomBar,
 } from '..';
 
+const BottomBar: React.FC<{
+  packageInfoName: string;
+  packageInfoVersion: string;
+}> = ({ packageInfoName, packageInfoVersion }) => (
+  <>
+    <NotObscuredByBottomBar />
+    <CreatePackagePolicyFinalBottomBar pkgkey={`${packageInfoName}-${packageInfoVersion}`} />
+  </>
+);
+
 export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
   const { enrolledAgentIds, packageInfo, isManaged } = props;
   const core = useStartServices();
@@ -25,18 +35,11 @@ export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) =
   const { docLinks } = core;
   const troubleshootLink = docLinks.links.fleet.troubleshooting;
 
-  const bottomBar = (
-    <>
-      <NotObscuredByBottomBar />
-      <CreatePackagePolicyFinalBottomBar pkgkey={`${packageInfo.name}-${packageInfo.version}`} />
-    </>
-  );
-
   if (!isManaged) {
     return (
       <>
         <ConfirmIncomingDataStandalone troubleshootLink={troubleshootLink} />
-        {bottomBar}
+        <BottomBar packageInfoName={packageInfo.name} packageInfoVersion={packageInfo.version} />
       </>
     );
   }
@@ -51,7 +54,9 @@ export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) =
         troubleshootLink={troubleshootLink}
       />
 
-      {!!agentDataConfirmed && bottomBar}
+      {!!agentDataConfirmed && (
+        <BottomBar packageInfoName={packageInfo.name} packageInfoVersion={packageInfo.version} />
+      )}
     </>
   );
 };

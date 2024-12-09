@@ -13,6 +13,8 @@ import { useIntraAppState } from '../../../hooks';
 
 interface IntegrationsStateContextValue {
   getFromIntegrations(): string | undefined;
+  pkgkey?: string;
+  panel?: string;
 }
 
 const IntegrationsStateContext = createContext<IntegrationsStateContextValue>({
@@ -24,7 +26,6 @@ export const IntegrationsStateContextProvider: FunctionComponent<{
 }> = ({ children }) => {
   const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
   const stateRef = useRef(maybeState);
-  console.log('myState---', maybeState);
   const getFromIntegrations = useCallback(() => {
     return stateRef.current?.fromIntegrations;
   }, []);
@@ -33,7 +34,6 @@ export const IntegrationsStateContextProvider: FunctionComponent<{
       value={{
         getFromIntegrations,
         pkgkey: maybeState?.pkgkey,
-        panel: maybeState?.panel,
       }}
     >
       {children}

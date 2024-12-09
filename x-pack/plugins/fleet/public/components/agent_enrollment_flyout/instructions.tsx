@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { FleetStatus } from '../../hooks';
 import { useFleetStatus, useFleetServerStandalone, useGetEnrollmentSettings } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
@@ -19,6 +20,22 @@ import type { InstructionProps } from './types';
 import { ManagedSteps, StandaloneSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
+export const shouldShowFleetServerEnrollment = ({
+  isFleetServerStandalone,
+  isFleetServerPolicySelected,
+  enrollmentSettings,
+  fleetStatusMissingRequirements,
+}: {
+  isFleetServerStandalone: boolean;
+  isFleetServerPolicySelected: boolean | undefined;
+  enrollmentSettings: any;
+  fleetStatusMissingRequirements: FleetStatus['missingRequirements'];
+}) =>
+  !isFleetServerStandalone &&
+  !isFleetServerPolicySelected &&
+  (!enrollmentSettings?.fleet_server.has_active ||
+    (fleetStatusMissingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
+
 export const Instructions = (props: InstructionProps) => {
   const {
     isFleetServerPolicySelected,
@@ -28,7 +45,8 @@ export const Instructions = (props: InstructionProps) => {
     setSelectionType,
     mode,
     setMode,
-    isIntegrationFlow,
+    from,
+    handleAddFleetServer,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isFleetServerStandalone } = useFleetServerStandalone();
@@ -42,11 +60,12 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerStandalone ||
     (fleetStatus.isReady && enrollmentSettings?.fleet_server.has_active && fleetServerHost);
 
-  const showFleetServerEnrollment =
-    !isFleetServerStandalone &&
-    !isFleetServerPolicySelected &&
-    (!enrollmentSettings?.fleet_server.has_active ||
-      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
+  const showFleetServerEnrollment = shouldShowFleetServerEnrollment({
+    isFleetServerStandalone,
+    isFleetServerPolicySelected,
+    enrollmentSettings,
+    fleetStatusMissingRequirements: fleetStatus.missingRequirements,
+  });
 
   useEffect(() => {
     // If we detect a CloudFormation integration, we want to hide the selection type
@@ -56,12 +75,12 @@ export const Instructions = (props: InstructionProps) => {
       props.cloudSecurityIntegration?.cloudShellUrl
     ) {
       setSelectionType(undefined);
-    } else if (!isIntegrationFlow && showAgentEnrollment) {
+    } else if (showAgentEnrollment) {
       setSelectionType('radio');
     } else {
       setSelectionType('tabs');
     }
-  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
+  }, [from, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
 
   if (isLoadingEnrollmentSettings || isLoadingAgentPolicies) return <Loading size="l" />;
 
@@ -71,7 +90,12 @@ export const Instructions = (props: InstructionProps) => {
 
   if (mode === 'managed') {
     if (showFleetServerEnrollment) {
-      return <FleetServerRequirementPage showStandaloneTab={() => setMode('standalone')} />;
+      return (
+        <FleetServerRequirementPage
+          showStandaloneTab={() => setMode('standalone')}
+          handleAddFleetServer={handleAddFleetServer}
+        />
+      );
     } else if (showAgentEnrollment) {
       return (
         <>
