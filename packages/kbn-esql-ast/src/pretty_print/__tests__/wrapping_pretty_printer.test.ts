@@ -14,12 +14,33 @@ const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src);
   const text = WrappingPrettyPrinter.print(root, opts);
 
-  // console.log(JSON.stringify(ast, null, 2));
+  // console.log(JSON.stringify(root.commands, null, 2));
 
   return { text };
 };
 
 describe('commands', () => {
+  describe('JOIN', () => {
+    test('with short identifiers', () => {
+      const { text } = reprint('FROM a | RIGHT JOIN b AS c ON d, e');
+
+      expect(text).toBe('FROM a | RIGHT JOIN b AS c ON d, e');
+    });
+
+    test('with long identifiers', () => {
+      const { text } = reprint(
+        'FROM aaaaaaaaaaaa | RIGHT JOIN bbbbbbbbbbbbbbbbb AS cccccccccccccccccccc ON dddddddddddddddddddddddddddddddddddddddd, eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+      );
+
+      expect('\n' + text).toBe(`
+FROM aaaaaaaaaaaa
+  | RIGHT JOIN bbbbbbbbbbbbbbbbb AS cccccccccccccccccccc
+        ON
+          dddddddddddddddddddddddddddddddddddddddd,
+          eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`);
+    });
+  });
+
   describe('GROK', () => {
     test('two basic arguments', () => {
       const { text } = reprint('FROM search-movies | GROK Awards "text"');
