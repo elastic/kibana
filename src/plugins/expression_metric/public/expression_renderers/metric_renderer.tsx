@@ -9,9 +9,8 @@
 
 import React, { CSSProperties } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -33,7 +32,7 @@ const strings = {
 };
 
 export const getMetricRenderer =
-  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<MetricRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<MetricRendererConfig> => ({
     name: 'metric',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -51,7 +50,7 @@ export const getMetricRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <MetricComponent
                 label={config.label}
                 labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}
@@ -68,4 +67,4 @@ export const getMetricRenderer =
     },
   });
 
-export const metricRendererFactory = (core: CoreSetup) => getMetricRenderer(core.theme.theme$);
+export const metricRendererFactory = (core: CoreStart) => getMetricRenderer(core);

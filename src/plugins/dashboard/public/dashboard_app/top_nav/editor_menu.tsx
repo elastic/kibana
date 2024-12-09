@@ -57,7 +57,7 @@ export const EditorMenu = ({ createNewVisType, isDisabled }: EditorMenuProps) =>
             />
           );
         }),
-        { analytics: coreServices.analytics, theme: coreServices.theme, i18n: coreServices.i18n }
+        coreServices
       );
 
       dashboardApi.openOverlay(

@@ -32,7 +32,7 @@ export interface StartDeps {
   expression: ExpressionsServiceStart;
 }
 
-export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 export type ExpressionXyPluginSetup = void;
 export type ExpressionXyPluginStart = void;
