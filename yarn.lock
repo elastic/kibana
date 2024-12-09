@@ -7360,7 +7360,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data-types@link:packages/shared-ux/page/kibana_no_data/types":
+"@kbn/shared-ux-page-kibana-no-data-types@link:src/platform/packages/private/shared-ux/page/kibana_no_data/types":
   version "0.0.0"
   uid ""
 
