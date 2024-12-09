@@ -1,6 +1,6 @@
 # Upgrade of Prebuilt Rules from Rule Updates table
 
-This test plan outlines the testing strategy for the **Upgrade of Prebuilt Rules** feature within the **Rule Updates** tab.
+This test plan outlines the testing strategy for the **Upgrade of Prebuilt Rules** feature within the **Rule Updates** tab of the Rules Management table.
 
 The focus is on ensuring that both the individual and the bulk upgrade functionality operate correctly, especially in scenarios involving rule conflicts.
 
@@ -9,6 +9,9 @@ The focus is on ensuring that both the individual and the bulk upgrade functiona
 - [Functional Requirements](#functional-requirements)
 - [Non-Functional Requirements](#non-functional-requirements)
 - [Test Scenarios](#test-scenarios)
+  - [Individual Rule Upgrade](#individual-rule-upgrade)
+    - [**Scenario: Upgrade conflict-free rule**](#scenario-upgrade-conflict-free-rule)
+    - [**Scenario: Attempt to upgrade conflicting rule**](#scenario-attempt-to-upgrade-conflicting-rule)
   - [UI Elements Validation](#ui-elements-validation)
     - [**Scenario: Verify presence of "Upgrade All" button**](#scenario-verify-presence-of-upgrade-all-button)
     - [**Scenario: Confirm tooltips explain exclusion of conflicting rules**](#scenario-confirm-tooltips-explain-exclusion-of-conflicting-rules)
@@ -18,9 +21,6 @@ The focus is on ensuring that both the individual and the bulk upgrade functiona
   - [Bulk Upgrade with Conflict Modal](#bulk-upgrade-with-conflict-modal)
     - [**Scenario: Mixed selection with conflicts**](#scenario-mixed-selection-with-conflicts)
     - [**Scenario: All selected rules have conflicts**](#scenario-all-selected-rules-have-conflicts)
-  - [Individual Rule Upgrade](#individual-rule-upgrade)
-    - [**Scenario: Upgrade conflict-free rule**](#scenario-upgrade-conflict-free-rule)
-    - [**Scenario: Attempt to upgrade conflicting rule**](#scenario-attempt-to-upgrade-conflicting-rule)
   - [Error Handling](#error-handling)
     - [**Scenario: Backend error during bulk upgrade**](#scenario-backend-error-during-bulk-upgrade)
     - [**Scenario: Network failure during upgrade**](#scenario-network-failure-during-upgrade)
@@ -38,10 +38,10 @@ The focus is on ensuring that both the individual and the bulk upgrade functiona
 1. **Individual Rule Upgrade**:
    - Allow users to upgrade individual rules directly if they are conflict-free.
    - Disable direct upgrade for rules with conflicts until they are reviewed.
-   - Provide appropriate tooltips for rules with conflicts that cannot be upgraded directly.
+   - Provide appropriate tooltips for rules with conflicts that cannot be upgraded directly, clearly explaining users why direct upgrade is disabled.
 
 2. **Bulk Rule Upgrade**:
-   - Upgrade all or multiple selected rules that are conflict-free.
+   - Allow users to upgrade all or multiple selected rules that are conflict-free.
    - Display a modal when selected rules include conflicts, allowing users to proceed with upgrading only the conflict-free rules.
 
 3. **Rule Version Target**:
@@ -57,6 +57,34 @@ The focus is on ensuring that both the individual and the bulk upgrade functiona
 ---
 
 ## Test Scenarios
+
+### Individual Rule Upgrade
+
+#### **Scenario: Upgrade conflict-free rule**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given the user is on the Rule Updates tab
+And there is a rule with an available update and no conflicts
+When the user clicks the upgrade "Upgrade rule" button for that rule
+Then the rule should be upgraded to its merged version
+And a success message "Rule 'Detect SSH Brute Force' has been upgraded." should be displayed
+```
+
+#### **Scenario: Attempt to upgrade conflicting rule**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given the user is on the Rule Updates tab
+And there is a rule with an available update and at least one conflict
+When the user attemps to click the upgrade "Upgrade rule" button for that rule
+Then the upgrade button should be disabled
+And a tooltip should be displayed on hover that indicates "Please resolve conflicts before upgrading this rule."
+```
+
+---
 
 ### UI Elements Validation
 
@@ -77,34 +105,6 @@ Then the "Upgrade All" button should be visible
 ```Gherkin
 Given the user hovers over the "Upgrade All" button
 Then a tooltip should appear with the text "Only rules without conflicts will be upgraded."
-```
-
----
-
-### Individual Rule Upgrade
-
-#### **Scenario: Upgrade conflict-free rule**
-
-**Automation**: 1 e2e test.
-
-```Gherkin
-Given the user is on the Rule Updates tab
-And there is a rule named "Detect SSH Brute Force" with no conflicts
-When the user clicks the upgrade icon next to "Detect SSH Brute Force"
-Then the rule should be upgraded to its merged version
-And a success message "Rule 'Detect SSH Brute Force' has been upgraded." should be displayed
-```
-
-#### **Scenario: Attempt to upgrade conflicting rule**
-
-**Automation**: 1 e2e test.
-
-```Gherkin
-Given the user is on the Rule Updates tab
-And there is a rule named "Detect Unauthorized Access" with conflicts
-When the user attempts to click the upgrade icon next to "Detect Unauthorized Access"
-Then the upgrade option should be disabled
-And a tooltip should indicate "Please resolve conflicts before upgrading this rule."
 ```
 
 ---

@@ -1,8 +1,8 @@
-# Installation and Upgrade of Prebuilt Rules
+# Upgrade of Prebuilt Rules
 
-This is a test plan for the workflows of installing and upgrading prebuilt rules.
+This is a test plan for the workflow of upgrading prebuilt rules.
 
-Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic. It does not cover any past functionality that was removed or functionality to be implemented in the future. The plan is about to change in the future Milestones.
+Status: `in progress`. The current test plan matches `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/kibana/issues/174168) epic.
 
 ## Table of Contents
 
@@ -13,38 +13,6 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
   - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
-  - [Package installation](#package-installation)
-    - [**Scenario: Package is installed via Fleet**](#scenario-package-is-installed-via-fleet)
-    - [**Scenario: Package is installed via bundled Fleet package in Kibana**](#scenario-package-is-installed-via-bundled-fleet-package-in-kibana)
-    - [**Scenario: Large package can be installed on a small Kibana instance**](#scenario-large-package-can-be-installed-on-a-small-kibana-instance)
-  - [Rule installation and upgrade via the Prebuilt rules API](#rule-installation-and-upgrade-via-the-prebuilt-rules-api)
-    - [**Scenario: API can install all prebuilt rules**](#scenario-api-can-install-all-prebuilt-rules)
-    - [**Scenario: API can install prebuilt rules that are not yet installed**](#scenario-api-can-install-prebuilt-rules-that-are-not-yet-installed)
-    - [**Scenario: API can upgrade prebuilt rules that are outdated**](#scenario-api-can-upgrade-prebuilt-rules-that-are-outdated)
-    - [**Scenario: API does not install or upgrade prebuilt rules if they are up to date**](#scenario-api-does-not-install-or-upgrade-prebuilt-rules-if-they-are-up-to-date)
-  - [Scenarios for the real package](#scenarios-for-the-real-package)
-    - [**Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package**](#scenario-user-can-install-prebuilt-rules-from-scratch-then-install-new-rules-and-upgrade-existing-rules-from-the-new-package)
-  - [Rule installation and upgrade notifications on the Rule Management page](#rule-installation-and-upgrade-notifications-on-the-rule-management-page)
-    - [**Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**](#scenario-user-is-not-notified-when-no-prebuilt-rules-are-installed-and-there-are-no-prebuilt-rules-assets)
-    - [**Scenario: User is NOT notified when all prebuilt rules are installed and up to date**](#scenario-user-is-not-notified-when-all-prebuilt-rules-are-installed-and-up-to-date)
-    - [**Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**](#scenario-user-is-notified-when-no-prebuilt-rules-are-installed-and-there-are-rules-available-to-install)
-    - [**Scenario: User is notified when some prebuilt rules can be installed**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-installed)
-    - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
-    - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
-    - [**Scenario: User is notified after a prebuilt rule gets deleted**](#scenario-user-is-notified-after-a-prebuilt-rule-gets-deleted)
-  - [Rule installation workflow: base cases](#rule-installation-workflow-base-cases)
-    - [**Scenario: User can install prebuilt rules one by one**](#scenario-user-can-install-prebuilt-rules-one-by-one)
-    - [**Scenario: User can install multiple prebuilt rules selected on the page**](#scenario-user-can-install-multiple-prebuilt-rules-selected-on-the-page)
-    - [**Scenario: User can install all available prebuilt rules at once**](#scenario-user-can-install-all-available-prebuilt-rules-at-once)
-    - [**Scenario: Empty screen is shown when all prebuilt rules are installed**](#scenario-empty-screen-is-shown-when-all-prebuilt-rules-are-installed)
-    - [**Scenario: User can preview rules available for installation**](#scenario-user-can-preview-rules-available-for-installation)
-    - [**Scenario: User can install a rule using the rule preview**](#scenario-user-can-install-a-rule-using-the-rule-preview)
-    - [**Scenario: User can see correct rule information in preview before installing**](#scenario-user-can-see-correct-rule-information-in-preview-before-installing)
-    - [**Scenario: Tabs and sections without content should be hidden in preview before installing**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-installing)
-  - [Rule installation workflow: filtering, sorting, pagination](#rule-installation-workflow-filtering-sorting-pagination)
-  - [Rule installation workflow: misc cases](#rule-installation-workflow-misc-cases)
-    - [**Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**](#scenario-user-opening-the-add-rules-page-sees-a-loading-skeleton-until-the-package-installation-is-completed)
-    - [**Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**](#scenario-user-can-navigate-from-the-add-rules-page-to-the-rule-management-page-via-breadcrumbs)
   - [Rule upgrade workflow: base cases](#rule-upgrade-workflow-base-cases)
     - [**Scenario: User can upgrade prebuilt rules one by one**](#scenario-user-can-upgrade-prebuilt-rules-one-by-one)
     - [**Scenario: User can upgrade multiple prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-prebuilt-rules-selected-on-the-page)
@@ -73,22 +41,27 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-a-different-rule-type)
   - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
     - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
+  - [Rule upgrade via the Prebuilt rules API](#rule-installation-and-upgrade-via-the-prebuilt-rules-api)
+    - [**Scenario: API can upgrade prebuilt rules that are outdated**](#scenario-api-can-upgrade-prebuilt-rules-that-are-outdated)
+    - [**Scenario: API does not upgrade prebuilt rules if they are up to date**](#scenario-api-does-not-install-or-upgrade-prebuilt-rules-if-they-are-up-to-date)
   - [Error handling](#error-handling)
     - [**Scenario: Error is handled when any operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-operation-on-prebuilt-rules-fails)
   - [Authorization / RBAC](#authorization--rbac)
-    - [**Scenario: User with read privileges on Security Solution cannot install prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-install-prebuilt-rules)
     - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
-  - [Kibana upgrade](#kibana-upgrade)
-    - [**Scenario: User can use prebuilt rules after upgrading Kibana from version A to B**](#scenario-user-can-use-prebuilt-rules-after-upgrading-kibana-from-version-a-to-b)
 
 ## Useful information
 
 ### Tickets
 
 - [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic
+
+**Milestone 3 - Prebuilt Rules Customization:**
+- [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
+- [Tests for prebuilt rule upgrade workflow #202078](https://github.com/elastic/kibana/issues/202078)
+
+**Milestone 2:**
 - [Ensure full test coverage for existing workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148176)
 - [Write test plan and add test coverage for the new workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148192)
-- [Document the new UI for installing and upgrading prebuilt detection rules](https://github.com/elastic/security-docs/issues/3496)
 
 ### Terminology
 
@@ -204,266 +177,15 @@ Examples:
 
 ## Scenarios
 
-### Package installation
-
-#### **Scenario: Package is installed via Fleet**
-
-**Automation**: 2 e2e tests that install the real package.
-
-```Gherkin
-Given the package is not installed
-When user opens the Rule Management page
-Then the package gets installed in the background from EPR
-```
-
-#### **Scenario: Package is installed via bundled Fleet package in Kibana**
-
-**Automation**: 2 integration tests.
-
-```Gherkin
-Given the package is not installed
-And user is in an air-gapped environment
-When user opens the Rule Management page
-Then the package gets installed in the background from packages bundled into Kibana
-```
-
-#### **Scenario: Large package can be installed on a small Kibana instance**
-
-**Automation**: 1 integration test.
-
-```Gherkin
-Given the package is not installed
-And the package contains the largest amount of historical rule versions (15000)
-And the Kibana instance has a memory heap size of 700 Mb (see note below)
-When user opens the Rule Management page
-Then the package is installed without Kibana crashing with an Out Of Memory error
-```
-
-**Note**: 600 Mb seems to always crash Kibana with an OOM error. 700 Mb runs with no issues in the Flaky test runner with 100 iterations: https://buildkite.com/elastic/kibana-flaky-test-suite-runner/builds/2215.
-
-### Rule installation and upgrade via the Prebuilt rules API
-
-There's a legacy prebuilt rules API and a new one. Both should be tested against two types of the package: with and without historical rule versions.
-
-#### **Scenario: API can install all prebuilt rules**
-
-**Automation**: 8 integration tests with mock rules: 4 examples below \* 2 (we split checking API response and installed rules into two different tests).
-
-```Gherkin
-Given the package <package_type> is installed
-And the package contains N rules
-When user installs all rules via install <api>
-Then the endpoint should return 200 with <install_response>
-And N rule objects should be created
-And each rule object should have correct id and version
-
-Examples:
-  | package_type             | api    | install_response         |
-  | with historical versions | legacy | installed: N, updated: 0 |
-  | w/o historical versions  | legacy | installed: N, updated: 0 |
-  | with historical versions | new    | total: N, succeeded: N   |
-  | w/o historical versions  | new    | total: N, succeeded: N   |
-```
-
-Notes:
-
-- Legacy API:
-  - install: `PUT /api/detection_engine/rules/prepackaged`
-- New API:
-  - install: `POST /internal/detection_engine/prebuilt_rules/installation/_perform`
-
-#### **Scenario: API can install prebuilt rules that are not yet installed**
-
-**Automation**: 4 integration tests with mock rules.
-
-```Gherkin
-Given the package <package_type> is installed
-And the package contains N rules
-When user installs all rules via install <api>
-And deletes one of the installed rules
-And gets prebuilt rules status via status <api>
-Then the endpoint should return 200 with <status_response>
-When user installs all rules via install <api> again
-Then the endpoint should return 200 with <install_response>
-
-Examples:
-  | package_type             | api    | status_response  | install_response         |
-  | with historical versions | legacy | not_installed: 1 | installed: 1, updated: 0 |
-  | w/o historical versions  | legacy | not_installed: 1 | installed: 1, updated: 0 |
-  | with historical versions | new    | to_install: 1    | total: 1, succeeded: 1   |
-  | w/o historical versions  | new    | to_install: 1    | total: 1, succeeded: 1   |
-```
-
-Notes:
-
-- Legacy API:
-  - install: `PUT /api/detection_engine/rules/prepackaged`
-  - status: `GET /api/detection_engine/rules/prepackaged/_status`
-- New API:
-  - install: `POST /internal/detection_engine/prebuilt_rules/installation/_perform`
-  - status: `GET /internal/detection_engine/prebuilt_rules/status`
-
-#### **Scenario: API can upgrade prebuilt rules that are outdated**
-
-**Automation**: 4 integration tests with mock rules.
-
-```Gherkin
-Given the package <package_type> is installed
-And the package contains N rules
-When user installs all rules via install <api>
-And new X+1 version of a rule asset <assets_update>
-And user gets prebuilt rules status via status <api>
-Then the endpoint should return 200 with <status_response>
-When user upgrades all rules via upgrade <api>
-Then the endpoint should return 200 with <upgrade_response>
-
-Examples:
-  | package_type             | api    | assets_update | status_response | upgrade_response         |
-  | with historical versions | legacy | gets added    | not_updated: 1  | installed: 0, updated: 1 |
-  | w/o historical versions  | legacy | replaces X    | not_updated: 1  | installed: 0, updated: 1 |
-  | with historical versions | new    | gets added    | to_upgrade: 1   | total: 1, succeeded: 1   |
-  | w/o historical versions  | new    | replaces X    | to_upgrade: 1   | total: 1, succeeded: 1   |
-```
-
-TODO: Check why for the legacy API Dmitrii has added 2 integration tests for `rule package with historical versions` instead of 1:
-
-- `should update outdated prebuilt rules when previous historical versions available`
-- `should update outdated prebuilt rules when previous historical versions unavailable`
-
-(NOTE: the second scenario tests that, if a new version of a rule is released, it can upgrade the current instance of that rule even if the historical versions of that rule are no longer in the package)
-
-Notes:
-
-- Legacy API:
-  - install: `PUT /api/detection_engine/rules/prepackaged`
-  - upgrade: `PUT /api/detection_engine/rules/prepackaged`
-  - status: `GET /api/detection_engine/rules/prepackaged/_status`
-- New API:
-  - install: `POST /internal/detection_engine/prebuilt_rules/installation/_perform`
-  - upgrade: `POST /internal/detection_engine/prebuilt_rules/upgrade/_perform`
-  - status: `GET /internal/detection_engine/prebuilt_rules/status`
-
-#### **Scenario: API does not install or upgrade prebuilt rules if they are up to date**
-
-**Automation**: 4 integration tests with mock rules.
-
-```Gherkin
-Given the package <package_type> is installed
-And the package contains N rules
-When user installs all rules via install <api>
-And user gets prebuilt rules status via status <api>
-Then the endpoint should return 200 with <status_response>
-When user calls install <api>
-Then the endpoint should return 200 with <install_response>
-When user calls upgrade <api>
-Then the endpoint should return 200 with <upgrade_response>
-
-Examples:
-  | package_type             | api    | status_response                  | install_response         | upgrade_response         |
-  | with historical versions | legacy | not_installed: 0, not_updated: 0 | installed: 0, updated: 0 | installed: 0, updated: 0 |
-  | w/o historical versions  | legacy | not_installed: 0, not_updated: 0 | installed: 0, updated: 0 | installed: 0, updated: 0 |
-  | with historical versions | new    | to_install: 0, to_upgrade: 0     | total: 0, succeeded: 0   | total: 0, succeeded: 0   |
-  | w/o historical versions  | new    | to_install: 0, to_upgrade: 0     | total: 0, succeeded: 0   | total: 0, succeeded: 0   |
-```
-
-Notes:
-
-- Legacy API:
-  - install: `PUT /api/detection_engine/rules/prepackaged`
-  - upgrade: `PUT /api/detection_engine/rules/prepackaged`
-  - status: `GET /api/detection_engine/rules/prepackaged/_status`
-- New API:
-  - install: `POST /internal/detection_engine/prebuilt_rules/installation/_perform`
-  - upgrade: `POST /internal/detection_engine/prebuilt_rules/upgrade/_perform`
-  - status: `GET /internal/detection_engine/prebuilt_rules/status`
-
-### Scenarios for the real package
-
-#### **Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package**
-
-**Automation**: 1 integration test with real packages.
-
-```Gherkin
-Given there are two package versions: N-1 and N
-And the package of N-1 version is installed
-When user calls the status endpoint
-Then it should return a 200 response with some number of rules to install and 0 rules to upgrade
-When user calls the installation/_review endpoint
-Then it should return a 200 response matching the response of the status endpoint
-When user calls the installation/_perform_ endpoint
-Then it should return a 200 response matching the response of the status endpoint
-And rules returned in this response should exist as alert saved objects
-When user installs the package of N version
-Then it should be installed successfully
-When user calls the status endpoint
-Then it should return a 200 response with some number of new rules to install and some number of rules to upgrade
-When user calls the installation/_review endpoint
-Then it should return a 200 response matching the response of the status endpoint
-When user calls the installation/_perform_ endpoint
-Then rules returned in this response should exist as alert saved objects
-When user calls the upgrade/_review endpoint
-Then it should return a 200 response matching the response of the status endpoint
-When user calls the upgrade/_perform_ endpoint
-Then rules returned in this response should exist as alert saved objects
-```
-
 ### Rule installation and upgrade notifications on the Rule Management page
 
-#### **Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And no prebuilt rule assets exist
-When user opens the Rule Management page
-Then user should NOT see a CTA to install prebuilt rules
-And user should NOT see a number of rules available to install
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
-```
-
-#### **Scenario: User is NOT notified when all prebuilt rules are installed and up to date**
+#### **Scenario: User is NOT notified when all installed prebuilt rules are up to date**
 
 **Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
 
 ```Gherkin
 Given all the latest prebuilt rules are installed in Kibana
 When user opens the Rule Management page
-Then user should NOT see a CTA to install prebuilt rules
-And user should NOT see a number of rules available to install
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
-```
-
-#### **Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are X prebuilt rules available to install
-When user opens the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see a number of rules available to install (X)
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
-```
-
-#### **Scenario: User is notified when some prebuilt rules can be installed**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And there are Y more prebuilt rules available to install
-And for all X installed rules there are no new versions available
-When user opens the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see the number of rules available to install (Y)
 And user should NOT see a CTA to upgrade prebuilt rules
 And user should NOT see a number of rules available to upgrade
 And user should NOT see the Rule Updates table
@@ -497,184 +219,6 @@ Then user should see a CTA to install prebuilt rules
 And user should see the number of rules available to install (Y)
 And user should see a CTA to upgrade prebuilt rules
 And user should see the number of rules available to upgrade (Z)
-```
-
-#### **Scenario: User is notified after a prebuilt rule gets deleted**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
-
-```Gherkin
-Given X prebuilt rules are installed in Kibana
-And there are no more prebuilt rules available to install
-When user opens the Rule Management page
-And user deletes Y prebuilt rules
-Then user should see a CTA to install prebuilt rules
-And user should see the number of rules available to install (Y)
-```
-
-### Rule installation workflow: base cases
-
-#### **Scenario: User can install prebuilt rules one by one**
-
-**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /installation/\* endpoints in integration.
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are X prebuilt rules available to install
-When user opens the Add Rules page
-Then prebuilt rules available for installation should be displayed in the table
-When user installs one individual rule without previewing it
-Then success message should be displayed after installation
-And the installed rule should be removed from the table
-When user navigates back to the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see the number of rules available to install decreased by 1
-```
-
-#### **Scenario: User can install multiple prebuilt rules selected on the page**
-
-**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /installation/\* endpoints in integration.
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are X prebuilt rules available to install
-When user opens the Add Rules page
-Then prebuilt rules available for installation should be displayed in the table
-When user selects <Y> rules
-Then user should see a CTA to install <Y> number of rules
-When user clicks the CTA
-Then success message should be displayed after installation
-And all the installed rules should be removed from the table
-When user navigates back to the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see the number of rules available to install decreased by <Y> number of installed rules
-
-Examples:
-  | Y                               |
-  | a few rules on the page, e.g. 2 |
-  | all rules on the page, e.g. 12  |
-```
-
-#### **Scenario: User can install all available prebuilt rules at once**
-
-**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /installation/\* endpoints in integration.
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are X prebuilt rules available to install
-When user opens the Add Rules page
-Then prebuilt rules available for installation should be displayed in the table
-When user installs all rules
-Then success message should be displayed after installation
-And all the rules should be removed from the table
-And user should see a message indicating that all available rules have been installed
-And user should see a CTA that leads to the Rule Management page
-When user clicks on the CTA
-Then user should be navigated back to Rule Management page
-And user should NOT see a CTA to install prebuilt rules
-And user should NOT see a number of rules available to install
-```
-
-#### **Scenario: Empty screen is shown when all prebuilt rules are installed**
-
-**Automation**: 1 e2e test with mock rules + 1 integration test.
-
-```Gherkin
-Given all the available prebuilt rules are installed in Kibana
-When user opens the Add Rules page
-Then user should see a message indicating that all available rules have been installed
-And user should see a CTA that leads to the Rule Management page
-```
-
-#### **Scenario: User can preview rules available for installation**
-
-**Automation**: 1 e2e test
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are 2 rules available to install
-When user opens the Add Rules page
-Then all rules available for installation should be displayed in the table
-When user opens the rule preview for the 1st rule
-Then the preview should open
-When user closes the preview
-Then it should disappear
-```
-
-#### **Scenario: User can install a rule using the rule preview**
-
-**Automation**: 1 e2e test
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are 2 rules available to install
-When user opens the Add Rules page
-Then all rules available for installation should be displayed in the table
-When user opens the rule preview for the rule
-Then the preview should open
-When user installs the rule using a CTA in the rule preview
-Then the rule should be installed
-And a success message should be displayed after installation
-And the rule should be removed from the Add Rules table
-When user navigates back to the Rule Management page
-Then user should see a CTA to install prebuilt rules
-And user should see the number of rules available to install as initial number minus 1
-```
-
-#### **Scenario: User can see correct rule information in preview before installing**
-
-**Automation**: 1 e2e test
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there are X prebuilt rules of all types available to install
-When user opens the Add Rules page
-Then all X rules available for installation should be displayed in the table
-When user opens a rule preview for any rule
-Then the preview should appear
-And all properties of a rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
-```
-
-#### **Scenario: Tabs and sections without content should be hidden in preview before installing**
-
-**Automation**: 1 e2e test
-
-```Gherkin
-Given no prebuilt rules are installed in Kibana
-And there is at least 1 rule available to install
-And this rule has neither Setup guide nor Investigation guide
-When user opens the Add Rules page
-Then all rules available for installation should be displayed in the table
-When user opens the rule preview for this rule
-Then the preview should open
-And the Setup Guide section should NOT be displayed in the Overview tab
-And the Investigation Guide tab should NOT be displayed
-```
-
-### Rule installation workflow: filtering, sorting, pagination
-
-TODO: add scenarios https://github.com/elastic/kibana/issues/166215
-
-### Rule installation workflow: misc cases
-
-#### **Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**
-
-**Automation**: unit tests.
-
-```Gherkin
-Given prebuilt rules package is not installed
-When user opens the Add Rules page
-Then user should see a loading skeleton until the package installation is completed
-```
-
-#### **Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**
-
-**Automation**: 1 e2e test.
-
-```Gherkin
-Given user is on the Add Rules page
-When user navigates to the Rule Management page via breadcrumbs
-Then the Rule Management page should be displayed
 ```
 
 ### Rule upgrade workflow: base cases
@@ -1109,20 +653,86 @@ Examples:
   | upgrading individual  |
 ```
 
-### Authorization / RBAC
 
-#### **Scenario: User with read privileges on Security Solution cannot install prebuilt rules**
+### Rule upgrade via the Prebuilt rules API
 
-**Automation**: 1 e2e test with mock rules + 3 integration tests with mock rules for the status and installation endpoints.
+There's a legacy prebuilt rules API and a new one. Both should be tested against two types of the package: with and without historical rule versions.
+
+#### **Scenario: API can upgrade prebuilt rules that are outdated**
+
+**Automation**: 4 integration tests with mock rules.
 
 ```Gherkin
-Given user with "Security: read" privileges on Security Solution
-And no prebuilt rules are installed in Kibana
-And there are prebuilt rules available to install
-When user opens the Add Rules page
-Then user should see prebuilt rules available to install
-But user should not be able to install them
+Given the package <package_type> is installed
+And the package contains N rules
+When user installs all rules via install <api>
+And new X+1 version of a rule asset <assets_update>
+And user gets prebuilt rules status via status <api>
+Then the endpoint should return 200 with <status_response>
+When user upgrades all rules via upgrade <api>
+Then the endpoint should return 200 with <upgrade_response>
+
+Examples:
+  | package_type             | api    | assets_update | status_response | upgrade_response         |
+  | with historical versions | legacy | gets added    | not_updated: 1  | installed: 0, updated: 1 |
+  | w/o historical versions  | legacy | replaces X    | not_updated: 1  | installed: 0, updated: 1 |
+  | with historical versions | new    | gets added    | to_upgrade: 1   | total: 1, succeeded: 1   |
+  | w/o historical versions  | new    | replaces X    | to_upgrade: 1   | total: 1, succeeded: 1   |
 ```
+
+TODO: Check why for the legacy API Dmitrii has added 2 integration tests for `rule package with historical versions` instead of 1:
+
+- `should update outdated prebuilt rules when previous historical versions available`
+- `should update outdated prebuilt rules when previous historical versions unavailable`
+
+(NOTE: the second scenario tests that, if a new version of a rule is released, it can upgrade the current instance of that rule even if the historical versions of that rule are no longer in the package)
+
+Notes:
+
+- Legacy API:
+  - install: `PUT /api/detection_engine/rules/prepackaged`
+  - upgrade: `PUT /api/detection_engine/rules/prepackaged`
+  - status: `GET /api/detection_engine/rules/prepackaged/_status`
+- New API:
+  - install: `POST /internal/detection_engine/prebuilt_rules/installation/_perform`
+  - upgrade: `POST /internal/detection_engine/prebuilt_rules/upgrade/_perform`
+  - status: `GET /internal/detection_engine/prebuilt_rules/status`
+
+#### **Scenario: API does not upgrade prebuilt rules if they are up to date**
+
+**Automation**: 4 integration tests with mock rules.
+
+```Gherkin
+Given the package <package_type> is installed
+And the package contains N rules
+When user installs all rules via install <api>
+And user gets prebuilt rules status via status <api>
+Then the endpoint should return 200 with <status_response>
+When user calls install <api>
+Then the endpoint should return 200 with <install_response>
+When user calls upgrade <api>
+Then the endpoint should return 200 with <upgrade_response>
+
+Examples:
+  | package_type             | api    | status_response                  | install_response         | upgrade_response         |
+  | with historical versions | legacy | not_installed: 0, not_updated: 0 | installed: 0, updated: 0 | installed: 0, updated: 0 |
+  | w/o historical versions  | legacy | not_installed: 0, not_updated: 0 | installed: 0, updated: 0 | installed: 0, updated: 0 |
+  | with historical versions | new    | to_install: 0, to_upgrade: 0     | total: 0, succeeded: 0   | total: 0, succeeded: 0   |
+  | w/o historical versions  | new    | to_install: 0, to_upgrade: 0     | total: 0, succeeded: 0   | total: 0, succeeded: 0   |
+```
+
+Notes:
+
+- Legacy API:
+  - install: `PUT /api/detection_engine/rules/prepackaged`
+  - upgrade: `PUT /api/detection_engine/rules/prepackaged`
+  - status: `GET /api/detection_engine/rules/prepackaged/_status`
+- New API:
+  - install: `POST /internal/detection_engine/prebuilt_rules/installation/_perform`
+  - upgrade: `POST /internal/detection_engine/prebuilt_rules/upgrade/_perform`
+  - status: `GET /internal/detection_engine/prebuilt_rules/status`
+
+### Authorization / RBAC
 
 #### **Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**
 
@@ -1136,24 +746,4 @@ When user opens the Rule Management page
 And user opens the Rule Updates table
 Then user should see prebuilt rules available to upgrade
 But user should not be able to upgrade them
-```
-
-### Kibana upgrade
-
-#### **Scenario: User can use prebuilt rules after upgrading Kibana from version A to B**
-
-**Automation**: not automated, manual testing required.
-
-```Gherkin
-Given user is upgrading Kibana from version <A> to version <B>
-And the <A> instance contains already installed prebuilt rules
-When the upgrade is complete
-Then user should be able to install new prebuilt rules
-And delete installed prebuilt rules
-And upgrade installed prebuilt rules that have newer versions in <B>
-
-Examples:
-  | A      | B     |
-  | 8.7    | 8.9.0 |
-  | 7.17.x | 8.9.0 |
 ```
