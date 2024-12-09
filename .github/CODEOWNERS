@@ -424,7 +424,6 @@ packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
-packages/kbn-react-field @elastic/kibana-data-discovery
 packages/kbn-react-hooks @elastic/obs-ux-logs-team
 packages/kbn-recently-accessed @elastic/appex-sharedux
 packages/kbn-repo-file-maps @elastic/kibana-operations
@@ -623,6 +622,7 @@ src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_field_editor @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_view_management @elastic/kibana-data-discovery
