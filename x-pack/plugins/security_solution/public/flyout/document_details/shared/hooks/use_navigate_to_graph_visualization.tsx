@@ -45,7 +45,7 @@ export interface UseNavigateToGraphVisualizationResult {
 }
 
 /**
- * Hook that returns the a callback to navigate to the graph visualization in the flyout
+ * Hook that returns a callback to navigate to the graph visualization in the flyout
  */
 export const useNavigateToGraphVisualization = ({
   isFlyoutOpen,
