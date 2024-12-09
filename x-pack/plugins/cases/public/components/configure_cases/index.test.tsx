@@ -71,7 +71,7 @@ describe('ConfigureCases', () => {
 
   beforeEach(() => {
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
-    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => false });
   });
 
   describe('rendering', () => {
@@ -1257,6 +1257,53 @@ describe('ConfigureCases', () => {
     });
   });
 
+  describe('observable types', () => {
+    let appMockRender: AppMockRenderer;
+    const persistCaseConfigure = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true, isAtLeastGold: () => true });
+    });
+
+    it('should render observable types section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
+    });
+
+    it('opens fly out for when click on add field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.ADD_OBSERVABLE_TYPE
+      );
+    });
+
+    it('closes fly out for when click on cancel', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      await userEvent.click(screen.getByTestId('add-observable-type'));
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('common-flyout-cancel'));
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
+  });
+
   describe('rendering with license limitations', () => {
     let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
@@ -1273,7 +1320,10 @@ describe('ConfigureCases', () => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
 
       // Updated
-      useLicenseMock.mockReturnValue({ isAtLeastGold: () => false });
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => false,
+        isAtLeastPlatinum: () => false,
+      });
     });
 
     it('should not render connectors and closure options', () => {
@@ -1285,6 +1335,13 @@ describe('ConfigureCases', () => {
     it('should render custom field section', () => {
       appMockRender.render(<ConfigureCases />);
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+    });
+
+    it('should not render observable types section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
     });
 
     describe('when the previously selected connector doesnt appear due to license downgrade or because it was deleted', () => {
