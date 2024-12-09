@@ -1538,16 +1538,16 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (with `scan`) when opened', async () => {
-      render();
+    it('should show a list of actions (with `runscript`) when opened', async () => {
+      render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
 
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      // TODO this is a EUI issue where it dynamically render the list and the length is not accurate - I'll try to adjust in the following PR when there is time
-      const TEMPORARY_LENGTH = RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1;
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(TEMPORARY_LENGTH);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length
+      );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'isolate. To check this option, press Enter.',
         'release. To check this option, press Enter.',
@@ -1558,6 +1558,7 @@ describe('Response actions history', () => {
         'execute. To check this option, press Enter.',
         'upload. To check this option, press Enter.',
         'scan. To check this option, press Enter.',
+        'runscript. To check this option, press Enter.',
       ]);
     });
 
