@@ -7,16 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: [
-    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/public',
-    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/server',
-    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/common',
-  ],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/ai_infra/llm_tasks/server'],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/ai_infra/product_doc_base/{public,server,common}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/ai_infra/llm_tasks/{public,server,common}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],
