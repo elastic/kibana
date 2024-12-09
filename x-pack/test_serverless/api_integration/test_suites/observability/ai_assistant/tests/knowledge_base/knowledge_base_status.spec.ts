@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('returns correct status after knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient
-        .slsAdmin({
+        .slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/status',
         })
         .expect(200);
@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID });
 
       const res = await observabilityAIAssistantAPIClient
-        .slsAdmin({
+        .slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/status',
         })
         .expect(200);
