@@ -1539,6 +1539,7 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions (with `runscript`) when opened', async () => {
+      // Note: when we enable new commands, it might be needed to increase the height
       render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
 
