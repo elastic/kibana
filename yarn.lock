@@ -7660,7 +7660,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tinymath@link:packages/kbn-tinymath":
+"@kbn/tinymath@link:src/platform/packages/private/kbn-tinymath":
   version "0.0.0"
   uid ""
 
