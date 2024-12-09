@@ -60,7 +60,7 @@ import { ClientConfigType, InitialAppData, ProductAccess } from '../common/types
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
-import { SEARCH_APPLICATIONS_PATH, PLAYGROUND_PATH } from './applications/applications/routes';
+import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
   SEARCH_INDICES_PATH,
@@ -151,14 +151,6 @@ const relevanceLinks: AppDeepLink[] = [
 ];
 
 const applicationsLinks: AppDeepLink[] = [
-  {
-    id: 'playground',
-    path: `/${PLAYGROUND_PATH}`,
-    title: i18n.translate('xpack.enterpriseSearch.navigation.contentPlaygroundLinkLabel', {
-      defaultMessage: 'Playground',
-    }),
-    visibleIn: ['sideNav', 'globalSearch'],
-  },
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
@@ -281,6 +273,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
+      order: 0,
       title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
       visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
     });
@@ -306,6 +299,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
+      order: 1,
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
     });
 

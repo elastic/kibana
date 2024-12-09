@@ -19,14 +19,12 @@ import { SetEnterpriseSearchApplicationsChrome } from '../../../shared/kibana_ch
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchApplicationNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
-import { PlaygroundHeaderDocsAction } from '../playground/header_docs_action';
 import { SearchApplicationHeaderDocsAction } from '../search_application/header_docs_action';
 
 export type EnterpriseSearchApplicationsPageTemplateProps = Omit<
   PageTemplateProps,
   'useEndpointHeaderActions'
 > & {
-  docLink?: 'search_application' | 'playground';
   hasSchemaConflicts?: boolean;
   restrictWidth?: boolean;
   searchApplicationName?: string;
@@ -41,7 +39,6 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   searchApplicationName,
   hasSchemaConflicts,
   restrictWidth = true,
-  docLink = 'search_application',
   ...pageTemplateProps
 }) => {
   const alwaysReturnNavItems = true;
@@ -72,11 +69,7 @@ export const EnterpriseSearchApplicationsPageTemplate: React.FC<
   );
 
   useLayoutEffect(() => {
-    const docAction = {
-      playground: PlaygroundHeaderDocsAction,
-      search_application: SearchApplicationHeaderDocsAction,
-    }[docLink];
-    renderHeaderActions(docAction);
+    renderHeaderActions(SearchApplicationHeaderDocsAction);
 
     return () => {
       renderHeaderActions();
