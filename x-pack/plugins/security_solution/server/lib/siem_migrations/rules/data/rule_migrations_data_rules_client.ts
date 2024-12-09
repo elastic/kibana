@@ -42,6 +42,7 @@ export interface RuleMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
   installable?: boolean;
+  prebuilt?: boolean;
   searchTerm?: string;
 }
 export interface RuleMigrationGetOptions {
@@ -54,7 +55,6 @@ export interface RuleMigrationGetOptions {
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
 const BULK_MAX_SIZE = 500 as const;
-/* The default number of rule migrations to retrieve in a single GET request. */
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
@@ -337,7 +337,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   private getFilterQuery(
     migrationId: string,
-    { status, ids, installable, searchTerm }: RuleMigrationFilters = {}
+    { status, ids, installable, prebuilt, searchTerm }: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (status) {
@@ -352,6 +352,9 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
     if (installable) {
       filter.push(...conditions.isInstallable());
+    }
+    if (prebuilt) {
+      filter.push(conditions.isPrebuilt());
     }
     if (searchTerm?.length) {
       filter.push(conditions.matchTitle(searchTerm));

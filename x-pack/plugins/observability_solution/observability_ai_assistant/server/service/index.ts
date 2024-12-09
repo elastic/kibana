@@ -93,6 +93,7 @@ export class ObservabilityAIAssistantService {
     const basePath = coreStart.http.basePath.get(request);
 
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
+    const inferenceClient = plugins.inference.getClient({ request });
 
     const { asInternalUser } = coreStart.elasticsearch.client;
 
@@ -115,6 +116,7 @@ export class ObservabilityAIAssistantService {
         asInternalUser,
         asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
       },
+      inferenceClient,
       logger: this.logger,
       user: user
         ? {

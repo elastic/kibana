@@ -10,6 +10,7 @@ import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import { getMeteringStats } from '../../utils/get_metering_stats';
 import { DataStreamsRequestQuery } from '../../../common/rest_types/data_streams';
+import { NoIndicesMeteringError, NoPrivilegeMeteringError } from '../../errors';
 
 export const getDataStreamsHandler = (
   dataUsageContext: DataUsageContext
@@ -45,6 +46,12 @@ export const getDataStreamsHandler = (
         body,
       });
     } catch (error) {
+      if (error.message.includes('security_exception')) {
+        return errorHandler(logger, response, new NoPrivilegeMeteringError());
+      } else if (error.message.includes('index_not_found_exception')) {
+        return errorHandler(logger, response, new NoIndicesMeteringError());
+      }
+
       return errorHandler(logger, response, error);
     }
   };
