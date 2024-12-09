@@ -7392,7 +7392,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-mocks@link:packages/shared-ux/page/no_data/mocks":
+"@kbn/shared-ux-page-no-data-mocks@link:src/platform/packages/shared/shared-ux/page/no_data/mocks":
   version "0.0.0"
   uid ""
 
