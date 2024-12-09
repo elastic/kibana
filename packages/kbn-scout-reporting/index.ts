@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/scout').runTestsCli();
+export * as cli from './src/cli';
+export * as datasources from './src/datasources';
+export * from './src/reporting';
