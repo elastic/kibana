@@ -6664,7 +6664,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-root@link:packages/react/kibana_context/root":
+"@kbn/react-kibana-context-root@link:src/platform/packages/private/react/kibana_context/root":
   version "0.0.0"
   uid ""
 

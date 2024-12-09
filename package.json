@@ -734,7 +734,7 @@
     "@kbn/react-hooks": "link:packages/kbn-react-hooks",
     "@kbn/react-kibana-context-common": "link:src/platform/packages/shared/react/kibana_context/common",
     "@kbn/react-kibana-context-render": "link:src/platform/packages/shared/react/kibana_context/render",
-    "@kbn/react-kibana-context-root": "link:packages/react/kibana_context/root",
+    "@kbn/react-kibana-context-root": "link:src/platform/packages/private/react/kibana_context/root",
     "@kbn/react-kibana-context-styled": "link:packages/react/kibana_context/styled",
     "@kbn/react-kibana-context-theme": "link:packages/react/kibana_context/theme",
     "@kbn/react-kibana-mount": "link:packages/react/kibana_mount",
