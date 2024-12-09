@@ -10,10 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { CASE_COMMENT_DETAILS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const deleteCommentRoute = createCasesRoute({
   method: 'delete',
   path: CASE_COMMENT_DETAILS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),
