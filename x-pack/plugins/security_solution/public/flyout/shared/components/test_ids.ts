@@ -50,3 +50,4 @@ export const HOST_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}HostRow` as co
 export const USER_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}UserRow` as const;
 export const NETWORK_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}NetworkRow` as const;
 export const GENERIC_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}GenericRow` as const;
+export const NO_DATA_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}NoDataRow` as const;

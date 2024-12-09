@@ -12,6 +12,7 @@ import {
   FLYOUT_HISTORY_TEST_ID,
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID,
+  NO_DATA_HISTORY_ROW_TEST_ID,
 } from './test_ids';
 import { FlyoutHistory } from './flyout_history';
 
@@ -39,12 +40,13 @@ describe('FlyoutHistory', () => {
     expect(getByTestId(FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('does not render if history is empty', () => {
-    const { container } = render(
+  it('render empty history message if history is empty', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <FlyoutHistory history={[]} />
       </TestProviders>
     );
-    expect(container).toBeEmptyDOMElement();
+    fireEvent.click(getByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID));
+    expect(getByTestId(NO_DATA_HISTORY_ROW_TEST_ID)).toBeInTheDocument();
   });
 });

@@ -143,6 +143,16 @@ describe('<FlyoutNavigation />', () => {
       jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     });
 
+    it('should render history button when there is no item in history', () => {
+      jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
+      const { getByTestId } = render(
+        <ExpandableFlyoutTestProviders>
+          <FlyoutNavigation flyoutIsExpandable={false} />
+        </ExpandableFlyoutTestProviders>
+      );
+      expect(getByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID)).toBeInTheDocument();
+    });
+
     it('should render history button when there are more than 1 unqie item in history', () => {
       const { getByTestId } = render(
         <ExpandableFlyoutTestProviders>
@@ -152,17 +162,7 @@ describe('<FlyoutNavigation />', () => {
       expect(getByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID)).toBeInTheDocument();
     });
 
-    it('should not render history button when there is 1 item in history', () => {
-      jest.mocked(useExpandableFlyoutHistory).mockReturnValue([{ id: 'id1', params: {} }]);
-      const { queryByTestId } = render(
-        <ExpandableFlyoutTestProviders>
-          <FlyoutNavigation flyoutIsExpandable={false} />
-        </ExpandableFlyoutTestProviders>
-      );
-      expect(queryByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID)).not.toBeInTheDocument();
-    });
-
-    it('should not render history button if in preview', () => {
+    it('should not render history button if in rule preview', () => {
       const { container } = render(
         <ExpandableFlyoutTestProviders>
           <FlyoutNavigation flyoutIsExpandable={false} isPreview={true} />
@@ -177,17 +177,6 @@ describe('<FlyoutNavigation />', () => {
           <FlyoutNavigation isPreviewMode={true} flyoutIsExpandable={true} />
         </ExpandableFlyoutTestProviders>
       );
-      expect(container).toBeEmptyDOMElement();
-    });
-
-    it('should render empty component only if panel is not expandable, no action is available and no history is available', () => {
-      jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
-      const { container } = render(
-        <ExpandableFlyoutTestProviders>
-          <FlyoutNavigation flyoutIsExpandable={false} />
-        </ExpandableFlyoutTestProviders>
-      );
-
       expect(container).toBeEmptyDOMElement();
     });
   });

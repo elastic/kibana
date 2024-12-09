@@ -243,9 +243,9 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsights: false,
 
   /**
-   * Enables flyout history
+   * Enables flyout history and new preview navigation
    */
-  flyoutHistoryEnabled: false,
+  newExpandableFlyoutNavigationEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
