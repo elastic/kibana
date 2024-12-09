@@ -280,12 +280,12 @@ export default function ({ getService }: FtrProviderContext) {
         },
         documents: [
           {
-            '@timestamp': now.subtract(2, 'minute').toISOString(),
+            '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
             'car.brand': 'Fiat',
             'car.model': 'Multipla',
           },
           {
-            '@timestamp': now.subtract(1, 'minute').toISOString(),
+            '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
             'car.brand': 'Citroen',
             'car.model': 'ZX break',
           },
@@ -318,38 +318,20 @@ export default function ({ getService }: FtrProviderContext) {
           'entity.id': 'Citroen:ZX break',
           'entity.display_name': 'ZX break',
           'entity.type': 'most-refined-cars',
+          'car.brand': 'Citroen',
+          'car.model': 'ZX break',
         },
         {
           'entity.last_seen_timestamp': moment(now).subtract(2, 'minute').toISOString(),
           'entity.id': 'Fiat:Multipla',
           'entity.display_name': 'Multipla',
           'entity.type': 'most-refined-cars',
+          'car.brand': 'Fiat',
+          'car.model': 'Multipla',
         },
       ]);
 
       await deleteIndex();
-    });
-
-    it('returns error if index does not exist', async () => {
-      await createEntitySourceDefinition(supertest, {
-        source: {
-          id: 'non-existing-index',
-          type_id: 'type-with-non-existing-index',
-          index_patterns: ['non-existing-index-pattern*', 'non-existing-index'],
-          identity_fields: ['service.name'],
-          metadata_fields: [],
-          filters: [],
-          timestamp_field: '@timestamp',
-        },
-      });
-
-      const { entities, errors } = await searchEntities(supertest, {
-        type: 'type-with-non-existing-index',
-      });
-      expect(errors).toEqual([
-        'No index found for source [non-existing-index] with index patterns [non-existing-index-pattern*, non-existing-index]',
-      ]);
-      expect(entities).toEqual([]);
     });
 
     it('casts conflicting mappings to keywords', async () => {
@@ -411,6 +393,64 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
 
       await Promise.all(deleteIndices.map((fn) => fn()));
+    });
+
+    it('returns error if index does not exist', async () => {
+      await createEntitySourceDefinition(supertest, {
+        source: {
+          id: 'non-existing-index',
+          type_id: 'type-with-non-existing-index',
+          index_patterns: ['non-existing-index-pattern*', 'non-existing-index'],
+          identity_fields: ['service.name'],
+          metadata_fields: [],
+          filters: [],
+          timestamp_field: '@timestamp',
+        },
+      });
+
+      const { entities, errors } = await searchEntities(supertest, {
+        type: 'type-with-non-existing-index',
+      });
+      expect(errors).toEqual([
+        'No index found for source [non-existing-index] with index patterns [non-existing-index-pattern*, non-existing-index]',
+      ]);
+      expect(entities).toEqual([]);
+    });
+
+    it('returns error if mandatory fields are not mapped', async () => {
+      const deleteIndex = await createIndexWithDocuments(esClient, {
+        index: 'unmapped-id-fields',
+        properties: { 'service.environment': { type: 'keyword' } },
+        documents: [
+          {
+            '@timestamp': moment().toISOString(),
+            'service.name': 'service-one',
+            'service.environment': 'prod',
+          },
+        ],
+      });
+
+      await createEntitySourceDefinition(supertest, {
+        source: {
+          id: 'unmapped-fields',
+          type_id: 'type-with-unmapped-id-fields',
+          index_patterns: ['unmapped-id-fields'],
+          identity_fields: ['service.name', 'service.environment'],
+          metadata_fields: [],
+          filters: [],
+          timestamp_field: '@timestamp',
+        },
+      });
+
+      const { entities, errors } = await searchEntities(supertest, {
+        type: 'type-with-unmapped-id-fields',
+      });
+      expect(errors).toEqual([
+        'Mandatory fields [service.name, @timestamp] are not mapped for source [unmapped-fields] with index patterns [unmapped-id-fields]',
+      ]);
+      expect(entities).toEqual([]);
+
+      await deleteIndex();
     });
   });
 }
