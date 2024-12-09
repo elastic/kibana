@@ -53,7 +53,7 @@ export function mergeEntitiesList({
   metadataFields: string[];
 }): EntityV2[] {
   const mergeableFields = uniq([
-    ...sources.flatMap((source) => source.metadata_fields),
+    ...sources.flatMap((source) => [...source.identity_fields, ...source.metadata_fields]),
     ...metadataFields,
   ]);
   const instances: { [key: string]: EntityV2 } = {};

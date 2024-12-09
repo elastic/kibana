@@ -135,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteIndex();
     });
 
-    it.only('merges entities from different sources', async () => {
+    it('merges entities from different sources', async () => {
       const now = moment();
 
       const deleteIndices = await Promise.all([
@@ -235,6 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
           'entity.type': 'hosts-with-agents',
           'entity.last_seen_timestamp': moment(now).subtract(1, 'minute').toISOString(),
           'host.name': 'host-uno',
+          hostname_field: 'host-uno',
           'agent.name': expect.arrayContaining(['agent-a', 'agent-b', 'agent-1']),
         },
         {
@@ -243,6 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
           'entity.type': 'hosts-with-agents',
           'entity.last_seen_timestamp': moment(now).subtract(2, 'minute').toISOString(),
           'host.name': 'host-dos',
+          hostname_field: 'host-dos',
           'agent.name': expect.arrayContaining(['agent-3', 'agent-k']),
         },
         {
