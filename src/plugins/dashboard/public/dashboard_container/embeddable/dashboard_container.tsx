@@ -579,10 +579,10 @@ export class DashboardContainer
   public isEmbeddedExternally: boolean;
   public uuid$: BehaviorSubject<string>;
 
-  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+  public async replacePanel(idToRemove: string, { panelType, serializedState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
       idToRemove,
-      initialState as Partial<EmbeddableInput>,
+      serializedState as Partial<EmbeddableInput>,
       panelType,
       true
     );
@@ -617,9 +617,17 @@ export class DashboardContainer
         panelPackage.panelType
       );
 
-      const customPlacementSettings = getCustomPlacementSettingFunc
-        ? await getCustomPlacementSettingFunc(panelPackage.initialState)
-        : {};
+      let customPlacementSettings = {};
+      if (getCustomPlacementSettingFunc) {
+        try {
+          customPlacementSettings = await getCustomPlacementSettingFunc(
+            panelPackage.serializedState,
+            panelPackage.runtimeState
+          );
+        } catch (error) {
+          // fall back to defaults when getCustomPlacementSettingFunc throws
+        }
+      }
 
       const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,
@@ -643,10 +651,11 @@ export class DashboardContainer
         },
         explicitInput: {
           id: newId,
+          ...(panelPackage?.serializedState ?? {}),
         },
       };
-      if (panelPackage.initialState) {
-        this.setRuntimeStateForChild(newId, panelPackage.initialState);
+      if (panelPackage.runtimeState) {
+        this.setRuntimeStateForChild(newId, panelPackage.runtimeState);
       }
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
       onSuccess(newId, newPanel.explicitInput.title);
@@ -657,7 +666,7 @@ export class DashboardContainer
     if (!embeddableFactory) {
       throw new EmbeddableFactoryNotFoundError(panelPackage.panelType);
     }
-    const initialInput = panelPackage.initialState as Partial<EmbeddableInput>;
+    const initialInput = panelPackage.serializedState as Partial<EmbeddableInput>;
 
     let explicitInput: Partial<EmbeddableInput>;
     let attributes: unknown;

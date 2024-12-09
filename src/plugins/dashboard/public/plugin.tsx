@@ -134,9 +134,12 @@ export interface DashboardStart {
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
+  registerDashboardPanelPlacementSetting: <
+    SerializedState extends object = object,
+    RuntimeState extends object = object
+  >(
     embeddableType: string,
-    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
+    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState, RuntimeState>
   ) => void;
 }
 

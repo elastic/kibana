@@ -136,15 +136,15 @@ export abstract class Container<
   ): Promise<ApiType | undefined> {
     const newEmbeddable = await this.addNewEmbeddable(
       panelPackage.panelType,
-      panelPackage.initialState as Partial<EmbeddableInput>
+      panelPackage.serializedState as Partial<EmbeddableInput>
     );
     return newEmbeddable as ApiType;
   }
 
-  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+  public async replacePanel(idToRemove: string, { panelType, serializedState }: PanelPackage) {
     return await this.replaceEmbeddable(
       idToRemove,
-      initialState as Partial<EmbeddableInput>,
+      serializedState as Partial<EmbeddableInput>,
       panelType,
       true
     );

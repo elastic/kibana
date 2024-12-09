@@ -28,7 +28,7 @@ describe('PresentationContainer api', () => {
     const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
     const addNewPanelPromise = controlsManager.api.addNewPanel({
       panelType: 'testControl',
-      initialState: {},
+      runtimeState: {},
     });
     controlsManager.setControlApi('delta', {} as unknown as DefaultControlApi);
     await addNewPanelPromise;
@@ -53,7 +53,7 @@ describe('PresentationContainer api', () => {
     const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
     const replacePanelPromise = controlsManager.api.replacePanel('bravo', {
       panelType: 'testControl',
-      initialState: {},
+      runtimeState: {},
     });
     controlsManager.setControlApi('delta', {} as unknown as DefaultControlApi);
     await replacePanelPromise;
@@ -294,7 +294,7 @@ describe('getNewControlState', () => {
     const controlsManager = initControlsManager({}, new BehaviorSubject<ControlPanelsState>({}));
     controlsManager.api.addNewPanel({
       panelType: 'testControl',
-      initialState: {
+      runtimeState: {
         grow: false,
         width: 'small',
         dataViewId: 'myOtherDataViewId',
