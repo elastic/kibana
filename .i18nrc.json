@@ -118,7 +118,7 @@
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
     "sse": ["packages/kbn-sse-utils"],
-    "coloring": "packages/kbn-coloring/src",
+    "coloring": "src/platform/packages/shared/kbn-coloring/src",
     "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
     "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
