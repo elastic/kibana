@@ -308,14 +308,21 @@ export const reindexServiceFactory = (
       });
     }
 
-    // Delete the task from ES .tasks index
-    const deleteTaskResp = await esClient.delete({
-      index: '.tasks',
-      id: taskId,
-    });
-
-    if (deleteTaskResp.result !== 'deleted') {
-      throw error.reindexTaskCannotBeDeleted(`Could not delete reindexing task ${taskId}`);
+    try {
+      // Delete the task from ES .tasks index
+      const deleteTaskResp = await esClient.delete({
+        index: '.tasks',
+        id: taskId,
+      });
+      if (deleteTaskResp.result !== 'deleted') {
+        log.warn(
+          error.reindexTaskCannotBeDeleted(
+            `Could not delete reindexing task ${taskId}, got response "${deleteTaskResp.result}"`
+          )
+        );
+      }
+    } catch (e) {
+      log.warn(e);
     }
 
     return reindexOp;
@@ -396,24 +403,21 @@ export const reindexServiceFactory = (
         names.push(sourceName);
       }
 
-      // Otherwise, query for required privileges for this index.
-      const body = {
-        cluster: ['manage'],
-        index: [
-          {
-            names,
-            allow_restricted_indices: true,
-            privileges: ['all'],
-          },
-          {
-            names: ['.tasks'],
-            privileges: ['read', 'delete'],
-          },
-        ],
-      } as any;
-
       const resp = await esClient.security.hasPrivileges({
-        body,
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names,
+              allow_restricted_indices: true,
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read'],
+            },
+          ],
+        },
       });
 
       return resp.has_all_requested;

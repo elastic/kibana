@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:searchFieldsFromSource': false,
   };
 
   const createRuntimeField = async (fieldName: string) => {
