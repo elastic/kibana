@@ -6732,7 +6732,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-csv@link:packages/kbn-reporting/export_types/csv":
+"@kbn/reporting-export-types-csv@link:src/platform/packages/private/kbn-reporting/export_types/csv":
   version "0.0.0"
   uid ""
 
