@@ -115,7 +115,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
   }
 
   /** Returns batching functions to traverse all the migration resources search results */
-  searchBatches(
+  searchBatches<T extends RuleMigrationResource = RuleMigrationResource>(
     migrationId: string,
     options: { scroll?: Duration; size?: number; filters?: RuleMigrationResourceFilters } = {}
   ) {
@@ -123,7 +123,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
     const query = this.getFilterQuery(migrationId, filters);
     const search = { query, sort: '_doc', scroll, size }; // sort by _doc to ensure consistent order
     try {
-      return this.getSearchBatches<RuleMigrationResource>(search);
+      return this.getSearchBatches<T>(search);
     } catch (error) {
       this.logger.error(`Error scrolling rule migration resources: ${error.message}`);
       throw error;

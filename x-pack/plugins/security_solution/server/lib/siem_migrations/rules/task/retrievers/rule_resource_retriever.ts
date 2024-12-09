@@ -13,12 +13,15 @@ import type {
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
+export interface RuleMigrationDefinedResource extends RuleMigrationResource {
+  content: string; // ensures content exists
+}
 export type RuleMigrationResources = Partial<
-  Record<RuleMigrationResourceType, RuleMigrationResource[]>
+  Record<RuleMigrationResourceType, RuleMigrationDefinedResource[]>
 >;
 interface ExistingResources {
-  macro: Record<string, RuleMigrationResource>;
-  list: Record<string, RuleMigrationResource>;
+  macro: Record<string, RuleMigrationDefinedResource>;
+  list: Record<string, RuleMigrationDefinedResource>;
 }
 
 export class RuleResourceRetriever {
@@ -30,8 +33,10 @@ export class RuleResourceRetriever {
   ) {}
 
   public async initialize(): Promise<void> {
-    const options = { filters: { hasContent: true } };
-    const batches = this.dataClient.resources.searchBatches(this.migrationId, options);
+    const batches = this.dataClient.resources.searchBatches<RuleMigrationDefinedResource>(
+      this.migrationId,
+      { filters: { hasContent: true } }
+    );
 
     const existingRuleResources: ExistingResources = { macro: {}, list: {} };
     let resources;
@@ -54,8 +59,8 @@ export class RuleResourceRetriever {
     const resourceIdentifier = new ResourceIdentifier(originalRule.vendor);
     const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginalRule(originalRule);
 
-    const macrosFound = new Map<string, RuleMigrationResource>();
-    const listsFound = new Map<string, RuleMigrationResource>();
+    const macrosFound = new Map<string, RuleMigrationDefinedResource>();
+    const listsFound = new Map<string, RuleMigrationDefinedResource>();
     resourcesIdentifiedFromRule.forEach((resource) => {
       const existingResource = existingResources[resource.type][resource.name];
       if (existingResource) {
