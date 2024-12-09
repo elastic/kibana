@@ -142,7 +142,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       // adding code owners only for the failed test case
       if (failed) {
         const testCaseRelativePath = getPath(node);
-        const owners = getCodeOwnersForFile(testCaseRelativePath, reversedCodeowners);
+        const { owners } = getCodeOwnersForFile(testCaseRelativePath, reversedCodeowners);
         attrs.owners = owners || ''; // empty string when no codeowners are defined
       }
 
