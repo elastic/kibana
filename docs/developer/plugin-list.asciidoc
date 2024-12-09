@@ -964,6 +964,10 @@ For adding localizations and instrument a ui to support translated content, see 
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
 
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/x-pack/examples/ui_actions_enhanced_examples/README.md[uiActionsEnhancedExamples]
+|To run this example plugin, use the command yarn start --run-examples.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 

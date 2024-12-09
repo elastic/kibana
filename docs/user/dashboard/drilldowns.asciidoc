@@ -12,7 +12,7 @@ There are three types of drilldowns you can add to dashboards:
 
 * *Discover* &mdash; Navigates you from a *Lens* dashboard panel to *Discover*. For example, create a drilldown for a *Lens* visualization that opens the visualization data in *Discover* for further exploration. 
 
-Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
+Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/platform/plugins/private/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
 
 ++++
 <script type="text/javascript" async 
