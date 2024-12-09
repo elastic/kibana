@@ -6,7 +6,7 @@
  */
 
 import { castArray } from 'lodash';
-import { InventoryEntity } from '../../../common/entities';
+import type { InventoryEntity } from '../../../common/entities';
 
 export type IdentityFieldsPerEntityType = Map<string, string[]>;
 
