@@ -133,6 +133,19 @@ paths:
           required: false
           schema:
             type: number
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
         - name: search_term
           in: query
           required: false
@@ -180,10 +193,18 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                description: The rule migration id
-                $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+              type: object
+              required:
+                - ids
+              properties:
+                ids:
+                  type: array
+                  items:
+                    description: The rule migration id
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                enabled:
+                  type: boolean
+                  description: Indicates whether installed rules should be enabled
       responses:
         200:
           description: Indicates rules migrations have been installed correctly.
@@ -354,6 +375,33 @@ paths:
                     description: Indicates the migration has been stopped.
         204:
           description: Indicates the migration id was not found running.
+
+  /internal/siem_migrations/rules/{migration_id}/prebuilt_rules:
+    get:
+      summary: Retrieves all prebuilt rules for a specific migration
+      operationId: GetRuleMigrationPrebuiltRules
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves all available prebuilt rules (installed and installable)
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retrieve prebuilt rules for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates prebuilt rules have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The map of prebuilt rules, with the rules id as a key
+                additionalProperties:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/PrebuiltRuleVersion'
 
   # Rule migration resources APIs
 
