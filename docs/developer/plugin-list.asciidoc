@@ -685,7 +685,7 @@ the infrastructure monitoring use-case within Kibana.
 |This plugin is used by ES UI plugins to reject API requests when the plugin is unsupported by the user's license.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/license_management/README.md[licenseManagement]
 |This plugin enables users to activate a trial license, downgrade to Basic, and upload a new license.
 
 
