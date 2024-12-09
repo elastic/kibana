@@ -200,7 +200,7 @@ for use in their own application.
 |Index pattern fields formatters
 
 
-|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/files/README.md[files]
 |The files service provides functionality to manage, retrieve, share files in Kibana.
 
 

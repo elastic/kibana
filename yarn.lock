@@ -5736,7 +5736,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/files-plugin@link:src/plugins/files":
+"@kbn/files-plugin@link:src/platform/plugins/shared/files":
   version "0.0.0"
   uid ""
 

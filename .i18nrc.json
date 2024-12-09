@@ -56,7 +56,7 @@
     "eventAnnotationComponents": "packages/kbn-event-annotation-components",
     "fieldUtils": "packages/kbn-field-utils",
     "fieldFormats": "src/plugins/field_formats",
-    "files": "src/plugins/files",
+    "files": "src/platform/plugins/shared/files",
     "filesManagement": "src/platform/plugins/private/files_management",
     "flot": "packages/kbn-flot-charts/lib",
     "generateCsv": "packages/kbn-generate-csv",
