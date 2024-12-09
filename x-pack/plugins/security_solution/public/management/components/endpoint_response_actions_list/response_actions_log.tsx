@@ -47,7 +47,7 @@ export const ResponseActionsLog = memo<
     isFlyout = true,
     setIsDataInResponse,
     'data-test-subj': dataTestSubj = 'response-actions-list',
-    'data-test-height': dataTestHeight = undefined,
+    'data-test-height': dataTestHeight,
   }) => {
     const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
       useUrlPagination();
