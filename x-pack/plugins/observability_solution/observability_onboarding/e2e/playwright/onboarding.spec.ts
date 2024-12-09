@@ -112,6 +112,7 @@ test('Kubernetes EA', async ({ onboardingPage, page, kubernetesOverviewDashboard
   await onboardingPage.assertVisibilityCodeBlock();
   await onboardingPage.copyToClipboard();
   const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;
+  await page.evaluate('window.dispatchEvent(new Event("blur"))');
   fs.writeFileSync(outputPath, clipboardData);
   await onboardingPage.assertReceivedDataIndicatorKubernetes();
 
