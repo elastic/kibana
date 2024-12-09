@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/streams'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/streams',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/streams'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/streams',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/streams/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/solutions/observability/plugins/streams/{common,public,server}/**/*.{js,ts,tsx}'],
 };

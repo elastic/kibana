@@ -917,7 +917,7 @@ routes, etc.
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/streams/README.md[streams]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/streams/README.md[streams]
 |This plugin provides an interface to manage streams
 
 
