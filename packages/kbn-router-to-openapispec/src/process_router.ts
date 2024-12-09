@@ -9,7 +9,7 @@
 
 import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
-import { ALLOWED_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
+import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
@@ -20,7 +20,6 @@ import {
   extractValidationSchemaFromRoute,
   getPathParameters,
   getVersionedContentTypeString,
-  getVersionedHeaderParam,
   mergeResponseContent,
   prepareRoutes,
   setXState,
@@ -34,7 +33,7 @@ export const processRouter = (
   appRouter: Router,
   converter: OasConverter,
   getOpId: GetOpId,
-  filters?: GenerateOpenApiDocumentOptionsFilters
+  filters: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};
   if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
@@ -47,7 +46,6 @@ export const processRouter = (
       const contentType = extractContentType(route.options?.body);
 
       const parameters: OpenAPIV3.ParameterObject[] = [
-        getVersionedHeaderParam(SERVERLESS_VERSION_2023_10_31, [SERVERLESS_VERSION_2023_10_31]),
         ...getXsrfHeaderForMethod(route.method, route.options),
       ];
       if (validationSchemas) {
@@ -84,7 +82,11 @@ export const processRouter = (
         requestBody: !!validationSchemas?.body
           ? {
               content: {
-                [getVersionedContentTypeString(SERVERLESS_VERSION_2023_10_31, contentType)]: {
+                [getVersionedContentTypeString(
+                  SERVERLESS_VERSION_2023_10_31,
+                  'public',
+                  contentType
+                )]: {
                   schema: converter.convert(validationSchemas.body),
                 },
               },
@@ -124,6 +126,7 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
           ? {
               [getVersionedContentTypeString(
                 SERVERLESS_VERSION_2023_10_31,
+                'public',
                 schema.bodyContentType ? [schema.bodyContentType] : contentType
               )]: {
                 schema: converter.convert(schema.body()),

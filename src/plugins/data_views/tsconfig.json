@@ -37,6 +37,8 @@
     "@kbn/core-http-browser",
     "@kbn/core-http-browser-internal",
     "@kbn/logging-mocks",
+    "@kbn/doc-links",
+    "@kbn/core-deprecations-common",
   ],
   "exclude": [
     "target/**/*",

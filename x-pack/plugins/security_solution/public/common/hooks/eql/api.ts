@@ -36,11 +36,18 @@ interface Params {
   signal?: AbortSignal;
 }
 
-export interface EqlResponseError {
-  code: EQL_ERROR_CODES;
-  messages?: string[];
-  error?: Error;
-}
+export type EqlResponseError =
+  | {
+      code:
+        | EQL_ERROR_CODES.INVALID_SYNTAX
+        | EQL_ERROR_CODES.INVALID_EQL
+        | EQL_ERROR_CODES.MISSING_DATA_SOURCE;
+      messages: string[];
+    }
+  | {
+      code: EQL_ERROR_CODES.FAILED_REQUEST;
+      error: Error;
+    };
 
 export interface ValidateEqlResponse {
   valid: boolean;

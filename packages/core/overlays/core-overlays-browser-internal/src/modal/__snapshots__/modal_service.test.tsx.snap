@@ -108,6 +108,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiConfirmModal
         cancelButtonText="Cancel"
@@ -374,6 +384,16 @@ Array [
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -701,6 +721,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiConfirmModal
         cancelButtonText="Cancel"
@@ -943,6 +973,16 @@ Array [
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1194,6 +1234,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiModal
         onClose={[Function]}
@@ -1438,6 +1488,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiConfirmModal
         cancelButtonText="Cancel"
@@ -1482,6 +1542,16 @@ Array [
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1632,6 +1702,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiConfirmModal
         cancelButtonText="Cancel"
@@ -1740,6 +1820,16 @@ Array [
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1857,6 +1947,16 @@ Array [
           },
         }
       }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
+        }
+      }
     >
       <EuiModal
         onClose={[Function]}
@@ -1965,6 +2065,16 @@ Array [
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >

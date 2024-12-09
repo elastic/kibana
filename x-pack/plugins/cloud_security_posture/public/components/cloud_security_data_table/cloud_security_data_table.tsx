@@ -49,8 +49,6 @@ const gridStyle: EuiDataGridStyle = {
   header: 'underline',
 };
 
-const useNewFieldsApi = true;
-
 // Hide Checkbox, enable open details Flyout
 const controlColumnIds = ['openDetails'];
 
@@ -208,7 +206,6 @@ export const CloudSecurityDataTable = ({
     dataView,
     dataViews,
     setAppState: (props) => setColumns(props.columns),
-    useNewFieldsApi,
     columns,
     sort,
   });
@@ -350,7 +347,6 @@ export const CloudSecurityDataTable = ({
           rowsPerPageState={pageSize}
           totalHits={total}
           services={services}
-          useNewFieldsApi
           onUpdateRowsPerPage={onChangeItemsPerPage}
           rowHeightState={rowHeightState}
           showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
