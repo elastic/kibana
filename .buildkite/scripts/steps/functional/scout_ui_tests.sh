@@ -6,26 +6,28 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-scout-ui-tests
 
-echo "--- Stateful: 'discover_enhanced' plugin UI Tests"
-node scripts/scout run-tests \
-  --stateful \
-  --config x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+echo "--- Running 'discover_enhanced' plugin UI Tests"
 
-echo "--- Serverless Elasticsearch: 'discover_enhanced' plugin UI Tests"
-node scripts/scout run-tests \
-  --serverless=es \
-  --config x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+TEST_CONFIG="x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts"
+KIBANA_DIR="$KIBANA_BUILD_LOCATION"
 
-echo "--- Serverless Observability: 'discover_enhanced' plugin UI Tests"
-node scripts/scout run-tests \
-  --serverless=oblt \
-  --config x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+declare -A TESTS=(
+  ["Stateful"]="--stateful"
+  ["Serverless Elasticsearch"]="--serverless=es"
+  ["Serverless Observability"]="--serverless=oblt"
+  ["Serverless Security"]="--serverless=security"
+)
 
-echo "--- Serverless Security: 'discover_enhanced' plugin UI Tests"
-node scripts/scout run-tests \
-  --serverless=security \
-  --config x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+EXIT_CODE=0
+
+for TEST_NAME in "${!TESTS[@]}"; do
+  echo "--- $TEST_NAME: 'discover_enhanced' plugin UI Tests"
+  if ! node scripts/scout run-tests ${TESTS[$TEST_NAME]} --config "$TEST_CONFIG" --kibana-install-dir "$KIBANA_DIR"; then
+    echo "--- $TEST_NAME: failed"
+    EXIT_CODE=1
+  else
+    echo "--- $TEST_NAME: passed"
+  fi
+done
+
+exit $EXIT_CODE
