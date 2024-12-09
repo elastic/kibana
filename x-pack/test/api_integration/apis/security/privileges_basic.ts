@@ -50,6 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
             securitySolutionAttackDiscovery: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionCasesV2: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionTimeline: ['all', 'read', 'minimal_all', 'minimal_read'],
+            securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
