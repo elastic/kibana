@@ -6668,7 +6668,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-styled@link:packages/react/kibana_context/styled":
+"@kbn/react-kibana-context-styled@link:src/platform/packages/shared/react/kibana_context/styled":
   version "0.0.0"
   uid ""
 
