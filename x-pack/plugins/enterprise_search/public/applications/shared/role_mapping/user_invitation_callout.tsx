@@ -13,6 +13,7 @@ import {
   INVITATION_DESCRIPTION,
   NEW_INVITATION_LABEL,
   EXISTING_INVITATION_LABEL,
+  INVITATION_LINK_COPY_ARIA_LABEL,
   INVITATION_LINK,
 } from './constants';
 
@@ -35,11 +36,23 @@ export const UserInvitationCallout: React.FC<Props> = ({ isNew, invitationCode, 
       <EuiSpacer size="xs" />
       <EuiText size="s">{INVITATION_DESCRIPTION}</EuiText>
       <EuiSpacer size="xs" />
-      <EuiLink href={link} target="_blank" external>
+      <EuiLink
+        data-test-subj="enterpriseSearchUserInvitationCalloutLink"
+        href={link}
+        target="_blank"
+        external
+      >
         {INVITATION_LINK}
       </EuiLink>{' '}
       <EuiCopy textToCopy={link}>
-        {(copy) => <EuiButtonIcon iconType="copy" onClick={copy} />}
+        {(copy) => (
+          <EuiButtonIcon
+            data-test-subj="enterpriseSearchUserInvitationCalloutButton"
+            iconType="copy"
+            onClick={copy}
+            aria-label={INVITATION_LINK_COPY_ARIA_LABEL}
+          />
+        )}
       </EuiCopy>
       <EuiSpacer />
     </>

@@ -348,20 +348,7 @@
       "get": {
         "deprecated": true,
         "operationId": "get-actions",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {},
         "summary": "Get all connectors",
         "tags": [
@@ -375,18 +362,6 @@
         "operationId": "post-actions-action",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -399,7 +374,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -434,7 +409,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -499,18 +474,6 @@
         "operationId": "delete-actions-action-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -545,18 +508,6 @@
         "operationId": "get-actions-action-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "An identifier for the connector.",
             "in": "path",
             "name": "id",
@@ -569,7 +520,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -631,18 +582,6 @@
         "operationId": "put-actions-action-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -664,7 +603,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -693,7 +632,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -757,18 +696,6 @@
         "operationId": "post-actions-action-id-execute",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -790,7 +717,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -810,7 +737,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -874,18 +801,6 @@
         "operationId": "delete-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -919,18 +834,6 @@
         "operationId": "get-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "An identifier for the connector.",
             "in": "path",
             "name": "id",
@@ -943,7 +846,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -1004,18 +907,6 @@
         "operationId": "post-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -1037,7 +928,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1072,7 +963,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -1133,18 +1024,6 @@
         "operationId": "put-actions-connector-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -1166,7 +1045,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1196,7 +1075,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -1260,18 +1139,6 @@
         "operationId": "post-actions-connector-id-execute",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -1293,7 +1160,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1313,7 +1180,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -1377,18 +1244,6 @@
         "operationId": "get-actions-connector-types",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
             "in": "query",
             "name": "feature_id",
@@ -1408,20 +1263,7 @@
     "/api/actions/connectors": {
       "get": {
         "operationId": "get-actions-connectors",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {},
         "summary": "Get all connectors",
         "tags": [
@@ -1433,20 +1275,7 @@
       "get": {
         "deprecated": true,
         "operationId": "get-actions-list-action-types",
-        "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {},
         "summary": "Get connector types",
         "tags": [
@@ -1458,18 +1287,6 @@
       "delete": {
         "operationId": "delete-alerting-rule-id",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -1513,18 +1330,6 @@
         "operationId": "get-alerting-rule-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "The identifier for the rule.",
             "in": "path",
             "name": "id",
@@ -1537,7 +1342,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -2394,18 +2199,6 @@
         "operationId": "post-alerting-rule-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -2427,7 +2220,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -2723,7 +2516,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -3580,18 +3373,6 @@
         "operationId": "put-alerting-rule-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -3613,7 +3394,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -3892,7 +3673,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -4754,18 +4535,6 @@
         "operationId": "post-alerting-rule-id-disable",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -4787,7 +4556,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "nullable": true,
@@ -4827,18 +4596,6 @@
       "post": {
         "operationId": "post-alerting-rule-id-enable",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -4884,18 +4641,6 @@
         "operationId": "post-alerting-rule-id-mute-all",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -4940,18 +4685,6 @@
         "operationId": "post-alerting-rule-id-unmute-all",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -4995,18 +4728,6 @@
       "post": {
         "operationId": "post-alerting-rule-id-update-api-key",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -5054,18 +4775,6 @@
       "post": {
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -5120,18 +4829,6 @@
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-unmute",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -5184,18 +4881,6 @@
       "get": {
         "operationId": "get-alerting-rules-find",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "The number of rules to return per page.",
             "in": "query",
@@ -5342,7 +5027,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -6193,9 +5878,10 @@
         ]
       }
     },
-    "/api/security/role": {
+    "/api/dashboards/dashboard": {
       "get": {
-        "operationId": "get-security-role",
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
+        "operationId": "get-dashboards-dashboard",
         "parameters": [
           {
             "description": "The version of the API to use",
@@ -6209,6 +5895,3231 @@
               "type": "string"
             }
           },
+          {
+            "description": "The page number to return. Default is \"1\".",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "description": "The number of dashboards to display on each page (max 1000). Default is \"20\".",
+            "in": "query",
+            "name": "perPage",
+            "required": false,
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "additionalProperties": true,
+                        "properties": {
+                          "attributes": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "description": {
+                                "default": "",
+                                "description": "A short description.",
+                                "type": "string"
+                              },
+                              "timeRestore": {
+                                "default": false,
+                                "description": "Whether to restore time upon viewing this dashboard",
+                                "type": "boolean"
+                              },
+                              "title": {
+                                "description": "A human-readable title for the dashboard",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "title"
+                            ],
+                            "type": "object"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "createdBy": {
+                            "type": "string"
+                          },
+                          "error": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "error": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              },
+                              "metadata": {
+                                "additionalProperties": true,
+                                "properties": {},
+                                "type": "object"
+                              },
+                              "statusCode": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "error",
+                              "message",
+                              "statusCode"
+                            ],
+                            "type": "object"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "managed": {
+                            "type": "boolean"
+                          },
+                          "namespaces": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "originId": {
+                            "type": "string"
+                          },
+                          "references": {
+                            "items": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "type",
+                                "id"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          },
+                          "updatedBy": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "attributes",
+                          "references"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "total": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a list of dashboards",
+        "tags": [
+          "Dashboards"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/dashboards/dashboard/{id}": {
+      "delete": {
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
+        "operationId": "delete-dashboards-dashboard-id",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "A unique identifier for the dashboard.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {},
+        "summary": "Delete a dashboard",
+        "tags": [
+          "Dashboards"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "get": {
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
+        "operationId": "get-dashboards-dashboard-id",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A unique identifier for the dashboard.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": true,
+                      "properties": {
+                        "attributes": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "controlGroupInput": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "autoApplySelections": {
+                                  "default": true,
+                                  "description": "Show apply selections button in controls.",
+                                  "type": "boolean"
+                                },
+                                "chainingSystem": {
+                                  "default": "HIERARCHICAL",
+                                  "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
+                                  "enum": [
+                                    "NONE",
+                                    "HIERARCHICAL"
+                                  ],
+                                  "type": "string"
+                                },
+                                "controls": {
+                                  "default": [],
+                                  "description": "An array of control panels and their state in the control group.",
+                                  "items": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "controlConfig": {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      },
+                                      "grow": {
+                                        "default": false,
+                                        "description": "Expand width of the control panel to fit available space.",
+                                        "type": "boolean"
+                                      },
+                                      "id": {
+                                        "description": "The unique ID of the control.",
+                                        "type": "string"
+                                      },
+                                      "order": {
+                                        "description": "The order of the control panel in the control group.",
+                                        "type": "number"
+                                      },
+                                      "type": {
+                                        "description": "The type of the control panel.",
+                                        "type": "string"
+                                      },
+                                      "width": {
+                                        "default": "medium",
+                                        "description": "Minimum width of the control panel in the control group.",
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large"
+                                        ],
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "order"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "enhancements": {
+                                  "additionalProperties": {},
+                                  "type": "object"
+                                },
+                                "ignoreParentSettings": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "ignoreFilters": {
+                                      "default": false,
+                                      "description": "Ignore global filters in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreQuery": {
+                                      "default": false,
+                                      "description": "Ignore the global query bar in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreTimerange": {
+                                      "default": false,
+                                      "description": "Ignore the global time range in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreValidations": {
+                                      "default": false,
+                                      "description": "Ignore validations in controls.",
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "labelPosition": {
+                                  "default": "oneLine",
+                                  "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
+                                  "enum": [
+                                    "oneLine",
+                                    "twoLine"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ignoreParentSettings"
+                              ],
+                              "type": "object"
+                            },
+                            "description": {
+                              "default": "",
+                              "description": "A short description.",
+                              "type": "string"
+                            },
+                            "kibanaSavedObjectMeta": {
+                              "additionalProperties": false,
+                              "default": {},
+                              "description": "A container for various metadata",
+                              "properties": {
+                                "searchSource": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "filter": {
+                                      "items": {
+                                        "additionalProperties": false,
+                                        "description": "A filter for the search source.",
+                                        "properties": {
+                                          "$state": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                              "store": {
+                                                "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+                                                "enum": [
+                                                  "appState",
+                                                  "globalState"
+                                                ],
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "store"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "meta": {
+                                            "additionalProperties": true,
+                                            "properties": {
+                                              "alias": {
+                                                "nullable": true,
+                                                "type": "string"
+                                              },
+                                              "controlledBy": {
+                                                "type": "string"
+                                              },
+                                              "disabled": {
+                                                "type": "boolean"
+                                              },
+                                              "field": {
+                                                "type": "string"
+                                              },
+                                              "group": {
+                                                "type": "string"
+                                              },
+                                              "index": {
+                                                "type": "string"
+                                              },
+                                              "isMultiIndex": {
+                                                "type": "boolean"
+                                              },
+                                              "key": {
+                                                "type": "string"
+                                              },
+                                              "negate": {
+                                                "type": "boolean"
+                                              },
+                                              "params": {},
+                                              "type": {
+                                                "type": "string"
+                                              },
+                                              "value": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "params"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "query": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          }
+                                        },
+                                        "required": [
+                                          "meta"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "query": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "language": {
+                                          "description": "The query language such as KQL or Lucene.",
+                                          "type": "string"
+                                        },
+                                        "query": {
+                                          "anyOf": [
+                                            {
+                                              "description": "A text-based query such as Kibana Query Language (KQL) or Lucene query language.",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "additionalProperties": {},
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "query",
+                                        "language"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "sort": {
+                                      "items": {
+                                        "additionalProperties": {
+                                          "anyOf": [
+                                            {
+                                              "enum": [
+                                                "asc",
+                                                "desc"
+                                              ],
+                                              "type": "string"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "format": {
+                                                  "type": "string"
+                                                },
+                                                "order": {
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "order"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "numeric_type": {
+                                                  "enum": [
+                                                    "double",
+                                                    "long",
+                                                    "date",
+                                                    "date_nanos"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "order": {
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "order"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        },
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "options": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "hidePanelTitles": {
+                                  "default": false,
+                                  "description": "Hide the panel titles in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncColors": {
+                                  "default": true,
+                                  "description": "Synchronize colors between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncCursor": {
+                                  "default": true,
+                                  "description": "Synchronize cursor position between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncTooltips": {
+                                  "default": true,
+                                  "description": "Synchronize tooltips between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "useMargins": {
+                                  "default": true,
+                                  "description": "Show margins between panels in the dashboard layout.",
+                                  "type": "boolean"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "panels": {
+                              "default": [],
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "gridData": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "h": {
+                                        "default": 15,
+                                        "description": "The height of the panel in grid units",
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "i": {
+                                        "type": "string"
+                                      },
+                                      "w": {
+                                        "default": 24,
+                                        "description": "The width of the panel in grid units",
+                                        "maximum": 48,
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "x": {
+                                        "description": "The x coordinate of the panel in grid units",
+                                        "type": "number"
+                                      },
+                                      "y": {
+                                        "description": "The y coordinate of the panel in grid units",
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "x",
+                                      "y",
+                                      "i"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "id": {
+                                    "description": "The saved object id for by reference panels",
+                                    "type": "string"
+                                  },
+                                  "panelConfig": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "description": {
+                                        "description": "The description of the panel",
+                                        "type": "string"
+                                      },
+                                      "enhancements": {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      },
+                                      "hidePanelTitles": {
+                                        "description": "Set to true to hide the panel title in its container.",
+                                        "type": "boolean"
+                                      },
+                                      "savedObjectId": {
+                                        "description": "The unique id of the library item to construct the embeddable.",
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "description": "The title of the panel",
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "description": "The version of the embeddable in the panel.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "panelIndex": {
+                                    "type": "string"
+                                  },
+                                  "panelRefName": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "description": "The title of the panel",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "The embeddable type",
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "deprecated": true,
+                                    "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "panelConfig",
+                                  "type",
+                                  "gridData",
+                                  "panelIndex"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "refreshInterval": {
+                              "additionalProperties": false,
+                              "description": "A container for various refresh interval settings",
+                              "properties": {
+                                "display": {
+                                  "deprecated": true,
+                                  "description": "A human-readable string indicating the refresh frequency. No longer used.",
+                                  "type": "string"
+                                },
+                                "pause": {
+                                  "description": "Whether the refresh interval is set to be paused while viewing the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "section": {
+                                  "deprecated": true,
+                                  "description": "No longer used.",
+                                  "type": "number"
+                                },
+                                "value": {
+                                  "description": "A numeric value indicating refresh frequency in milliseconds.",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "pause",
+                                "value"
+                              ],
+                              "type": "object"
+                            },
+                            "timeFrom": {
+                              "description": "An ISO string indicating when to restore time from",
+                              "type": "string"
+                            },
+                            "timeRestore": {
+                              "default": false,
+                              "description": "Whether to restore time upon viewing this dashboard",
+                              "type": "boolean"
+                            },
+                            "timeTo": {
+                              "description": "An ISO string indicating when to restore time from",
+                              "type": "string"
+                            },
+                            "title": {
+                              "description": "A human-readable title for the dashboard",
+                              "type": "string"
+                            },
+                            "version": {
+                              "deprecated": true,
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "options"
+                          ],
+                          "type": "object"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "error": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "error": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            },
+                            "metadata": {
+                              "additionalProperties": true,
+                              "properties": {},
+                              "type": "object"
+                            },
+                            "statusCode": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "error",
+                            "message",
+                            "statusCode"
+                          ],
+                          "type": "object"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "managed": {
+                          "type": "boolean"
+                        },
+                        "namespaces": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "originId": {
+                          "type": "string"
+                        },
+                        "references": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "type",
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        },
+                        "updatedBy": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "attributes",
+                        "references"
+                      ],
+                      "type": "object"
+                    },
+                    "meta": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "aliasPurpose": {
+                          "enum": [
+                            "savedObjectConversion",
+                            "savedObjectImport"
+                          ],
+                          "type": "string"
+                        },
+                        "aliasTargetId": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "enum": [
+                            "exactMatch",
+                            "aliasMatch",
+                            "conflict"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "outcome"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item",
+                    "meta"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a dashboard",
+        "tags": [
+          "Dashboards"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "post": {
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
+        "operationId": "post-dashboards-dashboard-id",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "A unique identifier for the dashboard.",
+            "in": "path",
+            "name": "id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "attributes": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "controlGroupInput": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "autoApplySelections": {
+                            "default": true,
+                            "description": "Show apply selections button in controls.",
+                            "type": "boolean"
+                          },
+                          "chainingSystem": {
+                            "default": "HIERARCHICAL",
+                            "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
+                            "enum": [
+                              "NONE",
+                              "HIERARCHICAL"
+                            ],
+                            "type": "string"
+                          },
+                          "controls": {
+                            "default": [],
+                            "description": "An array of control panels and their state in the control group.",
+                            "items": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "controlConfig": {
+                                  "additionalProperties": {},
+                                  "type": "object"
+                                },
+                                "grow": {
+                                  "default": false,
+                                  "description": "Expand width of the control panel to fit available space.",
+                                  "type": "boolean"
+                                },
+                                "id": {
+                                  "description": "The unique ID of the control.",
+                                  "type": "string"
+                                },
+                                "order": {
+                                  "description": "The order of the control panel in the control group.",
+                                  "type": "number"
+                                },
+                                "type": {
+                                  "description": "The type of the control panel.",
+                                  "type": "string"
+                                },
+                                "width": {
+                                  "default": "medium",
+                                  "description": "Minimum width of the control panel in the control group.",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "order"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "enhancements": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "ignoreParentSettings": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "ignoreFilters": {
+                                "default": false,
+                                "description": "Ignore global filters in controls.",
+                                "type": "boolean"
+                              },
+                              "ignoreQuery": {
+                                "default": false,
+                                "description": "Ignore the global query bar in controls.",
+                                "type": "boolean"
+                              },
+                              "ignoreTimerange": {
+                                "default": false,
+                                "description": "Ignore the global time range in controls.",
+                                "type": "boolean"
+                              },
+                              "ignoreValidations": {
+                                "default": false,
+                                "description": "Ignore validations in controls.",
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "labelPosition": {
+                            "default": "oneLine",
+                            "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
+                            "enum": [
+                              "oneLine",
+                              "twoLine"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "ignoreParentSettings"
+                        ],
+                        "type": "object"
+                      },
+                      "description": {
+                        "default": "",
+                        "description": "A short description.",
+                        "type": "string"
+                      },
+                      "kibanaSavedObjectMeta": {
+                        "additionalProperties": false,
+                        "default": {},
+                        "description": "A container for various metadata",
+                        "properties": {
+                          "searchSource": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "filter": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "description": "A filter for the search source.",
+                                  "properties": {
+                                    "$state": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "store": {
+                                          "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+                                          "enum": [
+                                            "appState",
+                                            "globalState"
+                                          ],
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "store"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "meta": {
+                                      "additionalProperties": true,
+                                      "properties": {
+                                        "alias": {
+                                          "nullable": true,
+                                          "type": "string"
+                                        },
+                                        "controlledBy": {
+                                          "type": "string"
+                                        },
+                                        "disabled": {
+                                          "type": "boolean"
+                                        },
+                                        "field": {
+                                          "type": "string"
+                                        },
+                                        "group": {
+                                          "type": "string"
+                                        },
+                                        "index": {
+                                          "type": "string"
+                                        },
+                                        "isMultiIndex": {
+                                          "type": "boolean"
+                                        },
+                                        "key": {
+                                          "type": "string"
+                                        },
+                                        "negate": {
+                                          "type": "boolean"
+                                        },
+                                        "params": {},
+                                        "type": {
+                                          "type": "string"
+                                        },
+                                        "value": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "params"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "query": {
+                                      "additionalProperties": {},
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "meta"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "query": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "language": {
+                                    "description": "The query language such as KQL or Lucene.",
+                                    "type": "string"
+                                  },
+                                  "query": {
+                                    "anyOf": [
+                                      {
+                                        "description": "A text-based query such as Kibana Query Language (KQL) or Lucene query language.",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "query",
+                                  "language"
+                                ],
+                                "type": "object"
+                              },
+                              "sort": {
+                                "items": {
+                                  "additionalProperties": {
+                                    "anyOf": [
+                                      {
+                                        "enum": [
+                                          "asc",
+                                          "desc"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "format": {
+                                            "type": "string"
+                                          },
+                                          "order": {
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "order"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "numeric_type": {
+                                            "enum": [
+                                              "double",
+                                              "long",
+                                              "date",
+                                              "date_nanos"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "order": {
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "order"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    ]
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "options": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "hidePanelTitles": {
+                            "default": false,
+                            "description": "Hide the panel titles in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "syncColors": {
+                            "default": true,
+                            "description": "Synchronize colors between related panels in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "syncCursor": {
+                            "default": true,
+                            "description": "Synchronize cursor position between related panels in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "syncTooltips": {
+                            "default": true,
+                            "description": "Synchronize tooltips between related panels in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "useMargins": {
+                            "default": true,
+                            "description": "Show margins between panels in the dashboard layout.",
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "panels": {
+                        "default": [],
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "gridData": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "h": {
+                                  "default": 15,
+                                  "description": "The height of the panel in grid units",
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "i": {
+                                  "description": "The unique identifier of the panel",
+                                  "type": "string"
+                                },
+                                "w": {
+                                  "default": 24,
+                                  "description": "The width of the panel in grid units",
+                                  "maximum": 48,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "x": {
+                                  "description": "The x coordinate of the panel in grid units",
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "description": "The y coordinate of the panel in grid units",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "type": "object"
+                            },
+                            "id": {
+                              "description": "The saved object id for by reference panels",
+                              "type": "string"
+                            },
+                            "panelConfig": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "description": {
+                                  "description": "The description of the panel",
+                                  "type": "string"
+                                },
+                                "enhancements": {
+                                  "additionalProperties": {},
+                                  "type": "object"
+                                },
+                                "hidePanelTitles": {
+                                  "description": "Set to true to hide the panel title in its container.",
+                                  "type": "boolean"
+                                },
+                                "savedObjectId": {
+                                  "description": "The unique id of the library item to construct the embeddable.",
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "description": "The title of the panel",
+                                  "type": "string"
+                                },
+                                "version": {
+                                  "description": "The version of the embeddable in the panel.",
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "panelIndex": {
+                              "description": "The unique ID of the panel.",
+                              "type": "string"
+                            },
+                            "panelRefName": {
+                              "type": "string"
+                            },
+                            "title": {
+                              "description": "The title of the panel",
+                              "type": "string"
+                            },
+                            "type": {
+                              "description": "The embeddable type",
+                              "type": "string"
+                            },
+                            "version": {
+                              "deprecated": true,
+                              "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "panelConfig",
+                            "type",
+                            "gridData"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "refreshInterval": {
+                        "additionalProperties": false,
+                        "description": "A container for various refresh interval settings",
+                        "properties": {
+                          "display": {
+                            "deprecated": true,
+                            "description": "A human-readable string indicating the refresh frequency. No longer used.",
+                            "type": "string"
+                          },
+                          "pause": {
+                            "description": "Whether the refresh interval is set to be paused while viewing the dashboard.",
+                            "type": "boolean"
+                          },
+                          "section": {
+                            "deprecated": true,
+                            "description": "No longer used.",
+                            "type": "number"
+                          },
+                          "value": {
+                            "description": "A numeric value indicating refresh frequency in milliseconds.",
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "pause",
+                          "value"
+                        ],
+                        "type": "object"
+                      },
+                      "timeFrom": {
+                        "description": "An ISO string indicating when to restore time from",
+                        "type": "string"
+                      },
+                      "timeRestore": {
+                        "default": false,
+                        "description": "Whether to restore time upon viewing this dashboard",
+                        "type": "boolean"
+                      },
+                      "timeTo": {
+                        "description": "An ISO string indicating when to restore time from",
+                        "type": "string"
+                      },
+                      "title": {
+                        "description": "A human-readable title for the dashboard",
+                        "type": "string"
+                      },
+                      "version": {
+                        "deprecated": true,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "title",
+                      "options"
+                    ],
+                    "type": "object"
+                  },
+                  "references": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "type",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "spaces": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "attributes"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": true,
+                      "properties": {
+                        "attributes": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "controlGroupInput": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "autoApplySelections": {
+                                  "default": true,
+                                  "description": "Show apply selections button in controls.",
+                                  "type": "boolean"
+                                },
+                                "chainingSystem": {
+                                  "default": "HIERARCHICAL",
+                                  "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
+                                  "enum": [
+                                    "NONE",
+                                    "HIERARCHICAL"
+                                  ],
+                                  "type": "string"
+                                },
+                                "controls": {
+                                  "default": [],
+                                  "description": "An array of control panels and their state in the control group.",
+                                  "items": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "controlConfig": {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      },
+                                      "grow": {
+                                        "default": false,
+                                        "description": "Expand width of the control panel to fit available space.",
+                                        "type": "boolean"
+                                      },
+                                      "id": {
+                                        "description": "The unique ID of the control.",
+                                        "type": "string"
+                                      },
+                                      "order": {
+                                        "description": "The order of the control panel in the control group.",
+                                        "type": "number"
+                                      },
+                                      "type": {
+                                        "description": "The type of the control panel.",
+                                        "type": "string"
+                                      },
+                                      "width": {
+                                        "default": "medium",
+                                        "description": "Minimum width of the control panel in the control group.",
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large"
+                                        ],
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "order"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "enhancements": {
+                                  "additionalProperties": {},
+                                  "type": "object"
+                                },
+                                "ignoreParentSettings": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "ignoreFilters": {
+                                      "default": false,
+                                      "description": "Ignore global filters in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreQuery": {
+                                      "default": false,
+                                      "description": "Ignore the global query bar in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreTimerange": {
+                                      "default": false,
+                                      "description": "Ignore the global time range in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreValidations": {
+                                      "default": false,
+                                      "description": "Ignore validations in controls.",
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "labelPosition": {
+                                  "default": "oneLine",
+                                  "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
+                                  "enum": [
+                                    "oneLine",
+                                    "twoLine"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ignoreParentSettings"
+                              ],
+                              "type": "object"
+                            },
+                            "description": {
+                              "default": "",
+                              "description": "A short description.",
+                              "type": "string"
+                            },
+                            "kibanaSavedObjectMeta": {
+                              "additionalProperties": false,
+                              "default": {},
+                              "description": "A container for various metadata",
+                              "properties": {
+                                "searchSource": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "filter": {
+                                      "items": {
+                                        "additionalProperties": false,
+                                        "description": "A filter for the search source.",
+                                        "properties": {
+                                          "$state": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                              "store": {
+                                                "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+                                                "enum": [
+                                                  "appState",
+                                                  "globalState"
+                                                ],
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "store"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "meta": {
+                                            "additionalProperties": true,
+                                            "properties": {
+                                              "alias": {
+                                                "nullable": true,
+                                                "type": "string"
+                                              },
+                                              "controlledBy": {
+                                                "type": "string"
+                                              },
+                                              "disabled": {
+                                                "type": "boolean"
+                                              },
+                                              "field": {
+                                                "type": "string"
+                                              },
+                                              "group": {
+                                                "type": "string"
+                                              },
+                                              "index": {
+                                                "type": "string"
+                                              },
+                                              "isMultiIndex": {
+                                                "type": "boolean"
+                                              },
+                                              "key": {
+                                                "type": "string"
+                                              },
+                                              "negate": {
+                                                "type": "boolean"
+                                              },
+                                              "params": {},
+                                              "type": {
+                                                "type": "string"
+                                              },
+                                              "value": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "params"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "query": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          }
+                                        },
+                                        "required": [
+                                          "meta"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "query": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "language": {
+                                          "description": "The query language such as KQL or Lucene.",
+                                          "type": "string"
+                                        },
+                                        "query": {
+                                          "anyOf": [
+                                            {
+                                              "description": "A text-based query such as Kibana Query Language (KQL) or Lucene query language.",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "additionalProperties": {},
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "query",
+                                        "language"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "sort": {
+                                      "items": {
+                                        "additionalProperties": {
+                                          "anyOf": [
+                                            {
+                                              "enum": [
+                                                "asc",
+                                                "desc"
+                                              ],
+                                              "type": "string"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "format": {
+                                                  "type": "string"
+                                                },
+                                                "order": {
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "order"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "numeric_type": {
+                                                  "enum": [
+                                                    "double",
+                                                    "long",
+                                                    "date",
+                                                    "date_nanos"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "order": {
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "order"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        },
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "options": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "hidePanelTitles": {
+                                  "default": false,
+                                  "description": "Hide the panel titles in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncColors": {
+                                  "default": true,
+                                  "description": "Synchronize colors between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncCursor": {
+                                  "default": true,
+                                  "description": "Synchronize cursor position between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncTooltips": {
+                                  "default": true,
+                                  "description": "Synchronize tooltips between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "useMargins": {
+                                  "default": true,
+                                  "description": "Show margins between panels in the dashboard layout.",
+                                  "type": "boolean"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "panels": {
+                              "default": [],
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "gridData": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "h": {
+                                        "default": 15,
+                                        "description": "The height of the panel in grid units",
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "i": {
+                                        "type": "string"
+                                      },
+                                      "w": {
+                                        "default": 24,
+                                        "description": "The width of the panel in grid units",
+                                        "maximum": 48,
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "x": {
+                                        "description": "The x coordinate of the panel in grid units",
+                                        "type": "number"
+                                      },
+                                      "y": {
+                                        "description": "The y coordinate of the panel in grid units",
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "x",
+                                      "y",
+                                      "i"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "id": {
+                                    "description": "The saved object id for by reference panels",
+                                    "type": "string"
+                                  },
+                                  "panelConfig": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "description": {
+                                        "description": "The description of the panel",
+                                        "type": "string"
+                                      },
+                                      "enhancements": {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      },
+                                      "hidePanelTitles": {
+                                        "description": "Set to true to hide the panel title in its container.",
+                                        "type": "boolean"
+                                      },
+                                      "savedObjectId": {
+                                        "description": "The unique id of the library item to construct the embeddable.",
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "description": "The title of the panel",
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "description": "The version of the embeddable in the panel.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "panelIndex": {
+                                    "type": "string"
+                                  },
+                                  "panelRefName": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "description": "The title of the panel",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "The embeddable type",
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "deprecated": true,
+                                    "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "panelConfig",
+                                  "type",
+                                  "gridData",
+                                  "panelIndex"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "refreshInterval": {
+                              "additionalProperties": false,
+                              "description": "A container for various refresh interval settings",
+                              "properties": {
+                                "display": {
+                                  "deprecated": true,
+                                  "description": "A human-readable string indicating the refresh frequency. No longer used.",
+                                  "type": "string"
+                                },
+                                "pause": {
+                                  "description": "Whether the refresh interval is set to be paused while viewing the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "section": {
+                                  "deprecated": true,
+                                  "description": "No longer used.",
+                                  "type": "number"
+                                },
+                                "value": {
+                                  "description": "A numeric value indicating refresh frequency in milliseconds.",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "pause",
+                                "value"
+                              ],
+                              "type": "object"
+                            },
+                            "timeFrom": {
+                              "description": "An ISO string indicating when to restore time from",
+                              "type": "string"
+                            },
+                            "timeRestore": {
+                              "default": false,
+                              "description": "Whether to restore time upon viewing this dashboard",
+                              "type": "boolean"
+                            },
+                            "timeTo": {
+                              "description": "An ISO string indicating when to restore time from",
+                              "type": "string"
+                            },
+                            "title": {
+                              "description": "A human-readable title for the dashboard",
+                              "type": "string"
+                            },
+                            "version": {
+                              "deprecated": true,
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "options"
+                          ],
+                          "type": "object"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "error": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "error": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            },
+                            "metadata": {
+                              "additionalProperties": true,
+                              "properties": {},
+                              "type": "object"
+                            },
+                            "statusCode": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "error",
+                            "message",
+                            "statusCode"
+                          ],
+                          "type": "object"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "managed": {
+                          "type": "boolean"
+                        },
+                        "namespaces": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "originId": {
+                          "type": "string"
+                        },
+                        "references": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "type",
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        },
+                        "updatedBy": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "attributes",
+                        "references"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a dashboard",
+        "tags": [
+          "Dashboards"
+        ],
+        "x-state": "Technical Preview"
+      },
+      "put": {
+        "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.",
+        "operationId": "put-dashboards-dashboard-id",
+        "parameters": [
+          {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": {
+              "default": "2023-10-31",
+              "enum": [
+                "2023-10-31"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "A unique identifier for the dashboard.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json; Elastic-Api-Version=2023-10-31": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "attributes": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "controlGroupInput": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "autoApplySelections": {
+                            "default": true,
+                            "description": "Show apply selections button in controls.",
+                            "type": "boolean"
+                          },
+                          "chainingSystem": {
+                            "default": "HIERARCHICAL",
+                            "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
+                            "enum": [
+                              "NONE",
+                              "HIERARCHICAL"
+                            ],
+                            "type": "string"
+                          },
+                          "controls": {
+                            "default": [],
+                            "description": "An array of control panels and their state in the control group.",
+                            "items": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "controlConfig": {
+                                  "additionalProperties": {},
+                                  "type": "object"
+                                },
+                                "grow": {
+                                  "default": false,
+                                  "description": "Expand width of the control panel to fit available space.",
+                                  "type": "boolean"
+                                },
+                                "id": {
+                                  "description": "The unique ID of the control.",
+                                  "type": "string"
+                                },
+                                "order": {
+                                  "description": "The order of the control panel in the control group.",
+                                  "type": "number"
+                                },
+                                "type": {
+                                  "description": "The type of the control panel.",
+                                  "type": "string"
+                                },
+                                "width": {
+                                  "default": "medium",
+                                  "description": "Minimum width of the control panel in the control group.",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "order"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "enhancements": {
+                            "additionalProperties": {},
+                            "type": "object"
+                          },
+                          "ignoreParentSettings": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "ignoreFilters": {
+                                "default": false,
+                                "description": "Ignore global filters in controls.",
+                                "type": "boolean"
+                              },
+                              "ignoreQuery": {
+                                "default": false,
+                                "description": "Ignore the global query bar in controls.",
+                                "type": "boolean"
+                              },
+                              "ignoreTimerange": {
+                                "default": false,
+                                "description": "Ignore the global time range in controls.",
+                                "type": "boolean"
+                              },
+                              "ignoreValidations": {
+                                "default": false,
+                                "description": "Ignore validations in controls.",
+                                "type": "boolean"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "labelPosition": {
+                            "default": "oneLine",
+                            "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
+                            "enum": [
+                              "oneLine",
+                              "twoLine"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "ignoreParentSettings"
+                        ],
+                        "type": "object"
+                      },
+                      "description": {
+                        "default": "",
+                        "description": "A short description.",
+                        "type": "string"
+                      },
+                      "kibanaSavedObjectMeta": {
+                        "additionalProperties": false,
+                        "default": {},
+                        "description": "A container for various metadata",
+                        "properties": {
+                          "searchSource": {
+                            "additionalProperties": true,
+                            "properties": {
+                              "filter": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "description": "A filter for the search source.",
+                                  "properties": {
+                                    "$state": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "store": {
+                                          "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+                                          "enum": [
+                                            "appState",
+                                            "globalState"
+                                          ],
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "store"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "meta": {
+                                      "additionalProperties": true,
+                                      "properties": {
+                                        "alias": {
+                                          "nullable": true,
+                                          "type": "string"
+                                        },
+                                        "controlledBy": {
+                                          "type": "string"
+                                        },
+                                        "disabled": {
+                                          "type": "boolean"
+                                        },
+                                        "field": {
+                                          "type": "string"
+                                        },
+                                        "group": {
+                                          "type": "string"
+                                        },
+                                        "index": {
+                                          "type": "string"
+                                        },
+                                        "isMultiIndex": {
+                                          "type": "boolean"
+                                        },
+                                        "key": {
+                                          "type": "string"
+                                        },
+                                        "negate": {
+                                          "type": "boolean"
+                                        },
+                                        "params": {},
+                                        "type": {
+                                          "type": "string"
+                                        },
+                                        "value": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "params"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "query": {
+                                      "additionalProperties": {},
+                                      "type": "object"
+                                    }
+                                  },
+                                  "required": [
+                                    "meta"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "query": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "language": {
+                                    "description": "The query language such as KQL or Lucene.",
+                                    "type": "string"
+                                  },
+                                  "query": {
+                                    "anyOf": [
+                                      {
+                                        "description": "A text-based query such as Kibana Query Language (KQL) or Lucene query language.",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "query",
+                                  "language"
+                                ],
+                                "type": "object"
+                              },
+                              "sort": {
+                                "items": {
+                                  "additionalProperties": {
+                                    "anyOf": [
+                                      {
+                                        "enum": [
+                                          "asc",
+                                          "desc"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "format": {
+                                            "type": "string"
+                                          },
+                                          "order": {
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "order"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "numeric_type": {
+                                            "enum": [
+                                              "double",
+                                              "long",
+                                              "date",
+                                              "date_nanos"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          "order": {
+                                            "enum": [
+                                              "asc",
+                                              "desc"
+                                            ],
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "order"
+                                        ],
+                                        "type": "object"
+                                      }
+                                    ]
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "options": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "hidePanelTitles": {
+                            "default": false,
+                            "description": "Hide the panel titles in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "syncColors": {
+                            "default": true,
+                            "description": "Synchronize colors between related panels in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "syncCursor": {
+                            "default": true,
+                            "description": "Synchronize cursor position between related panels in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "syncTooltips": {
+                            "default": true,
+                            "description": "Synchronize tooltips between related panels in the dashboard.",
+                            "type": "boolean"
+                          },
+                          "useMargins": {
+                            "default": true,
+                            "description": "Show margins between panels in the dashboard layout.",
+                            "type": "boolean"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "panels": {
+                        "default": [],
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "gridData": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "h": {
+                                  "default": 15,
+                                  "description": "The height of the panel in grid units",
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "i": {
+                                  "description": "The unique identifier of the panel",
+                                  "type": "string"
+                                },
+                                "w": {
+                                  "default": 24,
+                                  "description": "The width of the panel in grid units",
+                                  "maximum": 48,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "x": {
+                                  "description": "The x coordinate of the panel in grid units",
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "description": "The y coordinate of the panel in grid units",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "type": "object"
+                            },
+                            "id": {
+                              "description": "The saved object id for by reference panels",
+                              "type": "string"
+                            },
+                            "panelConfig": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "description": {
+                                  "description": "The description of the panel",
+                                  "type": "string"
+                                },
+                                "enhancements": {
+                                  "additionalProperties": {},
+                                  "type": "object"
+                                },
+                                "hidePanelTitles": {
+                                  "description": "Set to true to hide the panel title in its container.",
+                                  "type": "boolean"
+                                },
+                                "savedObjectId": {
+                                  "description": "The unique id of the library item to construct the embeddable.",
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "description": "The title of the panel",
+                                  "type": "string"
+                                },
+                                "version": {
+                                  "description": "The version of the embeddable in the panel.",
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "panelIndex": {
+                              "description": "The unique ID of the panel.",
+                              "type": "string"
+                            },
+                            "panelRefName": {
+                              "type": "string"
+                            },
+                            "title": {
+                              "description": "The title of the panel",
+                              "type": "string"
+                            },
+                            "type": {
+                              "description": "The embeddable type",
+                              "type": "string"
+                            },
+                            "version": {
+                              "deprecated": true,
+                              "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "panelConfig",
+                            "type",
+                            "gridData"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "refreshInterval": {
+                        "additionalProperties": false,
+                        "description": "A container for various refresh interval settings",
+                        "properties": {
+                          "display": {
+                            "deprecated": true,
+                            "description": "A human-readable string indicating the refresh frequency. No longer used.",
+                            "type": "string"
+                          },
+                          "pause": {
+                            "description": "Whether the refresh interval is set to be paused while viewing the dashboard.",
+                            "type": "boolean"
+                          },
+                          "section": {
+                            "deprecated": true,
+                            "description": "No longer used.",
+                            "type": "number"
+                          },
+                          "value": {
+                            "description": "A numeric value indicating refresh frequency in milliseconds.",
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "pause",
+                          "value"
+                        ],
+                        "type": "object"
+                      },
+                      "timeFrom": {
+                        "description": "An ISO string indicating when to restore time from",
+                        "type": "string"
+                      },
+                      "timeRestore": {
+                        "default": false,
+                        "description": "Whether to restore time upon viewing this dashboard",
+                        "type": "boolean"
+                      },
+                      "timeTo": {
+                        "description": "An ISO string indicating when to restore time from",
+                        "type": "string"
+                      },
+                      "title": {
+                        "description": "A human-readable title for the dashboard",
+                        "type": "string"
+                      },
+                      "version": {
+                        "deprecated": true,
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "title",
+                      "options"
+                    ],
+                    "type": "object"
+                  },
+                  "references": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "type",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "attributes"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json; Elastic-Api-Version=2023-10-31": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": true,
+                      "properties": {
+                        "attributes": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "controlGroupInput": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "autoApplySelections": {
+                                  "default": true,
+                                  "description": "Show apply selections button in controls.",
+                                  "type": "boolean"
+                                },
+                                "chainingSystem": {
+                                  "default": "HIERARCHICAL",
+                                  "description": "The chaining strategy for multiple controls. For example, \"HIERARCHICAL\" or \"NONE\".",
+                                  "enum": [
+                                    "NONE",
+                                    "HIERARCHICAL"
+                                  ],
+                                  "type": "string"
+                                },
+                                "controls": {
+                                  "default": [],
+                                  "description": "An array of control panels and their state in the control group.",
+                                  "items": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "controlConfig": {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      },
+                                      "grow": {
+                                        "default": false,
+                                        "description": "Expand width of the control panel to fit available space.",
+                                        "type": "boolean"
+                                      },
+                                      "id": {
+                                        "description": "The unique ID of the control.",
+                                        "type": "string"
+                                      },
+                                      "order": {
+                                        "description": "The order of the control panel in the control group.",
+                                        "type": "number"
+                                      },
+                                      "type": {
+                                        "description": "The type of the control panel.",
+                                        "type": "string"
+                                      },
+                                      "width": {
+                                        "default": "medium",
+                                        "description": "Minimum width of the control panel in the control group.",
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large"
+                                        ],
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "order"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "enhancements": {
+                                  "additionalProperties": {},
+                                  "type": "object"
+                                },
+                                "ignoreParentSettings": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "ignoreFilters": {
+                                      "default": false,
+                                      "description": "Ignore global filters in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreQuery": {
+                                      "default": false,
+                                      "description": "Ignore the global query bar in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreTimerange": {
+                                      "default": false,
+                                      "description": "Ignore the global time range in controls.",
+                                      "type": "boolean"
+                                    },
+                                    "ignoreValidations": {
+                                      "default": false,
+                                      "description": "Ignore validations in controls.",
+                                      "type": "boolean"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "labelPosition": {
+                                  "default": "oneLine",
+                                  "description": "Position of the labels for controls. For example, \"oneLine\", \"twoLine\".",
+                                  "enum": [
+                                    "oneLine",
+                                    "twoLine"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "ignoreParentSettings"
+                              ],
+                              "type": "object"
+                            },
+                            "description": {
+                              "default": "",
+                              "description": "A short description.",
+                              "type": "string"
+                            },
+                            "kibanaSavedObjectMeta": {
+                              "additionalProperties": false,
+                              "default": {},
+                              "description": "A container for various metadata",
+                              "properties": {
+                                "searchSource": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "filter": {
+                                      "items": {
+                                        "additionalProperties": false,
+                                        "description": "A filter for the search source.",
+                                        "properties": {
+                                          "$state": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                              "store": {
+                                                "description": "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+                                                "enum": [
+                                                  "appState",
+                                                  "globalState"
+                                                ],
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "store"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "meta": {
+                                            "additionalProperties": true,
+                                            "properties": {
+                                              "alias": {
+                                                "nullable": true,
+                                                "type": "string"
+                                              },
+                                              "controlledBy": {
+                                                "type": "string"
+                                              },
+                                              "disabled": {
+                                                "type": "boolean"
+                                              },
+                                              "field": {
+                                                "type": "string"
+                                              },
+                                              "group": {
+                                                "type": "string"
+                                              },
+                                              "index": {
+                                                "type": "string"
+                                              },
+                                              "isMultiIndex": {
+                                                "type": "boolean"
+                                              },
+                                              "key": {
+                                                "type": "string"
+                                              },
+                                              "negate": {
+                                                "type": "boolean"
+                                              },
+                                              "params": {},
+                                              "type": {
+                                                "type": "string"
+                                              },
+                                              "value": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "params"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          "query": {
+                                            "additionalProperties": {},
+                                            "type": "object"
+                                          }
+                                        },
+                                        "required": [
+                                          "meta"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "query": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "language": {
+                                          "description": "The query language such as KQL or Lucene.",
+                                          "type": "string"
+                                        },
+                                        "query": {
+                                          "anyOf": [
+                                            {
+                                              "description": "A text-based query such as Kibana Query Language (KQL) or Lucene query language.",
+                                              "type": "string"
+                                            },
+                                            {
+                                              "additionalProperties": {},
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "query",
+                                        "language"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "sort": {
+                                      "items": {
+                                        "additionalProperties": {
+                                          "anyOf": [
+                                            {
+                                              "enum": [
+                                                "asc",
+                                                "desc"
+                                              ],
+                                              "type": "string"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "format": {
+                                                  "type": "string"
+                                                },
+                                                "order": {
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "order"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "numeric_type": {
+                                                  "enum": [
+                                                    "double",
+                                                    "long",
+                                                    "date",
+                                                    "date_nanos"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                "order": {
+                                                  "enum": [
+                                                    "asc",
+                                                    "desc"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "order"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        },
+                                        "type": "object"
+                                      },
+                                      "type": "array"
+                                    },
+                                    "type": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "options": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "hidePanelTitles": {
+                                  "default": false,
+                                  "description": "Hide the panel titles in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncColors": {
+                                  "default": true,
+                                  "description": "Synchronize colors between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncCursor": {
+                                  "default": true,
+                                  "description": "Synchronize cursor position between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "syncTooltips": {
+                                  "default": true,
+                                  "description": "Synchronize tooltips between related panels in the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "useMargins": {
+                                  "default": true,
+                                  "description": "Show margins between panels in the dashboard layout.",
+                                  "type": "boolean"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "panels": {
+                              "default": [],
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "gridData": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "h": {
+                                        "default": 15,
+                                        "description": "The height of the panel in grid units",
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "i": {
+                                        "type": "string"
+                                      },
+                                      "w": {
+                                        "default": 24,
+                                        "description": "The width of the panel in grid units",
+                                        "maximum": 48,
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "x": {
+                                        "description": "The x coordinate of the panel in grid units",
+                                        "type": "number"
+                                      },
+                                      "y": {
+                                        "description": "The y coordinate of the panel in grid units",
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "x",
+                                      "y",
+                                      "i"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "id": {
+                                    "description": "The saved object id for by reference panels",
+                                    "type": "string"
+                                  },
+                                  "panelConfig": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "description": {
+                                        "description": "The description of the panel",
+                                        "type": "string"
+                                      },
+                                      "enhancements": {
+                                        "additionalProperties": {},
+                                        "type": "object"
+                                      },
+                                      "hidePanelTitles": {
+                                        "description": "Set to true to hide the panel title in its container.",
+                                        "type": "boolean"
+                                      },
+                                      "savedObjectId": {
+                                        "description": "The unique id of the library item to construct the embeddable.",
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "description": "The title of the panel",
+                                        "type": "string"
+                                      },
+                                      "version": {
+                                        "description": "The version of the embeddable in the panel.",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "type": "object"
+                                  },
+                                  "panelIndex": {
+                                    "type": "string"
+                                  },
+                                  "panelRefName": {
+                                    "type": "string"
+                                  },
+                                  "title": {
+                                    "description": "The title of the panel",
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "description": "The embeddable type",
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "deprecated": true,
+                                    "description": "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "panelConfig",
+                                  "type",
+                                  "gridData",
+                                  "panelIndex"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "refreshInterval": {
+                              "additionalProperties": false,
+                              "description": "A container for various refresh interval settings",
+                              "properties": {
+                                "display": {
+                                  "deprecated": true,
+                                  "description": "A human-readable string indicating the refresh frequency. No longer used.",
+                                  "type": "string"
+                                },
+                                "pause": {
+                                  "description": "Whether the refresh interval is set to be paused while viewing the dashboard.",
+                                  "type": "boolean"
+                                },
+                                "section": {
+                                  "deprecated": true,
+                                  "description": "No longer used.",
+                                  "type": "number"
+                                },
+                                "value": {
+                                  "description": "A numeric value indicating refresh frequency in milliseconds.",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "pause",
+                                "value"
+                              ],
+                              "type": "object"
+                            },
+                            "timeFrom": {
+                              "description": "An ISO string indicating when to restore time from",
+                              "type": "string"
+                            },
+                            "timeRestore": {
+                              "default": false,
+                              "description": "Whether to restore time upon viewing this dashboard",
+                              "type": "boolean"
+                            },
+                            "timeTo": {
+                              "description": "An ISO string indicating when to restore time from",
+                              "type": "string"
+                            },
+                            "title": {
+                              "description": "A human-readable title for the dashboard",
+                              "type": "string"
+                            },
+                            "version": {
+                              "deprecated": true,
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "options"
+                          ],
+                          "type": "object"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "error": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "error": {
+                              "type": "string"
+                            },
+                            "message": {
+                              "type": "string"
+                            },
+                            "metadata": {
+                              "additionalProperties": true,
+                              "properties": {},
+                              "type": "object"
+                            },
+                            "statusCode": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "error",
+                            "message",
+                            "statusCode"
+                          ],
+                          "type": "object"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "managed": {
+                          "type": "boolean"
+                        },
+                        "namespaces": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "originId": {
+                          "type": "string"
+                        },
+                        "references": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "type",
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        },
+                        "updatedBy": {
+                          "type": "string"
+                        },
+                        "version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "attributes",
+                        "references"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update an existing dashboard",
+        "tags": [
+          "Dashboards"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/security/role": {
+      "get": {
+        "operationId": "get-security-role",
+        "parameters": [
           {
             "description": "If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.",
             "in": "query",
@@ -6234,18 +9145,6 @@
       "delete": {
         "operationId": "delete-security-role-name",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -6279,18 +9178,6 @@
       "get": {
         "operationId": "get-security-role-name",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "The role name.",
             "in": "path",
@@ -6326,18 +9213,6 @@
         "operationId": "put-security-role-name",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -6371,7 +9246,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -6645,18 +9520,6 @@
         "operationId": "post-security-roles",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -6669,7 +9532,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -6956,18 +9819,6 @@
         "operationId": "post-spaces-copy-saved-objects",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -6980,7 +9831,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7054,18 +9905,6 @@
         "operationId": "post-spaces-disable-legacy-url-aliases",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7078,7 +9917,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7130,18 +9969,6 @@
         "operationId": "post-spaces-get-shareable-references",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7154,7 +9981,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7199,18 +10026,6 @@
         "operationId": "post-spaces-resolve-copy-saved-objects-errors",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7223,7 +10038,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7320,18 +10135,6 @@
         "operationId": "post-spaces-update-objects-spaces",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7344,7 +10147,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7405,18 +10208,6 @@
       "get": {
         "operationId": "get-spaces-space",
         "parameters": [
-          {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
           {
             "description": "Specifies which authorization checks are applied to the API call. The default value is `any`.",
             "in": "query",
@@ -7486,18 +10277,6 @@
         "operationId": "post-spaces-space",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7510,7 +10289,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7587,18 +10366,6 @@
         "operationId": "delete-spaces-space-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7635,18 +10402,6 @@
         "operationId": "get-spaces-space-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "The space identifier.",
             "in": "path",
             "name": "id",
@@ -7670,18 +10425,6 @@
         "operationId": "put-spaces-space-id",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
             "name": "kbn-xsrf",
@@ -7703,7 +10446,7 @@
         ],
         "requestBody": {
           "content": {
-            "application/json; Elastic-Api-Version=2023-10-31": {
+            "application/json": {
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -7779,18 +10522,6 @@
         "operationId": "get-status",
         "parameters": [
           {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": {
-              "default": "2023-10-31",
-              "enum": [
-                "2023-10-31"
-              ],
-              "type": "string"
-            }
-          },
-          {
             "description": "Set to \"true\" to get the response in v7 format.",
             "in": "query",
             "name": "v7format",
@@ -7812,7 +10543,7 @@
         "responses": {
           "200": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "anyOf": [
                     {
@@ -7830,7 +10561,7 @@
           },
           "503": {
             "content": {
-              "application/json; Elastic-Api-Version=2023-10-31": {
+              "application/json": {
                 "schema": {
                   "anyOf": [
                     {
@@ -7870,6 +10601,9 @@
     },
     {
       "name": "connectors"
+    },
+    {
+      "name": "Dashboards"
     },
     {
       "name": "roles"

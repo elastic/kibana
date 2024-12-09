@@ -17,14 +17,18 @@ export async function getHasData({
   logger: Logger;
 }) {
   try {
-    const esqlResults = await inventoryEsClient.esql<{ _count: number }>('get_has_data', {
-      query: `FROM ${ENTITIES_LATEST_ALIAS} 
+    const esqlResults = await inventoryEsClient.esql<{ _count: number }, { transform: 'plain' }>(
+      'get_has_data',
+      {
+        query: `FROM ${ENTITIES_LATEST_ALIAS} 
       | ${getBuiltinEntityDefinitionIdESQLWhereClause()} 
       | STATS _count = COUNT(*)
       | LIMIT 1`,
-    });
+      },
+      { transform: 'plain' }
+    );
 
-    const totalCount = esqlResults[0]._count;
+    const totalCount = esqlResults.hits[0]._count;
 
     return { hasData: totalCount > 0 };
   } catch (e) {

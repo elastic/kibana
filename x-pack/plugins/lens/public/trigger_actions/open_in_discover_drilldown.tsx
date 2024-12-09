@@ -21,7 +21,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import { DOC_TYPE } from '../../common/constants';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
-import { LensApi } from '../embeddable';
+import { LensApi } from '../react_embeddable/types';
 
 export const getDiscoverHelpersAsync = async () => await import('../async_services');
 

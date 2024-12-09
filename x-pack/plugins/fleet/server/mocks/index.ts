@@ -29,6 +29,7 @@ import { createFleetActionsClientMock } from '../services/actions/mocks';
 import { createFleetFilesClientFactoryMock } from '../services/files/mocks';
 
 import { createArtifactsClientMock } from '../services/artifacts/mocks';
+import { createOutputClientMock } from '../services/output_client.mock';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
@@ -301,6 +302,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     uninstallTokenService: createUninstallTokenServiceMock(),
     createFleetActionsClient: jest.fn((_) => fleetActionsClient),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
+    createOutputClient: jest.fn(async (_) => createOutputClientMock()),
   };
 
   return startContract;

@@ -17,9 +17,9 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/core-http-browser",
     "@kbn/rule-data-utils",
     "@kbn/core",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/core-http-browser-mocks"
   ]
 }

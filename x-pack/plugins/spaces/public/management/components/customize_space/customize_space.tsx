@@ -122,32 +122,31 @@ export class CustomizeSpace extends Component<Props, State> {
             />
           </EuiFormRow>
 
-          {editingExistingSpace ? null : (
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
-                  defaultMessage="URL identifier"
-                />
-              }
-              helpText={
-                <FormattedMessage
-                  id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
-                  defaultMessage="You can't change the URL identifier once created."
-                />
-              }
-              {...this.props.validator.validateURLIdentifier(this.props.space)}
-              fullWidth
-            >
-              <EuiFieldText
-                data-test-subj="spaceURLDisplay"
-                value={this.props.space.id ?? ''}
-                onChange={this.onSpaceIdentifierChange}
-                isInvalid={this.props.validator.validateURLIdentifier(this.props.space).isInvalid}
-                fullWidth
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
+                defaultMessage="URL identifier"
               />
-            </EuiFormRow>
-          )}
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
+                defaultMessage="You can't change the URL identifier once created."
+              />
+            }
+            {...this.props.validator.validateURLIdentifier(this.props.space)}
+            fullWidth
+          >
+            <EuiFieldText
+              data-test-subj="spaceURLDisplay"
+              value={this.props.space.id ?? ''}
+              onChange={this.onSpaceIdentifierChange}
+              isInvalid={this.props.validator.validateURLIdentifier(this.props.space).isInvalid}
+              disabled={editingExistingSpace}
+              fullWidth
+            />
+          </EuiFormRow>
         </EuiDescribedFormGroup>
       </SectionPanel>
     );

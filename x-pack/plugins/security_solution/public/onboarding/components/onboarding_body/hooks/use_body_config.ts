@@ -5,51 +5,26 @@
  * 2.0.
  */
 
-import useObservable from 'react-use/lib/useObservable';
 import { useMemo } from 'react';
-import { hasCapabilities } from '../../../../common/lib/capabilities';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { bodyConfig } from '../body_config';
+import { useOnboardingContext } from '../../onboarding_context';
+import { useTopicId } from '../../hooks/use_topic_id';
 import type { OnboardingGroupConfig } from '../../../types';
 
 /**
- * Hook that filters the config based on the user's capabilities and license
+ * Hook that returns the body config for the selected topic
  */
-export const useBodyConfig = () => {
-  const { application, licensing } = useKibana().services;
-  const license = useObservable(licensing.license$);
-
-  const filteredBodyConfig = useMemo(() => {
-    // Return empty array when the license is not defined. It should always become defined at some point.
-    // This exit case prevents code dependant on the cards config (like completion checks) from running multiple times.
-    if (!license) {
-      return [];
+export const useBodyConfig = (): OnboardingGroupConfig[] => {
+  const topicId = useTopicId();
+  const { config } = useOnboardingContext();
+  const topicBodyConfig = useMemo(() => {
+    let bodyConfig: OnboardingGroupConfig[] = [];
+    const topicConfig = config.get(topicId);
+    // The selected topic should always exist in the config, but we check just in case
+    if (topicConfig) {
+      bodyConfig = topicConfig.body;
     }
-    return bodyConfig.reduce<OnboardingGroupConfig[]>((filteredGroups, group) => {
-      const filteredCards = group.cards.filter((card) => {
-        if (card.capabilities) {
-          const cardHasCapabilities = hasCapabilities(application.capabilities, card.capabilities);
-          if (!cardHasCapabilities) {
-            return false;
-          }
-        }
+    return bodyConfig;
+  }, [config, topicId]);
 
-        if (card.licenseType) {
-          const cardHasLicense = license.hasAtLeast(card.licenseType);
-          if (!cardHasLicense) {
-            return false;
-          }
-        }
-
-        return true;
-      });
-
-      if (filteredCards.length > 0) {
-        filteredGroups.push({ ...group, cards: filteredCards });
-      }
-      return filteredGroups;
-    }, []);
-  }, [license, application.capabilities]);
-
-  return filteredBodyConfig;
+  return topicBodyConfig;
 };

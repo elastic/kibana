@@ -6,7 +6,7 @@
  */
 
 import { getUserDisplayName, useProcessData } from './use_process_data';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
 import React from 'react';

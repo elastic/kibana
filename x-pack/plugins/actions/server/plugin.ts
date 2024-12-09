@@ -144,6 +144,7 @@ export interface PluginSetupContract {
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
+
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 }
 
@@ -172,6 +173,7 @@ export interface PluginStartContract {
     params: Params,
     variables: Record<string, unknown>
   ): Params;
+
   isSystemActionConnector: (connectorId: string) => boolean;
 }
 

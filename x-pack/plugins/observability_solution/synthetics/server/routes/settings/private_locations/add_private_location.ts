@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
@@ -38,10 +39,12 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       body: PrivateLocationSchema,
     },
   },
+  requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    await migrateLegacyPrivateLocations(routeContext);
+    const { response, request, savedObjectsClient, syntheticsMonitorClient, server } = routeContext;
+    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
 
-    const { response, request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
+    await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
     const location = request.body as PrivateLocationObject;
 

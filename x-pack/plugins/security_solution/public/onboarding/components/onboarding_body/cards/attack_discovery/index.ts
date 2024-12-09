@@ -22,6 +22,6 @@ export const attackDiscoveryCardConfig: OnboardingCardConfig = {
         './attack_discovery_card'
       )
   ),
-  capabilities: 'securitySolutionAttackDiscovery.attack-discovery',
-  licenseType: 'enterprise',
+  capabilitiesRequired: 'securitySolutionAttackDiscovery.attack-discovery',
+  licenseTypeRequired: 'enterprise',
 };

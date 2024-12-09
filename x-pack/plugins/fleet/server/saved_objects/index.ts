@@ -213,6 +213,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           schema_version: { type: 'version' },
@@ -304,6 +305,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -315,6 +324,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           schema_version: { type: 'version' },
@@ -347,6 +357,16 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
         },
       },
     },
@@ -601,6 +621,7 @@ export const getSavedObjectTypes = (
           },
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
+          supports_agentless: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
@@ -761,6 +782,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '16': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                supports_agentless: { type: 'boolean' },
+              },
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -816,6 +847,7 @@ export const getSavedObjectTypes = (
           },
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
+          supports_agentless: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
@@ -831,6 +863,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 bump_agent_policy_revision: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                supports_agentless: { type: 'boolean' },
               },
             },
           ],

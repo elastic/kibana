@@ -8,14 +8,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import type { TimeRange } from '@kbn/es-query';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { INFRA_ALERT_CONSUMERS } from '../../../../common/constants';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
-import { ALERT_STATUS_ALL, infraAlertFeatureIds } from './constants';
+import { ALERT_STATUS_ALL } from './constants';
 import AlertsStatusFilter from './alerts_status_filter';
 import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
@@ -26,8 +27,6 @@ interface AlertsOverviewProps {
   onRangeSelection?: (dateRange: TimeRange) => void;
   assetType?: InventoryItemType;
 }
-
-const alertFeatureIds = [...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY];
 
 export const AlertsOverview = ({
   assetId,
@@ -114,7 +113,8 @@ export const AlertsOverview = ({
       <EuiFlexItem>
         <AlertSummaryWidget
           chartProps={chartProps}
-          featureIds={infraAlertFeatureIds}
+          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+          consumers={INFRA_ALERT_CONSUMERS}
           filter={alertsEsQuery}
           timeRange={summaryTimeRange}
           onLoaded={onLoaded}
@@ -127,7 +127,8 @@ export const AlertsOverview = ({
           alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
           id={'assetDetailsAlertsTable'}
           configurationId={AlertConsumers.OBSERVABILITY}
-          featureIds={alertFeatureIds}
+          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+          consumers={INFRA_ALERT_CONSUMERS}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
           initialPageSize={5}

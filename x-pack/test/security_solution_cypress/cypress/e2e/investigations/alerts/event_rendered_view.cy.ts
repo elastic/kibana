@@ -33,8 +33,7 @@ import {
   XY_CHART,
 } from '../../../screens/shared';
 
-// skipping as this test is also failing on main (see https://github.com/elastic/security-team/issues/10874)
-describe.skip(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());
@@ -44,12 +43,16 @@ describe.skip(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
     waitForAlerts();
   });
 
-  it('should show Event Summary column correctly', () => {
+  // skipping as this test is also failing on main (see https://github.com/elastic/security-team/issues/10874)
+  // Looks like the height of the new table isn't being properly calculated. Making the table full screen shows the rows appropriately
+  it.skip('should show Event Summary column correctly', () => {
     cy.get(EVENT_SUMMARY_COLUMN).should('be.visible');
     cy.get(EVENT_SUMMARY_ALERT_RENDERER_CONTENT).should('be.visible');
   });
 
-  it('should show TopN in Event Summary column', () => {
+  // skipping as this test is also failing on main (see https://github.com/elastic/security-team/issues/10874)
+  // Looks like the height of the new table isn't being properly calculated. Making the table full screen shows the rows appropriately
+  it.skip('should show TopN in Event Summary column', () => {
     showHoverActionsEventRenderedView(ALERT_RENDERER_HOST_NAME);
     cy.get(HOVER_ACTIONS.SHOW_TOP).trigger('click');
     cy.get(TOP_N_ALERT_HISTOGRAM).should('be.visible');

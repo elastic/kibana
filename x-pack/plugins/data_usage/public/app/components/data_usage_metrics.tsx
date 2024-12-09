@@ -17,7 +17,12 @@ import { PLUGIN_NAME } from '../../translations';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
-import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
+import {
+  DEFAULT_DATE_RANGE_OPTIONS,
+  transformToUTCtime,
+  isDateRangeValid,
+} from '../../../common/utils';
+import { useDateRangePicker } from '../hooks/use_date_picker';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
 import { ChartsLoading } from './charts_loading';
 import { NoDataCallout } from './no_data_callout';
@@ -104,11 +109,39 @@ export const DataUsageMetrics = memo(
         ...prevState,
         metricTypes: metricTypesFromUrl?.length ? metricTypesFromUrl : prevState.metricTypes,
         dataStreams: dataStreamsFromUrl?.length ? dataStreamsFromUrl : prevState.dataStreams,
+        from: startDateFromUrl ?? prevState.from,
+        to: endDateFromUrl ?? prevState.to,
       }));
-    }, [metricTypesFromUrl, dataStreamsFromUrl]);
+    }, [metricTypesFromUrl, dataStreamsFromUrl, startDateFromUrl, endDateFromUrl]);
 
     const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
+    const isValidDateRange = useMemo(
+      () =>
+        isDateRangeValid({
+          start: dateRangePickerState.startDate,
+          end: dateRangePickerState.endDate,
+        }),
+      [dateRangePickerState.endDate, dateRangePickerState.startDate]
+    );
+
+    const enableFetchUsageMetricsData = useMemo(
+      () =>
+        isValidDateRange &&
+        metricsFilters.dataStreams.length > 0 &&
+        metricsFilters.metricTypes.length > 0,
+      [isValidDateRange, metricsFilters.dataStreams, metricsFilters.metricTypes]
+    );
+
+    const utcTimeRange = useMemo(
+      () =>
+        transformToUTCtime({
+          start: dateRangePickerState.startDate,
+          end: dateRangePickerState.endDate,
+          isISOString: true,
+        }),
+      [dateRangePickerState]
+    );
     const {
       error: errorFetchingDataUsageMetrics,
       data: usageMetricsData,
@@ -118,12 +151,12 @@ export const DataUsageMetrics = memo(
     } = useGetDataUsageMetrics(
       {
         ...metricsFilters,
-        from: dateRangePickerState.startDate,
-        to: dateRangePickerState.endDate,
+        from: utcTimeRange.start as string,
+        to: utcTimeRange.end as string,
       },
       {
         retry: false,
-        enabled: !!(metricsFilters.dataStreams.length && metricsFilters.metricTypes.length),
+        enabled: enableFetchUsageMetricsData,
       }
     );
 
@@ -134,8 +167,11 @@ export const DataUsageMetrics = memo(
     }, [isFetching, hasFetchedDataUsageMetricsData]);
 
     const onRefresh = useCallback(() => {
+      if (!enableFetchUsageMetricsData) {
+        return;
+      }
       refetchDataUsageMetrics();
-    }, [refetchDataUsageMetrics]);
+    }, [enableFetchUsageMetricsData, refetchDataUsageMetrics]);
 
     const onChangeDataStreamsFilter = useCallback(
       (selectedDataStreams: string[]) => {
@@ -206,6 +242,7 @@ export const DataUsageMetrics = memo(
           <ChartFilters
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isFetchingDataStreams}
+            isUpdateDisabled={!enableFetchUsageMetricsData}
             onClick={refetchDataUsageMetrics}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}

@@ -20,6 +20,12 @@ export const registerBulkGetRoute = (
   router.post(
     {
       path: '/api/kibana/management/saved_objects/_bulk_get',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

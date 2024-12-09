@@ -21,6 +21,12 @@ export const registerRelationshipsRoute = (
   router.get(
     {
       path: '/api/kibana/management/saved_objects/relationships/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
