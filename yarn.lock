@@ -4236,7 +4236,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-favorites-public@link:packages/content-management/favorites/favorites_public":
+"@kbn/content-management-favorites-public@link:src/platform/packages/shared/content-management/favorites/favorites_public":
   version "0.0.0"
   uid ""
 
