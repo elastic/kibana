@@ -7348,7 +7348,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-types@link:packages/shared-ux/page/analytics_no_data/types":
+"@kbn/shared-ux-page-analytics-no-data-types@link:src/platform/packages/private/shared-ux/page/analytics_no_data/types":
   version "0.0.0"
   uid ""
 
