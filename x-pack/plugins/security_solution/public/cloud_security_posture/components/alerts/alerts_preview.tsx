@@ -93,7 +93,7 @@ export const AlertsPreview = ({
   const { goToEntityInsightTab } = useNavigateEntityInsight({
     field,
     value,
-    queryIdExtension: 'ALERTS_PREVIEW',
+    queryIdExtension: isPreviewMode ? 'ALERTS_PREVIEW_TRUE' : 'ALERTS_PREVIEW_FALSE',
     subTab: CspInsightLeftPanelSubTab.ALERTS,
   });
   const link = useMemo(

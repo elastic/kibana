@@ -115,6 +115,40 @@ describe('single line query', () => {
         expect(text).toBe('FROM index | DISSECT input "pattern" APPEND_SEPARATOR = "<separator>"');
       });
     });
+
+    describe('JOIN', () => {
+      test('example from docs', () => {
+        const { text } = reprint(`
+          FROM employees
+            | EVAL language_code = languages
+            | LOOKUP JOIN languages_lookup ON language_code
+            | WHERE emp_no < 500
+            | KEEP emp_no, language_name
+            | SORT emp_no
+            | LIMIT 10
+        `);
+
+        expect(text).toBe(
+          'FROM employees | EVAL language_code = languages | LOOKUP JOIN languages_lookup ON language_code | WHERE emp_no < 500 | KEEP emp_no, language_name | SORT emp_no | LIMIT 10'
+        );
+      });
+
+      test('supports aliases', () => {
+        const { text } = reprint(`
+          FROM employees | LEFT JOIN languages_lookup AS something ON language_code`);
+
+        expect(text).toBe(
+          'FROM employees | LEFT JOIN languages_lookup AS something ON language_code'
+        );
+      });
+
+      test('supports multiple conditions', () => {
+        const { text } = reprint(`
+          FROM employees | LEFT JOIN a ON b, c, d.e.f`);
+
+        expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
+      });
+    });
   });
 
   describe('expressions', () => {
