@@ -28,6 +28,12 @@ export const WORKFLOW_INSIGHTS = {
     button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
       defaultMessage: 'Scan',
     }),
+    loading: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.scan.loading',
+      {
+        defaultMessage: 'Loading...',
+      }
+    ),
   },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
@@ -37,6 +43,26 @@ export const WORKFLOW_INSIGHTS = {
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {
         defaultMessage: 'No issues had been found',
+      }
+    ),
+  },
+  toasts: {
+    scanError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.error',
+      {
+        defaultMessage: 'Failed to start scan',
+      }
+    ),
+    fetchInsightsError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.fetchInsightsError',
+      {
+        defaultMessage: 'Failed to fetch insights',
+      }
+    ),
+    fetchPendingInsightsError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.fetchPendingInsightsError',
+      {
+        defaultMessage: 'Failed to retrieve insights in the generation process',
       }
     ),
   },

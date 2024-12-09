@@ -44,7 +44,7 @@ export function buildIncompatibleAntivirusWorkflowInsights(
       },
       target: {
         type: TargetType.Endpoint,
-        ids: endpointIds,
+        id: endpointIds,
       },
       action: {
         type: ActionType.Refreshed,
@@ -54,15 +54,15 @@ export function buildIncompatibleAntivirusWorkflowInsights(
       remediation: {
         exception_list_items: [
           {
-            list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+            list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
             name: defendInsight.group,
             description: 'Suggested by Security Workflow Insights',
             entries: [
               {
-                field: 'file.path.caseless',
+                field: 'process.executable.caseless', // TODO: handle different OS keys
                 operator: 'included',
-                type: 'match_any',
-                value: filePaths,
+                type: 'wildcard', // TODO: verify this is correct
+                value: filePaths[0], // TODO: handle multiple file paths?
               },
             ],
             // TODO add per policy support

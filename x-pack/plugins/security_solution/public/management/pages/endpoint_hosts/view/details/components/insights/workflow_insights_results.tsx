@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
   EuiButtonIcon,
@@ -20,8 +20,16 @@ import {
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 
 interface WorkflowInsightsResultsProps {
-  results: boolean;
+  results?: SecurityWorkflowInsight[];
+  scanCompleted: boolean;
+  endpointId: string;
+  endpointOs?: string;
 }
+import type { EndpointInsightRouteState } from '../../../../types';
+import { getEndpointDetailsPath } from '../../../../../../common/routing';
+import { useKibana } from '../../../../../../../common/lib/kibana';
+import { APP_PATH, TRUSTED_APPS_PATH } from '../../../../../../../../common/constants';
+import type { SecurityWorkflowInsight } from '../../../../../../../../common/endpoint/types/workflow_insights';
 
 const CustomEuiCallOut = styled(EuiCallOut)`
   & .euiButtonIcon {
@@ -29,51 +37,122 @@ const CustomEuiCallOut = styled(EuiCallOut)`
   }
 `;
 
-export const WorkflowInsightsResults = ({ results }: WorkflowInsightsResultsProps) => {
-  const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(true);
+export const WorkflowInsightsResults = ({
+  results,
+  scanCompleted,
+  endpointId,
+  endpointOs,
+}: WorkflowInsightsResultsProps) => {
+  const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(false);
   const hideEmptyStateCallout = () => setShowEmptyResultsCallout(false);
-  if (!results) {
-    return null;
-  }
 
-  return (
-    <>
-      <EuiText size={'s'}>
-        <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
-      </EuiText>
-      <EuiSpacer size={'s'} />
-      <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
-        <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" size="l" color="warning" />
-          </EuiFlexItem>
+  const {
+    application: { navigateToUrl },
+  } = useKibana().services;
 
-          <EuiFlexItem>
-            <EuiText size="s">
-              <EuiText size={'s'}>
-                <strong>{'McAfee EndpointSecurity'}</strong>
-              </EuiText>
-              <EuiText size={'s'} color={'subdued'}>
-                {'Add McAfee as a trusted application'}
-              </EuiText>
-            </EuiText>
-          </EuiFlexItem>
+  useEffect(() => {
+    setShowEmptyResultsCallout(results?.length === 0 && scanCompleted);
+  }, [results, scanCompleted]);
 
-          <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-            <EuiButtonIcon
-              iconType="popout"
-              aria-label="External link"
-              href="https://google.com"
-              target="_blank"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      {showEmptyResultsCallout && (
+  const openArtifactCreationPage = ({
+    remediation,
+  }: Pick<SecurityWorkflowInsight, 'remediation'>) => {
+    const url = `${APP_PATH}${TRUSTED_APPS_PATH}?show=create`;
+
+    // TODO: handle multiple exception list items
+    const state: EndpointInsightRouteState | {} = {
+      ...(remediation.exception_list_items && remediation.exception_list_items.length
+        ? {
+            insight: {
+              back_url: `${APP_PATH}${getEndpointDetailsPath({
+                name: 'endpointDetails',
+                selected_endpoint: endpointId,
+              })}`,
+              item: {
+                comments: [],
+                description: remediation.exception_list_items[0].description,
+                entries: remediation.exception_list_items[0].entries,
+                list_id: remediation.exception_list_items[0].list_id,
+                name: remediation.exception_list_items[0].name,
+                namespace_type: 'agnostic',
+                tags: remediation.exception_list_items[0].tags,
+                type: 'simple',
+                os_types: [endpointOs], // TODO: is this needed?
+              },
+            },
+          }
+        : {}),
+    };
+
+    navigateToUrl(url, {
+      state,
+    });
+  };
+
+  const onInsightClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    { remediation }: Pick<SecurityWorkflowInsight, 'remediation'>
+  ) => {
+    e.preventDefault();
+    openArtifactCreationPage({ remediation });
+  };
+
+  const renderContent = () => {
+    if (showEmptyResultsCallout) {
+      return (
         <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
           {WORKFLOW_INSIGHTS.issues.emptyResults}
         </CustomEuiCallOut>
-      )}
+      );
+    } else if (results?.length) {
+      return results.map((insight, index) => {
+        return (
+          <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
+            <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="warning" size="l" color="warning" />
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <EuiText size={'s'}>
+                    <strong>{insight.value}</strong>
+                  </EuiText>
+                  <EuiText size={'s'} color={'subdued'}>
+                    {insight.message}
+                  </EuiText>
+                </EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+                <EuiButtonIcon
+                  aria-label="Navigate to create trusted app" // TODO: localize
+                  iconType="popout"
+                  href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
+                    onInsightClick(e, { remediation: insight.remediation })
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        );
+      });
+    }
+    return null;
+  };
+
+  return (
+    <>
+      {showEmptyResultsCallout || results?.length ? (
+        <>
+          <EuiText size={'s'}>
+            <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
+          </EuiText>
+          <EuiSpacer size={'s'} />
+        </>
+      ) : null}
+      {renderContent()}
     </>
   );
 };
