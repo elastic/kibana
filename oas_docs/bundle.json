@@ -1131,7 +1131,8 @@
                                 "license",
                                 "timeout",
                                 "disabled",
-                                "validate"
+                                "validate",
+                                "blocked"
                               ],
                               "type": "string"
                             }
@@ -1288,6 +1289,7 @@
                             "timeout",
                             "disabled",
                             "validate",
+                            "blocked",
                             "maxExecutableActions",
                             "maxAlerts",
                             "maxQueuedActions",
@@ -2305,7 +2307,8 @@
                                 "license",
                                 "timeout",
                                 "disabled",
-                                "validate"
+                                "validate",
+                                "blocked"
                               ],
                               "type": "string"
                             }
@@ -2462,6 +2465,7 @@
                             "timeout",
                             "disabled",
                             "validate",
+                            "blocked",
                             "maxExecutableActions",
                             "maxAlerts",
                             "maxQueuedActions",
@@ -3462,7 +3466,8 @@
                                 "license",
                                 "timeout",
                                 "disabled",
-                                "validate"
+                                "validate",
+                                "blocked"
                               ],
                               "type": "string"
                             }
@@ -3619,6 +3624,7 @@
                             "timeout",
                             "disabled",
                             "validate",
+                            "blocked",
                             "maxExecutableActions",
                             "maxAlerts",
                             "maxQueuedActions",
@@ -4816,7 +4822,8 @@
                                 "license",
                                 "timeout",
                                 "disabled",
-                                "validate"
+                                "validate",
+                                "blocked"
                               ],
                               "type": "string"
                             }
@@ -4973,6 +4980,7 @@
                             "timeout",
                             "disabled",
                             "validate",
+                            "blocked",
                             "maxExecutableActions",
                             "maxAlerts",
                             "maxQueuedActions",
