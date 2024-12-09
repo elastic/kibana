@@ -904,7 +904,7 @@
     "@kbn/shared-ux-page-kibana-no-data-types": "link:src/platform/packages/private/shared-ux/page/kibana_no_data/types",
     "@kbn/shared-ux-page-kibana-template": "link:src/platform/packages/shared/shared-ux/page/kibana_template/impl",
     "@kbn/shared-ux-page-kibana-template-mocks": "link:src/platform/packages/shared/shared-ux/page/kibana_template/mocks",
-    "@kbn/shared-ux-page-kibana-template-types": "link:packages/shared-ux/page/kibana_template/types",
+    "@kbn/shared-ux-page-kibana-template-types": "link:src/platform/packages/shared/shared-ux/page/kibana_template/types",
     "@kbn/shared-ux-page-no-data": "link:packages/shared-ux/page/no_data/impl",
     "@kbn/shared-ux-page-no-data-config": "link:packages/shared-ux/page/no_data_config/impl",
     "@kbn/shared-ux-page-no-data-config-mocks": "link:packages/shared-ux/page/no_data_config/mocks",

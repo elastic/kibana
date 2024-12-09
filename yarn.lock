@@ -7372,7 +7372,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-template-types@link:packages/shared-ux/page/kibana_template/types":
+"@kbn/shared-ux-page-kibana-template-types@link:src/platform/packages/shared/shared-ux/page/kibana_template/types":
   version "0.0.0"
   uid ""
 
