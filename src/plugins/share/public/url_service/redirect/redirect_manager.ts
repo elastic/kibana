@@ -39,13 +39,14 @@ export class RedirectManager {
       mount: async (params) => {
         const { render } = await import('./render');
         const [start] = await core.getStartServices();
-        const { chrome, uiSettings } = start;
+        const { chrome, uiSettings, userProfile } = start;
 
         const unmount = render(params.element, {
           manager: this,
           customBranding,
           docTitle: chrome.docTitle,
           theme,
+          userProfile,
           homeHref: getHomeHref(http, uiSettings),
         });
 
