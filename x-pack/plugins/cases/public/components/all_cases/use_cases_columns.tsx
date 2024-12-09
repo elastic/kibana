@@ -18,7 +18,6 @@ import {
   EuiButton,
   EuiLink,
   EuiIcon,
-  EuiHealth,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
@@ -38,7 +37,7 @@ import { useCasesColumnsConfiguration } from './use_cases_columns_configuration'
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { severities } from '../severity/config';
+import { severities, SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -60,7 +59,6 @@ const getLineClampedCss = css`
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
-
 export interface GetCasesColumn {
   filterStatus: string[];
   userProfiles: Map<string, UserProfileWithAvatar>;
@@ -300,12 +298,11 @@ export const useCasesColumns = ({
           if (severity != null) {
             const severityData = severities[severity ?? CaseSeverity.LOW];
             return (
-              <EuiHealth
+              <SeverityHealth
                 data-test-subj={`case-table-column-severity-${severity}`}
-                color={severityData.color}
-              >
-                {severityData.label}
-              </EuiHealth>
+                severity={severity}
+                label={severityData.label}
+              />
             );
           }
           return getEmptyCellValue();
