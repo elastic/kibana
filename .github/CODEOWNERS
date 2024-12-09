@@ -631,6 +631,7 @@ src/platform/plugins/shared/chart_expressions/expression_gauge @elastic/kibana-v
 src/platform/plugins/shared/chart_expressions/expression_heatmap @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_legacy_metric @elastic/kibana-visualizations
 src/platform/plugins/shared/chart_expressions/expression_metric @elastic/kibana-visualizations
+src/platform/plugins/shared/chart_expressions/expression_partition_vis @elastic/kibana-visualizations
 src/platform/plugins/shared/charts @elastic/kibana-visualizations
 src/platform/plugins/shared/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/plugins/shared/esql @elastic/kibana-esql
@@ -638,7 +639,6 @@ src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
-src/plugins/chart_expressions/expression_partition_vis @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_tagcloud @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_xy @elastic/kibana-visualizations
 src/plugins/console @elastic/kibana-management
