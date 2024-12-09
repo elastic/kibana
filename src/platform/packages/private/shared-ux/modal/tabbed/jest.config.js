@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/shared-ux/modal/tabbed'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/shared-ux/modal/tabbed'],
 };
