@@ -107,7 +107,12 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     const sortedDataStreamsFilterOptions = useMemo(() => {
       if (shouldPinSelectedDataStreams() || areDataStreamsSelectedOnMount) {
         // pin checked items to the top
-        return orderBy('checked', 'asc', items);
+        const sorted = orderBy(
+          'checked',
+          'asc',
+          items.filter((item) => !item.isGroupLabel)
+        );
+        return [...items.filter((item) => item.isGroupLabel), ...sorted];
       }
       // return options as are for other filters
       return items;

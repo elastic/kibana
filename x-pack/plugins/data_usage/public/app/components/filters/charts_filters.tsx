@@ -6,28 +6,27 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSuperUpdateButton } from '@elastic/eui';
-import type {
-  DurationRange,
-  OnRefreshChangeProps,
-} from '@elastic/eui/src/components/date_picker/types';
+import {
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperUpdateButton,
+  EuiText,
+  EuiTextAlign,
+} from '@elastic/eui';
+
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetDataUsageMetrics } from '../../../hooks/use_get_usage_metrics';
-import { DateRangePickerValues, UsageMetricsDateRangePicker } from './date_picker';
+import { type UsageMetricsDateRangePickerProps, UsageMetricsDateRangePicker } from './date_picker';
 import { ChartsFilter, ChartsFilterProps } from './charts_filter';
 import { FilterName } from '../../hooks';
 
-export interface ChartFiltersProps {
-  dateRangePickerState: DateRangePickerValues;
-  isDataLoading: boolean;
+export interface ChartFiltersProps extends UsageMetricsDateRangePickerProps {
   isUpdateDisabled: boolean;
+  isValidDateRange: boolean;
   filterOptions: Record<FilterName, ChartsFilterProps['filterOptions']>;
-  onRefresh: () => void;
-  onRefreshChange: (evt: OnRefreshChangeProps) => void;
-  onTimeChange: ({ start, end }: DurationRange) => void;
   onClick: ReturnType<typeof useGetDataUsageMetrics>['refetch'];
   showMetricsTypesFilter?: boolean;
-  'data-test-subj'?: string;
 }
 
 export const ChartFilters = memo<ChartFiltersProps>(
@@ -35,6 +34,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
     dateRangePickerState,
     isDataLoading,
     isUpdateDisabled,
+    isValidDateRange,
     filterOptions,
     onClick,
     onRefresh,
@@ -74,6 +74,13 @@ export const ChartFilters = memo<ChartFiltersProps>(
             onTimeChange={onTimeChange}
             data-test-subj={dataTestSubj}
           />
+          {!isValidDateRange && (
+            <EuiText color="danger" size="s">
+              <EuiTextAlign textAlign="center">
+                <p>The date range should be within 10 days from now.</p>
+              </EuiTextAlign>
+            </EuiText>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSuperUpdateButton
