@@ -20,10 +20,7 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['serverless'],
-      prototypeDocument: join(
-        ROOT,
-        'docs/openapi/detections_prototype_serverless.yaml'
-      ),
+      prototypeDocument: join(ROOT, 'docs/openapi/detections_prototype_serverless.yaml'),
     },
   });
 
@@ -35,10 +32,7 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['ess'],
-      prototypeDocument: join(
-        ROOT,
-        'docs/openapi/detections_prototype_ess.yaml'
-      ),
+      prototypeDocument: join(ROOT, 'docs/openapi/detections_prototype_ess.yaml'),
     },
   });
 })();
