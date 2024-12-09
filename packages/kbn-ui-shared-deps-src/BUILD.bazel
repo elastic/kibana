@@ -33,7 +33,7 @@ webpack_cli(
     "//packages/kbn-es-query",
     "//packages/kbn-search-errors",
     "//packages/kbn-std",
-    "//packages/kbn-safer-lodash-set",
+    "//src/platform/packages/shared/kbn-safer-lodash-set",
     "//packages/kbn-peggy",
     "//packages/kbn-peggy-loader",
     "//packages/shared-ux/error_boundary",
