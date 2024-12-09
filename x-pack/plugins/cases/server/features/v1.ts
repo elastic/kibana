@@ -12,7 +12,7 @@ import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/s
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { APP_ID, FEATURE_ID, FEATURE_ID_V2 } from '../../common/constants';
+import { APP_ID, FEATURE_ID, FEATURE_ID_V3 } from '../../common/constants';
 import { createUICapabilities, getApiTags } from '../../common';
 import { CASES_DELETE_SUB_PRIVILEGE_ID, CASES_SETTINGS_SUB_PRIVILEGE_ID } from './constants';
 
@@ -35,7 +35,7 @@ export const getV1 = (): KibanaFeatureConfig => {
           'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
         values: {
           currentId: FEATURE_ID,
-          casesFeatureIdV2: FEATURE_ID_V2,
+          casesFeatureIdV2: FEATURE_ID_V3,
         },
       }),
     },
@@ -71,10 +71,10 @@ export const getV1 = (): KibanaFeatureConfig => {
         },
         ui: capabilities.all,
         replacedBy: {
-          default: [{ feature: FEATURE_ID_V2, privileges: ['all'] }],
+          default: [{ feature: FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
             {
-              feature: FEATURE_ID_V2,
+              feature: FEATURE_ID_V3,
               privileges: ['minimal_all', 'create_comment', 'case_reopen'],
             },
           ],
@@ -94,8 +94,8 @@ export const getV1 = (): KibanaFeatureConfig => {
         },
         ui: capabilities.read,
         replacedBy: {
-          default: [{ feature: FEATURE_ID_V2, privileges: ['read'] }],
-          minimal: [{ feature: FEATURE_ID_V2, privileges: ['minimal_read'] }],
+          default: [{ feature: FEATURE_ID_V3, privileges: ['read'] }],
+          minimal: [{ feature: FEATURE_ID_V3, privileges: ['minimal_read'] }],
         },
       },
     },
@@ -124,7 +124,7 @@ export const getV1 = (): KibanaFeatureConfig => {
                 },
                 ui: capabilities.delete,
                 replacedBy: [
-                  { feature: FEATURE_ID_V2, privileges: [CASES_DELETE_SUB_PRIVILEGE_ID] },
+                  { feature: FEATURE_ID_V3, privileges: [CASES_DELETE_SUB_PRIVILEGE_ID] },
                 ],
               },
             ],
@@ -154,7 +154,7 @@ export const getV1 = (): KibanaFeatureConfig => {
                 },
                 ui: capabilities.settings,
                 replacedBy: [
-                  { feature: FEATURE_ID_V2, privileges: [CASES_SETTINGS_SUB_PRIVILEGE_ID] },
+                  { feature: FEATURE_ID_V3, privileges: [CASES_SETTINGS_SUB_PRIVILEGE_ID] },
                 ],
               },
             ],
