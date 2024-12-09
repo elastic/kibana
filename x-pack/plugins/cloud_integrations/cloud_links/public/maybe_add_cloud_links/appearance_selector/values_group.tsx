@@ -6,16 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  type EuiThemeComputed,
-  useEuiTheme,
-  EuiKeyPadMenuItem,
-} from '@elastic/eui';
-
+import { EuiIcon, EuiKeyPadMenuItem, EuiKeyPadMenu } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export interface Value<T> {
@@ -27,20 +18,13 @@ export interface Value<T> {
   betaBadgeIconType?: string;
 }
 
-const getStyles = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
-  title: css`
-    font-weight: 600;
-  `,
-  group: css`
-    padding-top: ${euiTheme.size.s};
-  `,
-});
-
 interface Props<T> {
   title: string;
   values: Array<Value<T>>;
   selectedValue: T;
   onChange: (id: T) => void;
+  ariaLabel: string;
+  // legend: string;
 }
 
 export function ValuesGroup<T extends string = string>({
@@ -48,37 +32,36 @@ export function ValuesGroup<T extends string = string>({
   values,
   onChange,
   selectedValue,
+  ariaLabel,
 }: Props<T>) {
-  const { euiTheme } = useEuiTheme();
-  const styles = getStyles({ euiTheme });
-
   return (
     <>
-      <EuiText size="xs" css={styles.title}>
-        {title}
-      </EuiText>
-
-      <EuiFlexGroup css={styles.group} gutterSize="s">
-        {values.map(
-          ({ id, label, icon, betaBadgeIconType, betaBadgeLabel, betaBadgeTooltipContent }) => (
-            <EuiFlexItem key={id} grow={false}>
-              <EuiKeyPadMenuItem
-                key={id}
-                label={label}
-                isSelected={selectedValue === id}
-                onClick={() => {
-                  onChange(id);
-                }}
-                betaBadgeLabel={betaBadgeLabel}
-                betaBadgeTooltipContent={betaBadgeTooltipContent}
-                betaBadgeIconType={betaBadgeIconType}
-              >
-                <EuiIcon type={icon} size="l" />
-              </EuiKeyPadMenuItem>
-            </EuiFlexItem>
-          )
-        )}
-      </EuiFlexGroup>
+      <EuiKeyPadMenu
+        aria-label={ariaLabel}
+        data-test-subj="appearanceColorMode"
+        checkable={{
+          legend: <span>{title}</span>,
+        }}
+        css={css`
+          inline-size: 420px; // Allow for 4 items to fit in a row instead of the default 3
+        `}
+      >
+        {values.map(({ id, label, icon }) => (
+          <EuiKeyPadMenuItem
+            name={id}
+            key={id}
+            label={label}
+            checkable="single"
+            isSelected={selectedValue === id}
+            onChange={() => {
+              onChange(id);
+            }}
+            data-test-subj={`colorModeKeyPadItem${id}`}
+          >
+            <EuiIcon type={icon} size="l" />
+          </EuiKeyPadMenuItem>
+        ))}
+      </EuiKeyPadMenu>
     </>
   );
 }
