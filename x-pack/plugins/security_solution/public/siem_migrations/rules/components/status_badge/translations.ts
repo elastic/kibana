@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-export * from './constants';
+import { i18n } from '@kbn/i18n';
 
-export * from './actions';
-export * from './author';
-export * from './name';
-export * from './risk_score';
-export * from './severity';
-export * from './status';
-export * from './updated';
+export const RULE_STATUS_INSTALLED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.status.installedLabel',
+  {
+    defaultMessage: 'Installed',
+  }
+);
