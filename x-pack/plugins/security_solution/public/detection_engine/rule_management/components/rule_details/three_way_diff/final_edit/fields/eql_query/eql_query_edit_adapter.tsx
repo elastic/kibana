@@ -29,7 +29,6 @@ export function EqlQueryEditAdapter({
       dataView={dataView ?? DEFAULT_DATA_VIEW_BASE}
       loading={isLoading}
       disabled={isLoading}
-      skipEqlValidation
     />
   );
 }

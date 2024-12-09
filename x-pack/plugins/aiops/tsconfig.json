@@ -78,7 +78,6 @@
     "@kbn/ui-theme",
     "@kbn/apm-utils",
     "@kbn/ml-field-stats-flyout",
-    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

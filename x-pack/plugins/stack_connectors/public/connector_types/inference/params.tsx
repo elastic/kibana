@@ -11,7 +11,7 @@ import {
   type ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
-import { RuleFormParamsErrors } from '@kbn/alerts-ui-shared';
+import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
 import {
   ChatCompleteParams,
   RerankParams,

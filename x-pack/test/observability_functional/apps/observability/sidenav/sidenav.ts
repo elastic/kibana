@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check Machine Learning section
-        await solutionNavigation.sidenav.openPanel('machine_learning-landing');
+        await solutionNavigation.sidenav.openPanel('machine_learning-landing', { button: 'link' });
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('machine_learning-landing');
           expect(isOpen).to.be(true);

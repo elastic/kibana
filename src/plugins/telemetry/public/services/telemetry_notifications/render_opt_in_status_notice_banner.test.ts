@@ -15,6 +15,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { mockTelemetryConstants, mockTelemetryService } from '../../mocks';
 
 describe('renderOptInStatusNoticeBanner', () => {
@@ -25,6 +26,7 @@ describe('renderOptInStatusNoticeBanner', () => {
     const analytics = analyticsServiceMock.createAnalyticsServiceStart();
     const i18n = i18nServiceMock.createStartContract();
     const theme = themeServiceMock.createStartContract();
+    const userProfile = userProfileServiceMock.createStart();
     const telemetryConstants = mockTelemetryConstants();
     const telemetryService = mockTelemetryService();
     overlays.banners.add.mockReturnValue(bannerID);
@@ -36,6 +38,7 @@ describe('renderOptInStatusNoticeBanner', () => {
       analytics,
       i18n,
       theme,
+      userProfile,
       telemetryConstants,
       telemetryService,
     });

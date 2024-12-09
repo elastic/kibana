@@ -57,15 +57,17 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
     {
       width: '8%',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelRoutingStateHeader', {
-        defaultMessage: 'Routing state',
+        defaultMessage: 'State',
       }),
       'data-test-subj': 'mlAllocatedModelsTableRoutingState',
       render: (v: AllocatedModel) => {
         const { routing_state: routingState, reason } = v.node.routing_state;
 
+        const isFailed = routingState === 'failed';
+
         return (
           <EuiToolTip content={reason ? reason : ''}>
-            <EuiBadge color={reason ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+            <EuiBadge color={isFailed ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
           </EuiToolTip>
         );
       },
@@ -252,7 +254,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       }),
       'data-test-subj': 'mlAllocatedModelsTableStartedTime',
       render: (v: AllocatedModel) => {
-        return dateFormatter(v.node.start_time);
+        return v.node.start_time ? dateFormatter(v.node.start_time) : '-';
       },
     },
     {

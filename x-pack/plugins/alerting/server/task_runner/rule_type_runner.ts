@@ -285,6 +285,7 @@ export class RuleTypeRunner<
                     ...(context.queryDelaySec ? { queryDelay: context.queryDelaySec } : {}),
                     ...(startedAtOverridden ? { forceNow: startedAt } : {}),
                   }),
+                isServerless: context.isServerless,
               })
             )
           );

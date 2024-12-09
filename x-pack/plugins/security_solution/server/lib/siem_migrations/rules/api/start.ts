@@ -50,7 +50,7 @@ export const registerSiemRuleMigrationsStartRoute = (
             const inferenceClient = ctx.securitySolution.getInferenceClient();
             const actionsClient = ctx.actions.getActionsClient();
             const soClient = ctx.core.savedObjects.client;
-            const rulesClient = ctx.alerting.getRulesClient();
+            const rulesClient = await ctx.alerting.getRulesClient();
 
             const invocationConfig = {
               callbacks: [

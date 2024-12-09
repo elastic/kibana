@@ -136,6 +136,8 @@ export interface DocumentCountChartProps {
   dataTestSubj?: string;
   /** Optional change point metadata */
   changePoint?: DocumentCountStatsChangePoint;
+  /** Whether the brush should be non-interactive */
+  nonInteractive?: boolean;
 }
 
 const SPEC_ID = 'document_count';
@@ -190,6 +192,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     barHighlightColorOverride,
     deviationBrush = {},
     baselineBrush = {},
+    nonInteractive,
   } = props;
 
   const { data, uiSettings, fieldFormats, charts } = dependencies;
@@ -470,6 +473,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
               marginLeft={mlBrushMarginLeft}
               snapTimestamps={snapTimestamps}
               width={mlBrushWidth}
+              nonInteractive={nonInteractive}
             />
           </div>
         </div>

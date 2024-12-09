@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+
+import { useValues } from 'kea';
 
 import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { APPLICATIONS_PLUGIN } from '../../../../../../../common/constants';
-import { PLAYGROUND_PATH } from '../../../../../applications/routes';
 import { KibanaLogic } from '../../../../../shared/kibana';
 
 export interface SearchPlaygroundPopoverProps {
@@ -24,18 +24,21 @@ export const SearchPlaygroundPopover: React.FC<SearchPlaygroundPopoverProps> = (
   indexName,
   ingestionMethod,
 }) => {
-  const playgroundUrl = `${APPLICATIONS_PLUGIN.URL}${PLAYGROUND_PATH}?default-index=${indexName}`;
+  const { share } = useValues(KibanaLogic);
+  const onStartPlaygroundClick = useCallback(() => {
+    if (!share) return;
+    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
+    if (playgroundLocator) {
+      playgroundLocator.navigate({ 'default-index': indexName });
+    }
+  }, [indexName, share]);
 
   return (
     <EuiButton
       data-test-subj="enterpriseSearchSearchPlaygroundPopoverViewInPlaygroundButton"
       data-telemetry-id={`entSearchContent-${ingestionMethod}-header-viewPlayground`}
       iconType="eye"
-      onClick={() => {
-        KibanaLogic.values.navigateToUrl(playgroundUrl, {
-          shouldNotCreateHref: true,
-        });
-      }}
+      onClick={onStartPlaygroundClick}
     >
       {i18n.translate('xpack.enterpriseSearch.content.index.viewPlayground', {
         defaultMessage: 'View in Playground',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import type { TestRenderer } from '../mock';
@@ -15,8 +15,7 @@ import type { AgentPolicy } from '../types';
 
 import { MultipleAgentPoliciesSummaryLine } from './multiple_agent_policy_summary_line';
 
-// FLAKY: https://github.com/elastic/kibana/issues/200786
-describe.skip('MultipleAgentPolicySummaryLine', () => {
+describe('MultipleAgentPolicySummaryLine', () => {
   let testRenderer: TestRenderer;
 
   const render = (agentPolicies: AgentPolicy[]) =>
@@ -32,7 +31,7 @@ describe.skip('MultipleAgentPolicySummaryLine', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  test('it should only render the policy name when there is only one policy', async () => {
+  test('it should only render the policy name when there is only one policy', () => {
     const results = render([{ name: 'Test policy', revision: 2 }] as AgentPolicy[]);
     expect(results.container.textContent).toBe('Test policyrev. 2');
     expect(results.queryByTestId('agentPolicyNameLink')).toBeInTheDocument();
@@ -49,18 +48,17 @@ describe.skip('MultipleAgentPolicySummaryLine', () => {
     expect(results.queryByTestId('agentPoliciesNumberBadge')).toBeInTheDocument();
     expect(results.container.textContent).toBe('Test policy 1+2');
 
-    await act(async () => {
-      fireEvent.click(results.getByTestId('agentPoliciesNumberBadge'));
-    });
-    expect(results.queryByTestId('agentPoliciesPopover')).toBeInTheDocument();
-    expect(results.queryByTestId('agentPoliciesPopoverButton')).toBeInTheDocument();
-    expect(results.queryByTestId('policy-0001')).toBeInTheDocument();
-    expect(results.queryByTestId('policy-0002')).toBeInTheDocument();
-    expect(results.queryByTestId('policy-0003')).toBeInTheDocument();
+    fireEvent.click(results.getByTestId('agentPoliciesNumberBadge'));
 
-    await act(async () => {
-      fireEvent.click(results.getByTestId('agentPoliciesPopoverButton'));
+    await waitFor(() => {
+      expect(results.queryByTestId('agentPoliciesPopover')).toBeInTheDocument();
+      expect(results.queryByTestId('agentPoliciesPopoverButton')).toBeInTheDocument();
+      expect(results.queryByTestId('policy-0001')).toBeInTheDocument();
+      expect(results.queryByTestId('policy-0002')).toBeInTheDocument();
+      expect(results.queryByTestId('policy-0003')).toBeInTheDocument();
     });
+
+    fireEvent.click(results.getByTestId('agentPoliciesPopoverButton'));
 
     expect(results.queryByTestId('manageAgentPoliciesModal')).toBeInTheDocument();
   });

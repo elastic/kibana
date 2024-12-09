@@ -12,29 +12,17 @@ import { Switch } from 'react-router-dom';
 
 import { Route } from '@kbn/shared-ux-router';
 
-import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
-import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { VectorSearchGuide } from './components/vector_search_guide/vector_search_guide';
 
 import { ROOT_PATH } from './routes';
 
-export const EnterpriseSearchVectorSearch: React.FC<InitialAppData> = (props) => {
-  const { enterpriseSearchVersion, kibanaVersion } = props;
-  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-
+export const EnterpriseSearchVectorSearch: React.FC<InitialAppData> = () => {
   return (
     <Switch>
       <Route exact path={ROOT_PATH}>
-        {incompatibleVersions ? (
-          <VersionMismatchPage
-            enterpriseSearchVersion={enterpriseSearchVersion}
-            kibanaVersion={kibanaVersion}
-          />
-        ) : (
-          <VectorSearchGuide />
-        )}
+        <VectorSearchGuide />
       </Route>
     </Switch>
   );

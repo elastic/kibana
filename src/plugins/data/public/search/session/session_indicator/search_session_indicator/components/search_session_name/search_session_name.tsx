@@ -38,7 +38,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
       justifyContent={'spaceBetween'}
       gutterSize={'none'}
       // padding to align with compressed input size
-      style={{ paddingTop: 4, paddingBottom: 4 }}
+      css={{ paddingTop: 4, paddingBottom: 4 }}
     >
       <EuiText size={'s'} className={'eui-textTruncate'}>
         <h4 className={'eui-textTruncate'}>{name}</h4>

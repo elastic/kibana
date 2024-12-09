@@ -230,6 +230,7 @@ export const EmptyWebCrawlersPrompt: React.FC = () => {
                   fill
                   iconType={githubIcon}
                   href={'https://github.com/elastic/crawler'}
+                  target="_blank"
                 >
                   {i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.selfManagedButton', {
                     defaultMessage: 'Self-managed web crawler',

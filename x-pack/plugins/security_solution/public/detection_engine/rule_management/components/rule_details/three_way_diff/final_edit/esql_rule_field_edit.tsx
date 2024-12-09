@@ -7,17 +7,21 @@
 
 import React from 'react';
 import type { UpgradeableEsqlFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { EsqlQueryEditForm } from './fields/esql_query';
 import { AlertSuppressionEditForm } from './fields/alert_suppression';
 
-interface EqQlRuleFieldEditProps {
+interface EsqlRuleFieldEditProps {
   fieldName: UpgradeableEsqlFields;
 }
 
-export function EsqlRuleFieldEdit({ fieldName }: EqQlRuleFieldEditProps) {
+export function EsqlRuleFieldEdit({ fieldName }: EsqlRuleFieldEditProps) {
   switch (fieldName) {
+    case 'esql_query':
+      return <EsqlQueryEditForm />;
     case 'alert_suppression':
       return <AlertSuppressionEditForm />;
     default:
-      return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

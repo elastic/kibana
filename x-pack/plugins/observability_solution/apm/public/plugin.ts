@@ -34,7 +34,7 @@ import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
@@ -70,6 +70,8 @@ import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -96,7 +98,6 @@ export interface ApmPluginSetupDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
-  licensing: LicensingPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
@@ -122,7 +123,7 @@ export interface ApmPluginStartDeps {
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
-  licensing: void;
+  licensing: LicensingPluginStart;
   maps?: MapsStartApi;
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -144,6 +145,8 @@ export interface ApmPluginStartDeps {
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
   logsShared: LogsSharedClientStartExports;
+  logsDataAccess: LogsDataAccessPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -198,7 +201,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
-      pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 

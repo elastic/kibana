@@ -9,35 +9,17 @@ import React from 'react';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
-import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { SearchExperiencesGuide } from './components/search_experiences_guide';
 
 import { ROOT_PATH } from './routes';
 
-export const SearchExperiences: React.FC<InitialAppData> = (props) => {
-  const { enterpriseSearchVersion, kibanaVersion } = props;
-  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-
-  const showView = () => {
-    if (incompatibleVersions) {
-      return (
-        <VersionMismatchPage
-          enterpriseSearchVersion={enterpriseSearchVersion}
-          kibanaVersion={kibanaVersion}
-        />
-      );
-    }
-
-    return <SearchExperiencesGuide />;
-  };
-
+export const SearchExperiences: React.FC<InitialAppData> = () => {
   return (
     <Routes>
       <Route exact path={ROOT_PATH}>
-        {showView()}
+        <SearchExperiencesGuide />
       </Route>
     </Routes>
   );

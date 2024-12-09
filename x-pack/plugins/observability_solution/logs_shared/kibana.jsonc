@@ -18,11 +18,13 @@
       "observabilityShared",
       "share",
       "usageCollection",
+      "embeddable",
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedDocViewer"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact"],
     "extraPublicDirs": ["common"]
   }
 }
+ 

@@ -17,8 +17,10 @@ const getConversationRoute = createObservabilityAIAssistantServerRoute({
       conversationId: t.string,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<Conversation> => {
     const { service, request, params } = resources;
@@ -40,8 +42,10 @@ const findConversationsRoute = createObservabilityAIAssistantServerRoute({
       query: t.string,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<{ conversations: Conversation[] }> => {
     const { service, request, params } = resources;
@@ -63,8 +67,10 @@ const createConversationRoute = createObservabilityAIAssistantServerRoute({
       conversation: conversationCreateRt,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<Conversation> => {
     const { service, request, params } = resources;
@@ -89,8 +95,10 @@ const updateConversationRoute = createObservabilityAIAssistantServerRoute({
       conversation: conversationUpdateRt,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<Conversation> => {
     const { service, request, params } = resources;
@@ -115,8 +123,10 @@ const updateConversationTitle = createObservabilityAIAssistantServerRoute({
       title: t.string,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<Conversation> => {
     const { service, request, params } = resources;
@@ -143,8 +153,10 @@ const deleteConversationRoute = createObservabilityAIAssistantServerRoute({
       conversationId: t.string,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<void> => {
     const { service, request, params } = resources;

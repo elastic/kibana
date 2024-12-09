@@ -13,6 +13,7 @@ import { overlayBannersServiceMock } from './banners_service.test.mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { Subject } from 'rxjs';
 
 describe('OverlayBannersService', () => {
@@ -20,6 +21,7 @@ describe('OverlayBannersService', () => {
   let service: UserBannerService;
   let uiSettings: ReturnType<typeof uiSettingsServiceMock.createStartContract>;
   let banners: ReturnType<typeof overlayBannersServiceMock.createStartContract>;
+  let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
 
   const startService = (content?: string) => {
     bannerContent = content;
@@ -40,6 +42,7 @@ describe('OverlayBannersService', () => {
       i18n: i18nServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       uiSettings,
+      userProfile,
     });
   };
 

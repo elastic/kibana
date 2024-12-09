@@ -20,6 +20,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -44,6 +45,7 @@ export const CustomizationModal: React.FC<Props> = ({
   sortFields,
 }) => {
   const { engine } = useValues(EngineLogic);
+  const modalTitleId = useGeneratedHtmlId();
 
   const [selectedFilterFields, setSelectedFilterFields] = useState(
     filterFields.map(fieldNameToComboBoxOption)
@@ -69,9 +71,9 @@ export const CustomizationModal: React.FC<Props> = ({
   );
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.title',
             {
@@ -132,8 +134,11 @@ export const CustomizationModal: React.FC<Props> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty data-test-subj="enterpriseSearchCustomizationModalButton" onClick={onClose}>
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
         <EuiButton
+          data-test-subj="enterpriseSearchCustomizationModalButton"
           fill
           onClick={() => {
             onSave({

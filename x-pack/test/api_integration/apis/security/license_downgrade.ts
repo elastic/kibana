@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'url_create',
         'store_search_session',
+        'generate_report',
       ];
       const trialPrivileges = await supertest
         .get('/api/security/privileges')

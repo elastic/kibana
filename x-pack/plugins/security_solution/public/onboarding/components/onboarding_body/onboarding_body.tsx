@@ -14,10 +14,10 @@ import { OnboardingCardGroup } from './onboarding_card_group';
 import { OnboardingCardPanel } from './onboarding_card_panel';
 import { useExpandedCard } from './hooks/use_expanded_card';
 import { useCompletedCards } from './hooks/use_completed_cards';
+import type { IsCardAvailable } from '../../types';
 
 export const OnboardingBody = React.memo(() => {
   const bodyConfig = useBodyConfig();
-
   const { expandedCardId, setExpandedCardId } = useExpandedCard();
   const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
     useCompletedCards(bodyConfig);
@@ -48,6 +48,12 @@ export const OnboardingBody = React.memo(() => {
     [checkCardComplete]
   );
 
+  const isCardAvailable = useCallback<IsCardAvailable>(
+    (cardId: OnboardingCardId) =>
+      bodyConfig.some((group) => group.cards.some((card) => card.id === cardId)),
+    [bodyConfig]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xl">
       {bodyConfig.map((group, index) => (
@@ -73,6 +79,7 @@ export const OnboardingBody = React.memo(() => {
                           setComplete={createSetCardComplete(id)}
                           checkComplete={createCheckCardComplete(id)}
                           isCardComplete={isCardComplete}
+                          isCardAvailable={isCardAvailable}
                           setExpandedCardId={setExpandedCardId}
                           checkCompleteMetadata={cardCheckCompleteResult?.metadata}
                         />

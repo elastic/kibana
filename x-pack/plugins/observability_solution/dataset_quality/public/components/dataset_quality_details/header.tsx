@@ -44,7 +44,8 @@ export function Header() {
     sendTelemetry,
   });
 
-  const pageTitle = integrationDetails?.integration?.datasets?.[datasetDetails.name] ?? title;
+  const pageTitle =
+    integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ?? title;
 
   return !loadingState.integrationDetailsLoaded ? (
     <EuiSkeletonTitle
@@ -67,7 +68,7 @@ export function Header() {
                 border-radius: ${euiTheme.size.xxs};
               `}
             >
-              <IntegrationIcon integration={integrationDetails?.integration} />
+              <IntegrationIcon integration={integrationDetails?.integration?.integration} />
             </div>
           </EuiFlexGroup>
           <p>

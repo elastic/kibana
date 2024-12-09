@@ -43,7 +43,12 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string) => {
+export const buildGenericEntityFlyoutPreviewQuery = (
+  field: string,
+  queryValue?: string,
+  status?: string,
+  queryField?: string
+) => {
   return {
     bool: {
       filter: [
@@ -59,9 +64,43 @@ export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string
             minimum_should_match: 1,
           },
         },
-      ],
+        status && queryField
+          ? {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      [queryField]: status,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            }
+          : undefined,
+      ].filter(Boolean),
     },
   };
+};
+
+// Higher-order function for Misconfiguration
+export const buildMisconfigurationEntityFlyoutPreviewQuery = (
+  field: string,
+  queryValue?: string,
+  status?: string
+) => {
+  const queryField = 'result.evaluation';
+  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
+};
+
+// Higher-order function for Vulnerability
+export const buildVulnerabilityEntityFlyoutPreviewQuery = (
+  field: string,
+  queryValue?: string,
+  status?: string
+) => {
+  const queryField = 'vulnerability.severity';
+  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
 };
 
 export const buildEntityAlertsQuery = (
@@ -69,7 +108,8 @@ export const buildEntityAlertsQuery = (
   to: string,
   from: string,
   queryValue?: string,
-  size?: number
+  size?: number,
+  severity?: string
 ) => {
   return {
     size: size || 0,
@@ -87,20 +127,30 @@ export const buildEntityAlertsQuery = (
         filter: [
           {
             bool: {
-              must: [],
-              filter: [
+              should: [
                 {
-                  match_phrase: {
-                    [field]: {
-                      query: queryValue,
-                    },
+                  term: {
+                    [field]: `${queryValue || ''}`,
                   },
                 },
               ],
-              should: [],
-              must_not: [],
+              minimum_should_match: 1,
             },
           },
+          severity
+            ? {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'kibana.alert.severity': severity,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              }
+            : undefined,
           {
             range: {
               '@timestamp': {
@@ -114,7 +164,7 @@ export const buildEntityAlertsQuery = (
               'kibana.alert.workflow_status': ['open', 'acknowledged'],
             },
           },
-        ],
+        ].filter(Boolean),
       },
     },
   };

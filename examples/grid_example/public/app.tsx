@@ -23,10 +23,12 @@ import {
   EuiPageTemplate,
   EuiProvider,
   EuiSpacer,
+  EuiButtonGroup,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData, GridAccessMode } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 
 import { getPanelId } from './get_panel_id';
@@ -46,6 +48,8 @@ const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [expandedPanelId, setExpandedPanelId] = useState<string | undefined>();
+  const [accessMode, setAccessMode] = useState<GridAccessMode>('EDIT');
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
@@ -72,6 +76,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           <div style={{ padding: 8 }}>{id}</div>
           <EuiButtonEmpty
             onClick={() => {
+              setExpandedPanelId(undefined);
               mockDashboardApi.removePanel(id);
             }}
           >
@@ -81,6 +86,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiButtonEmpty>
           <EuiButtonEmpty
             onClick={async () => {
+              setExpandedPanelId(undefined);
               const newPanelId = await getPanelId({
                 coreStart,
                 suggestion: id,
@@ -92,10 +98,25 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               defaultMessage: 'Replace panel',
             })}
           </EuiButtonEmpty>
+          <EuiButtonIcon
+            iconType={expandedPanelId ? 'minimize' : 'expand'}
+            onClick={() => setExpandedPanelId((expandedId) => (expandedId ? undefined : id))}
+            aria-label={
+              expandedPanelId
+                ? i18n.translate('examples.gridExample.minimizePanel', {
+                    defaultMessage: 'Minimize panel {id}',
+                    values: { id },
+                  })
+                : i18n.translate('examples.gridExample.maximizePanel', {
+                    defaultMessage: 'Maximize panel {id}',
+                    values: { id },
+                  })
+            }
+          />
         </>
       );
     },
-    [coreStart, mockDashboardApi]
+    [coreStart, mockDashboardApi, setExpandedPanelId, expandedPanelId]
   );
 
   return (
@@ -107,7 +128,12 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             defaultMessage: 'Grid Layout Example',
           })}
         />
-        <EuiPageTemplate.Section color="subdued">
+        <EuiPageTemplate.Section
+          color="subdued"
+          contentProps={{
+            css: { display: 'flex', flexFlow: 'column nowrap', flexGrow: 1 },
+          }}
+        >
           <EuiCallOut
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {
               defaultMessage:
@@ -132,6 +158,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={async () => {
+                  setExpandedPanelId(undefined);
                   const panelId = await getPanelId({
                     coreStart,
                     suggestion: uuidv4(),
@@ -146,6 +173,34 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={i18n.translate('examples.gridExample.layoutOptionsLegend', {
+                      defaultMessage: 'Layout options',
+                    })}
+                    options={[
+                      {
+                        id: 'VIEW',
+                        label: i18n.translate('examples.gridExample.viewOption', {
+                          defaultMessage: 'View',
+                        }),
+                        toolTipContent:
+                          'The layout adjusts when the window is resized. Panel interactivity, such as moving and resizing within the grid, is disabled.',
+                      },
+                      {
+                        id: 'EDIT',
+                        label: i18n.translate('examples.gridExample.editOption', {
+                          defaultMessage: 'Edit',
+                        }),
+                        toolTipContent: 'The layout does not adjust when the window is resized.',
+                      },
+                    ]}
+                    idSelected={accessMode}
+                    onChange={(id) => {
+                      setAccessMode(id as GridAccessMode);
+                    }}
+                  />
+                </EuiFlexItem>
                 {hasUnsavedChanges && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="warning">
@@ -190,6 +245,8 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
+            accessMode={accessMode}
+            expandedPanelId={expandedPanelId}
             layout={currentLayout}
             gridSettings={{
               gutterSize: DASHBOARD_MARGIN_SIZE,

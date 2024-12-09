@@ -426,7 +426,7 @@
         "label": "productDocIndexPrefix",
         "description": [],
         "signature": [
-          "\".kibana-ai-product-doc\""
+          "\".kibana_ai_product_doc\""
         ],
         "path": "x-pack/packages/ai-infra/product-doc-common/src/indices.ts",
         "deprecated": false,

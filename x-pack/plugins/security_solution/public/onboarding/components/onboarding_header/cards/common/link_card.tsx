@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiCard, EuiImage, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
-import { trackOnboardingLinkClick } from '../../../../common/lib/telemetry';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 import { useCardStyles } from './link_card.styles';
-import type { OnboardingHeaderCardId } from '../../../constants';
-import { TELEMETRY_HEADER_CARD } from '../../../constants';
+import type { OnboardingHeaderCardId } from '../../constants';
+import { TELEMETRY_HEADER_CARD } from '../../constants';
 
 interface LinkCardProps {
   id: OnboardingHeaderCardId;

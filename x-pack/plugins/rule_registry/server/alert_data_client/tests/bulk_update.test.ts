@@ -17,7 +17,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 const alertingAuthMock = alertingAuthorizationMock.create();
@@ -36,39 +35,38 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
+const authorizedRuleTypes = new Map([
+  [
+    'apm.error_rate',
+    {
+      producer: 'apm',
+      id: 'apm.error_rate',
+      alerts: {
+        context: 'observability.apm',
+      },
+      authorizedConsumers: {},
+    },
+  ],
+]);
 
 beforeEach(() => {
   jest.resetAllMocks();
-  alertingAuthMock.getSpaceId.mockImplementation(() => 'test_default_space_id');
-  // @ts-expect-error
-  alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
-    Promise.resolve({ filter: [] })
-  );
-  // @ts-expect-error
-  alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
-    const authorizedRuleTypes = new Set();
-    authorizedRuleTypes.add({ producer: 'apm' });
-    return Promise.resolve({ authorizedRuleTypes });
+  alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
+  alertingAuthMock.getAuthorizationFilter.mockResolvedValue({
+    filter: undefined,
+    ensureRuleTypeIsAuthorized: jest.fn(),
   });
-  alertingAuthMock.ensureAuthorized.mockImplementation(
-    // @ts-expect-error
-    async ({
-      ruleTypeId,
-      consumer,
-      operation,
-      entity,
-    }: {
-      ruleTypeId: string;
-      consumer: string;
-      operation: string;
-      entity: typeof AlertingAuthorizationEntity.Alert;
-    }) => {
-      if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
-        return Promise.resolve();
-      }
-      return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  alertingAuthMock.getAllAuthorizedRuleTypes.mockResolvedValue({
+    hasAllRequested: true,
+    authorizedRuleTypes,
+  });
+
+  alertingAuthMock.ensureAuthorized.mockImplementation(async ({ ruleTypeId, consumer }) => {
+    if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
+      return Promise.resolve();
     }
-  );
+    return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
+  });
 });
 
 const fakeAlertId = 'myfakeid1';
@@ -337,7 +335,7 @@ describe('bulkUpdate()', () => {
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
           "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
-           Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
+           Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"\\"kibana.alert.status: active\\"\\" and operation update 
           Error: Error: Unauthorized for fake.rule and apm"
         `);
 
@@ -404,7 +402,7 @@ describe('bulkUpdate()', () => {
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
           "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
-           Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
+           Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"\\"kibana.alert.status: active\\"\\" and operation update 
           Error: Error: Unauthorized for fake.rule and apm"
         `);
 

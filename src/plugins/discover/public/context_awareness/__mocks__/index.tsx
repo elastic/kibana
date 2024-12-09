@@ -25,6 +25,7 @@ import { ProfileProviderServices } from '../profile_providers/profile_provider_s
 import { ProfilesManager } from '../profiles_manager';
 import { DiscoverEBTManager } from '../../services/discover_ebt_manager';
 import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
+import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 
 export const createContextAwarenessMocks = ({
   shouldRegisterProviders = true,
@@ -181,5 +182,6 @@ export const createContextAwarenessMocks = ({
 const createProfileProviderServicesMock = () => {
   return {
     logsContextService: createLogsContextServiceMock(),
+    discoverShared: discoverSharedPluginMock.createStartContract(),
   } as ProfileProviderServices;
 };

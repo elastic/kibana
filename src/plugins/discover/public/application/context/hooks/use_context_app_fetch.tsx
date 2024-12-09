@@ -37,15 +37,9 @@ export interface ContextAppFetchProps {
   anchorId: string;
   dataView: DataView;
   appState: AppState;
-  useNewFieldsApi: boolean;
 }
 
-export function useContextAppFetch({
-  anchorId,
-  dataView,
-  appState,
-  useNewFieldsApi,
-}: ContextAppFetchProps) {
+export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppFetchProps) {
   const services = useDiscoverServices();
   const { uiSettings: config, data, toastNotifications, filterManager } = services;
 
@@ -89,14 +83,7 @@ export function useContextAppFetch({
         tieBreakerFieldName,
         isTimeNanosBased: dataView.isTimeNanosBased(),
       });
-      const result = await fetchAnchor(
-        anchorId,
-        dataView,
-        searchSource,
-        sort,
-        useNewFieldsApi,
-        services
-      );
+      const result = await fetchAnchor(anchorId, dataView, searchSource, sort, services);
       setState({
         anchor: result.anchorRow,
         anchorInterceptedWarnings: result.interceptedWarnings,
@@ -118,7 +105,6 @@ export function useContextAppFetch({
     dataView,
     anchorId,
     searchSource,
-    useNewFieldsApi,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -146,7 +132,6 @@ export function useContextAppFetch({
               count,
               filters,
               data,
-              useNewFieldsApi,
               services
             )
           : { rows: [], interceptedWarnings: undefined };
@@ -172,7 +157,6 @@ export function useContextAppFetch({
       setState,
       dataView,
       toastNotifications,
-      useNewFieldsApi,
       data,
     ]
   );

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { get as _get } from 'lodash';
+
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+
+import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
 
 import {
   COMPONENT_TEMPLATE_NAME,
@@ -59,4 +64,35 @@ export async function createPipeline(esClient: ElasticsearchClient): Promise<boo
     },
   });
   return response.acknowledged;
+}
+
+const validKeys = new Set([
+  'ids',
+  'categories',
+  'types',
+  'sourceTypes',
+  'sourceIds',
+  'targetTypes',
+  'targetIds',
+  'actionTypes',
+]);
+const paramFieldMap = {
+  ids: '_id',
+  sourceTypes: 'source.type',
+  sourceIds: 'source.id',
+  targetTypes: 'target.type',
+  targetIds: 'target.id',
+  actionTypes: 'action.type',
+};
+export function buildEsQueryParams(searchParams: SearchParams): QueryDslQueryContainer[] {
+  return Object.entries(searchParams).reduce((acc: object[], [k, v]) => {
+    if (!validKeys.has(k)) {
+      return acc;
+    }
+
+    const paramKey = _get(paramFieldMap, k, k);
+    const next = { terms: { [paramKey]: v } };
+
+    return [...acc, next];
+  }, []);
 }

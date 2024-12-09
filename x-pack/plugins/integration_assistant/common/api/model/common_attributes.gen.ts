@@ -84,6 +84,9 @@ export const SamplesFormatName = z.enum([
   'structured',
   'unstructured',
   'unsupported',
+  'cef',
+  'leef',
+  'fix',
 ]);
 export type SamplesFormatNameEnum = typeof SamplesFormatName.enum;
 export const SamplesFormatNameEnum = SamplesFormatName.enum;

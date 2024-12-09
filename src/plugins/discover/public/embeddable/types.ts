@@ -9,16 +9,16 @@
 
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesDataViews,
   PublishesSavedObjectId,
-  PublishesUnifiedSearch,
   PublishesWritablePanelTitle,
+  PublishesWritableUnifiedSearch,
   PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
@@ -30,6 +30,7 @@ import {
 } from '@kbn/saved-search-plugin/common/types';
 import { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { BehaviorSubject } from 'rxjs';
+import { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 export type SearchEmbeddableState = Pick<
@@ -47,6 +48,7 @@ export type SearchEmbeddableState = Pick<
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;
   totalHitCount: number | undefined;
+  inspectorAdapters: Record<string, unknown>;
 };
 
 export type SearchEmbeddableStateManager = {
@@ -55,9 +57,16 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddableState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource'
+  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
+
+// These are options that are not persisted in the saved object, but can be used by solutions
+// when utilising the SavedSearchComponent package outside of dashboard contexts.
+export interface NonPersistedDisplayOptions {
+  enableDocumentViewer?: boolean;
+  enableFilters?: boolean;
+}
 
 export type SearchEmbeddableSerializedState = SerializedTitles &
   SerializedTimeRange &
@@ -66,6 +75,7 @@ export type SearchEmbeddableSerializedState = SerializedTitles &
     attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
     // by reference
     savedObjectId?: string;
+    nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
 export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes &
@@ -74,22 +84,23 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;
+    nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<
   SearchEmbeddableSerializedState,
   SearchEmbeddableRuntimeState
 > &
-  PublishesDataViews &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
   PublishesWritablePanelTitle &
   PublishesSavedSearch &
-  PublishesDataViews &
-  PublishesUnifiedSearch &
+  PublishesWritableDataViews &
+  PublishesWritableUnifiedSearch &
   HasInPlaceLibraryTransforms &
   HasTimeRange &
+  HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;
 
 export interface PublishesSavedSearch {

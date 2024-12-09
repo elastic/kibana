@@ -7,7 +7,11 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
+import {
+  Connector,
+  CONNECTORS_INDEX,
+  MANAGED_CONNECTOR_INDEX_PREFIX,
+} from '@kbn/search-connectors';
 
 import { createIndex } from '../indices/create_index';
 import { indexOrAliasExists } from '../indices/exists_index';
@@ -20,10 +24,10 @@ export const generateConfig = async (client: IScopedClusterClient, connector: Co
   if (connector.index_name) {
     associatedIndex = connector.index_name;
   } else {
-    associatedIndex = await generatedIndexName(
-      client,
-      connector.name || connector.service_type || 'my-connector' // pass a default name to generate a readable index name rather than gibberish
-    );
+    const indexPrefix = connector.is_native ? MANAGED_CONNECTOR_INDEX_PREFIX : ''; // managed connectors need to be prefixed with `content-`
+    const connectorReference = connector.name || connector.service_type || 'my-connector'; // pass a default name to generate a readable index name rather than gibberish
+
+    associatedIndex = await generatedIndexName(client, indexPrefix + connectorReference);
   }
 
   if (!indexOrAliasExists(client, associatedIndex)) {

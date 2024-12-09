@@ -220,8 +220,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
       'objective.target',
       'objective.timesliceTarget',
       'objective.timesliceWindow',
+      'settings.syncDelay',
+      'settings.frequency',
     ] as const
-  ).every((field) => getFieldState(field).error === undefined);
+  ).every((field) => !getFieldState(field).invalid);
 
   const isDescriptionSectionValid =
     !getFieldState('name').invalid &&

@@ -72,6 +72,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import type { FieldValueQueryBar } from '../query_bar_field';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -206,11 +207,12 @@ export const getDescriptionItem = (
   indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
-    const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
-    const query = get('queryBar.query.query', data);
-    const savedId = get('queryBar.saved_id', data);
-    const savedQueryName = get('queryBar.title', data);
-    const ruleType: Type = get('ruleType', data);
+    const queryBar = get('queryBar', data) as FieldValueQueryBar;
+    const filters = addFilterStateIfNotThere(queryBar.filters ?? []);
+    const query = queryBar.query.query as string;
+    const savedId = queryBar.saved_id ?? '';
+    const savedQueryName = queryBar.title;
+    const ruleType: Type = get('ruleType', data) as Type;
     const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,

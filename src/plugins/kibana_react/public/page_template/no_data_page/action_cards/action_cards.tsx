@@ -23,7 +23,7 @@ export const ActionCards = ({ actionCards }: ActionCardsProps) => {
     </EuiFlexItem>
   ));
   return (
-    <EuiFlexGrid columns={2} style={{ justifyContent: 'space-around' }}>
+    <EuiFlexGrid columns={2} css={{ justifyContent: 'space-around' }}>
       {cards}
     </EuiFlexGrid>
   );

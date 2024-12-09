@@ -12,7 +12,7 @@ import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from './column_headers/default_headers';
 import type { UnifiedTimelineBodyProps } from './unified_timeline_body';
 import { UnifiedTimelineBody } from './unified_timeline_body';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 
 jest.mock('../unified_components', () => {
@@ -32,17 +32,14 @@ const defaultProps: UnifiedTimelineBodyProps = {
   isTextBasedQuery: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
-  onChangePage: jest.fn(),
+  onFetchMoreRecords: jest.fn(),
   refetch: jest.fn(),
   rowRenderers: [],
   sort: [],
   timelineId: 'timeline-1',
   totalCount: 0,
   updatedAt: 0,
-  pageInfo: {
-    activePage: 0,
-    querySize: 0,
-  },
+  onUpdatePageIndex: jest.fn(),
 };
 
 const renderTestComponents = (props?: UnifiedTimelineBodyProps) => {
@@ -56,39 +53,6 @@ const MockUnifiedTimelineComponent = jest.fn(() => <div />);
 describe('UnifiedTimelineBody', () => {
   beforeEach(() => {
     (UnifiedTimeline as unknown as jest.Mock).mockImplementation(MockUnifiedTimelineComponent);
-  });
-  it('should pass correct page rows', () => {
-    const { rerender } = renderTestComponents();
-
-    expect(screen.getByTestId('unifiedTimelineBody')).toBeVisible();
-    expect(MockUnifiedTimelineComponent).toHaveBeenCalledTimes(2);
-
-    expect(MockUnifiedTimelineComponent).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        events: mockEventsData.flat(),
-      }),
-      {}
-    );
-
-    const newEventsData = structuredClone([mockEventsData[0]]);
-
-    const newProps = {
-      ...defaultProps,
-      pageInfo: {
-        activePage: 1,
-        querySize: 0,
-      },
-      events: newEventsData,
-    };
-
-    MockUnifiedTimelineComponent.mockClear();
-    rerender(<UnifiedTimelineBody {...newProps} />);
-    expect(MockUnifiedTimelineComponent).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        events: [...mockEventsData, ...newEventsData].flat(),
-      }),
-      {}
-    );
   });
 
   it('should pass default columns when empty column list is supplied', () => {

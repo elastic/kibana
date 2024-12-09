@@ -14,6 +14,7 @@ import { createSlackConnectorAndObjectRemover, getConnectorByName } from './util
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
+  const find = getService('find');
   const retry = getService('retry');
   const supertest = getService('supertest');
   const actions = getService('actions');
@@ -119,10 +120,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return response.body.data[0].id;
       };
 
-      const selectSlackConnectorInRuleAction = async ({ connectorId }: { connectorId: string }) => {
-        await testSubjects.click('.slack-alerting-ActionTypeSelectOption'); // "Slack" in connector list
-        await testSubjects.click('selectActionConnector-.slack-0');
-        await testSubjects.click(`dropdown-connector-${connectorId}`);
+      const selectSlackConnectorInRuleAction = async ({
+        connectorName,
+      }: {
+        connectorName: string;
+      }) => {
+        await testSubjects.click('ruleActionsAddActionButton');
+        await testSubjects.existOrFail('ruleActionsConnectorsModal');
+        await find.clickByButtonText(connectorName);
       };
 
       before(async () => {
@@ -149,9 +154,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ruleName = await setupRule();
 
         await selectSlackConnectorInRuleAction({
-          connectorId: webhookAction.id,
+          connectorName: webhookConnectorName,
         });
-        await testSubjects.click('saveRuleButton');
+        await testSubjects.click('rulePageFooterSaveButton');
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        await testSubjects.click('rulesTab');
         await pageObjects.triggersActionsUI.searchAlerts(ruleName);
 
         const ruleId = await getRuleIdByName(ruleName);
@@ -166,9 +176,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             tags: '',
           },
         ]);
-
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
 
       /* FUTURE ENGINEER
@@ -179,7 +186,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it.skip('should save webapi type slack connectors', async () => {
         await setupRule();
         await selectSlackConnectorInRuleAction({
-          connectorId: webApiAction.id,
+          connectorName: webhookConnectorName,
         });
 
         await testSubjects.click('saveRuleButton');

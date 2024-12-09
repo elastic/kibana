@@ -192,6 +192,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       if (connector) {
         actions.generateConnectorName({
           connectorType: connector.serviceType,
+          isManagedConnector: connector.isNative,
         });
       }
     },

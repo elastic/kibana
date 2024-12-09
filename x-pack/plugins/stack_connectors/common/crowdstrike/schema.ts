@@ -17,7 +17,9 @@ export const CrowdstrikeSecretsSchema = schema.object({
   clientSecret: schema.string(),
 });
 
-export const RelaxedCrowdstrikeBaseApiResponseSchema = schema.object({}, { unknowns: 'allow' });
+export const RelaxedCrowdstrikeBaseApiResponseSchema = schema.maybe(
+  schema.object({}, { unknowns: 'allow' })
+);
 export const CrowdstrikeBaseApiResponseSchema = schema.object(
   {
     resources: schema.arrayOf(schema.any()),
@@ -231,6 +233,8 @@ export const CrowdstrikeHostActionsResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+// TODO temporary any value
+export const CrowdstrikeRTRCommandParamsSchema = schema.any();
 export const CrowdstrikeHostActionsParamsSchema = schema.object({
   command: schema.oneOf([schema.literal('contain'), schema.literal('lift_containment')]),
   actionParameters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
@@ -261,3 +265,45 @@ export const CrowdstrikeHostActionsSchema = schema.object({
 });
 
 export const CrowdstrikeActionParamsSchema = schema.oneOf([CrowdstrikeHostActionsSchema]);
+
+export const CrowdstrikeInitRTRResponseSchema = schema.object(
+  {
+    meta: schema.maybe(
+      schema.object(
+        {
+          query_time: schema.maybe(schema.number()),
+          powered_by: schema.maybe(schema.string()),
+          trace_id: schema.maybe(schema.string()),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
+    batch_id: schema.maybe(schema.string()),
+    resources: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.object(
+          {
+            session_id: schema.maybe(schema.string()),
+            task_id: schema.maybe(schema.string()),
+            complete: schema.maybe(schema.boolean()),
+            stdout: schema.maybe(schema.string()),
+            stderr: schema.maybe(schema.string()),
+            base_command: schema.maybe(schema.string()),
+            aid: schema.maybe(schema.string()),
+            errors: schema.maybe(schema.arrayOf(schema.any())),
+            query_time: schema.maybe(schema.number()),
+            offline_queued: schema.maybe(schema.boolean()),
+          },
+          { unknowns: 'allow' }
+        )
+      )
+    ),
+    errors: schema.maybe(schema.arrayOf(schema.any())),
+  },
+  { unknowns: 'allow' }
+);
+
+export const CrowdstrikeInitRTRParamsSchema = schema.object({
+  endpoint_ids: schema.arrayOf(schema.string()),
+});

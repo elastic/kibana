@@ -24,7 +24,7 @@ export const ShowDebugging: FC<Props> = ({ payload }) => {
         See Details
       </EuiButtonEmpty>
       {expanded && (
-        <div style={{ height: 260 }}>
+        <div css={{ height: 260 }}>
           <Debug payload={payload} />
         </div>
       )}

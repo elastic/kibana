@@ -78,12 +78,6 @@ export interface IRuleDataService {
    * Note: features are used in RBAC.
    */
   findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null;
-
-  /**
-   * Looks up Kibana "feature" associated with the given registration context.
-   * Note: features are used in RBAC.
-   */
-  findFeatureIdsByRegistrationContexts(registrationContexts: string[]): string[];
 }
 
 // TODO: This is a leftover. Remove its usage from the "observability" plugin and delete it.
@@ -246,17 +240,6 @@ export class RuleDataService implements IRuleDataService {
   public findIndexByName(registrationContext: string, dataset: Dataset): IndexInfo | null {
     const baseName = this.getResourceName(`${registrationContext}.${dataset}`);
     return this.indicesByBaseName.get(baseName) ?? null;
-  }
-
-  public findFeatureIdsByRegistrationContexts(registrationContexts: string[]): string[] {
-    const featureIds: string[] = [];
-    registrationContexts.forEach((rc) => {
-      const featureId = this.registrationContextByFeatureId.get(rc);
-      if (featureId) {
-        featureIds.push(featureId);
-      }
-    });
-    return featureIds;
   }
 
   public findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null {

@@ -49,5 +49,7 @@
     "@kbn/charts-plugin",
     "@kbn/core-ui-settings-common",
     "@kbn/field-formats-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/saved-search-plugin",
   ]
 }

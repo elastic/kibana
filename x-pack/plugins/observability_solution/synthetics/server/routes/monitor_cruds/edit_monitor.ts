@@ -305,7 +305,7 @@ export const syncEditedMonitor = async ({
 };
 
 export const validatePermissions = async (
-  { server, response, request }: RouteContext,
+  routeContext: RouteContext,
   monitorLocations: MonitorLocations
 ) => {
   const hasPublicLocations = monitorLocations?.some((loc) => loc.isServiceManaged);
@@ -313,17 +313,24 @@ export const validatePermissions = async (
     return;
   }
 
-  const elasticManagedLocationsEnabled =
-    Boolean(
-      (
-        await server.coreStart?.capabilities.resolveCapabilities(request, {
-          capabilityPath: 'uptime.*',
-        })
-      ).uptime.elasticManagedLocationsEnabled
-    ) ?? true;
+  const { elasticManagedLocationsEnabled } = await validateLocationPermissions(routeContext);
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
+};
+
+export const validateLocationPermissions = async ({ server, request }: RouteContext) => {
+  const uptimeFeature = await server.coreStart?.capabilities.resolveCapabilities(request, {
+    capabilityPath: 'uptime.*',
+  });
+  const elasticManagedLocationsEnabled =
+    Boolean(uptimeFeature.uptime.elasticManagedLocationsEnabled) ?? true;
+  const canManagePrivateLocations = Boolean(uptimeFeature.uptime.canManagePrivateLocations) ?? true;
+
+  return {
+    canManagePrivateLocations,
+    elasticManagedLocationsEnabled,
+  };
 };
 
 const getInvalidOriginError = (monitor: SyntheticsMonitor) => {

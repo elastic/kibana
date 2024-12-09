@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addRules.pageTitle',
   {
-    defaultMessage: 'Add Elastic Rules',
+    defaultMessage: 'Add Elastic rules',
   }
 );

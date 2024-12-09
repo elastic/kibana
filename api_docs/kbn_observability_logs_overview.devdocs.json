@@ -316,6 +316,8 @@
               "LogCategoriesGridChangeTimeCellDependencies",
               " & ",
               "LogCategoryDocumentExamplesTableDependencies",
+              " & ",
+              "DiscoverLinkDependencies",
               " & { search: ",
               {
                 "pluginId": "@kbn/search-types",
@@ -467,6 +469,8 @@
           "LogCategoriesGridChangeTimeCellDependencies",
           " & ",
           "LogCategoryDocumentExamplesTableDependencies",
+          " & ",
+          "DiscoverLinkDependencies",
           " & { search: ",
           {
             "pluginId": "@kbn/search-types",

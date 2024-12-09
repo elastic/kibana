@@ -189,7 +189,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'packages/kbn-esql-validation-autocomplete/scripts/**/*',
+  'src/platform/packages/shared/kbn-esql-validation-autocomplete/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -2025,6 +2025,13 @@ module.exports = {
         'no-console': 'off',
         // disabling it since package is marked as module and it requires extension for files written
         '@kbn/imports/uniform_imports': 'off',
+      },
+    },
+    {
+      files: ['packages/kbn-dependency-ownership/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
       },
     },
   ],

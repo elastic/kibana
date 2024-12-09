@@ -480,12 +480,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible ? (
       <CommonFlyout<CustomFieldConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={
-          !permissions.create ||
-          !permissions.update ||
-          loadingCaseConfigure ||
-          isPersistingConfiguration
-        }
+        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
         onCloseFlyout={onCloseCustomFieldFlyout}
         onSaveField={onCustomFieldSave}
         renderHeader={() => (
@@ -502,12 +497,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     flyOutVisibility?.type === 'template' && flyOutVisibility?.visible ? (
       <CommonFlyout<TemplateFormProps, TemplateConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={
-          !permissions.create ||
-          !permissions.update ||
-          loadingCaseConfigure ||
-          isPersistingConfiguration
-        }
+        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
         onCloseFlyout={onCloseTemplateFlyout}
         onSaveField={onTemplateSave}
         renderHeader={() => (
@@ -565,7 +555,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
               <div css={sectionWrapperCss}>
                 <ClosureOptions
                   closureTypeSelected={closureType}
-                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  disabled={
+                    isPersistingConfiguration || isLoadingConnectors || !permissions.settings
+                  }
                   onChangeClosureType={onChangeClosureType}
                 />
               </div>
@@ -574,13 +566,15 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 <Connectors
                   actionTypes={actionTypes}
                   connectors={connectors ?? []}
-                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  disabled={
+                    isPersistingConfiguration || isLoadingConnectors || !permissions.settings
+                  }
                   handleShowEditFlyout={onClickUpdateConnector}
                   isLoading={isLoadingAny}
                   mappings={mappings}
                   onChangeConnector={onChangeConnector}
                   selectedConnector={connector}
-                  updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
+                  updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
                   onAddNewConnector={onAddNewConnector}
                 />
               </div>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
@@ -28,6 +29,7 @@ export type LogRateAnalysisEmbeddableApi = DefaultEmbeddableApi<LogRateAnalysisE
 
 export interface LogRateAnalysisEmbeddableState extends SerializedTitles, SerializedTimeRange {
   dataViewId: string;
+  windowParameters?: WindowParameters;
 }
 
 export interface LogRateAnalysisEmbeddableInitialState
@@ -36,4 +38,7 @@ export interface LogRateAnalysisEmbeddableInitialState
   dataViewId?: string;
 }
 
-export type LogRateAnalysisEmbeddableRuntimeState = LogRateAnalysisEmbeddableState;
+export type LogRateAnalysisEmbeddableRuntimeState = Omit<
+  LogRateAnalysisEmbeddableState,
+  'windowParameters'
+>;

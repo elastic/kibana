@@ -17,6 +17,7 @@ import type {
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
+  HasParentApi,
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
@@ -25,6 +26,7 @@ import type {
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesRendered,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
   PublishingSubject,
@@ -62,6 +64,7 @@ import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common'
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -80,6 +83,7 @@ import type {
   SharingSavedObjectProps,
   Simplify,
   UserMessage,
+  VisualizationDisplayOptions,
   VisualizationMap,
 } from '../types';
 import type { LensPluginStartDependencies } from '../plugin';
@@ -275,7 +279,7 @@ export type LensSerializedState = Simplify<
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
-    LensSharedProps &
+    Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
 
@@ -362,6 +366,8 @@ export type LensApi = Simplify<
     PublishesUnifiedSearch &
     // Let the container know the loading state
     PublishesDataLoading &
+    // Let the container know when the rendering has completed rendering
+    PublishesRendered &
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
@@ -375,6 +381,8 @@ export type LensApi = Simplify<
     HasLibraryTransforms<LensRuntimeState> &
     // Let the container know the view mode
     PublishesViewMode &
+    // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface
+    Partial<HasParentApi<PresentationContainer>> &
     // Let the container know the saved object id
     PublishesSavedObjectId &
     // Lens specific API methods:
@@ -411,6 +419,7 @@ export type LensInternalApi = Simplify<
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       resetAllMessages: () => void;
+      getDisplayOptions: () => VisualizationDisplayOptions;
     }
 >;
 

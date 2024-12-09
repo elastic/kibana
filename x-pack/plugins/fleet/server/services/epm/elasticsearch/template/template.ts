@@ -19,6 +19,7 @@ import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -931,10 +932,15 @@ const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
   templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
-  const dataStreamPromises = templates.map((template) => {
-    return getDataStreams(esClient, template);
-  });
-  const dataStreamObjects = await Promise.all(dataStreamPromises);
+  const dataStreamObjects = await pMap(
+    templates,
+    (template) => {
+      return getDataStreams(esClient, template);
+    },
+    {
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+    }
+  );
   return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
@@ -997,8 +1003,7 @@ const updateAllDataStreams = async (
       });
     },
     {
-      // Limit concurrent putMapping/rollover requests to avoid overwhelming ES cluster
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
     }
   );
 };
@@ -1026,8 +1031,8 @@ const updateExistingDataStream = async ({
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
-  // @ts-expect-error Property 'mode' does not exist on type 'MappingSourceField'
-  const currentSourceType = currentBackingIndexConfig.mappings?._source?.mode;
+  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
+  const currentSourceType = currentBackingIndexConfig?.settings?.index?.mapping?.source?.mode;
 
   let settings: IndicesIndexSettings;
   let mappings: MappingTypeMapping = {};
@@ -1079,6 +1084,10 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
+    subobjectsFieldChanged =
+      subobjectsFieldChanged ||
+      (err.body?.error?.type === 'mapper_exception' &&
+        err.body?.error?.reason?.includes('subobjects'));
     if (
       (isResponseError(err) &&
         err.statusCode === 400 &&
@@ -1132,7 +1141,7 @@ const updateExistingDataStream = async ({
   // Trigger a rollover if the index mode or source type has changed
   if (
     currentIndexMode !== settings?.index?.mode ||
-    currentSourceType !== mappings?._source?.mode ||
+    currentSourceType !== settings?.index?.source?.mode ||
     dynamicDimensionMappingsChanged
   ) {
     if (options?.skipDataStreamRollover === true) {

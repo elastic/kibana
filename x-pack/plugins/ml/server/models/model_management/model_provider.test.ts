@@ -6,45 +6,54 @@
  */
 
 import { modelsProvider } from './models_provider';
-import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { MlClient } from '../../lib/ml_client';
 import downloadTasksResponse from './__mocks__/mock_download_tasks.json';
+import type { MlFeatures } from '../../../common/constants/app';
+import { mlLog } from '../../lib/log';
+import { errors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ExistingModelBase } from '../../../common/types/trained_models';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+jest.mock('../../lib/log');
 
 describe('modelsProvider', () => {
-  const mockClient = {
-    asInternalUser: {
-      transport: {
-        request: jest.fn().mockResolvedValue({
-          _nodes: {
-            total: 1,
-            successful: 1,
-            failed: 0,
-          },
-          cluster_name: 'default',
-          nodes: {
-            yYmqBqjpQG2rXsmMSPb9pQ: {
-              name: 'node-0',
-              roles: ['ml'],
-              attributes: {},
-              os: {
-                name: 'Linux',
-                arch: 'amd64',
-              },
-            },
-          },
-        }),
-      },
-      tasks: {
-        list: jest.fn().mockResolvedValue({ tasks: [] }),
+  const mockClient = elasticsearchClientMock.createScopedClusterClient();
+
+  mockClient.asInternalUser.transport.request.mockResolvedValue({
+    _nodes: {
+      total: 1,
+      successful: 1,
+      failed: 0,
+    },
+    cluster_name: 'default',
+    nodes: {
+      yYmqBqjpQG2rXsmMSPb9pQ: {
+        name: 'node-0',
+        roles: ['ml'],
+        attributes: {},
+        os: {
+          name: 'Linux',
+          arch: 'amd64',
+        },
       },
     },
-  } as unknown as jest.Mocked<IScopedClusterClient>;
+  });
+
+  mockClient.asInternalUser.tasks.list.mockResolvedValue({ tasks: [] });
 
   const mockMlClient = {} as unknown as jest.Mocked<MlClient>;
 
   const mockCloud = cloudMock.createSetup();
-  const modelService = modelsProvider(mockClient, mockMlClient, mockCloud);
+
+  const enabledMlFeatures: MlFeatures = {
+    ad: false,
+    dfa: true,
+    nlp: true,
+  };
+
+  const modelService = modelsProvider(mockClient, mockMlClient, mockCloud, enabledMlFeatures);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -122,7 +131,7 @@ describe('modelsProvider', () => {
 
     test('provides a list of models with default model as recommended', async () => {
       mockCloud.cloudId = undefined;
-      (mockClient.asInternalUser.transport.request as jest.Mock).mockResolvedValueOnce({
+      mockClient.asInternalUser.transport.request.mockResolvedValueOnce({
         _nodes: {
           total: 1,
           successful: 1,
@@ -218,7 +227,7 @@ describe('modelsProvider', () => {
 
     test('provides a default version if there is no recommended', async () => {
       mockCloud.cloudId = undefined;
-      (mockClient.asInternalUser.transport.request as jest.Mock).mockResolvedValueOnce({
+      mockClient.asInternalUser.transport.request.mockResolvedValueOnce({
         _nodes: {
           total: 1,
           successful: 1,
@@ -261,7 +270,7 @@ describe('modelsProvider', () => {
 
     test('provides a default version if there is no recommended', async () => {
       mockCloud.cloudId = undefined;
-      (mockClient.asInternalUser.transport.request as jest.Mock).mockResolvedValueOnce({
+      mockClient.asInternalUser.transport.request.mockResolvedValueOnce({
         _nodes: {
           total: 1,
           successful: 1,
@@ -292,14 +301,132 @@ describe('modelsProvider', () => {
       expect(result).toEqual({});
     });
     test('provides download status for all models', async () => {
-      (mockClient.asInternalUser.tasks.list as jest.Mock).mockResolvedValueOnce(
-        downloadTasksResponse
-      );
+      mockClient.asInternalUser.tasks.list.mockResolvedValueOnce(downloadTasksResponse);
       const result = await modelService.getModelsDownloadStatus();
       expect(result).toEqual({
         '.elser_model_2': { downloaded_parts: 0, total_parts: 418 },
         '.elser_model_2_linux-x86_64': { downloaded_parts: 96, total_parts: 263 },
       });
+    });
+  });
+
+  describe('#assignInferenceEndpoints', () => {
+    let trainedModels: ExistingModelBase[];
+
+    const inferenceServices = [
+      {
+        service: 'elser',
+        model_id: 'elser_test',
+        service_settings: { model_id: '.elser_model_2' },
+      },
+      { service: 'open_api_01', service_settings: {} },
+    ] as InferenceInferenceEndpointInfo[];
+
+    beforeEach(() => {
+      trainedModels = [
+        { model_id: '.elser_model_2' },
+        { model_id: 'model2' },
+      ] as ExistingModelBase[];
+
+      mockClient.asInternalUser.inference.get.mockResolvedValue({
+        endpoints: inferenceServices,
+      });
+
+      jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe('when the user has required privileges', () => {
+      beforeEach(() => {
+        mockClient.asCurrentUser.inference.get.mockResolvedValue({
+          endpoints: inferenceServices,
+        });
+      });
+
+      test('should populate inference services for trained models', async () => {
+        // act
+        await modelService.assignInferenceEndpoints(trainedModels, false);
+
+        // assert
+        expect(mockClient.asCurrentUser.inference.get).toHaveBeenCalledWith({
+          inference_id: '_all',
+        });
+
+        expect(mockClient.asInternalUser.inference.get).not.toHaveBeenCalled();
+
+        expect(trainedModels[0].inference_apis).toEqual([
+          {
+            model_id: 'elser_test',
+            service: 'elser',
+            service_settings: { model_id: '.elser_model_2' },
+          },
+        ]);
+        expect(trainedModels[0].hasInferenceServices).toBe(true);
+
+        expect(trainedModels[1].inference_apis).toEqual(undefined);
+        expect(trainedModels[1].hasInferenceServices).toBe(false);
+
+        expect(mlLog.error).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the user does not have required privileges', () => {
+      beforeEach(() => {
+        mockClient.asCurrentUser.inference.get.mockRejectedValue(
+          new errors.ResponseError(
+            elasticsearchClientMock.createApiResponse({
+              statusCode: 403,
+              body: { message: 'not allowed' },
+            })
+          )
+        );
+      });
+
+      test('should retry with internal user if an error occurs', async () => {
+        await modelService.assignInferenceEndpoints(trainedModels, false);
+
+        // assert
+        expect(mockClient.asCurrentUser.inference.get).toHaveBeenCalledWith({
+          inference_id: '_all',
+        });
+
+        expect(mockClient.asInternalUser.inference.get).toHaveBeenCalledWith({
+          inference_id: '_all',
+        });
+
+        expect(trainedModels[0].inference_apis).toEqual(undefined);
+        expect(trainedModels[0].hasInferenceServices).toBe(true);
+
+        expect(trainedModels[1].inference_apis).toEqual(undefined);
+        expect(trainedModels[1].hasInferenceServices).toBe(false);
+
+        expect(mlLog.error).not.toHaveBeenCalled();
+      });
+    });
+
+    test('should not retry on any other error than 403', async () => {
+      const notFoundError = new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 404,
+          body: { message: 'not found' },
+        })
+      );
+
+      mockClient.asCurrentUser.inference.get.mockRejectedValue(notFoundError);
+
+      await modelService.assignInferenceEndpoints(trainedModels, false);
+
+      // assert
+      expect(mockClient.asCurrentUser.inference.get).toHaveBeenCalledWith({
+        inference_id: '_all',
+      });
+
+      expect(mockClient.asInternalUser.inference.get).not.toHaveBeenCalled();
+
+      expect(mlLog.error).toHaveBeenCalledWith(notFoundError);
     });
   });
 });

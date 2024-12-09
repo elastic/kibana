@@ -27,8 +27,7 @@ exports[`ElasticAgentCard props button 1`] = `
     image={
       <EuiImage
         alt=""
-        size="fullWidth"
-        style={
+        css={
           Object {
             "background": "aliceblue",
             "height": 240,
@@ -36,6 +35,7 @@ exports[`ElasticAgentCard props button 1`] = `
             "width": "max(100%, 360px)",
           }
         }
+        size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
     }
@@ -78,8 +78,7 @@ exports[`ElasticAgentCard props category 1`] = `
     image={
       <EuiImage
         alt=""
-        size="fullWidth"
-        style={
+        css={
           Object {
             "background": "aliceblue",
             "height": 240,
@@ -87,6 +86,7 @@ exports[`ElasticAgentCard props category 1`] = `
             "width": "max(100%, 360px)",
           }
         }
+        size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
     }
@@ -129,8 +129,7 @@ exports[`ElasticAgentCard props href 1`] = `
     image={
       <EuiImage
         alt=""
-        size="fullWidth"
-        style={
+        css={
           Object {
             "background": "aliceblue",
             "height": 240,
@@ -138,6 +137,7 @@ exports[`ElasticAgentCard props href 1`] = `
             "width": "max(100%, 360px)",
           }
         }
+        size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
     }
@@ -185,8 +185,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
     image={
       <EuiImage
         alt=""
-        size="fullWidth"
-        style={
+        css={
           Object {
             "background": "aliceblue",
             "height": 240,
@@ -194,6 +193,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
             "width": "max(100%, 360px)",
           }
         }
+        size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
     }
@@ -236,8 +236,7 @@ exports[`ElasticAgentCard renders 1`] = `
     image={
       <EuiImage
         alt=""
-        size="fullWidth"
-        style={
+        css={
           Object {
             "background": "aliceblue",
             "height": 240,
@@ -245,6 +244,7 @@ exports[`ElasticAgentCard renders 1`] = `
             "width": "max(100%, 360px)",
           }
         }
+        size="fullWidth"
         url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
       />
     }

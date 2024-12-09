@@ -29,11 +29,15 @@ export const getProcessQueryNode = ({
       const replaceQueryResourcePrompt =
         REPLACE_QUERY_RESOURCE_PROMPT.pipe(model).pipe(replaceQueryParser);
       const resourceContext = getResourcesContext(resources);
-      query = await replaceQueryResourcePrompt.invoke({
+      const response = await replaceQueryResourcePrompt.invoke({
         query: state.original_rule.query,
         macros: resourceContext.macros,
         lookup_tables: resourceContext.lists,
       });
+      const splQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1] ?? '';
+      if (splQuery) {
+        query = splQuery;
+      }
     }
     return { inline_query: query };
   };

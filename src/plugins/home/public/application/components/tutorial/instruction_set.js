@@ -278,7 +278,7 @@ class InstructionSetUi extends React.Component {
     return (
       <EuiSplitPanel.Outer>
         <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-          <EuiTabs style={{ padding: `0 ${euiThemeVars.euiSizeL}` }}>{this.renderTabs()}</EuiTabs>
+          <EuiTabs css={{ padding: `0 ${euiThemeVars.euiSizeL}` }}>{this.renderTabs()}</EuiTabs>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="l">
           {this.renderHeader()}

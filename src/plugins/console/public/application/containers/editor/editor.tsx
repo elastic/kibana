@@ -135,7 +135,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
         </div>
       ) : null}
       <EuiResizableContainer
-        style={{ height: '100%' }}
+        css={{ height: '100%' }}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
         onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
         data-test-subj="consoleEditorContainer"
@@ -152,13 +152,13 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                 grow={true}
                 borderRadius="none"
                 hasShadow={false}
-                style={{ height: '100%' }}
+                css={{ height: '100%' }}
               >
                 <EuiSplitPanel.Inner
                   paddingSize="none"
                   grow={true}
                   className="consoleEditorPanel"
-                  style={{ top: 0, height: 'calc(100% - 40px)' }}
+                  css={{ top: 0, height: 'calc(100% - 40px)' }}
                 >
                   {loading ? (
                     <EditorContentSpinner />
@@ -210,10 +210,10 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
               tabIndex={0}
               paddingSize="none"
             >
-              <EuiSplitPanel.Outer borderRadius="none" hasShadow={false} style={{ height: '100%' }}>
+              <EuiSplitPanel.Outer borderRadius="none" hasShadow={false} css={{ height: '100%' }}>
                 <EuiSplitPanel.Inner
                   paddingSize="none"
-                  css={{ alignContent: 'center', top: 0 }}
+                  css={{ alignContent: 'center', top: 0, height: 'calc(100% - 40px)' }}
                   className="consoleEditorPanel"
                 >
                   {data ? (

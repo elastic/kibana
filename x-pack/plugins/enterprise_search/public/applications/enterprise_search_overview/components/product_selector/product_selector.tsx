@@ -20,8 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ApiKeyPanel } from '../../../shared/api_key/api_key_panel';
-import { ErrorStateCallout } from '../../../shared/error_state';
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SearchLabsBanner } from '../../../shared/search_labs_banner/search_labs_banner';
@@ -39,11 +37,8 @@ import './product_selector.scss';
 import { WelcomeBanner } from './welcome_banner';
 
 export const ProductSelector: React.FC = () => {
-  const { config } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
   const { user } = useValues(KibanaLogic);
 
-  const showErrorConnecting = !!(config.host && errorConnectingMessage);
   // The create index flow does not work without ent-search, when content is updated
   // to no longer rely on ent-search we can always show the Add Content component
 
@@ -80,12 +75,6 @@ export const ProductSelector: React.FC = () => {
           <EuiSpacer size="xl" />
           <IngestionSelector />
           <EuiSpacer />
-          {showErrorConnecting && (
-            <>
-              <SendTelemetry action="error" metric="cannot_connect" />
-              <ErrorStateCallout />
-            </>
-          )}
           <EuiSpacer size="xl" />
 
           <EuiTitle>

@@ -22,6 +22,7 @@ import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
 import { EntityActions } from '../entity_actions';
+import { type EntityTypeCheckOptions } from '../../../common/rt_types';
 
 interface Props {
   loading: boolean;
@@ -31,6 +32,7 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
+  onFilterByType: (value: string, checked: EntityTypeCheckOptions) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -43,6 +45,7 @@ export function EntitiesGrid({
   pageIndex,
   onChangePage,
   onChangeSort,
+  onFilterByType,
 }: Props) {
   const [showActions, setShowActions] = useState<boolean>(true);
 
@@ -84,7 +87,13 @@ export function EntitiesGrid({
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case 'entityType':
-          return <BadgeFilterWithPopover field={ENTITY_TYPE} value={entityType} />;
+          return (
+            <BadgeFilterWithPopover
+              field={ENTITY_TYPE}
+              value={entityType}
+              onFilter={onFilterByType}
+            />
+          );
 
         case 'entityLastSeenTimestamp':
           return (
@@ -120,7 +129,7 @@ export function EntitiesGrid({
           return null;
       }
     },
-    [entities]
+    [entities, onFilterByType]
   );
 
   if (loading) {

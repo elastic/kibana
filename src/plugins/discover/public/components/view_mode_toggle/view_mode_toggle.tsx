@@ -11,7 +11,7 @@ import React, { useMemo, useEffect, useState, type ReactElement, useCallback } f
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { VIEW_MODE } from '../../../common/constants';
@@ -42,10 +42,6 @@ export const DocumentViewModeToggle = ({
     dataVisualizer: dataVisualizerService,
     aiops: aiopsService,
   } = useDiscoverServices();
-  const isLegacy = useMemo(
-    () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
-    [uiSettings, isEsqlMode]
-  );
 
   const [showPatternAnalysisTab, setShowPatternAnalysisTab] = useState<boolean | null>(null);
   const showFieldStatisticsTab = useMemo(
@@ -93,7 +89,7 @@ export const DocumentViewModeToggle = ({
     }
   }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);
 
-  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
+  const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL;
 
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const containerCss = css`

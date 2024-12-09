@@ -19,7 +19,7 @@ export interface UseFindAlertsQueryProps {
   http: HttpStart;
   toasts: ToastsStart;
   enabled?: boolean;
-  params: ISearchRequestParams & { feature_ids?: string[] };
+  params: ISearchRequestParams & { ruleTypeIds?: string[]; consumers?: string[] };
 }
 
 /**
@@ -34,6 +34,7 @@ export const useFindAlertsQuery = <T>({
   enabled = true,
   params,
 }: UseFindAlertsQueryProps) => {
+  const { ruleTypeIds, ...rest } = params;
   const onErrorFn = (error: Error) => {
     if (error) {
       toasts.addDanger(
@@ -48,7 +49,7 @@ export const useFindAlertsQuery = <T>({
     queryKey: ['findAlerts', JSON.stringify(params)],
     queryFn: () =>
       http.post<SearchResponseBody<{}, T>>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
-        body: JSON.stringify(params),
+        body: JSON.stringify({ ...rest, rule_type_ids: ruleTypeIds }),
       }),
     onError: onErrorFn,
     refetchOnWindowFocus: false,
