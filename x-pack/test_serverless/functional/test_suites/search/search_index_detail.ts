@@ -20,6 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const es = getService('es');
   const security = getService('security');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
@@ -54,11 +56,48 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectConnectionDetails();
         });
 
-        describe.skip('API key details', () => {
-          // Flaky test related with deleting API keys
+        describe('check code example texts', () => {
+          const indexNameCodeExample = 'test-my-index2';
+          before(async () => {
+            await es.indices.create({ index: indexNameCodeExample });
+            await svlSearchNavigation.navigateToIndexDetailPage(indexNameCodeExample);
+          });
+
+          after(async () => {
+            await esDeleteAllIndices(indexNameCodeExample);
+          });
+
+          it('should have basic example texts', async () => {
+            await pageObjects.svlSearchIndexDetailPage.expectHasSampleDocuments();
+          });
+
+          it('should have other example texts when mapping changed', async () => {
+            await es.indices.putMapping({
+              index: indexNameCodeExample,
+              properties: {
+                text: { type: 'text' },
+                number: { type: 'integer' },
+              },
+            });
+            await pageObjects.svlSearchIndexDetailPage.expectSampleDocumentsWithCustomMappings();
+          });
+        });
+
+        describe('API key details', () => {
           it('should show api key', async () => {
             await pageObjects.svlApiKeys.deleteAPIKeys();
             await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+            // sometimes the API key exists in the cluster and its lost in sessionStorage
+            // if fails we retry to delete the API key and refresh the browser
+            await retry.try(
+              async () => {
+                await pageObjects.svlApiKeys.expectAPIKeyExists();
+              },
+              async () => {
+                await pageObjects.svlApiKeys.deleteAPIKeys();
+                await browser.refresh();
+              }
+            );
             await pageObjects.svlApiKeys.expectAPIKeyAvailable();
             const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
             await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
