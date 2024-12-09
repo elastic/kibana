@@ -18,7 +18,7 @@ const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
 const getRandomString = () => `${chance.string({ pool: CHARS_POOL })}-${Date.now()}`;
 
 const deprecationMock = {
-  'event.dataset': 'deprecation.elasticsearch',
+  'event.dataset': 'elasticsearch.deprecation',
   '@timestamp': '2021-12-06T16:28:11,104Z',
   'log.level': 'CRITICAL',
   'log.logger':
@@ -30,7 +30,7 @@ const deprecationMock = {
   message:
     '[types removal] Specifying include_type_name in get index template requests is deprecated.',
   'data_stream.type': 'logs',
-  'data_stream.dataset': 'deprecation.elasticsearch',
+  'data_stream.dataset': 'elasticsearch.deprecation',
   'data_stream.namespace': 'default',
   'ecs.version': '1.7',
   'elasticsearch.event.category': 'types',
