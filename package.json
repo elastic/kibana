@@ -194,7 +194,7 @@
     "@kbn/asset-inventory-plugin": "link:x-pack/plugins/asset_inventory",
     "@kbn/audit-log-plugin": "link:x-pack/test/security_api_integration/plugins/audit_log",
     "@kbn/avc-banner": "link:packages/kbn-avc-banner",
-    "@kbn/banners-plugin": "link:x-pack/plugins/banners",
+    "@kbn/banners-plugin": "link:x-pack/platform/plugins/private/banners",
     "@kbn/bfetch-error": "link:packages/kbn-bfetch-error",
     "@kbn/bfetch-explorer-plugin": "link:examples/bfetch_explorer",
     "@kbn/bfetch-plugin": "link:src/plugins/bfetch",

@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/banners'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/banners',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/private/banners'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/banners',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/banners/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/private/banners/{common,public,server}/**/*.{ts,tsx}'],
 };
