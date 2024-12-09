@@ -33,6 +33,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
   const {
     getUrlForApp,
     overlays,
+    userProfile,
     theme,
     i18n: i18nStart,
     logger,
@@ -99,7 +100,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
               }}
             />
           </EditSpaceProvider>,
-          { theme, i18n: i18nStart }
+          { theme, i18n: i18nStart, userProfile }
         ),
         {
           size: 'm',
@@ -117,6 +118,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
       features,
       invokeClient,
       getUrlForApp,
+      userProfile,
       theme,
       i18nStart,
       notifications.toasts,

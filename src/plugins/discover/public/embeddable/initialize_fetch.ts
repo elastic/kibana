@@ -13,7 +13,6 @@ import { KibanaExecutionContext } from '@kbn/core/types';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
-  SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
@@ -109,14 +108,12 @@ export function initializeFetch({
           return;
         }
 
-        const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
         updateSearchSource(
           discoverServices,
           savedSearch.searchSource,
           dataView,
           savedSearch.sort,
           getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings),
-          useNewFieldsApi,
           fetchContext,
           {
             sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),

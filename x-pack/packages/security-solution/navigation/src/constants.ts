@@ -38,7 +38,7 @@ export enum ExternalPageName {
   maps = 'maps:',
   visualize = 'visualize:',
   // Machine Learning
-  // Ref: packages/default-nav/ml/default_navigation.ts
+  // Ref: src/platform/packages/private/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',
   mlNotifications = 'ml:notifications',
   mlMemoryUsage = 'ml:memoryUsage',

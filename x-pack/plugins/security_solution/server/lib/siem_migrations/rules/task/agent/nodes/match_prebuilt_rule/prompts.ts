@@ -15,7 +15,7 @@ Here are some context for you to reference for your task, read it carefully as y
 
 <context>
 <elastic_detection_rule_names>
-{elasticSecurityRules}
+{rules}
 </elastic_detection_rule_names>
 </context>
 `,

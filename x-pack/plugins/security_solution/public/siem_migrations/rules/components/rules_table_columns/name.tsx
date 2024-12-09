@@ -12,12 +12,11 @@ import * as i18n from './translations';
 import type { TableColumn } from './constants';
 
 interface NameProps {
-  name: string;
   rule: RuleMigration;
   openMigrationRuleDetails: (rule: RuleMigration) => void;
 }
 
-const Name = ({ name, rule, openMigrationRuleDetails }: NameProps) => {
+const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
   return (
     <EuiLink
       onClick={() => {
@@ -25,7 +24,7 @@ const Name = ({ name, rule, openMigrationRuleDetails }: NameProps) => {
       }}
       data-test-subj="ruleName"
     >
-      {name}
+      {rule.elastic_rule?.title}
     </EuiLink>
   );
 };
@@ -36,10 +35,10 @@ export const createNameColumn = ({
   openMigrationRuleDetails: (rule: RuleMigration) => void;
 }): TableColumn => {
   return {
-    field: 'original_rule.title',
+    field: 'elastic_rule.title',
     name: i18n.COLUMN_NAME,
-    render: (value: RuleMigration['original_rule']['title'], rule: RuleMigration) => (
-      <Name name={value} rule={rule} openMigrationRuleDetails={openMigrationRuleDetails} />
+    render: (_, rule: RuleMigration) => (
+      <Name rule={rule} openMigrationRuleDetails={openMigrationRuleDetails} />
     ),
     sortable: true,
     truncateText: true,

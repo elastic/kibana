@@ -483,6 +483,10 @@
             "references": [
               {
                 "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
@@ -8351,6 +8355,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
@@ -16870,6 +16878,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"

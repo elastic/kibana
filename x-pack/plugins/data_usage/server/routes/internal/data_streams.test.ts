@@ -19,6 +19,7 @@ import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
 import { createMockedDataUsageContext } from '../../mocks';
 import { getMeteringStats } from '../../utils/get_metering_stats';
 import { CustomHttpRequestError } from '../../utils';
+import { NoIndicesMeteringError, NoPrivilegeMeteringError } from '../../errors';
 
 jest.mock('../../utils/get_metering_stats');
 const mockGetMeteringStats = getMeteringStats as jest.Mock;
@@ -126,7 +127,7 @@ describe('registerDataStreamsRoute', () => {
     });
   });
 
-  it('should return correct error if metering stats request fails', async () => {
+  it('should return correct error if metering stats request fails with an unknown error', async () => {
     // using custom error for test here to avoid having to import the actual error class
     mockGetMeteringStats.mockRejectedValue(
       new CustomHttpRequestError('Error getting metring stats!')
@@ -141,6 +142,38 @@ describe('registerDataStreamsRoute', () => {
     expect(mockResponse.customError).toHaveBeenCalledWith({
       body: new CustomHttpRequestError('Error getting metring stats!'),
       statusCode: 500,
+    });
+  });
+
+  it('should return `not found` error if metering stats request fails when no indices', async () => {
+    mockGetMeteringStats.mockRejectedValue(
+      new Error(JSON.stringify({ message: 'index_not_found_exception' }))
+    );
+    const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRouter = mockCore.http.createRouter.mock.results[0].value;
+    const [[, handler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
+    await handler(context, mockRequest, mockResponse);
+
+    expect(mockResponse.notFound).toHaveBeenCalledTimes(1);
+    expect(mockResponse.notFound).toHaveBeenCalledWith({
+      body: new NoIndicesMeteringError(),
+    });
+  });
+
+  it('should return `forbidden` error if metering stats request fails with privileges error', async () => {
+    mockGetMeteringStats.mockRejectedValue(
+      new Error(JSON.stringify({ message: 'security_exception' }))
+    );
+    const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRouter = mockCore.http.createRouter.mock.results[0].value;
+    const [[, handler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
+    await handler(context, mockRequest, mockResponse);
+
+    expect(mockResponse.forbidden).toHaveBeenCalledTimes(1);
+    expect(mockResponse.forbidden).toHaveBeenCalledWith({
+      body: new NoPrivilegeMeteringError(),
     });
   });
 

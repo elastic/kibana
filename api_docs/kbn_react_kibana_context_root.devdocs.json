@@ -170,6 +170,28 @@
           },
           {
             "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-common.KibanaEuiProviderProps.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              ", \"getUserProfile$\"> | undefined"
+            ],
+            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
             "id": "def-common.KibanaEuiProviderProps.globalStyles",
             "type": "CompoundType",
             "tags": [],

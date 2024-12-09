@@ -35,7 +35,9 @@ export type FunctionResponse =
     }
   | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
 
-export interface FunctionDefinition<TParameters extends CompatibleJSONSchema = any> {
+export interface FunctionDefinition<
+  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
+> {
   name: string;
   description: string;
   visibility?: FunctionVisibility;
