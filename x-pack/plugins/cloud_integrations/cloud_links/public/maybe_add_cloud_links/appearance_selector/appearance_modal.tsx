@@ -23,7 +23,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { type Value, ValuesGroup } from './values_group';
 // import { useAppearance } from './use_appearance_hook';
 
-type ColorMode = 'system' | 'light' | 'dark' | 'space';
+type ColorMode = 'system' | 'light' | 'dark' | 'space_default';
 type Contrast = 'system' | 'normal' | 'high';
 
 const systemLabel = i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalSystemLabel', {
@@ -51,7 +51,7 @@ const colorModeOptions: Array<Value<ColorMode>> = [
     icon: 'moon',
   },
   {
-    id: 'space',
+    id: 'space_default',
     label: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalSpaceDefaultLabel', {
       defaultMessage: 'Space default',
     }),
@@ -117,16 +117,22 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
 
       <EuiModalBody>
         <ValuesGroup<ColorMode>
-          title={i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalColorModeLabel', {
+          title={i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalColorModeTitle', {
             defaultMessage: 'Color mode',
           })}
           values={colorModeOptions}
           selectedValue={colorMode}
           onChange={setColorMode}
+          ariaLabel={i18n.translate(
+            'xpack.cloudLinks.userMenuLinks.appearanceModalColorModeAriaLabel',
+            {
+              defaultMessage: 'Appearance color mode',
+            }
+          )}
         />
         <EuiSpacer />
 
-        {colorMode === 'space' && (
+        {colorMode === 'space_default' && (
           <>
             <EuiCallOut
               title={i18n.translate(
@@ -154,7 +160,7 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
 
         <ValuesGroup<Contrast>
           title={i18n.translate(
-            'xpack.cloudLinks.userMenuLinks.appearanceModalInterfaceContrastLabel',
+            'xpack.cloudLinks.userMenuLinks.appearanceModalInterfaceContrastTitle',
             {
               defaultMessage: 'Interface contrast',
             }
@@ -162,6 +168,12 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
           values={contrastOptions}
           selectedValue={contrast}
           onChange={setContrast}
+          ariaLabel={i18n.translate(
+            'xpack.cloudLinks.userMenuLinks.appearanceModalContrastAriaLabel',
+            {
+              defaultMessage: 'Appearance contrast',
+            }
+          )}
         />
         <EuiSpacer />
       </EuiModalBody>
