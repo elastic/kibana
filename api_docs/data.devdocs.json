@@ -2726,7 +2726,7 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               },
-              ">, { bfetch, expressions, uiActions, usageCollection, inspector, fieldFormats, management, }: ",
+              ">, { expressions, uiActions, usageCollection, inspector, fieldFormats, management, }: ",
               "DataSetupDependencies",
               ") => ",
               {
@@ -2778,7 +2778,7 @@
                 "id": "def-public.DataPublicPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      bfetch,\n      expressions,\n      uiActions,\n      usageCollection,\n      inspector,\n      fieldFormats,\n      management,\n    }",
+                "label": "{\n      expressions,\n      uiActions,\n      usageCollection,\n      inspector,\n      fieldFormats,\n      management,\n    }",
                 "description": [],
                 "signature": [
                   "DataSetupDependencies"

@@ -20,7 +20,6 @@ export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SAMPLE_ROWS_PER_PAGE_SETTING = 'discover:sampleRowsPerPage';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
-export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
