@@ -37,6 +37,7 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
     impact = null,
     category = null,
     subcategory = null,
+    additionalFields = null,
   } = fields ?? {};
 
   const { http } = useKibana().services;
@@ -134,8 +135,17 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
             },
           ]
         : []),
+      ...(additionalFields != null && additionalFields.length > 0
+        ? [
+            {
+              title: i18n.ADDITIONAL_FIELDS_LABEL,
+              description: additionalFields,
+            },
+          ]
+        : []),
     ],
     [
+      additionalFields,
       category,
       categoryOptions,
       impact,
