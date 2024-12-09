@@ -117,7 +117,7 @@ export const getIsRulePreviewDisabled = ({
   dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
-  machineLearningJobId: string[];
+  machineLearningJobId: string[] | undefined;
   queryBar: FieldValueQueryBar;
   newTermsFields: string[];
 }) => {
@@ -125,7 +125,7 @@ export const getIsRulePreviewDisabled = ({
     return isEsqlPreviewDisabled({ isQueryBarValid, queryBar });
   }
   if (ruleType === 'machine_learning') {
-    return machineLearningJobId.length === 0;
+    return !machineLearningJobId ?? machineLearningJobId?.length === 0;
   }
   if (
     !isQueryBarValid ||
