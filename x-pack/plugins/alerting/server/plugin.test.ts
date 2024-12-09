@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingPlugin, PluginSetupContract } from './plugin';
+import { AlertingPlugin, AlertingServerSetup } from './plugin';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
@@ -170,7 +170,7 @@ describe('Alerting Plugin', () => {
         });
 
         describe('registerType()', () => {
-          let setup: PluginSetupContract;
+          let setup: AlertingServerSetup;
           beforeEach(async () => {
             const context = coreMock.createPluginInitializerContext<AlertingConfig>(
               generateAlertingConfig()
@@ -209,7 +209,8 @@ describe('Alerting Plugin', () => {
               ...sampleRuleType,
               minimumLicenseRequired: 'basic',
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+
+            setup.registerType(ruleType);
             expect(ruleType.ruleTaskTimeout).toBe('5m');
           });
 
@@ -219,7 +220,7 @@ describe('Alerting Plugin', () => {
               minimumLicenseRequired: 'basic',
               ruleTaskTimeout: '20h',
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+            setup.registerType(ruleType);
             expect(ruleType.ruleTaskTimeout).toBe('20h');
           });
 
@@ -228,7 +229,7 @@ describe('Alerting Plugin', () => {
               ...sampleRuleType,
               minimumLicenseRequired: 'basic',
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+            setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(true);
           });
 
@@ -238,13 +239,13 @@ describe('Alerting Plugin', () => {
               minimumLicenseRequired: 'basic',
               cancelAlertsOnRuleTimeout: false,
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
-            await setup.registerType(ruleType);
+            setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);
           });
         });
 
         describe('registerConnectorAdapter()', () => {
-          let setup: PluginSetupContract;
+          let setup: AlertingServerSetup;
 
           beforeEach(async () => {
             const context = coreMock.createPluginInitializerContext<AlertingConfig>(
@@ -314,9 +315,9 @@ describe('Alerting Plugin', () => {
             });
 
             expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
-            expect(() =>
+            await expect(() =>
               startContract.getRulesClientWithRequest({} as KibanaRequest)
-            ).toThrowErrorMatchingInlineSnapshot(
+            ).rejects.toThrowErrorMatchingInlineSnapshot(
               `"Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
             );
           });
@@ -380,7 +381,8 @@ describe('Alerting Plugin', () => {
               },
               getSavedObjectsClient: jest.fn(),
             } as unknown as KibanaRequest;
-            startContract.getRulesClientWithRequest(fakeRequest);
+
+            await startContract.getRulesClientWithRequest(fakeRequest);
           });
         });
 
@@ -443,7 +445,8 @@ describe('Alerting Plugin', () => {
             },
             getSavedObjectsClient: jest.fn(),
           } as unknown as KibanaRequest;
-          startContract.getAlertingAuthorizationWithRequest(fakeRequest);
+
+          await startContract.getAlertingAuthorizationWithRequest(fakeRequest);
         });
       });
     });

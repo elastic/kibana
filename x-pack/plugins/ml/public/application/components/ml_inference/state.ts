@@ -6,10 +6,10 @@
  */
 
 import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
+import type { DFAModelItem } from '../../../../common/types/trained_models';
 import type { MlInferenceState } from './types';
-import type { ModelItem } from '../../model_management/models_list';
 
-export const getModelType = (model: ModelItem): string | undefined => {
+export const getModelType = (model: DFAModelItem): string | undefined => {
   const analysisConfig = model.metadata?.analytics_config?.analysis;
   return analysisConfig !== undefined ? getAnalysisType(analysisConfig) : undefined;
 };
@@ -54,13 +54,17 @@ export const getDefaultOnFailureConfiguration = (): MlInferenceState['onFailure'
   },
 ];
 
-export const getInitialState = (model: ModelItem): MlInferenceState => {
+export const getInitialState = (model: DFAModelItem): MlInferenceState => {
   const modelType = getModelType(model);
   let targetField;
 
   if (modelType !== undefined) {
     targetField = model.inference_config
-      ? `ml.inference.${model.inference_config[modelType].results_field}`
+      ? `ml.inference.${
+          model.inference_config[
+            modelType as keyof Exclude<DFAModelItem['inference_config'], undefined>
+          ]!.results_field
+        }`
       : undefined;
   }
 

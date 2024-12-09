@@ -21,8 +21,8 @@ import {
   AlertStatus,
 } from '@kbn/rule-data-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertingAuthorizationEntity } from '../../authorization/alerting_authorization';
 import type { RulesClientContext } from '../../rules_client';
+import { AlertingAuthorizationEntity } from '../../authorization/types';
 
 type EnsureAuthorized = (opts: { ruleTypeId: string; consumer: string }) => Promise<unknown>;
 
@@ -32,9 +32,9 @@ export interface SetAlertsToUntrackedParams {
   alertUuids?: string[];
   query?: QueryDslQueryContainer[];
   spaceId?: RulesClientContext['spaceId'];
-  featureIds?: string[];
+  ruleTypeIds?: string[];
   isUsingQuery?: boolean;
-  getAuthorizedRuleTypes?: RulesClientContext['authorization']['getAuthorizedRuleTypes'];
+  getAllAuthorizedRuleTypesFindOperation?: RulesClientContext['authorization']['getAllAuthorizedRuleTypesFindOperation'];
   getAlertIndicesAlias?: RulesClientContext['getAlertIndicesAlias'];
   ensureAuthorized?: EnsureAuthorized;
 }
@@ -155,21 +155,26 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
 };
 
 const getAuthorizedAlertsIndices = async ({
-  featureIds,
-  getAuthorizedRuleTypes,
+  ruleTypeIds,
+  getAllAuthorizedRuleTypesFindOperation,
   getAlertIndicesAlias,
   spaceId,
   logger,
 }: SetAlertsToUntrackedParamsWithDep) => {
   try {
-    const authorizedRuleTypes =
-      (await getAuthorizedRuleTypes?.(AlertingAuthorizationEntity.Alert, new Set(featureIds))) ||
-      [];
-    const indices = getAlertIndicesAlias?.(
-      authorizedRuleTypes.map((art: { id: string }) => art.id),
-      spaceId
-    );
-    return indices;
+    const authorizedRuleTypes = await getAllAuthorizedRuleTypesFindOperation?.({
+      authorizationEntity: AlertingAuthorizationEntity.Alert,
+      ruleTypeIds,
+    });
+
+    if (authorizedRuleTypes) {
+      return getAlertIndicesAlias?.(
+        Array.from(authorizedRuleTypes.keys()).map((id) => id),
+        spaceId
+      );
+    }
+
+    return [];
   } catch (error) {
     const errMessage = `Failed to get authorized rule types to untrack alerts by query: ${error}`;
     logger.error(errMessage);

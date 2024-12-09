@@ -36,8 +36,6 @@ import {
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
-import { CannotConnect } from '../search_index/components/cannot_connect';
-
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { ConnectorStats } from './connector_stats';
@@ -55,7 +53,7 @@ export const connectorsBreadcrumbs = [
 
 export const crawlersBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.crawlers.breadcrumb', {
-    defaultMessage: 'Web crawlers',
+    defaultMessage: 'Web Crawlers',
   }),
 ];
 
@@ -95,7 +93,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                 defaultMessage: 'Elasticsearch connectors',
               })
             : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
-                defaultMessage: 'Elasticsearch web crawlers',
+                defaultMessage: 'Elastic Web Crawler',
               }),
           rightSideGroupProps: {
             gutterSize: 's',
@@ -240,12 +238,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
       >
         {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
           <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
-        )}
-        {Boolean(errorConnectingMessage) && (
-          <>
-            <CannotConnect />
-            <EuiSpacer />
-          </>
         )}
         <ConnectorStats isCrawler={isCrawler} />
         <EuiSpacer />
