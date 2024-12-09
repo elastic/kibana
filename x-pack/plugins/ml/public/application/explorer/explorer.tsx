@@ -270,7 +270,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyExplorerPanelState]);
 
-  const { displayWarningToast, displayDangerToast } = useToastNotificationService();
+  const { displayDangerToast } = useToastNotificationService();
   const {
     anomalyTimelineStateService,
     anomalyExplorerCommonStateService,
