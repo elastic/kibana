@@ -6884,7 +6884,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-settings@link:packages/kbn-saved-objects-settings":
+"@kbn/saved-objects-settings@link:src/platform/packages/private/kbn-saved-objects-settings":
   version "0.0.0"
   uid ""
 
