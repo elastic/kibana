@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './header_logo.scss';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -16,6 +16,7 @@ import Url from 'url';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import { useEuiTheme } from '@elastic/eui';
 import { ElasticMark } from './elastic_mark';
 import { LoadingIndicator } from '../loading_indicator';
 
@@ -83,14 +84,29 @@ interface Props {
 }
 
 export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables }: Props) {
+  const { euiTheme } = useEuiTheme();
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
   const customBranding = useObservable(observables.customBranding$, {});
   const { customizedLogo, logo } = customBranding;
+
+  const styles = {
+    logoCss: css({
+      display: 'flex',
+      alignItems: 'center',
+      height: euiTheme.size.xxl,
+      paddingInline: euiTheme.size.s,
+    }),
+    logoMarkCss: css({
+      marginLeft: euiTheme.size.s,
+      fill: euiTheme.colors.ghost,
+    }),
+  };
+
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
-      className="chrHeaderLogo"
+      css={styles.logoCss}
       href={href}
       data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
@@ -101,12 +117,13 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
       {customizedLogo ? (
         <img
           src={customizedLogo}
-          className="chrHeaderLogo__mark"
+          data-test-subj="logoMark"
+          css={styles.logoMarkCss}
           style={{ maxWidth: '200px', maxHeight: '84px' }}
           alt="custom mark"
         />
       ) : (
-        <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+        <ElasticMark data-test-subj="logoMark" css={styles.logoMarkCss} aria-hidden={true} />
       )}
     </a>
   );
