@@ -4240,7 +4240,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-favorites-server@link:packages/content-management/favorites/favorites_server":
+"@kbn/content-management-favorites-server@link:src/platform/packages/shared/content-management/favorites/favorites_server":
   version "0.0.0"
   uid ""
 
