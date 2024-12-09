@@ -6,6 +6,7 @@
  */
 
 export { Graph } from './graph/graph';
+export { GraphInvestigation } from './graph_investigation/graph_investigation';
 export { GraphPopover } from './graph/graph_popover';
 export { useGraphPopover } from './graph/use_graph_popover';
 export type { GraphProps } from './graph/graph';

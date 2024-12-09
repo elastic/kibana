@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './src/components';
-export { useFetchGraphData } from './src/hooks';
+export const EVENT_GRAPH_VISUALIZATION_API = '/internal/cloud_security_posture/graph' as const;

@@ -6,16 +6,16 @@
  */
 
 import React, { memo } from 'react';
-import { GraphPopover } from '@kbn/cloud-security-posture-graph';
 import { EuiListGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ExpandPopoverListItem } from '@kbn/cloud-security-posture-graph/src/components/styles';
+import { ExpandPopoverListItem } from '../styles';
+import { GraphPopover } from '../../..';
 import {
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
-} from './test_ids';
+} from '../test_ids';
 
 interface GraphNodeExpandPopoverProps {
   isOpen: boolean;

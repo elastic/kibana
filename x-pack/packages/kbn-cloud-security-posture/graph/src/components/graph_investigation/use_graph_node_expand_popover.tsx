@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { useGraphPopover } from '@kbn/cloud-security-posture-graph';
-import type {
-  ExpandButtonClickCallback,
-  NodeProps,
-} from '@kbn/cloud-security-posture-graph/src/components/types';
-import type { PopoverActions } from '@kbn/cloud-security-posture-graph/src/components/graph/use_graph_popover';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useGraphPopover } from '../../..';
+import type { ExpandButtonClickCallback, NodeProps } from '../types';
 import { GraphNodeExpandPopover } from './graph_node_expand_popover';
 
 interface UseGraphNodeExpandPopoverArgs {
@@ -91,22 +87,17 @@ export const useGraphNodeExpandPopover = ({
 
   PopoverComponent.displayName = GraphNodeExpandPopover.displayName;
 
-  const actionsWithClose: PopoverActions = useMemo(
-    () => ({
-      ...actions,
-      closePopover: closePopoverHandler,
-    }),
-    [actions, closePopoverHandler]
-  );
-
   return useMemo(
     () => ({
       onNodeExpandButtonClick,
       PopoverComponent,
       id,
-      actions: actionsWithClose,
+      actions: {
+        ...actions,
+        closePopover: closePopoverHandler,
+      },
       state,
     }),
-    [PopoverComponent, actionsWithClose, id, onNodeExpandButtonClick, state]
+    [PopoverComponent, actions, closePopoverHandler, id, onNodeExpandButtonClick, state]
   );
 };

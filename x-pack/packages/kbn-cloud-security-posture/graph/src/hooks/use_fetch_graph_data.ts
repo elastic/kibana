@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   GraphRequest,
   GraphResponse,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { useMemo } from 'react';
-import { EVENT_GRAPH_VISUALIZATION_API } from '../../../../../common/constants';
-import { useHttp } from '../../../../common/lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EVENT_GRAPH_VISUALIZATION_API } from '../common/constants';
 
 /**
  * Interface for the input parameters of the useFetchGraphData hook.
@@ -82,7 +82,9 @@ export const useFetchGraphData = ({
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
   const queryClient = useQueryClient();
   const { esQuery, eventIds, start, end } = req.query;
-  const http = useHttp();
+  const {
+    services: { http },
+  } = useKibana();
   const QUERY_KEY = useMemo(
     () => ['useFetchGraphData', eventIds, start, end, esQuery],
     [end, esQuery, eventIds, start]
@@ -91,6 +93,10 @@ export const useFetchGraphData = ({
   const { isLoading, isError, data, isFetching } = useQuery<GraphResponse>(
     QUERY_KEY,
     () => {
+      if (!http) {
+        return Promise.reject(new Error('Http service is not available'));
+      }
+
       return http.post<GraphResponse>(EVENT_GRAPH_VISUALIZATION_API, {
         version: '1',
         body: JSON.stringify(req),
