@@ -191,7 +191,6 @@ export const rulesErrorReasonTranslationsMapping = {
   timeout: ALERT_ERROR_TIMEOUT_REASON,
   disabled: ALERT_ERROR_DISABLED_REASON,
   validate: ALERT_ERROR_VALIDATE_REASON,
-  blocked: ALERT_ERROR_VALIDATE_REASON,
 };
 
 export const rulesWarningReasonTranslationsMapping = {
