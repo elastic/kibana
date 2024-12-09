@@ -7304,7 +7304,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-picker@link:packages/shared-ux/file/file_picker/impl":
+"@kbn/shared-ux-file-picker@link:src/platform/packages/shared/shared-ux/file/file_picker/impl":
   version "0.0.0"
   uid ""
 
