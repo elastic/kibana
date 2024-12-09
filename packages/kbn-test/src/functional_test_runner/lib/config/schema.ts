@@ -178,6 +178,12 @@ export const schema = Joi.object()
       })
       .default(),
 
+    scoutReporter: Joi.object()
+      .keys({
+        enabled: Joi.boolean().default(process.env.ENABLE_SCOUT_REPORTER || false),
+      })
+      .default(),
+
     users: Joi.object().pattern(
       ID_PATTERN,
       Joi.object()
