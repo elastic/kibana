@@ -7432,7 +7432,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-router@link:packages/shared-ux/router/impl":
+"@kbn/shared-ux-router@link:src/platform/packages/shared/shared-ux/router/impl":
   version "0.0.0"
   uid ""
 
