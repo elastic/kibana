@@ -625,6 +625,7 @@ src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-es
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-visualizations
 src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
+src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/shared/charts @elastic/kibana-visualizations
 src/platform/plugins/shared/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/plugins/shared/esql @elastic/kibana-esql
@@ -654,7 +655,6 @@ src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-
 src/plugins/embeddable @elastic/kibana-presentation
 src/plugins/es_ui_shared @elastic/kibana-management
 src/plugins/event_annotation @elastic/kibana-visualizations
-src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/expression_error @elastic/kibana-presentation
 src/plugins/expression_image @elastic/kibana-presentation
 src/plugins/expression_metric @elastic/kibana-presentation
