@@ -13,7 +13,11 @@ import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
 import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
-import { customFieldsConfigurationMock, templatesConfigurationMock } from '../../containers/mock';
+import {
+  customFieldsConfigurationMock,
+  observableTypesMock,
+  templatesConfigurationMock,
+} from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
@@ -1301,6 +1305,93 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
+    });
+
+    it('updates observable type correctly', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          observableTypes: observableTypesMock,
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = screen.getByTestId('observable-types-list');
+
+      await userEvent.click(
+        within(list).getByTestId(`${observableTypesMock[0].key}-observable-type-edit`)
+      );
+
+      expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.EDIT_OBSERVABLE_TYPE
+      );
+
+      await userEvent.click(screen.getByTestId('observable-type-label-input'));
+      await userEvent.paste('updated');
+      await userEvent.click(screen.getByTestId('common-flyout-save'));
+
+      const updatedObservableTypes = structuredClone(observableTypesMock);
+      updatedObservableTypes[0].label = 'test_observable_type_1updated';
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          closureType: 'close-by-user',
+          customFields: [],
+          templates: [],
+          observableTypes: updatedObservableTypes,
+          id: '',
+          version: '',
+        });
+      });
+    });
+
+    it('deletes observable types correctly', async () => {
+      useGetCaseConfigurationMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        data: {
+          ...useCaseConfigureResponse.data,
+          observableTypes: observableTypesMock,
+        },
+      }));
+
+      appMockRender.render(<ConfigureCases />);
+
+      const list = screen.getByTestId('observable-types-list');
+
+      await userEvent.click(
+        within(list).getByTestId(`${observableTypesMock[0].key}-observable-type-delete`)
+      );
+
+      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Delete'));
+
+      await waitFor(() => {
+        expect(persistCaseConfigure).toHaveBeenCalledWith({
+          connector: {
+            id: 'none',
+            name: 'none',
+            type: ConnectorTypes.none,
+            fields: null,
+          },
+          customFields: [],
+          closureType: 'close-by-user',
+          observableTypes: [observableTypesMock[1]],
+          templates: [],
+          id: '',
+          version: '',
+        });
+      });
     });
   });
 
