@@ -149,8 +149,6 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        log.debug(events);
-
         expect(events[0].properties).to.eql({
           profileLevel: 'rootLevel',
           profileId: 'observability-root-profile',
@@ -189,8 +187,6 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        log.debug(events);
-
         expect(events[3].properties).to.eql({
           profileLevel: 'dataSourceLevel',
           profileId: 'default-data-source-profile',
@@ -203,29 +199,33 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
+        await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
         await testSubjects.click('querySubmitButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
-        await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
+        let events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_profile_resolved'],
+          withTimeoutMs: 500,
+        });
+
+        expect(events.length).to.be(3);
 
         // should trigger a new event after opening the doc viewer
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
 
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+        events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_profile_resolved'],
           withTimeoutMs: 500,
         });
 
-        log.debug(events);
+        expect(events.length).to.be(4);
 
-        expect(events[0].properties).to.eql({
+        expect(events[events.length - 1].properties).to.eql({
           profileLevel: 'documentLevel',
           profileId: 'observability-log-document-profile',
         });
-
-        expect(events.length).to.be(1);
       });
 
       it('should send EBT events also for embeddables', async () => {
@@ -248,8 +248,6 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        log.debug(events);
-
         expect(events[0].properties).to.eql({
           profileLevel: 'rootLevel',
           profileId: 'observability-root-profile',
@@ -257,12 +255,12 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         expect(events[1].properties).to.eql({
           profileLevel: 'dataSourceLevel',
-          profileId: 'default-data-source-profile',
+          profileId: 'observability-logs-data-source-profile',
         });
 
         expect(events[2].properties).to.eql({
           profileLevel: 'documentLevel',
-          profileId: 'default-document-profile',
+          profileId: 'observability-log-document-profile',
         });
 
         expect(events.length).to.be(3);
