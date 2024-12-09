@@ -93,3 +93,5 @@ export const INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH =
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
 export const ENABLE_MAINTENANCE_WINDOWS = true;
+
+export { rRuleRequestSchema } from './routes/r_rule/request/schemas/latest';

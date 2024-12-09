@@ -182,6 +182,51 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should return 400 if the timezone of an action is not valid', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const updatedData = {
+        name: 'bcd',
+        tags: ['bar'],
+        schedule: { interval: '12s' },
+        throttle: '1m',
+        params: {},
+        actions: [
+          {
+            id: 'test-id',
+            group: 'default',
+            params: {},
+            alerts_filter: {
+              timeframe: {
+                days: [1, 2, 3, 4, 5, 6, 7],
+                timezone: 'invalid',
+                hours: { start: '00:00', end: '01:00' },
+              },
+            },
+          },
+        ],
+      };
+
+      const response = await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(updatedData);
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          '[request body.actions.0.alerts_filter.timeframe.timezone]: string is not a valid timezone: invalid',
+      });
+    });
+
     describe('update rule flapping', () => {
       afterEach(async () => {
         await resetRulesSettings(supertest, 'space1');
