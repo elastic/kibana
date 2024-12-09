@@ -32,7 +32,7 @@ as uiSettings within the code.
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
-|{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
 
 

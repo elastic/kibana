@@ -4052,7 +4052,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/bfetch-plugin@link:src/plugins/bfetch":
+"@kbn/bfetch-plugin@link:src/platform/plugins/shared/bfetch":
   version "0.0.0"
   uid ""
 

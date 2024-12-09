@@ -7,7 +7,7 @@
     - 'x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*'
 - 'Feature:ExpressionLanguage':
     - 'src/plugins/expressions/**/*.*'
-    - 'src/plugins/bfetch/**/*.*'
+    - 'src/platform/plugins/shared/bfetch/**/*.*'
 - 'Team:obs-ux-infra_services':
     - 'x-pack/plugins/observability_solution/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
