@@ -7292,7 +7292,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image-mocks@link:packages/shared-ux/file/image/mocks":
+"@kbn/shared-ux-file-image-mocks@link:src/platform/packages/shared/shared-ux/file/image/mocks":
   version "0.0.0"
   uid ""
 
