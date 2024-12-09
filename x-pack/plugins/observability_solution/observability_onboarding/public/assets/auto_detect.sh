@@ -607,8 +607,8 @@ backup_elastic_agent_config
 
 printf "\n\e[1m%s\e[0m\n" "Installing Elastic Agent..."
 install_integrations
-download_elastic_agent
-extract_elastic_agent
+#download_elastic_agent
+#extract_elastic_agent
 install_elastic_agent
 apply_elastic_agent_config
 
