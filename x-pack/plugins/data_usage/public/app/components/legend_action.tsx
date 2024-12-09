@@ -73,11 +73,13 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
             <LegendActionItem
               label={UX_LABELS.dataQualityPopup.copy}
               onClick={onCopyDataStreamName}
+              dataTestSubj="copyDataStreamNameAction"
             />
             {hasIndexManagementFeature && (
               <LegendActionItem
                 label={UX_LABELS.dataQualityPopup.manage}
                 onClick={onClickIndexManagement}
+                dataTestSubj="manageDataStreamAction"
               />
             )}
             {hasDataSetQualityFeature && <DatasetQualityLink dataStreamName={label} />}

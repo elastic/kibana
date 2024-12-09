@@ -11,12 +11,18 @@ import { interceptRequest } from './intercept_request';
 import { setupMockServer } from '../../../../api_integration/test_suites/common/data_usage/mock_api';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['svlCommonPage', 'svlManagementPage', 'common']);
+  const pageObjects = getPageObjects([
+    'svlDataUsagePage',
+    'svlCommonPage',
+    'svlManagementPage',
+    'common',
+  ]);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const driver = getService('__webdriver__');
   const mockAutoopsApiService = setupMockServer();
   const es = getService('es');
+  const browser = getService('browser');
   let mockApiServer: http.Server;
 
   const dataStreamsMockResponse = [
@@ -85,14 +91,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders data usage page', async () => {
       await retry.waitFor('page to be visible', async () => {
-        return await testSubjects.exists('DataUsagePage');
+        return await pageObjects.svlDataUsagePage.assertDataUsagePageExists();
       });
     });
     it('shows 3 data streams in the filter dropdown', async () => {
       // Click the dropdown button to show the options
-      await testSubjects.click('data-usage-metrics-filter-dataStreams-popoverButton');
+      await pageObjects.svlDataUsagePage.clickDatastreamsDropdown();
 
-      const options = await testSubjects.findAll('dataStreams-filter-option');
+      const options = await pageObjects.svlDataUsagePage.findDatastreamsDropdownOptions();
 
       // Assert that exactly 3 elements are present
       expect(options.length).to.eql(3);
@@ -104,12 +110,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       // Locate the filter button using its data-test-subj
-      const filterButton = await testSubjects.find(
-        'data-usage-metrics-filter-dataStreams-popoverButton'
-      );
+      const datastreamsDropdownFilterButton =
+        await pageObjects.svlDataUsagePage.findDatastreamsDropdownFilterButton();
 
       // Find the badge element within the button (using its CSS class)
-      const notificationBadge = await filterButton.findByCssSelector('.euiNotificationBadge');
+      const notificationBadge = await datastreamsDropdownFilterButton.findByCssSelector(
+        '.euiNotificationBadge'
+      );
 
       // Retrieve the text content of the badge
       const activeFiltersCount = await notificationBadge.getVisibleText();
@@ -118,11 +125,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(activeFiltersCount).to.be('3');
     });
     it('renders charts', async () => {
-      // data is coming from the mocked autoops API
+      // Data is coming from the mocked autoops API
       const chartContainer = await testSubjects.find('data-usage-metrics');
       await testSubjects.existOrFail('data-usage-metrics');
 
-      // check 2 charts rendered
+      // Check 2 charts rendered
       await retry.waitFor('chart to render', async () => {
         const chartStatus = await chartContainer.findAllByCssSelector(
           '.echChartStatus[data-ech-render-complete="true"]'
@@ -130,51 +137,69 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return chartStatus.length === 2;
       });
     });
-    it('renders legend and actions popover', async () => {
-      const ingestRateChart = await testSubjects.find('ingest_rate-chart');
-      const storageRetainedChart = await testSubjects.find('storage_retained-chart');
+    it('renders legend', async () => {
+      const ingestRateChart = await pageObjects.svlDataUsagePage.findIngestRateChart();
+      const storageRetainedChart = await pageObjects.svlDataUsagePage.storageRetainedChart();
 
-      // Verify legend items for the ingest_rate chart
-      const ingestLegendItems = await ingestRateChart.findAllByCssSelector('li.echLegendItem');
+      const ingestLegendItems = await pageObjects.svlDataUsagePage.findLegendItemsInChart(
+        ingestRateChart
+      );
+
       expect(ingestLegendItems.length).to.eql(4); // 3 data streams + 1 Total line series
 
-      const ingestLegendNames = await Promise.all(
-        ingestLegendItems.map(async (item) => item.getAttribute('data-ech-series-name'))
-      );
-
-      expect(ingestLegendNames.sort()).to.eql(
-        [
-          'metrics-system.cpu-default',
-          'metrics-system.core.total.pct-default',
-          'logs-nginx.access-default',
-          'Total',
-        ].sort()
-      );
-
-      const storageLegendItems = await storageRetainedChart.findAllByCssSelector(
-        'li.echLegendItem'
+      const storageLegendItems = await pageObjects.svlDataUsagePage.findLegendItemsInChart(
+        storageRetainedChart
       );
       expect(storageLegendItems.length).to.eql(4); // same number of data streams + total line series
+    });
+    it('renders actions popover with correct links', async () => {
+      // Open the first legend item actions popover
+      const ingestRateChart = await pageObjects.svlDataUsagePage.findIngestRateChart();
+      await pageObjects.svlDataUsagePage.clickLegendActionButtonAtIndex(ingestRateChart, 0);
+      await pageObjects.svlDataUsagePage.assertLegendActionPopoverExists();
+      // Check for links
+      await testSubjects.existOrFail('copyDataStreamNameAction');
+      await testSubjects.existOrFail('manageDataStreamAction');
+      await testSubjects.existOrFail('DatasetQualityAction');
 
-      const storageLegendNames = await Promise.all(
-        storageLegendItems.map(async (item) => item.getAttribute('data-ech-series-name'))
-      );
+      const manageLink = await testSubjects.find('manageDataStreamAction');
+      await manageLink.click();
 
-      expect(storageLegendNames.sort()).to.eql(
-        [
-          'metrics-system.cpu-default',
-          'metrics-system.core.total.pct-default',
-          'logs-nginx.access-default',
-          'Total',
-        ].sort()
-      );
-      // actions menu
-      const firstLegendItem = ingestLegendItems[0];
-      const actionButton = await firstLegendItem.findByTestSubject('legendActionButton');
-      await actionButton.click();
+      // Wait for navigation to the data stream details page
+      await retry.waitFor('URL to update (index management)', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes(
+          `/app/management/data/index_management/data_streams/${dataStreamsMockResponse[0].name}`
+        );
+      });
+      await browser.goBack();
+      // test second link to ensure state changed
+      await pageObjects.svlDataUsagePage.clickLegendActionButtonAtIndex(ingestRateChart, 1);
+      await pageObjects.svlDataUsagePage.assertLegendActionPopoverExists();
 
-      // Verify that the popover now appears
-      await testSubjects.existOrFail('legendActionPopover');
+      await manageLink.click();
+
+      // Wait for navigation to the data stream details page
+      await retry.waitFor('URL to update (index management)', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes(
+          `/app/management/data/index_management/data_streams/${dataStreamsMockResponse[1].name}`
+        );
+      });
+      await browser.goBack();
+
+      // Test navigation for the data quality link
+      await pageObjects.svlDataUsagePage.clickLegendActionButtonAtIndex(ingestRateChart, 0);
+      await pageObjects.svlDataUsagePage.assertLegendActionPopoverExists();
+      const dataQualityLink = await testSubjects.find('DatasetQualityAction');
+      await dataQualityLink.click();
+
+      // Wait for navigation to the data quality details page
+      await retry.waitFor('URL to update (data quality)', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        return currentUrl.includes('/app/management/data/data_quality/details');
+      });
+      await browser.goBack();
     });
   });
 };
