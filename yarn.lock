@@ -6764,7 +6764,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-server@link:packages/kbn-reporting/server":
+"@kbn/reporting-server@link:src/platform/packages/private/kbn-reporting/server":
   version "0.0.0"
   uid ""
 
