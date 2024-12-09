@@ -627,6 +627,7 @@ src/platform/packages/shared/presentation/presentation_containers @elastic/kiban
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
+src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 src/platform/plugins/shared/embeddable @elastic/kibana-presentation
@@ -682,7 +683,6 @@ src/plugins/management @elastic/kibana-management
 src/plugins/navigation @elastic/appex-sharedux
 src/plugins/newsfeed @elastic/kibana-core
 src/plugins/no_data_page @elastic/appex-sharedux
-src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 src/plugins/saved_objects @elastic/appex-sharedux
 src/plugins/saved_objects_finder @elastic/kibana-data-discovery
