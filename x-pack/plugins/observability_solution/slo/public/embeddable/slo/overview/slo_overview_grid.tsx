@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   Chart,
-  isMetricElementEvent,
   Metric,
+  MetricDatum,
   MetricTrendShape,
   Settings,
-  MetricDatum,
+  isMetricElementEvent,
 } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import { useKibana } from '../../../hooks/use_kibana';
-import { SloOverviewDetails } from '../common/slo_overview_details';
-import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
-import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
-import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
-import {
-  getSubTitle,
-  useSloCardColor,
-} from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
+import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useSloCardColors } from '../../../pages/slos/components/card_view/hooks/use_slo_card_colors';
+import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
+import { getFirstGrouping } from '../../../pages/slos/components/card_view/utils/get_first_grouping';
+import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { SloOverviewDetails } from '../common/slo_overview_details';
 
 const getSloChartData = ({
   slo,
@@ -105,11 +103,11 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
     sloList: sloList?.results ?? [],
   });
 
-  const { colors } = useSloCardColor();
+  const colors = useSloCardColors();
   const chartsData: MetricDatum[][] = [[]];
   sloList?.results.forEach((slo) => {
-    const subTitle = getSubTitle(slo);
-    const cardColor = colors[slo.summary.status ?? 'NO_DATA'];
+    const subTitle = getFirstGrouping(slo);
+    const cardColor = colors[slo.summary.status];
     const { sliValue, sloTarget } = getSloFormattedSummary(slo, uiSettings, basePath);
 
     const historicalSummary =
