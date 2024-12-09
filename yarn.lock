@@ -7256,7 +7256,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-avatar-solution@link:packages/shared-ux/avatar/solution":
+"@kbn/shared-ux-avatar-solution@link:src/platform/packages/shared/shared-ux/avatar/solution":
   version "0.0.0"
   uid ""
 
