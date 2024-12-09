@@ -108,12 +108,6 @@ export function ServiceMap({
   const serviceName = useServiceName();
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
-  const {
-    query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
 
   const {
     data = { elements: [] },
@@ -193,7 +187,7 @@ export function ServiceMap({
 
   if (status === FETCH_STATUS.SUCCESS) {
     onPageReady({
-      meta: { rangeFrom, rangeTo },
+      meta: { rangeFrom: start, rangeTo: end },
     });
   }
 
