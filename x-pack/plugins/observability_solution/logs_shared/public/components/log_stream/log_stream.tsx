@@ -299,7 +299,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
 
 const LogStreamContainer = styled.div`
   display: flex;
-  background-color: ${props => props.theme.euiTheme.colors.emptyShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
 `;
 
 function convertLogColumnDefinitionToLogSourceColumnDefinition(
