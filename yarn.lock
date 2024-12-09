@@ -7312,7 +7312,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-upload@link:packages/shared-ux/file/file_upload/impl":
+"@kbn/shared-ux-file-upload@link:src/platform/packages/shared/shared-ux/file/file_upload/impl":
   version "0.0.0"
   uid ""
 
