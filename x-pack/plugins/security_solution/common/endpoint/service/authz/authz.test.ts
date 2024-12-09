@@ -126,13 +126,6 @@ describe('Endpoint Authz service', () => {
           ).toBe(value);
         });
 
-        it(`should set canAccessFleet to ${value} if \`fleet.all\` is ${value}`, () => {
-          fleetAuthz.fleet.all = value;
-          expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
-            value
-          );
-        });
-
         it(`should set canWriteIntegrationPolicies to ${value} if \`integrations.writeIntegrationPolicies\` is ${value}`, () => {
           fleetAuthz.integrations.writeIntegrationPolicies = value;
           expect(
