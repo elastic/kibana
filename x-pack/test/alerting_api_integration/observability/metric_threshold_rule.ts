@@ -7,12 +7,9 @@
 
 import expect from '@kbn/expect';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import {
-  Aggregators,
-  InfraRuleType,
-  MetricThresholdParams,
-} from '@kbn/infra-plugin/common/alerting/metrics';
+import { Aggregators, MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { InfraRuleType } from '@kbn/rule-data-utils';
 import {
   waitForDocumentInIndex,
   waitForAlertInIndex,

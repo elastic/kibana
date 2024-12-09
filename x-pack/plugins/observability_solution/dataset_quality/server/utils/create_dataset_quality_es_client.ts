@@ -13,6 +13,8 @@ import {
   FieldCapsRequest,
   FieldCapsResponse,
   Indices,
+  IndicesGetIndexTemplateRequest,
+  IndicesGetIndexTemplateResponse,
   IndicesGetMappingResponse,
   IndicesGetSettingsResponse,
   IndicesPutSettingsRequest,
@@ -62,6 +64,11 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
     },
     rollover(params: { alias: string }): Promise<IndicesRolloverResponse> {
       return esClient.indices.rollover(params);
+    },
+    indexTemplates(
+      params: IndicesGetIndexTemplateRequest
+    ): Promise<IndicesGetIndexTemplateResponse> {
+      return esClient.indices.getIndexTemplate(params);
     },
   };
 }

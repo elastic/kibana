@@ -129,13 +129,13 @@
     "functions": [
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
-        "id": "def-common.buildEntityFlyoutPreviewQuery",
+        "id": "def-common.buildGenericEntityFlyoutPreviewQuery",
         "type": "Function",
         "tags": [],
-        "label": "buildEntityFlyoutPreviewQuery",
+        "label": "buildGenericEntityFlyoutPreviewQuery",
         "description": [],
         "signature": [
-          "(field: string, queryValue?: string | undefined) => { bool: { filter: { bool: { should: { term: { [x: string]: string; }; }[]; minimum_should_match: number; }; }[]; }; }"
+          "(field: string, queryValue?: string | undefined, status?: string | undefined, queryField?: string | undefined) => { bool: { filter: ({ bool: { should: { term: { [x: string]: string; }; }[]; minimum_should_match: number; }; } | undefined)[]; }; }"
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
         "deprecated": false,
@@ -143,7 +143,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
-            "id": "def-common.buildEntityFlyoutPreviewQuery.$1",
+            "id": "def-common.buildGenericEntityFlyoutPreviewQuery.$1",
             "type": "string",
             "tags": [],
             "label": "field",
@@ -158,10 +158,103 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
-            "id": "def-common.buildEntityFlyoutPreviewQuery.$2",
+            "id": "def-common.buildGenericEntityFlyoutPreviewQuery.$2",
             "type": "string",
             "tags": [],
             "label": "queryValue",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildGenericEntityFlyoutPreviewQuery.$3",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildGenericEntityFlyoutPreviewQuery.$4",
+            "type": "string",
+            "tags": [],
+            "label": "queryField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.buildMisconfigurationEntityFlyoutPreviewQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "buildMisconfigurationEntityFlyoutPreviewQuery",
+        "description": [],
+        "signature": [
+          "(field: string, queryValue?: string | undefined, status?: string | undefined) => { bool: { filter: ({ bool: { should: { term: { [x: string]: string; }; }[]; minimum_should_match: number; }; } | undefined)[]; }; }"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildMisconfigurationEntityFlyoutPreviewQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildMisconfigurationEntityFlyoutPreviewQuery.$2",
+            "type": "string",
+            "tags": [],
+            "label": "queryValue",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildMisconfigurationEntityFlyoutPreviewQuery.$3",
+            "type": "string",
+            "tags": [],
+            "label": "status",
             "description": [],
             "signature": [
               "string | undefined"
@@ -205,6 +298,69 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.buildVulnerabilityEntityFlyoutPreviewQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "buildVulnerabilityEntityFlyoutPreviewQuery",
+        "description": [],
+        "signature": [
+          "(field: string, queryValue?: string | undefined, status?: string | undefined) => { bool: { filter: ({ bool: { should: { term: { [x: string]: string; }; }[]; minimum_should_match: number; }; } | undefined)[]; }; }"
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildVulnerabilityEntityFlyoutPreviewQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildVulnerabilityEntityFlyoutPreviewQuery.$2",
+            "type": "string",
+            "tags": [],
+            "label": "queryValue",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.buildVulnerabilityEntityFlyoutPreviewQuery.$3",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1556,6 +1712,42 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.MISCONFIGURATION_STATUS",
+        "type": "Object",
+        "tags": [],
+        "label": "MISCONFIGURATION_STATUS",
+        "description": [],
+        "path": "x-pack/packages/kbn-cloud-security-posture/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.MISCONFIGURATION_STATUS.PASSED",
+            "type": "string",
+            "tags": [],
+            "label": "PASSED",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-common",
+            "id": "def-common.MISCONFIGURATION_STATUS.FAILED",
+            "type": "string",
+            "tags": [],
+            "label": "FAILED",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.VULNERABILITIES_SEVERITY",

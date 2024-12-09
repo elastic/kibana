@@ -25,6 +25,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { LogRateAnalysisPage } from './log_rate_analysis_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
+import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -58,6 +59,8 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   if (warning !== null) {
     return <>{warning}</>;
   }
+  const CasesContext = appContextValue.cases?.ui.getCasesContext() ?? React.Fragment;
+  const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
@@ -67,17 +70,21 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
 
   return (
     <AiopsAppContext.Provider value={appContextValue}>
-      <UrlStateProvider>
-        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-          <LogRateAnalysisReduxProvider>
-            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </LogRateAnalysisReduxProvider>
-        </DataSourceContext.Provider>
-      </UrlStateProvider>
+      <CasesContext permissions={casesPermissions!} owner={[]}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <LogRateAnalysisReduxProvider>
+              <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+                <DatePickerContextProvider {...datePickerDeps}>
+                  <FilterQueryContextProvider>
+                    <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
+                  </FilterQueryContextProvider>
+                </DatePickerContextProvider>
+              </StorageContextProvider>
+            </LogRateAnalysisReduxProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </CasesContext>
     </AiopsAppContext.Provider>
   );
 };

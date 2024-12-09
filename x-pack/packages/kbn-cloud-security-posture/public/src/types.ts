@@ -58,7 +58,7 @@ export interface CspClientPluginStartDeps {
 export interface CspBaseEsQuery {
   query?: {
     bool: {
-      filter: estypes.QueryDslQueryContainer[];
+      filter: Array<estypes.QueryDslQueryContainer | undefined> | undefined;
     };
   };
 }

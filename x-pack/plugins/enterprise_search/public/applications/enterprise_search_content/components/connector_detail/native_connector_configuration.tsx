@@ -11,7 +11,6 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callout';
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
@@ -36,8 +34,7 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const NativeConnectorConfiguration: React.FC = () => {
   const { connector } = useValues(ConnectorViewLogic);
-  const { config, connectorTypes: connectors } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
+  const { connectorTypes: connectors } = useValues(KibanaLogic);
 
   const NATIVE_CONNECTORS = useMemo(
     () => connectors.filter(({ isNative }) => isNative),
@@ -109,39 +106,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {config.host && config.canDeployEntSearch && errorConnectingMessage && (
-            <>
-              <EuiCallOut
-                color="warning"
-                size="m"
-                title={i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.title',
-                  {
-                    defaultMessage: 'No running Enterprise Search instance detected',
-                  }
-                )}
-                iconType="warning"
-              >
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.text',
-                    {
-                      defaultMessage:
-                        'Elastic managed connectors require a running Enterprise Search instance.',
-                    }
-                  )}
-                </p>
-              </EuiCallOut>
-
-              <EuiSpacer />
-            </>
-          )}
-          {
-            <>
-              <EuiSpacer />
-              <AttachIndexBox connector={connector} />
-            </>
-          }
+          <EuiSpacer />
+          <AttachIndexBox connector={connector} />
           {connector.index_name && (
             <>
               <EuiSpacer />

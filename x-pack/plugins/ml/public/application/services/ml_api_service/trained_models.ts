@@ -20,22 +20,20 @@ import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import type {
-  TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
   ModelDownloadState,
+  TrainedModelUIItem,
+  TrainedModelConfigResponse,
 } from '../../../../common/types/trained_models';
+
 export interface InferenceQueryParams {
-  decompress_definition?: boolean;
   from?: number;
   include_model_definition?: boolean;
   size?: number;
   tags?: string;
-  // Custom kibana endpoint query params
-  with_pipelines?: boolean;
-  with_indices?: boolean;
   include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
 }
 
@@ -118,6 +116,19 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
+        version: '1',
+      });
+    },
+
+    /**
+     * Fetches a complete list of trained models required for UI
+     * including stats for each model, pipelines definitions, and
+     * models available for download.
+     */
+    getTrainedModelsList() {
+      return httpService.http<TrainedModelUIItem[]>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models_list`,
+        method: 'GET',
         version: '1',
       });
     },
