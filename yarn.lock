@@ -6744,7 +6744,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-png-common@link:packages/kbn-reporting/export_types/png_common":
+"@kbn/reporting-export-types-png-common@link:src/platform/packages/private/kbn-reporting/export_types/png_common":
   version "0.0.0"
   uid ""
 
