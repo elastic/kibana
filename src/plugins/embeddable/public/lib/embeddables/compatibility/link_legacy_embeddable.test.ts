@@ -27,8 +27,8 @@ const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, 
 
 const defaultCapabilities = {
   advancedSettings: {},
-  visualize: { save: true },
-  maps: { save: true },
+  visualize_v2: { save: true },
+  maps_v2: { save: true },
   navLinks: {},
 };
 
@@ -78,7 +78,7 @@ test('Cannot link an ES|QL Embeddable to the library', async () => {
 
 test('Cannot link a visualize embeddable to the library without visualize save permissions', async () => {
   Object.defineProperty(core.application, 'capabilities', {
-    value: { ...defaultCapabilities, visualize: { save: false } },
+    value: { ...defaultCapabilities, visualize_v2: { save: false } },
   });
   expect(await canLinkLegacyEmbeddable(embeddable as unknown as CommonLegacyEmbeddable)).toBe(
     false

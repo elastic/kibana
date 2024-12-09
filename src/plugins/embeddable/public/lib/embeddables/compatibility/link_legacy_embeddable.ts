@@ -28,7 +28,7 @@ export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable
     return false;
   }
 
-  const { visualize } = core.application.capabilities;
+  const { visualize_v2: visualize } = core.application.capabilities;
   const canSave = visualize.save;
 
   const { isOfAggregateQueryType } = await import('@kbn/es-query');

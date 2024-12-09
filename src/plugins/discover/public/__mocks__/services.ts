@@ -174,10 +174,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
     docLinks: docLinksServiceMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     capabilities: {
-      visualize: {
+      visualize_v2: {
         show: true,
       },
-      discover: {
+      discover_v2: {
         save: false,
       },
       advancedSettings: {

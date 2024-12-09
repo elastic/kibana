@@ -14,7 +14,7 @@
  *
  * @public
  */
-export interface Capabilities {
+export type Capabilities = {
   /** Navigation link capabilities. */
   navLinks: Record<string, boolean>;
 
@@ -28,4 +28,9 @@ export interface Capabilities {
 
   /** Custom capabilities, registered by plugins. */
   [key: string]: Record<string, boolean | Record<string, boolean>>;
-}
+} & {
+  discover?: never;
+  dashboard?: never;
+  maps?: never;
+  visualize?: never;
+};

@@ -33,7 +33,7 @@ const mockUseKibana = useKibana as jest.Mock;
 
 describe('useSaveToLibrary hook', () => {
   const mockStartServices = {
-    application: { capabilities: { visualize: { save: true } } },
+    application: { capabilities: { visualize_v2: { save: true } } },
     lens: { SaveModalComponent: jest.fn() },
   };
 
@@ -57,7 +57,7 @@ describe('useSaveToLibrary hook', () => {
   it('should disable visualizations if user cannot save', () => {
     const noSaveCapabilities = {
       ...mockStartServices,
-      application: { capabilities: { visualize: { save: false } } },
+      application: { capabilities: { visualize_v2: { save: false } } },
     };
     mockUseKibana.mockReturnValue({ services: noSaveCapabilities });
 
