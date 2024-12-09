@@ -267,7 +267,6 @@ packages/deeplinks/fleet @elastic/fleet
 packages/deeplinks/management @elastic/kibana-management
 packages/deeplinks/ml @elastic/ml-ui
 packages/deeplinks/observability @elastic/obs-ux-management-team
-packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/security @elastic/security-solution
 packages/deeplinks/shared @elastic/appex-sharedux
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
@@ -384,7 +383,6 @@ packages/kbn-index-adapter @elastic/security-threat-hunting
 packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
-packages/kbn-ipynb @elastic/search-kibana
 packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
@@ -468,12 +466,7 @@ packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-screenshotting-server @elastic/appex-sharedux
-packages/kbn-search-api-keys-components @elastic/search-kibana
-packages/kbn-search-api-keys-server @elastic/search-kibana
-packages/kbn-search-api-panels @elastic/search-kibana
-packages/kbn-search-connectors @elastic/search-kibana
 packages/kbn-search-errors @elastic/kibana-data-discovery
-packages/kbn-search-index-documents @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 packages/kbn-search-types @elastic/kibana-data-discovery
 packages/kbn-security-hardening @elastic/kibana-security
@@ -523,7 +516,6 @@ packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 packages/kbn-transpose-utils @elastic/kibana-visualizations
 packages/kbn-triggers-actions-ui-types @elastic/response-ops
-packages/kbn-try-in-console @elastic/search-kibana
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
@@ -564,7 +556,6 @@ packages/response-ops/rule_params @elastic/response-ops
 packages/serverless/project_switcher @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
-packages/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 packages/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
@@ -622,10 +613,15 @@ packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
+src/platform/packages/shared/deeplinks/search @elastic/search-kibana
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
+src/platform/packages/shared/kbn-search-api-panels @elastic/search-kibana
+src/platform/packages/shared/kbn-search-connectors @elastic/search-kibana
+src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
+src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
@@ -781,8 +777,6 @@ x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
-x-pack/packages/kbn-ai-assistant @elastic/search-kibana
-x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
 x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
@@ -847,7 +841,6 @@ x-pack/packages/observability/observability_utils/observability_utils_common @el
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/packages/rollup @elastic/kibana-management
-x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
@@ -866,6 +859,8 @@ x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/packages/security/ui_components @elastic/kibana-security
 x-pack/performance @elastic/appex-qa
+x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
+x-pack/platform/packages/shared/kbn-ai-assistant-common @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/plugins/actions @elastic/response-ops
@@ -897,7 +892,6 @@ x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explo
 x-pack/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
-x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/event_log @elastic/response-ops
 x-pack/plugins/features @elastic/kibana-core
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
@@ -963,14 +957,6 @@ x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-te
 x-pack/plugins/runtime_fields @elastic/kibana-management
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services
-x-pack/plugins/search_assistant @elastic/search-kibana
-x-pack/plugins/search_connectors @elastic/search-kibana
-x-pack/plugins/search_homepage @elastic/search-kibana
-x-pack/plugins/search_indices @elastic/search-kibana
-x-pack/plugins/search_inference_endpoints @elastic/search-kibana
-x-pack/plugins/search_notebooks @elastic/search-kibana
-x-pack/plugins/search_playground @elastic/search-kibana
-x-pack/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/security_solution @elastic/security-solution
@@ -978,7 +964,6 @@ x-pack/plugins/security_solution_ess @elastic/security-solution
 x-pack/plugins/security_solution_serverless @elastic/security-solution
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_observability @elastic/obs-ux-management-team
-x-pack/plugins/serverless_search @elastic/search-kibana
 x-pack/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/plugins/snapshot_restore @elastic/kibana-management
 x-pack/plugins/spaces @elastic/kibana-security
@@ -997,6 +982,21 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
+x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
+x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
+x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
+x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
+x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
+x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
+x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
+x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
+x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana
+x-pack/solutions/search/plugins/search_indices @elastic/search-kibana
+x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kibana
+x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
+x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
+x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
+x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
