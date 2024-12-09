@@ -53,7 +53,7 @@
       "plugins/global_search_bar"
     ],
     "xpack.graph": [
-      "plugins/graph"
+      "platform/plugins/private/graph"
     ],
     "xpack.grokDebugger": "plugins/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
