@@ -510,7 +510,7 @@
     "@kbn/expression-error-plugin": "link:src/platform/plugins/shared/expression_error",
     "@kbn/expression-gauge-plugin": "link:src/plugins/chart_expressions/expression_gauge",
     "@kbn/expression-heatmap-plugin": "link:src/plugins/chart_expressions/expression_heatmap",
-    "@kbn/expression-image-plugin": "link:src/plugins/expression_image",
+    "@kbn/expression-image-plugin": "link:src/platform/plugins/shared/expression_image",
     "@kbn/expression-legacy-metric-vis-plugin": "link:src/plugins/chart_expressions/expression_legacy_metric",
     "@kbn/expression-metric-plugin": "link:src/plugins/expression_metric",
     "@kbn/expression-metric-vis-plugin": "link:src/plugins/chart_expressions/expression_metric",
