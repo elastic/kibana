@@ -38,11 +38,6 @@ describe.skip('Enrichment', { tags: ['@ess'] }, () => {
   before(() => {
     cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
     cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_updated' });
-    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', { archiveName: 'risk_users' });
   });
 
   describe('Custom query rule', () => {
