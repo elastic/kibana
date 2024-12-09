@@ -97,6 +97,19 @@ components:
       $ref: '#/components/schemas/ElasticRule'
       x-modify: partial
 
+    PrebuiltRuleVersion:
+      type: object
+      description: The prebuilt rule version.
+      required:
+        - target
+      properties:
+        target:
+          description: The latest available version of prebuilt rule.
+          $ref: '../../../common/api/detection_engine/model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+        current:
+          description: The currently installed version of prebuilt rule.
+          $ref: '../../../common/api/detection_engine/model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+
     RuleMigration:
       description: The rule migration document object.
       allOf:

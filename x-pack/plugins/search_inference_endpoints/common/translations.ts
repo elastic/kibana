@@ -103,3 +103,17 @@ export const TRAINED_MODELS_STAT_GATHER_FAILED = i18n.translate(
     defaultMessage: 'Failed to retrieve trained model statistics',
   }
 );
+
+export const BREADCRUMB_RELEVANCE = i18n.translate(
+  'xpack.searchInferenceEndpoints.breadcrumbs.relevance',
+  {
+    defaultMessage: 'Relevance',
+  }
+);
+
+export const BREADCRUMB_INFERENCE_ENDPOINTS = i18n.translate(
+  'xpack.searchInferenceEndpoints.breadcrumbs.inferenceEndpoints',
+  {
+    defaultMessage: 'Inference Endpoints',
+  }
+);

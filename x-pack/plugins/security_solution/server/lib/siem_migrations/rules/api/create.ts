@@ -56,7 +56,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
               migration_id: migrationId,
               original_rule: originalRule,
             }));
-            await ruleMigrationsClient.data.integrations.create();
+
             await ruleMigrationsClient.data.rules.create(ruleMigrations);
 
             // Create identified resource documents without content to keep track of them

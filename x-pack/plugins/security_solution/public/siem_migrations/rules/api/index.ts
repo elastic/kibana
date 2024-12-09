@@ -21,6 +21,7 @@ import {
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
   SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
   SIEM_RULE_MIGRATION_RESOURCES_PATH,
+  SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -35,6 +36,7 @@ import type {
   GetRuleMigrationResourcesMissingResponse,
   UpsertRuleMigrationResourcesRequestBody,
   UpsertRuleMigrationResourcesResponse,
+  GetRuleMigrationPrebuiltRulesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface GetRuleMigrationStatsParams {
@@ -231,6 +233,23 @@ export const installTranslatedMigrationRules = async ({
 }: InstallTranslatedRulesParams): Promise<InstallTranslatedMigrationRulesResponse> => {
   return KibanaServices.get().http.post<InstallTranslatedMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH, { migration_id: migrationId }),
+    { version: '1', signal }
+  );
+};
+
+export interface GetRuleMigrationsPrebuiltRulesParams {
+  /** `id` of the migration to install rules for */
+  migrationId: string;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves all prebuilt rules matched within a specific migration. */
+export const getRuleMigrationsPrebuiltRules = async ({
+  migrationId,
+  signal,
+}: GetRuleMigrationsPrebuiltRulesParams): Promise<GetRuleMigrationPrebuiltRulesResponse> => {
+  return KibanaServices.get().http.get<GetRuleMigrationPrebuiltRulesResponse>(
+    replaceParams(SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH, { migration_id: migrationId }),
     { version: '1', signal }
   );
 };
