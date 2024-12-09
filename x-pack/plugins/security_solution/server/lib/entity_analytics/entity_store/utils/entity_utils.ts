@@ -19,8 +19,10 @@ import { entityEngineDescriptorTypeName } from '../saved_object';
 
 export const getIdentityFieldForEntityType = (entityType: EntityType) => {
   if (entityType === 'host') return 'host.name';
+  if (entityType === 'user') return 'user.name';
+  if (entityType === 'universal') return 'related.entity';
 
-  return 'user.name';
+  throw new Error(`Unknown entity type: ${entityType}`);
 };
 
 export const buildIndexPatterns = async (
