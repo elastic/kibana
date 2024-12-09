@@ -280,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         documents: [
           {
-            '@timestamp': now.subtract(1, 'minute').toISOString(),
+            '@timestamp': now.subtract(2, 'minute').toISOString(),
             'car.brand': 'Fiat',
             'car.model': 'Multipla',
           },
@@ -301,6 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
           metadata_fields: [],
           filters: [],
           timestamp_field: '@timestamp',
+          display_name: 'car.model',
         },
       });
 
@@ -314,14 +315,14 @@ export default function ({ getService }: FtrProviderContext) {
       expect(entities).toEqual([
         {
           'entity.last_seen_timestamp': moment(now).subtract(1, 'minute').toISOString(),
-          'entity.id': 'Fiat:Multipla',
-          'entity.display_name': 'service-one',
+          'entity.id': 'Citroen:ZX break',
+          'entity.display_name': 'ZX break',
           'entity.type': 'most-refined-cars',
         },
         {
-          'entity.last_seen_timestamp': moment(now).subtract(1, 'minute').toISOString(),
-          'entity.id': 'Citroen:ZX break',
-          'entity.display_name': 'Citroen:ZX break',
+          'entity.last_seen_timestamp': moment(now).subtract(2, 'minute').toISOString(),
+          'entity.id': 'Fiat:Multipla',
+          'entity.display_name': 'Multipla',
           'entity.type': 'most-refined-cars',
         },
       ]);
