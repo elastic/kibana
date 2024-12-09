@@ -83,7 +83,7 @@ We are very excited to see how these enhancements empower your alerting strategi
 ==== Support for case file attachments through API actions 
 The latest enhancements to Kibana Cases introduce highly requested functionality for managing security incidents and workflows. You can now use the public API to attach files to cases to enrich them with supporting documentation, evidence, and other critical information. This improvement marks a significant enhancement in case management, providing incident response teams with greater flexibility to include all relevant details directly within their cases.
 
-Additionally, this release expands integration capabilities with third-party systems such as ServiceNow and Tines. Users can now programmatically update cases through API calls from external platforms, streamlining workflows and fostering seamless collaboration across tools. These features make it easier to automate case updates and efficiently track complex security incidents in real time. For more details, see the https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createcasedefaultspace[API documentation].
+Additionally, this release expands integration capabilities with third-party systems such as ServiceNow and Tines. You can now programmatically update cases through API calls from external platforms, streamlining workflows and fostering seamless collaboration across tools. These features make it easier to automate case updates and efficiently track complex security incidents in real time. For more details, check out the https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createcasedefaultspace[API documentation].
 
 [discrete]
 ==== Kibana Connector now supports Jira Data Center
