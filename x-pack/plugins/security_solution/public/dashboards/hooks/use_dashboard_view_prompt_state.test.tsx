@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiEmptyPromptProps } from '@elastic/eui';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import {
   DashboardViewPromptState,
   useDashboardViewPromptState,
@@ -13,18 +12,14 @@ import {
 
 describe('useDashboardViewPromptState', () => {
   it('returns empty state', () => {
-    const { result } = renderHook<
-      DashboardViewPromptState | null,
-      Partial<EuiEmptyPromptProps> | null
-    >(() => useDashboardViewPromptState(null));
+    const { result } = renderHook(() => useDashboardViewPromptState(null));
     expect(result.current).toBeNull();
   });
 
   it('returns NoReadPermission state', () => {
-    const { result } = renderHook<
-      DashboardViewPromptState | null,
-      Partial<EuiEmptyPromptProps> | null
-    >(() => useDashboardViewPromptState(DashboardViewPromptState.NoReadPermission));
+    const { result } = renderHook(() =>
+      useDashboardViewPromptState(DashboardViewPromptState.NoReadPermission)
+    );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "body": <p>

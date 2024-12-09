@@ -34,7 +34,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('patch rules', () => {
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
-        await deleteAllPrebuiltRuleAssets(es, log);
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {
@@ -233,7 +232,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        await deleteAllPrebuiltRuleAssets(es, log);
         // Install base prebuilt detection rule
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
           createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),

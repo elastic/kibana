@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
-import type { ModelItem } from '../../model_management/models_list';
+import type { DFAModelItem } from '../../../../common/types/trained_models';
 import type { AddInferencePipelineSteps } from './types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 import { AddInferencePipelineFooter } from '../shared';
@@ -39,7 +39,7 @@ import { useFetchPipelines } from './hooks/use_fetch_pipelines';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
-  model: ModelItem;
+  model: DFAModelItem;
 }
 
 export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = ({
