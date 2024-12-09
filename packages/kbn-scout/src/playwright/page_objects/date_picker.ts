@@ -13,8 +13,36 @@ import { expect } from '..';
 export class DatePicker {
   constructor(private readonly page: ScoutPage) {}
 
+  private async showStartEndTimes() {
+    // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
+    await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton', {
+      timeout: 10000,
+    });
+    const isShowDateBtnVisible = await this.page.testSubj.isVisible(
+      'superDatePickerShowDatesButton',
+      {
+        timeout: 5000,
+      }
+    );
+
+    if (isShowDateBtnVisible) {
+      await this.page.testSubj.click('superDatePickerShowDatesButton');
+    }
+
+    const isStartDatePopoverBtnVisible = await this.page.testSubj.isVisible(
+      'superDatePickerstartDatePopoverButton',
+      {
+        timeout: 5000,
+      }
+    );
+
+    if (isStartDatePopoverBtnVisible) {
+      await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
+    }
+  }
+
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
-    await this.page.testSubj.click('superDatePickerShowDatesButton');
+    await this.showStartEndTimes();
     // we start with end date
     await this.page.testSubj.click('superDatePickerendDatePopoverButton');
     await this.page.testSubj.click('superDatePickerAbsoluteTab');
@@ -32,10 +60,14 @@ export class DatePicker {
     await this.page.testSubj.click('parseAbsoluteDateFormat');
     await this.page.keyboard.press('Escape');
 
-    await expect(this.page.testSubj.locator('superDatePickerstartDatePopoverButton')).toHaveText(
-      from
-    );
-    await expect(this.page.testSubj.locator('superDatePickerendDatePopoverButton')).toHaveText(to);
+    await expect(
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      `Date picker 'start date' should be set correctly`
+    ).toHaveText(from);
+    await expect(
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      `Date picker 'end date' should be set correctly`
+    ).toHaveText(to);
     await this.page.testSubj.click('querySubmitButton');
   }
 }

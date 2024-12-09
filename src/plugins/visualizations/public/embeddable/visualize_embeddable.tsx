@@ -472,7 +472,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
         return (
           <div
-            style={{ width: '100%', height: '100%' }}
+            css={{ width: '100%', height: '100%' }}
             ref={domNode}
             data-test-subj="visualizationLoader"
             data-rendering-count={renderCount /* Used for functional tests */}
@@ -482,7 +482,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
             data-shared-item
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
-            <EuiFlexGroup style={{ height: '100%' }} justifyContent="center" alignItems="center">
+            <EuiFlexGroup css={{ height: '100%' }} justifyContent="center" alignItems="center">
               {isLoading && <EuiLoadingChart size="l" mono />}
               {!isLoading && error && (
                 <EuiEmptyPrompt

@@ -9,7 +9,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { useTimeBuckets } from '@kbn/observability-plugin/public';
 import { getAlertSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
-import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
+import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useSloAlertsQuery } from './slo_alerts_table';
 
 import { SloEmbeddableDeps } from '../types';
@@ -61,7 +61,8 @@ export function SloAlertsSummary({
 
   return (
     <AlertSummaryWidget
-      featureIds={observabilityAlertFeatureIds}
+      ruleTypeIds={SLO_RULE_TYPE_IDS}
+      consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
       filter={esQuery}
       timeRange={alertSummaryTimeRange}
       fullSize
