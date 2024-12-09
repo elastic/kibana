@@ -866,6 +866,7 @@ x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
+x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
@@ -937,7 +938,6 @@ x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
-x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
