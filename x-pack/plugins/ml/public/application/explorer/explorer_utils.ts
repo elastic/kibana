@@ -55,6 +55,7 @@ import type { Annotations, AnnotationsTable } from '../../../common/types/annota
 import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import type { GroupObj } from '../components/job_selector/job_selector';
 
 export interface ExplorerJob {
   id: string;
@@ -717,4 +718,15 @@ export function getIndexPattern(influencers: ExplorerJob[]) {
       searchable: true,
     })),
   };
+}
+
+// Returns a list of unique group ids and job ids
+export function getMergedGroupsAndJobsIds(groups: GroupObj[], selectedJobs: ExplorerJob[]) {
+  const jobIdsFromGroups = groups.flatMap((group) => group.jobIds);
+  const groupIds = groups.map((group) => group.groupId);
+  const uniqueJobIds = selectedJobs
+    .filter((job) => !jobIdsFromGroups.includes(job.id))
+    .map((job) => job.id);
+
+  return [...groupIds, ...uniqueJobIds];
 }
