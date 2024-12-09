@@ -24,7 +24,8 @@ import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { euiFormMaxWidth } from '@elastic/eui/src/components/form/form.styles';
+// @ts-expect-error no types declaration for module
+import { euiFormMaxWidth } from '@elastic/eui/lib/components/form/form.styles';
 
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 
