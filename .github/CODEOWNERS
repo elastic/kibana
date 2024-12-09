@@ -262,7 +262,6 @@ packages/core/user-settings/core-user-settings-server @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-security
 packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
-packages/deeplinks/devtools @elastic/kibana-management
 packages/deeplinks/fleet @elastic/fleet
 packages/deeplinks/management @elastic/kibana-management
 packages/deeplinks/ml @elastic/ml-ui
@@ -622,6 +621,7 @@ packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
+src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/plugins/shared/console @elastic/kibana-management
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
