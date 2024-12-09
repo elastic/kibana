@@ -59,6 +59,7 @@ describe('When using processes action from response actions console', () => {
         canSuspendProcess: true,
         canGetRunningProcesses: true,
       },
+      platform: 'linux',
     });
   };
 

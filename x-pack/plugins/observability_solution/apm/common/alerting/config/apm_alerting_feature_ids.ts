@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { AlertConsumers, type ValidFeatureId } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  OBSERVABILITY_RULE_TYPE_IDS,
+  type ValidFeatureId,
+} from '@kbn/rule-data-utils';
 
-export const apmAlertingFeatureIds: ValidFeatureId[] = [
+export const APM_ALERTING_CONSUMERS: ValidFeatureId[] = [
   AlertConsumers.LOGS,
   AlertConsumers.APM,
   AlertConsumers.SLO,
   AlertConsumers.OBSERVABILITY,
   AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.ALERTS,
 ];
+
+export const APM_ALERTING_RULE_TYPE_IDS: string[] = [...OBSERVABILITY_RULE_TYPE_IDS];
