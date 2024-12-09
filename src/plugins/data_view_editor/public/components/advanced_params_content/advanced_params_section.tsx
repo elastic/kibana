@@ -36,7 +36,7 @@ export const AdvancedParamsSection = ({ children, defaultVisible = false }: Prop
             })}
       </EuiButtonEmpty>
 
-      <div style={{ display: isVisible ? 'block' : 'none' }} data-test-subj="advancedSettings">
+      <div css={{ display: isVisible ? 'block' : 'none' }} data-test-subj="advancedSettings">
         <EuiSpacer size="m" />
         {/* We ned to wrap the children inside a "div" to have our css :first-child rule */}
         <div>{children}</div>

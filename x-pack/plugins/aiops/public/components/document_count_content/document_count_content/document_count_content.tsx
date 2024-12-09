@@ -45,19 +45,25 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
   const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
+  const isCasesEmbedding = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+
+  const isEmbeddedInDashboardOrCases =
+    embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD || isCasesEmbedding;
+
   if (documentCountStats === undefined) {
-    return totalCount !== undefined && embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD ? (
+    return totalCount !== undefined && !isEmbeddedInDashboardOrCases ? (
       <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
     ) : null;
   }
 
-  if (embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD) {
+  if (isEmbeddedInDashboardOrCases) {
     return (
       <DocumentCountChartRedux
         dependencies={{ data, uiSettings, fieldFormats, charts }}
         barColorOverride={barColorOverride}
         barHighlightColorOverride={barHighlightColorOverride}
         changePoint={documentCountStats.changePoint}
+        nonInteractive={isCasesEmbedding}
         {...docCountChartProps}
       />
     );

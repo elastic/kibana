@@ -57,7 +57,6 @@ export function generateAlertingConfig(): AlertingConfig {
       interval: '5m',
       removalDelay: '1h',
     },
-    maxEphemeralActionsPerAlert: 10,
     cancelAlertsOnRuleTimeout: true,
     rules: {
       maxScheduledPerMinute: 10000,

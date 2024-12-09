@@ -13,6 +13,7 @@ import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { LogRateAnalysisDataGenerator } from './log_rate_analysis_data_generator';
+import { CreateCaseParams } from '../cases/create';
 
 export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
@@ -22,6 +23,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
   const retry = getService('retry');
   const header = getPageObject('header');
   const dashboardPage = getPageObject('dashboard');
+  const cases = getService('cases');
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -434,6 +436,23 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       await this.clickAttachToDashboard();
       await this.confirmAttachToDashboard();
       await this.completeSaveToDashboardForm(true);
+    },
+
+    async assertAttachToCaseButtonDisabled() {
+      const button = await testSubjects.find('aiopsLogRateAnalysisAttachToCaseButton');
+      const isEnabled = await button.isEnabled();
+      expect(isEnabled).to.be(false);
+    },
+
+    async clickAttachToCase() {
+      await testSubjects.click('aiopsLogRateAnalysisAttachToCaseButton');
+    },
+
+    async attachToCase(params: CreateCaseParams) {
+      await this.openAttachmentsMenu();
+      await this.clickAttachToCase();
+
+      await cases.create.createCaseFromModal(params);
     },
   };
 }

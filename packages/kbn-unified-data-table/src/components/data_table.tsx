@@ -218,10 +218,6 @@ export interface UnifiedDataTableProps {
    */
   sort: SortOrder[];
   /**
-   * How the data is fetched
-   */
-  useNewFieldsApi: boolean;
-  /**
    * Manage pagination control
    */
   isPaginationEnabled?: boolean;
@@ -454,7 +450,6 @@ export const UnifiedDataTable = ({
   showTimeCol,
   showFullScreenButton = true,
   sort,
-  useNewFieldsApi,
   isSortEnabled = true,
   isPaginationEnabled = true,
   cellActionsTriggerId,
@@ -716,7 +711,6 @@ export const UnifiedDataTable = ({
       getRenderCellValueFn({
         dataView,
         rows: displayedRows,
-        useNewFieldsApi,
         shouldShowFieldHandler,
         closePopover: () => dataGridRef.current?.closeCellPopover(),
         fieldFormats,
@@ -728,7 +722,6 @@ export const UnifiedDataTable = ({
     [
       dataView,
       displayedRows,
-      useNewFieldsApi,
       shouldShowFieldHandler,
       maxDocFieldsDisplayed,
       fieldFormats,
@@ -1155,8 +1148,6 @@ export const UnifiedDataTable = ({
             />
           ) : (
             <EuiDataGridMemoized
-              // Using this as the `key` is a workaround for https://github.com/elastic/eui/issues/7962. This forces a re-render if the density is changed.
-              key={dataGridDensity}
               id={dataGridId}
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}
