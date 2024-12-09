@@ -5,20 +5,11 @@
  * 2.0.
  */
 
+import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/model/rule_migration.gen';
 
-export interface RuleMigrationTask extends RuleMigrationTaskStats {
+export interface RuleMigrationStats extends RuleMigrationTaskStats {
+  status: SiemMigrationTaskStatus;
   /** The sequential number of the migration */
   number: number;
-}
-
-export interface InstallRulesProps {
-  migrationId: string;
-  ids: string[];
-  signal?: AbortSignal;
-}
-
-export interface InstallTranslatedRulesProps {
-  migrationId: string;
-  signal?: AbortSignal;
 }
