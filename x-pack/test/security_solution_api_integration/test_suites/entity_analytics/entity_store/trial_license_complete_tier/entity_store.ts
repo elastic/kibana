@@ -9,11 +9,16 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
+import { useIsExperimentalFeatureEnabled } from '@kbn/security-solution-plugin/public/common/hooks/use_experimental_features';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
+
+  jest.mock('../hooks/useIsExperimentalFeatureEnabled');
+  const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+
   describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
@@ -275,6 +280,11 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ resource: 'component_template' }),
           ]);
         });
+
+        it('should return null when isEntityStoreFeatureFlagDisabled is true', async () => {
+          mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+          const result = await api.getEntityStoreStatus({query: {}});
+          expect(result).toBeNull();
       });
     });
 
