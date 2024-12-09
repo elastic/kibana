@@ -4260,7 +4260,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-table-list-view@link:packages/content-management/table_list_view":
+"@kbn/content-management-table-list-view@link:src/platform/packages/shared/content-management/table_list_view":
   version "0.0.0"
   uid ""
 
