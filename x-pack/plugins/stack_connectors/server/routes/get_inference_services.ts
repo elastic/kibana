@@ -34,15 +34,24 @@ export const getInferenceServicesRoute = (router: IRouter) => {
   ): Promise<IKibanaResponse> {
     const esClient = (await ctx.core).elasticsearch.client.asInternalUser;
 
-    const response = await esClient.transport.request<{
-      endpoints: InferenceProvider[];
-    }>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await esClient.transport.request<any[]>({
       method: 'GET',
       path: `/_inference/_services`,
     });
 
+    // TODO: replace transformative map to the real type coming from the _inference/_service
     return res.ok({
-      body: response,
+      body: response.map(
+        (e) =>
+          ({
+            service: e.provider,
+            name: e.provider,
+            description: '',
+            configurations: e.configuration,
+            task_types: e.task_types.map((t) => t.task_type),
+          } as InferenceProvider)
+      ),
     });
   }
 };
