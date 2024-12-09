@@ -16,10 +16,12 @@ import type {
   ActionTypeParams,
   RenderParameterTemplates,
   Services,
+  SubFeatureType,
   ValidatorType as ValidationSchema,
 } from '../types';
 import type { SubActionConnector } from './sub_action_connector';
 import type { HookServices } from '../types';
+import { ActionExecutionSourceType } from '../lib';
 
 export interface ServiceParams<Config, Secrets> {
   /**
@@ -119,8 +121,10 @@ export interface SubActionConnectorType<Config, Secrets> {
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
   renderParameterTemplates?: RenderParameterTemplates<ExecutorParams>;
   isSystemActionType?: boolean;
+  subFeatureType?: SubFeatureType;
   getKibanaPrivileges?: (args?: {
     params?: { subAction: string; subActionParams: Record<string, unknown> };
+    source?: ActionExecutionSourceType;
   }) => string[];
   preSaveHook?: (params: PreSaveConnectorHookParams<Config, Secrets>) => Promise<void>;
   postSaveHook?: (params: PostSaveConnectorHookParams<Config, Secrets>) => Promise<void>;

@@ -76,6 +76,24 @@ export async function validateActions(
       );
     }
   }
+
+  // check for invalid EDR connectors
+  const allConnectorTypes = await actionsClient.listTypes({});
+  const edrConnectorTypeIds = new Set(
+    allConnectorTypes.filter((type) => type.subFeatureType === 'edr').map((type) => type.id)
+  );
+  const edrActionTypeIds = actionResults
+    .map((result) => result.actionTypeId)
+    .filter((id) => edrConnectorTypeIds.has(id));
+
+  if (edrActionTypeIds.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.edrConnector', {
+        defaultMessage: 'Invalid EDR connectors.',
+      })
+    );
+  }
+
   // check for actions with invalid action groups
   const { actionGroups: alertTypeActionGroups } = ruleType;
   const usedAlertActionGroups = actions.map((action) => action.group);

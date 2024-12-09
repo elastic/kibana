@@ -339,9 +339,12 @@ const ActionsConnectorsList = ({
               <RunOperation
                 canExecute={
                   !!(
-                    hasExecuteActionsCapability(capabilities, item.actionTypeId) &&
                     actionTypesIndex &&
-                    actionTypesIndex[item.actionTypeId]
+                    actionTypesIndex[item.actionTypeId] &&
+                    hasExecuteActionsCapability(
+                      capabilities,
+                      Boolean(actionTypesIndex[item.actionTypeId].subFeatureType)
+                    )
                   )
                 }
                 item={item}
