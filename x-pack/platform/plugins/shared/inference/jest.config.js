@@ -7,16 +7,16 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
+  rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/plugins/inference/public',
-    '<rootDir>/x-pack/plugins/inference/server',
-    '<rootDir>/x-pack/plugins/inference/common',
+    '<rootDir>/x-pack/platform/plugins/shared/inference/public',
+    '<rootDir>/x-pack/platform/plugins/shared/inference/server',
+    '<rootDir>/x-pack/platform/plugins/shared/inference/common',
   ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/inference/{public,server,common}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/inference/{public,server,common}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

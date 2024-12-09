@@ -156,7 +156,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^x-pack\/packages\/ai-infra/,
         /^x-pack\/plugins\/ai_infra/,
-        /^x-pack\/plugins\/inference/,
+        /^x-pack\/platform\/plugins\/shared\/inference/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,

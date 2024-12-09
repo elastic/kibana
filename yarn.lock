@@ -5940,7 +5940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inference-plugin@link:x-pack/plugins/inference":
+"@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
   version "0.0.0"
   uid ""
 
