@@ -5792,7 +5792,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-csv@link:packages/kbn-generate-csv":
+"@kbn/generate-csv@link:src/platform/packages/private/kbn-generate-csv":
   version "0.0.0"
   uid ""
 
