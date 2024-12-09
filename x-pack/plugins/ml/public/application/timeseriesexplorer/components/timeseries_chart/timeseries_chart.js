@@ -153,7 +153,7 @@ class TimeseriesChartIntl extends Component {
     zoomToFocusLoaded: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     tableData: PropTypes.object,
-    sourceIndicesWithGeoFields: PropTypes.object.isRequired,
+    sourceIndicesWithGeoFields: PropTypes.object,
   };
 
   static contextType = context;

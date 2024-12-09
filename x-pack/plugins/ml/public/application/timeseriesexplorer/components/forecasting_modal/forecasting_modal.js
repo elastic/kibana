@@ -60,7 +60,7 @@ function getDefaultState() {
 
 export class ForecastingModal extends Component {
   static propTypes = {
-    buttonMode: PropTypes.string,
+    emptyMode: PropTypes.bool,
     isDisabled: PropTypes.bool,
     job: PropTypes.object,
     jobState: PropTypes.string,
@@ -70,6 +70,7 @@ export class ForecastingModal extends Component {
     entities: PropTypes.array,
     setForecastId: PropTypes.func,
     selectedForecastId: PropTypes.string,
+    onForecastComplete: PropTypes.func,
   };
 
   constructor(props) {
@@ -534,7 +535,7 @@ export class ForecastingModal extends Component {
       <ForecastButton
         onClick={this.openModal}
         isDisabled={isForecastingDisabled}
-        mode={this.props.buttonMode}
+        emptyMode={this.props.emptyMode}
       />
     );
 
