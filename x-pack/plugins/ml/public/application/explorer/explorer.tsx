@@ -143,7 +143,6 @@ interface ExplorerUIProps {
   showCharts: boolean;
   selectedJobsRunning: boolean;
   overallSwimlaneData: OverallSwimlaneData | null;
-  invalidTimeRangeError?: boolean;
   stoppedPartitions?: string[];
   // TODO Remove
   timefilter: TimefilterContract;
@@ -168,7 +167,6 @@ export function getDefaultPanelsState() {
 }
 
 export const Explorer: FC<ExplorerUIProps> = ({
-  invalidTimeRangeError,
   showCharts,
   severity,
   stoppedPartitions,
@@ -363,21 +361,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [explorerState, language, filterSettings]
   );
-
-  useEffect(() => {
-    if (invalidTimeRangeError) {
-      displayWarningToast(
-        i18n.translate('xpack.ml.explorer.invalidTimeRangeInUrlCallout', {
-          defaultMessage:
-            'The time filter was changed to the full range due to an invalid default time filter. Check the advanced settings for {field}.',
-          values: {
-            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
-          },
-        })
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const {
     services: {

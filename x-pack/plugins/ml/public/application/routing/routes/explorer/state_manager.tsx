@@ -47,9 +47,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   } = useMlKibana();
   const { mlApi } = mlServices;
 
-  const [globalState] = useUrlState('_g');
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
-  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
   const timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
@@ -66,20 +64,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   const refresh = useRefresh();
   const lastRefresh = refresh?.lastRefresh ?? 0;
-
-  // TODO: Revalidate if this is still needed
-  // We cannot simply infer bounds from the globalState's `time` attribute
-  // with `moment` since it can contain custom strings such as `now-15m`.
-  // So when globalState's `time` changes, we update the timefilter and use
-  // `timefilter.getBounds()` to update `bounds` in this component's state.
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      if (globalState.time.mode === 'invalid') {
-        setInValidTimeRangeError(true);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -215,7 +199,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
               showCharts,
               severity: tableSeverity.val,
               stoppedPartitions,
-              invalidTimeRangeError,
               selectedJobsRunning,
               timeBuckets,
               timefilter,
