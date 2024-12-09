@@ -28,6 +28,13 @@ export const SNOOZE_FAILED_MESSAGE = i18n.translate(
   }
 );
 
+export const INVALID_SNOOZE_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.invalidSnooze',
+  {
+    defaultMessage: 'Invalid snooze',
+  }
+);
+
 export const OPEN_SNOOZE_PANEL_ARIA_LABEL = (name: string) =>
   i18n.translate(
     'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
