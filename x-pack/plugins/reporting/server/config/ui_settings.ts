@@ -14,7 +14,7 @@ import { PLUGIN_ID } from '@kbn/reporting-server';
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 const maxLogoSizeInBase64 = kbToBase64Length(200);
 
-// inspired by x-pack/plugins/canvas/common/lib/dataurl.ts
+// inspired by x-pack/platform/plugins/private/canvas/common/lib/dataurl.ts
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
 const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 

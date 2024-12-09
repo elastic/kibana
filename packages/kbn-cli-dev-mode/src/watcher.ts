@@ -20,7 +20,7 @@ const packageMatcher = makeMatcher([
   '**/*',
   '!**/.*',
   '!x-pack/plugins/screenshotting/chromium/**',
-  '!x-pack/plugins/canvas/shareable_runtime/**',
+  '!x-pack/platform/plugins/private/canvas/shareable_runtime/**',
 ]);
 
 /**
