@@ -180,6 +180,10 @@ export async function reportFailuresToFile(
                 : ''
             }
             <div>
+                <strong>Owners</strong>:
+                <pre>${escape(failure.owners) || 'Unable to determine code owners'}</pre>
+            </div>
+            <div>
                 <strong>Failures in tracked branches</strong>:
                     <span class="badge rounded-pill bg-danger">${failure.failureCount || 0}</span>
             </div>
