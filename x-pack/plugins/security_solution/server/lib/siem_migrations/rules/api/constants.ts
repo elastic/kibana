@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-entities-schema'],
-};
+export const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
+export const MAX_PREBUILT_RULES_TO_FETCH = 10_000 as const;
+export const MAX_TRANSLATED_RULES_TO_INSTALL = 10_000 as const;
