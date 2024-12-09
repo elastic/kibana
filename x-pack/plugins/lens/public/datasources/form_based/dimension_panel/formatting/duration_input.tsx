@@ -11,7 +11,13 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Prepend } from '../../../../shared_components/prepend_provider';
 
-function getNewHumanizeOutputLabel({ text, method }: { text: string; method: string }): {
+function getNewHumanizeOutputLabel({
+  text,
+  method,
+}: {
+  text: string | ((value: string) => string);
+  method: string;
+}): {
   label: string;
   value: string;
 } {
@@ -31,7 +37,7 @@ function getNewHumanizeOutputLabel({ text, method }: { text: string; method: str
       value: method,
     };
   }
-  return { label: text, value: method };
+  return { label: typeof text === 'function' ? text('') : text, value: method };
 }
 
 export const durationOutputOptions = DURATION_OUTPUT_FORMATS.map(getNewHumanizeOutputLabel);
