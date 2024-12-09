@@ -8,6 +8,6 @@
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution_serverless/server/'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution_serverless/server/'],
 };

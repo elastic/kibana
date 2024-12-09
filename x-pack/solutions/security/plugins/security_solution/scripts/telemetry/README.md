@@ -6,7 +6,7 @@ The purpose of the script is to map telemetry fields to runtime fields on the ap
 - The browser ebt events come from `telemetryEvents` imported from `x-pack/solutions/security/plugins/security_solution/public/common/lib/telemetry/events/telemetry_events`
 - The server ebt events come from:
   - `events` imported from `x-pack/plugins/elastic-assistant/server/lib/telemetry/event_based_telemetry`
-  - `telemetryEvents` imported from `x-pack/plugins/security_solution_serverless/server/telemetry/event_based_telemetry`
+  - `telemetryEvents` imported from `x-pack/solutions/security/plugins/security_solution_serverless/server/telemetry/event_based_telemetry`
   - `events` imported from `x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/event_based/events`
 
 If you have further events to be included in the data views, please update the script to include the event schema.
