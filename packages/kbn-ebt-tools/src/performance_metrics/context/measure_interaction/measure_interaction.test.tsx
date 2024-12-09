@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { now } from 'lodash';
 import { measureInteraction } from '.';
 import { perfomanceMarkers } from '../../performance_markers';
 
