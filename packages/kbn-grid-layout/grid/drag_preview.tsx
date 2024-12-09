@@ -10,9 +10,8 @@
 import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { transparentize } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager } from './types';
 
@@ -24,6 +23,7 @@ export const DragPreview = ({
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(
     () => {
@@ -62,8 +62,8 @@ export const DragPreview = ({
       css={css`
         display: none;
         pointer-events: none;
-        border-radius: ${euiThemeVars.euiBorderRadius};
-        background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.2)};
+        border-radius: ${euiTheme.border.radius};
+        background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
         transition: opacity 100ms linear;
       `}
     />
