@@ -34,11 +34,11 @@ const getAllCollisionsWithPanel = (
   return collidingPanels;
 };
 
-export const getKeysInOrder = (rowData: GridRowData, draggedId?: string): string[] => {
-  const panelKeys = Object.keys(rowData.panels);
+export const getKeysInOrder = (panels: GridRowData['panels'], draggedId?: string): string[] => {
+  const panelKeys = Object.keys(panels);
   return panelKeys.sort((panelKeyA, panelKeyB) => {
-    const panelA = rowData.panels[panelKeyA];
-    const panelB = rowData.panels[panelKeyB];
+    const panelA = panels[panelKeyA];
+    const panelB = panels[panelKeyB];
 
     // sort by row first
     if (panelA.row > panelB.row) return 1;
@@ -60,7 +60,7 @@ export const getKeysInOrder = (rowData: GridRowData, draggedId?: string): string
 const compactGridRow = (originalLayout: GridRowData) => {
   const nextRowData = { ...originalLayout, panels: { ...originalLayout.panels } };
   // compact all vertical space.
-  const sortedKeysAfterMove = getKeysInOrder(nextRowData);
+  const sortedKeysAfterMove = getKeysInOrder(nextRowData.panels);
   for (const panelKey of sortedKeysAfterMove) {
     const panel = nextRowData.panels[panelKey];
     // try moving panel up one row at a time until it collides
@@ -90,7 +90,7 @@ export const resolveGridRow = (
   // return nextRowData;
 
   // push all panels down if they collide with another panel
-  const sortedKeys = getKeysInOrder(nextRowData, dragRequest?.id);
+  const sortedKeys = getKeysInOrder(nextRowData.panels, dragRequest?.id);
 
   for (const key of sortedKeys) {
     const panel = nextRowData.panels[key];
