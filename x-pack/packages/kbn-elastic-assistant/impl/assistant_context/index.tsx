@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ChromeNavControls, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -43,6 +43,7 @@ import {
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { SettingsTabs } from '../assistant/settings/types';
+import { AssistantNavLink } from './assistant_nav_link';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -77,6 +78,8 @@ export interface AssistantProviderProps {
   toasts?: IToasts;
   currentAppId: string;
   userProfileService: UserProfileService;
+  navControls: ChromeNavControls;
+  isServerless: boolean;
 }
 
 export interface UserAvatar {
@@ -151,6 +154,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   toasts,
   currentAppId,
   userProfileService,
+  navControls,
+  isServerless,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -341,7 +346,17 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     ]
   );
 
-  return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
+  return (
+    <AssistantContext.Provider value={value}>
+      <AssistantNavLink
+        hasAssistantPrivilege={assistantAvailability.hasAssistantPrivilege}
+        showAssistantOverlay={showAssistantOverlay}
+        navControls={navControls}
+        isServerless={isServerless}
+      />
+      {children}
+    </AssistantContext.Provider>
+  );
 };
 
 export const useAssistantContext = () => {

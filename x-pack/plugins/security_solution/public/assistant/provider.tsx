@@ -143,6 +143,8 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     userProfile,
+    chrome: { navControls },
+    serverless,
   } = useKibana().services;
   const basePath = useBasePath();
 
@@ -227,6 +229,8 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
       userProfileService={userProfile}
+      navControls={navControls}
+      isServerless={serverless !== undefined}
     >
       {children}
     </ElasticAssistantProvider>
