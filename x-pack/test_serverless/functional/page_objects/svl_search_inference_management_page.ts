@@ -27,8 +27,15 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
 
         const table = await testSubjects.find('inferenceEndpointTable');
         const rows = await table.findAllByClassName('euiTableRow');
-        // we need at least one (ELSER) otherwise index mapping will start to fail
+        // we need at least one (ELSER) otherwise index_mapping might experience some issues
         expect(rows.length).to.greaterThan(1);
+
+        const texts = await Promise.all(rows.map((row) => row.getVisibleText()));
+        const hasElser2 = texts.some((text) => text.includes('.elser-2'));
+        const hasE5 = texts.some((text) => text.includes('.multilingual-e5'));
+
+        expect(hasElser2).to.be(true);
+        expect(hasE5).to.be(true);
       },
 
       async expectPreconfiguredEndpointsCannotBeDeleted() {
