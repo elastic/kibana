@@ -39,7 +39,6 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
-  SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
@@ -140,7 +139,6 @@ function DiscoverDocumentsComponent({
   });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const isEsqlMode = useIsEsqlMode();
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const documentState = useDataState(documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
@@ -183,7 +181,6 @@ function DiscoverDocumentsComponent({
     dataView,
     dataViews,
     setAppState,
-    useNewFieldsApi,
     columns,
     sort,
     settings: grid,
@@ -356,7 +353,7 @@ function DiscoverDocumentsComponent({
       <>
         <SelectedVSAvailableCallout
           esqlQueryColumns={documents?.esqlQueryColumns}
-          // `discover:searchFieldsFromSource` adds `_source` to the columns, but we should exclude it from the callout
+          // If `_source` is in the columns, we should exclude it from the callout
           selectedColumns={currentColumns.filter((col) => col !== '_source')}
         />
         <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
@@ -438,7 +435,6 @@ function DiscoverDocumentsComponent({
             onSetColumns={onSetColumns}
             onSort={onSort}
             onResize={onResizeDataGrid}
-            useNewFieldsApi={useNewFieldsApi}
             configHeaderRowHeight={3}
             headerRowHeightState={headerRowHeight}
             onUpdateHeaderRowHeight={onUpdateHeaderRowHeight}

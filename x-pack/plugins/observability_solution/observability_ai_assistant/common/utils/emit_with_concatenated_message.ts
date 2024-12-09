@@ -14,13 +14,15 @@ import {
   OperatorFunction,
   shareReplay,
   withLatestFrom,
+  filter,
 } from 'rxjs';
 import { withoutTokenCountEvents } from './without_token_count_events';
 import {
-  ChatCompletionChunkEvent,
+  type ChatCompletionChunkEvent,
   ChatEvent,
   MessageAddEvent,
   StreamingChatResponseEventType,
+  StreamingChatResponseEvent,
 } from '../conversation_complete';
 import {
   concatenateChatCompletionChunks,
@@ -51,13 +53,23 @@ function mergeWithEditedMessage(
   );
 }
 
+function filterChunkEvents(): OperatorFunction<
+  StreamingChatResponseEvent,
+  ChatCompletionChunkEvent
+> {
+  return filter(
+    (event): event is ChatCompletionChunkEvent =>
+      event.type === StreamingChatResponseEventType.ChatCompletionChunk
+  );
+}
+
 export function emitWithConcatenatedMessage<T extends ChatEvent>(
   callback?: ConcatenateMessageCallback
 ): OperatorFunction<T, T | MessageAddEvent> {
   return (source$) => {
     const shared = source$.pipe(shareReplay());
 
-    const withoutTokenCount$ = shared.pipe(withoutTokenCountEvents());
+    const withoutTokenCount$ = shared.pipe(filterChunkEvents());
 
     const response$ = concat(
       shared,
