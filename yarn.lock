@@ -6184,7 +6184,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-cards-navigation@link:packages/kbn-management/cards_navigation":
+"@kbn/management-cards-navigation@link:src/platform/packages/shared/kbn-management/cards_navigation":
   version "0.0.0"
   uid ""
 
