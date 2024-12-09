@@ -116,7 +116,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { pkgkey: pkgKeyContext } = useIntegrationsStateContext();
-  const pkgkey = params.pkgkey || pkgKeyContext;
+  const pkgkey = params.pkgkey || pkgKeyContext || '';
 
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();

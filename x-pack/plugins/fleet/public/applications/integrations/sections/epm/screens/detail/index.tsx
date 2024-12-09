@@ -6,8 +6,7 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, useLocation, useParams, useHistory } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { useLocation, useParams, useHistory } from 'react-router-dom';
 
 import styled from 'styled-components';
 import {
@@ -47,7 +46,6 @@ import {
   useIntegrationsStateContext,
   useGetSettingsQuery,
 } from '../../../../hooks';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 import {
   useGetPackageInfoByKeyQuery,
@@ -67,8 +65,6 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { PermissionsError } from '../../../../../fleet/layouts';
-
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -80,13 +76,7 @@ import {
   LoadingIconPanel,
   AddIntegrationButton,
 } from './components';
-import { AssetsPage } from './assets';
-import { OverviewPage } from './overview';
-import { PackagePoliciesPage } from './policies';
-import { SettingsPage } from './settings';
-import { CustomViewPage } from './custom';
-import { DocumentationPage, hasDocumentation } from './documentation';
-import { Configs } from './configs';
+import { hasDocumentation } from './documentation';
 
 import './index.scss';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
@@ -145,10 +135,12 @@ export function Detail({
     pkgkey: pkgKeyContext,
     panel: panelContext,
   } = useIntegrationsStateContext();
-  const [selectedPanel, setSelectedPanel] = useState<DetailViewPanelName>(panelContext);
   const { pkgkey: pkgkeyParam, panel: panelParam } = useParams<DetailParams>();
-  const pkgkey = pkgkeyParam || pkgKeyContext;
-  const panel = panelParam || selectedPanel;
+  const pkgkey = pkgkeyParam || pkgKeyContext || '';
+  const panel = panelParam || panelContext;
+  const [selectedPanel, setSelectedPanel] = useState<DetailViewPanelName>(
+    (panel as DetailViewPanelName) || 'overview'
+  );
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
@@ -180,7 +172,7 @@ export function Detail({
   const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
     ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
-  const isOverviewPage = panel === 'overview';
+  const isOverviewPage = selectedPanel === 'overview';
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -653,7 +645,7 @@ export function Detail({
             defaultMessage="Overview"
           />
         ),
-        isSelected: panel === 'overview',
+        isSelected: selectedPanel === 'overview',
         'data-test-subj': `tab-overview`,
         href:
           originFrom !== 'onboarding-integration'
@@ -678,7 +670,7 @@ export function Detail({
             defaultMessage="Integration policies"
           />
         ),
-        isSelected: panel === 'policies',
+        isSelected: selectedPanel === 'policies',
         'data-test-subj': `tab-policies`,
         href: routesEnabled
           ? getHref('integration_details_policies', {
@@ -708,7 +700,7 @@ export function Detail({
             ) : null}
           </div>
         ),
-        isSelected: panel === 'assets',
+        isSelected: selectedPanel === 'assets',
         'data-test-subj': `tab-assets`,
         href: routesEnabled
           ? getHref('integration_details_assets', {
@@ -732,7 +724,7 @@ export function Detail({
             defaultMessage="Settings"
           />
         ),
-        isSelected: panel === 'settings',
+        isSelected: selectedPanel === 'settings',
         'data-test-subj': `tab-settings`,
         href: routesEnabled
           ? getHref('integration_details_settings', {
@@ -756,7 +748,7 @@ export function Detail({
             defaultMessage="Configs"
           />
         ),
-        isSelected: panel === 'configs',
+        isSelected: selectedPanel === 'configs',
         'data-test-subj': `tab-configs`,
         href: routesEnabled
           ? getHref('integration_details_configs', {
@@ -780,7 +772,7 @@ export function Detail({
             defaultMessage="Advanced"
           />
         ),
-        isSelected: panel === 'custom',
+        isSelected: selectedPanel === 'custom',
         'data-test-subj': `tab-custom`,
         href: routesEnabled
           ? getHref('integration_details_custom', {
@@ -804,7 +796,7 @@ export function Detail({
             defaultMessage="API reference"
           />
         ),
-        isSelected: panel === 'api-reference',
+        isSelected: selectedPanel === 'api-reference',
         'data-test-subj': `tab-api-reference`,
         href: routesEnabled
           ? getHref('integration_details_api_reference', {
@@ -822,7 +814,7 @@ export function Detail({
     return tabs;
   }, [
     packageInfo,
-    panel,
+    selectedPanel,
     originFrom,
     getHref,
     integration,
@@ -900,7 +892,7 @@ export function Detail({
           latestGAVersion={latestGAVersion}
           packageInfo={packageInfo}
           packageInfoData={packageInfoData}
-          panel={panel}
+          panel={selectedPanel}
           refetchPackageInfo={refetchPackageInfo}
           routesEnabled={routesEnabled}
           services={services}

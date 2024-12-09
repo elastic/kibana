@@ -39,7 +39,7 @@ export const OnboardingPage = React.memo((plugins: StartPlugins) => {
   }
 
   return (
-    <OnboardingContextProvider spaceId={spaceId} fleet={plugins.fleet}>
+    <OnboardingContextProvider spaceId={spaceId}>
       <PluginTemplateWrapper paddingSize="none" data-test-subj="onboarding-hub-page">
         <OnboardingAVCBanner />
         <KibanaPageTemplate.Section
