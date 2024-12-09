@@ -10,5 +10,7 @@ module.exports = {
   roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph'],
   rootDir: '../../../../../..',
   setupFiles: ['jest-canvas-mock'],
-  setupFilesAfterEnv: ['<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/setup_tests.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/setup_tests.ts',
+  ],
 };
