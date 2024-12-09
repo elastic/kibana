@@ -2,8 +2,8 @@
 
 ## Triggers the artifacts container image build for emergency releases
 agents:
-  image: family/kibana-ubuntu-2004
-  imageProject: elastic-images-prod
+  image: kibana-ubuntu-2004-1732561171
+  imageProject: elastic-images-qa
   provider: gcp
   machineType: n2-standard-2
 
