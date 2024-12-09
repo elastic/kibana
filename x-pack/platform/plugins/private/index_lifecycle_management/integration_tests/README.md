@@ -10,5 +10,5 @@ Jest integration tests are just sit in a different directory and have two main d
 To run these tests use: 
 
 ```
-node scripts/jest_integration x-pack/plugins/index_lifecycle_management/
+node scripts/jest_integration x-pack/platform/plugins/private/index_lifecycle_management/
 ```

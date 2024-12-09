@@ -58,7 +58,7 @@
     "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
-    "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
+    "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
     "xpack.infra": "plugins/observability_solution/infra",
     "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
     "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",

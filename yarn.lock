@@ -5920,7 +5920,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-lifecycle-management-plugin@link:x-pack/plugins/index_lifecycle_management":
+"@kbn/index-lifecycle-management-plugin@link:x-pack/platform/plugins/private/index_lifecycle_management":
   version "0.0.0"
   uid ""
 
