@@ -6060,7 +6060,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-overview-plugin@link:src/plugins/kibana_overview":
+"@kbn/kibana-overview-plugin@link:src/platform/plugins/private/kibana_overview":
   version "0.0.0"
   uid ""
 
