@@ -46,7 +46,6 @@ import { buildThresholdSignalHistory } from './build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
 import type { ExperimentalFeatures } from '../../../../../common';
-import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 export const thresholdExecutor = async ({
   inputIndex,

@@ -29,10 +29,11 @@ import type {
   ThresholdBucket,
   ThresholdSingleBucketAggregationResult,
 } from './types';
-import { shouldFilterByCardinality, searchResultHasAggs } from './utils';
+import { shouldFilterByCardinality, searchResultHasAggs, stringifyAfterKey } from './utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getMaxSignalsWarning } from '../utils/utils';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import * as i18n from '../translations';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -116,7 +117,9 @@ export const findThresholdSignals = async ({
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
-        isLoggedRequestsEnabled,
+        loggedRequestDescription: isLoggedRequestsEnabled
+          ? i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION(stringifyAfterKey(sortKeys))
+          : undefined,
       });
 
       searchAfterResults.searchDurations.push(searchDuration);
@@ -130,7 +133,6 @@ export const findThresholdSignals = async ({
       } else if (searchResultHasAggs<ThresholdMultiBucketAggregationResult>(searchResult)) {
         const thresholdTerms = searchResult.aggregations?.thresholdTerms;
         sortKeys = thresholdTerms?.after_key;
-
         buckets.push(
           ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
         );
@@ -162,7 +164,9 @@ export const findThresholdSignals = async ({
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-      isLoggedRequestsEnabled,
+      loggedRequestDescription: isLoggedRequestsEnabled
+        ? i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION()
+        : undefined,
     });
 
     searchAfterResults.searchDurations.push(searchDuration);

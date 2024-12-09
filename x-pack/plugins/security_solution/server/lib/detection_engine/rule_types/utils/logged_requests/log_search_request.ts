@@ -10,18 +10,23 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 export const logSearchRequest = (searchRequest: estypes.SearchRequest): string => {
   // handle deprecated body property which still used widely across Detection Engine
   if (searchRequest.body) {
-    const { body, runtime_mappings: _, index, ...params } = searchRequest;
+    const { body, index, ...params } = searchRequest;
     const urlParams = Object.entries(params)
       .reduce<string[]>((acc, [key, value]) => {
-        if (value) {
+        if (value != null) {
           acc.push(`${key}=${value}`);
         }
 
         return acc;
       }, [])
       .join('&');
-    return `POST /${index}/_search?${urlParams}\n${JSON.stringify(searchRequest.body, null, 2)}`;
+    return `POST /${index}/_search?${urlParams}\n${JSON.stringify(
+      { ...searchRequest.body },
+      null,
+      2
+    )}`;
   }
 
+  // TODO: fix me
   return '???';
 };

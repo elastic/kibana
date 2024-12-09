@@ -37,7 +37,7 @@ export interface SingleSearchAfterParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
-  isLoggedRequestsEnabled?: boolean;
+  loggedRequestDescription?: string;
 }
 
 // utilize search_after for paging results into bulk.
@@ -60,7 +60,7 @@ export const singleSearchAfter = async <
   trackTotalHits,
   additionalFilters,
   overrideBody,
-  isLoggedRequestsEnabled,
+  loggedRequestDescription,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
@@ -95,7 +95,7 @@ export const singleSearchAfter = async <
       const start = performance.now();
       const { body: nextSearchAfterResult } =
         await services.scopedClusterClient.asCurrentUser.search<SignalSource, TAggregations>(
-          searchAfterQuery as estypes.SearchRequest,
+          searchAfterQuery,
           { meta: true }
         );
 
@@ -105,11 +105,11 @@ export const singleSearchAfter = async <
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
 
-      if (isLoggedRequestsEnabled) {
+      if (loggedRequestDescription) {
         loggedRequests.push({
-          request: logSearchRequest(searchAfterQuery as estypes.SearchRequest),
-          description: 'Search documents',
-          duration: end - start,
+          request: logSearchRequest(searchAfterQuery),
+          description: loggedRequestDescription,
+          duration: Math.round(end - start),
         });
       }
 
