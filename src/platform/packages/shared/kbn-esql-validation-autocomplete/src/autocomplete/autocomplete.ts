@@ -627,12 +627,15 @@ async function getExpressionSuggestionsByType(
           (fragment) => Boolean(getColumnByName(fragment, references)),
           (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
             // COMMAND fie<suggest>
-            return fieldSuggestions.map((suggestion) => ({
-              ...suggestion,
-              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            }));
+            return fieldSuggestions.map((suggestion) => {
+              if (suggestion.command) return suggestion;
+              return {
+                ...suggestion,
+                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              };
+            });
           },
           (fragment: string, rangeToReplace: { start: number; end: number }) => {
             // COMMAND field<suggest>
