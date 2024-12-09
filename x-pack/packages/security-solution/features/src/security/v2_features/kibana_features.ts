@@ -25,6 +25,7 @@ import {
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   CLOUD_DEFEND_APP_ID,
+  SERVER_APP_ID,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -43,7 +44,7 @@ const SECURITY_RULE_TYPES = [
 
 const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [SECURITY_FEATURE_ID_V2],
+  consumers: [SERVER_APP_ID],
 }));
 
 export const getSecurityV2BaseKibanaFeature = ({
