@@ -78,6 +78,44 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
           expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
         });
+
+        it('should trim all whitespace before version comparison', async () => {
+          // Install base prebuilt detection rule
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
+          await installPrebuiltRules(es, supertest);
+
+          // Customize an esql_query field on the installed rule
+          await updateRule(supertest, {
+            ...getPrebuiltRuleMock(),
+            rule_id: 'rule-1',
+            type: 'esql',
+            query: '\tFROM query WHERE true\t',
+            language: 'esql',
+          } as RuleUpdateProps);
+
+          // Add a v2 rule asset to make the upgrade possible, do NOT update the related esql_query field, and create the new rule assets
+          const updatedRuleAssetSavedObjects = [
+            createRuleAssetSavedObject({
+              rule_id: 'rule-1',
+              version: 2,
+              type: 'esql',
+              query: '\n\nFROM query WHERE true\n\n',
+              language: 'esql',
+            }),
+          ];
+          await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
+
+          // Call the upgrade review prebuilt rules endpoint and check that there is 1 rule eligible for update but esql_query field is NOT returned
+          const reviewResponse = await reviewPrebuiltRulesToUpgrade(supertest);
+          const fieldDiffObject = reviewResponse.rules[0].diff.fields as AllFieldsDiff;
+          expect(fieldDiffObject.esql_query).toBeUndefined();
+
+          expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1); // `version` is considered an updated field
+          expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
+          expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
+          expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
+        });
       });
 
       describe("when rule field doesn't have an update but has a custom value - scenario ABA", () => {
