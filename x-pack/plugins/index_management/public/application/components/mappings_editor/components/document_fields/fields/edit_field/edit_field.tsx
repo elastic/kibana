@@ -59,16 +59,11 @@ const FormWrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) => 
 
 export const EditField = React.memo(
   ({ form, field, allFields, exitEdit, updateField, kibanaVersion }: Props) => {
-    const fieldTypeInputRef = useRef<HTMLInputElement>(null);
-
     const submitForm = async () => {
       const { isValid, data } = await form.submit();
 
       if (isValid) {
         updateField({ ...field, source: data });
-      }
-      if (fieldTypeInputRef.current) {
-        fieldTypeInputRef.current.focus();
       }
     };
 
@@ -154,7 +149,6 @@ export const EditField = React.memo(
             defaultValue={field.source}
             isRootLevelField={field.parentId === undefined}
             isMultiField={isMultiField}
-            fieldTypeInputRef={fieldTypeInputRef}
           />
 
           <FormDataProvider pathsToWatch={['type', 'subType']}>

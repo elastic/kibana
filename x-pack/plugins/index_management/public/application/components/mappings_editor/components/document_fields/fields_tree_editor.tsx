@@ -36,10 +36,7 @@ export const DocumentFieldsTreeEditor = ({
 
   const addField = useCallback(() => {
     dispatch({ type: 'documentField.createField' });
-    if (createFieldFormRef.current) {
-      createFieldFormRef.current.focus();
-    }
-  }, [dispatch, createFieldFormRef.current]);
+  }, [dispatch]);
 
   const renderCreateField = () => {
     // The "fieldToAddFieldTo" is undefined when adding to the top level "properties" object.

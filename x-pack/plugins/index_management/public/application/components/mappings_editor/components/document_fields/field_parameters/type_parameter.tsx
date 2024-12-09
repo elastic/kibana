@@ -24,7 +24,7 @@ interface Props {
   isMultiField?: boolean | null;
   showDocLink?: boolean;
   isSemanticTextEnabled?: boolean;
-  fieldTypeInputRef: React.MutableRefObject<HTMLInputElement | null>;
+  fieldTypeInputRef?: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 export const TypeParameter = ({

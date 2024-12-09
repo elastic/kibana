@@ -19,7 +19,6 @@ interface Props {
   defaultValue: Field;
   isRootLevelField: boolean;
   isMultiField: boolean;
-  fieldTypeInputRef: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 const getTypeDefinition = (type: MainType, subType: SubType): DataTypeDefinition | undefined => {
@@ -42,7 +41,7 @@ const getTypeDefinition = (type: MainType, subType: SubType): DataTypeDefinition
 };
 
 export const EditFieldHeaderForm = React.memo(
-  ({ defaultValue, isRootLevelField, isMultiField, fieldTypeInputRef }: Props) => {
+  ({ defaultValue, isRootLevelField, isMultiField }: Props) => {
     return (
       <>
         <EuiFlexGroup gutterSize="s">
@@ -53,11 +52,7 @@ export const EditFieldHeaderForm = React.memo(
 
           {/* Field type */}
           <EuiFlexItem>
-            <TypeParameter
-              isRootLevelField={isRootLevelField}
-              isMultiField={isMultiField}
-              fieldTypeInputRef={fieldTypeInputRef}
-            />
+            <TypeParameter isRootLevelField={isRootLevelField} isMultiField={isMultiField} />
           </EuiFlexItem>
 
           {/* Field subType (if any) */}
