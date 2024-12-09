@@ -28,10 +28,11 @@ import type { EmbeddedIntegrationFlowProps } from './types';
 
 export const EmbeddedIntegrationFlow: React.FC<EmbeddedIntegrationFlowProps> = ({
   prerelease,
-  integrationName,
-  setIntegrationStep,
+  integrationName: integration,
+  onStepNext,
   onCancel,
   handleViewAssets,
+  from,
 }) => {
   const { notifications } = useStartServices();
 
@@ -47,8 +48,7 @@ export const EmbeddedIntegrationFlow: React.FC<EmbeddedIntegrationFlowProps> = (
     setCurrentStep(0);
   };
 
-  const integration = integrationName;
-  const agentPolicyId = selectedAgentPolicies?.[0]?.id;
+  const agentPolicyId = useMemo(() => selectedAgentPolicies?.[0]?.id, [selectedAgentPolicies]);
   const {
     data: packageInfoData,
     error: packageInfoError,
@@ -80,12 +80,14 @@ export const EmbeddedIntegrationFlow: React.FC<EmbeddedIntegrationFlowProps> = (
       }
 
       setCurrentStep(props?.toStep ?? currentStep + 1);
-      setIntegrationStep?.(props?.toStep ?? currentStep + 1);
+      onStepNext?.(props?.toStep ?? currentStep + 1);
+
+      // selected agent policy is set after integration is configured
       if (props?.selectedAgentPolicies) {
         setSelectedAgentPolicies(props?.selectedAgentPolicies);
       }
     },
-    [currentStep, setIntegrationStep]
+    [currentStep, onStepNext]
   );
 
   const stepsBack = () => {
@@ -136,9 +138,10 @@ export const EmbeddedIntegrationFlow: React.FC<EmbeddedIntegrationFlowProps> = (
       setEnrolledAgentIds={setEnrolledAgentIds}
       enrolledAgentIds={enrolledAgentIds}
       onCancel={onCancel}
-      hasIncomingDataStep={false}
       prerelease={prerelease}
       handleViewAssets={handleViewAssets}
+      from={from}
+      selectedAgentPolicies={selectedAgentPolicies}
     />
   ) : (
     <Loading />

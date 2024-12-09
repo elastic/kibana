@@ -29,8 +29,7 @@ export const AgentEnrollmentFromOnboardingHub = ({
   agentPolicy,
   selectedAgentPolicies,
   isManaged,
-  isIntegrationFlow,
-  installedPackagePolicy,
+  from,
   onNext,
   setEnrolledAgentIds,
   steps,
@@ -113,12 +112,10 @@ export const AgentEnrollmentFromOnboardingHub = ({
       setMode={setMode}
       selectionType={selectionType}
       setSelectionType={setSelectionType}
-      isIntegrationFlow={isIntegrationFlow}
       selectedApiKeyId={selectedApiKeyId}
       setSelectedAPIKeyId={setSelectedAPIKeyId}
       onClickViewIncomingData={onClickViewIncomingData}
-      installedPackagePolicy={installedPackagePolicy}
-      hasIncomingDataStep={false}
+      from={from}
       handleAddFleetServer={handleAddFleetServer}
     />
   );

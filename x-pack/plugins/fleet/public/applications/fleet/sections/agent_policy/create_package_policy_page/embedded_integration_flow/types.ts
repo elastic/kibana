@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { InstalledIntegrationPolicy } from '../../../../../../components/agent_enrollment_flyout/use_get_agent_incoming_data';
-import type { DetailViewPanelName } from '../../../../../integrations/sections/epm/screens/detail';
 import type {
   FleetProxy,
   DownloadSource,
@@ -35,25 +33,20 @@ export interface EmbeddedIntegrationStepsLayoutProps {
   isManaged: boolean;
   setEnrolledAgentIds: (agentIds: string[]) => void;
   enrolledAgentIds: string[];
-  onCancel?: () => void;
+  onCancel: () => void;
   prerelease: boolean;
-  hasIncomingDataStep?: boolean;
-  installedPackagePolicy?: InstalledIntegrationPolicy;
-  selectedAgentPolicies?: AgentPolicy[];
-  isIntegrationFlow?: boolean;
   handleViewAssets: () => void;
+  from: EditPackagePolicyFrom;
+  selectedAgentPolicies?: AgentPolicy[];
 }
 
 export interface EmbeddedIntegrationFlowProps {
   from: EditPackagePolicyFrom;
   queryParamsPolicyId?: string;
-  propPolicyId?: string;
   integrationName?: string;
   prerelease: boolean;
-  onNext?: (params?: { selectedAgentPolicies?: AgentPolicy[] }) => void;
-  onCancel?: () => void;
-  setIntegrationStep?: (step: number) => void;
-  setSelectedDetailsTab: (tab: DetailViewPanelName) => void;
+  onCancel: () => void;
+  onStepNext?: (step: number) => void;
   handleViewAssets: () => void;
 }
 

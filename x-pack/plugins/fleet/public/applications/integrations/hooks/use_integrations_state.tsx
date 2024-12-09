@@ -34,7 +34,6 @@ export const IntegrationsStateContextProvider: FunctionComponent<{
       value={{
         getFromIntegrations,
         pkgkey: maybeState?.pkgkey,
-        panel: maybeState?.panel,
       }}
     >
       {children}

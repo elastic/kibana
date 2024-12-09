@@ -17,12 +17,7 @@ import { FleetServerMissingESPrivileges } from '../../../../agents/components';
 import type { EmbeddedIntegrationStepsLayoutProps } from '../types';
 
 export const AddFleetServerStepFromOnboardingHub: React.FC<EmbeddedIntegrationStepsLayoutProps> = ({
-  agentPolicy,
-  selectedAgentPolicies,
   onCancel,
-  onBack,
-  isManaged,
-  setIsManaged,
   onNext,
 }) => {
   const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(

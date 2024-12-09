@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -45,7 +45,7 @@ export const Instructions = (props: InstructionProps) => {
     setSelectionType,
     mode,
     setMode,
-    isIntegrationFlow,
+    from,
     handleAddFleetServer,
   } = props;
   const fleetStatus = useFleetStatus();
@@ -75,12 +75,12 @@ export const Instructions = (props: InstructionProps) => {
       props.cloudSecurityIntegration?.cloudShellUrl
     ) {
       setSelectionType(undefined);
-    } else if (!isIntegrationFlow && showAgentEnrollment) {
+    } else if (showAgentEnrollment) {
       setSelectionType('radio');
     } else {
       setSelectionType('tabs');
     }
-  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
+  }, [from, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
 
   if (isLoadingEnrollmentSettings || isLoadingAgentPolicies) return <Loading size="l" />;
 
