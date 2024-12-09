@@ -5732,7 +5732,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/files-management-plugin@link:src/plugins/files_management":
+"@kbn/files-management-plugin@link:src/platform/plugins/private/files_management":
   version "0.0.0"
   uid ""
 

@@ -624,6 +624,7 @@ src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-es
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
+src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/shared/bfetch @elastic/appex-sharedux
 src/platform/plugins/shared/content_management @elastic/appex-sharedux
 src/platform/plugins/shared/esql @elastic/kibana-esql
@@ -663,7 +664,6 @@ src/plugins/expression_shape @elastic/kibana-presentation
 src/plugins/expressions @elastic/kibana-visualizations
 src/plugins/field_formats @elastic/kibana-data-discovery
 src/plugins/files @elastic/appex-sharedux
-src/plugins/files_management @elastic/appex-sharedux
 src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/guided_onboarding @elastic/appex-sharedux
 src/plugins/home @elastic/appex-sharedux

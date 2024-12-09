@@ -204,7 +204,7 @@ for use in their own application.
 |The files service provides functionality to manage, retrieve, share files in Kibana.
 
 
-|{kib-repo}blob/{branch}/src/plugins/files_management/README.md[filesManagement]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/files_management/README.md[filesManagement]
 |Minimal interface for admins to manage files in Kibana.
 
 
