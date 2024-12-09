@@ -26,6 +26,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiTextTruncate,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -709,7 +710,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Username"
         />
       ),
-      description: user.username as string | undefined | JSX.Element,
+      description:
+        user.username &&
+        ((<EuiTextTruncate text={user.username} />) as string | undefined | JSX.Element),
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -728,7 +731,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Full name"
         />
       ),
-      description: user.full_name,
+      description: user.full_name && <EuiTextTruncate text={user.full_name} />,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.fullNameHelpText"
@@ -745,7 +748,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Email address"
         />
       ),
-      description: user.email,
+      description: user.email && <EuiTextTruncate text={user.email} />,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.emailHelpText"
