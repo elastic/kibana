@@ -7396,7 +7396,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-types@link:packages/shared-ux/page/no_data/types":
+"@kbn/shared-ux-page-no-data-types@link:src/platform/packages/shared/shared-ux/page/no_data/types":
   version "0.0.0"
   uid ""
 
