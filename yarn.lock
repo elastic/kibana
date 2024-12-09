@@ -7296,7 +7296,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image@link:packages/shared-ux/file/image/impl":
+"@kbn/shared-ux-file-image@link:src/platform/packages/shared/shared-ux/file/image/impl":
   version "0.0.0"
   uid ""
 
