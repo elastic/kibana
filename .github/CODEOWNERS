@@ -521,7 +521,6 @@ packages/shared-ux/modal/tabbed @elastic/appex-sharedux
 packages/shared-ux/router/mocks @elastic/appex-sharedux
 packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
-packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/platform/packages/private/content-management/favorites/favorites_common @elastic/appex-sharedux
@@ -623,6 +622,7 @@ src/platform/packages/shared/shared-ux/page/solution_nav @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/prompt/no_data_views/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/prompt/not_found @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
