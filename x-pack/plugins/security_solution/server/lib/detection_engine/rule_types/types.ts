@@ -410,5 +410,5 @@ export interface SearchAfterAndBulkCreateReturnType {
 // the new fields can be added later if needed
 export interface OverrideBodyQuery {
   _source?: estypes.SearchSourceConfig;
-  fields?: estypes.Fields;
+  fields?: Array<estypes.QueryDslFieldAndFormat | estypes.Field>;
 }
