@@ -213,7 +213,6 @@ export const findCaseUserActions = async (
     }
   );
 
-  console.log({ response });
   return {
     ...response,
     userActions: convertUserActionsToCamelCase(

@@ -287,12 +287,22 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    debugger;
-    const comment = commentUserAction.payload.updatedComment;
-
-    if (comment == null) {
-      return [];
-    }
+    const comment: AttachmentUI = {
+      ...commentUserAction.payload.comment,
+      createdAt: commentUserAction.createdAt,
+      createdBy: commentUserAction.createdBy,
+      id: commentUserAction.id,
+      version: commentUserAction.version,
+      owner: commentUserAction.owner,
+      ...(commentUserAction.payload?.latest?.comment
+        ? { comment: commentUserAction.payload?.latest?.comment }
+        : {}),
+      // TODO:
+      pushedAt: null,
+      pushedBy: null,
+      updatedAt: null,
+      updatedBy: null,
+    };
 
     if (commentUserAction.action === UserActionActions.create) {
       const commentAction = getCreateCommentUserAction({

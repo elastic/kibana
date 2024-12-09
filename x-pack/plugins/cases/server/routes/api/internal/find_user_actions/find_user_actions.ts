@@ -53,23 +53,18 @@ export const findUserActionsRoute = createCasesRoute({
       }
 
       const userActionWithUpdatedComments = userActionsResponse.userActions.map((userAction) => {
-        if (userAction.type === 'comment') {
-          const updatedComment = comments.attachments.find(
-            (comment) => comment.id === userAction.comment_id
-          );
-          console.log(JSON.stringify(updatedComment, null, 2));
+        const comment = comments.attachments.find((c) => c.id === userAction.comment_id);
+
+        if (userAction.type === 'comment' && comment?.comment) {
           return {
             ...userAction,
             payload: {
               ...userAction.payload,
-              comment: {
-                ...userAction.payload.comment,
-                updatedComment: updatedComment.comment,
-              },
-              updatedComment,
+              latest: { updated_at: comment.updated_at, comment: comment.comment },
             },
           };
         }
+
         return userAction;
       });
 
