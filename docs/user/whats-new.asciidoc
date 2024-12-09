@@ -87,7 +87,7 @@ Additionally, this release expands integration capabilities with third-party sys
 
 [discrete]
 ==== Kibana Connector now supports Jira Data Center
-This release introduces Kibana Connector support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with Kibana, enabling more efficient workflows and streamlined incident management.
+This release introduces support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with Kibana, enabling more efficient workflows and streamlined incident management.
 
 With this update, users can create and manage Jira issues directly from Kibana, regardless of their Jira deployment model. This expanded compatibility highlights our commitment to supporting diverse customer deployment setups and delivering enhanced functionality tailored to enterprise environments.
 
