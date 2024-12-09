@@ -7,23 +7,41 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { EuiBetaBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { GraphPreview } from './graph_preview';
-import { useFetchGraphData } from '../hooks/use_fetch_graph_data';
-import { useGraphPreview } from '../hooks/use_graph_preview';
+import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
+import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
  */
 export const GraphPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject, getFieldsData } = useDocumentDetailsContext();
+  const { dataAsNestedObject, getFieldsData, eventId, indexName, scopeId, isPreviewMode } =
+    useDocumentDetailsContext();
+
+  const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+    ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
+
+  const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
+    eventId,
+    indexName,
+    isFlyoutOpen: true,
+    scopeId,
+  });
 
   const {
     eventIds,
     timestamp = new Date().toISOString(),
     isAuditLog,
+    isAlert,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
@@ -33,9 +51,10 @@ export const GraphPreviewContainer: React.FC = () => {
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
       query: {
-        eventIds,
+        eventIds: isAlert ? eventIds : [],
         start: `${timestamp}||-30m`,
         end: `${timestamp}||+30m`,
+        esQuery: !isAlert ? { bool: { filter: [{ terms: { 'event.id': eventIds } }] } } : undefined,
       },
     },
     options: {
@@ -54,7 +73,39 @@ export const GraphPreviewContainer: React.FC = () => {
               defaultMessage="Graph preview"
             />
           ),
-          iconType: 'indexMapping',
+          headerContent: (
+            <EuiBetaBadge
+              alignment="middle"
+              iconType="beaker"
+              data-test-subj="graphPreviewBetaBadge"
+              label={i18n.translate(
+                'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel',
+                {
+                  defaultMessage: 'Technical Preview',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewTooltip',
+                {
+                  defaultMessage:
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                }
+              )}
+            />
+          ),
+          iconType: visualizationInFlyoutEnabled ? 'arrowStart' : 'indexMapping',
+          ...(visualizationInFlyoutEnabled &&
+            !isPreviewMode && {
+              link: {
+                callback: navigateToGraphVisualization,
+                tooltip: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
+                    defaultMessage="Expand graph"
+                  />
+                ),
+              },
+            }),
         }}
         data-test-subj={GRAPH_PREVIEW_TEST_ID}
         content={

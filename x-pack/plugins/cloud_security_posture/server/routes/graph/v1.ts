@@ -32,6 +32,8 @@ interface GraphEdge {
   actorIds: string[] | string;
   action: string;
   targetIds: string[] | string;
+  lastEventId: string;
+  lastEventIdx: string;
   eventOutcome: string;
   isAlert: boolean;
 }
@@ -144,23 +146,29 @@ const fetchGraph = async ({
   showUnknownTarget: boolean;
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
-  const query = `from logs-*
+  const query = `from logs-* METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 | EVAL isAlert = ${
     eventIds.length > 0
       ? `event.id in (${eventIds.map((_id, idx) => `?al_id${idx}`).join(', ')})`
       : 'false'
   }
+| EVAL eventId = CONCAT(TO_STRING(\`@timestamp\`), "~", _id)
+| EVAL eventIdx = CONCAT(TO_STRING(\`@timestamp\`), "~", _index)
 | STATS badge = COUNT(*),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
-  users = VALUES(related.user)
+  users = VALUES(related.user),
+  lastEventId = MAX(eventId),
+  lastEventIdx = MAX(eventIdx)
     by actorIds = actor.entity.id,
       action = event.action,
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
       isAlert
 | LIMIT 1000
+| EVAL lastEventId = MV_SLICE(SPLIT(lastEventId, "~"), 1)
+| EVAL lastEventIdx = MV_SLICE(SPLIT(lastEventIdx, "~"), 1)
 | SORT isAlert DESC`;
 
   logger.trace(`Executing query [${query}]`);
@@ -281,6 +289,9 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           id: edgeId + `label(${action})outcome(${eventOutcome})`,
           label: action,
           color: isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          badge: record.badge,
+          lastEventId: record.lastEventId,
+          lastEventIdx: record.lastEventIdx,
           shape: 'label',
         };
 
@@ -316,7 +327,7 @@ const determineEntityNodeShape = (
     return { shape: 'diamond', icon: 'globe' };
   }
 
-  return { shape: 'hexagon', icon: 'questionInCircle' };
+  return { shape: 'hexagon', icon: '' };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {

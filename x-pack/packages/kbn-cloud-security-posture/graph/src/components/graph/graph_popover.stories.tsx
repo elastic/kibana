@@ -10,7 +10,7 @@ import { ThemeProvider } from '@emotion/react';
 import { Story } from '@storybook/react';
 import { css } from '@emotion/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
-import type { EntityNodeViewModel, NodeProps } from '..';
+import type { EntityNodeViewModel, LabelNodeViewModel, NodeProps } from '..';
 import { Graph } from '..';
 import { GraphPopover } from './graph_popover';
 import { ExpandButtonClickCallback } from '../types';
@@ -173,18 +173,30 @@ const Template: Story = () => {
     popoverOpenWrapper(expandNodePopover.onNodeExpandButtonClick, ...args);
   const nodeClickHandler = (...args: any[]) => popoverOpenWrapper(nodePopover.onNodeClick, ...args);
 
-  const nodes: EntityNodeViewModel[] = useMemo(
-    () =>
-      (['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const).map((shape, idx) => ({
-        id: `${idx}`,
-        label: `Node ${idx}`,
+  const nodes: Array<EntityNodeViewModel | LabelNodeViewModel> = useMemo(
+    () => [
+      ...(['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const).map(
+        (shape, idx) => ({
+          id: `${idx}`,
+          label: `Node ${idx}`,
+          color: 'primary',
+          icon: 'okta',
+          interactive: true,
+          shape,
+          expandButtonClick: expandButtonClickHandler,
+          nodeClick: nodeClickHandler,
+        })
+      ),
+      {
+        id: 'label',
+        label: 'Label Node',
         color: 'primary',
-        icon: 'okta',
         interactive: true,
-        shape,
+        shape: 'label',
         expandButtonClick: expandButtonClickHandler,
         nodeClick: nodeClickHandler,
-      })),
+      },
+    ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
