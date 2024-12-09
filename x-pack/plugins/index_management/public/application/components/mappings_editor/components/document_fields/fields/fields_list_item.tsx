@@ -64,7 +64,7 @@ interface Props {
   treeDepth: number;
   state: State;
   isAddingFields?: boolean;
-  createFieldFormRef: React.RefObject<HTMLDivElement>;
+  createFieldFormRef?: React.RefObject<HTMLDivElement>;
   pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
@@ -87,7 +87,6 @@ function FieldListItemComponent(
     state,
     isAddingFields,
     setPreviousState,
-    createFieldFormRef,
     pendingFieldsRef,
   }: Props,
   ref: React.Ref<HTMLLIElement>
@@ -134,7 +133,6 @@ function FieldListItemComponent(
         paddingLeft={indentCreateField}
         maxNestedDepth={maxNestedDepth}
         isAddingFields={isAddingFields}
-        createFieldFormRef={createFieldFormRef}
       />
     );
   };

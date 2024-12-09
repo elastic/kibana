@@ -62,7 +62,7 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
-  createFieldFormRef: React.RefObject<HTMLDivElement>;
+  createFieldFormRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({

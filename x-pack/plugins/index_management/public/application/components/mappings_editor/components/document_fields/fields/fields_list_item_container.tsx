@@ -31,7 +31,6 @@ export const FieldsListItemContainer = ({
   pendingFieldsRef,
 }: Props) => {
   const dispatch = useDispatch();
-  const createFieldFormRef = useRef<HTMLDivElement>(null);
   const listElement = useRef<HTMLLIElement | null>(null);
   const {
     documentFields: { status, fieldToAddFieldTo, fieldToEdit },
@@ -113,7 +112,6 @@ export const FieldsListItemContainer = ({
       toggleExpand={toggleExpand}
       state={state}
       isAddingFields={isAddingFields}
-      createFieldFormRef={createFieldFormRef}
       pendingFieldsRef={pendingFieldsRef}
     />
   );
