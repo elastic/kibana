@@ -6660,7 +6660,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-render@link:packages/react/kibana_context/render":
+"@kbn/react-kibana-context-render@link:src/platform/packages/shared/react/kibana_context/render":
   version "0.0.0"
   uid ""
 
