@@ -6672,7 +6672,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-kibana-context-theme@link:packages/react/kibana_context/theme":
+"@kbn/react-kibana-context-theme@link:src/platform/packages/shared/react/kibana_context/theme":
   version "0.0.0"
   uid ""
 
