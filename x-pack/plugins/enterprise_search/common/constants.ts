@@ -10,7 +10,6 @@ import dedent from 'dedent';
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
-  ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
@@ -198,22 +197,6 @@ export const SEMANTIC_SEARCH_PLUGIN = {
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/semantic_search',
-};
-
-export const SEARCH_RELEVANCE_PLUGIN = {
-  ID: ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
-  NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
-    defaultMessage: 'Inference Endpoints',
-  }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.navTitle', {
-    defaultMessage: 'Relevance',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
-    defaultMessage: 'Manage your inference endpoints for semantic search and AI use cases.',
-  }),
-  URL: '/app/elasticsearch/relevance',
-  LOGO: 'logoEnterpriseSearch',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
 export const CREATE_CONNECTOR_PLUGIN = {
