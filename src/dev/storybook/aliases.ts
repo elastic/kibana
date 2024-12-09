@@ -61,7 +61,7 @@ export const storybookAliases = {
   observability_shared: 'x-pack/plugins/observability_solution/observability_shared/.storybook',
   observability_slo: 'x-pack/plugins/observability_solution/slo/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
-  random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
+  random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
