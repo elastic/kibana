@@ -25,7 +25,10 @@
     "data": "src/plugins/data",
     "observabilityAlertDetails": "x-pack/packages/observability/alert_details",
     "dataViews": "src/plugins/data_views",
-    "defaultNavigation": "packages/default-nav",
+    "defaultNavigation": [
+      "packages/default-nav",
+      "src/platform/packages/private/default-nav"
+    ],
     "devTools": "src/plugins/dev_tools",
     "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
     "savedSearch": "src/plugins/saved_search",
@@ -76,7 +79,7 @@
     "interpreter": "src/legacy/core_plugins/interpreter",
     "imageEmbeddable": "src/plugins/image_embeddable",
     "kbn": "src/legacy/core_plugins/kibana",
-    "kbn-esql-validation-autocomplete": "packages/kbn-esql-validation-autocomplete/src",
+    "kbn-esql-validation-autocomplete": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src",
     "kbnConfig": "packages/kbn-config/src",
     "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kibana_react": "src/legacy/core_plugins/kibana_react",
@@ -98,8 +101,8 @@
     "presentationUtil": "src/plugins/presentation_util",
     "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reactPackages": "packages/react",
-    "esqlEditor": "packages/kbn-esql-editor",
-    "esqlUtils": "packages/kbn-esql-utils",
+    "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
+    "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
     "reporting": "packages/kbn-reporting",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
@@ -117,11 +120,11 @@
     "searchTypes": "packages/kbn-search-types",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
-    "sse": [ "packages/kbn-sse-utils" ],
+    "sse": ["packages/kbn-sse-utils"],
     "coloring": "packages/kbn-coloring/src",
-    "languageDocumentation": "packages/kbn-language-documentation/src",
-    "esql": "src/plugins/esql",
-    "esqlDataGrid": "src/plugins/esql_datagrid",
+    "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
+    "esql": "src/platform/plugins/shared/esql",
+    "esqlDataGrid": "src/platform/plugins/shared/esql_datagrid",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],
@@ -154,7 +157,8 @@
     "unifiedDataTable": "packages/kbn-unified-data-table",
     "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "packages/kbn-unsaved-changes-prompt",
-    "managedContentBadge": "packages/kbn-managed-content-badge"
+    "managedContentBadge": "packages/kbn-managed-content-badge",
+    "responseOpsRuleForm": "packages/response-ops/rule_form"
   },
   "translations": []
 }
