@@ -61,7 +61,8 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
       VisitorInput<Methods, 'visitInlineCastExpression'> &
       VisitorInput<Methods, 'visitRenameExpression'> &
-      VisitorInput<Methods, 'visitOrderExpression'>
+      VisitorInput<Methods, 'visitOrderExpression'> &
+      VisitorInput<Methods, 'visitIdentifierExpression'>
 >;
 
 /**
@@ -77,7 +78,8 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'>
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
   | VisitorOutput<Methods, 'visitRenameExpression'>
-  | VisitorOutput<Methods, 'visitOrderExpression'>;
+  | VisitorOutput<Methods, 'visitOrderExpression'>
+  | VisitorOutput<Methods, 'visitIdentifierExpression'>;
 
 /**
  * Input that satisfies any command visitor input constraints.
@@ -103,7 +105,8 @@ export type CommandVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitDissectCommand'> &
       VisitorInput<Methods, 'visitGrokCommand'> &
       VisitorInput<Methods, 'visitEnrichCommand'> &
-      VisitorInput<Methods, 'visitMvExpandCommand'>
+      VisitorInput<Methods, 'visitMvExpandCommand'> &
+      VisitorInput<Methods, 'visitJoinCommand'>
 >;
 
 /**
@@ -130,7 +133,8 @@ export type CommandVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitDissectCommand'>
   | VisitorOutput<Methods, 'visitGrokCommand'>
   | VisitorOutput<Methods, 'visitEnrichCommand'>
-  | VisitorOutput<Methods, 'visitMvExpandCommand'>;
+  | VisitorOutput<Methods, 'visitMvExpandCommand'>
+  | VisitorOutput<Methods, 'visitJoinCommand'>;
 
 export interface VisitorMethods<
   Visitors extends VisitorMethods = any,
@@ -162,6 +166,7 @@ export interface VisitorMethods<
   visitGrokCommand?: Visitor<contexts.GrokCommandVisitorContext<Visitors, Data>, any, any>;
   visitEnrichCommand?: Visitor<contexts.EnrichCommandVisitorContext<Visitors, Data>, any, any>;
   visitMvExpandCommand?: Visitor<contexts.MvExpandCommandVisitorContext<Visitors, Data>, any, any>;
+  visitJoinCommand?: Visitor<contexts.JoinCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
@@ -205,6 +210,11 @@ export interface VisitorMethods<
     any
   >;
   visitOrderExpression?: Visitor<contexts.OrderExpressionVisitorContext<Visitors, Data>, any, any>;
+  visitIdentifierExpression?: Visitor<
+    contexts.IdentifierExpressionVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
 }
 
 /**
@@ -230,6 +240,8 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitTimeIntervalLiteralExpression'
   : Node extends ast.ESQLInlineCast
   ? 'visitInlineCastExpression'
+  : Node extends ast.ESQLIdentifier
+  ? 'visitIdentifierExpression'
   : never;
 
 /**
