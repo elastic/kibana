@@ -47,28 +47,25 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
         <EuiListGroup gutterSize="none" bordered={false} flush={true}>
           <ExpandPopoverListItem
             iconType="users"
-            label={i18n.translate(
-              'cloudSecurityPosture.graph.graphNodeExpandPopover.showActionsByEntity',
-              { defaultMessage: 'Show actions by this entity' }
-            )}
+            label={i18n.translate('xpack.csp.graph.graphNodeExpandPopover.showActionsByEntity', {
+              defaultMessage: 'Show actions by this entity',
+            })}
             onClick={onShowActionsByEntityClick}
             data-test-subj={GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID}
           />
           <ExpandPopoverListItem
             iconType="storage"
-            label={i18n.translate(
-              'cloudSecurityPosture.graph.graphNodeExpandPopover.showActionsOnEntity',
-              { defaultMessage: 'Show actions on this entity' }
-            )}
+            label={i18n.translate('xpack.csp.graph.graphNodeExpandPopover.showActionsOnEntity', {
+              defaultMessage: 'Show actions on this entity',
+            })}
             onClick={onShowActionsOnEntityClick}
             data-test-subj={GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID}
           />
           <ExpandPopoverListItem
             iconType="visTagCloud"
-            label={i18n.translate(
-              'cloudSecurityPosture.graph.graphNodeExpandPopover.showRelatedEvents',
-              { defaultMessage: 'Show related events' }
-            )}
+            label={i18n.translate('xpack.csp.graph.graphNodeExpandPopover.showRelatedEvents', {
+              defaultMessage: 'Show related events',
+            })}
             onClick={onExploreRelatedEntitiesClick}
             data-test-subj={GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID}
           />
