@@ -638,6 +638,7 @@ src/platform/plugins/shared/home @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
+src/platform/plugins/shared/saved_objects @elastic/appex-sharedux
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
@@ -683,7 +684,6 @@ src/plugins/maps_ems @elastic/kibana-presentation
 src/plugins/newsfeed @elastic/kibana-core
 src/plugins/presentation_panel @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
-src/plugins/saved_objects @elastic/appex-sharedux
 src/plugins/saved_objects_finder @elastic/kibana-data-discovery
 src/plugins/saved_objects_management @elastic/kibana-core
 src/plugins/saved_objects_tagging_oss @elastic/appex-sharedux

@@ -101,7 +101,7 @@
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
     "esqlUtils": "src/platform/packages/shared/kbn-esql-utils",
     "reporting": "packages/kbn-reporting",
-    "savedObjects": "src/plugins/saved_objects",
+    "savedObjects": "src/platform/plugins/shared/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "searchConnectors": "packages/kbn-search-connectors",

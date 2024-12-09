@@ -6880,7 +6880,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-plugin@link:src/plugins/saved_objects":
+"@kbn/saved-objects-plugin@link:src/platform/plugins/shared/saved_objects":
   version "0.0.0"
   uid ""
 
