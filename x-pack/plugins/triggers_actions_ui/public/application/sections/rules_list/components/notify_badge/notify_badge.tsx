@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, memo } from 'react';
 import moment from 'moment';
 import {
   EuiButton,
@@ -19,8 +19,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RRuleParams } from '@kbn/alerting-types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { SnoozeSchedule } from '../../../../../types';
+import { RuleSnoozeSettings, SnoozeSchedule } from '../../../../../types';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_month_day_date';
 import { SnoozePanel, futureTimeToInterval } from '../rule_snooze';
 import { getNextRuleSnoozeSchedule, isRuleSnoozed } from './helpers';
@@ -30,6 +31,7 @@ import {
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
   UNITS_TRANSLATION,
+  INVALID_SNOOZE_ARIA_LABEL,
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
 
@@ -105,6 +107,11 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const isScheduled = useMemo(() => {
     return !isSnoozed && Boolean(nextScheduledSnooze);
   }, [nextScheduledSnooze, isSnoozed]);
+
+  const isSnoozeValid = useMemo(
+    () => isSnoozeScheduleValid(snoozeSettings?.snoozeSchedule),
+    [snoozeSettings?.snoozeSchedule]
+  );
 
   const formattedSnoozeText = useMemo(() => {
     if (!isSnoozedUntil) {
@@ -246,6 +253,24 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     );
   }, [showOnHover, isLoading, isDisabled, snoozeButtonAriaLabel, isPopoverOpen, openPopover]);
 
+  const onApplyUnsnooze = useCallback(
+    async (scheduleIds: string[] = []) => {
+      try {
+        setRequestInFlightLoading(true);
+        closePopover();
+        await unsnoozeRule(scheduleIds);
+        await onRuleChanged();
+        toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
+      } catch (e) {
+        toasts.addDanger(SNOOZE_FAILED_MESSAGE);
+      } finally {
+        setRequestInFlightLoading(false);
+        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
+      }
+    },
+    [closePopover, unsnoozeRule, onRuleChanged, toasts]
+  );
+
   const indefiniteSnoozeButton = useMemo(() => {
     return (
       <EuiButtonIcon
@@ -264,6 +289,17 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover]);
 
   const button = useMemo(() => {
+    if (!isSnoozeValid) {
+      return (
+        <InvalidSnoozeButton
+          isLoading={isLoading}
+          isDisabled={isDisabled}
+          onClick={() => onApplyUnsnooze(getSnoozeScheduleIds(snoozeSettings?.snoozeSchedule))}
+          ref={focusTrapButtonRef}
+        />
+      );
+    }
+
     if (isScheduled) {
       return scheduledSnoozeButton;
     }
@@ -275,13 +311,18 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     }
     return unsnoozedButton;
   }, [
-    isSnoozed,
+    isSnoozeValid,
     isScheduled,
     isSnoozedIndefinitely,
-    scheduledSnoozeButton,
-    snoozedButton,
-    indefiniteSnoozeButton,
+    isSnoozed,
     unsnoozedButton,
+    isLoading,
+    isDisabled,
+    onApplyUnsnooze,
+    snoozeSettings?.snoozeSchedule,
+    scheduledSnoozeButton,
+    indefiniteSnoozeButton,
+    snoozedButton,
   ]);
 
   const buttonWithToolTip = useMemo(() => {
@@ -291,6 +332,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         : isPopoverOpen || showTooltipInline
         ? undefined
         : snoozeTimeLeft;
+
     return (
       <EuiToolTip
         title={
@@ -328,24 +370,6 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     [closePopover, snoozeRule, onRuleChanged, toasts]
   );
 
-  const onApplyUnsnooze = useCallback(
-    async (scheduleIds?: string[]) => {
-      try {
-        setRequestInFlightLoading(true);
-        closePopover();
-        await unsnoozeRule(scheduleIds);
-        await onRuleChanged();
-        toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
-      } catch (e) {
-        toasts.addDanger(SNOOZE_FAILED_MESSAGE);
-      } finally {
-        setRequestInFlightLoading(false);
-        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
-      }
-    },
-    [closePopover, unsnoozeRule, onRuleChanged, toasts]
-  );
-
   const popover = (
     <EuiPopover
       data-test-subj="rulesListNotifyBadge"
@@ -366,6 +390,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       />
     </EuiPopover>
   );
+
   if (showTooltipInline) {
     return (
       <EuiFlexGroup alignItems="center">
@@ -378,5 +403,74 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       </EuiFlexGroup>
     );
   }
+
   return popover;
+};
+
+interface InvalidSnoozeButtonProps {
+  isLoading: boolean;
+  isDisabled: boolean;
+  ref?: React.RefObject<HTMLButtonElement>;
+  onClick: () => void;
+}
+
+const InvalidSnoozeButton: React.FC<InvalidSnoozeButtonProps> = memo(
+  ({ isLoading, isDisabled, onClick, ref }) => {
+    return (
+      <EuiButton
+        size="s"
+        isLoading={isLoading}
+        disabled={isLoading || isDisabled}
+        data-test-subj="rulesListNotifyBadge-invalidSnooze"
+        aria-label={INVALID_SNOOZE_ARIA_LABEL}
+        minWidth={85}
+        iconType="error"
+        color="danger"
+        onClick={onClick}
+        buttonRef={ref}
+      >
+        <EuiText size="xs">{'invalid'}</EuiText>
+      </EuiButton>
+    );
+  }
+);
+
+const isSnoozeScheduleValid = (snoozeSchedule: RuleSnoozeSettings['snoozeSchedule']) => {
+  return snoozeSchedule?.every(isSnoozeValid);
+};
+
+const isSnoozeValid = (snooze: NonNullable<RuleSnoozeSettings['snoozeSchedule']>[number]) => {
+  const { rRule } = snooze;
+
+  const rRuleOptions = {
+    dtstart: rRule.dtstart,
+    tzid: rRule.tzid,
+    freq: rRule.freq,
+    interval: rRule.interval,
+    until: rRule.until,
+    count: rRule.count,
+    byweekday: rRule.byweekday,
+    bymonthday: rRule.bymonthday,
+    bymonth: rRule.bymonth,
+  };
+
+  return isValidateRRule(rRuleOptions);
+};
+
+const getSnoozeScheduleIds = (snooze: NonNullable<RuleSnoozeSettings['snoozeSchedule']> = []) => {
+  return snooze.map(({ id }) => id).filter(Boolean) as string[];
+};
+
+const isValidateRRule = (rRule: RRuleParams): boolean => {
+  const validWeekDays = new Set(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
+
+  if (moment.tz.zone(rRule.tzid) != null) {
+    return false;
+  }
+
+  if (rRule.byweekday && !rRule.byweekday.every((value) => validWeekDays.has(value as string))) {
+    return false;
+  }
+
+  return true;
 };
