@@ -49,7 +49,7 @@ export const deleteListItem = async ({
 
       await waitUntilDocumentIndexed(checkIfListItemDeleted);
     } else {
-      throw Error('No list item has been deleted');
+      throw Error('Deletion of List Item [item_id] from [item_index] was not successful');
     }
   }
   return listItem;
