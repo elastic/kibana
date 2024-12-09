@@ -207,7 +207,7 @@
     "@kbn/cbor": "link:packages/kbn-cbor",
     "@kbn/cell-actions": "link:packages/kbn-cell-actions",
     "@kbn/chart-expressions-common": "link:src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common",
-    "@kbn/chart-icons": "link:packages/kbn-chart-icons",
+    "@kbn/chart-icons": "link:src/platform/packages/shared/kbn-chart-icons",
     "@kbn/charts-plugin": "link:src/plugins/charts",
     "@kbn/cloud": "link:packages/cloud",
     "@kbn/cloud-chat-plugin": "link:x-pack/plugins/cloud_integrations/cloud_chat",
