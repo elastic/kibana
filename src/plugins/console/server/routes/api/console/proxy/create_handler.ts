@@ -130,7 +130,7 @@ export const createHandler =
 
         // Because this can technically be provided by a settings-defined proxy config, we need to
         // preserve these property names to maintain BWC.
-        const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
+        const { agent, headers, rejectUnauthorized } = getRequestConfig(
           request.headers,
           legacyConfig,
           uri.toString(),
@@ -152,7 +152,7 @@ export const createHandler =
           method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
           headers: requestHeaders,
           uri,
-          timeout,
+          timeout: 60000,
           payload: body,
           rejectUnauthorized,
           agent,
