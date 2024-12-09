@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FieldReadOnly } from '../../field_readonly';
+import { FieldFinalReadOnly } from '../../field_final_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import {
@@ -22,7 +22,7 @@ import {
 } from '../../storybook/mocks';
 
 export default {
-  component: FieldReadOnly,
+  component: FieldFinalReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/kql_query',
 };
 
@@ -36,8 +36,9 @@ const Template: Story<TemplateProps> = (args) => {
     <ThreeWayDiffStorybookProviders
       kibanaServicesOverrides={args.kibanaServicesOverrides}
       finalDiffableRule={args.finalDiffableRule}
+      fieldName="kql_query"
     >
-      <FieldReadOnly fieldName="kql_query" />
+      <FieldFinalReadOnly />
     </ThreeWayDiffStorybookProviders>
   );
 };
