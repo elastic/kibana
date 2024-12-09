@@ -6,12 +6,16 @@
  */
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
+
+const TEN_SECONDS = 10000;
 
 export const useInvalidateRiskEngineStatusQuery = () => {
   const queryClient = useQueryClient();
@@ -36,6 +40,28 @@ export const useIsNewRiskScoreModuleInstalled = (): RiskScoreModuleStatus => {
   }
 
   return { isLoading: false, installed: !!riskEngineStatus?.isNewRiskScoreModuleInstalled };
+};
+
+export const useRiskEngineCountdownTime = (interval: number = TEN_SECONDS): string => {
+  const { data: riskEngineStatus } = useRiskEngineStatus({
+    refetchInterval: interval,
+  });
+
+  const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
+
+  const isRunning = useMemo(
+    () => status === 'running' || (!!runAt && new Date(runAt) < new Date()),
+    [runAt, status]
+  );
+
+  return isRunning
+    ? i18n.translate(
+        'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.nowRunningMessage',
+        {
+          defaultMessage: 'Now running',
+        }
+      )
+    : moment(runAt).fromNow(true);
 };
 
 export interface RiskEngineStatus extends RiskEngineStatusResponse {
