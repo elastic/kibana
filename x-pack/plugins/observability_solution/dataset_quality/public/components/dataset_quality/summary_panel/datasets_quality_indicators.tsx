@@ -9,7 +9,6 @@ import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import * as rt from 'io-ts';
-import { getDateISORange } from '@kbn/timerange';
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -44,7 +43,6 @@ export type Meta = rt.TypeOf<typeof metaRt>;
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();
   const { timeRange } = useDatasetQualityFilters();
-  const { startDate, endDate } = getDateISORange(timeRange);
   const {
     datasetsQuality,
     isDatasetsQualityLoading,
@@ -65,8 +63,8 @@ export function DatasetsQualityIndicators() {
         value2: numberOfDocuments,
       },
       meta: {
-        startDate,
-        endDate,
+        rangeFrom: timeRange.from,
+        rangeTo: timeRange.to,
       },
     });
   }
