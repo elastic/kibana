@@ -634,6 +634,7 @@ src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/files @elastic/appex-sharedux
 src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
+src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
@@ -672,7 +673,6 @@ src/plugins/ftr_apis @elastic/kibana-core
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
 src/plugins/interactive_setup @elastic/kibana-security
-src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 src/plugins/links @elastic/kibana-presentation

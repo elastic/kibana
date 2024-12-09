@@ -604,7 +604,7 @@
     "@kbn/kbn-tp-run-pipeline-plugin": "link:test/interpreter_functional/plugins/kbn_tp_run_pipeline",
     "@kbn/kibana-cors-test-plugin": "link:x-pack/test/functional_cors/plugins/kibana_cors_test",
     "@kbn/kibana-overview-plugin": "link:src/platform/plugins/private/kibana_overview",
-    "@kbn/kibana-react-plugin": "link:src/plugins/kibana_react",
+    "@kbn/kibana-react-plugin": "link:src/platform/plugins/shared/kibana_react",
     "@kbn/kibana-usage-collection-plugin": "link:src/plugins/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/plugins/kibana_utils",
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",

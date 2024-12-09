@@ -6064,7 +6064,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-react-plugin@link:src/plugins/kibana_react":
+"@kbn/kibana-react-plugin@link:src/platform/plugins/shared/kibana_react":
   version "0.0.0"
   uid ""
 
