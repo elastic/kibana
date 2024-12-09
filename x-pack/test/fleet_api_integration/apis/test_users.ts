@@ -187,6 +187,8 @@ export const testUsers: {
           'event_filters_read',
           'policy_management_read',
         ],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
       },
       spaces: ['*'],
     },
@@ -199,6 +201,8 @@ export const testUsers: {
       feature: {
         fleet: ['all'],
         siemV2: ['minimal_all', 'policy_management_all'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
       },
       spaces: ['*'],
     },
@@ -211,6 +215,8 @@ export const testUsers: {
       feature: {
         fleet: ['all'],
         siemV2: ['minimal_all', 'policy_management_read'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
       },
       spaces: ['*'],
     },
@@ -223,6 +229,8 @@ export const testUsers: {
       feature: {
         fleet: ['read'],
         siemV2: ['minimal_all'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
       },
       spaces: ['*'],
     },
@@ -234,6 +242,8 @@ export const testUsers: {
     permissions: {
       feature: {
         siemV2: ['minimal_all'],
+        securitySolutionNotes: ['all'],
+        securitySolutionTimeline: ['all'],
       },
       spaces: ['*'],
     },
