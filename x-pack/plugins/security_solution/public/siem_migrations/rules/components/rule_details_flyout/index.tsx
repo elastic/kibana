@@ -6,7 +6,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -21,16 +21,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useGeneratedHtmlId,
+  EuiSkeletonLoading,
+  EuiSkeletonTitle,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   RuleOverviewTab,
   useOverviewTabSections,
 } from '../../../../detection_engine/rule_management/components/rule_details/rule_overview_tab';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
+import * as logicI18n from '../../logic/translations';
 import * as i18n from './translations';
 import {
   DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
@@ -41,6 +45,8 @@ import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
+import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
+import { useUpdateMigrationRules } from '../../logic/use_update_migration_rules';
 
 /*
  * Fixes tabs to the top and allows the content to scroll.
@@ -62,8 +68,9 @@ export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) 
 );
 
 interface MigrationRuleDetailsFlyoutProps {
+  migrationId: string;
+  migrationRuleId: string;
   ruleActions?: React.ReactNode;
-  ruleMigration: RuleMigration;
   matchedPrebuiltRule?: RuleResponse;
   size?: EuiFlyoutProps['size'];
   extraTabs?: EuiTabbedContentTab[];
@@ -73,23 +80,65 @@ interface MigrationRuleDetailsFlyoutProps {
 export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProps> = React.memo(
   ({
     ruleActions,
-    ruleMigration,
+    migrationId,
+    migrationRuleId,
     matchedPrebuiltRule,
     size = 'm',
     extraTabs = [],
     closeFlyout,
   }: MigrationRuleDetailsFlyoutProps) => {
+    const { addError } = useAppToasts();
+
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-    const rule = useMemo(() => {
-      if (isMigrationCustomRule(ruleMigration.elastic_rule)) {
-        return convertMigrationCustomRuleToSecurityRulePayload(
-          ruleMigration.elastic_rule,
-          false
-        ) as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter;
+    const { data: { ruleMigrations } = { ruleMigrations: [] }, isLoading: isDataLoading } =
+      useGetMigrationRules({
+        migrationId,
+        ids: [migrationRuleId],
+      });
+    const ruleMigration = useMemo(() => {
+      if (!isDataLoading && ruleMigrations.length === 1) {
+        return ruleMigrations[0];
+      }
+    }, [isDataLoading, ruleMigrations]);
+
+    const { mutateAsync: updateMigrationRules } = useUpdateMigrationRules(migrationId);
+
+    const [isUpdating, setIsUpdating] = useState(false);
+    const isLoading = isDataLoading || isUpdating;
+
+    const handleTranslationUpdate = useCallback(
+      async (ruleName: string, ruleQuery: string) => {
+        if (!ruleMigration || isLoading) {
+          return;
+        }
+        setIsUpdating(true);
+        try {
+          await updateMigrationRules([
+            {
+              id: ruleMigration.id,
+              elastic_rule: {
+                title: ruleName,
+                query: ruleQuery,
+              },
+            },
+          ]);
+        } catch (error) {
+          addError(error, { title: logicI18n.UPDATE_MIGRATION_RULES_FAILURE });
+        } finally {
+          setIsUpdating(false);
+        }
+      },
+      [addError, ruleMigration, isLoading, updateMigrationRules]
+    );
+
+    const ruleDetailsToOverview = useMemo(() => {
+      const elasticRule = ruleMigration?.elastic_rule;
+      if (isMigrationCustomRule(elasticRule)) {
+        return convertMigrationCustomRuleToSecurityRulePayload(elasticRule, false) as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter;
       }
       return matchedPrebuiltRule;
-    }, [matchedPrebuiltRule, ruleMigration]);
+    }, [ruleMigration, matchedPrebuiltRule]);
 
     const translationTab: EuiTabbedContentTab = useMemo(
       () => ({
@@ -97,14 +146,17 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.TRANSLATION_TAB_LABEL,
         content: (
           <TabContentPadding>
-            <TranslationTab
-              ruleMigration={ruleMigration}
-              matchedPrebuiltRule={matchedPrebuiltRule}
-            />
+            {ruleMigration && (
+              <TranslationTab
+                ruleMigration={ruleMigration}
+                matchedPrebuiltRule={matchedPrebuiltRule}
+                onTranslationUpdate={handleTranslationUpdate}
+              />
+            )}
           </TabContentPadding>
         ),
       }),
-      [matchedPrebuiltRule, ruleMigration]
+      [ruleMigration, handleTranslationUpdate, matchedPrebuiltRule]
     );
 
     const overviewTab: EuiTabbedContentTab = useMemo(
@@ -113,9 +165,9 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         name: i18n.OVERVIEW_TAB_LABEL,
         content: (
           <TabContentPadding>
-            {rule && (
+            {ruleDetailsToOverview && (
               <RuleOverviewTab
-                rule={rule}
+                rule={ruleDetailsToOverview}
                 columnWidths={
                   size === 'l'
                     ? LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS
@@ -128,7 +180,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           </TabContentPadding>
         ),
       }),
-      [rule, size, expandedOverviewSections, toggleOverviewSection]
+      [ruleDetailsToOverview, size, expandedOverviewSections, toggleOverviewSection]
     );
 
     const tabs = useMemo(() => {
@@ -149,6 +201,16 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
       setSelectedTabId(tab.id);
     };
 
+    const tabsContent = useMemo(() => {
+      return (
+        <ScrollableFlyoutTabbedContent
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={onTabClick}
+        />
+      );
+    }, [selectedTab, tabs]);
+
     const migrationsRulesFlyoutTitleId = useGeneratedHtmlId({
       prefix: 'migrationRulesFlyoutTitle',
     });
@@ -166,16 +228,23 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         <EuiFlyoutHeader>
           <EuiTitle size="m">
             <h2 id={migrationsRulesFlyoutTitleId}>
-              {rule?.name ?? ruleMigration.original_rule.title}
+              {ruleDetailsToOverview?.name ??
+                ruleMigration?.original_rule.title ??
+                i18n.UNKNOWN_MIGRATION_RULE_TITLE}
             </h2>
           </EuiTitle>
           <EuiSpacer size="l" />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <ScrollableFlyoutTabbedContent
-            tabs={tabs}
-            selectedTab={selectedTab}
-            onTabClick={onTabClick}
+          <EuiSkeletonLoading
+            isLoading={isLoading}
+            loadingContent={
+              <>
+                <EuiSkeletonTitle />
+                <EuiSkeletonText />
+              </>
+            }
+            loadedContent={tabsContent}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
