@@ -85,14 +85,18 @@ class SecurityWorkflowInsightsService {
         esClient,
         pluginStop$: this.stop$,
       });
-      await esClient.indices.createDataStream({ name: DATA_STREAM_NAME });
-    } catch (err) {
-      // ignore datastream already exists error
-      if (err?.body?.error?.type === 'resource_already_exists_exception') {
-        return;
-      }
 
-      this.logger.warn(new SecurityWorkflowInsightsFailedInitialized(err.message).message);
+      try {
+        await esClient.indices.createDataStream({ name: DATA_STREAM_NAME });
+      } catch (err) {
+        if (err?.body?.error?.type === 'resource_already_exists_exception') {
+          this.logger.debug(`Datastream ${DATA_STREAM_NAME} already exists`);
+        } else {
+          throw new SecurityWorkflowInsightsFailedInitialized(err.message);
+        }
+      }
+    } catch (err) {
+      this.logger.warn(err.message);
       return;
     }
 

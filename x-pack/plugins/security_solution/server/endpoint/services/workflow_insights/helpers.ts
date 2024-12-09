@@ -76,6 +76,7 @@ const validKeys = new Set([
   'targetIds',
   'actionTypes',
 ]);
+
 const paramFieldMap = {
   ids: '_id',
   sourceTypes: 'source.type',
@@ -84,6 +85,7 @@ const paramFieldMap = {
   targetIds: 'target.id',
   actionTypes: 'action.type',
 };
+
 export function buildEsQueryParams(searchParams: SearchParams): QueryDslQueryContainer[] {
   return Object.entries(searchParams).reduce((acc: object[], [k, v]) => {
     if (!validKeys.has(k)) {
@@ -91,8 +93,21 @@ export function buildEsQueryParams(searchParams: SearchParams): QueryDslQueryCon
     }
 
     const paramKey = _get(paramFieldMap, k, k);
-    const next = { terms: { [paramKey]: v } };
 
+    // Special handling for `actionTypes` (nested under `action`) and `targetIds` (nested under `target`)
+    if (k === 'actionTypes' || k === 'targetIds') {
+      const nestedQuery = {
+        nested: {
+          path: k === 'actionTypes' ? 'action' : 'target',
+          query: {
+            terms: { [paramKey]: v },
+          },
+        },
+      };
+      return [...acc, nestedQuery];
+    }
+
+    const next = { terms: { [paramKey]: v } };
     return [...acc, next];
   }, []);
 }

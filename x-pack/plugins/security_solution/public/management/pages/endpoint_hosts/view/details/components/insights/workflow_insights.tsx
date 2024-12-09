@@ -59,6 +59,7 @@ export const WorkflowInsights = React.memo(({ endpointId, endpointOs }: Workflow
 
   const renderLastResultsCaption = () => {
     // TODO: get the last scan date from the insights data
+    // TODO: Format the date
     if (!insights?.length || !insights[0]['@timestamp']) {
       return null;
     }

@@ -59,8 +59,9 @@ export const WorkflowInsightsResults = ({
   }: Pick<SecurityWorkflowInsight, 'remediation'>) => {
     const url = `${APP_PATH}${TRUSTED_APPS_PATH}?show=create`;
 
+    // TODO: handle multiple exception list items
     const state: EndpointInsightRouteState | {} = {
-      ...(remediation.exception_list_items
+      ...(remediation.exception_list_items && remediation.exception_list_items.length
         ? {
             insight: {
               back_url: `${APP_PATH}${getEndpointDetailsPath({
@@ -76,7 +77,7 @@ export const WorkflowInsightsResults = ({
                 namespace_type: 'agnostic',
                 tags: remediation.exception_list_items[0].tags,
                 type: 'simple',
-                os_types: [endpointOs],
+                os_types: [endpointOs], // TODO: is this needed?
               },
             },
           }
@@ -125,6 +126,7 @@ export const WorkflowInsightsResults = ({
 
               <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
                 <EuiButtonIcon
+                  aria-label="Navigate to create trusted app" // TODO: localize
                   iconType="popout"
                   href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
                   onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
