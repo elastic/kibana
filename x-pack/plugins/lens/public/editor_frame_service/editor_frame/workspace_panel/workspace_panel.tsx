@@ -328,6 +328,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           dateRange: framePublicAPI.dateRange,
           nowInstant: plugins.data.nowProvider.get(),
           searchSessionId,
+          forceDSL: framePublicAPI.forceDSL,
         });
 
         if (ast) {
@@ -373,6 +374,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     dataViews.indexPatterns,
     framePublicAPI.dateRange,
+    framePublicAPI.forceDSL,
     plugins.data.nowProvider,
     searchSessionId,
     addUserMessages,
