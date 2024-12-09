@@ -138,7 +138,7 @@ export const createMetricThresholdExecutor =
       executionId,
     });
 
-    const { alertsClient } = services;
+    const { alertsClient, getDataViews } = services;
 
     const searchSourceClient = await services.getSearchSourceClient();
 
@@ -243,8 +243,15 @@ export const createMetricThresholdExecutor =
           )
         : [];
 
-    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
-    const dataView = initialSearchSource.getField('index')!;
+    let dataView;
+
+    if (params.searchConfiguration) {
+      const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+      dataView = initialSearchSource.getField('index')!;
+    } else {
+      dataView = await (await getDataViews()).get('infra_rules_data_view');
+    }
+
     const { timeFieldName } = dataView;
     const dataViewIndexPattern = dataView.getIndexPattern();
 
