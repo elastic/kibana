@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { NodeViewModel } from './types';
+
 export { Graph } from './graph/graph';
 export { GraphPopover } from './graph/graph_popover';
 export { useGraphPopover } from './graph/use_graph_popover';
@@ -17,3 +19,10 @@ export type {
   EntityNodeViewModel,
   NodeProps,
 } from './types';
+
+export const isEntityNode = (node: NodeViewModel) =>
+  node.shape === 'ellipse' ||
+  node.shape === 'pentagon' ||
+  node.shape === 'rectangle' ||
+  node.shape === 'diamond' ||
+  node.shape === 'hexagon';
