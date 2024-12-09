@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { BaseError } from '../common/errors';
-
-export class AutoOpsError extends BaseError {}
+export const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
+export const MAX_PREBUILT_RULES_TO_FETCH = 10_000 as const;
+export const MAX_TRANSLATED_RULES_TO_INSTALL = 10_000 as const;

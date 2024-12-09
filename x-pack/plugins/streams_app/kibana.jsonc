@@ -15,7 +15,8 @@
       "data",
       "dataViews",
       "unifiedSearch",
-      "share"
+      "share",
+      "navigation"
     ],
     "requiredBundles": [
       "kibanaReact"
