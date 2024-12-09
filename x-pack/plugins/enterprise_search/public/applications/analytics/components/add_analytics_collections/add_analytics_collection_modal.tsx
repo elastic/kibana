@@ -81,13 +81,17 @@ export const AddAnalyticsCollectionModal: React.FC<AddAnalyticsCollectionModalPr
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchAddAnalyticsCollectionModalCancelButton"
+          onClick={onClose}
+        >
           {i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.form.cancelButton', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
 
         <EuiButton
+          data-test-subj="enterpriseSearchAddAnalyticsCollectionModalCreateButton"
           fill
           type="submit"
           form={modalFormId}
