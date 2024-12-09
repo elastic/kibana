@@ -1541,7 +1541,7 @@
         "label": "expect",
         "description": [],
         "signature": [
-          "{ <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined): MakeMatchers<void, T, {}>; soft: <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined) => MakeMatchers<void, T, {}>; poll: <T = unknown>(actual: () => T | Promise<T>, messageOrOptions?: string | { message?: string | undefined; timeout?: number | undefined; intervals?: number[] | undefined; } | undefined) => GenericAssertions<Promise<void>> & PlaywrightTest.Matchers<Promise<void>, T> & SnapshotAssertions & { not: BaseMatchers<Promise<void>, T>; }; extend<MoreMatchers extends Record<string, (this: ",
+          "{ <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined): MakeMatchers<void, T, {}>; soft: <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined) => MakeMatchers<void, T, {}>; poll: <T = unknown>(actual: () => T | Promise<T>, messageOrOptions?: string | { message?: string | undefined; timeout?: number | undefined; intervals?: number[] | undefined; } | undefined) => PollMatchers<Promise<void>, T, {}>; extend<MoreMatchers extends Record<string, (this: ",
           "ExpectMatcherState",
           ", receiver: any, ...args: any[]) => ",
           "MatcherReturnType",
@@ -1642,22 +1642,6 @@
           "PlaywrightTestOptions",
           " & { browserAuth: ",
           "LoginFixture",
-          "; } & { page: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutPage",
-            "text": "ScoutPage"
-          },
-          "; kbnUrl: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.KibanaUrl",
-            "text": "KibanaUrl"
-          },
           "; } & ",
           {
             "pluginId": "@kbn/scout",

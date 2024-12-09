@@ -18,11 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  DEFAULT_COLUMNS_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-} from '@kbn/discover-utils';
+import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -235,7 +231,6 @@ export function getDataStateContainer({
             getAppState: appStateContainer.getState,
             getInternalState: internalStateContainer.getState,
             savedSearch: getSavedSearch(),
-            useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
           };
 
           abortController?.abort();
