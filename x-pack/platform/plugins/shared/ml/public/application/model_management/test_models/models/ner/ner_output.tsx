@@ -11,22 +11,32 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  useEuiFontSize,
+  useEuiTheme,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiToolTip,
+  type EuiThemeComputed,
 } from '@elastic/eui';
-import { useCurrentThemeVars } from '../../../../contexts/kibana';
-import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
 import type { NerInference, NerResponse } from './ner_inference';
 import { INPUT_TYPE } from '../inference_base';
+
+type EuiVisColor = keyof EuiThemeComputed['colors']['vis'];
 
 const ICON_PADDING = '2px';
 const PROBABILITY_SIG_FIGS = 3;
 
-const ENTITY_TYPES = {
+interface EntityType {
+  label: string;
+  icon: string;
+  color: EuiVisColor;
+  borderColor: EuiVisColor;
+}
+
+const ENTITY_TYPES: Record<string, EntityType> = {
   PER: {
     label: 'Person',
     icon: 'user',
@@ -53,11 +63,11 @@ const ENTITY_TYPES = {
   },
 };
 
-const UNKNOWN_ENTITY_TYPE = {
+const UNKNOWN_ENTITY_TYPE: EntityType = {
   label: '',
   icon: 'questionInCircle',
   color: 'euiColorVis5_behindText',
-  borderColor: 'euiColorVis5',
+  borderColor: 'euiColorVis5' as EuiVisColor,
 };
 
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
@@ -86,7 +96,7 @@ const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
 };
 
 const Lines: FC<{ result: NerResponse }> = ({ result }) => {
-  const { euiTheme } = useCurrentThemeVars();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {
     if (entity === null) {
@@ -110,7 +120,7 @@ const Lines: FC<{ result: NerResponse }> = ({ result }) => {
                 {value}
               </div>
               <EuiHorizontalRule margin="none" />
-              <div style={{ fontSize: euiTheme.euiFontSizeXS, marginTop: ICON_PADDING }}>
+              <div style={{ fontSize: euiFontSizeXS, marginTop: ICON_PADDING }}>
                 <div>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.testModelsFlyout.ner.output.typeTitle"
@@ -143,7 +153,8 @@ const EntityBadge = ({
 }: PropsWithChildren<{
   entity: estypes.MlTrainedModelEntities;
 }>) => {
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
   return (
     <EuiBadge
       // @ts-expect-error colors are correct in ENTITY_TYPES
@@ -152,7 +163,7 @@ const EntityBadge = ({
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
         border: `1px solid ${getClassColor(euiTheme, entity.class_name, true)}`,
-        fontSize: euiTheme.euiFontSizeXS,
+        fontSize: euiFontSizeXS,
         padding: '0px 6px',
         pointerEvents: 'none',
       }}
@@ -181,11 +192,17 @@ function getClassLabel(className: string) {
   return entity?.label ?? className;
 }
 
-function getClassColor(euiTheme: EuiThemeType, className: string, border: boolean = false) {
+function getClassColor(euiTheme: EuiThemeComputed, className: string, border: boolean = false) {
+  console.log('getClassColor', className, border);
   const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
+
+  if (border) {
+    return euiTheme.colors.vis[entity?.borderColor ?? UNKNOWN_ENTITY_TYPE.borderColor];
+  }
   let color = entity?.color ?? UNKNOWN_ENTITY_TYPE.color;
   if (border) {
     color = entity?.borderColor ?? UNKNOWN_ENTITY_TYPE.borderColor;
   }
-  return euiTheme[color as keyof typeof euiTheme];
+
+  return euiTheme.colors[color as keyof typeof euiTheme.colors];
 }
