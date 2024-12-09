@@ -7340,7 +7340,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-markdown@link:packages/shared-ux/markdown/impl":
+"@kbn/shared-ux-markdown@link:src/platform/packages/shared/shared-ux/markdown/impl":
   version "0.0.0"
   uid ""
 
