@@ -23,3 +23,5 @@ export enum TaskTypes {
   sparse_embedding = 'sparse_embedding',
   text_embedding = 'text_embedding',
 }
+
+export type { InferenceProvider } from '@kbn/genai-common';

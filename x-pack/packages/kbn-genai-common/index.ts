@@ -7,6 +7,6 @@
 
 export { InferenceServices } from './src/components/inference_services';
 
-export { fetchInferenceServices } from './src/lib/fetchInferenceServices';
+// export { fetchInferenceServices } from './src/lib/fetchInferenceServices';
 
 export * from './src/types/types';

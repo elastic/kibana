@@ -17,5 +17,11 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/search-connectors",
+    "@kbn/core",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/triggers-actions-ui-plugin"
   ]
 }

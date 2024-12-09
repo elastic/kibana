@@ -8,11 +8,11 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
-import { fetchInferenceServices } from '@kbn/genai-common';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
 import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
+import { fetchInferenceServices } from './lib/fetch_inference_services';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -36,29 +36,30 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
     })
   );
 
-  router.get(
-    {
-      path: APIRoutes.GET_INFERENCE_SERVICES,
-      options: {
-        access: 'internal',
-      },
-      validate: false,
-    },
-    errorHandler(logger)(async (context, request, response) => {
-      const {
-        client: { asInternalUser },
-      } = (await context.core).elasticsearch;
+  /* FIX ME: Currently we are adding hard coded values which will be removed once
+    we have the endpoint ready to use.
+  */
 
-      const services = await fetchInferenceServices(asInternalUser);
+  // router.get(
+  //   {
+  //     path: APIRoutes.GET_INFERENCE_SERVICES,
+  //     validate: {},
+  //   },
+  //   errorHandler(logger)(async (context, request, response) => {
+  //     const {
+  //       client: { asCurrentUser },
+  //     } = (await context.core).elasticsearch;
 
-      return response.ok({
-        body: {
-          inference_services: services,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    })
-  );
+  //     const services = await fetchInferenceServices(asCurrentUser);
+
+  //     return response.ok({
+  //       body: {
+  //         inference_services: services,
+  //       },
+  //       headers: { 'content-type': 'application/json' },
+  //     });
+  //   })
+  // );
 
   router.delete(
     {

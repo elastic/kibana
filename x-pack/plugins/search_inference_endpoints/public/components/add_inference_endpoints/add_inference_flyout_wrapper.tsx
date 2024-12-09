@@ -9,7 +9,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -36,7 +35,7 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
     services: { http },
   } = useKibana();
 
-  const { data: providers, isLoading } = useProviders(http);
+  const { data: providers } = useProviders(http);
 
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',

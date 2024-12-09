@@ -36,6 +36,7 @@ export const SelectableProvider: React.FC<SelectableProviderProps> = ({
   onProviderChange,
 }) => {
   const [searchProviderValue, setSearchProviderValue] = useState<string>('');
+  console.log(searchProviderValue);
   const onSearchProvider = useCallback(
     (val: string) => {
       setSearchProviderValue(val);

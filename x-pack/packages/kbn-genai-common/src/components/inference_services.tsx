@@ -43,7 +43,7 @@ export const InferenceServices: React.FC<InferenceServicesProps> = ({ providers 
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
   const [taskTypeSchema, setTaskTypeSchema] = useState<ConfigEntryView[]>([]);
 
-  const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
+  const { updateFieldValues, setFieldValue } = useFormContext();
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
       'secrets.providerSecrets',
@@ -54,6 +54,8 @@ export const InferenceServices: React.FC<InferenceServicesProps> = ({ providers 
       'config.providerConfig',
     ],
   });
+
+  console.log(providerSchema, taskTypeOptions, selectedTaskType, taskTypeSchema, secrets);
 
   const handleProviderPopover = useCallback(() => {
     setProviderPopoverOpen((isOpen) => !isOpen);
