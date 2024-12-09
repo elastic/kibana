@@ -704,8 +704,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "field": "service.state",
-              "maxLength": 10,
-              "operation": "collect_values",
+              "operation": "prefer_newest_value",
             },
             Object {
               "field": "service.type",
@@ -714,8 +713,7 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "field": "service.version",
-              "maxLength": 10,
-              "operation": "collect_values",
+              "operation": "prefer_newest_value",
             },
             Object {
               "field": "entity.source",
@@ -816,8 +814,10 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "aggregation": Object {
-                "limit": 10,
-                "type": "terms",
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+                "type": "top_value",
               },
               "destination": "service.state",
               "source": "service.state",
@@ -832,8 +832,10 @@ describe('getUnitedEntityDefinition', () => {
             },
             Object {
               "aggregation": Object {
-                "limit": 10,
-                "type": "terms",
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+                "type": "top_value",
               },
               "destination": "service.version",
               "source": "service.version",

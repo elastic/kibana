@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collectValuesWithLength } from '../definition_utils';
+import { collectValuesWithLength, newestValue } from '../definition_utils';
 import type { UnitedDefinitionBuilder } from '../types';
 
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
@@ -21,9 +21,9 @@ export const getServiceUnitedDefinition: UnitedDefinitionBuilder = (fieldHistory
       collect({ field: 'service.id' }),
       collect({ field: 'service.node.name' }),
       collect({ field: 'service.node.roles' }),
-      collect({ field: 'service.state' }),
+      newestValue({ field: 'service.state' }),
       collect({ field: 'service.type' }),
-      collect({ field: 'service.version' }),
+      newestValue({ field: 'service.version' }),
     ],
   };
 };
