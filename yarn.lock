@@ -5876,7 +5876,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-card@link:packages/home/sample_data_card":
+"@kbn/home-sample-data-card@link:src/platform/packages/shared/home/sample_data_card":
   version "0.0.0"
   uid ""
 
