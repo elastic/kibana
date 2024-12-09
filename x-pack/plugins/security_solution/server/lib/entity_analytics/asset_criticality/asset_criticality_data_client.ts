@@ -148,11 +148,11 @@ export class AssetCriticalityDataClient {
 
   /**
    * Check if the index mappings needs update.
-   * @returns
    */
   public async isIndexMappingsOutdated(): Promise<boolean> {
     const storedMappings = await this.getIndexMappings();
     const storedIndexProperties = storedMappings?.[this.getIndex()]?.mappings.properties;
+
     if (!storedIndexProperties) {
       return true;
     }
