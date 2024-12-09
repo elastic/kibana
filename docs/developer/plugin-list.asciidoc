@@ -356,7 +356,7 @@ In general this plugin provides:
 - Exposing a context menu for the user to choose the appropriate action when there are multiple actions attached to a single trigger.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/ui_actions_enhanced/README.md[uiActionsEnhanced]
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
