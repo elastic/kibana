@@ -24,7 +24,7 @@ import {
 } from './types';
 import { UnknownEntityType } from './errors/unknown_entity_type';
 import { runESQLQuery } from './run_esql_query';
-import { validateFields } from './search_by_source';
+import { validateFields } from './validate_fields';
 
 export class EntityClient {
   constructor(
