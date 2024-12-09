@@ -69,7 +69,7 @@ _Exported CSV now_
 
 [discrete]
 ==== Alerting scalability improvements
-The Kibana Alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all Elastic Cloud-hosted deployments. These improvements will provide our customers with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new Kibana Alerting framework:  
+The Kibana alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all {ecloud} hosted deployments. These improvements will provide you with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new Kibana alerting framework:  
 
 ** 10x reduction in alerting task delays
 ** 2x increase in task execution throughput on average
