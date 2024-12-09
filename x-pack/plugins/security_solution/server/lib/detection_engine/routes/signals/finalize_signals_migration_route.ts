@@ -37,6 +37,14 @@ export const finalizeSignalsMigrationRoute = (
         validate: {
           request: { body: buildRouteValidationWithZod(FinalizeAlertsMigrationRequestBody) },
         },
+        options: {
+          deprecated: {
+            documentationUrl:
+              'https://www.elastic.co/guide/en/security/current/signals-migration-api.html',
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
+        },
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
@@ -65,6 +73,7 @@ export const finalizeSignalsMigrationRoute = (
           });
 
           const spaceId = securitySolution.getSpaceId();
+          const legacySiemSignalsAlias = appClient.getSignalsIndex();
           const signalsAlias = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
           const finalizeResults = await Promise.all(
             migrations.map(async (migration) => {
@@ -72,6 +81,7 @@ export const finalizeSignalsMigrationRoute = (
                 const finalizedMigration = await migrationService.finalize({
                   migration,
                   signalsAlias,
+                  legacySiemSignalsAlias,
                 });
 
                 if (isMigrationFailed(finalizedMigration)) {

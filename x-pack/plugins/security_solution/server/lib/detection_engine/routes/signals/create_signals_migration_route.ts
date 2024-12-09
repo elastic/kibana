@@ -36,6 +36,14 @@ export const createSignalsMigrationRoute = (router: SecuritySolutionPluginRouter
         validate: {
           request: { body: buildRouteValidationWithZod(CreateAlertsMigrationRequestBody) },
         },
+        options: {
+          deprecated: {
+            documentationUrl:
+              'https://www.elastic.co/guide/en/security/current/signals-migration-api.html',
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
+        },
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);

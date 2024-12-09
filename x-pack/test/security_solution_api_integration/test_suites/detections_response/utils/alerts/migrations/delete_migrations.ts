@@ -25,3 +25,28 @@ export const deleteMigrations = async ({
     )
   );
 };
+
+export const deleteMigrationsIfExists = async ({
+  ids,
+  kbnClient,
+}: {
+  ids: string[];
+  kbnClient: KbnClient;
+}): Promise<void> => {
+  await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const res = await kbnClient.savedObjects.delete({
+          id,
+          type: signalsMigrationType,
+        });
+        return res;
+      } catch (e) {
+        // do not throw error when migration already deleted/not found
+        if (e?.response?.status !== 404) {
+          throw e;
+        }
+      }
+    })
+  );
+};
