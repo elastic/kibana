@@ -4248,7 +4248,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-tabbed-table-list-view@link:packages/content-management/tabbed_table_list_view":
+"@kbn/content-management-tabbed-table-list-view@link:src/platform/packages/private/content-management/tabbed_table_list_view":
   version "0.0.0"
   uid ""
 
