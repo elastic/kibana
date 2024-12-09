@@ -9,7 +9,6 @@
 
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { getTimestampRangeInSeconds } from './get_timerange_in_seconds';
 
 const MAX_CUSTOM_METRICS = 9;
 // The keys and values for the custom metrics are limited to 9 pairs
@@ -74,9 +73,9 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             ...customMetrics,
             meta: {
               target,
-              query_range_secs: meta
-                ? getTimestampRangeInSeconds(meta.startDate, meta.endDate, isDevMode)
-                : undefined,
+              query_range_secs: meta?.queryRangeSecs,
+              query_offset_secs: meta?.queryOffsetSecs,
+              ...meta,
             },
           });
         } catch (error) {
