@@ -14,7 +14,6 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { ObservabilityAIAssistantApiClient } from '../../common/observability_ai_assistant_api_client';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export function decodeEvents(body: Readable | string) {
   return String(body)
@@ -56,20 +55,14 @@ export function getConversationUpdatedEvent(body: Readable | string) {
 
 export async function deleteAllConversations({
   observabilityAIAssistantAPIClient,
-  internalReqHeader,
-  roleAuthc,
   log,
 }: {
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
-  internalReqHeader: InternalRequestHeader;
-  roleAuthc: RoleCredentials;
   log: ToolingLog;
 }) {
   const findConversationsResponse = await observabilityAIAssistantAPIClient
-    .slsUser({
+    .slsEditor({
       endpoint: 'POST /internal/observability_ai_assistant/conversations',
-      internalReqHeader,
-      roleAuthc,
       params: {
         body: {
           query: '',
@@ -87,10 +80,8 @@ export async function deleteAllConversations({
     conversations.map(async (conversation) => {
       try {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-            internalReqHeader,
-            roleAuthc,
             params: {
               path: {
                 conversationId: conversation.conversation.id,

@@ -57,7 +57,9 @@
                 "section": "def-common.KibanaFeatureScope",
                 "text": "KibanaFeatureScope"
               },
-              "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+              "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+              "AlertingKibanaPrivilege",
+              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
               {
                 "pluginId": "@kbn/core-application-common",
                 "scope": "common",
@@ -170,7 +172,9 @@
             "section": "def-common.KibanaFeatureScope",
             "text": "KibanaFeatureScope"
           },
-          "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+          "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
           {
             "pluginId": "@kbn/core-application-common",
             "scope": "common",
@@ -469,7 +473,15 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ rule?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; alert?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; } | undefined>; cases?: ",
+          "<{ rule?: { all?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; } | undefined; alert?: { all?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; } | undefined; } | undefined>; cases?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

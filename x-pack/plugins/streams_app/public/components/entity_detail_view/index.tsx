@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/css';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -73,7 +74,13 @@ export function EntityDetailViewWithoutParams({
   const selectedTabObject = tabMap[selectedTab];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={css`
+        max-width: 100%;
+      `}
+    >
       <EuiFlexItem grow={false}>
         <EuiPanel color="transparent">
           <EuiLink data-test-subj="streamsEntityDetailViewGoBackHref" href={router.link('/')}>
