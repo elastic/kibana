@@ -16,6 +16,7 @@ import { Rule, RuleSystemAction } from '../../../common/rule';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -32,6 +33,7 @@ beforeEach(() => {
 });
 
 describe('createAlertRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
   const createdAt = new Date();
   const updatedAt = new Date();
 
@@ -104,6 +106,7 @@ describe('createAlertRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -179,6 +182,7 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       isServerless: true,
+      docLinks,
     });
 
     const [config] = router.post.mock.calls[0];
@@ -204,6 +208,7 @@ describe('createAlertRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -281,6 +286,7 @@ describe('createAlertRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -359,6 +365,7 @@ describe('createAlertRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -426,7 +433,7 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects });
+    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -448,7 +455,7 @@ describe('createAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects });
+    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -466,7 +473,7 @@ describe('createAlertRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createAlertRoute({ router, licenseState, encryptedSavedObjects });
+    createAlertRoute({ router, licenseState, encryptedSavedObjects, docLinks });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -491,6 +498,7 @@ describe('createAlertRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
     const [, handler] = router.post.mock.calls[0];
     rulesClient.create.mockResolvedValueOnce(createResult);
@@ -511,6 +519,7 @@ describe('createAlertRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -569,5 +578,40 @@ describe('createAlertRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: createResult,
     });
+  });
+
+  it('should be deprecated', () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    createAlertRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      usageCounter: mockUsageCounter,
+      docLinks,
+    });
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "POST",
+          "newApiPath": "/api/alerting/rule/{id?}",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

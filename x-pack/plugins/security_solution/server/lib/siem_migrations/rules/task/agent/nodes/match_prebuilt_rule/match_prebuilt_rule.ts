@@ -5,55 +5,59 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { StringOutputParser } from '@langchain/core/output_parsers';
+import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
-import { filterPrebuiltRules, type PrebuiltRulesMapByName } from '../../../util/prebuilt_rules';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
-  prebuiltRulesMap: PrebuiltRulesMapByName;
-  logger: Logger;
+  ruleMigrationsRetriever: RuleMigrationsRetriever;
+}
+
+interface GetMatchedRuleResponse {
+  match: string;
 }
 
 export const getMatchPrebuiltRuleNode =
-  ({ model, prebuiltRulesMap }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
+  ({ model, ruleMigrationsRetriever }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
   async (state) => {
-    const mitreAttackIds = state.original_rule.mitre_attack_ids;
-    if (!mitreAttackIds?.length) {
-      return {};
-    }
-    const filteredPrebuiltRulesMap = filterPrebuiltRules(prebuiltRulesMap, mitreAttackIds);
-    if (filteredPrebuiltRulesMap.size === 0) {
-      return {};
-    }
+    const query = state.semantic_query;
+    const techniqueIds = state.original_rule.annotations?.mitre_attack || [];
+    const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(
+      query,
+      techniqueIds.join(',')
+    );
 
-    const outputParser = new StringOutputParser();
+    const outputParser = new JsonOutputParser();
     const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
-    const elasticSecurityRules = Array(filteredPrebuiltRulesMap.keys()).join('\n');
-    const response = await matchPrebuiltRule.invoke({
-      elasticSecurityRules,
-      ruleTitle: state.original_rule.title,
-    });
-    const cleanResponse = response.trim();
-    if (cleanResponse === 'no_match') {
-      return {};
-    }
-
-    const result = filteredPrebuiltRulesMap.get(cleanResponse);
-    if (result != null) {
+    const elasticSecurityRules = prebuiltRules.map((rule) => {
       return {
-        elastic_rule: {
-          title: result.rule.name,
-          description: result.rule.description,
-          prebuilt_rule_id: result.rule.rule_id,
-          id: result.installedRuleId,
-        },
+        name: rule.name,
+        description: rule.description,
       };
-    }
+    });
 
+    const response = (await matchPrebuiltRule.invoke({
+      rules: JSON.stringify(elasticSecurityRules, null, 2),
+      ruleTitle: state.original_rule.title,
+    })) as GetMatchedRuleResponse;
+    if (response.match) {
+      const matchedRule = prebuiltRules.find((r) => r.name === response.match);
+      if (matchedRule) {
+        return {
+          elastic_rule: {
+            title: matchedRule.name,
+            description: matchedRule.description,
+            id: matchedRule.installedRuleId,
+            prebuilt_rule_id: matchedRule.rule_id,
+          },
+          translation_result: SiemMigrationRuleTranslationResult.FULL,
+        };
+      }
+    }
     return {};
   };

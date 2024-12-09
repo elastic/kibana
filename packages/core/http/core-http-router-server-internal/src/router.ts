@@ -35,7 +35,7 @@ import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 import { RouteValidator } from './validator';
-import { ALLOWED_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
+import { BASE_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
@@ -113,6 +113,11 @@ function validOptions(
         routeConfig.path
       } is not valid. Only '${validBodyOutput.join("' or '")}' are valid.`
     );
+  }
+
+  // @ts-expect-error to eliminate problems with `security` in the options for route factories abstractions
+  if (options.security) {
+    throw new Error('`options.security` is not allowed in route config. Use `security` instead.');
   }
 
   const body = shouldNotHavePayload
@@ -334,7 +339,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       if (isPublicUnversionedRoute) {
         response.output.headers = {
           ...response.output.headers,
-          ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
+          ...getVersionHeader(BASE_PUBLIC_VERSION),
         };
       }
 
@@ -357,7 +362,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       if (isPublicUnversionedRoute) {
-        injectVersionHeader(ALLOWED_PUBLIC_VERSION, kibanaResponse);
+        injectVersionHeader(BASE_PUBLIC_VERSION, kibanaResponse);
       }
       if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({

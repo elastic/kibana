@@ -22,8 +22,10 @@ const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
       scopes: t.union([t.array(assistantScopeType), assistantScopeType]),
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (
     resources
@@ -97,8 +99,10 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (
     resources
@@ -132,8 +136,10 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       labels: t.record(t.string, t.string),
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });

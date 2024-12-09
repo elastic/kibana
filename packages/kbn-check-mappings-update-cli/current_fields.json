@@ -511,6 +511,7 @@
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -532,6 +533,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
@@ -692,6 +694,7 @@
     "version"
   ],
   "ingest-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -713,6 +716,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"

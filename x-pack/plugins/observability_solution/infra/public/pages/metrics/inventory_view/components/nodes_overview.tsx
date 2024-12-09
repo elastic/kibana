@@ -145,6 +145,18 @@ export const NodesOverview = ({
           currentTime={currentTime}
           onFilter={handleDrilldown}
         />
+        {nodeType === assetType && detailsItemId && (
+          <AssetDetailsFlyout
+            assetId={detailsItemId}
+            assetName={nodeName}
+            assetType={nodeType}
+            closeFlyout={closeFlyout}
+            currentTime={currentTime}
+            isAutoReloading={isAutoReloading}
+            options={options}
+            refreshInterval={refreshInterval}
+          />
+        )}
       </TableContainer>
     );
   }

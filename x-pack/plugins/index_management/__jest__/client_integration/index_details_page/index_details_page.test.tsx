@@ -727,6 +727,11 @@ describe('<IndexDetailsPage />', () => {
           isActive: true,
           hasAtLeast: jest.fn((type) => true),
         };
+        const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';
+        const createMockLocator = (id: string) => ({
+          useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+        });
+        const mockInferenceManagementLocator = createMockLocator(INFERENCE_LOCATOR);
         beforeEach(async () => {
           httpRequestsMockHelpers.setInferenceModels({
             data: [
@@ -750,7 +755,9 @@ describe('<IndexDetailsPage />', () => {
                 docLinks: {
                   links: {
                     ml: '',
-                    enterpriseSearch: '',
+                    inferenceManagement: {
+                      inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
+                    },
                   },
                 },
                 core: {
@@ -815,6 +822,20 @@ describe('<IndexDetailsPage />', () => {
                               },
                             },
                           ],
+                        }),
+                      },
+                    },
+                  },
+                  share: {
+                    url: {
+                      locators: {
+                        get: jest.fn((id) => {
+                          switch (id) {
+                            case INFERENCE_LOCATOR:
+                              return mockInferenceManagementLocator;
+                            default:
+                              throw new Error(`Unknown locator id: ${id}`);
+                          }
                         }),
                       },
                     },

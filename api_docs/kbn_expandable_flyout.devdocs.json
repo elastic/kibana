@@ -138,57 +138,6 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-public.withExpandableFlyoutProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "withExpandableFlyoutProvider",
-        "description": [],
-        "signature": [
-          "<Props extends {}>(Component: React.ComponentType<Props>, expandableProviderProps?: ",
-          "ExpandableFlyoutContextProviderProps",
-          " | undefined) => (props: Props) => React.JSX.Element"
-        ],
-        "path": "packages/kbn-expandable-flyout/src/with_provider.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-public.withExpandableFlyoutProvider.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "Component",
-            "description": [],
-            "signature": [
-              "React.ComponentType<Props>"
-            ],
-            "path": "packages/kbn-expandable-flyout/src/with_provider.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-public.withExpandableFlyoutProvider.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "expandableProviderProps",
-            "description": [],
-            "signature": [
-              "ExpandableFlyoutContextProviderProps",
-              " | undefined"
-            ],
-            "path": "packages/kbn-expandable-flyout/src/with_provider.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [

@@ -411,13 +411,44 @@ export class MonacoEditorActionsProvider {
     return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }
 
+  private isInsideMultilineComment(model: monaco.editor.ITextModel, lineNumber: number): boolean {
+    let insideComment = false;
+    for (let i = 1; i <= lineNumber; i++) {
+      const lineContent = model.getLineContent(i).trim();
+      if (lineContent.startsWith('/*')) {
+        insideComment = true;
+      }
+      if (lineContent.includes('*/')) {
+        insideComment = false;
+      }
+    }
+    return insideComment;
+  }
+
   private async getAutocompleteType(
     model: monaco.editor.ITextModel,
     { lineNumber, column }: monaco.Position
   ): Promise<AutocompleteType | null> {
+    // Get the content of the current line up until the cursor position
+    const currentLineContent = model.getLineContent(lineNumber);
+    const trimmedContent = currentLineContent.trim();
+
+    // If we are positioned inside a comment block, no autocomplete should be provided
+    if (
+      trimmedContent.startsWith('#') ||
+      trimmedContent.startsWith('//') ||
+      trimmedContent.startsWith('/*') ||
+      trimmedContent.startsWith('*') ||
+      trimmedContent.includes('*/') ||
+      this.isInsideMultilineComment(model, lineNumber)
+    ) {
+      return null;
+    }
+
     // get the current request on this line
     const currentRequests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
     const currentRequest = currentRequests.at(0);
+
     // if there is no request, suggest method
     if (!currentRequest) {
       return AutocompleteType.METHOD;

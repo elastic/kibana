@@ -12,7 +12,7 @@ import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
 import { InventoryEntity, entityColumnIdsRt } from '../../../common/entities';
-import { createAlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
+import { createAlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityGroupsBy } from './get_entity_groups';
 import { getEntityTypes } from './get_entity_types';
@@ -47,7 +47,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       t.partial({
-        esQuery: jsonRt.pipe(t.UnknownRecord),
+        kuery: t.string,
         entityTypes: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
@@ -69,7 +69,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       plugin: `@kbn/${INVENTORY_APP_ID}-plugin`,
     });
 
-    const { sortDirection, sortField, esQuery, entityTypes } = params.query;
+    const { sortDirection, sortField, kuery, entityTypes } = params.query;
 
     const [alertsClient, latestEntities] = await Promise.all([
       createAlertsClient({ plugins, request }),
@@ -77,7 +77,7 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         inventoryEsClient,
         sortDirection,
         sortField,
-        esQuery,
+        kuery,
         entityTypes,
       }),
     ]);
@@ -113,7 +113,9 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     t.type({ path: t.type({ field: t.literal(ENTITY_TYPE) }) }),
     t.partial({
       query: t.partial({
-        esQuery: jsonRt.pipe(t.UnknownRecord),
+        includeEntityTypes: jsonRt.pipe(t.array(t.string)),
+        excludeEntityTypes: jsonRt.pipe(t.array(t.string)),
+        kuery: t.string,
       }),
     }),
   ]),
@@ -129,12 +131,14 @@ export const groupEntitiesByRoute = createInventoryServerRoute({
     });
 
     const { field } = params.path;
-    const { esQuery } = params.query ?? {};
+    const { kuery, includeEntityTypes, excludeEntityTypes } = params.query ?? {};
 
     const groups = await getEntityGroupsBy({
       inventoryEsClient,
       field,
-      esQuery,
+      kuery,
+      includeEntityTypes,
+      excludeEntityTypes,
     });
 
     const entitiesCount = groups.reduce((acc, group) => acc + group.count, 0);

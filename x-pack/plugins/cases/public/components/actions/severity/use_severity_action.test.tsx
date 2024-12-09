@@ -7,7 +7,7 @@
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useSeverityAction } from './use_severity_action';
 
 import * as api from '../../../containers/api';
@@ -80,7 +80,7 @@ describe('useSeverityAction', () => {
   it('update the severity cases', async () => {
     const updateSpy = jest.spyOn(api, 'updateCases');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -120,7 +120,7 @@ describe('useSeverityAction', () => {
   it.each(singleCaseTests)(
     'shows the success toaster correctly when updating the severity of the case: %s',
     async (_, index, expectedMessage) => {
-      const { result, waitFor } = renderHook(
+      const { result } = renderHook(
         () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -153,7 +153,7 @@ describe('useSeverityAction', () => {
   it.each(multipleCasesTests)(
     'shows the success toaster correctly when updating the severity of the case: %s',
     async (_, index, expectedMessage) => {
-      const { result, waitFor } = renderHook(
+      const { result } = renderHook(
         () => useSeverityAction({ onAction, onActionSuccess, isDisabled: false }),
         {
           wrapper: appMockRender.AppWrapper,

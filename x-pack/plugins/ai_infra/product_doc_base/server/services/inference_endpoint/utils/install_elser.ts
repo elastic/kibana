@@ -23,7 +23,7 @@ export const installElser = async ({
       inference_config: {
         service: 'elasticsearch',
         service_settings: {
-          num_allocations: 1,
+          adaptive_allocations: { enabled: true },
           num_threads: 1,
           model_id: '.elser_model_2',
         },

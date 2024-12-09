@@ -90,6 +90,7 @@ describe('Panel', () => {
               id: 'group2',
               title: 'Group 2',
               path: 'root.group2',
+              href: '/app/group2',
               renderAs: 'panelOpener',
               children: [
                 // sideNavStatus is "visible" by default

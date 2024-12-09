@@ -13,6 +13,7 @@ import {
   getCellRenderers,
   getRowIndicatorProvider,
   getRowAdditionalLeadingControls,
+  createGetDefaultAppState,
 } from './accessors';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
@@ -22,6 +23,7 @@ export const createLogsDataSourceProfileProvider = (
 ): DataSourceProfileProvider => ({
   profileId: 'observability-logs-data-source-profile',
   profile: {
+    getDefaultAppState: createGetDefaultAppState(),
     getCellRenderers,
     getRowIndicatorProvider,
     getRowAdditionalLeadingControls,

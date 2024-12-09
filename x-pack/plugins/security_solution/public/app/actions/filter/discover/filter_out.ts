@@ -6,7 +6,7 @@
  */
 
 import type { CellActionFactory, CellAction } from '@kbn/cell-actions';
-import { isInSecurityApp } from '../../utils';
+import { isInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { SecurityAppStore } from '../../../../common/store';
 import type { StartServices } from '../../../../types';
 import { createFilterOutCellActionFactory } from '../cell_action/filter_out';

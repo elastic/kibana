@@ -85,7 +85,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'stackAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
-          'isUsingRuleCreateFlyout',
         ])}`,
         `--xpack.alerting.rules.minimumScheduleInterval.value="5s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,

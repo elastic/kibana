@@ -8,11 +8,12 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
+import { SIEM_RULE_MIGRATION_CREATE_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   CreateRuleMigrationRequestBody,
+  CreateRuleMigrationRequestParams,
   type CreateRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rules_client';
 import { withLicense } from './util/with_license';
@@ -23,7 +24,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
 ) => {
   router.versioned
     .post({
-      path: SIEM_RULE_MIGRATIONS_PATH,
+      path: SIEM_RULE_MIGRATION_CREATE_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
@@ -31,17 +32,19 @@ export const registerSiemRuleMigrationsCreateRoute = (
       {
         version: '1',
         validate: {
-          request: { body: buildRouteValidationWithZod(CreateRuleMigrationRequestBody) },
+          request: {
+            body: buildRouteValidationWithZod(CreateRuleMigrationRequestBody),
+            params: buildRouteValidationWithZod(CreateRuleMigrationRequestParams),
+          },
         },
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
           const originalRules = req.body;
+          const migrationId = req.params.migration_id ?? uuidV4();
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-
-            const migrationId = uuidV4();
 
             const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
               migration_id: migrationId,

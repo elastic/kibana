@@ -5,18 +5,12 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiListGroup } from '@elastic/eui';
 import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { DatasetQualityLink } from './dataset_quality_link';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
+import { LegendActionItem } from './legend_action_item';
+import { UX_LABELS } from '../../translations';
 
 interface LegendActionProps {
   idx: number;
@@ -63,7 +57,7 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="boxesHorizontal"
-                  aria-label="Open data stream actions"
+                  aria-label={UX_LABELS.dataQualityPopup.open}
                   onClick={() => togglePopover(uniqueStreamName)}
                 />
               </EuiFlexItem>
@@ -74,11 +68,15 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
           anchorPosition="downRight"
         >
           <EuiListGroup gutterSize="none">
-            <EuiListGroupItem label="Copy data stream name" onClick={onCopyDataStreamName} />
-            <EuiSpacer size="s" />
-
+            <LegendActionItem
+              label={UX_LABELS.dataQualityPopup.copy}
+              onClick={onCopyDataStreamName}
+            />
             {hasIndexManagementFeature && (
-              <EuiListGroupItem label="Manage data stream" onClick={onClickIndexManagement} />
+              <LegendActionItem
+                label={UX_LABELS.dataQualityPopup.manage}
+                onClick={onClickIndexManagement}
+              />
             )}
             {hasDataSetQualityFeature && <DatasetQualityLink dataStreamName={label} />}
           </EuiListGroup>

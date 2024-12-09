@@ -30,12 +30,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+
+      // need reporting privileges in dashboard
+      await security.role.create('test_dashboard_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { dashboard: ['minimal_read', 'generate_report'] },
+          },
+        ],
+      });
+
       await security.testUser.setRoles(
         [
           'test_logstash_reader',
           'global_dashboard_read',
           'global_visualize_all',
-          'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+          'test_dashboard_user',
         ],
         { skipBrowserRefresh: true }
       );

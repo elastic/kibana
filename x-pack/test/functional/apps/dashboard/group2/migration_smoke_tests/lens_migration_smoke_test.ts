@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       //   All panels should be editable. This will catch cases where an error does not create an error embeddable.
       const panelTitles = await dashboard.getPanelTitles();
       for (const title of panelTitles) {
-        await dashboardPanelActions.expectExistsEditPanelAction(title, true);
+        await dashboardPanelActions.expectExistsEditPanelAction(title);
       }
     });
 

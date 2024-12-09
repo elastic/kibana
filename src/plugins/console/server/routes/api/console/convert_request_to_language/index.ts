@@ -18,6 +18,7 @@ const routeValidationConfig = {
   query: schema.object({
     language: schema.string(),
     esHost: schema.string(),
+    kibanaHost: schema.string(),
   }),
   body: schema.maybe(
     schema.arrayOf(
@@ -39,7 +40,7 @@ export const registerConvertRequestRoute = ({
 }: RouteDependencies) => {
   const handler: RequestHandler<unknown, Query, Body> = async (ctx, req, response) => {
     const { body, query } = req;
-    const { language, esHost } = query;
+    const { language, esHost, kibanaHost } = query;
 
     try {
       // Iterate over each request and build all the requests into a single string
@@ -60,6 +61,9 @@ export const registerConvertRequestRoute = ({
         printResponse: true,
         complete: true,
         elasticsearchUrl: esHost,
+        otherUrls: {
+          kbn: kibanaHost,
+        },
       });
 
       return response.ok({

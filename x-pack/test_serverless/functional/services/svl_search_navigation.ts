@@ -47,5 +47,10 @@ export function SvlSearchNavigationServiceProvider({
       });
       await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
+    async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
+      await PageObjects.common.navigateToApp('searchInferenceEndpoints', {
+        shouldLoginIfPrompted: false,
+      });
+    },
   };
 }

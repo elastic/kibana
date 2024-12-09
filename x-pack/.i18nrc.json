@@ -112,7 +112,9 @@
     "xpack.observabilityLogsOverview": [
       "packages/observability/logs_overview/src/components"
     ],
-    "xpack.osquery": ["plugins/osquery"],
+    "xpack.osquery": [
+      "plugins/osquery"
+    ],
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.profiling": [
       "plugins/observability_solution/profiling"
@@ -130,6 +132,7 @@
     "xpack.searchSharedUI": "packages/search/shared_ui",
     "xpack.searchHomepage": "plugins/search_homepage",
     "xpack.searchIndices": "plugins/search_indices",
+    "xpack.searchNavigation": "plugins/search_solution/search_navigation",
     "xpack.searchNotebooks": "plugins/search_notebooks",
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
@@ -147,6 +150,9 @@
     "xpack.securitySolutionEss": "plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
     "xpack.sessionView": "plugins/session_view",
+    "xpack.streams": [
+      "plugins/streams_app"
+    ],
     "xpack.slo": "plugins/observability_solution/slo",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",

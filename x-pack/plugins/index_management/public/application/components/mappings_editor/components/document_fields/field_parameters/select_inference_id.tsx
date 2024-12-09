@@ -80,13 +80,15 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   value,
 }) => {
   const {
-    core: { application, http },
+    core: { application },
     docLinks,
-    plugins: { ml },
+    plugins: { ml, share },
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
-  const inferenceEndpointsPageLink = `${http.basePath.get()}/app/enterprise_search/relevance/inference_endpoints`;
+  const inferenceEndpointsPageLink = share?.url.locators
+    .get('SEARCH_INFERENCE_ENDPOINTS')
+    ?.useUrl({});
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<
@@ -130,6 +132,14 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       'data-test-subj': `custom-inference_${endpoint.inference_id}`,
       checked: value === endpoint.inference_id ? 'on' : undefined,
     }));
+    /**
+     * Adding this check to ensure we have the preconfigured elser endpoint selected by default.
+     */
+    const hasInferenceSelected = newOptions.some((option) => option.checked === 'on');
+    if (!hasInferenceSelected && newOptions.length > 0) {
+      newOptions[0].checked = 'on';
+    }
+
     if (value && !newOptions.find((option) => option.label === value)) {
       // Sometimes we create a new endpoint but the backend is slow in updating so we need to optimistically update
       const newOption: EuiSelectableOption = {
@@ -224,24 +234,28 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       panelPaddingSize="m"
       closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
     >
-      <EuiContextMenuPanel>
-        <EuiContextMenuItem
-          key="manageInferenceEndpointButton"
-          icon="gear"
-          size="s"
-          data-test-subj="manageInferenceEndpointButton"
-          onClick={async () => {
-            application.navigateToUrl(inferenceEndpointsPageLink);
-          }}
-        >
-          {i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
-            {
-              defaultMessage: 'Manage Inference Endpoints',
-            }
-          )}
-        </EuiContextMenuItem>
-      </EuiContextMenuPanel>
+      {inferenceEndpointsPageLink && (
+        <EuiContextMenuPanel>
+          <EuiContextMenuItem
+            key="manageInferenceEndpointButton"
+            icon="gear"
+            size="s"
+            data-test-subj="manageInferenceEndpointButton"
+            href={inferenceEndpointsPageLink}
+            onClick={(e) => {
+              e.preventDefault();
+              application.navigateToUrl(inferenceEndpointsPageLink);
+            }}
+          >
+            {i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
+              {
+                defaultMessage: 'Manage Inference Endpoints',
+              }
+            )}
+          </EuiContextMenuItem>
+        </EuiContextMenuPanel>
+      )}
       <EuiHorizontalRule margin="none" />
       <EuiPanel color="transparent" paddingSize="s">
         <EuiTitle size="xxxs">
@@ -267,6 +281,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
           searchable
           isLoading={isLoading}
           singleSelection="always"
+          defaultChecked
           searchProps={{
             compressed: true,
             placeholder: i18n.translate(
@@ -292,7 +307,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiHorizontalRule margin="none" />
       <EuiContextMenuItem icon={<EuiIcon type="help" color="primary" />} size="s">
         <EuiLink
-          href={docLinks.links.enterpriseSearch.inferenceApiCreate}
+          href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
           target="_blank"
           data-test-subj="learn-how-to-create-inference-endpoints"
         >

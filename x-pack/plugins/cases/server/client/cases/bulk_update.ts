@@ -295,6 +295,7 @@ function partitionPatchRequest(
     ) {
       // Track cases that are closed and a user is attempting to reopen
       reopenedCases.push(reqCase);
+      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     } else {
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     }

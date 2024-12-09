@@ -13,8 +13,7 @@
         "hidden",
         "none"
       ],
-      "ignore_unavailable": "__flag__",
-      "local": "__flag__"
+      "ignore_unavailable": "__flag__"
     },
     "methods": [
       "HEAD"

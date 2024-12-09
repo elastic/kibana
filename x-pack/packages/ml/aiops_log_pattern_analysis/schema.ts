@@ -38,7 +38,6 @@ export const indicesOptionsSchema = schema.object({
   ),
   ignore_unavailable: schema.maybe(schema.boolean()),
   allow_no_indices: schema.maybe(schema.boolean()),
-  ignore_throttled: schema.maybe(schema.boolean()),
 });
 
 /**

@@ -6,9 +6,9 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { EditorFrameService } from './editor_frame_service';
 import { createChartInfoApi } from './chart_info_api';
-import type { LensSavedObjectAttributes } from '.';
+import { LensDocument } from './persistence';
+import { DatasourceMap, VisualizationMap } from './types';
 
 const mockGetVisualizationInfo = jest.fn().mockReturnValue({
   layers: [
@@ -37,18 +37,19 @@ const mockGetDatasourceInfo = jest.fn().mockResolvedValue([
 describe('createChartInfoApi', () => {
   const dataViews = dataViewPluginMocks.createStartContract();
   test('get correct chart info', async () => {
-    const chartInfoApi = await createChartInfoApi(dataViews, {
-      loadVisualizations: () => ({
+    const chartInfoApi = await createChartInfoApi(
+      dataViews,
+      {
         lnsXY: {
           getVisualizationInfo: mockGetVisualizationInfo,
         },
-      }),
-      loadDatasources: () => ({
+      } as unknown as VisualizationMap,
+      {
         from_based: {
           getDatasourceInfo: mockGetDatasourceInfo,
         },
-      }),
-    } as unknown as EditorFrameService);
+      } as unknown as DatasourceMap
+    );
     const vis = {
       title: 'xy',
       visualizationType: 'lnsXY',
@@ -69,7 +70,7 @@ describe('createChartInfoApi', () => {
         query: '',
       },
       references: [],
-    } as LensSavedObjectAttributes;
+    } as LensDocument;
 
     const chartInfo = await chartInfoApi.getChartInfo(vis);
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
-import { Subject } from 'rxjs';
-import type { InstallParams } from '@kbn/index-adapter';
-import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import type { InstallParams } from '@kbn/index-adapter';
+import { IndexPatternAdapter } from '@kbn/index-adapter';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Subject } from 'rxjs';
 import type { IndexNameProviders } from './rule_migrations_data_client';
+import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
 
 jest.mock('@kbn/index-adapter');
 
@@ -42,7 +42,7 @@ describe('SiemRuleMigrationsDataService', () => {
   describe('constructor', () => {
     it('should create IndexPatternAdapters', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
-      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(2);
+      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(4);
     });
 
     it('should create component templates', () => {
@@ -54,6 +54,12 @@ describe('SiemRuleMigrationsDataService', () => {
       expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-resources` })
       );
+      expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-integrations` })
+      );
+      expect(indexPatternAdapter.setComponentTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
+      );
     });
 
     it('should create index templates', () => {
@@ -64,6 +70,12 @@ describe('SiemRuleMigrationsDataService', () => {
       );
       expect(indexPatternAdapter.setIndexTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: `${INDEX_PATTERN}-resources` })
+      );
+      expect(indexPatternAdapter.setIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-integrations` })
+      );
+      expect(indexPatternAdapter.setIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: `${INDEX_PATTERN}-prebuiltrules` })
       );
     });
   });
@@ -92,8 +104,12 @@ describe('SiemRuleMigrationsDataService', () => {
         logger: loggerMock.create(),
         pluginStop$: new Subject(),
       };
-      const [rulesIndexPatternAdapter, resourcesIndexPatternAdapter] =
-        MockedIndexPatternAdapter.mock.instances;
+      const [
+        rulesIndexPatternAdapter,
+        resourcesIndexPatternAdapter,
+        integrationsIndexPatternAdapter,
+        prebuiltrulesIndexPatternAdapter,
+      ] = MockedIndexPatternAdapter.mock.instances;
       (rulesIndexPatternAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
 
       await index.install(params);
@@ -101,12 +117,20 @@ describe('SiemRuleMigrationsDataService', () => {
 
       await mockIndexNameProviders.rules();
       await mockIndexNameProviders.resources();
+      await mockIndexNameProviders.integrations();
+      await mockIndexNameProviders.prebuiltrules();
 
       expect(rulesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
       expect(rulesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
 
       expect(resourcesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
       expect(resourcesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
+
+      expect(integrationsIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
+      expect(integrationsIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
+
+      expect(prebuiltrulesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
+      expect(prebuiltrulesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
     });
   });
 });

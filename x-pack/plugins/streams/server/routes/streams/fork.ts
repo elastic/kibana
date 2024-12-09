@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { badRequest, internal, notFound } from '@hapi/boom';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -17,20 +18,18 @@ import { conditionSchema, streamDefinitonWithoutChildrenSchema } from '../../../
 import { syncStream, readStream, validateAncestorFields } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { isChildOf } from '../../lib/streams/helpers/hierarchy';
+import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const forkStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/_fork 2023-10-31',
+  endpoint: 'POST /api/streams/{id}/_fork',
   options: {
-    access: 'public',
-    availability: {
-      stability: 'experimental',
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-      },
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   params: z.object({
@@ -39,11 +38,18 @@ export const forkStreamsRoute = createServerRoute({
     }),
     body: z.object({ stream: streamDefinitonWithoutChildrenSchema, condition: conditionSchema }),
   }),
-  handler: async ({ response, params, logger, request, getScopedClients }) => {
+  handler: async ({
+    params,
+    logger,
+    request,
+    getScopedClients,
+  }): Promise<{ acknowledged: true }> => {
     try {
       if (!params.body.condition) {
         throw new ForkConditionMissing('You must provide a condition to fork a stream');
       }
+
+      validateCondition(params.body.condition);
 
       const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -52,7 +58,7 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      const childDefinition = { ...params.body.stream, children: [] };
+      const childDefinition = { ...params.body.stream, children: [], managed: true };
 
       // check whether root stream has a child of the given name already
       if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {
@@ -73,6 +79,14 @@ export const forkStreamsRoute = createServerRoute({
         params.body.stream.fields
       );
 
+      // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
+      await syncStream({
+        scopedClusterClient,
+        definition: childDefinition,
+        rootDefinition,
+        logger,
+      });
+
       rootDefinition.children.push({
         id: params.body.stream.id,
         condition: params.body.condition,
@@ -85,17 +99,10 @@ export const forkStreamsRoute = createServerRoute({
         logger,
       });
 
-      await syncStream({
-        scopedClusterClient,
-        definition: childDefinition,
-        rootDefinition,
-        logger,
-      });
-
-      return response.ok({ body: { acknowledged: true } });
+      return { acknowledged: true };
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {
-        return response.notFound({ body: e });
+        throw notFound(e);
       }
 
       if (
@@ -103,10 +110,10 @@ export const forkStreamsRoute = createServerRoute({
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId
       ) {
-        return response.customError({ body: e, statusCode: 400 });
+        throw badRequest(e);
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });

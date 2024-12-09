@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { isAgentlessApiEnabled } from '../../../services/utils/agentless';
+import { isAgentlessEnabled } from '../../../services/utils/agentless';
 
 import { getAgentlessAgentPolicyNameFromPackagePolicyName } from '../../../../common/services/agentless_policy_helper';
 
@@ -65,7 +65,7 @@ export async function renameAgentlessAgentPolicy(
   packagePolicy: PackagePolicy,
   name: string
 ) {
-  if (!isAgentlessApiEnabled()) {
+  if (!isAgentlessEnabled()) {
     return;
   }
   // If agentless is enabled for cloud, we need to rename the agent policy

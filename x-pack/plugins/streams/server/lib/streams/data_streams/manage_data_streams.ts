@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -23,6 +24,7 @@ interface DeleteDataStreamOptions {
 interface RolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
+  mappings: MappingTypeMapping['properties'] | undefined;
   logger: Logger;
 }
 
@@ -56,38 +58,37 @@ export async function rolloverDataStreamIfNecessary({
   esClient,
   name,
   logger,
+  mappings,
 }: RolloverDataStreamOptions) {
   const dataStreams = await esClient.indices.getDataStream({ name: `${name},${name}.*` });
   for (const dataStream of dataStreams.data_streams) {
-    const currentMappings =
-      Object.values(
-        await esClient.indices.getMapping({
-          index: dataStream.indices.at(-1)?.index_name,
-        })
-      )[0].mappings.properties || {};
-    const simulatedIndex = await esClient.indices.simulateIndexTemplate({ name: dataStream.name });
-    const simulatedMappings = simulatedIndex.template.mappings.properties || {};
-
-    // check whether the same fields and same types are listed (don't check for other mapping attributes)
-    const isDifferent =
-      Object.values(simulatedMappings).length !== Object.values(currentMappings).length ||
-      Object.entries(simulatedMappings || {}).some(([fieldName, { type }]) => {
-        const currentType = currentMappings[fieldName]?.type;
-        return currentType !== type;
-      });
-
-    if (!isDifferent) {
+    const writeIndex = dataStream.indices.at(-1);
+    if (!writeIndex) {
       continue;
     }
-
     try {
-      await retryTransientEsErrors(() => esClient.indices.rollover({ alias: dataStream.name }), {
-        logger,
-      });
-      logger.debug(() => `Rolled over data stream: ${dataStream.name}`);
+      await retryTransientEsErrors(
+        () => esClient.indices.putMapping({ index: writeIndex.index_name, properties: mappings }),
+        {
+          logger,
+        }
+      );
     } catch (error: any) {
-      logger.error(`Error rolling over data stream: ${error.message}`);
-      throw error;
+      if (
+        typeof error.message !== 'string' ||
+        !error.message.includes('illegal_argument_exception')
+      ) {
+        throw error;
+      }
+      try {
+        await retryTransientEsErrors(() => esClient.indices.rollover({ alias: dataStream.name }), {
+          logger,
+        });
+        logger.debug(() => `Rolled over data stream: ${dataStream.name}`);
+      } catch (rolloverError: any) {
+        logger.error(`Error rolling over data stream: ${error.message}`);
+        throw error;
+      }
     }
   }
 }

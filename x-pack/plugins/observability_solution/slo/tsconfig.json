@@ -24,13 +24,13 @@
     "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/kibana-utils-plugin",
     "@kbn/slo-schema",
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
+    "@kbn/embeddable-enhanced-plugin",
     "@kbn/lens-plugin",
     "@kbn/ui-theme",
     "@kbn/es-query",
@@ -100,6 +100,6 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
-    "@kbn/server-route-repository-utils"
+    "@kbn/security-plugin-types-public",
   ]
 }

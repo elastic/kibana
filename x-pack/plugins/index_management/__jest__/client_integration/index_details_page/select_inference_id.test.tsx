@@ -9,7 +9,7 @@ import {
   Form,
   useForm,
 } from '../../../public/application/components/mappings_editor/shared_imports';
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import { findTestSubject, registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import {
   SelectInferenceId,
@@ -20,6 +20,11 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 const createInferenceEndpointMock = jest.fn();
 const mockDispatch = jest.fn();
+const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';
+const createMockLocator = (id: string) => ({
+  useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+});
+const mockInferenceManagementLocator = createMockLocator(INFERENCE_LOCATOR);
 
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
@@ -33,8 +38,8 @@ jest.mock('../../../public/application/app_context', () => ({
     },
     docLinks: {
       links: {
-        enterpriseSearch: {
-          inferenceApiCreate: 'https://abc.com/inference-api-create',
+        inferenceManagement: {
+          inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
         },
       },
     },
@@ -44,6 +49,20 @@ jest.mock('../../../public/application/app_context', () => ({
           trainedModels: {
             getTrainedModels: jest.fn().mockResolvedValue([]),
             getTrainedModelStats: jest.fn().mockResolvedValue([]),
+          },
+        },
+      },
+      share: {
+        url: {
+          locators: {
+            get: jest.fn((id) => {
+              switch (id) {
+                case INFERENCE_LOCATOR:
+                  return mockInferenceManagementLocator;
+                default:
+                  throw new Error(`Unknown locator id: ${id}`);
+              }
+            }),
           },
         },
       },
@@ -132,5 +151,35 @@ describe('SelectInferenceId', () => {
     expect(find('data-inference-endpoint-list').contains('endpoint-1')).toBe(true);
     expect(find('data-inference-endpoint-list').contains('endpoint-2')).toBe(true);
     expect(find('data-inference-endpoint-list').contains('endpoint-3')).toBe(false);
+  });
+
+  it('select the first endpoint by default', () => {
+    find('inferenceIdButton').simulate('click');
+    const defaultElser = findTestSubject(
+      find('data-inference-endpoint-list'),
+      'custom-inference_.preconfigured-elser'
+    );
+    expect(defaultElser.prop('aria-checked')).toEqual(true);
+  });
+
+  it('does not select the other endpoints by default', () => {
+    find('inferenceIdButton').simulate('click');
+    const defaultE5 = findTestSubject(
+      find('data-inference-endpoint-list'),
+      'custom-inference_.preconfigured-e5'
+    );
+    expect(defaultE5.prop('aria-checked')).toEqual(false);
+
+    const endpoint1 = findTestSubject(
+      find('data-inference-endpoint-list'),
+      'custom-inference_endpoint-1'
+    );
+    expect(endpoint1.prop('aria-checked')).toEqual(false);
+
+    const endpoint2 = findTestSubject(
+      find('data-inference-endpoint-list'),
+      'custom-inference_endpoint-2'
+    );
+    expect(endpoint2.prop('aria-checked')).toEqual(false);
   });
 });
