@@ -597,6 +597,11 @@ describe('utils', () => {
       const from = calculateFromValue('5m', '0m');
       expect(from).toEqual('now-300s');
     });
+
+    test('should return formatted `from` value from rule schedule fields with invalid moment fields', () => {
+      const from = calculateFromValue('5', '5');
+      expect(from).toEqual('now-0s');
+    });
   });
 
   describe('getMaxCatchupRatio', () => {
