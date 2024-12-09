@@ -116,5 +116,5 @@ function getOwner(report: TestReport) {
   // } else {
   //   return report.testsuite?.$['command-line'] || '';
   // }
-   if ('testsuites' in report) return report.testsuites?.testsuite?.[0]?.testcase?.[0].$.owners;
+  if ('testsuites' in report) return report.testsuites?.testsuite?.[0]?.testcase?.[0].$.owners;
 }
