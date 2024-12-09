@@ -870,6 +870,7 @@ x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elasti
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
+x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
@@ -918,7 +919,6 @@ x-pack/plugins/license_management @elastic/kibana-management
 x-pack/plugins/licensing @elastic/kibana-core
 x-pack/plugins/lists @elastic/security-detection-engine
 x-pack/plugins/logstash @elastic/logstash
-x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/plugins/ml @elastic/ml-ui
 x-pack/plugins/monitoring @elastic/stack-monitoring
 x-pack/plugins/monitoring_collection @elastic/stack-monitoring
