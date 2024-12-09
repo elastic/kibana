@@ -47,9 +47,9 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
 }
 
 /**
- * Send message containing timeRange via main observable
+ * Send message when data fetching starts via main observable
  */
-export function sendTimeRangeMsg(
+export function sendFetchStartMsg(
   main$: DataMain$,
   timeRange: TimeRange,
   timeRangeRelative?: TimeRange,

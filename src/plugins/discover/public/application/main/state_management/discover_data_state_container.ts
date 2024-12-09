@@ -26,7 +26,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { sendResetMsg, sendTimeRangeMsg } from '../hooks/use_saved_search_messages';
+import { sendResetMsg, sendFetchStartMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -238,7 +238,7 @@ export function getDataStateContainer({
 
           abortController?.abort();
           abortControllerFetchMore?.abort();
-          sendTimeRangeMsg(
+          sendFetchStartMsg(
             dataSubjects.main$,
             timefilter.getAbsoluteTime(),
             timefilter.getTime(),
