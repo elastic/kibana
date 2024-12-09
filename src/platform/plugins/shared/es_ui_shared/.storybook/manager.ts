@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/es_ui_shared'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/es_ui_shared',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/plugins/es_ui_shared/{__packages_do_not_import__,common,public,server,static}/**/*.{ts,tsx}',
-  ],
-};
+import { addons } from '@storybook/addons';
+import { create } from '@storybook/theming';
+import { PANEL_ID } from '@storybook/addon-actions';
+
+addons.setConfig({
+  theme: create({
+    base: 'light',
+    brandTitle: 'Platform Deployment Management Storybook',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/es_ui_shared',
+  }),
+  showPanel: () => true,
+  selectedPanel: PANEL_ID,
+});

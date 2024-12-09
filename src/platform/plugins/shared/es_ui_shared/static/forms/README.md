@@ -26,7 +26,7 @@ In order to run the documentation locally
   "location": "../../<root-kibana-repo>", 
   // optional, if you want a faster build you can only include the form lib docs
   "subdirs": [
-    "src/plugins/es_ui_shared/static/forms/docs"
+    "src/platform/plugins/shared/es_ui_shared/static/forms/docs"
   ]
 }
 ```
