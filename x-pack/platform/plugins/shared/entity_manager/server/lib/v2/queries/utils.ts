@@ -17,7 +17,12 @@ function getLatestDate(date1?: string, date2?: string) {
   ).toISOString();
 }
 
-function mergeEntities(metadataFields: string[], entity1: EntityV2, entity2: EntityV2): EntityV2 {
+function mergeEntities(
+  identityFields: string[],
+  mergeableFields: string[],
+  entity1: EntityV2,
+  entity2: EntityV2
+): EntityV2 {
   const merged: EntityV2 = { ...entity1 };
 
   const latestTimestamp = getLatestDate(
@@ -29,13 +34,17 @@ function mergeEntities(metadataFields: string[], entity1: EntityV2, entity2: Ent
   }
 
   for (const [key, value] of Object.entries(entity2).filter(([_key]) =>
-    metadataFields.includes(_key)
+    mergeableFields.includes(_key)
   )) {
     if (merged[key]) {
-      merged[key] = uniq([
-        ...(Array.isArray(merged[key]) ? merged[key] : [merged[key]]),
-        ...(Array.isArray(value) ? value : [value]),
-      ]);
+      // we want to keep identity fields as single-value properties.
+      // this can happen if two sources group by the same identity
+      if (!identityFields.includes(key)) {
+        merged[key] = uniq([
+          ...(Array.isArray(merged[key]) ? merged[key] : [merged[key]]),
+          ...(Array.isArray(value) ? value : [value]),
+        ]);
+      }
     } else {
       merged[key] = value;
     }
@@ -52,9 +61,11 @@ export function mergeEntitiesList({
   sources: EntitySourceDefinition[];
   metadataFields: string[];
 }): EntityV2[] {
+  const identityFields = uniq([...sources.flatMap((source) => source.identity_fields)]);
   const mergeableFields = uniq([
-    ...sources.flatMap((source) => [...source.identity_fields, ...source.metadata_fields]),
+    ...identityFields,
     ...metadataFields,
+    ...sources.flatMap((source) => source.metadata_fields),
   ]);
   const instances: { [key: string]: EntityV2 } = {};
 
@@ -63,7 +74,7 @@ export function mergeEntitiesList({
     const id = entity['entity.id'];
 
     if (instances[id]) {
-      instances[id] = mergeEntities(mergeableFields, instances[id], entity);
+      instances[id] = mergeEntities(identityFields, mergeableFields, instances[id], entity);
     } else {
       instances[id] = entity;
     }
