@@ -427,7 +427,7 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
   const msg = errorMessage ?? (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.advancedSettingDisabledMessage"
-      defaultMessage="The don't have privileges to access Asset Criticality feature. Contact your administrator for further assistance."
+      defaultMessage="Privileges to access the Asset Criticality feature are missing for your user. Contact your administrator for further assistance."
     />
   );
 
