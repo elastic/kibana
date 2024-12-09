@@ -10,7 +10,7 @@ export function MonitoringAlertsProvider({ getService }) {
 
   return new (class MonitoringAlerts {
     async deleteAlerts() {
-      const apiResponse = await supertest.get('/api/alerts/_find?per_page=20');
+      const apiResponse = await supertest.get('/api/alerting/rules/_find?per_page=20');
       const alerts = apiResponse.body.data.filter(({ consumer }) => consumer === 'monitoring');
 
       return await Promise.all(

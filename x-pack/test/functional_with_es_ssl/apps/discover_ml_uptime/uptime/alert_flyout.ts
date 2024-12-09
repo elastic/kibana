@@ -98,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(60 * 1000, async () => {
           // add a delay before next call to not overload the server
           await setTimeoutAsync(1500);
-          const apiResponse = await supertest.get('/api/alerts/_find?search=uptime-test');
+          const apiResponse = await supertest.get('/api/alerting/rules/_find?search=uptime-test');
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === 'uptime-test'
           );
@@ -178,7 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('has created a valid alert with expected parameters', async () => {
         let alert: any;
         await retry.tryForTime(60 * 1000, async () => {
-          const apiResponse = await supertest.get(`/api/alerts/_find?search=${alertId}`);
+          const apiResponse = await supertest.get(`/api/alerting/rules/_find?search=${alertId}`);
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === alertId
           );

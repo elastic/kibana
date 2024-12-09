@@ -199,7 +199,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, RULE_SAVED_OBJECT_TYPE, 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/actions/connectors`)
