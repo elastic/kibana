@@ -9,13 +9,13 @@
 
 import { Page, test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { ScoutPage, KibanaUrl } from '../types';
+import { ScoutPage, KibanaUrl, ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
  * All methods must have 'selector: string' as the first argument
  */
-function extendPageWithTestSubject(page: Page) {
+function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   const methods: Array<keyof Page> = [
     'check',
     'click',
@@ -28,10 +28,15 @@ function extendPageWithTestSubject(page: Page) {
     'innerText',
     'isChecked',
     'isHidden',
+    'isVisible',
     'locator',
+    'waitForSelector',
   ];
 
-  const extendedMethods: Partial<Record<keyof Page, Function>> = {};
+  const extendedMethods: Partial<Record<keyof Page, Function>> & {
+    typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
+    clearInput?: ScoutPage['testSubj']['clearInput'];
+  } = {};
 
   for (const method of methods) {
     extendedMethods[method] = (...args: any[]) => {
@@ -41,7 +46,27 @@ function extendPageWithTestSubject(page: Page) {
     };
   }
 
-  return extendedMethods as Record<keyof Page, any>;
+  // custom method to types text into an input field character by character with a delay
+  extendedMethods.typeWithDelay = async (
+    selector: string,
+    text: string,
+    options?: { delay: number }
+  ) => {
+    const { delay = 25 } = options || {};
+    const testSubjSelector = subj(selector);
+    await page.locator(testSubjSelector).click();
+    for (const char of text) {
+      await page.keyboard.insertText(char);
+      await page.waitForTimeout(delay);
+    }
+  };
+  // custom method to clear an input field
+  extendedMethods.clearInput = async (selector: string) => {
+    const testSubjSelector = subj(selector);
+    await page.locator(testSubjSelector).fill('');
+  };
+
+  return extendedMethods as ScoutPage['testSubj'];
 }
 
 /**
@@ -70,14 +95,20 @@ function extendPageWithTestSubject(page: Page) {
  * await page.gotoApp('discover);
  * ```
  */
-export const scoutPageFixture = base.extend<{ page: ScoutPage; kbnUrl: KibanaUrl }>({
-  page: async ({ page, kbnUrl }, use) => {
+export const scoutPageFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
+  page: async (
+    { page, kbnUrl }: { page: Page; kbnUrl: KibanaUrl },
+    use: (extendedPage: ScoutPage) => Promise<void>
+  ) => {
+    const extendedPage = page as ScoutPage;
     // Extend page with '@kbn/test-subj-selector' support
-    page.testSubj = extendPageWithTestSubject(page);
-
+    extendedPage.testSubj = extendPageWithTestSubject(page);
     // Method to navigate to specific Kibana apps
-    page.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+    extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+    // Method to wait for global loading indicator to be hidden
+    extendedPage.waitForLoadingIndicatorHidden = () =>
+      extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
 
-    await use(page);
+    await use(extendedPage);
   },
 });

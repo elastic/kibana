@@ -54,7 +54,7 @@ export interface SavedObjectCreationOpts {
   overwrite?: boolean;
 }
 
-export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 export interface SavedObjectAttributesAndRefs {
   attributes: SavedObjectAttributes;

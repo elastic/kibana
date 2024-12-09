@@ -509,7 +509,9 @@ export function ChatBody({
             saveTitle(newTitle);
           }}
           onToggleFlyoutPositionMode={onToggleFlyoutPositionMode}
-          navigateToConversation={navigateToConversation}
+          navigateToConversation={
+            initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
+          }
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

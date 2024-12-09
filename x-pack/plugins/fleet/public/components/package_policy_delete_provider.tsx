@@ -247,6 +247,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   defaultMessage="This integration is shared by multiple agent policies."
                 />
               }
+              data-test-subj="sharedAgentPolicyCallOut"
             />
             <EuiSpacer size="m" />
           </>
@@ -261,6 +262,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           <>
             <EuiCallOut
               color="danger"
+              data-test-subj="affectedAgentsCallOut"
               title={
                 !isAgentlessPolicy && (
                   <FormattedMessage

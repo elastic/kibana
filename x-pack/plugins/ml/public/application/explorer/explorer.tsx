@@ -227,7 +227,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   );
 
   const onPanelWidthChange = useCallback(
-    (newSizes: any) => {
+    (newSizes: { [key: string]: number }) => {
       setAnomalyExplorerPanelState({
         mainPage: {
           size: newSizes.mainPage,

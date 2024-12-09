@@ -55,6 +55,10 @@ const mockGroupingLevelProps: Omit<AlertsGroupingLevelProps, 'children'> = {
 describe('AlertsGroupingLevel', () => {
   let buildEsQuerySpy: jest.SpyInstance;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeAll(() => {
     buildEsQuerySpy = jest.spyOn(buildEsQueryModule, 'buildEsQuery');
   });
@@ -118,5 +122,59 @@ describe('AlertsGroupingLevel', () => {
     expect(Object.keys(getGrouping.mock.calls[0][0].data)).toMatchObject(
       Object.keys(groupingSearchResponse.aggregations)
     );
+  });
+
+  it('should calls useGetAlertsGroupAggregationsQuery with correct props', () => {
+    render(
+      <AlertsGroupingLevel {...mockGroupingLevelProps}>
+        {() => <span data-test-subj="grouping-level" />}
+      </AlertsGroupingLevel>
+    );
+
+    expect(mockUseGetAlertsGroupAggregationsQuery.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "enabled": true,
+            "http": Object {
+              "get": [MockFunction],
+            },
+            "params": Object {
+              "aggregations": Object {},
+              "consumers": Array [
+                "stackAlerts",
+              ],
+              "filters": Array [
+                Object {
+                  "bool": Object {
+                    "filter": Array [],
+                    "must": Array [],
+                    "must_not": Array [],
+                    "should": Array [],
+                  },
+                },
+                Object {
+                  "range": Object {
+                    "kibana.alert.time_range": Object {
+                      "gte": "2020-07-07T08:20:18.966Z",
+                      "lte": "2020-07-08T08:20:18.966Z",
+                    },
+                  },
+                },
+              ],
+              "groupByField": "selectedGroup",
+              "pageIndex": 0,
+              "pageSize": 10,
+              "ruleTypeIds": Array [
+                ".es-query",
+              ],
+            },
+            "toasts": Object {
+              "addDanger": [MockFunction],
+            },
+          },
+        ],
+      ]
+    `);
   });
 });
