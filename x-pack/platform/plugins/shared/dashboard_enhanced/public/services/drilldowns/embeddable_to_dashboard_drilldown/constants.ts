@@ -10,6 +10,6 @@
  * STORED IN SAVED OBJECTS.
  *
  * Also temporary dashboard drilldown migration code inside embeddable plugin relies on it
- * x-pack/plugins/embeddable_enhanced/public/embeddables/embeddable_action_storage.ts
+ * x-pack/platform/plugins/shared/embeddable_enhanced/public/embeddables/embeddable_action_storage.ts
  */
 export const EMBEDDABLE_TO_DASHBOARD_DRILLDOWN = 'DASHBOARD_TO_DASHBOARD_DRILLDOWN';
