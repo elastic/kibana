@@ -594,7 +594,7 @@
     "@kbn/investigate-plugin": "link:x-pack/plugins/observability_solution/investigate",
     "@kbn/investigation-shared": "link:packages/kbn-investigation-shared",
     "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
-    "@kbn/ipynb": "link:packages/kbn-ipynb",
+    "@kbn/ipynb": "link:x-pack/solutions/search/packages/kbn-ipynb",
     "@kbn/item-buffer": "link:packages/kbn-item-buffer",
     "@kbn/json-schemas": "link:x-pack/packages/ml/json_schemas",
     "@kbn/kbn-health-gateway-status-plugin": "link:test/health_gateway/plugins/status",
