@@ -13,7 +13,7 @@
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
   apm: 'x-pack/plugins/observability_solution/apm/.storybook',
-  canvas: 'x-pack/plugins/canvas/storybook',
+  canvas: 'x-pack/platform/plugins/private/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'packages/kbn-cell-actions/.storybook',
   cloud_security_posture_packages: 'x-pack/packages/kbn-cloud-security-posture/storybook/config',

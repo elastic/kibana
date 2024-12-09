@@ -1,6 +1,6 @@
 # Contributing to Canvas
 
-Canvas is a plugin for Kibana, therefore its [contribution guidelines](../../../CONTRIBUTING.md) apply to Canvas development, as well.  This document contains Canvas-specific guidelines that extend from the Kibana guidelines.
+Canvas is a plugin for Kibana, therefore its [contribution guidelines](../../../../../CONTRIBUTING.md) apply to Canvas development, as well.  This document contains Canvas-specific guidelines that extend from the Kibana guidelines.
 
 - [Active Migrations](#active_migrations)
 - [i18n](#i18n)
