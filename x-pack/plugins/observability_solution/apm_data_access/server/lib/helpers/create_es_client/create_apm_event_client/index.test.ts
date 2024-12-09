@@ -47,34 +47,46 @@ describe('APMEventClient', () => {
       const router = createRouter('/');
 
       let abortSignal: AbortSignal | undefined;
-      router.get({ path: '/', validate: false }, async (context, request, res) => {
-        const eventClient = new APMEventClient({
-          esClient: {
-            search: async (params: any, { signal }: { signal: AbortSignal }) => {
-              abortSignal = signal;
-              await setTimeoutPromise(3_000, undefined, {
-                signal: abortSignal,
-              });
-              return {};
+      router.get(
+        {
+          path: '/',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out from authorization',
             },
-          } as any,
-          debug: false,
-          request,
-          indices: {} as APMIndices,
-          options: {
-            includeFrozen: false,
           },
-        });
+          validate: false,
+        },
+        async (context, request, res) => {
+          const eventClient = new APMEventClient({
+            esClient: {
+              search: async (params: any, { signal }: { signal: AbortSignal }) => {
+                abortSignal = signal;
+                await setTimeoutPromise(3_000, undefined, {
+                  signal: abortSignal,
+                });
+                return {};
+              },
+            } as any,
+            debug: false,
+            request,
+            indices: {} as APMIndices,
+            options: {
+              includeFrozen: false,
+            },
+          });
 
-        await eventClient.search('foo', {
-          apm: {
-            events: [],
-          },
-          body: { size: 0, track_total_hits: false },
-        });
+          await eventClient.search('foo', {
+            apm: {
+              events: [],
+            },
+            body: { size: 0, track_total_hits: false },
+          });
 
-        return res.ok({ body: 'ok' });
-      });
+          return res.ok({ body: 'ok' });
+        }
+      );
 
       await server.start();
 
