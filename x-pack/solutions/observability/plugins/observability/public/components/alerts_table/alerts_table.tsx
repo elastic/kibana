@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ALERT_DURATION } from '@kbn/rule-data-utils';
+import { ALERT_START } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { ObservabilityPublicStart } from '../..';
@@ -29,7 +29,7 @@ import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../
 const columns = getColumns({ showRuleName: true });
 const initialSort = [
   {
-    [ALERT_DURATION]: {
+    [ALERT_START]: {
       order: 'desc' as SortOrder,
     },
   },
