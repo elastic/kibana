@@ -5,56 +5,14 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-  SavedObjectsFindResult,
-} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { intersection } from 'lodash';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { periodToMs } from '../../routes/overview_status/overview_status';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   SourceType,
 } from '../../../common/runtime_types';
-
-export const getAllMonitors = async ({
-  soClient,
-  search,
-  fields,
-  filter,
-  sortField = 'name.keyword',
-  sortOrder = 'asc',
-  searchFields,
-  showFromAllSpaces,
-}: {
-  soClient: SavedObjectsClientContract;
-  search?: string;
-  filter?: string;
-  showFromAllSpaces?: boolean;
-} & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
-  const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
-    type: syntheticsMonitorType,
-    perPage: 1000,
-    search,
-    sortField,
-    sortOrder,
-    fields,
-    filter,
-    searchFields,
-    ...(showFromAllSpaces && { namespaces: ['*'] }),
-  });
-
-  const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
-  for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
-  }
-
-  finder.close().catch(() => {});
-
-  return hits;
-};
 
 export const processMonitors = (
   allMonitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>,
