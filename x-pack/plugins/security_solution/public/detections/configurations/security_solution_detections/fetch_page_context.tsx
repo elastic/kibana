@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { Alerts } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EuiDataGridColumn } from '@elastic/eui';
+import type { Alert } from '@kbn/alerting-types';
 import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 
 export interface AlertsUserProfilesData {
@@ -26,7 +26,7 @@ export const useFetchUserProfilesFromAlerts = ({
   alerts,
   columns,
 }: {
-  alerts: Alerts;
+  alerts: Alert[];
   columns: EuiDataGridColumn[];
 }) => {
   const uids = useMemo(() => {
@@ -34,8 +34,8 @@ export const useFetchUserProfilesFromAlerts = ({
     alerts.forEach((alert) => {
       profileUidColumns.forEach((columnId) => {
         if (columns.find((column) => column.id === columnId) != null) {
-          const userUids = alert[columnId];
-          userUids?.forEach((uid) => ids.add(uid as string));
+          const userUids = alert[columnId] as string[];
+          userUids?.forEach((uid) => ids.add(uid));
         }
       });
     });
