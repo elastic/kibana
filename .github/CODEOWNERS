@@ -711,6 +711,7 @@ packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
 packages/kbn-react-hooks @elastic/obs-ux-logs-team
+packages/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 packages/react/kibana_context/common @elastic/appex-sharedux
 packages/react/kibana_context/render @elastic/appex-sharedux
 packages/react/kibana_context/root @elastic/appex-sharedux
