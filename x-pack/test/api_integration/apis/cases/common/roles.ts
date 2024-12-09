@@ -127,6 +127,8 @@ export const secCasesV2All: Role = {
         feature: {
           siemV2: ['all'],
           securitySolutionCasesV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -152,6 +154,8 @@ export const secCasesV2NoReopenWithCreateComment: Role = {
         feature: {
           siemV2: ['all'],
           securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -176,6 +180,8 @@ export const secCasesV2NoCreateCommentWithReopen: Role = {
       {
         feature: {
           siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
