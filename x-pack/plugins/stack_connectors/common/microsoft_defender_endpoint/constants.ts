@@ -9,6 +9,7 @@ export const MICROSOFT_DEFENDER_ENDPOINT_TITLE = 'Microsoft Defender for Endpoin
 export const MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID = '.microsoft_defender_endpoint';
 
 export enum MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION {
+  TEST_CONNECTOR = 'testConnector',
   ISOLATE_HOST = 'isolateHost',
   RELEASE_HOST = 'releaseHost',
 }

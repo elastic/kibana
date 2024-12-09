@@ -12,6 +12,9 @@ import {
   MicrosoftDefenderEndpointConfigSchema,
   MicrosoftDefenderEndpointActionParamsSchema,
   MicrosoftDefenderEndpointBaseApiResponseSchema,
+  IsolateHostParamsSchema,
+  ReleaseHostParamsSchema,
+  TestConnectorParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -23,6 +26,12 @@ export type MicrosoftDefenderEndpointSecrets = TypeOf<
 export type MicrosoftDefenderEndpointBaseApiResponse = TypeOf<
   typeof MicrosoftDefenderEndpointBaseApiResponseSchema
 >;
+
+export type TestConnectorParams = TypeOf<typeof TestConnectorParamsSchema>;
+
+export type IsolateHostParams = TypeOf<typeof IsolateHostParamsSchema>;
+
+export type ReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
 
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema

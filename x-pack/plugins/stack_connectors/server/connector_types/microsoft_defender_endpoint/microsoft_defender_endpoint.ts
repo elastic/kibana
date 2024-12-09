@@ -9,18 +9,21 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
   IsolateHostParamsSchema,
   ReleaseHostParamsSchema,
   MicrosoftDefenderEndpointBaseApiResponseSchema,
+  TestConnectorParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import {
+  IsolateHostParams,
   MicrosoftDefenderEndpointBaseApiResponse,
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets,
+  ReleaseHostParams,
+  TestConnectorParams,
 } from '../../../common/microsoft_defender_endpoint/types';
-import type { SentinelOneIsolateHostParams } from '../../../common/sentinelone/types';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
 export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
@@ -49,15 +52,21 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
   private registerSubActions() {
     this.registerSubAction({
-      name: SUB_ACTION.ISOLATE_HOST,
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST,
       method: 'isolateHost',
       schema: IsolateHostParamsSchema,
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.RELEASE_HOST,
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RELEASE_HOST,
       method: 'releaseHost',
       schema: ReleaseHostParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR,
+      method: 'testConnector',
+      schema: TestConnectorParamsSchema,
     });
   }
 
@@ -106,15 +115,22 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     return appendResponseBody(`API Error: [${error.response?.statusText}] ${error.message}`);
   }
 
+  public async testConnector(
+    options: TestConnectorParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<void> {
+    throw new Error('Not implemented (yet)');
+  }
+
   public async isolateHost(
-    { alertIds, ...payload }: SentinelOneIsolateHostParams,
+    options: IsolateHostParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
     throw new Error('Not implemented (yet)');
   }
 
   public async releaseHost(
-    { alertIds, ...payload }: SentinelOneIsolateHostParams,
+    options: ReleaseHostParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
     throw new Error('Not implemented (yet)');

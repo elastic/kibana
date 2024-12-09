@@ -23,6 +23,8 @@ export const MicrosoftDefenderEndpointBaseApiResponseSchema = schema.maybe(
   schema.object({}, { unknowns: 'allow' })
 );
 
+export const TestConnectorParamsSchema = schema.object({});
+
 export const IsolateHostParamsSchema = schema.object({
   // FIXME:PT define params once we know them
 });
@@ -34,6 +36,12 @@ export const ReleaseHostParamsSchema = schema.object({
 // ----------------------------------
 // Connector Sub-Actions
 // ----------------------------------
+
+const TestConnectorSchema = schema.object({
+  subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR),
+  subActionParams: TestConnectorParamsSchema,
+});
+
 const IsolateHostSchema = schema.object({
   subAction: schema.literal(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST),
   subActionParams: IsolateHostParamsSchema,
@@ -45,6 +53,7 @@ const ReleaseHostSchema = schema.object({
 });
 
 export const MicrosoftDefenderEndpointActionParamsSchema = schema.oneOf([
+  TestConnectorSchema,
   IsolateHostSchema,
   ReleaseHostSchema,
 ]);
