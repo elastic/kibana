@@ -285,8 +285,6 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    await riskScoreService.updateMappingsIfNeeded();
-
     const range = convertRangeToISO(configuredRange);
     const { index, runtimeMappings } = await riskScoreService.getRiskInputsIndex({
       dataViewId,

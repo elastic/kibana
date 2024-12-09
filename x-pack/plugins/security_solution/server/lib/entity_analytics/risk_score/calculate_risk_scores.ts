@@ -304,12 +304,14 @@ export const calculateRiskScores = async ({
 
     const userBuckets = response.aggregations.user?.buckets ?? [];
     const hostBuckets = response.aggregations.host?.buckets ?? [];
-    const serviceBuckets = response.aggregations.service?.buckets ?? [];
+    const serviceBuckets = experimentalFeatures.serviceEntityStoreEnabled
+      ? response.aggregations.service?.buckets ?? []
+      : [];
 
     const afterKeys = {
       host: response.aggregations.host?.after_key,
       user: response.aggregations.user?.after_key,
-      service: response.aggregations.service?.after_key,
+      service: experimentalFeatures ? response.aggregations.service?.after_key : undefined,
     };
 
     const hostScores = await processScores({

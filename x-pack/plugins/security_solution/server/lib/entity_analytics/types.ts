@@ -77,7 +77,9 @@ export interface RiskEngineConfiguration {
   range: Range;
   alertSampleSizePerShard?: number;
   // When the version changes the engine automatically updates the mappings
-  mappingsVersion?: number;
+  _meta: {
+    mappingsVersion: number;
+  };
 }
 
 export interface CalculateScoresParams {

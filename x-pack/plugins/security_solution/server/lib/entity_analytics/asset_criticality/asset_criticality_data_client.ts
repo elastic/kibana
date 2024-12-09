@@ -18,10 +18,14 @@ import type { AssetCriticalityRecord } from '../../../../common/api/entity_analy
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import type { CriticalityValues } from './constants';
-import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
+import {
+  ASSET_CRITICALITY_MAPPINGS_VERSIONS,
+  CRITICALITY_VALUES,
+  assetCriticalityFieldMap,
+} from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
-import { getMappingForFlattenField, getImplicitEntityFields } from './helpers';
+import { getImplicitEntityFields } from './helpers';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -80,7 +84,12 @@ export class AssetCriticalityDataClient {
       logger: this.options.logger,
       options: {
         index: this.getIndex(),
-        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
+        mappings: {
+          ...mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
+          _meta: {
+            version: ASSET_CRITICALITY_MAPPINGS_VERSIONS,
+          },
+        },
       },
     });
   }
@@ -144,22 +153,6 @@ export class AssetCriticalityDataClient {
 
   public getIndex() {
     return getAssetCriticalityIndex(this.options.namespace);
-  }
-
-  /**
-   * Check if the index mappings needs update.
-   */
-  public async isIndexMappingsOutdated(): Promise<boolean> {
-    const storedMappings = await this.getIndexMappings();
-    const storedIndexProperties = storedMappings?.[this.getIndex()]?.mappings.properties;
-
-    if (!storedIndexProperties) {
-      return true;
-    }
-
-    return Object.keys(assetCriticalityFieldMap).some(
-      (flattenField) => getMappingForFlattenField(flattenField, storedIndexProperties) === undefined
-    );
   }
 
   public async doesIndexExist() {

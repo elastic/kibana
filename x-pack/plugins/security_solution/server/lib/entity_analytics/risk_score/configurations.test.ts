@@ -19,7 +19,7 @@ describe('getTransformOptions', () => {
         "_meta": Object {
           "managed": true,
           "managed_by": "security-entity-analytics",
-          "version": 2,
+          "version": 3,
         },
         "dest": Object {
           "index": "dest",
@@ -30,6 +30,7 @@ describe('getTransformOptions', () => {
           "unique_key": Array [
             "host.name",
             "user.name",
+            "service.name",
           ],
         },
         "settings": Object {

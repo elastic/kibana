@@ -7,6 +7,7 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
+import { ASSET_CRITICALITY_MAPPINGS_VERSIONS } from './constants';
 
 interface AssetCriticalityEcsMigrationClientOpts {
   logger: Logger;
@@ -53,7 +54,7 @@ export class AssetCriticalityEcsMigrationClient {
     const indicesMappings = await this.assetCriticalityDataClient.getIndexMappings();
 
     return Object.values(indicesMappings).some(
-      ({ mappings }) => mappings?.properties?.asset === undefined
+      ({ mappings }) => mappings._meta?.version !== ASSET_CRITICALITY_MAPPINGS_VERSIONS
     );
   };
 
