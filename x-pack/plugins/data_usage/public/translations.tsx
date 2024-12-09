@@ -34,7 +34,7 @@ export const DATA_USAGE_PAGE = Object.freeze({
     defaultMessage: 'Data Usage',
   }),
   subTitle: i18n.translate('xpack.dataUsage.pageSubtitle', {
-    defaultMessage: 'Monitor data ingested and retained by data streams.',
+    defaultMessage: 'Monitor data ingested and retained by data streams over the past 10 days.',
   }),
 });
 

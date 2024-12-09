@@ -28,7 +28,7 @@ export interface DateRangePickerValues {
   recentlyUsedDateRanges: EuiSuperDatePickerRecentRange[];
 }
 
-interface UsageMetricsDateRangePickerProps {
+export interface UsageMetricsDateRangePickerProps {
   dateRangePickerState: DateRangePickerValues;
   isDataLoading: boolean;
   onRefresh: () => void;

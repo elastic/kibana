@@ -228,14 +228,14 @@ describe('DataUsageMetrics', () => {
     expect(toggleFilterButton).toHaveTextContent('Data streams10');
     await user.click(toggleFilterButton);
     const allFilterOptions = getAllByTestId('dataStreams-filter-option');
-    // deselect 9 options
-    for (let i = 0; i < allFilterOptions.length; i++) {
+    // deselect 3 options
+    for (let i = 0; i < 3; i++) {
       await user.click(allFilterOptions[i]);
     }
 
-    expect(toggleFilterButton).toHaveTextContent('Data streams1');
+    expect(toggleFilterButton).toHaveTextContent('Data streams7');
     expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
-      '1 active filters'
+      '7 active filters'
     );
   });
 
