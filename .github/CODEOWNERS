@@ -427,7 +427,6 @@ packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/resp
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
 packages/kbn-scout @elastic/appex-qa
-packages/kbn-screenshotting-server @elastic/appex-sharedux
 packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-keys-server @elastic/search-kibana
 packages/kbn-search-api-panels @elastic/search-kibana
@@ -590,6 +589,7 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
+src/platform/packages/private/kbn-screenshotting-server @elastic/appex-sharedux
 src/platform/packages/private/react/kibana_context/root @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux

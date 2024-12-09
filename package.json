@@ -793,7 +793,7 @@
     "@kbn/screenshot-mode-plugin": "link:src/platform/plugins/shared/screenshot_mode",
     "@kbn/screenshotting-example-plugin": "link:x-pack/platform/plugins/private/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/x-pack/examples/screenshotting_example",
     "@kbn/screenshotting-plugin": "link:x-pack/plugins/screenshotting",
-    "@kbn/screenshotting-server": "link:packages/kbn-screenshotting-server",
+    "@kbn/screenshotting-server": "link:src/platform/packages/private/kbn-screenshotting-server",
     "@kbn/search-api-keys-components": "link:packages/kbn-search-api-keys-components",
     "@kbn/search-api-keys-server": "link:packages/kbn-search-api-keys-server",
     "@kbn/search-api-panels": "link:packages/kbn-search-api-panels",
