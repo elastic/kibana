@@ -4,7 +4,7 @@ Contains the Discover application and the saved search embeddable.
 
 ## Project tree
 
-### [src/plugins/discover/public](./public)
+### [src/platform/plugins/shared/discover/public](./public)
 
 Contains all the client-only code. When you initially load Discover, [public/application/main](./public/application/main) is executed and displayed. 
 
@@ -21,7 +21,7 @@ One folder for every "route", each folder contains files and folders related onl
 * **[/services](./public/services)** (Services either for external or internal use)
 * **[/utils](./public/utils)** (All utility functions used across more than one application)
 
-### [src/plugins/discover/server](./server)
+### [src/platform/plugins/shared/discover/server](./server)
 
 Contains all the server-only code.
 
@@ -30,7 +30,7 @@ Contains all the server-only code.
 * **[/ui_settings](./server/ui_settings.ts)** (Settings and the default values for UiSettingsServiceSetup )
 * **[/locator](./server/locator)** (Extensions of DiscoverAppLocator for the DiscoverServerPlugin API)
 
-### [src/plugins/discover/common](./common))
+### [src/platform/plugins/shared/discover/common](./common))
 
 Contains all code shared by client and server.
 

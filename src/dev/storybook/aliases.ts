@@ -28,7 +28,7 @@ export const storybookAliases = {
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   dashboard: 'src/plugins/dashboard/.storybook',
   data: 'src/plugins/data/.storybook',
-  discover: 'src/plugins/discover/.storybook',
+  discover: 'src/platform/plugins/shared/discover/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
