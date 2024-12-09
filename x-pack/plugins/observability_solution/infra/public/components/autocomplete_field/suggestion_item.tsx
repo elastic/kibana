@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 import { transparentize } from 'polished';
@@ -20,14 +20,22 @@ interface Props {
 
 export const SuggestionItem: React.FC<Props> = (props) => {
   const { isSelected, onClick, onMouseEnter, suggestion } = props;
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <SuggestionItemContainer isSelected={isSelected} onClick={onClick} onMouseEnter={onMouseEnter}>
-      <SuggestionItemIconField suggestionType={suggestion.type}>
+    <SuggestionItemContainer
+      isSelected={isSelected}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      euiTheme={euiTheme}
+    >
+      <SuggestionItemIconField suggestionType={suggestion.type} euiTheme={euiTheme}>
         <EuiIcon type={getEuiIconType(suggestion.type)} />
       </SuggestionItemIconField>
-      <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-      <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
+      <SuggestionItemTextField euiTheme={euiTheme}>{suggestion.text}</SuggestionItemTextField>
+      <SuggestionItemDescriptionField euiTheme={euiTheme}>
+        {suggestion.description}
+      </SuggestionItemDescriptionField>
     </SuggestionItemContainer>
   );
 };
@@ -38,39 +46,42 @@ SuggestionItem.defaultProps = {
 
 const SuggestionItemContainer = euiStyled.div<{
   isSelected?: boolean;
+  euiTheme: EuiThemeComputed;
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${(props) => props.theme.eui.euiFontSizeS};
-  height: ${(props) => props.theme.eui.euiSizeXL};
+  font-size: ${(props) => props.euiTheme.size.s};
+  height: ${(props) => props.euiTheme.size.xl};
   white-space: nowrap;
   background-color: ${(props) =>
-    props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
+    props.isSelected ? props.euiTheme.colors.lightestShade : 'transparent'};
 `;
 
-const SuggestionItemField = euiStyled.div`
+const SuggestionItemField = euiStyled.div<{
+  euiTheme: EuiThemeComputed;
+}>`
   align-items: center;
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${(props) => props.theme.eui.euiSizeXL};
-  padding: ${(props) => props.theme.eui.euiSizeXS};
+  height: ${(props) => props.euiTheme.size.xl};
+  padding: ${(props) => props.euiTheme.size.xs};
 `;
 
 const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
   suggestionType: QuerySuggestionTypes;
 }>`
   background-color: ${(props) =>
-    transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
-  color: ${(props) => getEuiIconColor(props.theme, props.suggestionType)};
+    transparentize(0.9, getEuiIconColor(props.euiTheme, props.suggestionType))};
+  color: ${(props) => getEuiIconColor(props.euiTheme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${(props) => props.theme.eui.euiSizeXL};
+  width: ${(props) => props.euiTheme.size.xl};
 `;
 
 const SuggestionItemTextField = euiStyled(SuggestionItemField)`
   flex: 2 0 0;
-  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  font-family: ${(props) => props.euiTheme.font.familyCode};
 `;
 
 const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
@@ -80,7 +91,7 @@ const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
     display: inline;
 
     span {
-      font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+      font-family: ${(props) => props.euiTheme.font.familyCode};
     }
   }
 `;
@@ -102,18 +113,21 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
   }
 };
 
-const getEuiIconColor = (theme: any, suggestionType: QuerySuggestionTypes): string => {
+const getEuiIconColor = (
+  theme: EuiThemeComputed<{}>,
+  suggestionType: QuerySuggestionTypes
+): string => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return theme?.eui.euiColorVis7;
+      return theme?.colors.vis.euiColorVis7;
     case QuerySuggestionTypes.Value:
-      return theme?.eui.euiColorVis0;
+      return theme?.colors.vis.euiColorVis0;
     case QuerySuggestionTypes.Operator:
-      return theme?.eui.euiColorVis1;
+      return theme?.colors.vis.euiColorVis1;
     case QuerySuggestionTypes.Conjunction:
-      return theme?.eui.euiColorVis2;
+      return theme?.colors.vis.euiColorVis2;
     case QuerySuggestionTypes.RecentSearch:
     default:
-      return theme?.eui.euiColorMediumShade;
+      return theme?.colors.mediumShade;
   }
 };

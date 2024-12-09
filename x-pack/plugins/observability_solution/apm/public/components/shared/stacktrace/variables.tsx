@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -13,11 +13,11 @@ import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe
 import { KeyValueTable } from '../key_value_table';
 import { flattenObject } from '../../../../common/utils/flatten_object';
 
-const VariablesContainer = euiStyled.div`
-  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
-  border-radius: 0 0 ${({ theme }) =>
-    `${theme.eui.euiBorderRadiusSmall} ${theme.eui.euiBorderRadiusSmall}`};
-  padding:  ${({ theme }) => `${theme.eui.euiSizeS} ${theme.eui.euiSizeM}`};
+const VariablesContainer = euiStyled.div<{ euiTheme: EuiThemeComputed }>`
+  background: ${({ euiTheme }) => euiTheme.colors.emptyShade};
+  border-radius: 0 0 ${({ euiTheme }) =>
+    `${euiTheme.border.radius.small} ${euiTheme.border.radius.small}`};
+  padding:  ${({ euiTheme }) => `${euiTheme.size.s} ${euiTheme.size.m}`};
 `;
 
 interface Props {
@@ -25,13 +25,14 @@ interface Props {
 }
 
 export function Variables({ vars }: Props) {
+  const { euiTheme } = useEuiTheme();
   if (!vars) {
     return null;
   }
   const flattenedVariables = flattenObject(vars);
   return (
     <React.Fragment>
-      <VariablesContainer>
+      <VariablesContainer euiTheme={euiTheme}>
         <EuiAccordion
           id="local-variables"
           className="euiAccordion"

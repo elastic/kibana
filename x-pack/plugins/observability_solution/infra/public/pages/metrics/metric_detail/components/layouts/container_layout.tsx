@@ -7,7 +7,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
+import { withEuiTheme } from '@elastic/eui';
 import React from 'react';
 import type { LayoutPropsWithTheme } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
@@ -16,7 +16,7 @@ import { MetadataDetails } from '../metadata_details';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 
-export const ContainerLayout = withTheme(
+export const ContainerLayout = withEuiTheme(
   ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <React.Fragment>
       <MetadataDetails />
@@ -47,7 +47,7 @@ export const ContainerLayout = withTheme(
                       defaultMessage: 'CPU Usage',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -58,7 +58,7 @@ export const ContainerLayout = withTheme(
                       defaultMessage: 'Memory Usage',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -76,7 +76,7 @@ export const ContainerLayout = withTheme(
                       defaultMessage: 'CPU Usage',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -87,7 +87,7 @@ export const ContainerLayout = withTheme(
                       defaultMessage: 'Memory Usage',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -98,7 +98,7 @@ export const ContainerLayout = withTheme(
                       defaultMessage: 'Inbound (RX)',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'bits',
                   formatterTemplate: '{{value}}/s',
                 },
@@ -109,7 +109,7 @@ export const ContainerLayout = withTheme(
                       defaultMessage: 'Outbound (TX)',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'bits',
                   formatterTemplate: '{{value}}/s',
                 },
@@ -130,7 +130,7 @@ export const ContainerLayout = withTheme(
               type="area"
               formatter="percent"
               seriesOverrides={{
-                cpu: { color: theme.eui.euiColorVis1 },
+                cpu: { color: theme.euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -148,7 +148,7 @@ export const ContainerLayout = withTheme(
               type="area"
               formatter="percent"
               seriesOverrides={{
-                memory: { color: theme.eui.euiColorVis1 },
+                memory: { color: theme.euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -166,7 +166,7 @@ export const ContainerLayout = withTheme(
               type="area"
               formatter="percent"
               seriesOverrides={{
-                cpu: { color: theme.eui.euiColorVis1 },
+                cpu: { color: theme.euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -184,7 +184,7 @@ export const ContainerLayout = withTheme(
               type="area"
               formatter="percent"
               seriesOverrides={{
-                memory: { color: theme.eui.euiColorVis1 },
+                memory: { color: theme.euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -203,7 +203,7 @@ export const ContainerLayout = withTheme(
               type="area"
               seriesOverrides={{
                 rx: {
-                  color: theme.eui.euiColorVis1,
+                  color: theme.euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.containerMetricsLayout.networkTrafficSection.networkRxRateSeriesLabel',
                     {
@@ -212,7 +212,7 @@ export const ContainerLayout = withTheme(
                   ),
                 },
                 tx: {
-                  color: theme.eui.euiColorVis2,
+                  color: theme.euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.containerMetricsLayout.networkTrafficSection.networkTxRateSeriesLabel',
                     {
@@ -238,7 +238,7 @@ export const ContainerLayout = withTheme(
               formatter="number"
               seriesOverrides={{
                 read: {
-                  color: theme.eui.euiColorVis1,
+                  color: theme.euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoOpsSection.readRateSeriesLabel',
                     {
@@ -247,7 +247,7 @@ export const ContainerLayout = withTheme(
                   ),
                 },
                 write: {
-                  color: theme.eui.euiColorVis2,
+                  color: theme.euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoOpsSection.writeRateSeriesLabel',
                     {
@@ -273,7 +273,7 @@ export const ContainerLayout = withTheme(
               formatterTemplate="{{value}}/s"
               seriesOverrides={{
                 read: {
-                  color: theme.eui.euiColorVis1,
+                  color: theme.euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoBytesSection.readRateSeriesLabel',
                     {
@@ -282,7 +282,7 @@ export const ContainerLayout = withTheme(
                   ),
                 },
                 write: {
-                  color: theme.eui.euiColorVis2,
+                  color: theme.euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoBytesSection.writeRateSeriesLabel',
                     {

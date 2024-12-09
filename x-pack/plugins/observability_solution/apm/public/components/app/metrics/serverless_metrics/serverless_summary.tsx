@@ -11,7 +11,9 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiStat,
+  type EuiThemeComputed,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -32,15 +34,16 @@ const CentralizedContainer = styled.div`
   align-items: center;
 `;
 
-const Border = styled.div`
+const Border = styled.div<{ euiTheme: EuiThemeComputed }>`
   height: 55px;
-  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-right: 1px solid ${({ euiTheme }) => euiTheme.colors.lightShade};
 `;
 
 function VerticalRule() {
+  const { euiTheme } = useEuiTheme();
   return (
     <CentralizedContainer>
-      <Border />
+      <Border euiTheme={euiTheme} />
     </CentralizedContainer>
   );
 }

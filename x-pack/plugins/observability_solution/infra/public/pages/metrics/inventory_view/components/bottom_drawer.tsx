@@ -7,7 +7,14 @@
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiPanel,
+  type EuiThemeComputed,
+  useEuiTheme,
+} from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -61,6 +68,7 @@ const KubernetesButton = () => {
 };
 export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
+  const { euiTheme } = useEuiTheme();
 
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
 
@@ -77,15 +85,21 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
 
   if (view === 'table') {
     return nodeType === 'pod' ? (
-      <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
+      <BottomPanel
+        euiTheme={euiTheme}
+        hasBorder={false}
+        hasShadow={false}
+        borderRadius="none"
+        paddingSize="s"
+      >
         <KubernetesButton />
       </BottomPanel>
     ) : null;
   }
 
   return (
-    <BottomActionContainer>
-      <StickyPanel borderRadius="none" paddingSize="s">
+    <BottomActionContainer euiTheme={euiTheme}>
+      <StickyPanel euiTheme={euiTheme} borderRadius="none" paddingSize="s">
         <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -117,19 +131,19 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   );
 };
 
-const BottomActionContainer = euiStyled.div`
+const BottomActionContainer = euiStyled.div<{ euiTheme: EuiThemeComputed }>`
   position: sticky;
   bottom: 0;
   left: 0;
-  background: ${(props) => props.theme.eui.euiColorGhost};
-  width: calc(100% + ${(props) => props.theme.eui.euiSizeL} * 2);
-  margin-left: -${(props) => props.theme.eui.euiSizeL};
+  background: ${(props) => props.euiTheme.colors.ghost};
+  width: calc(100% + ${(props) => props.euiTheme.size.l} * 2);
+  margin-left: -${(props) => props.euiTheme.size.l};
 `; // Additional width comes from the padding on the EuiPageBody and inner nodes container
 
-const BottomPanel = euiStyled(EuiPanel)`
-  padding: ${(props) => props.theme.eui.euiSizeL} 0;
+const BottomPanel = euiStyled(EuiPanel)<{ euiTheme: EuiThemeComputed }>`
+  padding: ${(props) => props.euiTheme.size.l} 0;
 `;
 
-const StickyPanel = euiStyled(EuiPanel)`
-  padding: 0 ${(props) => props.theme.eui.euiSizeL};
+const StickyPanel = euiStyled(EuiPanel)<{ euiTheme: EuiThemeComputed }>`
+  padding: 0 ${(props) => props.euiTheme.size.l};
 `;

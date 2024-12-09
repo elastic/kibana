@@ -9,6 +9,7 @@ import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';
 import { getTimeLabelFormat } from './time_label_formatter';
 
@@ -28,6 +29,7 @@ const useZonedDate = (timestamp: number) => {
 };
 
 export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCount, width }) => {
+  const { euiTheme } = useEuiTheme();
   const startWithOffset = useZonedDate(start);
   const endWithOffset = useZonedDate(end);
 
@@ -46,10 +48,10 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
 
         return (
           <g key={`tick${tickIndex}`}>
-            <TimeRulerTickLabel x={0} y={y - 4}>
+            <TimeRulerTickLabel euiTheme={euiTheme} x={0} y={y - 4}>
               {formatTick(tick)}
             </TimeRulerTickLabel>
-            <TimeRulerGridLine x1={0} y1={y} x2={width} y2={y} />
+            <TimeRulerGridLine euiTheme={euiTheme} x1={0} y1={y} x2={width} y2={y} />
           </g>
         );
       })}
@@ -59,19 +61,17 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
 
 TimeRuler.displayName = 'TimeRuler';
 
-const TimeRulerTickLabel = euiStyled.text`
+const TimeRulerTickLabel = euiStyled.text<{ euiTheme: EuiThemeComputed }>`
   font-size: 9px;
   line-height: ${(props) => props.theme.eui.euiLineHeight};
-  fill: ${(props) => props.theme.eui.euiTextSubduedColor};
+  fill: ${(props) => props.euiTheme.colors.textSubdued};
   user-select: none;
   pointer-events: none;
 `;
 
-const TimeRulerGridLine = euiStyled.line`
+const TimeRulerGridLine = euiStyled.line<{ euiTheme: EuiThemeComputed }>`
   stroke: ${(props) =>
-    props.theme.darkMode
-      ? props.theme.eui.euiColorDarkestShade
-      : props.theme.eui.euiColorDarkShade};
+    props.theme.darkMode ? props.euiTheme.colors.darkestShade : props.euiTheme.colors.darkShade};
   stroke-opacity: 0.5;
   stroke-width: 1px;
 `;
