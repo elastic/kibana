@@ -25,13 +25,12 @@ export const timelineDefaultProductFeaturesConfig: Record<
   [ProductFeatureTimelineFeatureKey.timeline]: {
     privileges: {
       all: {
-        ui: [],
+        ui: ['read', 'crud'],
       },
       read: {
-        ui: [],
+        ui: ['read'],
       },
     },
-    subFeatureIds: [],
   },
 };
 // console.log('figure out what to put into `ui`, `api` and others');
