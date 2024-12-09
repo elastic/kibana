@@ -4084,7 +4084,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cbor@link:packages/kbn-cbor":
+"@kbn/cbor@link:src/platform/packages/shared/kbn-cbor":
   version "0.0.0"
   uid ""
 
