@@ -4220,7 +4220,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-content-insights-public@link:packages/content-management/content_insights/content_insights_public":
+"@kbn/content-management-content-insights-public@link:src/platform/packages/shared/content-management/content_insights/content_insights_public":
   version "0.0.0"
   uid ""
 
