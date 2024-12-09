@@ -7,7 +7,7 @@ import {
   createStateContainer,
   syncState,
   createSessionStorageStateStorage,
-} from 'src/plugins/kibana_utils/public';
+} from 'src/platform/plugins/shared/kibana_utils/public';
 
 const stateContainer = createStateContainer({ count: 0 });
 const stateStorage = createSessionStorageStateStorage();

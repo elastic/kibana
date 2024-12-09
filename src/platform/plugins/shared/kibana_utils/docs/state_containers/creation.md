@@ -30,7 +30,7 @@ const defaultState: MyState = {
 Create your a state container.
 
 ```ts
-import { createStateContainer } from 'src/plugins/kibana_utils';
+import { createStateContainer } from 'src/platform/plugins/shared/kibana_utils';
 
 const container = createStateContainer<MyState>(defaultState);
 

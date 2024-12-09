@@ -78,7 +78,7 @@ export interface DrilldownDefinition<
    *
    * ```tsx
    * import React from 'react';
-   * import { CollectConfigProps } from 'src/plugins/kibana_utils/public';
+   * import { CollectConfigProps } from 'src/platform/plugins/shared/kibana_utils/public';
    *
    * type Props = CollectConfigProps<Config>;
    *

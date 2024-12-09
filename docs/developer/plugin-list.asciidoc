@@ -250,7 +250,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |This plugin registers the Platform Usage Collectors in Kibana.
 
 
-|{kib-repo}blob/{branch}/src/plugins/kibana_utils/README.md[kibanaUtils]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/kibana_utils/README.md[kibanaUtils]
 |Utilities for building Kibana plugins.
 
 

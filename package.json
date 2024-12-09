@@ -606,7 +606,7 @@
     "@kbn/kibana-overview-plugin": "link:src/platform/plugins/private/kibana_overview",
     "@kbn/kibana-react-plugin": "link:src/platform/plugins/shared/kibana_react",
     "@kbn/kibana-usage-collection-plugin": "link:src/plugins/kibana_usage_collection",
-    "@kbn/kibana-utils-plugin": "link:src/plugins/kibana_utils",
+    "@kbn/kibana-utils-plugin": "link:src/platform/plugins/shared/kibana_utils",
     "@kbn/kubernetes-security-plugin": "link:x-pack/plugins/kubernetes_security",
     "@kbn/langchain": "link:x-pack/packages/kbn-langchain",
     "@kbn/language-documentation": "link:src/platform/packages/private/kbn-language-documentation",
