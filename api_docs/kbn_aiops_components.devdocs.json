@@ -703,6 +703,22 @@
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.DocumentCountChartProps.nonInteractive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nonInteractive",
+            "description": [
+              "Whether the brush should be non-interactive"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

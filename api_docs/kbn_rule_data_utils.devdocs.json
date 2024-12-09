@@ -202,6 +202,41 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.isSiemRuleType",
+        "type": "Function",
+        "tags": [],
+        "label": "isSiemRuleType",
+        "description": [
+          "\nTODO: Remove when checks for specific rule type ids is not needed\nin the codebase."
+        ],
+        "signature": [
+          "(ruleTypeId: string) => boolean"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.isSiemRuleType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.isValidFeatureId",
         "type": "Function",
         "tags": [],
@@ -249,7 +284,23 @@
         "type": "Enum",
         "tags": [],
         "label": "ApmRuleType",
-        "description": [],
+        "description": [
+          "\nAPM rule types"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.InfraRuleType",
+        "type": "Enum",
+        "tags": [],
+        "label": "InfraRuleType",
+        "description": [
+          "\nInfra rule types"
+        ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1615,7 +1666,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
+          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1648,6 +1699,28 @@
           "\"recovered\" | \"active\" | \"untracked\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.APM_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "APM_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.ApmRuleType",
+            "text": "ApmRuleType"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1789,6 +1862,29 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.INFRA_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "INFRA_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "(string | ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.InfraRuleType",
+            "text": "InfraRuleType"
+          },
+          ")[]"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.KIBANA_NAMESPACE",
         "type": "string",
         "tags": [],
@@ -1804,11 +1900,28 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.LOG_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "LOG_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.LOG_THRESHOLD_ALERT_TYPE_ID",
         "type": "string",
         "tags": [],
         "label": "LOG_THRESHOLD_ALERT_TYPE_ID",
-        "description": [],
+        "description": [
+          "\nLogs rule types"
+        ],
         "signature": [
           "\"logs.alert.document.count\""
         ],
@@ -1838,7 +1951,9 @@
         "type": "string",
         "tags": [],
         "label": "METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID",
-        "description": [],
+        "description": [
+          "\nMetrics rule types"
+        ],
         "signature": [
           "\"metrics.alert.inventory.threshold\""
         ],
@@ -1873,6 +1988,29 @@
           "\"xpack.ml.anomaly_detection_alert\""
         ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/stack_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.OBSERVABILITY_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "OBSERVABILITY_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "(string | ",
+          {
+            "pluginId": "@kbn/rule-data-utils",
+            "scope": "common",
+            "docId": "kibKbnRuleDataUtilsPluginApi",
+            "section": "def-common.InfraRuleType",
+            "text": "InfraRuleType"
+          },
+          ")[]"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1928,9 +2066,26 @@
         "type": "string",
         "tags": [],
         "label": "SLO_BURN_RATE_RULE_TYPE_ID",
-        "description": [],
+        "description": [
+          "\nSLO rule types"
+        ],
         "signature": [
           "\"slo.rules.burnRate\""
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SLO_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "SLO_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "string[]"
         ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
         "deprecated": false,
@@ -1969,6 +2124,23 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY",
+        "type": "Array",
+        "tags": [],
+        "label": "STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY",
+        "description": [
+          "\nThese rule types are not the only stack rules. There are more.\nThe variable holds all stack rule types that support multiple\nconsumers aka the \"Role visibility\" UX dropdown."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/stack_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.STATUS_VALUES",
         "type": "Type",
         "tags": [],
@@ -1984,11 +2156,28 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SYNTHETICS_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "SYNTHETICS_RULE_TYPE_IDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.SYNTHETICS_STATUS_RULE",
         "type": "string",
         "tags": [],
         "label": "SYNTHETICS_STATUS_RULE",
-        "description": [],
+        "description": [
+          "\nSynthetics ryle types"
+        ],
         "signature": [
           "\"xpack.synthetics.alerts.monitorStatus\""
         ],
@@ -2074,13 +2263,30 @@
       },
       {
         "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.UPTIME_RULE_TYPE_IDS",
+        "type": "Array",
+        "tags": [],
+        "label": "UPTIME_RULE_TYPE_IDS",
+        "description": [
+          "\nUptime rule types"
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
         "id": "def-common.ValidFeatureId",
         "type": "Type",
         "tags": [],
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
+          "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -2129,11 +2335,47 @@
           "\nregistering a new instance of the rule data client\nin a new plugin will require updating the below data structure\nto include the index name where the alerts as data will be written to."
         ],
         "signature": [
-          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; readonly MONITORING: \"monitoring\"; }"
+          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; readonly MONITORING: \"monitoring\"; readonly ALERTS: \"alerts\"; readonly DISCOVER: \"discover\"; }"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.SYNTHETICS_ALERT_RULE_TYPES",
+        "type": "Object",
+        "tags": [],
+        "label": "SYNTHETICS_ALERT_RULE_TYPES",
+        "description": [],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS",
+            "type": "string",
+            "tags": [],
+            "label": "MONITOR_STATUS",
+            "description": [],
+            "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/rule-data-utils",
+            "id": "def-common.SYNTHETICS_ALERT_RULE_TYPES.TLS",
+            "type": "string",
+            "tags": [],
+            "label": "TLS",
+            "description": [],
+            "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]

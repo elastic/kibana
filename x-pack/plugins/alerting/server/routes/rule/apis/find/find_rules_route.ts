@@ -52,7 +52,7 @@ export const findRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
 
         const query: FindRulesRequestQueryV1 = req.query;
 

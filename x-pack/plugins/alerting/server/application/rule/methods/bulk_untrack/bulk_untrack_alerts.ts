@@ -41,12 +41,11 @@ async function bulkUntrackAlertsWithOCC(context: RulesClientContext, params: Bul
     if (!context.alertsService) throw new Error('unable to access alertsService');
     const result = await context.alertsService.setAlertsToUntracked({
       ...params,
-      featureIds: params.featureIds || [],
+      ruleTypeIds: params.ruleTypeIds || [],
       spaceId: context.spaceId,
       getAlertIndicesAlias: context.getAlertIndicesAlias,
-      getAuthorizedRuleTypes: context.authorization.getAuthorizedRuleTypes.bind(
-        context.authorization
-      ),
+      getAllAuthorizedRuleTypesFindOperation:
+        context.authorization.getAllAuthorizedRuleTypesFindOperation.bind(context.authorization),
       ensureAuthorized: async ({
         ruleTypeId,
         consumer,
