@@ -28,8 +28,10 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
@@ -77,12 +79,20 @@ export function LensEditConfigurationFlyout({
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
   hideTimeFilterInfo,
+  dashboardApi,
+  panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
+  // const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+
+  const [esqlVariables, setEsqlVariables] = useState<ESQLControlVariable[]>(
+    esqlVariablesService.getVariables()
+  );
+
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -113,6 +123,12 @@ export function LensEditConfigurationFlyout({
 
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
+
+  esqlVariablesService?.esqlVariables$.subscribe((nextVariables) => {
+    if (nextVariables.length && !isEqual(nextVariables, esqlVariables)) {
+      setEsqlVariables(nextVariables);
+    }
+  });
 
   const dispatch = useLensDispatch();
   useEffect(() => {
@@ -147,7 +163,8 @@ export function LensEditConfigurationFlyout({
           query,
           adHocDataViews,
           startDependencies,
-          abortController
+          abortController,
+          esqlVariables
         );
 
         setDataGridAttrs({
@@ -158,7 +175,7 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
-  }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
+  }, [adHocDataViews, dataGridAttrs, esqlVariables, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -332,7 +349,8 @@ export function LensEditConfigurationFlyout({
         adHocDataViews,
         setErrors,
         abortController,
-        setDataGridAttrs
+        setDataGridAttrs,
+        esqlVariables
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -349,8 +367,19 @@ export function LensEditConfigurationFlyout({
       adHocDataViews,
       setCurrentAttributes,
       updateSuggestion,
+      esqlVariables,
     ]
   );
+
+  useEffect(() => {
+    // runs the query from the variables service when the flyout is opened after the creation of the control
+    const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
+    if (queryWithVariables) {
+      setQuery({ esql: queryWithVariables });
+      runQuery({ esql: queryWithVariables });
+      esqlVariablesService.setEsqlQueryWithVariables('');
+    }
+  }, [runQuery]);
 
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
@@ -508,6 +537,7 @@ export function LensEditConfigurationFlyout({
                     : undefined
                 }
                 editorIsInline
+                supportsVariables
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   // do not run the suggestions if the query is the same as the previous one
@@ -519,6 +549,8 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
+                dashboardApi={dashboardApi}
+                panelId={panelId}
               />
             </EuiFlexItem>
           )}

@@ -13,6 +13,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+  ESQL_CONTROL,
   type ControlGroupRuntimeState,
   type ControlPanelsState,
   type DefaultDataControlState,
@@ -48,6 +49,20 @@ export const controlGroupStateBuilder = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
         type: OPTIONS_LIST_CONTROL,
+        order: getNextControlOrder(controlGroupState.initialChildControlState),
+        ...controlState,
+      },
+    };
+  },
+  addESQLControl: (
+    controlGroupState: Partial<ControlGroupRuntimeState>,
+    controlState: OptionsListControlState,
+    controlId?: string
+  ) => {
+    controlGroupState.initialChildControlState = {
+      ...(controlGroupState.initialChildControlState ?? {}),
+      [controlId ?? uuidv4()]: {
+        type: ESQL_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
       },

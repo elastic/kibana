@@ -1,0 +1,9 @@
+// styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
+.esqlControls__overlay {
+  clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+  max-inline-size: $euiSizeXXL * 20;
+  min-inline-size: $euiSizeXXL * 8;
+  @include euiBreakpoint('xs', 's', 'm') {
+    clip-path: none;
+  }
+}

@@ -89,7 +89,12 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
+import type {
+  ESQLCallbacks,
+  ESQLSourceResult,
+  ESQLControlVariable,
+  EsqlControlType,
+} from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
@@ -176,6 +181,8 @@ export async function suggest(
     queryForFields.replace(EDITOR_MARKER, ''),
     resourceRetriever
   );
+  const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
@@ -254,9 +261,10 @@ export async function suggest(
       astContext,
       getFieldsByType,
       getFieldsMap,
-      getPolicyMetadata,
       fullText,
-      offset
+      offset,
+      getVariablesByType,
+      supportsVariables
     );
   }
   if (astContext.type === 'list') {
@@ -277,14 +285,21 @@ export function getFieldsByTypeRetriever(
   resourceRetriever?: ESQLCallbacks
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
+  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+  // console.log(supportsVariables);
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
       ignored: string[] = [],
       options
     ) => {
+      const updatedOptions = {
+        ...options,
+        supportsVariables,
+      };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, options);
+      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -612,12 +627,15 @@ async function getExpressionSuggestionsByType(
           (fragment) => Boolean(getColumnByName(fragment, references)),
           (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
             // COMMAND fie<suggest>
-            return fieldSuggestions.map((suggestion) => ({
-              ...suggestion,
-              text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
-              command: TRIGGER_SUGGESTION_COMMAND,
-              rangeToReplace,
-            }));
+            return fieldSuggestions.map((suggestion) => {
+              if (suggestion.command) return suggestion;
+              return {
+                ...suggestion,
+                text: suggestion.text + (['grok', 'dissect'].includes(command.name) ? ' ' : ''),
+                command: TRIGGER_SUGGESTION_COMMAND,
+                rangeToReplace,
+              };
+            });
           },
           (fragment: string, rangeToReplace: { start: number; end: number }) => {
             // COMMAND field<suggest>
@@ -1026,9 +1044,10 @@ async function getFunctionArgsSuggestions(
   },
   getFieldsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn,
   fullText: string,
-  offset: number
+  offset: number,
+  getVariablesByType?: (type: EsqlControlType) => ESQLControlVariable[],
+  supportsVariables?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
@@ -1150,7 +1169,12 @@ async function getFunctionArgsSuggestions(
         command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         undefined,
-        { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
+        {
+          addComma: shouldAddComma,
+          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+          supportsVariables,
+        },
+        getVariablesByType
       )
     );
 

@@ -12,12 +12,14 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { ControlsPluginStartDeps } from '../types';
 
 export let coreServices: CoreStart;
 export let dataService: DataPublicPluginStart;
 export let dataViewsService: DataViewsPublicPluginStart;
+export let uiActionsService: UiActionsStart;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -25,6 +27,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: ControlsPluginSta
   coreServices = kibanaCore;
   dataService = deps.data;
   dataViewsService = deps.dataViews;
+  uiActionsService = deps.uiActions;
 
   servicesReady$.next(true);
 };

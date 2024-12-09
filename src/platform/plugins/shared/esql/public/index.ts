@@ -11,6 +11,7 @@ import { EsqlPlugin } from './plugin';
 export type { ESQLEditorProps } from '@kbn/esql-editor';
 export type { EsqlPluginStart } from './types';
 export { ESQLLangEditor } from './create_editor';
+export type { ESQLControlState } from './triggers/esql_controls/types';
 
 export function plugin() {
   return new EsqlPlugin();
