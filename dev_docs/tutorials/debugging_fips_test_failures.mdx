@@ -1,0 +1,51 @@
+---
+id: kibDevTutorialDebuggingFipsTestFailures
+slug: /kibana-dev-docs/tutorials/debugging-fips-test-failures
+title: Debugging FIPS test failures
+description: Learn how to debug test failures generated from the FIPS nightly pipeline
+date: 2024-12-04
+tags: ['kibana', 'FIPS', 'dev', 'test', 'debugging', 'FTR']
+---
+
+## What is FIPS?
+
+The Federal Information Processing Standard (FIPS) is a set of standards that describe document processing,
+encryption algorithms, and other information technology standards for use within non-military government agencies 
+and by government contractors and vendors who work with the agencies.
+
+### How does that relate to Kibana?
+
+Kibana can be configured to run in a FIPS-compliant mode, which disallows certain configurations,
+requires a Platinum or better license, and requires the Security plugin to be enabled.
+
+In order to ensure parity between the FIPS-compliant mode and the standard mode,
+Kibana has a nightly pipeline that runs as many tests as possible to ensure that Kibana is FIPS compliant.
+
+### Why do we skip some tests?
+
+As Kibana's FIPS mode requires a Platinum or better license and the Security plugin to be enabled, Kibana's test suite configuration is overridden to meet these requirements.
+
+With these overrides, the assumptions that the tests make about the environment are no longer valid, and some tests fail. For instance, if a test is asserting that a certain feature is not
+available with a basic license, that test will fail in the FIPS pipeline as the license is forced to true.
+
+### How do we discern between test failures resulting from FIPS overrides and actually FIPS/OpenSSL errors?
+
+For an override related error the `expect(...)` will usually fail with typical errors, such as "expected 404, got 200", or it may be more subtle, but related to the subject of the test.
+
+For a FIPS/OpenSSL error, the error will be more cryptic/the test will fail to run, usually something like "digital envelope routines::unsupported". Generally these are related to Node.js's crypto module.
+
+If you are unsure, please reach out to the Security team for guidance at `#kibana-security` in Slack.
+
+### Skipping failing tests due to FIPS overrides
+
+If you have determined that the test in question is failing due to the FIPS overrides, you can skip the test by adding the `this.tags('skipFIPS')` tag to the nearest possible `describe` block in the suite.
+
+You may need to create a new `describe` block so that the minimum amount of tests are skipped. Ensure the `describe` block is not using an arrow function.
+
+This will still allow the test to run as part of regular CI, but will skip the test in the FIPS pipeline.
+
+### Failed tests due to FIPS/OpenSSL errors
+
+Errors that are related to FIPS/OpenSSL are more serious and should be addressed immediately. These will require code changes to switch to FIPS compliant crypto functionality.
+
+Please reach out to the Security team for guidance at `#kibana-security` in Slack immediately.
