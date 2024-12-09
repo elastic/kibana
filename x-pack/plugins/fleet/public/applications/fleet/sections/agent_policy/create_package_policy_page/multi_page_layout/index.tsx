@@ -18,10 +18,6 @@ import {
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
-import { useIntegrationsStateContext } from '../../../../../integrations/hooks';
-
-import type { AgentPolicy } from '../../../../types';
-
 import { useGetAgentPolicyOrDefault } from './hooks';
 
 import {
@@ -31,7 +27,6 @@ import {
   AddIntegrationPageStep,
   ConfirmDataPageStep,
 } from './components';
-import { onboardingSteps } from './components/onboarding_steps';
 
 const installAgentStep = {
   title: i18n.translate('xpack.fleet.createFirstPackagePolicy.installAgentStepTitle', {
@@ -58,35 +53,25 @@ const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep
 
 const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
-export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
+export const CreatePackagePolicyMultiPage: React.FC<CreatePackagePolicyParams> = ({
   queryParamsPolicyId,
   prerelease,
-  from,
-  integrationName,
-  setIntegrationStep,
-  onCancel,
-  withHeader,
-  withBreadcrumb,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
-  // fixme
-  const { pkgkey: pkgkeyParam, policyId, integration: integrationParam } = params;
-  const { pkgkey: pkgKeyContext } = useIntegrationsStateContext();
-  const pkgkey = pkgkeyParam || pkgKeyContext || '';
+  const { pkgkey, policyId, integration } = params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-  const [onSplash, setOnSplash] = useState(from !== 'onboarding-hub');
+  const [onSplash, setOnSplash] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
   const { getHref } = useLink();
   const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
-  const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<AgentPolicy[]>();
+
   const toggleIsManaged = (newIsManaged: boolean) => {
     setIsManaged(newIsManaged);
     setCurrentStep(0);
   };
 
-  const integration = integrationName || integrationParam;
-  const agentPolicyId = selectedAgentPolicies?.[0]?.id || policyId || queryParamsPolicyId;
+  const agentPolicyId = policyId || queryParamsPolicyId;
   const {
     data: packageInfoData,
     error: packageInfoError,
@@ -123,8 +108,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(agentPolicyId ? { agentPolicyId } : {}),
   });
 
-  const steps =
-    from === 'onboarding-hub' ? onboardingSteps : isManaged ? fleetManagedSteps : standaloneSteps;
+  const steps = isManaged ? fleetManagedSteps : standaloneSteps;
 
   if (onSplash || !packageInfo) {
     return (
@@ -139,16 +123,12 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     );
   }
 
-  const stepsNext = (props?: { selectedAgentPolicies?: AgentPolicy[]; toStep?: number }) => {
+  const stepsNext = () => {
     if (currentStep === steps.length - 1) {
       return;
     }
 
-    setCurrentStep(props?.toStep ?? currentStep + 1);
-    setIntegrationStep?.(props?.toStep ?? currentStep + 1);
-    if (props?.selectedAgentPolicies) {
-      setSelectedAgentPolicies(props?.selectedAgentPolicies);
-    }
+    setCurrentStep(currentStep + 1);
   };
 
   const stepsBack = () => {
@@ -164,7 +144,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       fleetServerHost={fleetServerHost}
       fleetProxy={fleetProxy}
       downloadSource={downloadSource}
-      agentPolicy={selectedAgentPolicies?.[0] ?? agentPolicy}
+      agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
       steps={steps}
@@ -177,11 +157,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       setIsManaged={toggleIsManaged}
       setEnrolledAgentIds={setEnrolledAgentIds}
       enrolledAgentIds={enrolledAgentIds}
-      onCancel={onCancel}
-      hasIncomingDataStep={false}
-      prerelease={prerelease}
-      withHeader={withHeader}
-      withBreadcrumb={withBreadcrumb}
     />
   );
 };

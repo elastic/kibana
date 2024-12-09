@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type React from 'react';
-
 import type { AgentPolicy } from '../../../types';
 
 export type EditPackagePolicyFrom =
@@ -36,15 +34,11 @@ export interface AddToPolicyParams {
   policyId?: string;
 }
 
-export type CreatePackagePolicyParams = React.FunctionComponent<{
+export interface CreatePackagePolicyParams {
   from: EditPackagePolicyFrom;
   queryParamsPolicyId?: string;
-  propPolicyId?: string;
-  integrationName?: string;
   prerelease: boolean;
-  onNext?: (params?: { selectedAgentPolicies?: AgentPolicy[] }) => void;
+  onAddAgent?: (params: { selectedAgentPolicies: AgentPolicy[] }) => void;
   onCancel?: () => void;
-  setIntegrationStep?: (step: number) => void;
   withHeader?: boolean;
-  withBreadcrumb?: boolean;
-}>;
+}

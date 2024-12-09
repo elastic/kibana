@@ -20,15 +20,7 @@ import type { MultiPageStepLayoutProps } from '../types';
 import { PageSteps } from '.';
 
 export const MultiPageStepsLayout: React.FunctionComponent<MultiPageStepLayoutProps> = (props) => {
-  const {
-    packageInfo,
-    integrationInfo,
-    steps,
-    currentStep,
-    error,
-    withHeader = true,
-    withBreadcrumb = true,
-  } = props;
+  const { packageInfo, integrationInfo, steps, currentStep, error } = props;
 
   if (error) {
     return (
@@ -66,21 +58,6 @@ export const MultiPageStepsLayout: React.FunctionComponent<MultiPageStepLayoutPr
 
   const maxWidth = 866;
 
-  if (!withHeader) {
-    return (
-      <>
-        <StepComponent {...props} />
-        {packageInfo && withBreadcrumb && (
-          <IntegrationBreadcrumb
-            pkgTitle={integrationInfo?.title || packageInfo.title}
-            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-            integration={integrationInfo?.name}
-          />
-        )}
-      </>
-    );
-  }
-
   return (
     <WithHeaderLayout
       topContent={topContent}
@@ -88,7 +65,7 @@ export const MultiPageStepsLayout: React.FunctionComponent<MultiPageStepLayoutPr
       restrictWidth={maxWidth}
     >
       <StepComponent {...props} />
-      {packageInfo && withBreadcrumb && (
+      {packageInfo && (
         <IntegrationBreadcrumb
           pkgTitle={integrationInfo?.title || packageInfo.title}
           pkgkey={pkgKeyFromPackageInfo(packageInfo)}

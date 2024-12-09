@@ -22,6 +22,7 @@ import { noop } from 'lodash';
 
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DetailViewPanelName } from '@kbn/fleet-plugin/public/applications/integrations/sections/epm/screens/detail';
 import { withLazyHook } from '../../../../../common/components/with_lazy_hook';
 import {
   useStoredIntegrationSearchTerm,
@@ -137,6 +138,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
+    const [selectedDetailsTab, setSelectedDetailsTab] = useState<DetailViewPanelName>('overview');
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
         setSearchTerm(searchQuery);
@@ -148,6 +150,15 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       },
       [selectedTab.showSearchTools, setSearchTerm, setSearchTermToStorage]
     );
+
+    const handleViewAssets = useCallback(() => {
+      setModalView('overview');
+      setSelectedDetailsTab('assets');
+    }, []);
+
+    const onDetailsTabClick = useCallback((detailsTab: DetailViewPanelName) => {
+      setSelectedDetailsTab(detailsTab);
+    }, []);
 
     useEffect(() => {
       setCategory(selectedTab.category ?? '');
@@ -260,9 +271,8 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
               aria-labelledby={modalTitleId}
               onClose={closeModal}
               css={css`
-                width: 85%;
+                width: 1024px;
               `}
-              maxWidth="90%"
             >
               {modalView === 'configure-integration' && (
                 <EuiModalHeader>{`step indicator place holder. Integration step: ${integrationStepMap[integrationStep]}`}</EuiModalHeader>
@@ -276,6 +286,8 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
                       onAddIntegrationPolicyClick={onAddIntegrationPolicyClick}
                       originFrom="onboarding-hub"
                       routesEnabled={false}
+                      onDetailsTabClick={onDetailsTabClick}
+                      selectedDetailsTab={selectedDetailsTab}
                     />
                   )}
                   {modalView === 'configure-integration' && (
@@ -286,8 +298,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
                       integrationName={integrationName}
                       setIntegrationStep={setIntegrationStep}
                       onCancel={closeModal}
-                      withHeader={false}
-                      withBreadcrumb={false}
+                      handleViewAssets={handleViewAssets}
                     />
                   )}
                 </FleetIntegrationsStateContextProvider>

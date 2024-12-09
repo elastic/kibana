@@ -9,21 +9,27 @@ import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { useCheckPermissions } from '../../../../../../hooks';
+import { useCheckPermissions } from '../../../../../hooks';
 
-import { useFleetServerTabs } from '../../../../../../components';
-import { Header } from '../../../../../../components/fleet_server_instructions';
-import { FleetServerMissingESPrivileges } from '../../../../../agents/components';
-import type { MultiPageStepLayoutProps } from '../../types';
+import { useFleetServerTabs } from '../../../../../components';
+import { Header } from '../../../../../components/fleet_server_instructions';
+import { FleetServerMissingESPrivileges } from '../../../../agents/components';
+import type { EmbeddedIntegrationStepsLayoutProps } from '../types';
 
-export const AddFleetServerStepFromOnboardingHub: React.FC<MultiPageStepLayoutProps> = ({
+export const AddFleetServerStepFromOnboardingHub: React.FC<EmbeddedIntegrationStepsLayoutProps> = ({
+  agentPolicy,
+  selectedAgentPolicies,
   onCancel,
   onBack,
+  isManaged,
+  setIsManaged,
+  onNext,
 }) => {
   const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(
     onCancel,
-    onBack
+    onNext
   );
+
   const { permissionsError, isPermissionsLoading } = useCheckPermissions();
 
   return (

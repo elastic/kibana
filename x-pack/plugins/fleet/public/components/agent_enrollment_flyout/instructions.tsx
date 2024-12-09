@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { FleetStatus } from '../../hooks';
 import { useFleetStatus, useFleetServerStandalone, useGetEnrollmentSettings } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
@@ -18,6 +19,22 @@ import { AdvancedTab } from '../../applications/fleet/components/fleet_server_in
 import type { InstructionProps } from './types';
 import { ManagedSteps, StandaloneSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
+
+export const shouldShowFleetServerEnrollment = ({
+  isFleetServerStandalone,
+  isFleetServerPolicySelected,
+  enrollmentSettings,
+  fleetStatusMissingRequirements,
+}: {
+  isFleetServerStandalone: boolean;
+  isFleetServerPolicySelected: boolean | undefined;
+  enrollmentSettings: any;
+  fleetStatusMissingRequirements: FleetStatus['missingRequirements'];
+}) =>
+  !isFleetServerStandalone &&
+  !isFleetServerPolicySelected &&
+  (!enrollmentSettings?.fleet_server.has_active ||
+    (fleetStatusMissingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
 export const Instructions = (props: InstructionProps) => {
   const {
@@ -43,11 +60,12 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerStandalone ||
     (fleetStatus.isReady && enrollmentSettings?.fleet_server.has_active && fleetServerHost);
 
-  const showFleetServerEnrollment =
-    !isFleetServerStandalone &&
-    !isFleetServerPolicySelected &&
-    (!enrollmentSettings?.fleet_server.has_active ||
-      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
+  const showFleetServerEnrollment = shouldShowFleetServerEnrollment({
+    isFleetServerStandalone,
+    isFleetServerPolicySelected,
+    enrollmentSettings,
+    fleetStatusMissingRequirements: fleetStatus.missingRequirements,
+  });
 
   useEffect(() => {
     // If we detect a CloudFormation integration, we want to hide the selection type

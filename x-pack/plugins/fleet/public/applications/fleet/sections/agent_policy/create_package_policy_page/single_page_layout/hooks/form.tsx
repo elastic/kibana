@@ -133,6 +133,17 @@ const DEFAULT_PACKAGE_POLICY = {
   inputs: [],
 };
 
+export interface UseOnSubmitProps {
+  agentCount: number;
+  selectedPolicyTab: SelectedPolicyTab;
+  newAgentPolicy: NewAgentPolicy;
+  withSysMonitoring: boolean;
+  queryParamsPolicyId: string | undefined;
+  packageInfo?: PackageInfo;
+  integrationToEnable?: string;
+  hasFleetAddAgentsPrivileges: boolean;
+}
+
 export function useOnSubmit({
   agentCount,
   selectedPolicyTab,
@@ -142,16 +153,7 @@ export function useOnSubmit({
   packageInfo,
   integrationToEnable,
   hasFleetAddAgentsPrivileges,
-}: {
-  packageInfo?: PackageInfo;
-  newAgentPolicy: NewAgentPolicy;
-  withSysMonitoring: boolean;
-  selectedPolicyTab: SelectedPolicyTab;
-  agentCount: number;
-  queryParamsPolicyId: string | undefined;
-  integrationToEnable?: string;
-  hasFleetAddAgentsPrivileges: boolean;
-}) {
+}: UseOnSubmitProps) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();

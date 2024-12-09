@@ -134,10 +134,14 @@ export function Detail({
   originFrom,
   routesEnabled = true,
   onAddIntegrationPolicyClick,
+  onDetailsTabClick,
+  selectedDetailsTab = 'overview',
 }: {
   originFrom?: string;
   routesEnabled?: boolean;
   onAddIntegrationPolicyClick?: () => void;
+  onDetailsTabClick?: (tabId: DetailViewPanelName) => void;
+  selectedDetailsTab?: DetailViewPanelName;
 }) {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const {
@@ -145,10 +149,10 @@ export function Detail({
     pkgkey: pkgKeyContext,
     panel: panelContext,
   } = useIntegrationsStateContext();
-  const [selectedPanel, setSelectedPanel] = useState<DetailViewPanelName>(panelContext);
+
   const { pkgkey: pkgkeyParam, panel: panelParam } = useParams<DetailParams>();
   const pkgkey = pkgkeyParam || pkgKeyContext;
-  const panel = panelParam || selectedPanel;
+  const panel = panelParam || selectedDetailsTab;
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
@@ -664,7 +668,7 @@ export function Detail({
             : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('overview');
+          onDetailsTabClick?.('overview');
         },
       },
     ];
@@ -688,7 +692,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('policies');
+          onDetailsTabClick?.('policies');
         },
       });
     }
@@ -718,7 +722,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('assets');
+          onDetailsTabClick?.('assets');
         },
       });
     }
@@ -742,7 +746,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('settings');
+          onDetailsTabClick?.('settings');
         },
       });
     }
@@ -766,7 +770,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('configs');
+          onDetailsTabClick?.('configs');
         },
       });
     }
@@ -790,7 +794,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('custom');
+          onDetailsTabClick?.('custom');
         },
       });
     }
@@ -814,7 +818,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('api-reference');
+          onDetailsTabClick?.('api-reference');
         },
       });
     }
@@ -833,6 +837,7 @@ export function Detail({
     showConfigTab,
     showCustomTab,
     showDocumentationTab,
+    onDetailsTabClick,
     routesEnabled,
     numOfDeferredInstallations,
   ]);

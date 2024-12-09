@@ -11,6 +11,7 @@ import { CreatePackagePolicyFromOnboardingHub } from './create_package_policy';
 import { AgentEnrollmentFromOnboardingHub } from './agent_enrollment';
 import { AddFleetServerStepFromOnboardingHub } from './add_fleet_server';
 import { ConfirmDataStepFromOnboardingHub } from './confirm_incoming_data';
+import { CheckFleetServerRequiredFromOnboardingHub } from './check_fleet_server_required';
 
 const addIntegrationFromOnboardingHub = {
   title: i18n.translate('xpack.fleet.createFirstPackagePolicy.addIntegrationStepTitle', {
@@ -40,9 +41,20 @@ const confirmDataStepFromOnboardingHub = {
   component: ConfirmDataStepFromOnboardingHub,
 };
 
-export const onboardingSteps = [
+const checkFleetServerRequirementsStep = {
+  title: i18n.translate(
+    'xpack.fleet.createFirstPackagePolicy.checkFleetServerRequirementsStepTitle',
+    {
+      defaultMessage: 'Check Fleet Server requirements',
+    }
+  ),
+  component: CheckFleetServerRequiredFromOnboardingHub,
+};
+
+export const onboardingManagedSteps = [
   addIntegrationFromOnboardingHub,
-  agentEnrollmentStepFromOnboardingHub,
+  checkFleetServerRequirementsStep,
   addFleetServerStepFromOnboardingHub,
+  agentEnrollmentStepFromOnboardingHub,
   confirmDataStepFromOnboardingHub,
 ];

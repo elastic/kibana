@@ -123,7 +123,7 @@ export const AgentStandaloneBottomBar: React.FC<{
   );
 };
 
-export const FinalBottomBar: React.FC<{
+const FinalBottomBar: React.FC<{
   pkgkey: string;
 }> = ({ pkgkey }) => {
   const isK8s = pkgkey.includes(FLEET_KUBERNETES_PACKAGE);
