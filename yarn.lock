@@ -5808,7 +5808,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-plugin@link:x-pack/plugins/global_search":
+"@kbn/global-search-plugin@link:x-pack/platform/plugins/shared/global_search":
   version "0.0.0"
   uid ""
 
