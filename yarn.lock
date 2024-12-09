@@ -5312,7 +5312,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-shared@link:packages/deeplinks/shared":
+"@kbn/deeplinks-shared@link:src/platform/packages/shared/deeplinks/shared":
   version "0.0.0"
   uid ""
 

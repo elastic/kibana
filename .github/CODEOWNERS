@@ -258,7 +258,6 @@ packages/deeplinks/ml @elastic/ml-ui
 packages/deeplinks/observability @elastic/obs-ux-management-team
 packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/security @elastic/security-solution
-packages/deeplinks/shared @elastic/appex-sharedux
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/default-nav/devtools @elastic/kibana-management
 packages/default-nav/management @elastic/kibana-management
@@ -616,6 +615,7 @@ src/platform/packages/shared/content-management/table_list_view @elastic/appex-s
 src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
+src/platform/packages/shared/deeplinks/shared @elastic/appex-sharedux
 src/platform/packages/shared/kbn-bfetch-error @elastic/appex-sharedux
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
