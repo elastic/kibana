@@ -65,11 +65,11 @@ export function getTimeDifferenceInSeconds({
   }
 
   const rangeInSeconds = (endDate - startDate) / 1000;
-  return rangeInSeconds;
+  return Math.round(rangeInSeconds);
 }
 
 export function getOffsetFromNowInSeconds(epochDate: number) {
   const now = Date.now();
 
-  return (epochDate - now) / 1000;
+  return Math.round((epochDate - now) / 1000);
 }

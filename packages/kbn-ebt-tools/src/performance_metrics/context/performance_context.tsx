@@ -25,11 +25,6 @@ export interface EventData {
   meta?: Meta;
 }
 
-interface PerformanceMeta {
-  queryRangeSecs: number;
-  queryOffsetSecs: number;
-}
-
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
   const [isRendered, setIsRendered] = useState(false);
   const location = useLocation();

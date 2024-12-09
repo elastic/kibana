@@ -75,7 +75,6 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
               target,
               query_range_secs: meta?.queryRangeSecs,
               query_offset_secs: meta?.queryOffsetSecs,
-              ...meta,
             },
           });
         } catch (error) {
