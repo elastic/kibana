@@ -94,7 +94,7 @@ describe('connectors_selection', () => {
 
   it('renders a selector', () => {
     const wrapper = mountWithIntl(
-      <KibanaThemeProvider theme={core.theme}>
+      <KibanaThemeProvider {...core}>
         <ConnectorsSelection
           accordionIndex={0}
           actionItem={actionItem}
@@ -113,7 +113,7 @@ describe('connectors_selection', () => {
 
   it('renders the title of the connector', () => {
     render(
-      <KibanaThemeProvider theme={core.theme}>
+      <KibanaThemeProvider {...core}>
         <ConnectorsSelection
           accordionIndex={0}
           actionItem={actionItem}

@@ -8,6 +8,7 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery } from './modal';
@@ -44,9 +45,12 @@ describe('Modal Inspect', () => {
 
   const renderModalInspectQuery = () => {
     const theme = { theme$: of({ darkMode: false, name: 'amsterdam' }) };
+    const userProfile = userProfileServiceMock.createStart();
     return render(<ModalInspectQuery {...defaultProps} />, {
       wrapper: ({ children }) => (
-        <KibanaThemeProvider theme={theme}>{children}</KibanaThemeProvider>
+        <KibanaThemeProvider theme={theme} userProfile={userProfile}>
+          {children}
+        </KibanaThemeProvider>
       ),
     });
   };
