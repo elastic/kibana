@@ -22,7 +22,7 @@ import { getPlaywrightGrepTag } from '../utils';
 
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
-  const reportTime = getTimeReporter(log, 'scripts/scout_test');
+  const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
 
   const config = await loadServersConfig(options.mode, log);
   const playwrightGrepTag = getPlaywrightGrepTag(config);
