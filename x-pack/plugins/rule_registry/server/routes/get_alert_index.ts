@@ -8,7 +8,6 @@
 import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validFeatureIds } from '@kbn/rule-data-utils';
 import { buildRouteValidation } from './utils/route_validation';
 
 import { RacRequestHandlerContext } from '../types';
@@ -22,7 +21,7 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
         query: buildRouteValidation(
           t.exact(
             t.partial({
-              features: t.string,
+              ruleTypeIds: t.union([t.string, t.array(t.string)]),
             })
           )
         ),
@@ -40,10 +39,17 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { features } = request.query;
-        const indexName = await alertsClient.getAuthorizedAlertsIndices(
-          features?.split(',') ?? validFeatureIds
-        );
+        const { ruleTypeIds } = request.query;
+
+        const ruleTypeIdsAsArray =
+          ruleTypeIds != null
+            ? Array.isArray(ruleTypeIds)
+              ? ruleTypeIds
+              : [ruleTypeIds]
+            : ruleTypeIds;
+
+        const indexName = await alertsClient.getAuthorizedAlertsIndices(ruleTypeIdsAsArray);
+
         return response.ok({
           body: { index_name: indexName },
         });

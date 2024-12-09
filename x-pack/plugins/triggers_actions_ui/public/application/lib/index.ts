@@ -7,6 +7,5 @@
 
 export { templateActionVariable } from './template_action_variable';
 export { hasMustacheTokens } from './has_mustache_tokens';
-export type { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/action_variables';
 export { updateActionConnector, executeAction } from './action_connector_api';
 export { isRuleSnoozed } from './is_rule_snoozed';
