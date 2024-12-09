@@ -17,7 +17,7 @@ import {
 
 export type ToMountPointParams = Pick<
   KibanaRenderContextProviderProps,
-  'analytics' | 'i18n' | 'theme'
+  'analytics' | 'i18n' | 'theme' | 'userProfile'
 >;
 
 /**

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 
-import type { ModelItem } from '../models_list';
+import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
 import { AddInferencePipelineFooter } from '../../components/shared';
@@ -40,7 +40,7 @@ import { useTestTrainedModelsContext } from '../test_models/test_trained_models_
 
 export interface CreatePipelineForModelFlyoutProps {
   onClose: (refreshList?: boolean) => void;
-  model: ModelItem;
+  model: TrainedModelItem;
 }
 
 export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps> = ({
