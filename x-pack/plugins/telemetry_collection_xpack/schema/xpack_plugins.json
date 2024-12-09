@@ -19470,6 +19470,22 @@
                   }
                 }
               }
+            },
+            "legacy_siem_signals": {
+              "properties": {
+                "non_migrated_indices_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of non migrated legacy siem signals indices"
+                  }
+                },
+                "spaces_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Total number of Kibana spaces that have non migrated legacy siem signals indices"
+                  }
+                }
+              }
             }
           }
         },

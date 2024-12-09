@@ -14,7 +14,6 @@ import type { SignalsMigrationSO } from './saved_objects_schema';
 /**
  * Deletes a completed migration:
  *   * deletes the migration SO
- *   * deletes the underlying task document
  *   * applies deletion policy to the relevant index
  *
  * @param esClient An {@link ElasticsearchClient}
@@ -40,7 +39,7 @@ export const deleteMigration = async ({
     return migration;
   }
 
-  const { destinationIndex, sourceIndex, taskId } = migration.attributes;
+  const { destinationIndex, sourceIndex } = migration.attributes;
 
   if (isMigrationFailed(migration)) {
     await applyMigrationCleanupPolicy({
@@ -57,7 +56,6 @@ export const deleteMigration = async ({
     });
   }
 
-  await esClient.delete({ index: '.tasks', id: taskId });
   await deleteMigrationSavedObject({ id: migration.id, soClient });
 
   return migration;
