@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as cli from './src/cli';
-export { expect, test, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
-export type {
-  ScoutPage,
-  ScoutPlaywrightOptions,
-  ScoutTestOptions,
-  PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  EsArchiverFixture,
-} from './src/playwright';
+import path from 'node:path';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
+export const SCOUT_OUTPUT_ROOT = path.resolve(REPO_ROOT, '.scout');
+
+// Servers
+export const SCOUT_SERVERS_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'servers');
+
+// Reporting
+export const SCOUT_REPORT_OUTPUT_ROOT = path.resolve(SCOUT_OUTPUT_ROOT, 'reports');
