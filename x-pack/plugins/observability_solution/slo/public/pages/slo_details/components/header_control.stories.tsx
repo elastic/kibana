@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ComponentStory } from '@storybook/react';
-
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import React from 'react';
 import { buildSlo } from '../../../data/slo/slo';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { HeaderControl as Component, Props } from './header_control';
 
 export default {
@@ -22,11 +21,10 @@ const Template: ComponentStory<typeof Component> = (props: Props) => <Component 
 
 const defaultProps: Props = {
   slo: buildSlo(),
-  isLoading: false,
 };
 
 export const Default = Template.bind({});
 Default.args = defaultProps;
 
 export const WithLoading = Template.bind({});
-WithLoading.args = { slo: undefined, isLoading: true };
+WithLoading.args = { slo: undefined };
