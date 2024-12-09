@@ -57,7 +57,7 @@ export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps
   const visibleFields = useMemo(
     () =>
       convertFieldsToFallbackFields({
-        // `discover:searchFieldsFromSource` adds `_source` to the columns, but we should exclude it for Field Statistics
+        // If `_source` is in the columns, we should exclude it for Field Statistics
         fields: columns.filter((col) => col !== '_source'),
         additionalFieldGroups,
       }),

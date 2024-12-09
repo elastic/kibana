@@ -76,6 +76,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     getTagIdsFromReferences: () => [],
     isTaggingEnabled: () => true,
     isFavoritesEnabled: () => false,
+    isKibanaVersioningEnabled: false,
     ...params,
   };
 

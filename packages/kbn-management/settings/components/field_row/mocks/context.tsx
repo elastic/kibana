@@ -11,6 +11,7 @@ import React, { ReactChild } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
@@ -26,10 +27,12 @@ const createRootMock = () => {
     Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
   };
   const theme = themeServiceMock.createStartContract();
+  const userProfile = userProfileServiceMock.createStart();
   return {
     analytics,
     i18n,
     theme,
+    userProfile,
   };
 };
 

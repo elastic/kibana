@@ -24,6 +24,8 @@ Follow these steps to do this:
   * 'structured': If the log samples have structured message body with key-value pairs then classify it as "name: structured". Look for a flat list of key-value pairs, often separated by some delimiters. Consider variations in formatting, such as quotes around values ("key=value", key="value"), special characters in keys or values, or escape sequences.
   * 'unstructured': If the log samples have unstructured body like a free-form text then classify it as "name: unstructured".
   * 'cef': If the log samples have Common Event Format (CEF) then classify it as "name: cef".
+  * 'leef': If the log samples have Log Event Extended Format (LEEF) then classify it as "name: leef".
+  * 'fix': If the log samples have Financial Information eXchange (FIX) then classify it as "name: fix".
   * 'unsupported': If you cannot put the format into any of the above categories then classify it with "name: unsupported".
 2. Header: for structured and unstructured format:
   - if the samples have any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId in the beginning information then set "header: true".

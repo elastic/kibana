@@ -14,10 +14,12 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { getListOfSloSummaryIndices } from '../../common/summary_indices';
-import { StoredSLOSettings } from '../domain/models';
-import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../saved_objects/slo_settings';
+import { SLOSettings, StoredSLOSettings } from '../domain/models';
+import { SO_SLO_SETTINGS_TYPE, sloSettingsObjectId } from '../saved_objects/slo_settings';
 
-export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
+export const getSloSettings = async (
+  soClient: SavedObjectsClientContract
+): Promise<SLOSettings> => {
   try {
     const soObject = await soClient.get<StoredSLOSettings>(
       SO_SLO_SETTINGS_TYPE,
@@ -41,7 +43,7 @@ export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
 export const storeSloSettings = async (
   soClient: SavedObjectsClientContract,
   params: PutSLOSettingsParams
-) => {
+): Promise<SLOSettings> => {
   const object = await soClient.create<StoredSLOSettings>(
     SO_SLO_SETTINGS_TYPE,
     sloSettingsSchema.encode(params),

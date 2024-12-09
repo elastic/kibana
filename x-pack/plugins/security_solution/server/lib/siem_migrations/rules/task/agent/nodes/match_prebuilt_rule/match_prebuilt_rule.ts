@@ -24,7 +24,7 @@ interface GetMatchedRuleResponse {
 export const getMatchPrebuiltRuleNode =
   ({ model, prebuiltRulesMap }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
   async (state) => {
-    const mitreAttackIds = state.original_rule.mitre_attack_ids;
+    const mitreAttackIds = state.original_rule.annotations?.mitre_attack;
     if (!mitreAttackIds?.length) {
       return {};
     }
