@@ -16,13 +16,27 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString } from './common.gen';
+import { NonEmptyString } from '../../api/model/primitives.gen';
+import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
 
 /**
  * The original rule vendor identifier.
  */
 export type OriginalRuleVendor = z.infer<typeof OriginalRuleVendor>;
 export const OriginalRuleVendor = z.literal('splunk');
+
+/**
+ * The original rule annotations containing additional information.
+ */
+export type OriginalRuleAnnotations = z.infer<typeof OriginalRuleAnnotations>;
+export const OriginalRuleAnnotations = z
+  .object({
+    /**
+     * The original rule Mitre Attack IDs.
+     */
+    mitre_attack: z.array(z.string()).optional(),
+  })
+  .catchall(z.unknown());
 
 /**
  * The original rule to migrate.
@@ -40,7 +54,7 @@ export const OriginalRule = z.object({
   /**
    * The original rule name.
    */
-  title: z.string(),
+  title: NonEmptyString,
   /**
    * The original rule description.
    */
@@ -48,15 +62,15 @@ export const OriginalRule = z.object({
   /**
    * The original rule query.
    */
-  query: z.string(),
+  query: z.string().min(1),
   /**
    * The original rule query language.
    */
   query_language: z.string(),
   /**
-   * The original rule Mitre Attack technique IDs.
+   * The original rule annotations containing additional information.
    */
-  mitre_attack_ids: z.array(z.string()).optional(),
+  annotations: OriginalRuleAnnotations.optional(),
 });
 
 /**
@@ -103,6 +117,21 @@ export const ElasticRule = z.object({
  */
 export type ElasticRulePartial = z.infer<typeof ElasticRulePartial>;
 export const ElasticRulePartial = ElasticRule.partial();
+
+/**
+ * The prebuilt rule version.
+ */
+export type PrebuiltRuleVersion = z.infer<typeof PrebuiltRuleVersion>;
+export const PrebuiltRuleVersion = z.object({
+  /**
+   * The latest available version of prebuilt rule.
+   */
+  target: RuleResponse,
+  /**
+   * The currently installed version of prebuilt rule.
+   */
+  current: RuleResponse.optional(),
+});
 
 /**
  * The rule translation result.
