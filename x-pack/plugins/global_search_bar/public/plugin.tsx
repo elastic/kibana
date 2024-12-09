@@ -50,14 +50,14 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
 
   private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
     const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
-    const { application, http, theme, i18n } = core;
+    const { application, http } = core;
     const reportEvent = new EventReporter({ analytics: core.analytics, usageCollection });
 
     const navControl: ChromeNavControl = {
       order: 1000,
       mount: (container) => {
         ReactDOM.render(
-          <KibanaRenderContextProvider theme={theme} i18n={i18n}>
+          <KibanaRenderContextProvider {...core}>
             <SearchBar
               globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
               navigateToUrl={application.navigateToUrl}

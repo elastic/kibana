@@ -395,7 +395,7 @@ export class LensPlugin {
       });
 
       // Let Dashboard know about the Lens panel type
-      embeddable.registerReactEmbeddableSavedObject<LensSavedObjectAttributes>({
+      embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
           const { attributeService } = await getStartServicesForEmbeddable();
           // deserialize the saved object from visualize library
@@ -411,7 +411,6 @@ export class LensPlugin {
             initialState: state,
           });
         },
-        embeddableType: LENS_EMBEDDABLE_TYPE,
         savedObjectType: LENS_EMBEDDABLE_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
           defaultMessage: 'Lens',
