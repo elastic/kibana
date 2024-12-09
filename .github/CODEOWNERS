@@ -394,7 +394,6 @@ packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mapbox-gl @elastic/kibana-presentation
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
-packages/kbn-monaco @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 packages/kbn-object-versioning-utils @elastic/appex-sharedux
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -621,6 +620,7 @@ src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-es
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
+src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management

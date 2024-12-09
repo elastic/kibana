@@ -6408,7 +6408,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/monaco@link:packages/kbn-monaco":
+"@kbn/monaco@link:src/platform/packages/shared/kbn-monaco":
   version "0.0.0"
   uid ""
 

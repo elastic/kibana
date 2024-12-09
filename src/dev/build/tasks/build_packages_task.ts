@@ -111,7 +111,7 @@ export const BuildPackages: Task = {
         'build',
         '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
         '//packages/kbn-ui-shared-deps-src:shared_built_assets',
-        '//packages/kbn-monaco:target_workers',
+        '//src/platform/packages/shared/kbn-monaco:target_workers',
         '--show_result=1',
         '--define=dist=true',
       ],
