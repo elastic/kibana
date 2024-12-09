@@ -8,7 +8,7 @@
 import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { getInferenceServicesRoute } from './get_inference_services';
-import { DisplayType, FieldType } from '../../common/dynamic_config/types';
+import { FieldType } from '../../common/dynamic_config/types';
 
 describe('getInferenceServicesRoute', () => {
   it('returns available service providers', async () => {
@@ -23,12 +23,11 @@ describe('getInferenceServicesRoute', () => {
             task_type: 'completion',
             configuration: {
               user: {
-                display: DisplayType.TEXTBOX,
                 label: 'User',
                 order: 1,
                 required: false,
                 sensitive: false,
-                tooltip: 'Specifies the user issuing the request.',
+                description: 'Specifies the user issuing the request.',
                 type: FieldType.STRING,
                 validations: [],
                 value: '',
@@ -41,12 +40,11 @@ describe('getInferenceServicesRoute', () => {
         ],
         configuration: {
           api_key: {
-            display: DisplayType.TEXTBOX,
             label: 'API Key',
             order: 3,
             required: true,
             sensitive: true,
-            tooltip: `The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.`,
+            description: `The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.`,
             type: FieldType.STRING,
             validations: [],
             value: null,
@@ -55,12 +53,11 @@ describe('getInferenceServicesRoute', () => {
             depends_on: [],
           },
           model_id: {
-            display: DisplayType.TEXTBOX,
             label: 'Model ID',
             order: 2,
             required: true,
             sensitive: false,
-            tooltip: 'The name of the model to use for the inference task.',
+            description: 'The name of the model to use for the inference task.',
             type: FieldType.STRING,
             validations: [],
             value: null,
@@ -69,12 +66,11 @@ describe('getInferenceServicesRoute', () => {
             depends_on: [],
           },
           organization_id: {
-            display: DisplayType.TEXTBOX,
             label: 'Organization ID',
             order: 4,
             required: false,
             sensitive: false,
-            tooltip: 'The unique identifier of your organization.',
+            description: 'The unique identifier of your organization.',
             type: FieldType.STRING,
             validations: [],
             value: null,
@@ -83,12 +79,11 @@ describe('getInferenceServicesRoute', () => {
             depends_on: [],
           },
           url: {
-            display: DisplayType.TEXTBOX,
             label: 'URL',
             order: 1,
             required: true,
             sensitive: false,
-            tooltip:
+            description:
               'The OpenAI API endpoint URL. For more information on the URL, refer to the https://platform.openai.com/docs/api-reference.',
             type: FieldType.STRING,
             validations: [],
@@ -98,12 +93,11 @@ describe('getInferenceServicesRoute', () => {
             depends_on: [],
           },
           'rate_limit.requests_per_minute': {
-            display: DisplayType.NUMERIC,
             label: 'Rate limit',
             order: 5,
             required: false,
             sensitive: false,
-            tooltip:
+            description:
               'Default number of requests allowed per minute. For text_embedding is 3000. For completion is 500.',
             type: FieldType.INTEGER,
             validations: [],
