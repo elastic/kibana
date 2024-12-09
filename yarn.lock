@@ -7352,7 +7352,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data@link:packages/shared-ux/page/analytics_no_data/impl":
+"@kbn/shared-ux-page-analytics-no-data@link:src/platform/packages/private/shared-ux/page/analytics_no_data/impl":
   version "0.0.0"
   uid ""
 
