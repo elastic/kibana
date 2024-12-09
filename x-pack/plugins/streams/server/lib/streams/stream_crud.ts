@@ -537,7 +537,7 @@ async function syncUnmanagedStream({ scopedClusterClient, definition, logger }: 
   if (pipelineName === streamManagedPipelineName) {
     throw new Error('Unmanaged stream cannot have the @stream pipeline as the default pipeline');
   }
-  await findStreamManagedPipelineReferenceAddOrCheckNestedCustomPipeline(
+  await ensureStreamManagedPipelineReference(
     scopedClusterClient,
     pipelineName,
     definition,
@@ -621,7 +621,7 @@ async function findStreamManagedPipelineReference(
   };
 }
 
-async function findStreamManagedPipelineReferenceAddOrCheckNestedCustomPipeline(
+async function ensureStreamManagedPipelineReference(
   scopedClusterClient: IScopedClusterClient,
   pipelineName: string,
   definition: StreamDefinition,
