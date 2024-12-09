@@ -9,11 +9,7 @@
 
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import {
-  DataSourceCategory,
-  RootContext,
-  SolutionType,
-} from '../../../profiles';
+import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
 import { createDeprecationLogsDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
@@ -21,7 +17,8 @@ import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
 describe('deprecationLogsProfileProvider', () => {
   const deprecationLogsProfileProvider = createDeprecationLogsDocumentProfileProvider();
   const VALID_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
-  const VALID_MIXED_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default,.logs-deprecation.abc,.logs-deprecation.def';
+  const VALID_MIXED_INDEX_PATTERN =
+    '.logs-deprecation.elasticsearch-default,.logs-deprecation.abc,.logs-deprecation.def';
   const INVALID_MIXED_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
@@ -65,7 +62,7 @@ describe('deprecationLogsProfileProvider', () => {
     });
     expect(result).toEqual(RESOLUTION_MISMATCH);
   });
-  
+
   it('should NOT match data view sources with a mixed pattern containing not allowed index patterns', () => {
     const result = deprecationLogsProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataSourceCategory } from '../../../profiles';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DataSourceCategory } from '../../../profiles';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { type DataSourceProfileProvider } from '../../../profiles';
 import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
@@ -25,7 +25,7 @@ export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfil
         { name: 'message' },
         { name: 'x-opaque-id' },
         { name: 'elasticsearch.cluster.name' },
-        { name: 'elasticsearch.event.category' }
+        { name: 'elasticsearch.event.category' },
       ],
     }),
   },
@@ -66,4 +66,4 @@ const checkAllIndicesInPatternAreDeprecationLogs = (indexPattern: string | undef
     true
   );
   return result;
-}
+};
