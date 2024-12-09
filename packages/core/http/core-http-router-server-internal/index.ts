@@ -11,7 +11,7 @@ export { filterHeaders } from './src/headers';
 export {
   versionHandlerResolvers,
   CoreVersionedRouter,
-  ALLOWED_PUBLIC_VERSION,
+  BASE_PUBLIC_VERSION,
   unwrapVersionedResponseBodyValidation,
   type HandlerResolutionStrategy,
 } from './src/versioned_router';
