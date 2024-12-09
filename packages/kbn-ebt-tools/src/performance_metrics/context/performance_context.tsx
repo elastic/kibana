@@ -6,8 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isoToEpochRt, decodeOrThrow } from '@kbn/io-ts-utils';
-import * as rt from 'io-ts';
+import {
+  getDateRange,
+  getOffsetFromNowInSeconds,
+  getTimeDifferenceInSeconds,
+} from '@kbn/timerange';
 import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
@@ -17,16 +20,18 @@ import { PerformanceMetricEvent } from '../../performance_metric_events';
 
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
-export const metaRt = rt.type({
-  endDate: isoToEpochRt,
-  startDate: isoToEpochRt,
-});
-
-export type Meta = rt.TypeOf<typeof metaRt>;
-
+export interface Meta {
+  rangeFrom: string;
+  rangeTo: string;
+}
 export interface EventData {
   customMetrics?: CustomMetrics;
   meta?: Meta;
+}
+
+interface PerformanceMeta {
+  queryRangeSecs: number;
+  queryOffsetSecs: number;
 }
 
 function measureInteraction() {
@@ -39,14 +44,23 @@ function measureInteraction() {
      * @param customMetrics - Custom metrics to be included in the performance measure.
      */
     pageReady(pathname: string, eventData?: EventData) {
-      let decodedMeta: Meta | undefined;
+      let performanceMeta: PerformanceMeta | undefined;
       performance.mark(perfomanceMarkers.endPageReady);
 
       if (eventData?.meta) {
-        decodedMeta = decodeOrThrow(
-          metaRt,
-          (message: string) => new Error(`Failed to decode meta type: ${message}`)
-        )(eventData?.meta);
+        const { rangeFrom, rangeTo } = eventData.meta;
+
+        // Convert the date range (`rangeFrom`, `rangeTo`) to epoch timestamps (in milliseconds)
+        const dateRangesInEpoch = getDateRange({
+          from: rangeFrom,
+          to: rangeTo,
+        });
+
+        performanceMeta = {
+          queryRangeSecs: getTimeDifferenceInSeconds(dateRangesInEpoch),
+          queryOffsetSecs:
+            rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate),
+        };
       }
 
       if (!trackedRoutes.includes(pathname)) {
@@ -55,7 +69,7 @@ function measureInteraction() {
             eventName: 'kibana:plugin_render_time',
             type: 'kibana:performance',
             customMetrics: eventData?.customMetrics,
-            meta: decodedMeta,
+            meta: performanceMeta,
           },
           start: perfomanceMarkers.startPageChange,
           end: perfomanceMarkers.endPageReady,
