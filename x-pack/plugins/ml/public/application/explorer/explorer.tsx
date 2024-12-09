@@ -69,16 +69,15 @@ import { FILTER_ACTION } from './explorer_constants';
 // Anomalies Table
 // @ts-ignore
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
-import type { ExplorerState } from './reducers';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 import { AlertsPanel } from './alerts';
 import { useMlIndexUtils } from '../util/index_service';
+import type { ExplorerState } from './explorer_data';
 
 const AnnotationFlyout = dynamic(async () => ({
   default: (await import('../components/annotations/annotation_flyout')).AnnotationFlyout,
@@ -94,8 +93,6 @@ const ExplorerChartsContainer = dynamic(async () => ({
 
 interface ExplorerPageProps {
   jobSelectorProps: JobSelectorProps;
-  noInfluencersConfigured?: boolean;
-  influencers?: ExplorerState['influencers'];
   filterActive?: boolean;
   filterPlaceHolder?: string;
   indexPattern?: DataView;
@@ -107,8 +104,6 @@ interface ExplorerPageProps {
 const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
   children,
   jobSelectorProps,
-  noInfluencersConfigured,
-  influencers,
   filterActive,
   filterPlaceHolder,
   indexPattern,
@@ -147,7 +142,6 @@ interface ExplorerUIProps {
   showCharts: boolean;
   selectedJobsRunning: boolean;
   overallSwimlaneData: OverallSwimlaneData | null;
-  invalidTimeRangeError?: boolean;
   stoppedPartitions?: string[];
   // TODO Remove
   timefilter: TimefilterContract;
@@ -155,6 +149,7 @@ interface ExplorerUIProps {
   timeBuckets: TimeBuckets;
   selectedCells: AppStateSelectedCells | undefined | null;
   swimLaneSeverity?: number;
+  noInfluencersConfigured?: boolean;
 }
 
 export function getDefaultPanelsState() {
@@ -171,7 +166,6 @@ export function getDefaultPanelsState() {
 }
 
 export const Explorer: FC<ExplorerUIProps> = ({
-  invalidTimeRangeError,
   showCharts,
   severity,
   stoppedPartitions,
@@ -182,6 +176,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   swimLaneSeverity,
   explorerState,
   overallSwimlaneData,
+  noInfluencersConfigured,
 }) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
@@ -275,7 +270,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyExplorerPanelState]);
 
-  const { displayWarningToast, displayDangerToast } = useToastNotificationService();
+  const { displayDangerToast } = useToastNotificationService();
   const {
     anomalyTimelineStateService,
     anomalyExplorerCommonStateService,
@@ -298,6 +293,11 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const selectedJobs = useObservable(
     anomalyExplorerCommonStateService.getSelectedJobs$(),
     anomalyExplorerCommonStateService.getSelectedJobs()
+  );
+
+  const selectedGroups = useObservable(
+    anomalyExplorerCommonStateService.getSelectedGroups$(),
+    anomalyExplorerCommonStateService.getSelectedGroups()
   );
 
   const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);
@@ -361,21 +361,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
     [explorerState, language, filterSettings]
   );
 
-  useEffect(() => {
-    if (invalidTimeRangeError) {
-      displayWarningToast(
-        i18n.translate('xpack.ml.explorer.invalidTimeRangeInUrlCallout', {
-          defaultMessage:
-            'The time filter was changed to the full range due to an invalid default time filter. Check the advanced settings for {field}.',
-          values: {
-            field: ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
-          },
-        })
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const {
     services: {
       charts: chartsService,
@@ -387,15 +372,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
-  const {
-    annotations,
-    filterPlaceHolder,
-    indexPattern,
-    influencers,
-    loading,
-    noInfluencersConfigured,
-    tableData,
-  } = explorerState;
+  const { annotations, filterPlaceHolder, indexPattern, influencers, loading, tableData } =
+    explorerState;
 
   const chartsData = useObservable(
     chartsStateService.getChartsData$(),
@@ -442,11 +420,24 @@ export const Explorer: FC<ExplorerUIProps> = ({
       </EuiBadge>
     );
 
+  const handleJobSelectionChange = useCallback(
+    ({ jobIds, time }: { jobIds: string[]; time?: { from: string; to: string } }) => {
+      anomalyExplorerCommonStateService.setSelectedJobs(jobIds, time);
+    },
+    [anomalyExplorerCommonStateService]
+  );
+
+  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
+
   const jobSelectorProps = {
     dateFormatTz: getDateFormatTz(uiSettings),
-  } as JobSelectorProps;
+    onSelectionChange: handleJobSelectionChange,
+    selectedJobIds,
+    selectedGroups,
+  } as unknown as JobSelectorProps;
 
   const noJobsSelected = !selectedJobs || selectedJobs.length === 0;
+
   const hasResults: boolean =
     !!overallSwimlaneData?.points && overallSwimlaneData.points.length > 0;
   const hasResultsWithAnomalies =
@@ -454,7 +445,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
     tableData.anomalies?.length > 0;
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
-  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
 
   useEffect(() => {
     if (!noJobsSelected) {
@@ -650,8 +640,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
     <ExplorerPage
       dataViews={dataViews}
       jobSelectorProps={jobSelectorProps}
-      noInfluencersConfigured={noInfluencersConfigured}
-      influencers={influencers}
       filterActive={filterActive}
       filterPlaceHolder={filterPlaceHolder}
       indexPattern={indexPattern as DataView}

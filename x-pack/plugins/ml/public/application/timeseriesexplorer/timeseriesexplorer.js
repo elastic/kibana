@@ -115,6 +115,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableInterval: PropTypes.string,
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
+    handleJobSelectionChange: PropTypes.func,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -1009,7 +1010,11 @@ export class TimeSeriesExplorer extends React.Component {
 
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
       return (
-        <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+        <TimeSeriesExplorerPage
+          handleJobSelectionChange={this.props.handleJobSelectionChange}
+          dateFormatTz={dateFormatTz}
+          resizeRef={this.resizeRef}
+        >
           <ExplorerNoJobsSelected />
         </TimeSeriesExplorerPage>
       );
@@ -1039,7 +1044,12 @@ export class TimeSeriesExplorer extends React.Component {
     this.previousShowModelBounds = showModelBounds;
 
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+      <TimeSeriesExplorerPage
+        dateFormatTz={dateFormatTz}
+        resizeRef={this.resizeRef}
+        handleJobSelectionChange={this.props.handleJobSelectionChange}
+        selectedJobId={[selectedJobId]}
+      >
         {fieldNamesWithEmptyValues.length > 0 && (
           <>
             <EuiCallOut
