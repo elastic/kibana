@@ -383,7 +383,6 @@ packages/kbn-import-resolver @elastic/kibana-operations
 packages/kbn-index-adapter @elastic/security-threat-hunting
 packages/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
-packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
 packages/kbn-item-buffer @elastic/appex-sharedux
 packages/kbn-jest-serializers @elastic/kibana-operations
@@ -626,6 +625,7 @@ src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
+src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
