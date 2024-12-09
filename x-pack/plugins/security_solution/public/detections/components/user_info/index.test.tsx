@@ -26,7 +26,7 @@ describe('useUserInfo', () => {
       services: {
         application: {
           capabilities: {
-            siem: {
+            siemV2: {
               crud: true,
             },
           },
@@ -73,7 +73,7 @@ describe('useUserInfo', () => {
     const wrapper = ({ children }: { children: JSX.Element }) => (
       <TestProviders>
         <UserPrivilegesProvider
-          kibanaCapabilities={{ siem: { show: true, crud: true } } as unknown as Capabilities}
+          kibanaCapabilities={{ siemV2: { show: true, crud: true } } as unknown as Capabilities}
         >
           <ManageUserInfo>{children}</ManageUserInfo>
         </UserPrivilegesProvider>

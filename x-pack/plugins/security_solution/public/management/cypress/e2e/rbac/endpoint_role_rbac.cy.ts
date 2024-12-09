@@ -18,7 +18,7 @@ import { login, ROLE } from '../../tasks/login';
 describe('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
   const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
     return cy
-      .get('#featurePrivilegeControls_siem')
+      .get('#featurePrivilegeControls_siemV2')
       .findByTestSubj('mutexSubFeaturePrivilegeControl')
       .closest('.euiFlexGroup');
   };

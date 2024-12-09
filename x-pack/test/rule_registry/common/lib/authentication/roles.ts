@@ -40,7 +40,9 @@ export const securitySolutionOnlyAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['space1'],
       },
@@ -57,7 +59,9 @@ export const securitySolutionOnlyAllSpace2: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['space2'],
       },
@@ -74,7 +78,9 @@ export const securitySolutionOnlyRead: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
+          securitySolutionTimeline: ['read'],
+          securitySolutionNotes: ['read'],
         },
         spaces: ['space1'],
       },
@@ -91,7 +97,9 @@ export const securitySolutionOnlyReadSpace2: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
+          securitySolutionTimeline: ['read'],
+          securitySolutionNotes: ['read'],
         },
         spaces: ['space2'],
       },
@@ -183,7 +191,9 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['*'],
       },
@@ -205,7 +215,9 @@ export const securitySolutionOnlyAllSpacesAllWithReadESIndices: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['*'],
       },
@@ -222,7 +234,9 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
+          securitySolutionTimeline: ['read'],
+          securitySolutionNotes: ['read'],
         },
         spaces: ['*'],
       },

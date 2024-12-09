@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ONBOARDING_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
+import { ONBOARDING_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
 import { GETTING_STARTED } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
@@ -14,7 +14,7 @@ export const onboardingLinks: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: ONBOARDING_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.getStarted', {
       defaultMessage: 'Getting started',

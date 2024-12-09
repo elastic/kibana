@@ -24,7 +24,7 @@ import {
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
   SecurityPageName,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
@@ -100,7 +100,7 @@ export const links: LinkItem = {
   skipUrlState: true,
   hideTimeline: true,
   globalNavPosition: 10,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',
@@ -189,7 +189,7 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       experimentalKey: 'riskScoringRoutesEnabled',
       licenseType: 'platinum',
     },
@@ -203,7 +203,7 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
     },
     {
       id: SecurityPageName.responseActionsHistory,

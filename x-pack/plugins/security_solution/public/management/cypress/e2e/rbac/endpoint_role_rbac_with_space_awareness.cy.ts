@@ -88,7 +88,7 @@ describe(
         .findByTestSubj(`space-avatar-${spaceId}`)
         .should('exist');
 
-      cy.get('#row_siem_expansion')
+      cy.get('#row_siemV2_expansion')
         .findByTestSubj('subFeatureEntry')
         .then(($element) => {
           const features: string[] = [];
@@ -119,7 +119,7 @@ describe(
 
     it('should not display the privilege tooltip', () => {
       ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS.forEach((subFeaturePrivilegeId) => {
-        cy.getByTestSubj(`securitySolution_siem_${subFeaturePrivilegeId}_nameTooltip`).should(
+        cy.getByTestSubj(`securitySolution_siemV2_${subFeaturePrivilegeId}_nameTooltip`).should(
           'not.exist'
         );
       });
