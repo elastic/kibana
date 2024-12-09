@@ -7,6 +7,7 @@
 
 import { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
 import { getIndexConnectorType } from './es_index';
@@ -83,5 +84,8 @@ export function registerConnectorTypes({
   }
   if (ExperimentalFeaturesService.get().inferenceConnectorOn) {
     connectorTypeRegistry.register(getInferenceConnectorType());
+  }
+  if (ExperimentalFeaturesService.get().microsoftDefenderEndpointOn) {
+    connectorTypeRegistry.register(getMicrosoftDefenderEndpointConnectorType());
   }
 }
