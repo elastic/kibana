@@ -41,6 +41,8 @@ export const securitySolutionOnlyAll: Role = {
       {
         feature: {
           siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['space1'],
       },
@@ -58,6 +60,8 @@ export const securitySolutionOnlyAllSpace2: Role = {
       {
         feature: {
           siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['space2'],
       },
@@ -75,6 +79,8 @@ export const securitySolutionOnlyRead: Role = {
       {
         feature: {
           siemV2: ['read'],
+          securitySolutionTimeline: ['read'],
+          securitySolutionNotes: ['read'],
         },
         spaces: ['space1'],
       },
@@ -92,6 +98,8 @@ export const securitySolutionOnlyReadSpace2: Role = {
       {
         feature: {
           siemV2: ['read'],
+          securitySolutionTimeline: ['read'],
+          securitySolutionNotes: ['read'],
         },
         spaces: ['space2'],
       },
@@ -184,6 +192,8 @@ export const securitySolutionOnlyAllSpacesAll: Role = {
       {
         feature: {
           siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['*'],
       },
@@ -206,6 +216,8 @@ export const securitySolutionOnlyAllSpacesAllWithReadESIndices: Role = {
       {
         feature: {
           siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
         spaces: ['*'],
       },
@@ -223,6 +235,8 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
       {
         feature: {
           siemV2: ['read'],
+          securitySolutionTimeline: ['read'],
+          securitySolutionNotes: ['read'],
         },
         spaces: ['*'],
       },
