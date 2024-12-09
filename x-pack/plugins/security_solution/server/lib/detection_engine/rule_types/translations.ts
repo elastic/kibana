@@ -31,7 +31,7 @@ export const EQL_SEARCH_REQUEST_DESCRIPTION = i18n.translate(
 export const FIND_THRESHOLD_BUCKETS_DESCRIPTION = (afterBucket?: string) =>
   afterBucket
     ? i18n.translate(
-        'xpack.securitySolution.detectionEngine.esqlRuleType.findThresholdRuleBucketsDescription',
+        'xpack.securitySolution.detectionEngine.esqlRuleType.findThresholdRuleBucketsAfterDescription',
         {
           defaultMessage: 'Find all terms that exceeds threshold value after {afterBucket}',
           values: { afterBucket },
