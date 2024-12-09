@@ -321,7 +321,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
           },
           supertest
         );
-        objectRemover.add(rule.id, 'alert', 'alerts');
+        objectRemover.add(rule.id, 'rule', 'alerting');
 
         // refresh to see rule
         await browser.refresh();

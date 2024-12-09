@@ -111,7 +111,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // for our test helper to input into the flyout.
         const {
           actions,
-          alertTypeId,
+          rule_type_id: alertTypeId,
           consumer,
           id,
           params: { numTimes, timerangeUnit, timerangeCount, filters },
@@ -191,7 +191,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // for our test helper to input into the flyout.
         const {
           actions,
-          alertTypeId,
+          rule_type_id: alertTypeId,
           consumer,
           id,
           params,
