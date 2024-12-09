@@ -18,6 +18,7 @@ export function StreamsAppPageBody({ children }: { children: React.ReactNode }) 
         border-top: 1px solid ${theme.colors.lightShade};
         border-radius: 0px;
         display: flex;
+        overflow-y: auto;
       `}
       paddingSize="l"
     >
