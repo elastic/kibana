@@ -4184,7 +4184,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-editor-mock@link:packages/shared-ux/code_editor/mocks":
+"@kbn/code-editor-mock@link:src/platform/packages/shared/shared-ux/code_editor/mocks":
   version "0.0.0"
   uid ""
 

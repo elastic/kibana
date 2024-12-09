@@ -571,7 +571,6 @@ packages/shared-ux/card/no_data/impl @elastic/appex-sharedux
 packages/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 packages/shared-ux/card/no_data/types @elastic/appex-sharedux
 packages/shared-ux/chrome/navigation @elastic/appex-sharedux
-packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
 packages/shared-ux/error_boundary @elastic/appex-sharedux
 packages/shared-ux/file/context @elastic/appex-sharedux
 packages/shared-ux/file/file_picker/impl @elastic/appex-sharedux
@@ -623,6 +622,7 @@ src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/shared/bfetch @elastic/appex-sharedux
 src/platform/plugins/shared/esql @elastic/kibana-esql
