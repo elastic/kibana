@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 import { formatActionToEnqueue } from './format_action_to_enqueue';
 
@@ -62,6 +63,124 @@ describe('formatActionToEnqueue', () => {
         },
       ],
       actionTypeId: 'test',
+    });
+  });
+
+  test('should format a rule action with priority as expected', () => {
+    expect(
+      formatActionToEnqueue({
+        action: {
+          id: '1',
+          group: 'default',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+            contextVal: 'My {{context.value}} goes here',
+            stateVal: 'My {{state.value}} goes here',
+            alertVal:
+              'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+          },
+          uuid: '111-111',
+        },
+        apiKey: 'MTIzOmFiYw==',
+        executionId: '123',
+        ruleConsumer: 'rule-consumer',
+        ruleId: 'aaa',
+        ruleTypeId: 'security-rule',
+        spaceId: 'default',
+        priority: TaskPriority.Low,
+      })
+    ).toEqual({
+      id: '1',
+      uuid: '111-111',
+      params: {
+        foo: true,
+        contextVal: 'My {{context.value}} goes here',
+        stateVal: 'My {{state.value}} goes here',
+        alertVal:
+          'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+      },
+      spaceId: 'default',
+      apiKey: 'MTIzOmFiYw==',
+      consumer: 'rule-consumer',
+      source: {
+        source: {
+          id: 'aaa',
+          type: RULE_SAVED_OBJECT_TYPE,
+        },
+        type: 'SAVED_OBJECT',
+      },
+      executionId: '123',
+      relatedSavedObjects: [
+        {
+          id: 'aaa',
+          type: RULE_SAVED_OBJECT_TYPE,
+          namespace: undefined,
+          typeId: 'security-rule',
+        },
+      ],
+      actionTypeId: 'test',
+      priority: 1,
+    });
+  });
+
+  test('should format a rule action with apiKeyId as expected', () => {
+    expect(
+      formatActionToEnqueue({
+        action: {
+          id: '1',
+          group: 'default',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+            contextVal: 'My {{context.value}} goes here',
+            stateVal: 'My {{state.value}} goes here',
+            alertVal:
+              'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+          },
+          uuid: '111-111',
+        },
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyId: '4534623462346',
+        executionId: '123',
+        ruleConsumer: 'rule-consumer',
+        ruleId: 'aaa',
+        ruleTypeId: 'security-rule',
+        spaceId: 'default',
+        priority: TaskPriority.Low,
+      })
+    ).toEqual({
+      id: '1',
+      uuid: '111-111',
+      params: {
+        foo: true,
+        contextVal: 'My {{context.value}} goes here',
+        stateVal: 'My {{state.value}} goes here',
+        alertVal:
+          'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+      },
+      spaceId: 'default',
+      apiKey: 'MTIzOmFiYw==',
+      consumer: 'rule-consumer',
+      source: {
+        source: {
+          id: 'aaa',
+          type: RULE_SAVED_OBJECT_TYPE,
+        },
+        type: 'SAVED_OBJECT',
+      },
+      executionId: '123',
+      relatedSavedObjects: [
+        {
+          id: 'aaa',
+          type: RULE_SAVED_OBJECT_TYPE,
+          namespace: undefined,
+          typeId: 'security-rule',
+        },
+      ],
+      actionTypeId: 'test',
+      priority: 1,
+      apiKeyId: '4534623462346',
     });
   });
 
