@@ -106,4 +106,13 @@ export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
   total_alerts_detected?: number | null;
   total_alerts_created?: number | null;
   gap_duration_s?: number | null;
+  gap_range?: {
+    lte: string;
+    gte: string;
+  } | null;
+  unfilled_gaps_ms?: {
+    last_1d: number;
+    last_3d: number;
+    last_7d: number;
+  } | null;
 }
