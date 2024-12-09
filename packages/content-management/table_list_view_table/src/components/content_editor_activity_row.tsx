@@ -16,7 +16,10 @@ import { ActivityView, ViewsStats } from '@kbn/content-management-content-insigh
 /**
  * This component is used as an extension for the ContentEditor to render the ActivityView and ViewsStats inside the flyout without depending on them directly
  */
-export const ContentEditorActivityRow: FC<{ item: UserContentCommonSchema }> = ({ item }) => {
+export const ContentEditorActivityRow: FC<{
+  item: UserContentCommonSchema;
+  entityNamePlural?: string;
+}> = ({ item, entityNamePlural }) => {
   return (
     <EuiFormRow
       fullWidth
@@ -40,7 +43,7 @@ export const ContentEditorActivityRow: FC<{ item: UserContentCommonSchema }> = (
       }
     >
       <>
-        <ActivityView item={item} />
+        <ActivityView item={item} entityNamePlural={entityNamePlural} />
         <EuiSpacer size={'s'} />
         <ViewsStats item={item} />
       </>
