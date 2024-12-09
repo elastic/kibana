@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import cytoscape, { type Stylesheet } from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import { getCytoscapeOptions } from './cytoscape_options';
+import { useCytoscapeOptions } from './cytoscape_options';
 import type { EuiThemeType } from '../../../../components/color_range_legend';
 
 cytoscape.use(dagre);
@@ -77,14 +77,15 @@ export function Cytoscape({
   style,
   width,
 }: PropsWithChildren<CytoscapeProps>) {
-  const cytoscapeOptions = useMemo(() => {
+  const cytoscapeOptions = useCytoscapeOptions();
+  const cytoscapeOptionsWithElements = useMemo(() => {
     return {
-      ...getCytoscapeOptions(theme),
+      ...cytoscapeOptions,
       elements,
     };
-  }, [theme, elements]);
+  }, [cytoscapeOptions, elements]);
 
-  const [ref, cy] = useCytoscape(cytoscapeOptions);
+  const [ref, cy] = useCytoscape(cytoscapeOptionsWithElements);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
