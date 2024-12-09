@@ -78,7 +78,7 @@ To run ES with plugins:
 
 
 ### SLM status
-Snapshot lifecycle management (SLM) status is "RUNNING" by default, but it can be stoped manually (for mantenaince purpouses, for instance). When this happens, no schedule snapshots will be taken. Docs: https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshot-lifecycle-management-api.html
+Snapshot lifecycle management (SLM) status is "RUNNING" by default, but it can be stoped manually (for mantenaince purpouses, for instance). When this happens, no schedule snapshots will be taken. Docs: https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshot-lifecycle-management-api.html 
 
 * To check the SLM status you can run `GET _slm/status`
 * To start SLM `POST /_slm/start` 
