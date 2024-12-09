@@ -7388,7 +7388,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data-config@link:packages/shared-ux/page/no_data_config/impl":
+"@kbn/shared-ux-page-no-data-config@link:src/platform/packages/shared/shared-ux/page/no_data_config/impl":
   version "0.0.0"
   uid ""
 
