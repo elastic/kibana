@@ -41,7 +41,11 @@ export const DatasetQualityLink: React.FC<DatasetQualityLinkProps> = React.memo(
       }
     };
     return (
-      <LegendActionItem label={UX_LABELS.dataQualityPopup.view} onClick={onClickDataQuality} />
+      <LegendActionItem
+        label={UX_LABELS.dataQualityPopup.view}
+        onClick={onClickDataQuality}
+        dataTestSubj="DatasetQualityAction"
+      />
     );
   }
 );
