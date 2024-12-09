@@ -95,8 +95,7 @@ export class RuleMigrationsTaskClient {
     });
 
     const ruleMigrationsRetriever = new RuleMigrationsRetriever(this.data, migrationId);
-
-    await resourceRetriever.initialize();
+    await ruleMigrationsRetriever.initialize();
 
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
