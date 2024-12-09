@@ -178,6 +178,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     const store = await this.getStore();
     const report = await store.findReportFromTask(task); // receives seq_no and primary_term
+    const logger = this.logger.get(report._id);
 
     if (report.status === 'completed') {
       throw new Error(`Can not claim the report job: it is already completed!`);
@@ -197,7 +198,7 @@ export class ExecuteReportTask implements ReportingTask {
         err.stack = error.stack;
       } else {
         if (report.error && report.error instanceof Error) {
-          errorLogger(this.logger, 'Error executing report', report.error);
+          errorLogger(logger, 'Error executing report', report.error);
         }
         err = new QueueTimeoutError(
           `Max attempts reached (${maxAttempts}). Queue timeout reached.`
@@ -226,7 +227,7 @@ export class ExecuteReportTask implements ReportingTask {
       ...doc,
     });
 
-    this.logger.info(
+    logger.info(
       `Claiming ${claimedReport.jobtype} ${report._id} ` +
         `[_index: ${report._index}] ` +
         `[_seq_no: ${report._seq_no}] ` +
@@ -251,14 +252,15 @@ export class ExecuteReportTask implements ReportingTask {
     error?: ReportingError
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Failing ${report.jobtype} job ${report._id}`;
+    const logger = this.logger.get(report._id);
 
     // log the error
     let docOutput;
     if (error) {
-      errorLogger(this.logger, message, error);
+      errorLogger(logger, message, error);
       docOutput = this._formatOutput(error);
     } else {
-      errorLogger(this.logger, message);
+      errorLogger(logger, message);
     }
 
     // update the report in the store
@@ -287,8 +289,9 @@ export class ExecuteReportTask implements ReportingTask {
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
     const errorParsed = parseError(failedToExecuteErr);
+    const logger = this.logger.get(report._id);
     // log the error
-    errorLogger(this.logger, message, failedToExecuteErr);
+    errorLogger(logger, message, failedToExecuteErr);
 
     // update the report in the store
     const store = await this.getStore();
@@ -350,8 +353,9 @@ export class ExecuteReportTask implements ReportingTask {
     output: CompletedReportOutput
   ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
+    const logger = this.logger.get(report._id);
 
-    this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
+    logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
     const completedTime = moment();
     const docOutput = this._formatOutput(output);
@@ -365,7 +369,7 @@ export class ExecuteReportTask implements ReportingTask {
 
     const resp = await store.setReportCompleted(report, doc);
 
-    this.logger.info(`Saved ${report.jobtype} job ${docId}`);
+    logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no!;
     report._primary_term = resp._primary_term!;
 
@@ -464,11 +468,12 @@ export class ExecuteReportTask implements ReportingTask {
 
           const { jobtype: jobType, attempts } = report;
           const maxAttempts = this.getMaxAttempts();
+          const logger = this.logger.get(jobId);
 
-          this.logger.debug(
+          logger.debug(
             `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
           );
-          this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
+          logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           const eventLog = this.reporting.getEventLogger(
             new Report({ ...task, _id: task.id, _index: task.index })
@@ -502,7 +507,9 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
+            logger.debug(`Begin waiting for the stream's pending callbacks...`);
             await finishedWithNoPendingCallbacks(stream);
+            logger.info(`The stream's pending callbacks have completed.`);
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
@@ -513,24 +520,21 @@ export class ExecuteReportTask implements ReportingTask {
             });
 
             if (output) {
-              this.logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+              // Update the job status to "completed"
               report = await this._completeJob(report, {
                 ...output,
                 size: stream.bytesWritten,
               });
             }
             // untrack the report for concurrency awareness
-            this.logger.debug(`Stopping ${jobId}.`);
+            logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
             eventLog.logError(failedToExecuteErr);
 
             await this._saveExecutionError(report, failedToExecuteErr).catch(
               (failedToSaveError) => {
-                errorLogger(
-                  this.logger,
-                  `Error in saving execution error ${jobId}`,
-                  failedToSaveError
-                );
+                errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
               }
             );
 
@@ -541,7 +545,7 @@ export class ExecuteReportTask implements ReportingTask {
             throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
             this.reporting.untrackReport(jobId);
-            this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
+            logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           }
         },
 
@@ -551,7 +555,7 @@ export class ExecuteReportTask implements ReportingTask {
          */
         cancel: async () => {
           if (jobId) {
-            this.logger.warn(`Cancelling job ${jobId}...`);
+            this.logger.get(jobId).warn(`Cancelling job ${jobId}...`);
           }
           cancellationToken.cancel();
         },

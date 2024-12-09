@@ -169,15 +169,7 @@ paths:
     get:
       deprecated: true
       operationId: get-actions
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses: {}
       summary: Get all connectors
       tags:
@@ -187,14 +179,6 @@ paths:
       deprecated: true
       operationId: post-actions-action
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -275,14 +259,6 @@ paths:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
       operationId: delete-actions-action-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -306,14 +282,6 @@ paths:
       deprecated: true
       operationId: get-actions-action-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: An identifier for the connector.
           in: path
           name: id
@@ -367,14 +335,6 @@ paths:
       deprecated: true
       operationId: put-actions-action-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -455,14 +415,6 @@ paths:
       deprecated: true
       operationId: post-actions-action-id-execute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -536,14 +488,6 @@ paths:
       description: You do not need any Kibana feature privileges to run this API.
       operationId: get-actions-connector-types
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).
           in: query
           name: feature_id
@@ -566,14 +510,6 @@ paths:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
       operationId: delete-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -596,14 +532,6 @@ paths:
     get:
       operationId: get-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: An identifier for the connector.
           in: path
           name: id
@@ -659,14 +587,6 @@ paths:
     post:
       operationId: post-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -813,14 +733,6 @@ paths:
     put:
       operationId: put-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -950,14 +862,6 @@ paths:
       description: You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.
       operationId: post-actions-connector-id-execute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -1073,15 +977,7 @@ paths:
   /api/actions/connectors:
     get:
       operationId: get-actions-connectors
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           description: Indicates a successful call.
@@ -1097,15 +993,7 @@ paths:
     get:
       deprecated: true
       operationId: get-actions-list-action-types
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses: {}
       summary: Get connector types
       tags:
@@ -1456,14 +1344,6 @@ paths:
     delete:
       operationId: delete-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -1492,14 +1372,6 @@ paths:
     get:
       operationId: get-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The identifier for the rule.
           in: path
           name: id
@@ -2152,14 +2024,6 @@ paths:
     post:
       operationId: post-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3075,14 +2939,6 @@ paths:
     put:
       operationId: put-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3957,14 +3813,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-disable
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -4006,14 +3854,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-enable
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -4043,14 +3883,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-mute-all
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -4080,14 +3912,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-unmute-all
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -4117,14 +3941,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-update-api-key
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -4156,14 +3972,6 @@ paths:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -4199,14 +4007,6 @@ paths:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -4242,14 +4042,6 @@ paths:
     get:
       operationId: get-alerting-rules-find
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The number of rules to return per page.
           in: query
           name: per_page
@@ -19151,14 +18943,6 @@ paths:
     get:
       operationId: get-security-role
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.
           in: query
           name: replaceDeprecatedPrivileges
@@ -19180,14 +18964,6 @@ paths:
     delete:
       operationId: delete-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19210,14 +18986,6 @@ paths:
     get:
       operationId: get-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The role name.
           in: path
           name: name
@@ -19246,14 +19014,6 @@ paths:
       description: Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
       operationId: put-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19469,14 +19229,6 @@ paths:
     post:
       operationId: post-security-roles
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19677,14 +19429,6 @@ paths:
       description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved searches, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
       operationId: post-spaces-copy-saved-objects
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19763,14 +19507,6 @@ paths:
     post:
       operationId: post-spaces-disable-legacy-url-aliases
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19818,14 +19554,6 @@ paths:
       description: Collect references and space contexts for saved objects.
       operationId: post-spaces-get-shareable-references
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19864,14 +19592,6 @@ paths:
       description: 'Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
       operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19962,14 +19682,6 @@ paths:
       description: Update one or more saved objects to add or remove them from some spaces.
       operationId: post-spaces-update-objects-spaces
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20030,14 +19742,6 @@ paths:
     get:
       operationId: get-spaces-space
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Specifies which authorization checks are applied to the API call. The default value is `any`.
           in: query
           name: purpose
@@ -20084,14 +19788,6 @@ paths:
     post:
       operationId: post-spaces-space
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20158,14 +19854,6 @@ paths:
       description: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
       operationId: delete-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20190,14 +19878,6 @@ paths:
     get:
       operationId: get-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The space identifier.
           in: path
           name: id
@@ -20218,14 +19898,6 @@ paths:
     put:
       operationId: put-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20297,14 +19969,6 @@ paths:
     get:
       operationId: get-status
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Set to "true" to get the response in v7 format.
           in: query
           name: v7format

@@ -374,12 +374,15 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateRuleMigrationRequestParamsInput,
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationPrebuiltRulesRequestParamsInput,
+  GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
@@ -696,7 +699,7 @@ Migrations are initiated per index. While the process is neither destructive nor
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
-        path: '/internal/siem_migrations/rules',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1474,6 +1477,24 @@ finalize it.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves all available prebuilt rules (installed and installable)
+   */
+  async getRuleMigrationPrebuiltRules(props: GetRuleMigrationPrebuiltRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationPrebuiltRules`);
+    return this.kbnClient
+      .request<GetRuleMigrationPrebuiltRulesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2290,6 +2311,7 @@ export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
 export interface CreateRuleMigrationProps {
+  params: CreateRuleMigrationRequestParamsInput;
   body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateTimelinesProps {
@@ -2425,6 +2447,9 @@ export interface GetRuleExecutionResultsProps {
 export interface GetRuleMigrationProps {
   query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
+}
+export interface GetRuleMigrationPrebuiltRulesProps {
+  params: GetRuleMigrationPrebuiltRulesRequestParamsInput;
 }
 export interface GetRuleMigrationResourcesProps {
   query: GetRuleMigrationResourcesRequestQueryInput;

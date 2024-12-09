@@ -395,7 +395,7 @@ x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
 src/plugins/discover_shared @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 packages/kbn-discover-utils @elastic/kibana-data-discovery
-packages/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
@@ -433,13 +433,13 @@ packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
-src/plugins/esql @elastic/kibana-esql
-packages/kbn-esql-ast @elastic/kibana-esql
+src/platform/plugins/shared/esql @elastic/kibana-esql
+src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 examples/esql_ast_inspector @elastic/kibana-esql
-src/plugins/esql_datagrid @elastic/kibana-esql
-packages/kbn-esql-editor @elastic/kibana-esql
-packages/kbn-esql-utils @elastic/kibana-esql
-packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
+src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
+src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
+src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
+src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
 test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
 packages/kbn-event-annotation-common @elastic/kibana-visualizations
@@ -568,7 +568,7 @@ src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-langchain @elastic/security-generative-ai
-packages/kbn-language-documentation @elastic/kibana-esql
+src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 packages/kbn-lens-formula-docs @elastic/kibana-visualizations
@@ -717,6 +717,7 @@ packages/react/kibana_context/root @elastic/appex-sharedux
 packages/react/kibana_context/styled @elastic/appex-sharedux
 packages/react/kibana_context/theme @elastic/appex-sharedux
 packages/react/kibana_mount @elastic/appex-sharedux
+packages/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 packages/kbn-recently-accessed @elastic/appex-sharedux
 x-pack/plugins/remote_clusters @elastic/kibana-management
 test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
@@ -1582,6 +1583,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/plugins/security_solution/public/assistant @elastic/security-generative-ai
 /x-pack/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
+/x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -1687,6 +1689,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/common/hooks/use_form_with_warn @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
