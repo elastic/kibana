@@ -41,7 +41,7 @@ export const register = <Config extends ActionTypeConfig, Secrets extends Action
     executor,
     renderParameterTemplates: connector.renderParameterTemplates,
     isSystemActionType: connector.isSystemActionType,
-    isEdrActionType: connector.isEdrActionType,
+    subFeatureType: connector.subFeatureType,
     getService: connector.getService,
     getKibanaPrivileges: connector.getKibanaPrivileges,
     preSaveHook: connector.preSaveHook,

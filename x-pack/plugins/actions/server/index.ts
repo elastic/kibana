@@ -23,6 +23,7 @@ export type {
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
 } from './types';
+export { SubFeatureType } from './types';
 
 export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
 

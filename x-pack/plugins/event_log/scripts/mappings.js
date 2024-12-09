@@ -301,16 +301,6 @@ exports.EcsCustomPropertyMappings = {
       },
     },
   },
-  api_key: {
-    properties: {
-      id: {
-        type: 'keyword',
-      },
-      name: {
-        type: 'keyword',
-      },
-    },
-  },
 };
 
 /**
@@ -330,7 +320,6 @@ exports.EcsPropertiesToGenerate = [
   'user.name',
   'user.id',
   'kibana',
-  'api_key',
 ];
 
 /**

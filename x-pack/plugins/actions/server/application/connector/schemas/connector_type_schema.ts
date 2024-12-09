@@ -23,5 +23,5 @@ export const connectorTypeSchema = schema.object({
   ]),
   supportedFeatureIds: schema.arrayOf(schema.string()),
   isSystemActionType: schema.boolean(),
-  isEdrActionType: schema.boolean(),
+  subFeatureType: schema.maybe(schema.oneOf([schema.literal('edr')])),
 });

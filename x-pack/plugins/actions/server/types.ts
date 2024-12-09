@@ -45,6 +45,10 @@ export { ActionExecutionSourceType } from './lib';
 import { ConnectorUsageCollector } from './usage';
 export { ConnectorUsageCollector } from './usage';
 
+export enum SubFeatureType {
+  EDR = 'edr',
+}
+
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
@@ -197,7 +201,7 @@ export interface ActionType<
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
   isSystemActionType?: boolean;
-  isEdrActionType?: boolean;
+  subFeatureType?: SubFeatureType;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

@@ -80,7 +80,7 @@ export async function validateActions(
   // check for invalid EDR connectors
   const allConnectorTypes = await actionsClient.listTypes({});
   const edrConnectorTypeIds = new Set(
-    allConnectorTypes.filter((type) => type.isEdrActionType).map((type) => type.id)
+    allConnectorTypes.filter((type) => type.subFeatureType === 'edr').map((type) => type.id)
   );
   const edrActionTypeIds = actionResults
     .map((result) => result.actionTypeId)

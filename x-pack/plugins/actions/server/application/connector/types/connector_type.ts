@@ -19,5 +19,5 @@ export interface ConnectorType {
   minimumLicenseRequired: ConnectorTypeSchemaType['minimumLicenseRequired'];
   supportedFeatureIds: ConnectorTypeSchemaType['supportedFeatureIds'];
   isSystemActionType: ConnectorTypeSchemaType['isSystemActionType'];
-  isEdrActionType: ConnectorTypeSchemaType['isEdrActionType'];
+  subFeatureType?: ConnectorTypeSchemaType['subFeatureType'];
 }

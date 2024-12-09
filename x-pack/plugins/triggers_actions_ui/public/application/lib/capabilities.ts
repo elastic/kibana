@@ -18,8 +18,11 @@ type Capabilities = Record<string, any>;
 
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
-export const hasExecuteActionsCapability = (capabilities: Capabilities, isEdrAction?: boolean) =>
-  isEdrAction ? capabilities?.actions?.executeEdr : capabilities?.actions?.execute;
+export const hasExecuteActionsCapability = (
+  capabilities: Capabilities,
+  isSubFeatureAction?: boolean
+) =>
+  isSubFeatureAction ? capabilities?.actions?.executeSubFeature : capabilities?.actions?.execute;
 
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;

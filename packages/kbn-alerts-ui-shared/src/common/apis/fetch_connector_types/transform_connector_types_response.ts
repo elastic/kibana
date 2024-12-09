@@ -15,7 +15,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   minimum_license_required: minimumLicenseRequired,
   supported_feature_ids: supportedFeatureIds,
   is_system_action_type: isSystemActionType,
-  is_edr_action_type: isEdrActionType,
+  sub_feature_type: subFeatureType,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
@@ -23,7 +23,7 @@ const transformConnectorType: RewriteRequestCase<ActionType> = ({
   minimumLicenseRequired,
   supportedFeatureIds,
   isSystemActionType,
-  isEdrActionType,
+  subFeatureType,
   ...res,
 });
 

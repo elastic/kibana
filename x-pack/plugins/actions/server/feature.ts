@@ -92,7 +92,7 @@ export const ACTIONS_FEATURE = {
                 all: [ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, CONNECTOR_TOKEN_SAVED_OBJECT_TYPE],
                 read: [ACTION_SAVED_OBJECT_TYPE],
               },
-              ui: ['executeEdr'],
+              ui: ['executeSubFeature'],
             },
           ],
         },
