@@ -3,11 +3,11 @@
   "paths": {
     "xpack.actions": "plugins/actions",
     "xpack.aiops": [
-      "packages/ml/aiops_common",
-      "packages/ml/aiops_components",
-      "packages/ml/aiops_log_pattern_analysis",
-      "packages/ml/aiops_log_rate_analysis",
-      "plugins/aiops"
+      "platform/packages/shared/ml/aiops_common",
+      "platform/packages/private/ml/aiops_components",
+      "platform/packages/shared/ml/aiops_log_pattern_analysis",
+      "platform/packages/shared/ml/aiops_log_rate_analysis",
+      "platform/plugins/shared/aiops"
     ],
     "xpack.aiAssistant": "packages/kbn-ai-assistant",
     "xpack.alerting": "plugins/alerting",
@@ -43,7 +43,7 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
     "xpack.features": "plugins/features",
-    "xpack.dataVisualizer": "plugins/data_visualizer",
+    "xpack.dataVisualizer": "platform/plugins/private/data_visualizer",
     "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
     "xpack.globalSearch": [
@@ -85,17 +85,17 @@
     ],
     "xpack.metricsData": "plugins/observability_solution/metrics_data_access",
     "xpack.ml": [
-      "packages/ml/anomaly_utils",
-      "packages/ml/creation_wizard_utils",
-      "packages/ml/data_grid",
-      "packages/ml/data_view_utils",
-      "packages/ml/date_picker",
-      "packages/ml/field_stats_flyout",
-      "packages/ml/inference_integration_flyout",
-      "packages/ml/trained_models_utils",
-      "packages/ml/category_validator",
-      "packages/ml/ui_actions",
-      "plugins/ml"
+      "platform/packages/shared/ml/anomaly_utils",
+      "platform/packages/private/ml/creation_wizard_utils",
+      "platform/packages/private/ml/data_grid",
+      "platform/packages/private/ml/data_view_utils",
+      "platform/packages/private/ml/date_picker",
+      "platform/packages/private/ml/field_stats_flyout",
+      "platform/packages/private/ml/inference_integration_flyout",
+      "platform/packages/shared/ml/trained_models_utils",
+      "platform/packages/private/ml/category_validator",
+      "platform/packages/private/ml/ui_actions",
+      "platform/plugins/shared/ml"
     ],
     "xpack.monitoring": [
       "plugins/monitoring"
@@ -162,7 +162,7 @@
     "xpack.taskManager": "legacy/plugins/task_manager",
     "xpack.threatIntelligence": "plugins/threat_intelligence",
     "xpack.timelines": "plugins/timelines",
-    "xpack.transform": "plugins/transform",
+    "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.uptime": [
