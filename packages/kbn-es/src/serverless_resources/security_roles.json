@@ -379,8 +379,8 @@
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
-          "securitySolutionTimeline": ["read"],
-          "securitySolutionNotes": ["read"],
+          "securitySolutionTimeline": ["all"],
+          "securitySolutionNotes": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },
