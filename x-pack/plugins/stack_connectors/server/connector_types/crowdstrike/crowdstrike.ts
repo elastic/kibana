@@ -352,7 +352,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     connectorUsageCollector: ConnectorUsageCollector
   ) {
     return await this.executeRTRCommandWithUrl(
-      this.urls.batchAdminExecuteRTR,
+      this.urls.batchActiveResponderExecuteRTR,
       payload,
       connectorUsageCollector
     );
