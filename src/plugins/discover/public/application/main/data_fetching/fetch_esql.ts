@@ -51,7 +51,7 @@ export function fetchEsql({
   expressions: ExpressionsStart;
   profilesManager: ProfilesManager;
 }): Promise<RecordsFetchResponse> {
-  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getTime();
+  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getAbsoluteTime();
   return textBasedQueryStateToAstWithValidation({
     filters,
     query,

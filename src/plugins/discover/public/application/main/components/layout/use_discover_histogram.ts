@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
   canImportVisContext,
   UnifiedHistogramApi,
@@ -42,7 +41,6 @@ import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { addLog } from '../../../../utils/add_log';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import {
   useAppStateSelector,
   type DiscoverAppState,
@@ -216,14 +214,12 @@ export const useDiscoverHistogram = ({
   /**
    * Request params
    */
-  const { query, filters } = useQuerySubscriber({ data: services.data });
-  const customFilters = useInternalStateSelector((state) => state.customFilters);
-  const timefilter = services.data.query.timefilter.timefilter;
-  const timeRange = timefilter.getAbsoluteTime();
-  const relativeTimeRange = useObservable(
-    timefilter.getTimeUpdate$().pipe(map(() => timefilter.getTime())),
-    timefilter.getTime()
+  const { params } = useObservable(
+    main$.pipe(filter(({ fetchStatus }) => fetchStatus === FetchStatus.LOADING)),
+    main$.getValue()
   );
+  const { timeRangeRelative, timeRange, customFilters, query, filters, dataView } = params || {};
+  console.log('histogram params', params?.timeRange);
 
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
@@ -328,17 +324,12 @@ export const useDiscoverHistogram = ({
     };
   }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$, unifiedHistogram]);
 
-  const dataView = useInternalStateSelector((state) => state.dataView!);
-
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
   const filtersMemoized = useMemo(() => {
-    const allFilters = [...(filters ?? []), ...customFilters];
+    const allFilters = [...(filters ?? []), ...(customFilters ?? [])];
     return allFilters.length ? allFilters : EMPTY_FILTERS;
   }, [filters, customFilters]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
   const onVisContextChanged = useCallback(
     (
@@ -396,11 +387,11 @@ export const useDiscoverHistogram = ({
     ref,
     getCreationOptions,
     services,
-    dataView: isEsqlMode ? esqlDataView : dataView,
+    dataView: isEsqlMode ? esqlDataView : dataView!,
     query: isEsqlMode ? esqlQuery : query,
     filters: filtersMemoized,
-    timeRange: timeRangeMemoized,
-    relativeTimeRange,
+    timeRange,
+    relativeTimeRange: timeRangeRelative,
     columns: isEsqlMode ? esqlColumns : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,

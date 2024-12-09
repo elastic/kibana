@@ -12,7 +12,7 @@ import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -26,7 +26,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
-import { sendResetMsg } from '../hooks/use_saved_search_messages';
+import { sendResetMsg, sendFetchStartMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -53,6 +53,16 @@ export interface DataMsg {
 
 export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
+  params?: DataMainMsgParams;
+}
+
+export interface DataMainMsgParams {
+  customFilters?: Filter[];
+  dataView?: DataView;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  timeRangeRelative?: TimeRange;
+  query?: AggregateQuery | Query | undefined;
 }
 
 export interface DataDocumentsMsg extends DataMsg {
@@ -235,6 +245,14 @@ export function getDataStateContainer({
 
           abortController?.abort();
           abortControllerFetchMore?.abort();
+          sendFetchStartMsg(dataSubjects.main$, {
+            customFilters: internalStateContainer.getState().customFilters,
+            dataView: internalStateContainer.getState().dataView,
+            filters: appStateContainer.getState().filters,
+            query: appStateContainer.getState().query,
+            timeRange: timefilter.getAbsoluteTime(),
+            timeRangeRelative: timefilter.getTime(),
+          });
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
