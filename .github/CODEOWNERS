@@ -766,7 +766,6 @@ x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
 x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 x-pack/examples/lens_embeddable_inline_editing_example @elastic/kibana-visualizations
-x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
@@ -870,6 +869,7 @@ x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
 x-pack/platform/plugins/private/saved_objects_tagging @elastic/appex-sharedux
+x-pack/platform/plugins/private/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/x-pack/examples/screenshotting_example @elastic/appex-sharedux
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux

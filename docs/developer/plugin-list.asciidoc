@@ -820,6 +820,10 @@ Elastic.
 It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/x-pack/examples/screenshotting_example/README.md[screenshottingExample]
+|Screenshotting integration example plugin.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/search_assistant/README.md[searchAssistant]
 |This holds the Search AI Assistant which targets Search users and Serverless Elasticsearch.
 

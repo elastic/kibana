@@ -6916,7 +6916,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/screenshotting-example-plugin@link:x-pack/examples/screenshotting_example":
+"@kbn/screenshotting-example-plugin@link:x-pack/platform/plugins/private/Users/gsoldevila/Work/kibana-tertiary/Users/gsoldevila/Work/kibana-tertiary/x-pack/examples/screenshotting_example":
   version "0.0.0"
   uid ""
 
