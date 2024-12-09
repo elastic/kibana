@@ -4264,7 +4264,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/content-management-user-profiles@link:packages/content-management/user_profiles":
+"@kbn/content-management-user-profiles@link:src/platform/packages/shared/content-management/user_profiles":
   version "0.0.0"
   uid ""
 
