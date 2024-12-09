@@ -13,11 +13,15 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
-import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigrationResourceData,
+  RuleMigrationTaskStats,
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRequestBody,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationStatsResponse,
+  UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
@@ -29,6 +33,8 @@ import {
   getRuleMigrationsStatsAll,
   startRuleMigration,
   type GetRuleMigrationsStatsAllParams,
+  getMissingResources,
+  upsertMigrationResources,
 } from '../api';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
@@ -99,6 +105,20 @@ export class SiemRulesMigrationsService {
     return migrationId as string;
   }
 
+  public async upsertMigrationResources(
+    migrationId: string,
+    body: UpsertRuleMigrationResourcesRequestBody
+  ): Promise<void> {
+    if (body.length === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+    // Batching creation to avoid hitting the max payload size limit of the API
+    for (let i = 0; i < body.length; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+      const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+      await upsertMigrationResources({ migrationId, body: bodyBatch });
+    }
+  }
+
   public async startRuleMigration(migrationId: string): Promise<GetAllStatsRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
@@ -133,6 +153,10 @@ export class SiemRulesMigrationsService {
     );
     this.latestStats$.next(results); // Always update the latest stats
     return results;
+  }
+
+  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceData[]> {
+    return getMissingResources({ migrationId });
   }
 
   private async getRuleMigrationsStatsWithRetry(

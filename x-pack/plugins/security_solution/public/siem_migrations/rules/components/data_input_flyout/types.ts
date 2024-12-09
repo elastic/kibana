@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigrationResourceData,
+  RuleMigrationTaskStats,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export type OnMigrationCreated = (migrationStats: RuleMigrationTaskStats) => void;
+export type OnResourcesCreated = () => void;
+export type OnMissingResourcesFetched = (missingResources: RuleMigrationResourceData[]) => void;
+
+export type DataInputStep = 1 | 2 | 3;

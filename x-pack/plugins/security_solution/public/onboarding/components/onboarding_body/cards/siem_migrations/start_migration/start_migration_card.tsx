@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
+import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { OnboardingCardId } from '../../../../../constants';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useLatestStats } from '../../../../../../siem_migrations/rules/service/hooks/use_latest_stats';
@@ -21,22 +22,29 @@ import * as i18n from './translations';
 import { MissingAIConnectorCallout } from './missing_ai_connector_callout';
 
 export const StartMigrationCard: OnboardingCardComponent = React.memo(
-  ({ checkComplete, isCardComplete, setExpandedCardId }) => {
+  ({ setComplete, isCardComplete, setExpandedCardId }) => {
     const styles = useStyles();
-    const { data: migrationsStats, isLoading } = useLatestStats();
+    const { data: migrationsStats, isLoading, refreshStats } = useLatestStats();
 
     const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>();
     const [flyoutMigrationStats, setFlyoutMigrationStats] = useState<
       RuleMigrationTaskStats | undefined
     >();
 
+    useEffect(() => {
+      // Set card complete if any migration is finished
+      if (!isCardComplete(OnboardingCardId.siemMigrationsStart) && migrationsStats) {
+        if (migrationsStats.some(({ status }) => status === SiemMigrationTaskStatus.FINISHED)) {
+          setComplete(true);
+        }
+      }
+    }, [isCardComplete, migrationsStats, setComplete]);
+
     const closeFlyout = useCallback(() => {
       setIsFlyoutOpen(false);
       setFlyoutMigrationStats(undefined);
-      if (!isCardComplete(OnboardingCardId.siemMigrationsStart)) {
-        checkComplete();
-      }
-    }, [checkComplete, isCardComplete]);
+      refreshStats();
+    }, [refreshStats]);
 
     const openFlyout = useCallback((migrationStats?: RuleMigrationTaskStats) => {
       setFlyoutMigrationStats(migrationStats);

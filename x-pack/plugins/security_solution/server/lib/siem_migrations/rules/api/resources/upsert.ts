@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import {
   UpsertRuleMigrationResourcesRequestBody,
   UpsertRuleMigrationResourcesRequestParams,
@@ -49,12 +50,29 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-            const ruleMigrations = resources.map<CreateRuleMigrationResourceInput>((resource) => ({
-              migration_id: migrationId,
-              ...resource,
-            }));
+            // Check if the migration exists
+            const { data } = await ruleMigrationsClient.data.rules.get(migrationId, { size: 1 });
+            const [rule] = data;
+            if (!rule) {
+              return res.notFound({ body: { message: 'Migration not found' } });
+            }
 
+            // Upsert identified resource documents with content
+            const ruleMigrations = resources.map<CreateRuleMigrationResourceInput>((resource) => ({
+              ...resource,
+              migration_id: migrationId,
+            }));
             await ruleMigrationsClient.data.resources.upsert(ruleMigrations);
+
+            // Create identified resource documents without content to keep track of them
+            const resourceIdentifier = new ResourceIdentifier(rule.original_rule.vendor);
+            const resourcesToCreate = resourceIdentifier
+              .fromResources(resources)
+              .map<CreateRuleMigrationResourceInput>((resource) => ({
+                ...resource,
+                migration_id: migrationId,
+              }));
+            await ruleMigrationsClient.data.resources.create(resourcesToCreate);
 
             return res.ok({ body: { acknowledged: true } });
           } catch (err) {

@@ -20,4 +20,8 @@ export class RuleMigrationsRetriever {
     this.integrations = new IntegrationRetriever(dataClient);
     this.prebuiltRules = new PrebuiltRulesRetriever(dataClient);
   }
+
+  public async initialize() {
+    await this.resources.initialize();
+  }
 }
