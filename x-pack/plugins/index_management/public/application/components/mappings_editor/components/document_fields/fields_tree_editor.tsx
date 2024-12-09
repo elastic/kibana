@@ -16,12 +16,14 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const DocumentFieldsTreeEditor = ({
   onCancelAddingNewFields,
   isAddingFields,
   semanticTextInfo,
+  pendingFieldsRef,
 }: Props) => {
   const dispatch = useDispatch();
   const {
@@ -81,7 +83,12 @@ export const DocumentFieldsTreeEditor = ({
 
   return (
     <>
-      <FieldsList fields={fields} state={useMappingsState()} isAddingFields={isAddingFields} />
+      <FieldsList
+        fields={fields}
+        state={useMappingsState()}
+        isAddingFields={isAddingFields}
+        pendingFieldsRef={pendingFieldsRef}
+      />
       {renderCreateField()}
       {renderAddFieldButton()}
     </>

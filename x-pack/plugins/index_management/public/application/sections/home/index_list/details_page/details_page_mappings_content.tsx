@@ -85,7 +85,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     overlays,
     history,
   } = useAppContext();
-  const editFieldButtonRef = useRef<HTMLButtonElement>(null);
+  const pendingFieldsRef = useRef<HTMLDivElement>(null);
+
   const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
   useEffect(() => {
     const subscription = licensing?.license$.subscribe((license: ILicense) => {
@@ -559,7 +560,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
           {errorSavingMappings}
           {isAddingFields && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} ref={pendingFieldsRef} tabIndex={0}>
               <EuiPanel hasBorder paddingSize="s">
                 <EuiAccordion
                   id={pendingFieldListId}
@@ -597,13 +598,13 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                         onCancelAddingNewFields={onCancelAddingNewFields}
                         isAddingFields={isAddingFields}
                         semanticTextInfo={semanticTextInfo}
-                        editFieldButtonRef={editFieldButtonRef}
+                        pendingFieldsRef={pendingFieldsRef}
                       />
                     ) : (
                       <DocumentFields
                         isAddingFields={isAddingFields}
                         semanticTextInfo={semanticTextInfo}
-                        editFieldButtonRef={editFieldButtonRef}
+                        pendingFieldsRef={pendingFieldsRef}
                       />
                     )}
                   </EuiPanel>

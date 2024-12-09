@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useRef } from 'react';
+import React, { forwardRef } from 'react';
 import classNames from 'classnames';
 import {
   EuiFlexGroup,
@@ -65,6 +65,7 @@ interface Props {
   state: State;
   isAddingFields?: boolean;
   createFieldFormRef: React.RefObject<HTMLDivElement>;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
 function FieldListItemComponent(
@@ -87,6 +88,7 @@ function FieldListItemComponent(
     isAddingFields,
     setPreviousState,
     createFieldFormRef,
+    pendingFieldsRef,
   }: Props,
   ref: React.Ref<HTMLLIElement>
 ) {
@@ -179,7 +181,6 @@ function FieldListItemComponent(
               onClick={editField}
               data-test-subj="editFieldButton"
               aria-label={editButtonLabel}
-              buttonRef={editFieldButtonRef}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -324,6 +325,7 @@ function FieldListItemComponent(
           state={state}
           isAddingFields={isAddingFields}
           setPreviousState={setPreviousState}
+          pendingFieldsRef={pendingFieldsRef}
         />
       )}
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { deNormalize } from '../../lib';
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
@@ -27,7 +27,7 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
-  editFieldButtonRef: React.RefObject<HTMLButtonElement>;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 export const DocumentFields = React.memo(
   ({
@@ -36,7 +36,7 @@ export const DocumentFields = React.memo(
     onCancelAddingNewFields,
     isAddingFields,
     semanticTextInfo,
-    editFieldButtonRef,
+    pendingFieldsRef,
   }: Props) => {
     const { fields, documentFields } = useMappingsState();
     const dispatch = useDispatch();
@@ -60,20 +60,21 @@ export const DocumentFields = React.memo(
           onCancelAddingNewFields={onCancelAddingNewFields}
           isAddingFields={isAddingFields}
           semanticTextInfo={semanticTextInfo}
+          pendingFieldsRef={pendingFieldsRef}
         />
       );
 
     const exitEdit = useCallback(() => {
       dispatch({ type: 'documentField.changeStatus', value: 'idle' });
     }, [dispatch]);
-    // const editFieldButtonRef = useRef<HTMLButtonElement>(null);
+
     useEffect(() => {
       if (isEditing) {
         // Open the flyout with the <EditField /> content
         addContentToGlobalFlyout<EditFieldContainerProps>({
           id: 'mappingsEditField',
           Component: EditFieldContainer,
-          props: { exitEdit, editFieldButtonRef },
+          props: { exitEdit },
           flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
           cleanUpFunc: exitEdit,
         });
@@ -83,8 +84,9 @@ export const DocumentFields = React.memo(
     useEffect(() => {
       if (!isEditing) {
         removeContentFromGlobalFlyout('mappingsEditField');
+        if (pendingFieldsRef?.current) pendingFieldsRef.current.focus();
       }
-    }, [isEditing, removeContentFromGlobalFlyout]);
+    }, [isEditing, removeContentFromGlobalFlyout, pendingFieldsRef]);
 
     useEffect(() => {
       return () => {

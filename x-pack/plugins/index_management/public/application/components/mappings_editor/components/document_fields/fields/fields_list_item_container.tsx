@@ -18,6 +18,7 @@ interface Props {
   state: State;
   setPreviousState?: (state: State) => void;
   isAddingFields?: boolean;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const FieldsListItemContainer = ({
@@ -27,6 +28,7 @@ export const FieldsListItemContainer = ({
   state,
   setPreviousState,
   isAddingFields,
+  pendingFieldsRef,
 }: Props) => {
   const dispatch = useDispatch();
   const createFieldFormRef = useRef<HTMLDivElement>(null);
@@ -59,10 +61,6 @@ export const FieldsListItemContainer = ({
       type: 'documentField.createField',
       value: fieldId,
     });
-    // console.log('Field_list_item_container createFieldFormRef.current', createFieldFormRef.current);
-    // if (createFieldFormRef.current) {
-    //   createFieldFormRef.current.focus();
-    // }
   }, [fieldId, dispatch]);
 
   const editField = useCallback(() => {
@@ -116,6 +114,7 @@ export const FieldsListItemContainer = ({
       state={state}
       isAddingFields={isAddingFields}
       createFieldFormRef={createFieldFormRef}
+      pendingFieldsRef={pendingFieldsRef}
     />
   );
 };
