@@ -22,7 +22,15 @@ export const rootStreamDefinition: StreamDefinition = {
       type: 'match_only_text',
     },
     {
+      name: 'body.text',
+      type: 'match_only_text',
+    },
+    {
       name: 'host.name',
+      type: 'keyword',
+    },
+    {
+      name: 'resource.attributes.host.name',
       type: 'keyword',
     },
     {
