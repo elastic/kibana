@@ -25,7 +25,6 @@ import type {
   HunkTokens,
 } from 'react-diff-view';
 import unidiff from 'unidiff';
-import type { Change } from 'diff';
 import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
 import { Hunks } from './hunks';
 import { markEdits, DiffMethod } from './mark_edits';
