@@ -127,6 +127,7 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
+import { updatePoliciesEnrich } from './agent_policies/agent_policies_enrich';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
 
@@ -1404,6 +1405,10 @@ class AgentPolicyService {
       },
       fleetServerPolicy,
     ]);
+
+    if (appContextService.getExperimentalFeatures()?.enrichAgentPolicies) {
+      await updatePoliciesEnrich(soClient, esClient, agentPolicyIds);
+    }
 
     const bulkResponse = await esClient.bulk({
       index: AGENT_POLICY_INDEX,
