@@ -88,7 +88,7 @@ export interface ScoutTestInfo {
  */
 export interface ScoutFileInfo {
   path: string;
-  owner: string;
+  owner: string | string[];
 }
 
 /**

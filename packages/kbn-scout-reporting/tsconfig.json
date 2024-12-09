@@ -18,6 +18,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/scout-info",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/code-owners",
   ]
 }

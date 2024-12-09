@@ -23,6 +23,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { PathWithOwners, getPathsWithOwnersReversed, getCodeOwnersForFile } from '@kbn/code-owners';
 import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
 import { environmentMetadata } from '../datasources';
 
@@ -42,6 +43,7 @@ export class ScoutPlaywrightReporter implements Reporter {
   readonly name: string;
   readonly runId: string;
   private report: ScoutReport;
+  private readonly pathsWithOwners: PathWithOwners[];
 
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -54,6 +56,20 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutReport(this.log);
+    this.pathsWithOwners = getPathsWithOwnersReversed();
+  }
+
+  private getFileOwners(filePath: string): string[] {
+    const concatenatedOwners = getCodeOwnersForFile(filePath, this.pathsWithOwners);
+
+    if (concatenatedOwners === undefined) {
+      return [];
+    }
+
+    return concatenatedOwners
+      .replace(/#.+$/, '')
+      .split(',')
+      .filter((value) => value.length > 0);
   }
 
   /**
@@ -112,7 +128,7 @@ export class ScoutPlaywrightReporter implements Reporter {
       },
       file: {
         path: path.relative(REPO_ROOT, test.location.file),
-        owner: '?',
+        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
       },
     });
   }
@@ -148,7 +164,7 @@ export class ScoutPlaywrightReporter implements Reporter {
       },
       file: {
         path: path.relative(REPO_ROOT, test.location.file),
-        owner: '?',
+        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
       },
     });
   }
@@ -188,7 +204,7 @@ export class ScoutPlaywrightReporter implements Reporter {
       },
       file: {
         path: path.relative(REPO_ROOT, test.location.file),
-        owner: '?',
+        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
       },
     });
   }
@@ -225,7 +241,7 @@ export class ScoutPlaywrightReporter implements Reporter {
       },
       file: {
         path: path.relative(REPO_ROOT, test.location.file),
-        owner: '?',
+        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
       },
     });
   }
