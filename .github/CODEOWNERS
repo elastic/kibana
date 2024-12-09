@@ -435,6 +435,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 packages/kbn-react-field @elastic/kibana-data-discovery
 packages/kbn-react-hooks @elastic/obs-ux-logs-team
+packages/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 packages/kbn-recently-accessed @elastic/appex-sharedux
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-info @elastic/kibana-operations
@@ -464,6 +465,8 @@ packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
 packages/kbn-saved-search-component @elastic/obs-ux-logs-team
 packages/kbn-scout @elastic/appex-qa
+packages/kbn-scout-info @elastic/appex-qa
+packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-screenshotting-server @elastic/appex-sharedux
 packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-keys-server @elastic/search-kibana

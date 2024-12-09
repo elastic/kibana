@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useLocationName } from './use_location_name';
 import { WrappedHelper } from '../utils/testing';
 import { OverviewStatusMetaData } from '../../../../common/runtime_types';
@@ -16,7 +16,7 @@ describe('useLocationName', () => {
   });
 
   it('returns expected label', () => {
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper
           state={{
@@ -40,7 +40,7 @@ describe('useLocationName', () => {
             },
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, null, children)}
         </WrappedHelper>
       );
     };
@@ -56,7 +56,7 @@ describe('useLocationName', () => {
   });
 
   it('returns the location id if matching location cannot be found', () => {
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper
           state={{
@@ -80,7 +80,7 @@ describe('useLocationName', () => {
             },
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, null, children)}
         </WrappedHelper>
       );
     };
