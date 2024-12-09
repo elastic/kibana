@@ -107,6 +107,9 @@ export function registerChatCompleteRoute({
       .getStartServices()
       .then(([coreStart, pluginsStart]) => pluginsStart.actions);
 
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => abortController.abort());
+
     const client = createInferenceClient({ request, actions, logger });
 
     const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
@@ -119,6 +122,7 @@ export function registerChatCompleteRoute({
       tools,
       functionCalling,
       stream,
+      abortSignal: abortController.signal,
     });
   }
 

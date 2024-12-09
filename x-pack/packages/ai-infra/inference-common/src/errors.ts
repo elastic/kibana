@@ -13,6 +13,7 @@ import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task
 export enum InferenceTaskErrorCode {
   internalError = 'internalError',
   requestError = 'requestError',
+  abortedError = 'requestAborted',
 }
 
 /**
@@ -56,6 +57,11 @@ export type InferenceTaskRequestError = InferenceTaskError<
   { status: number }
 >;
 
+export type InferenceTaskAbortedError = InferenceTaskError<
+  InferenceTaskErrorCode.abortedError,
+  { status: number }
+>;
+
 export function createInferenceInternalError(
   message = 'An internal error occurred',
   meta?: Record<string, any>
@@ -69,6 +75,12 @@ export function createInferenceRequestError(
 ): InferenceTaskRequestError {
   return new InferenceTaskError(InferenceTaskErrorCode.requestError, message, {
     status,
+  });
+}
+
+export function createInferenceRequestAbortedError(message: string): InferenceTaskAbortedError {
+  return new InferenceTaskError(InferenceTaskErrorCode.abortedError, message, {
+    status: 499,
   });
 }
 
