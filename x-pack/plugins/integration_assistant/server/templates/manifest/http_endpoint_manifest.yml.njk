@@ -42,12 +42,6 @@
         The Ingest Node pipeline ID to be used by the integration.
       required: false
       show_user: true
-    - name: preserve_original_event
-      type: bool
-      title: Preserve Original Event
-      description: This option copies the raw unmodified body of the incoming request to the event.original field as a string before sending the event to Elasticsearch.
-      required: false
-      show_user: true
     - name: prefix
       type: text
       title: Prefix
