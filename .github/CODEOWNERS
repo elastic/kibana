@@ -841,7 +841,6 @@ x-pack/packages/observability/observability_utils/observability_utils_browser @e
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
@@ -861,6 +860,7 @@ x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/packages/security/ui_components @elastic/kibana-security
 x-pack/performance @elastic/appex-qa
+x-pack/platform/packages/private/rollup @elastic/kibana-management
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
