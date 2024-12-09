@@ -7400,7 +7400,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-no-data@link:packages/shared-ux/page/no_data/impl":
+"@kbn/shared-ux-page-no-data@link:src/platform/packages/shared/shared-ux/page/no_data/impl":
   version "0.0.0"
   uid ""
 
