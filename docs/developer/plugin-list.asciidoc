@@ -698,7 +698,7 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/llm_tasks/README.md[llmTasks]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/llm_tasks/README.md[llmTasks]
 |This plugin contains various LLM tasks.
 
 

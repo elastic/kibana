@@ -6136,7 +6136,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/llm-tasks-plugin@link:x-pack/plugins/ai_infra/llm_tasks":
+"@kbn/llm-tasks-plugin@link:x-pack/platform/plugins/shared/ai_infra/llm_tasks":
   version "0.0.0"
   uid ""
 
