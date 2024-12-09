@@ -24,7 +24,6 @@ interface Props<T> {
   selectedValue: T;
   onChange: (id: T) => void;
   ariaLabel: string;
-  // legend: string;
 }
 
 export function ValuesGroup<T extends string = string>({
