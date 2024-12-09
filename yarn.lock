@@ -5531,23 +5531,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast@link:packages/kbn-esql-ast":
+"@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-datagrid@link:src/plugins/esql_datagrid":
+"@kbn/esql-datagrid@link:src/platform/plugins/shared/esql_datagrid":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-editor@link:packages/kbn-esql-editor":
+"@kbn/esql-editor@link:src/platform/packages/private/kbn-esql-editor":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-utils@link:packages/kbn-esql-utils":
+"@kbn/esql-utils@link:src/platform/packages/shared/kbn-esql-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-validation-autocomplete@link:packages/kbn-esql-validation-autocomplete":
+"@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
 
@@ -5555,7 +5555,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql@link:src/plugins/esql":
+"@kbn/esql@link:src/platform/plugins/shared/esql":
   version "0.0.0"
   uid ""
 
@@ -6067,7 +6067,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/language-documentation@link:packages/kbn-language-documentation":
+"@kbn/language-documentation@link:src/platform/packages/private/kbn-language-documentation":
   version "0.0.0"
   uid ""
 
