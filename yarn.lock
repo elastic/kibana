@@ -7192,7 +7192,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-common-settings@link:packages/serverless/settings/common":
+"@kbn/serverless-common-settings@link:src/platform/packages/private/serverless/settings/common":
   version "0.0.0"
   uid ""
 
