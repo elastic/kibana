@@ -71,10 +71,10 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
   handler: async ({ params, plugins, request }): Promise<{ entities: InventoryEntity[] }> => {
     const entityManagerStart = await plugins.entityManager.start();
 
-    const { sortDirection, sortField, entityType } = params.query;
+    const { sortDirection, sortField, kuery, entityType } = params.query;
 
     const entityManagerClient = await entityManagerStart.getScopedClient({ request });
-    const [alertsClient, entities] = await Promise.all([
+    const [alertsClient, rawEntities] = await Promise.all([
       createAlertsClient({ plugins, request }),
       entityManagerClient.v2.searchEntities({
         start: moment().subtract(15, 'm').toISOString(),
@@ -82,9 +82,21 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
         limit: 500,
         type: entityType,
         metadata_fields: [DATA_STREAM_TYPE],
-        filters: [],
+        filters: kuery ? [kuery] : [],
       }),
     ]);
+
+    const entities = rawEntities.map((entity) => ({
+      entityId: entity.id,
+      entityType: entity.type,
+      entityDefinitionId: entity.definition_id,
+      entityDisplayName: entity.display_name,
+      entityIdentityFields: entity.identity_fields,
+      entityLastSeenTimestamp: entity.last_seen_timestamp,
+      entityDefinitionVersion: entity.definition_version,
+      entitySchemaVersion: entity.schema_version,
+      ...entity,
+    }));
 
     const identityFieldsPerEntityType = getIdentityFieldsPerEntityType(entities);
 
