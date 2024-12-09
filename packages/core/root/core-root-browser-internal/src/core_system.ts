@@ -330,6 +330,7 @@ export class CoreSystem {
         analytics,
         theme,
         uiSettings,
+        userProfile,
         targetDomElement: overlayTargetDomElement,
       });
       const notifications = this.notifications.start({
@@ -337,6 +338,7 @@ export class CoreSystem {
         i18n,
         overlays,
         theme,
+        userProfile,
         targetDomElement: notificationsTargetDomElement,
       });
       const customBranding = this.customBranding.start();
@@ -371,6 +373,7 @@ export class CoreSystem {
         analytics,
         i18n,
         theme,
+        userProfile,
       });
 
       const featureFlags = await this.featureFlags.start();
@@ -415,6 +418,7 @@ export class CoreSystem {
         overlays,
         theme,
         targetDomElement: coreUiTargetDomElement,
+        userProfile,
       });
 
       performance.mark(KBN_LOAD_MARKS, {
