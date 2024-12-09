@@ -6,15 +6,15 @@
  */
 
 import { castArray } from 'lodash';
-import type { InventoryEntity } from '../../../common/entities';
+import { EntityV2 } from '@kbn/entities-schema';
 
 export type IdentityFieldsPerEntityType = Map<string, string[]>;
 
-export const getIdentityFieldsPerEntityType = (latestEntities: InventoryEntity[]) => {
+export const getIdentityFieldsPerEntityType = (latestEntities: EntityV2[]) => {
   const identityFieldsPerEntityType = new Map<string, string[]>();
 
   latestEntities.forEach((entity) =>
-    identityFieldsPerEntityType.set(entity.entityType, castArray(entity.entityIdentityFields))
+    identityFieldsPerEntityType.set(entity['entity.type'], castArray(entity.entityIdentityFields))
   );
 
   return identityFieldsPerEntityType;

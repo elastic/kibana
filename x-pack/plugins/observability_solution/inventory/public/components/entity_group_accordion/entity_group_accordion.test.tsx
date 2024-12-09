@@ -12,7 +12,6 @@ import { EntityGroupAccordion } from '.';
 describe('EntityGroupAccordion', () => {
   it('renders with correct values', () => {
     const props = {
-      groupBy: 'entity.type',
       groups: [
         {
           count: 5999,
@@ -28,7 +27,6 @@ describe('EntityGroupAccordion', () => {
       <EntityGroupAccordion
         groupValue={props.groups[0]['entity.type']}
         groupCount={props.groups[0].count}
-        groupBy={props.groupBy}
       />
     );
     expect(screen.getByText(props.groups[0]['entity.type'])).toBeInTheDocument();
