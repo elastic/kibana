@@ -7,3 +7,4 @@
 
 export { categorizeSchema } from './schema';
 export type { CategorizeSchema } from './schema';
+export { categorizationAnalyzer } from './create_category_request';

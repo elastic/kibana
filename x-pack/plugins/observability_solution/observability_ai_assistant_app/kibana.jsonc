@@ -33,7 +33,8 @@
       "features",
       "inference",
       "logsDataAccess",
-      "llmTasks"
+      "spaces",
+      "slo"
     ],
     "optionalPlugins": [
       "cloud"

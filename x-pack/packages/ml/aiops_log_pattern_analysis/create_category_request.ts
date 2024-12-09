@@ -128,7 +128,7 @@ export function createCategoryRequest(
 // A future enhancement would be to check which analyzer is specified in the mappings for the source field and to use
 // that instead of unconditionally using 'standard'.
 // However for an initial fix, using the standard analyzer will be more likely to match the results from the majority of searches.
-const categorizationAnalyzer: AggregationsCustomCategorizeTextAnalyzer = {
+export const categorizationAnalyzer: AggregationsCustomCategorizeTextAnalyzer = {
   char_filter: ['first_line_with_letters'],
   tokenizer: 'standard',
   filter: [

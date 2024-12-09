@@ -20,7 +20,8 @@
       "licensing",
       "security",
       "taskManager",
-      "dataViews"
+      "dataViews",
+      "inference"
     ],
     "optionalPlugins": [
       "cloud",
