@@ -51,7 +51,12 @@ export class AnalyticsManager {
     private readonly _enabledFeatures: MlFeatures,
     cloud: CloudSetup
   ) {
-    this._modelsProvider = modelsProvider(this._client, this._mlClient, cloud);
+    this._modelsProvider = modelsProvider(
+      this._client,
+      this._mlClient,
+      cloud,
+      this._enabledFeatures
+    );
   }
 
   private async initData() {

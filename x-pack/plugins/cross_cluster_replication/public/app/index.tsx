@@ -23,7 +23,7 @@ import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
 import { ccrStore } from './store';
 
-type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 const AppWithExecutionContext = ({
   history,
