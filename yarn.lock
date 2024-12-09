@@ -6760,7 +6760,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-public@link:packages/kbn-reporting/public":
+"@kbn/reporting-public@link:src/platform/packages/private/kbn-reporting/public":
   version "0.0.0"
   uid ""
 
