@@ -5880,7 +5880,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/home-sample-data-tab@link:packages/home/sample_data_tab":
+"@kbn/home-sample-data-tab@link:src/platform/packages/shared/home/sample_data_tab":
   version "0.0.0"
   uid ""
 
