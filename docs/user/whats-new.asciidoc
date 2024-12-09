@@ -65,7 +65,7 @@ _Exported CSV now_
 
 
 [discrete]
-=== Managing {kib} and data
+=== Alerting, cases, and connectors
 
 [discrete]
 ==== Kibana Alerting scalability improvements
