@@ -5188,7 +5188,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-branding-plugin@link:x-pack/plugins/custom_branding":
+"@kbn/custom-branding-plugin@link:x-pack/platform/plugins/private/custom_branding":
   version "0.0.0"
   uid ""
 

@@ -524,7 +524,7 @@ This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeat
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/custom_branding/README.md[customBranding]
 |This is a plugin to configure custom branding.
 Plugin server-side only. Plugin has three main functions:
 
