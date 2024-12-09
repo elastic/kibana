@@ -13,19 +13,11 @@ import {
   EuiFieldPassword,
   EuiSwitch,
   EuiTextArea,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiFieldNumber,
-  EuiCheckableCard,
-  useGeneratedHtmlId,
-  EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
-import { ConfigEntryView, DisplayType } from '../../../../common/dynamic_config/types';
+import { ConfigEntryView, FieldType } from '../../../../common/dynamic_config/types';
 import {
   ensureBooleanType,
   ensureCorrectTyping,
@@ -49,7 +41,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   validateAndSetConfigValue,
 }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, placeholder, value, default_value, key } = configEntry;
+  const { isValid, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(
     !value || value.toString().length === 0 ? default_value : value
   );
@@ -68,7 +60,6 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
         setInnerValue(event.target.value);
         validateAndSetConfigValue(event.target.value);
       }}
-      placeholder={placeholder}
     />
   );
 };
@@ -104,7 +95,7 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   validateAndSetConfigValue,
 }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, placeholder, value, default_value, key } = configEntry;
+  const { isValid, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
   useEffect(() => {
     setInnerValue(value ?? default_value);
@@ -121,7 +112,6 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
         setInnerValue(event.target.value);
         validateAndSetConfigValue(event.target.value);
       }}
-      placeholder={placeholder}
     />
   );
 };
@@ -132,7 +122,7 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   validateAndSetConfigValue,
 }) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, placeholder, value, default_value, key } = configEntry;
+  const { isValid, value, default_value, key } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? default_value);
   useEffect(() => {
     setInnerValue(!value || value.toString().length === 0 ? default_value : value);
@@ -149,40 +139,7 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
         setInnerValue(newValue);
         validateAndSetConfigValue(newValue);
       }}
-      placeholder={placeholder}
     />
-  );
-};
-
-export const ConfigCheckableField: React.FC<ConfigInputFieldProps> = ({
-  configEntry,
-  validateAndSetConfigValue,
-}) => {
-  const radioCardId = useGeneratedHtmlId({ prefix: 'radioCard' });
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { value, options, default_value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value ?? default_value);
-  useEffect(() => {
-    setInnerValue(value ?? default_value);
-  }, [default_value, value]);
-  return (
-    <>
-      {options?.map((o) => (
-        <>
-          <EuiCheckableCard
-            id={radioCardId}
-            label={o.label}
-            value={innerValue as any}
-            checked={innerValue === o.value}
-            onChange={(event) => {
-              setInnerValue(o.value);
-              validateAndSetConfigValue(o.value);
-            }}
-          />
-          <EuiSpacer size="s" />
-        </>
-      ))}
-    </>
   );
 };
 
@@ -230,44 +187,6 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   );
 };
 
-export const ConfigSelectField: React.FC<ConfigInputFieldProps> = ({
-  configEntry,
-  isLoading,
-  validateAndSetConfigValue,
-}) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { isValid, options, value, default_value } = configEntry;
-  const [innerValue, setInnerValue] = useState(value ?? default_value);
-  const optionsRes = options?.map((o) => ({
-    value: o.value,
-    inputDisplay: (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        {o.icon ? (
-          <EuiFlexItem grow={false}>
-            <EuiIcon color="subdued" style={{ lineHeight: 'inherit' }} type={o.icon} />
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiText>{o.label}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  }));
-  return (
-    <EuiSuperSelect
-      fullWidth
-      isInvalid={!isValid}
-      disabled={isLoading}
-      options={optionsRes as any}
-      valueOfSelected={innerValue as any}
-      onChange={(newValue) => {
-        setInnerValue(newValue);
-        validateAndSetConfigValue(newValue);
-      }}
-    />
-  );
-};
-
 export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldProps> = ({
   configEntry,
   isLoading,
@@ -277,30 +196,10 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
     setConfigValue(ensureCorrectTyping(configEntry.type, value));
   };
 
-  const { key, display, sensitive } = configEntry;
+  const { key, type, sensitive } = configEntry;
 
-  switch (display) {
-    case DisplayType.DROPDOWN:
-      return (
-        <ConfigSelectField
-          key={key}
-          isLoading={isLoading}
-          configEntry={configEntry}
-          validateAndSetConfigValue={validateAndSetConfigValue}
-        />
-      );
-
-    case DisplayType.CHECKABLE:
-      return (
-        <ConfigCheckableField
-          key={key}
-          isLoading={isLoading}
-          configEntry={configEntry}
-          validateAndSetConfigValue={validateAndSetConfigValue}
-        />
-      );
-
-    case DisplayType.NUMERIC:
+  switch (type) {
+    case FieldType.INTEGER:
       return (
         <ConfigNumberField
           key={key}
@@ -310,29 +209,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         />
       );
 
-    case DisplayType.TEXTAREA:
-      const textarea = (
-        <ConfigInputTextArea
-          key={sensitive ? key + '-sensitive-text-area' : key + 'text-area'}
-          isLoading={isLoading}
-          configEntry={configEntry}
-          validateAndSetConfigValue={validateAndSetConfigValue}
-        />
-      );
-
-      return sensitive ? (
-        <>
-          <ConfigSensitiveTextArea
-            isLoading={isLoading}
-            configEntry={configEntry}
-            validateAndSetConfigValue={validateAndSetConfigValue}
-          />
-        </>
-      ) : (
-        textarea
-      );
-
-    case DisplayType.TOGGLE:
+    case FieldType.BOOLEAN:
       return (
         <ConfigSwitchField
           isLoading={isLoading}

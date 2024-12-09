@@ -13,7 +13,7 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 import { useProviders } from './providers/get_providers';
-import { DisplayType, FieldType } from '../../../common/dynamic_config/types';
+import { FieldType } from '../../../common/dynamic_config/types';
 
 jest.mock('./providers/get_providers');
 
@@ -50,44 +50,37 @@ const providersSchemas = [
         task_type: 'completion',
         configuration: {
           user: {
-            display: DisplayType.TEXTBOX,
             label: 'User',
             order: 1,
             required: false,
             sensitive: false,
-            tooltip: 'Specifies the user issuing the request.',
+            description: 'Specifies the user issuing the request.',
             type: FieldType.STRING,
             validations: [],
             value: '',
-            ui_restrictions: [],
             default_value: null,
-            depends_on: [],
           },
         },
       },
     ],
     configuration: {
       api_key: {
-        display: DisplayType.TEXTBOX,
         label: 'API Key',
         order: 3,
         required: true,
         sensitive: true,
-        tooltip: `The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.`,
+        description: `The OpenAI API authentication key. For more details about generating OpenAI API keys, refer to the https://platform.openai.com/account/api-keys.`,
         type: FieldType.STRING,
         validations: [],
         value: null,
-        ui_restrictions: [],
         default_value: null,
-        depends_on: [],
       },
       model_id: {
-        display: DisplayType.TEXTBOX,
         label: 'Model ID',
         order: 2,
         required: true,
         sensitive: false,
-        tooltip: 'The name of the model.',
+        description: 'The name of the model.',
         type: FieldType.STRING,
         validations: [],
         value: null,
@@ -96,12 +89,11 @@ const providersSchemas = [
         depends_on: [],
       },
       organization_id: {
-        display: DisplayType.TEXTBOX,
         label: 'Organization ID',
         order: 4,
         required: false,
         sensitive: false,
-        tooltip: '',
+        description: '',
         type: FieldType.STRING,
         validations: [],
         value: null,
@@ -110,12 +102,11 @@ const providersSchemas = [
         depends_on: [],
       },
       url: {
-        display: DisplayType.TEXTBOX,
         label: 'URL',
         order: 1,
         required: true,
         sensitive: false,
-        tooltip: '',
+        description: '',
         type: FieldType.STRING,
         validations: [],
         value: null,
@@ -140,12 +131,11 @@ const providersSchemas = [
     ],
     configuration: {
       api_key: {
-        display: DisplayType.TEXTBOX,
         label: 'API Key',
         order: 1,
         required: true,
         sensitive: true,
-        tooltip: `API Key for the provider you're connecting to`,
+        description: `API Key for the provider you're connecting to`,
         type: FieldType.STRING,
         validations: [],
         value: null,
@@ -154,12 +144,11 @@ const providersSchemas = [
         depends_on: [],
       },
       model_id: {
-        display: DisplayType.TEXTBOX,
         label: 'Model ID',
         order: 2,
         required: true,
         sensitive: false,
-        tooltip: `ID of the LLM you're using`,
+        description: `ID of the LLM you're using`,
         type: FieldType.STRING,
         validations: [],
         value: null,

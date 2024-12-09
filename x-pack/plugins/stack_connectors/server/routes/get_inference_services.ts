@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { InferenceProvider } from '../../common/inference/types';
+import { InferenceProvider, FieldsConfiguration } from '../../common/inference/types';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 
 export const getInferenceServicesRoute = (router: IRouter) => {
@@ -48,8 +48,13 @@ export const getInferenceServicesRoute = (router: IRouter) => {
             service: e.provider,
             name: e.provider,
             description: '',
-            configurations: e.configuration,
-            task_types: e.task_types.map((t) => t.task_type),
+            configurations: Object.keys(e.configuration).reduce((obj, k) => {
+              const n = { ...e.configuration[k], description: e.configuration[k].tooltip };
+              obj[k] = n;
+              return obj;
+            }, {} as FieldsConfiguration),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            task_types: e.task_types.map((t: any) => t.task_type),
           } as InferenceProvider)
       ),
     });
