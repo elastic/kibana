@@ -1,3 +1,6 @@
+env:
+  NX_VERBOSE_LOGGING: true
+
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
