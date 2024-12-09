@@ -520,7 +520,7 @@ This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeat
 |Cloud Posture automates the identification and remediation of risks across cloud infrastructures
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cross_cluster_replication/README.md[crossClusterReplication]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cross_cluster_replication/README.md[crossClusterReplication]
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
