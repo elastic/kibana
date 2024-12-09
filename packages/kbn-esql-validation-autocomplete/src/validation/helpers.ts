@@ -85,6 +85,8 @@ export function collapseWrongArgumentTypeMessages(
   // Replace the individual "wrong argument type" messages with a single one for the whole array
   messages = messages.filter(({ code }) => code !== 'wrongArgumentType');
 
+  // @TODO: remove
+  console.log(`--@@collapseWrongArgumentTypeMessages messages`, messages);
   messages.push(
     getMessageFromId({
       messageId: 'wrongArgumentType',
