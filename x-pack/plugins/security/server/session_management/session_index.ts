@@ -830,6 +830,7 @@ export class SessionIndex {
         {
           index: this.aliasName,
           keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+          allow_partial_search_results: true,
         },
         { ignore: [404], meta: true }
       );
@@ -841,6 +842,7 @@ export class SessionIndex {
           {
             index: this.aliasName,
             keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+            allow_partial_search_results: true,
           },
           { meta: true }
         ));
