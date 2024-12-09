@@ -6216,7 +6216,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-ids@link:packages/kbn-management/settings/setting_ids":
+"@kbn/management-settings-ids@link:src/platform/packages/shared/kbn-management/settings/setting_ids":
   version "0.0.0"
   uid ""
 

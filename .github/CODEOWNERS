@@ -388,7 +388,6 @@ packages/kbn-management/settings/components/field_row @elastic/kibana-management
 packages/kbn-management/settings/components/form @elastic/kibana-management
 packages/kbn-management/settings/field_definition @elastic/kibana-management
 packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
-packages/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
 packages/kbn-management/settings/types @elastic/kibana-management
 packages/kbn-management/settings/utilities @elastic/kibana-management
 packages/kbn-management/storybook/config @elastic/kibana-management
@@ -621,6 +620,7 @@ src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
+src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
