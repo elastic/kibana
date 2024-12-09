@@ -42,7 +42,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": [
     "target/**/*",

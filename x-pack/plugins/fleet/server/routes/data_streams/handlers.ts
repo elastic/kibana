@@ -17,6 +17,7 @@ import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import type { MeteringStats } from '../../services/data_streams';
 import { dataStreamService } from '../../services/data_streams';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../constants';
 import { appContextService } from '../../services';
 
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
@@ -233,7 +234,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
   // After filtering out data streams that are missing dataset/namespace/type/package fields
   body.data_streams = (
     await pMap(dataStreamNames, (dataStreamName) => queryDataStreamInfo(dataStreamName), {
-      concurrency: 50,
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
     })
   )
     .filter(({ dataset, namespace, type }) => dataset && namespace && type)
