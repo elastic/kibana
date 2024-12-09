@@ -55,3 +55,17 @@ export interface FieldMap {
     properties?: Record<string, { type: string }>;
   };
 }
+
+export interface DynamicTemplate {
+  [key: string]: {
+    mapping: {
+      [key: string]: any;
+    };
+    match_mapping_type?: string | string[];
+    match?: string;
+    unmatch?: string;
+    match_pattern?: string;
+    path_match?: string;
+    path_unmatch?: string;
+  };
+}
