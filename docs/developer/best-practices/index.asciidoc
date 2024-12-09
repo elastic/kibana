@@ -82,7 +82,7 @@ right advanced settings like whether to include frozen indices or not.
 ** Rendering maps, visualizations, dashboards in your application
 ** Register new widgets that will can be added to a dashboard or Canvas
 workpad, or rendered in another plugin.
-* {kib-repo}tree/{branch}/src/plugins/ui_actions/README.asciidoc[UiActions]
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/ui_actions/README.asciidoc[UiActions]
 ** Let other plugins inject functionality into your application
 ** Inject custom functionality into other plugins
 * Stateless helper utilities

@@ -993,7 +993,7 @@ in their infrastructure.
 
 include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
-include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/src/platform/plugins/shared/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/translations/README.asciidoc[leveloffset=+1]

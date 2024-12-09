@@ -7724,7 +7724,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-plugin@link:src/plugins/ui_actions":
+"@kbn/ui-actions-plugin@link:src/platform/plugins/shared/ui_actions":
   version "0.0.0"
   uid ""
 
