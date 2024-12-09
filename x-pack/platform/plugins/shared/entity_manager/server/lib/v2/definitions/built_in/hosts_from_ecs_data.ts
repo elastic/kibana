@@ -11,6 +11,7 @@ import { BuiltInDefinition } from '../../types';
 export const builtInHostsFromEcsEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}hosts_from_ecs_data`,
+    display_name: 'Hosts',
   },
   sources: [
     {

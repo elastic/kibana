@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesPodSemConvEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_pod_semconv`,
+    display_name: 'Kubernetes Pods (OTEL)',
   },
   sources: [
     {

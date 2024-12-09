@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesDaemonSetEcsEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_daemon_set_ecs`,
+    display_name: 'Kubernetes DaemonSets (ECS)',
   },
   sources: [
     {

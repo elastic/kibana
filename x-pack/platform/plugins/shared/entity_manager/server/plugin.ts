@@ -9,7 +9,6 @@ import {
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-  FakeRequest,
   KibanaRequest,
   Logger,
   Plugin,
@@ -167,10 +166,11 @@ export class EntityManagerServerPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
     }
 
-    const esClient = core.elasticsearch.client.asInternalUser;
-
     // Setup v1 definitions index
-    installEntityManagerTemplates({ esClient, logger: this.logger })
+    installEntityManagerTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    })
       .then(async () => {
         // the api key validation requires a check against the cluster license
         // which is lazily loaded. we ensure it gets loaded before the update
@@ -188,15 +188,7 @@ export class EntityManagerServerPlugin
 
     // Setup v2 definitions index
     setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger)
-      .then(() => {
-        // Using asScope with a FakeRequest to get a IScopedClusterClient which the lib functions expect
-        // They internally grab the internal user to use
-        const fakeRequest: FakeRequest = { headers: {} };
-        return installBuiltInDefinitions(
-          core.elasticsearch.client.asScoped(fakeRequest),
-          this.logger
-        );
-      })
+      .then(() => installBuiltInDefinitions(core.elasticsearch.client, this.logger))
       .catch((error) => {
         this.logger.error(error);
       });

@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesReplicaSetEcsEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_replica_set_ecs`,
+    display_name: 'Kubernetes ReplicaSets (ECS)',
   },
   sources: [
     {

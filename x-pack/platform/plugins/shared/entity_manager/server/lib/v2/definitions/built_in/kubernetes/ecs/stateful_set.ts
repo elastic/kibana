@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesStatefulSetEcsEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_stateful_set_ecs`,
+    display_name: 'Kubernetes StatefulSets (ECS)',
   },
   sources: [
     {

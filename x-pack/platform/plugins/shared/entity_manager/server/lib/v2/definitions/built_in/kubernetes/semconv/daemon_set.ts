@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesDaemonSetSemConvEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_daemon_set_semconv`,
+    display_name: 'Kubernetes DaemonSets (OTEL)',
   },
   sources: [
     {

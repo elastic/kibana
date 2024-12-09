@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesNodeSemConvEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_node_semconv`,
+    display_name: 'Kubernetes Nodes (OTEL)',
   },
   sources: [
     {

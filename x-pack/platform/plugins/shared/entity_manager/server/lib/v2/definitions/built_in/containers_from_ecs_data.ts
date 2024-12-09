@@ -11,6 +11,7 @@ import { BUILT_IN_ID_PREFIX } from './constants';
 export const builtInContainersFromEcsEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}containers_from_ecs_data`,
+    display_name: 'Containers',
   },
   sources: [
     {

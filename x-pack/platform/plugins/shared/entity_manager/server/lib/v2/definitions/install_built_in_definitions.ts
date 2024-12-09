@@ -5,40 +5,41 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IClusterClient, Logger } from '@kbn/core/server';
 import { storeTypeDefinition } from './type_definition';
 import { storeSourceDefinition } from './source_definition';
 import { builtInDefinitions } from './built_in';
-import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
 
-export async function installBuiltInDefinitions(
-  clusterClient: IScopedClusterClient,
-  logger: Logger
-) {
-  logger.debug('Installing built in entity definitions');
+export async function installBuiltInDefinitions(clusterClient: IClusterClient, logger: Logger) {
+  logger.info('Installing built in entity definitions');
 
-  // This flow does /not/ support updates
   for (const definition of builtInDefinitions) {
     const { type, sources } = definition;
 
     try {
-      await storeTypeDefinition(type, clusterClient, logger);
+      await storeTypeDefinition({
+        type,
+        clusterClient,
+        logger,
+        replace: true,
+      });
     } catch (error) {
-      if (!(error instanceof EntityDefinitionConflict)) {
-        logger.debug(error.message);
-      }
+      logger.error(error.message);
     }
 
     for (const source of sources) {
       try {
-        await storeSourceDefinition(source, clusterClient, logger);
+        await storeSourceDefinition({
+          source,
+          clusterClient,
+          logger,
+          replace: true,
+        });
       } catch (error) {
-        if (!(error instanceof EntityDefinitionConflict)) {
-          logger.debug(error.message);
-        }
+        logger.error(error.message);
       }
     }
   }
 
-  logger.debug(`Installed ${builtInDefinitions.length} entity definition(s)`);
+  logger.info(`Installed ${builtInDefinitions.length} entity definition(s)`);
 }

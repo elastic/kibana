@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesCronJobEcsEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_cron_job_ecs`,
+    display_name: 'Kubernetes CronJobs (ECS)',
   },
   sources: [
     {

@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesReplicaSetSemConvEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_replica_set_semconv`,
+    display_name: 'Kubernetes ReplicaSets (OTEL)',
   },
   sources: [
     {

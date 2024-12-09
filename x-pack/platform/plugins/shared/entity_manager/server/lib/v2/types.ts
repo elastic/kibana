@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { IClusterClient } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import moment from 'moment';
+
+export type InternalClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 
 // Definitions
 
 export const entityTypeDefinitionRt = z.object({
   id: z.string(),
+  display_name: z.string(),
 });
 
 export type EntityTypeDefinition = z.TypeOf<typeof entityTypeDefinitionRt>;

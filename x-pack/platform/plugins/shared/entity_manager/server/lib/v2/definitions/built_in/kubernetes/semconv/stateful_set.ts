@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesStatefulSetSemConvEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_stateful_set_semconv`,
+    display_name: 'Kubernetes StatefulSets (OTEL)',
   },
   sources: [
     {

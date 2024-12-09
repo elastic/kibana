@@ -12,6 +12,7 @@ import { BuiltInDefinition } from '../../../../types';
 export const builtInKubernetesCronJobSemConvEntityDefinition: BuiltInDefinition = {
   type: {
     id: `${BUILT_IN_ID_PREFIX}kubernetes_cron_job_semconv`,
+    display_name: 'Kubernetes CronJobs (OTEL)',
   },
   sources: [
     {
