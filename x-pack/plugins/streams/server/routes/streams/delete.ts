@@ -19,6 +19,7 @@ import { createServerRoute } from '../create_server_route';
 import { syncStream, readStream, deleteStreamObjects } from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
+import { AssetClient } from '../../lib/streams/assets/asset_client';
 
 export const deleteStreamRoute = createServerRoute({
   endpoint: 'DELETE /api/streams/{id}',
@@ -45,7 +46,7 @@ export const deleteStreamRoute = createServerRoute({
     getScopedClients,
   }): Promise<{ acknowledged: true }> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
 
       const parentId = getParentId(params.path.id);
       if (!parentId) {
@@ -53,9 +54,9 @@ export const deleteStreamRoute = createServerRoute({
       }
 
       // need to update parent first to cut off documents streaming down
-      await updateParentStream(scopedClusterClient, params.path.id, parentId, logger);
+      await updateParentStream(scopedClusterClient, assetClient, params.path.id, parentId, logger);
 
-      await deleteStream(scopedClusterClient, params.path.id, logger);
+      await deleteStream(scopedClusterClient, assetClient, params.path.id, logger);
 
       return { acknowledged: true };
     } catch (e) {
@@ -78,15 +79,16 @@ export const deleteStreamRoute = createServerRoute({
 
 export async function deleteStream(
   scopedClusterClient: IScopedClusterClient,
+  assetClient: AssetClient,
   id: string,
   logger: Logger
 ) {
   try {
     const { definition } = await readStream({ scopedClusterClient, id });
     for (const child of definition.children) {
-      await deleteStream(scopedClusterClient, child.id, logger);
+      await deleteStream(scopedClusterClient, assetClient, child.id, logger);
     }
-    await deleteStreamObjects({ scopedClusterClient, id, logger });
+    await deleteStreamObjects({ scopedClusterClient, id, logger, assetClient });
   } catch (e) {
     if (e instanceof DefinitionNotFound) {
       logger.debug(`Stream definition for ${id} not found.`);
@@ -98,6 +100,7 @@ export async function deleteStream(
 
 async function updateParentStream(
   scopedClusterClient: IScopedClusterClient,
+  assetClient: AssetClient,
   id: string,
   parentId: string,
   logger: Logger
@@ -111,6 +114,7 @@ async function updateParentStream(
 
   await syncStream({
     scopedClusterClient,
+    assetClient,
     definition: parentDefinition,
     logger,
   });
