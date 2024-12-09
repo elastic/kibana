@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from '@testing-library/react';
+import { act, waitForElementToBeRemoved } from '@testing-library/react';
 
 import type { PackageInfo } from '../../../../../../../../common';
 
@@ -122,13 +122,11 @@ for (let i = 0; i < 100; i++) {
         } as any);
 
         render();
-        await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
-        await act(async () => {
-          expect(updateAgentPoliciesMock).toBeCalledTimes(1);
-          expect(updateAgentPoliciesMock).toBeCalledWith([
-            { id: 'policy-1', package_policies: [] },
-          ]);
-        });
+
+        await waitForElementToBeRemoved(renderResult.getAllByRole('progressbar'));
+
+        expect(updateAgentPoliciesMock).toBeCalledTimes(1);
+        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
     });
 
@@ -163,12 +161,10 @@ for (let i = 0; i < 100; i++) {
         } as any);
 
         render();
-        await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
-        await act(async () => {
-          expect(updateAgentPoliciesMock).toBeCalledWith([
-            { id: 'policy-1', package_policies: [] },
-          ]);
-        });
+
+        await waitForElementToBeRemoved(renderResult.getAllByRole('progressbar'));
+
+        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
 
       test('should not select agent policy by default if multiple exists', async () => {
@@ -196,12 +192,10 @@ for (let i = 0; i < 100; i++) {
 
       test('should select agent policy if pre selected', async () => {
         render(undefined, ['policy-1']);
-        await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
-        await act(async () => {
-          expect(updateAgentPoliciesMock).toBeCalledWith([
-            { id: 'policy-1', package_policies: [] },
-          ]);
-        });
+
+        await waitForElementToBeRemoved(renderResult.getAllByRole('progressbar'));
+
+        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
 
       test('should select multiple agent policies', async () => {
