@@ -35,7 +35,6 @@ export const ruleExecutionStatusErrorReason = {
   TIMEOUT: 'timeout',
   DISABLED: 'disabled',
   VALIDATE: 'validate',
-  BLOCKED: 'blocked',
 } as const;
 
 export const ruleExecutionStatusWarningReason = {

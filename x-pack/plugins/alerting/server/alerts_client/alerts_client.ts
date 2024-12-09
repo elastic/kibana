@@ -70,6 +70,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithReason } from '../lib';
+import { ErrorWithType } from '../lib/error_with_type';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -824,9 +825,11 @@ export class AlertsClient<
     response.items.forEach((item) => {
       const op = item.create || item.index || item.update || item.delete;
       if (op?.error && op.error.type === CLUSTER_BLOCK_EXCEPTION) {
-        const err = new Error(op!.error!.reason);
-        err.stack = op.error.stack_trace;
-        throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Blocked, err);
+        throw new ErrorWithType({
+          message: op!.error!.reason,
+          type: 'cluster_block_exception',
+          stack: op.error.stack_trace,
+        });
       }
     });
   }

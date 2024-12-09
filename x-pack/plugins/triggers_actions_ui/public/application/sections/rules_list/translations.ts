@@ -147,13 +147,6 @@ export const ALERT_ERROR_VALIDATE_REASON = i18n.translate(
   }
 );
 
-export const ALERT_ERROR_BLOCKED_REASON = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.ruleErrorReasonBlocked',
-  {
-    defaultMessage: 'Rule failed because the alerts index was blocked',
-  }
-);
-
 export const ALERT_WARNING_MAX_EXECUTABLE_ACTIONS_REASON = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.ruleWarningReasonMaxExecutableActions',
   {

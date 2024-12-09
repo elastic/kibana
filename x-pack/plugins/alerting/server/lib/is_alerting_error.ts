@@ -6,8 +6,8 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-types';
-import { getReasonFromError, isErrorWithReason } from './error_with_reason';
+import { isErrorWithReason } from './error_with_reason';
+import { getErrorType } from './error_with_type';
 
 export const CLUSTER_BLOCK_EXCEPTION = 'cluster_block_exception';
 
@@ -25,7 +25,5 @@ export function isEsUnavailableError(err: Error, ruleId: string) {
 }
 
 export function isClusterBlockError(err: Error) {
-  return isErrorWithReason(err)
-    ? getReasonFromError(err) === RuleExecutionStatusErrorReasons.Blocked
-    : false;
+  return getErrorType(err) === CLUSTER_BLOCK_EXCEPTION;
 }
