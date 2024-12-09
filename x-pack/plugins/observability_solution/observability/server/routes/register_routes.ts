@@ -30,7 +30,7 @@ export interface RegisterRoutesDependencies {
   assistant: {
     alertDetailsContextualInsightsService: AlertDetailsContextualInsightsService;
   };
-  getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
+  getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi>;
 }
 
 export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {

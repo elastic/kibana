@@ -9,24 +9,22 @@
 
 import { calculateWidthFromEntries } from './calculate_width_from_entries';
 import { MAX_WIDTH } from './calculate_width_from_char_count';
-import faker from 'faker';
-
-const generateLabel = (length: number) => faker.random.alpha({ count: length });
+import { faker } from '@faker-js/faker';
 
 const generateObjectWithLabelOfLength = (length: number, propOverrides?: Record<string, any>) => ({
-  label: generateLabel(length),
+  label: faker.string.alpha(length),
   ...propOverrides,
 });
 
 describe('calculateWidthFromEntries', () => {
   it('calculates width for array of strings', () => {
-    const shortLabels = [10, 20].map(generateLabel);
+    const shortLabels = [10, 20].map(faker.string.alpha);
     expect(calculateWidthFromEntries(shortLabels)).toBe(256);
 
-    const mediumLabels = [50, 55, 10, 20].map(generateLabel);
+    const mediumLabels = [50, 55, 10, 20].map(faker.string.alpha);
     expect(calculateWidthFromEntries(mediumLabels)).toBe(501);
 
-    const longLabels = [80, 90, 10].map(generateLabel);
+    const longLabels = [80, 90, 10].map(faker.string.alpha);
     expect(calculateWidthFromEntries(longLabels)).toBe(MAX_WIDTH);
   });
 
@@ -42,12 +40,12 @@ describe('calculateWidthFromEntries', () => {
   });
   it('calculates width for array of objects for fallback keys', () => {
     const shortLabels = [10, 20].map((v) =>
-      generateObjectWithLabelOfLength(v, { label: undefined, name: generateLabel(v) })
+      generateObjectWithLabelOfLength(v, { label: undefined, name: faker.string.alpha(v) })
     );
     expect(calculateWidthFromEntries(shortLabels, ['id', 'label', 'name'])).toBe(256);
 
     const mediumLabels = [50, 55, 10, 20].map((v) =>
-      generateObjectWithLabelOfLength(v, { label: undefined, name: generateLabel(v) })
+      generateObjectWithLabelOfLength(v, { label: undefined, name: faker.string.alpha(v) })
     );
     expect(calculateWidthFromEntries(mediumLabels, ['id', 'label', 'name'])).toBe(501);
   });

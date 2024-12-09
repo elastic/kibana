@@ -20,7 +20,7 @@ import { jobManagementPreRouting } from './job_management_pre_routing';
 jest.mock('../../../lib/content_stream');
 jest.mock('./jobs_query');
 
-const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
+const mockReportingConfig = createMockConfigSchema();
 let mockCore: ReportingCore;
 let mockSetupDeps: ReportingInternalSetup;
 let mockStartDeps: ReportingInternalStart;

@@ -134,7 +134,7 @@ export class EntityStoreDataClient {
     this.esClient = clusterClient.asCurrentUser;
 
     this.entityClient = new EntityClient({
-      esClient: this.esClient,
+      clusterClient,
       soClient,
       logger,
     });

@@ -12,10 +12,22 @@ import { calculateRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/dif
 import { convertRuleToDiffable } from '../../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert_prebuilt_rule_asset_to_rule_response';
 
-export function calculateIsCustomized(
-  baseRule: PrebuiltRuleAsset | undefined,
-  nextRule: RuleResponse
-) {
+interface CalculateIsCustomizedArgs {
+  baseRule: PrebuiltRuleAsset | undefined;
+  nextRule: RuleResponse;
+  isRuleCustomizationEnabled: boolean;
+}
+
+export function calculateIsCustomized({
+  baseRule,
+  nextRule,
+  isRuleCustomizationEnabled,
+}: CalculateIsCustomizedArgs) {
+  if (!isRuleCustomizationEnabled) {
+    // We don't want to accidentally mark rules as customized when customization is disabled.
+    return false;
+  }
+
   if (baseRule == null) {
     // If the base version is missing, we consider the rule to be customized
     return true;

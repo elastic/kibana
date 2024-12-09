@@ -18,7 +18,7 @@ import {
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
-  SERVERLESS_ES_SEARCH_PLAYGROUND_ID,
+  ES_SEARCH_PLAYGROUND_ID,
   SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
   SEARCH_HOMEPAGE,
   SEARCH_INDICES_START,
@@ -40,7 +40,7 @@ export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPL
 export type ServerlessSearchApp = typeof SERVERLESS_ES_APP_ID;
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type ServerlessWebCrawlers = typeof SERVERLESS_ES_WEB_CRAWLERS_ID;
-export type SearchPlaygroundId = typeof SERVERLESS_ES_SEARCH_PLAYGROUND_ID;
+export type SearchPlaygroundId = typeof ES_SEARCH_PLAYGROUND_ID;
 export type SearchInferenceEndpointsId = typeof SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID;
 export type SearchHomepage = typeof SEARCH_HOMEPAGE;
 export type SearchStart = typeof SEARCH_INDICES_START;
@@ -52,7 +52,7 @@ export type SearchAISearch = typeof SEARCH_AI_SEARCH;
 
 export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
 
-export type ApplicationsLinkId = 'searchApplications' | 'playground';
+export type ApplicationsLinkId = 'searchApplications';
 
 export type AppsearchLinkId = 'engines';
 

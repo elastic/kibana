@@ -21,6 +21,7 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
@@ -42,6 +43,7 @@ import { useUserData } from '../../../../detections/components/user_info';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import { StepAboutRule } from '../../components/step_about_rule';
 import { StepDefineRule } from '../../components/step_define_rule';
+import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
 import { formatRule } from '../rule_creation/helpers';
@@ -52,6 +54,7 @@ import {
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
@@ -65,10 +68,11 @@ import {
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
+import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
+import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
+import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
-import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 
@@ -101,9 +105,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
-
-  const [isSaveWithErrorsModalVisible, setIsSaveWithErrorsModalVisible] = useState(false);
-  const [nonBlockingRuleErrors, setNonBlockingRuleErrors] = useState<string[]>([]);
 
   const backOptions = useMemo(
     () => ({
@@ -138,7 +139,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
-  const { getRuleFormsErrors } = useRuleFormsErrors();
+  const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
+    useConfirmValidationErrorsModal();
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
@@ -276,6 +278,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   form={aboutStepForm}
                   esqlQuery={esqlQueryForAboutStep}
                   key="aboutStep"
+                  ruleSource={rule.rule_source}
                 />
               )}
               <EuiSpacer />
@@ -341,6 +344,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     [
       isPrebuiltRulesCustomizationEnabled,
       rule?.immutable,
+      rule.rule_source,
       rule?.id,
       activeStep,
       loading,
@@ -368,11 +372,16 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const { startTransaction } = useStartTransaction();
 
+  const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
+
   const saveChanges = useCallback(async () => {
     startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
+    const localDefineStepData: DefineStepRule = defineFieldsTransform({
+      ...defineStepData,
+    });
     const updatedRule = await updateRule({
       ...formatRule<RuleUpdateProps>(
-        defineStepData,
+        localDefineStepData,
         aboutStepData,
         scheduleStepData,
         actionsStepData,
@@ -390,8 +399,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, [
     aboutStepData,
     actionsStepData,
-    addSuccess,
     defineStepData,
+    defineFieldsTransform,
+    addSuccess,
     navigateToApp,
     rule?.exceptions_list,
     ruleId,
@@ -401,16 +411,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     updateRule,
   ]);
 
-  const showSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(true), []);
-  const closeSaveWithErrorsModal = useCallback(() => setIsSaveWithErrorsModalVisible(false), []);
-  const onConfirmSaveWithErrors = useCallback(async () => {
-    closeSaveWithErrorsModal();
-    await saveChanges();
-  }, [closeSaveWithErrorsModal, saveChanges]);
-
   const onSubmit = useCallback(async () => {
-    setNonBlockingRuleErrors([]);
-
     const actionsStepFormValid = await actionsStepForm.validate();
     if (!isPrebuiltRulesCustomizationEnabled && rule.immutable) {
       // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
@@ -425,29 +426,36 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     const defineStepFormValid = await defineStepForm.validate();
     const aboutStepFormValid = await aboutStepForm.validate();
     const scheduleStepFormValid = await scheduleStepForm.validate();
+
     if (
-      defineStepFormValid &&
-      aboutStepFormValid &&
-      scheduleStepFormValid &&
-      actionsStepFormValid
+      !defineStepFormValid ||
+      !aboutStepFormValid ||
+      !scheduleStepFormValid ||
+      !actionsStepFormValid
     ) {
-      await saveChanges();
       return;
     }
 
-    const { blockingErrors, nonBlockingErrors } = getRuleFormsErrors({
-      defineStepForm,
-      aboutStepForm,
-      scheduleStepForm,
-      actionsStepForm,
-    });
-    if (blockingErrors.length > 0) {
+    const defineRuleWarnings = defineStepForm.getValidationWarnings();
+    const aboutRuleWarnings = aboutStepForm.getValidationWarnings();
+    const scheduleRuleWarnings = scheduleStepForm.getValidationWarnings();
+    const ruleActionsWarnings = actionsStepForm.getValidationWarnings();
+
+    const warnings = extractValidationMessages(
+      [
+        ...defineRuleWarnings,
+        ...aboutRuleWarnings,
+        ...scheduleRuleWarnings,
+        ...ruleActionsWarnings,
+      ],
+      VALIDATION_WARNING_CODE_FIELD_NAME_MAP
+    );
+
+    if (!(await confirmValidationErrors(warnings))) {
       return;
     }
-    if (nonBlockingErrors.length > 0) {
-      setNonBlockingRuleErrors(nonBlockingErrors);
-      showSaveWithErrorsModal();
-    }
+
+    await saveChanges();
   }, [
     actionsStepForm,
     isPrebuiltRulesCustomizationEnabled,
@@ -455,9 +463,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
-    getRuleFormsErrors,
+    confirmValidationErrors,
     saveChanges,
-    showSaveWithErrorsModal,
   ]);
 
   const onTabClick = useCallback(async (tab: EuiTabbedContentTab) => {
@@ -513,13 +520,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   return (
     <>
-      {isSaveWithErrorsModalVisible && (
-        <SaveWithErrorsModal
-          errors={nonBlockingRuleErrors}
-          onCancel={closeSaveWithErrorsModal}
-          onConfirm={onConfirmSaveWithErrors}
-        />
-      )}
+      {confirmSavingWithWarningModal}
       <SecuritySolutionPageWrapper>
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {

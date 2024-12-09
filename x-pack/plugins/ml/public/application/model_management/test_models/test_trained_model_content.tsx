@@ -12,14 +12,15 @@ import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiTab, EuiTabs, useEuiPaddingSize } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import { isNLPModelItem } from '../../../../common/types/trained_models';
 import { SelectedModel } from './selected_model';
-import { type ModelItem } from '../models_list';
 import { INPUT_TYPE } from './models/inference_base';
 import { useTestTrainedModelsContext } from './test_trained_models_context';
 import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
 
 interface ContentProps {
-  model: ModelItem;
+  model: TrainedModelItem;
   handlePipelineConfigUpdate?: (configUpdate: Partial<InferecePipelineCreationState>) => void;
   externalPipelineConfig?: estypes.IngestPipeline;
 }
@@ -29,7 +30,9 @@ export const TestTrainedModelContent: FC<ContentProps> = ({
   handlePipelineConfigUpdate,
   externalPipelineConfig,
 }) => {
-  const [deploymentId, setDeploymentId] = useState<string>(model.deployment_ids[0]);
+  const [deploymentId, setDeploymentId] = useState<string>(
+    isNLPModelItem(model) ? model.deployment_ids[0] : model.model_id
+  );
   const mediumPadding = useEuiPaddingSize('m');
 
   const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
@@ -46,8 +49,7 @@ export const TestTrainedModelContent: FC<ContentProps> = ({
   }, [model, createPipelineFlyoutOpen]);
   return (
     <>
-      {' '}
-      {model.deployment_ids.length > 1 ? (
+      {isNLPModelItem(model) && model.deployment_ids.length > 1 ? (
         <>
           <EuiFormRow
             fullWidth

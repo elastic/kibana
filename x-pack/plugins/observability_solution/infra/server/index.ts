@@ -6,11 +6,9 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { config, InfraConfig } from './plugin';
 
+export { config, type InfraConfig } from './config';
 export type { InfraPluginSetup, InfraPluginStart, InfraRequestHandlerContext } from './types';
-export type { InfraConfig };
-export { config };
 
 export async function plugin(context: PluginInitializerContext) {
   const { InfraServerPlugin } = await import('./plugin');

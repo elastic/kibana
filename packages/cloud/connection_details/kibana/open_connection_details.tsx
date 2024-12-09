@@ -21,6 +21,7 @@ export interface OpenConnectionDetailsParams {
       i18n: CoreStart['i18n'];
       analytics?: CoreStart['analytics'];
       theme: CoreStart['theme'];
+      userProfile: CoreStart['userProfile'];
     };
   };
 }

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { isEmpty } from 'lodash';
+import type { KueryNode } from '@kbn/es-query';
+import {
+  buildConsumersFilter,
+  buildRuleTypeIdsFilter,
+  combineFilterWithAuthorizationFilter,
+  combineFilters,
+} from '../../../../rules_client/common/filters';
 import { findRulesSo } from '../../../../data/rule';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -22,15 +27,15 @@ export async function aggregateRules<T = Record<string, unknown>>(
   params: AggregateParams<T>
 ): Promise<T> {
   const { options = {}, aggs } = params;
-  const { filter, page = 1, perPage = 0, filterConsumers, ...restOptions } = options;
+  const { filter, page = 1, perPage = 0, ruleTypeIds, consumers, ...restOptions } = options;
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts,
-      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
-    );
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      filterOpts: alertingAuthorizationFilterOpts,
+    });
+
     validateRuleAggregationFields(aggs);
     aggregateOptionsSchema.validate(options);
   } catch (error) {
@@ -45,15 +50,21 @@ export async function aggregateRules<T = Record<string, unknown>>(
 
   const { filter: authorizationFilter } = authorizationTuple;
   const filterKueryNode = buildKueryNodeFilter(filter);
+  const ruleTypeIdsFilter = buildRuleTypeIdsFilter(ruleTypeIds);
+  const consumersFilter = buildConsumersFilter(consumers);
+  const combinedFilters = combineFilters(
+    [filterKueryNode, ruleTypeIdsFilter, consumersFilter],
+    'and'
+  );
 
   const { aggregations } = await findRulesSo<T>({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
       ...restOptions,
-      filter:
-        authorizationFilter && filterKueryNode
-          ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
-          : authorizationFilter,
+      filter: combineFilterWithAuthorizationFilter(
+        combinedFilters,
+        authorizationFilter as KueryNode
+      ),
       page,
       perPage,
       aggs,

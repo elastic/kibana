@@ -62,7 +62,7 @@ const baseNavItems = [
         href: '/app/enterprise_search/content/crawlers',
         id: 'crawlers',
         items: undefined,
-        name: 'Web crawlers',
+        name: 'Web Crawlers',
       },
     ],
     name: 'Content',
@@ -73,7 +73,7 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Playground',
-        href: '/app/enterprise_search/applications/playground',
+        href: '/app/search_playground',
         id: 'playground',
         items: undefined,
         name: 'Playground',
@@ -184,13 +184,13 @@ const mockNavLinks = [
   },
   {
     id: 'enterpriseSearchContent:webCrawlers',
-    title: 'Web crawlers',
+    title: 'Web Crawlers',
     url: '/app/enterprise_search/content/crawlers',
   },
   {
-    id: 'enterpriseSearchApplications:playground',
+    id: 'searchPlayground',
     title: 'Playground',
-    url: '/app/enterprise_search/applications/playground',
+    url: '/app/search_playground',
   },
   {
     id: 'enterpriseSearchApplications:searchApplications',

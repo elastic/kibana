@@ -45,8 +45,10 @@ export const listAlertTypesRoute = (
       }
       trackLegacyRouteUsage('listAlertTypes', usageCounter);
       const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
+
       return res.ok({
-        body: Array.from(await alertingContext.getRulesClient().listRuleTypes()),
+        body: Array.from(await rulesClient.listRuleTypes()),
       });
     })
   );

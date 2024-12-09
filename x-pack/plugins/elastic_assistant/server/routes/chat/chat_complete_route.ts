@@ -69,6 +69,8 @@ export const chatCompleteRoute = (
         try {
           telemetry = ctx.elasticAssistant.telemetry;
           const inference = ctx.elasticAssistant.inference;
+          const productDocsAvailable =
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
@@ -217,6 +219,7 @@ export const chatCompleteRoute = (
             response,
             telemetry,
             responseLanguage: request.body.responseLanguage,
+            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });
         } catch (err) {
           const error = transformError(err as Error);

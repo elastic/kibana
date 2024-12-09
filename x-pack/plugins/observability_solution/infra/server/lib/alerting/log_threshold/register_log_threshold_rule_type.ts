@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import type {
+  GetViewInAppRelativeUrlFnOpts,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
@@ -103,7 +106,7 @@ const viewInAppUrlActionVariableDescription = i18n.translate(
 );
 
 export function registerLogThresholdRuleType(
-  alertingPlugin: PluginSetupContract,
+  alertingPlugin: AlertingServerSetup,
   libs: InfraBackendLibs,
   { featureFlags }: InfraConfig
 ) {

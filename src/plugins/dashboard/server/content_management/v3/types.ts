@@ -16,6 +16,7 @@ import {
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
   controlGroupInputSchema,
@@ -40,6 +41,7 @@ export type DashboardOptions = TypeOf<typeof optionsSchema>;
 // recognize this, so we need to manually extend the type here.
 export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
   panelConfig: TypeOf<typeof panelSchema>['panelConfig'] & { [key: string]: any };
+  gridData: GridData;
 };
 export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
   panels: DashboardPanel[];
@@ -52,7 +54,7 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 };
 
 export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
-export type GridData = TypeOf<typeof gridDataSchema>;
+export type GridData = WithRequiredProperty<TypeOf<typeof gridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;

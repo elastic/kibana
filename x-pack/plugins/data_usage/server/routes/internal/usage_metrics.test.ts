@@ -18,7 +18,7 @@ import type {
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
 import { createMockedDataUsageContext } from '../../mocks';
 import { CustomHttpRequestError } from '../../utils';
-import { AutoOpsError } from '../../services/errors';
+import { AutoOpsError } from '../../errors';
 import { transformToUTCtime } from '../../../common/utils';
 
 const timeRange = {

@@ -8,6 +8,7 @@
  */
 
 export type {
+  DeprecationDetailsMessage,
   BaseDeprecationDetails,
   ConfigDeprecationDetails,
   FeatureDeprecationDetails,

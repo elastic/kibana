@@ -154,6 +154,7 @@ export function AnalyticsIdSelector({
   async function fetchAnalyticsModels() {
     setIsLoading(true);
     try {
+      // FIXME should if fetch all trained models?
       const response = await trainedModelsApiService.getTrainedModels();
       setTrainedModels(response);
     } catch (e) {

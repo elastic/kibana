@@ -20,9 +20,7 @@ import { StepDefineSummary } from './step_define_summary';
 
 jest.mock('../../../../app_dependencies');
 
-// Failing: https://github.com/elastic/kibana/issues/195992
-describe.skip('Transform: <DefinePivotSummary />', () => {
-  // Using the async/await wait()/done() pattern to avoid act() errors.
+describe('Transform: <DefinePivotSummary />', () => {
   test('Minimal initialization', async () => {
     // Arrange
     const queryClient = new QueryClient();

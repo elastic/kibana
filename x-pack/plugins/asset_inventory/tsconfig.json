@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*.ts",
+    "common/**/*.json",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "public/**/*.json",
+    "server/**/*.ts",
+    "server/**/*.json",
+    "../../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
+    "@kbn/securitysolution-es-utils"
+  ]
+}

@@ -206,6 +206,13 @@ import type {
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
 import type {
+  GetWorkflowInsightsRequestQueryInput,
+  GetWorkflowInsightsResponse,
+  UpdateWorkflowInsightRequestParamsInput,
+  UpdateWorkflowInsightRequestBodyInput,
+  UpdateWorkflowInsightResponse,
+} from './endpoint/workflow_insights/workflow_insights.gen';
+import type {
   BulkUpsertAssetCriticalityRecordsRequestBodyInput,
   BulkUpsertAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
@@ -349,16 +356,22 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateRuleMigrationRequestParamsInput,
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
+  GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationPrebuiltRulesRequestParamsInput,
+  GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
+  GetRuleMigrationTranslationStatsRequestParamsInput,
+  GetRuleMigrationTranslationStatsResponse,
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
@@ -676,7 +689,7 @@ If a record already exists for the specified entity, that record is overwritten 
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
-        path: '/internal/siem_migrations/rules',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1415,6 +1428,26 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves all available prebuilt rules (installed and installable)
+   */
+  async getRuleMigrationPrebuiltRules(props: GetRuleMigrationPrebuiltRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationPrebuiltRules`);
+    return this.kbnClient
+      .request<GetRuleMigrationPrebuiltRulesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1454,6 +1487,24 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the translation stats of a SIEM rules migration using the migration id provided
+   */
+  async getRuleMigrationTranslationStats(props: GetRuleMigrationTranslationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationTranslationStats`);
+    return this.kbnClient
+      .request<GetRuleMigrationTranslationStatsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/translation_stats',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the details of an existing saved Timeline or Timeline template.
    */
   async getTimeline(props: GetTimelineProps) {
@@ -1480,6 +1531,20 @@ finalize it.
         path: '/api/timelines',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async getWorkflowInsights(props: GetWorkflowInsightsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetWorkflowInsights`);
+    return this.kbnClient
+      .request<GetWorkflowInsightsResponse>({
+        path: '/internal/api/endpoint/workflow_insights',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
 
@@ -2139,6 +2204,19 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
+    return this.kbnClient
+      .request<UpdateWorkflowInsightResponse>({
+        path: replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -2210,6 +2288,7 @@ export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
 export interface CreateRuleMigrationProps {
+  params: CreateRuleMigrationRequestParamsInput;
   body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateTimelinesProps {
@@ -2334,7 +2413,11 @@ export interface GetRuleExecutionResultsProps {
   params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
+  query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
+}
+export interface GetRuleMigrationPrebuiltRulesProps {
+  params: GetRuleMigrationPrebuiltRulesRequestParamsInput;
 }
 export interface GetRuleMigrationResourcesProps {
   query: GetRuleMigrationResourcesRequestQueryInput;
@@ -2343,11 +2426,17 @@ export interface GetRuleMigrationResourcesProps {
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
 }
+export interface GetRuleMigrationTranslationStatsProps {
+  params: GetRuleMigrationTranslationStatsRequestParamsInput;
+}
 export interface GetTimelineProps {
   query: GetTimelineRequestQueryInput;
 }
 export interface GetTimelinesProps {
   query: GetTimelinesRequestQueryInput;
+}
+export interface GetWorkflowInsightsProps {
+  query: GetWorkflowInsightsRequestQueryInput;
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
@@ -2450,6 +2539,10 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   body: UpdateRuleMigrationRequestBodyInput;
+}
+export interface UpdateWorkflowInsightProps {
+  params: UpdateWorkflowInsightRequestParamsInput;
+  body: UpdateWorkflowInsightRequestBodyInput;
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;

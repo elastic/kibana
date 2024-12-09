@@ -8,4 +8,3 @@
  */
 
 export * from './transform_action';
-export * from './transform_rule';
