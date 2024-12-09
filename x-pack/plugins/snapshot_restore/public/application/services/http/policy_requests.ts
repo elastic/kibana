@@ -131,3 +131,10 @@ export const executeRetention = async () => {
   uiMetricService.trackUiMetric(UIM_RETENTION_EXECUTE);
   return result;
 };
+
+export const useLoadSlmStatus = () => {
+  return useRequest({
+    path: `${API_BASE_PATH}policies/slm_status`,
+    method: 'get',
+  });
+};
