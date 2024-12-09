@@ -689,14 +689,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.only('preview logged requests', () => {
+    describe('preview logged requests', () => {
       const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
-          value: 1, // This value generates 7 alerts with the current esArchive
+          value: 100,
         },
-        max_signals: 5,
       };
 
       it('should not return requests property when not enabled', async () => {
@@ -716,9 +715,12 @@ export default ({ getService }: FtrProviderContext) => {
 
         const requests = logs[0].requests;
 
-        expect(requests).toHaveLength(1);
-        expect(requests![0].description).toBe('Threshold request to find all matches');
+        expect(requests).toHaveLength(2);
+        expect(requests![0].description).toBe('Find all terms that exceeds threshold value');
         expect(requests![0].request).toContain('POST /auditbeat-*/_search?allow_no_indices=true');
+        expect(requests![1].description).toBe(
+          'Find all terms that exceeds threshold value after host.id: f9c7ca2d33f548a8b37667f6fffc59ce'
+        );
       });
     });
   });
