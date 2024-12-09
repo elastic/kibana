@@ -882,7 +882,7 @@ This plugin is only enabled when the application is built for stateful deploymen
 This plugin is only enabled when the application is built for serverless project, keeping the main security_solution plugin clean and agnostic of the offering model.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/serverless/README.mdx[serverless]
 |
 
 

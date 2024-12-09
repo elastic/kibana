@@ -7228,7 +7228,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless@link:x-pack/plugins/serverless":
+"@kbn/serverless@link:x-pack/platform/plugins/shared/serverless":
   version "0.0.0"
   uid ""
 
