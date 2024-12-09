@@ -30,7 +30,6 @@ import {
   RuleAlertData,
   WithoutReservedActionGroups,
   DataStreamAdapter,
-  RuleExecutionStatusErrorReasons,
 } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import {
@@ -69,7 +68,6 @@ import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
-import { ErrorWithReason } from '../lib';
 import { ErrorWithType } from '../lib/error_with_type';
 
 // Term queries can take up to 10,000 terms
@@ -827,7 +825,7 @@ export class AlertsClient<
       if (op?.error && op.error.type === CLUSTER_BLOCK_EXCEPTION) {
         throw new ErrorWithType({
           message: op!.error!.reason,
-          type: 'cluster_block_exception',
+          type: CLUSTER_BLOCK_EXCEPTION,
           stack: op.error.stack_trace,
         });
       }

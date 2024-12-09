@@ -19,7 +19,6 @@ import {
   RuleAlertData,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
-  RuleExecutionStatusErrorReasons,
 } from '../types';
 import {
   ConcreteTaskInstance,
@@ -99,7 +98,7 @@ import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { ErrorWithReason } from '../lib';
+import { ErrorWithType } from '../lib/error_with_type';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -3427,9 +3426,10 @@ describe('Task Runner', () => {
   });
 
   test('reschedules when persistAlerts returns a cluster_block_exception', async () => {
-    const rootError = new Error('Index is blocked');
-    rootError.stack = 'stack message';
-    const err = new ErrorWithReason(RuleExecutionStatusErrorReasons.Blocked, rootError);
+    const err = new ErrorWithType({
+      message: 'Index is blocked',
+      type: 'cluster_block_exception',
+    });
 
     alertsClient.persistAlerts.mockRejectedValueOnce(err);
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
