@@ -19,7 +19,6 @@ export interface UseColumnsProps {
   capabilities: Capabilities;
   dataView: DataView;
   dataViews: DataViewsContract;
-  useNewFieldsApi: boolean;
   setAppState: (state: {
     columns: string[];
     sort?: string[][];
@@ -36,20 +35,19 @@ export const useColumns = ({
   dataView,
   dataViews,
   setAppState,
-  useNewFieldsApi,
   columns,
   sort,
   defaultOrder = 'desc',
   settings,
 }: UseColumnsProps) => {
-  const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
+  const [usedColumns, setUsedColumns] = useState(getColumns(columns));
   useEffect(() => {
-    const nextColumns = getColumns(columns, useNewFieldsApi);
+    const nextColumns = getColumns(columns);
     if (isEqual(usedColumns, nextColumns)) {
       return;
     }
     setUsedColumns(nextColumns);
-  }, [columns, useNewFieldsApi, usedColumns]);
+  }, [columns, usedColumns]);
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
@@ -57,23 +55,12 @@ export const useColumns = ({
         dataView,
         dataViews,
         setAppState,
-        useNewFieldsApi,
         columns: usedColumns,
         sort,
         defaultOrder,
         settings,
       }),
-    [
-      capabilities,
-      dataView,
-      dataViews,
-      defaultOrder,
-      setAppState,
-      settings,
-      sort,
-      useNewFieldsApi,
-      usedColumns,
-    ]
+    [capabilities, dataView, dataViews, defaultOrder, setAppState, settings, sort, usedColumns]
   );
 
   return {
@@ -85,9 +72,9 @@ export const useColumns = ({
   };
 };
 
-function getColumns(columns: string[] | undefined, useNewFieldsApi: boolean) {
+function getColumns(columns: string[] | undefined) {
   if (!columns) {
     return [];
   }
-  return useNewFieldsApi ? columns.filter((col) => col !== '_source') : columns;
+  return columns.filter((col) => col !== '_source');
 }
