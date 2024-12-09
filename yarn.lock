@@ -6680,7 +6680,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/recently-accessed@link:packages/kbn-recently-accessed":
+"@kbn/recently-accessed@link:src/platform/packages/shared/kbn-recently-accessed":
   version "0.0.0"
   uid ""
 
