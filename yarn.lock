@@ -7276,7 +7276,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-card-no-data@link:packages/shared-ux/card/no_data/impl":
+"@kbn/shared-ux-card-no-data@link:src/platform/packages/shared/shared-ux/card/no_data/impl":
   version "0.0.0"
   uid ""
 
