@@ -16,5 +16,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ui-theme",
     "@kbn/utility-types",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/data-service",
+    "@kbn/i18n",
   ]
 }
