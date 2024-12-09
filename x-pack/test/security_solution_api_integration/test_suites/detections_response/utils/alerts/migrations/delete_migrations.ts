@@ -26,7 +26,7 @@ export const deleteMigrations = async ({
   );
 };
 
-export const deleteMigrationsIfExists = async ({
+export const deleteMigrationsIfExistent = async ({
   ids,
   kbnClient,
 }: {
