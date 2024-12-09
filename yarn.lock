@@ -7260,7 +7260,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-exit-full-screen@link:packages/shared-ux/button/exit_full_screen":
+"@kbn/shared-ux-button-exit-full-screen@link:src/platform/packages/private/shared-ux/button/exit_full_screen":
   version "0.0.0"
   uid ""
 

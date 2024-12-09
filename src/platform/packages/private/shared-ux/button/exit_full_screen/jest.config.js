@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/shared-ux/button/exit_full_screen'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/shared-ux/button/exit_full_screen'],
 };
