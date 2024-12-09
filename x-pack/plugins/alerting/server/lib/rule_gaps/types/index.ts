@@ -10,3 +10,13 @@ import { gapSchema, findGapsParamsSchema } from '../schemas';
 
 export type Gap = TypeOf<typeof gapSchema>;
 export type FindGapsParams = TypeOf<typeof findGapsParamsSchema>;
+
+export interface Interval {
+  gte: Date;
+  lte: Date;
+}
+
+export interface StringInterval {
+  gte: string;
+  lte: string;
+}

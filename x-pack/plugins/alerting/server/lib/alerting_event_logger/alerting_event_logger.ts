@@ -417,9 +417,9 @@ export class AlertingEventLogger {
     );
   }
 
-  public updateGap({ _id, gap }: { _id: string; gap: {} }): void {
+  public async updateGap({ meta, gap }: { meta: {}; gap: {} }): Promise<void> {
     // TODO: Extract function to form gap document
-    this.eventLogger.updateEvent(_id, {
+    return this.eventLogger.updateEvent(meta, {
       kibana: {
         alert: {
           rule: {

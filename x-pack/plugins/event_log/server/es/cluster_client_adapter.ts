@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
-import { reject, isUndefined, isNumber, pick, isEmpty, get } from 'lodash';
+import { reject, isUndefined, isNumber, pick, isEmpty, get, mergeWith } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
@@ -26,7 +26,7 @@ export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 export interface Doc {
   index: string;
   body: IEvent;
-  id?: string;
+  meta?: {};
 }
 
 type Wait = () => Promise<boolean>;
@@ -139,8 +139,20 @@ export class ClusterClientAdapter<
     await this.docsBufferedFlushed;
   }
 
-  public updateDocument(doc: Required<TDoc>) {
-    this.docBuffer$.next(doc);
+  public async updateDocument(doc: Required<TDoc>) {
+    const esClient = await this.elasticsearchClientPromise;
+    try {
+      const result = await esClient.update({
+        doc: doc.body,
+        id: doc.meta._id,
+        index: doc.meta._index,
+        if_primary_term: doc.meta._primary_term,
+        if_seq_no: doc.meta._seq_no,
+      });
+    } catch (e) {
+      this.logger.error(`error update event: "${e.message}"; docs: ${JSON.stringify(doc)}`);
+      throw e;
+    }
   }
 
   public indexDocument(doc: TDoc): void {
@@ -172,35 +184,32 @@ export class ClusterClientAdapter<
 
     try {
       const esClient = await this.elasticsearchClientPromise;
-      const originalDocsBeforeUpdate = await esClient.search({
-        index: this.esNames.dataStream,
-        seq_no_primary_term: true,
-        query: {
-          terms: {
-            _id: docsToUpdate.map((doc) => doc.id),
-          },
-        },
-      });
 
-      for (const originalDoc of originalDocsBeforeUpdate?.hits?.hits ?? []) {
-        const fieldsToUpdate = docsToUpdate.find(
-          (docToUpdate) => docToUpdate.id === originalDoc._id
-        );
-        if (!fieldsToUpdate || !originalDoc._source) continue;
+      // for (const docToUpdate of docsToUpdate) {
+      //   bulkBody.push({
+      //     update: {
+      //       _index: docToUpdate.meta._index,
+      //       _id: docToUpdate.meta._id,
+      //       if_seq_no: docToUpdate.meta._seq_no,
+      //       if_primary_term: docToUpdate.meta._primary_term,
+      //     },
+      //   });
 
-        bulkBody.push({
-          index: {
-            _index: originalDoc._index,
-            _id: originalDoc._id,
-            if_seq_no: originalDoc._seq_no,
-            if_primary_term: originalDoc._primary_term,
-          },
-        });
-        bulkBody.push({
-          ...originalDoc._source,
-          ...fieldsToUpdate.body,
-        });
-      }
+      //   // const updatedDoc = mergeWith(
+      //   //   {},
+      //   //   originalDoc._source,
+      //   //   fieldsToUpdate.body,
+      //   //   (objValue, srcValue) => {
+      //   //     if (Array.isArray(srcValue)) {
+      //   //       return srcValue;
+      //   //     }
+      //   //   }
+      //   // );
+
+      //   // console.log('updatedDoc', JSON.stringify(updatedDoc));
+
+      //   bulkBody.push({ doc: docToUpdate.body });
+      // }
 
       const response = await esClient.bulk({
         // index: this.esNames.dataStream,
@@ -455,6 +464,7 @@ export class ClusterClientAdapter<
       } = await esClient.search<IValidatedEvent>({
         index,
         track_total_hits: true,
+        seq_no_primary_term: true,
         body,
       });
       return {
@@ -464,6 +474,9 @@ export class ClusterClientAdapter<
         data: hits.map((hit) => ({
           ...hit._source,
           _id: hit._id,
+          _index: hit._index,
+          _seq_no: hit._seq_no,
+          _primary_term: hit._primary_term,
         })),
       };
     } catch (err) {
@@ -503,6 +516,7 @@ export class ClusterClientAdapter<
         index,
         track_total_hits: true,
         body,
+        seq_no_primary_term: true,
       });
       return {
         page,
@@ -511,6 +525,9 @@ export class ClusterClientAdapter<
         data: hits.map((hit) => ({
           ...hit._source,
           _id: hit._id,
+          _index: hit._index,
+          if_seq_no: hit._seq_no,
+          if_primary_term: hit._primary_term,
         })),
       };
     } catch (err) {

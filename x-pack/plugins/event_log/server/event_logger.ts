@@ -108,19 +108,21 @@ export class EventLogger implements IEventLogger {
     }
   }
 
-  updateEvent(id: string, event: IEvent): void {
+  async updateEvent(meta: {}, event: IEvent): Promise<void> {
     const doc: Required<Doc> = {
       index: this.esContext.esNames.dataStream,
       body: event,
-      id,
+      meta,
     };
 
     if (this.eventLogService.isIndexingEntries()) {
-      updateEventDoc(this.esContext, doc);
-    }
+      const result = updateEventDoc(this.esContext, doc);
 
-    if (this.eventLogService.isLoggingEntries()) {
-      logUpdateEventDoc(this.systemLogger, doc);
+      if (this.eventLogService.isLoggingEntries()) {
+        logUpdateEventDoc(this.systemLogger, doc);
+      }
+
+      return result;
     }
   }
 }
@@ -185,6 +187,6 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
   esContext.esAdapter.indexDocument(doc);
 }
 
-function updateEventDoc(esContext: EsContext, doc: Required<Doc>): void {
-  esContext.esAdapter.updateDocument(doc);
+async function updateEventDoc(esContext: EsContext, doc: Required<Doc>): Promise<void> {
+  return esContext.esAdapter.updateDocument(doc);
 }

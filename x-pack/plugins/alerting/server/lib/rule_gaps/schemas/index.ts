@@ -14,19 +14,20 @@ export const gapStatusSchema = schema.oneOf([
   schema.literal(gapStatus.PARTIALLY_FILLED),
 ]);
 
-const rangeSchema = schema.object({
+export const rangeSchema = schema.object({
   lte: schema.string(),
   gte: schema.string(),
 });
 
+export const rangeListSchema = schema.arrayOf(rangeSchema);
+
 export const gapSchema = schema.object({
-  _id: schema.string(),
-  eventId: schema.string(),
+  _id: schema.maybe(schema.string()),
   status: gapStatusSchema,
   range: rangeSchema,
-  inProgressIntervals: schema.arrayOf(rangeSchema),
-  filledIntervals: schema.arrayOf(rangeSchema),
-  unfilledIntervals: schema.arrayOf(rangeSchema),
+  inProgressIntervals: rangeListSchema,
+  filledIntervals: rangeListSchema,
+  unfilledIntervals: rangeListSchema,
   totalGapDurationMs: schema.number(),
   filledDurationMs: schema.number(),
   unfilledDurationMs: schema.number(),
@@ -42,6 +43,7 @@ export const findGapsParamsSchema = schema.object(
     start: schema.maybe(schema.string()),
     sortField: schema.maybe(schema.oneOf([schema.literal('@timestamp')])),
     sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+    statuses: schema.maybe(schema.arrayOf(gapStatusSchema)),
   },
   {
     validate({ start, end }) {

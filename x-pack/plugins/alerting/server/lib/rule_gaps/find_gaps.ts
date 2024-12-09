@@ -8,8 +8,10 @@
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { Gap, FindGapsParams } from './types';
+import { FindGapsParams } from './types';
+import { Gap } from './gap';
 import { transformToGap } from './transforms/transformToGap';
+import { GapStatus } from '../../../common/constants/gap_status';
 
 export const findGaps = async ({
   eventLogClient,
@@ -25,13 +27,18 @@ export const findGaps = async ({
   page: number;
   perPage: number;
 }> => {
-  const { ruleIds, start, end, page, perPage } = params;
+  const { ruleIds, start, end, page, perPage, statuses } = params;
   try {
+    const statusesFilter = statuses
+      ?.map((status) => `kibana.alert.rule.gap.status : ${status}`)
+      .join(' OR ');
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
       ruleIds,
       {
-        filter: `event.action: gap AND event.provider: alerting and (kibana.alert.rule.gap.range <= "${end}" AND kibana.alert.rule.gap.range >= "${start}")`,
+        filter: `event.action: gap AND event.provider: alerting AND (kibana.alert.rule.gap.range <= "${end}" AND kibana.alert.rule.gap.range >= "${start}") ${
+          statusesFilter ? `AND (${statusesFilter})` : ''
+        }`,
         sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
         page,
         per_page: perPage,
@@ -61,9 +68,10 @@ export const findAllGaps = async ({
     ruleIds: string[];
     start: Date;
     end: Date;
+    statuses?: GapStatus[];
   };
 }): Promise<Gap[]> => {
-  const { ruleIds, start, end } = params;
+  const { ruleIds, start, end, statuses } = params;
   const allGaps: Gap[] = [];
   let currentPage = 1;
   const perPage = 10000;
@@ -78,6 +86,7 @@ export const findAllGaps = async ({
         end: end.toISOString(),
         page: currentPage,
         perPage,
+        statuses,
       },
     });
 
