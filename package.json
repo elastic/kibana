@@ -747,7 +747,7 @@
     "@kbn/reporting-csv-share-panel": "link:src/platform/packages/private/kbn-reporting/get_csv_panel_actions",
     "@kbn/reporting-export-types-csv": "link:src/platform/packages/private/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-csv-common": "link:src/platform/packages/private/kbn-reporting/export_types/csv_common",
-    "@kbn/reporting-export-types-pdf": "link:packages/kbn-reporting/export_types/pdf",
+    "@kbn/reporting-export-types-pdf": "link:src/platform/packages/private/kbn-reporting/export_types/pdf",
     "@kbn/reporting-export-types-pdf-common": "link:packages/kbn-reporting/export_types/pdf_common",
     "@kbn/reporting-export-types-png": "link:packages/kbn-reporting/export_types/png",
     "@kbn/reporting-export-types-png-common": "link:packages/kbn-reporting/export_types/png_common",

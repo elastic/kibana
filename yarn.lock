@@ -6740,7 +6740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/pdf":
+"@kbn/reporting-export-types-pdf@link:src/platform/packages/private/kbn-reporting/export_types/pdf":
   version "0.0.0"
   uid ""
 
