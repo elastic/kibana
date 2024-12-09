@@ -5,7 +5,7 @@ metadata:
   name: bk-kibana-gen-ai-daily
   description: Runs the GenAI FTR tests daily
   links:
-    - url: 'https://buildkite.com/elastic/kibana-gen-ai-daily'
+    - url: 'https://buildkite.com/elastic/kibana-gen-ai-tests-daily'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
