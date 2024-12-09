@@ -82,6 +82,7 @@ exports[`renders correctly 1`] = `
     >
       <EuiFieldText
         data-test-subj="spaceURLDisplay"
+        disabled={false}
         fullWidth={true}
         isInvalid={true}
         onChange={[Function]}

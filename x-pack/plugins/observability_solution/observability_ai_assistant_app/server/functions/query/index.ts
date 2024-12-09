@@ -15,12 +15,12 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
+import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
 import { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
-import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 
 export const QUERY_FUNCTION_NAME = 'query';
 export const EXECUTE_QUERY_NAME = 'execute_query';
