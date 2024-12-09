@@ -182,7 +182,6 @@ export async function suggest(
     resourceRetriever
   );
   const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
-  // console.log(supportsVariables);
   const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);

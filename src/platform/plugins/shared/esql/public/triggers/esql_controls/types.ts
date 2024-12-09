@@ -13,7 +13,6 @@ export enum EsqlControlFlyoutType {
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
 
-// should move to one place
 export interface ESQLControlState {
   grow?: boolean;
   width?: string;

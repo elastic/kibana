@@ -164,6 +164,8 @@ export function ESQLControlsFlyout({
     controlTypeOptions.find((option) => option.key === flyoutType)!,
   ]);
   const [formIsInvalid, setFormIsInvalid] = useState(false);
+  const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
+
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const dashboardPanels = useStateFromPublishingSubject(dashboardApi.children$);
   const suggestedVariableName = initialState
@@ -361,17 +363,22 @@ export function ESQLControlsFlyout({
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
       if (valuesQuery !== query) {
-        getESQLResults({
-          esqlQuery: query,
-          search,
-          signal: undefined,
-          filter: undefined,
-          dropNullColumns: true,
-        }).then((results) => {
-          const valuesArray = results.response.values.map((value) => value[0]);
-          setValues(valuesArray.filter((v) => v).join(', '));
-        });
-        setValuesQuery(query);
+        try {
+          getESQLResults({
+            esqlQuery: query,
+            search,
+            signal: undefined,
+            filter: undefined,
+            dropNullColumns: true,
+          }).then((results) => {
+            const valuesArray = results.response.values.map((value) => value[0]);
+            setValues(valuesArray.filter((v) => v).join(', '));
+            setEsqlQueryErrors([]);
+          });
+          setValuesQuery(query);
+        } catch (e) {
+          setEsqlQueryErrors([e]);
+        }
       }
     },
     [search, valuesQuery]
@@ -507,7 +514,7 @@ export function ESQLControlsFlyout({
                 }}
                 hideTimeFilterInfo={true}
                 disableAutoFocus={true}
-                // errors={errors}
+                errors={esqlQueryErrors}
                 editorIsInline
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {

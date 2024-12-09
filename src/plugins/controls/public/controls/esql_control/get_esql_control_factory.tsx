@@ -122,7 +122,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 onChange={(options) => {
                   const selectedValues = options.map((option) => option.label);
                   selections.setSelectedOptions(selectedValues);
-                  // take the name from the variable name
+
                   esqlVariablesService.updateVariable(
                     variableName,
                     selectedValues[0],
