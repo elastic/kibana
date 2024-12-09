@@ -48,5 +48,10 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
 export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
   return {
     processors: generateProcessingSteps(definition),
+    _meta: {
+      description: `Stream-managed pipeline for the ${definition.id} stream`,
+      managed: true,
+    },
+    version: ASSET_VERSION,
   };
 }
