@@ -7,27 +7,15 @@
 
 import { useEffect } from 'react';
 
-import { i18n } from '@kbn/i18n';
-
+import * as i18n from '../../common/translations';
 import { useKibana } from './use_kibana';
 
-export const usePlaygroundBreadcrumbs = () => {
+export const useInferenceEndpointsBreadcrumbs = () => {
   const { searchNavigation } = useKibana().services;
 
   useEffect(() => {
     searchNavigation?.breadcrumbs.setSearchBreadCrumbs(
-      [
-        {
-          text: i18n.translate('xpack.searchPlayground.breadcrumbs.build', {
-            defaultMessage: 'Build',
-          }),
-        },
-        {
-          text: i18n.translate('xpack.searchPlayground.breadcrumbs.playground', {
-            defaultMessage: 'Playground',
-          }),
-        },
-      ],
+      [{ text: i18n.BREADCRUMB_RELEVANCE }, { text: i18n.BREADCRUMB_INFERENCE_ENDPOINTS }],
       { forClassicChromeStyle: true }
     );
 
