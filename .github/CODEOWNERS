@@ -866,6 +866,7 @@ x-pack/packages/security/ui_components @elastic/kibana-security
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
+x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
@@ -885,7 +886,6 @@ x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/plugins/cross_cluster_replication @elastic/kibana-management
 x-pack/plugins/custom_branding @elastic/appex-sharedux
-x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/plugins/data_visualizer @elastic/ml-ui
