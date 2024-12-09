@@ -20,12 +20,11 @@ export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfil
   profile: {
     getDefaultAppState: () => () => ({
       columns: [
-        {
-          name: 'log.level',
-        },
-        {
-          name: 'message',
-        }
+        { name: 'log.level' },
+        { name: 'message' },
+        { name: 'x-opaque-id' },
+        { name: 'elasticsearch.cluster.name' },
+        { name: 'elasticsearch.event.category' }
       ],
     }),
   },
@@ -42,7 +41,7 @@ export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfil
       indexPattern = params.dataView.getIndexPattern();
     }
 
-    if (indexPattern !== '..logs-deprecation.elasticsearch-default') {
+    if (!indexPattern || !indexPattern.startsWith('.logs-deprecation')) {
       return { isMatch: false };
     }
 
