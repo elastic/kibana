@@ -26,7 +26,14 @@ describe('mergeEntitiesList', () => {
         },
       ];
 
-      const mergedEntities = mergeEntitiesList([], entities);
+      const mergedEntities = mergeEntitiesList({
+        entities,
+        metadataFields: [],
+        sources: [
+          { metadata_fields: ['only_in_record_1'] },
+          { metadata_fields: ['only_in_record_2'] },
+        ] as EntitySourceDefinition[],
+      });
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
@@ -60,17 +67,14 @@ describe('mergeEntitiesList', () => {
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(
-        [
-          {
-            metadata_fields: ['host.name', 'agent.name', 'service.environment', 'only_in_record_1'],
-          },
-          {
-            metadata_fields: ['host.name', 'agent.name', 'service.environment', 'only_in_record_2'],
-          },
+      const mergedEntities = mergeEntitiesList({
+        entities,
+        metadataFields: ['host.name', 'agent.name', 'service.environment'],
+        sources: [
+          { metadata_fields: ['only_in_record_1'] },
+          { metadata_fields: ['only_in_record_2'] },
         ] as EntitySourceDefinition[],
-        entities
-      );
+      });
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
@@ -116,17 +120,14 @@ describe('mergeEntitiesList', () => {
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(
-        [
-          {
-            metadata_fields: ['host.name'],
-          },
-          {
-            metadata_fields: ['host.name'],
-          },
+      const mergedEntities = mergeEntitiesList({
+        entities,
+        metadataFields: ['host.name'],
+        sources: [
+          { metadata_fields: [] as string[] },
+          { metadata_fields: [] as string[] },
         ] as EntitySourceDefinition[],
-        entities
-      );
+      });
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
@@ -153,13 +154,14 @@ describe('mergeEntitiesList', () => {
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(
-        [
-          { metadata_fields: ['host.name'] },
-          { metadata_fields: ['host.name'] },
+      const mergedEntities = mergeEntitiesList({
+        entities,
+        metadataFields: ['host.name'],
+        sources: [
+          { metadata_fields: [] as string[] },
+          { metadata_fields: [] as string[] },
         ] as EntitySourceDefinition[],
-        entities
-      );
+      });
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
@@ -194,17 +196,14 @@ describe('mergeEntitiesList', () => {
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(
-        [
-          {
-            metadata_fields: ['host.name'],
-          },
-          {
-            metadata_fields: ['host.name'],
-          },
+      const mergedEntities = mergeEntitiesList({
+        entities,
+        metadataFields: ['host.name'],
+        sources: [
+          { metadata_fields: [] as string[] },
+          { metadata_fields: [] as string[] },
         ] as EntitySourceDefinition[],
-        entities
-      );
+      });
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',

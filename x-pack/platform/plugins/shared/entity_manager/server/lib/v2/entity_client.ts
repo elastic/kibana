@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { EntityV2 } from '@kbn/entities-schema';
-import { without } from 'lodash';
+import { uniq, without } from 'lodash';
 import {
   ReadSourceDefinitionOptions,
   readSourceDefinitions,
@@ -17,7 +16,7 @@ import {
 } from './definitions/source_definition';
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
 import { getEntityInstancesQuery } from './queries';
-import { mergeEntitiesList } from './queries/utils';
+import { mergeEntitiesList, sortEntitiesList } from './queries/utils';
 import {
   EntitySourceDefinition,
   EntityTypeDefinition,
@@ -26,6 +25,7 @@ import {
 } from './types';
 import { UnknownEntityType } from './errors/unknown_entity_type';
 import { runESQLQuery } from './run_esql_query';
+import { validateFields } from './search_by_source';
 
 export class EntityClient {
   constructor(
@@ -61,49 +61,12 @@ export class EntityClient {
     limit,
   }: SearchBySources) {
     const searches = sources.map(async (source) => {
-      const mandatoryFields = [
-        ...source.identity_fields,
-        ...(source.timestamp_field ? [source.timestamp_field] : []),
-        ...(source.display_name ? [source.display_name] : []),
-      ];
-      const metaFields = [...metadataFields, ...source.metadata_fields];
-
-      // operations on an unmapped field result in a failing query so we verify
-      // field capabilities beforehand. the field caps is also used to check
-      // index existence
-      const { fields } = await this.options.clusterClient.asCurrentUser
-        .fieldCaps({
-          index: source.index_patterns,
-          fields: [...mandatoryFields, ...metaFields],
-        })
-        .catch((err) => {
-          if (err.meta?.statusCode === 404) {
-            throw new Error(
-              `No index found for source [${source.id}] with index patterns [${source.index_patterns}]`
-            );
-          }
-          throw err;
-        });
-
-      const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
-      if (!sourceHasMandatoryFields) {
-        // we can't build entities without id fields
-        // TODO filters should likely behave similarly
-        const missingFields = mandatoryFields.filter((field) => !fields[field]);
-        throw new Error(
-          `Ignoring source [${source.id}] because some mandatory fields [${missingFields.join(
-            ', '
-          )}] are not mapped in [${source.index_patterns}]`
-        );
-      }
-
-      // but metadata field not being available is fine
-      const availableMetadataFields = metaFields.filter((field) => fields[field]);
-      if (availableMetadataFields.length < metaFields.length) {
-        this.options.logger.info(
-          `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(', ')}]`
-        );
-      }
+      const availableMetadataFields = await validateFields({
+        source,
+        metadataFields,
+        esClient: this.options.clusterClient.asCurrentUser,
+        logger: this.options.logger,
+      });
 
       const { query, filter } = getEntityInstancesQuery({
         source: {
@@ -140,7 +103,20 @@ export class EntityClient {
       results.filter((result) => result.status === 'rejected') as PromiseRejectedResult[]
     ).map((result) => result.reason.message);
 
-    return { entities: mergeEntitiesList(sources, entities), errors };
+    if (sources.length === 1) {
+      return { entities, errors };
+    }
+
+    // we have to manually merge, sort and limit entities since we run
+    // independant queries for each source
+    return {
+      errors,
+      entities: sortEntitiesList({
+        sources,
+        sort,
+        entities: mergeEntitiesList({ entities, sources, metadataFields }),
+      }).slice(0, limit),
+    };
   }
 
   async storeTypeDefinition(type: EntityTypeDefinition) {

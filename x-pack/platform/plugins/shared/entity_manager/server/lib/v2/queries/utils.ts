@@ -6,8 +6,8 @@
  */
 
 import { EntityV2 } from '@kbn/entities-schema';
-import { compact, uniq } from 'lodash';
-import { EntitySourceDefinition } from '../types';
+import { orderBy, uniq } from 'lodash';
+import { EntitySourceDefinition, SortBy } from '../types';
 
 function getLatestDate(date1?: string, date2?: string) {
   if (!date1 && !date2) return;
@@ -43,13 +43,19 @@ function mergeEntities(metadataFields: string[], entity1: EntityV2, entity2: Ent
   return merged;
 }
 
-export function mergeEntitiesList(
-  sources: EntitySourceDefinition[],
-  entities: EntityV2[]
-): EntityV2[] {
-  const metadataFields = uniq(
-    sources.flatMap((source) => compact([source.timestamp_field, ...source.metadata_fields]))
-  );
+export function mergeEntitiesList({
+  entities,
+  sources,
+  metadataFields,
+}: {
+  entities: EntityV2[];
+  sources: EntitySourceDefinition[];
+  metadataFields: string[];
+}): EntityV2[] {
+  const mergeableFields = uniq([
+    ...sources.flatMap((source) => source.metadata_fields),
+    ...metadataFields,
+  ]);
   const instances: { [key: string]: EntityV2 } = {};
 
   for (let i = 0; i < entities.length; i++) {
@@ -57,7 +63,7 @@ export function mergeEntitiesList(
     const id = entity['entity.id'];
 
     if (instances[id]) {
-      instances[id] = mergeEntities(metadataFields, instances[id], entity);
+      instances[id] = mergeEntities(mergeableFields, instances[id], entity);
     } else {
       instances[id] = entity;
     }
@@ -66,6 +72,30 @@ export function mergeEntitiesList(
   return Object.values(instances);
 }
 
+export function sortEntitiesList({
+  entities,
+  sources,
+  sort,
+}: {
+  entities: EntityV2[];
+  sources: EntitySourceDefinition[];
+  sort?: SortBy;
+}) {
+  if (!sort) {
+    sort = defaultSort(sources);
+  }
+
+  return orderBy(entities, sort.field, sort.direction.toLowerCase() as 'asc' | 'desc');
+}
+
 export function asKeyword(field: string) {
   return `${field}::keyword`;
+}
+
+export function defaultSort(sources: EntitySourceDefinition[]): SortBy {
+  if (sources.some((source) => source.timestamp_field)) {
+    return { field: 'entity.last_seen_timestamp', direction: 'DESC' };
+  }
+
+  return { field: 'entity.id', direction: 'ASC' };
 }

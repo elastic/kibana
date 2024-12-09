@@ -38,6 +38,7 @@ export async function storeTypeDefinition(
     index: DEFINITIONS_ALIAS,
     id: `type:${definition.type.id}`,
     document: definition,
+    refresh: 'wait_for',
   });
 
   return definition.type;
