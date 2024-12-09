@@ -779,7 +779,7 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/product_doc_base/README.md[productDocBase]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md[productDocBase]
 |This plugin contains the product documentation base service.
 
 

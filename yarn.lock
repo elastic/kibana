@@ -6624,7 +6624,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
+"@kbn/product-doc-base-plugin@link:x-pack/platform/plugins/shared/ai_infra/product_doc_base":
   version "0.0.0"
   uid ""
 
