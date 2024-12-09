@@ -8,7 +8,13 @@ import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 
-export function PreviewTable({ documents }: { documents: unknown[] }) {
+export function PreviewTable({
+  documents,
+  displayColumns,
+}: {
+  documents: unknown[];
+  displayColumns?: string[];
+}) {
   const [height, setHeight] = useState('100px');
   useEffect(() => {
     // set height to 100% after a short delay otherwise it doesn't calculate correctly
@@ -19,6 +25,8 @@ export function PreviewTable({ documents }: { documents: unknown[] }) {
   }, []);
 
   const columns = useMemo(() => {
+    if (displayColumns) return displayColumns;
+
     const cols = new Set<string>();
     documents.forEach((doc) => {
       if (!doc || typeof doc !== 'object') {
@@ -29,7 +37,7 @@ export function PreviewTable({ documents }: { documents: unknown[] }) {
       });
     });
     return Array.from(cols);
-  }, [documents]);
+  }, [displayColumns, documents]);
 
   const gridColumns = useMemo(() => {
     return Array.from(columns).map((column) => ({
