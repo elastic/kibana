@@ -219,14 +219,15 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
  * @param capabilities Capabilities from coreStart.application
  */
 export const canFetchPackageAndAgentPolicies = (capabilities: Capabilities): boolean => {
-  const canReadPolicyManagement = (capabilities.siem?.readPolicyManagement ?? false) as boolean;
+  const canReadPolicyManagement = Boolean(capabilities.siem?.readPolicyManagement);
 
   const fleetv2 = capabilities.fleetv2;
-  const canReadFleetAgentPolicies = (fleetv2?.read &&
-    (fleetv2?.agent_policies_read === true ||
-      fleetv2?.agent_policies_read === undefined)) as boolean;
+  const canReadFleetAgentPolicies = Boolean(
+    fleetv2?.read &&
+      (fleetv2?.agent_policies_read === true || fleetv2?.agent_policies_read === undefined)
+  );
 
-  const canReadIntegrations = capabilities.fleet?.read as boolean;
+  const canReadIntegrations = Boolean(capabilities.fleet?.read);
 
   return canReadPolicyManagement || (canReadFleetAgentPolicies && canReadIntegrations);
 };
