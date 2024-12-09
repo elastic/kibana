@@ -515,7 +515,6 @@ packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
 packages/response-ops/rule_params @elastic/response-ops
 packages/serverless/project_switcher @elastic/appex-sharedux
-packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
 packages/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 packages/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
 packages/serverless/storybook/config @elastic/appex-sharedux
@@ -621,6 +620,7 @@ src/platform/packages/shared/react/kibana_context/render @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
+src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management

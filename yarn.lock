@@ -7196,7 +7196,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-observability-settings@link:packages/serverless/settings/observability_project":
+"@kbn/serverless-observability-settings@link:src/platform/packages/shared/serverless/settings/observability_project":
   version "0.0.0"
   uid ""
 

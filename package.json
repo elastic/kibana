@@ -862,7 +862,7 @@
     "@kbn/serverless": "link:x-pack/platform/plugins/shared/serverless",
     "@kbn/serverless-common-settings": "link:src/platform/packages/private/serverless/settings/common",
     "@kbn/serverless-observability": "link:x-pack/plugins/serverless_observability",
-    "@kbn/serverless-observability-settings": "link:packages/serverless/settings/observability_project",
+    "@kbn/serverless-observability-settings": "link:src/platform/packages/shared/serverless/settings/observability_project",
     "@kbn/serverless-project-switcher": "link:packages/serverless/project_switcher",
     "@kbn/serverless-search": "link:x-pack/plugins/serverless_search",
     "@kbn/serverless-search-settings": "link:packages/serverless/settings/search_project",
