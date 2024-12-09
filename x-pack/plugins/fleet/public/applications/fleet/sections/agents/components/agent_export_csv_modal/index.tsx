@@ -17,12 +17,16 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { startCase, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 
 import { AGENT_FIELDS_TO_EXPORT, INITIAL_AGENT_FIELDS_TO_EXPORT } from './columns';
 
 export interface ExportField {
-  field: string;
+  description: string;
+}
+
+export interface ExportFieldWithDescription extends ExportField {
+  description: string;
 }
 
 interface Props {
@@ -36,34 +40,26 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
   onSubmit,
   agentCount,
 }) => {
-  const [selection, setSelection] = useState<ExportField[]>(INITIAL_AGENT_FIELDS_TO_EXPORT);
+  const [selection, setSelection] = useState<ExportFieldWithDescription[]>(
+    INITIAL_AGENT_FIELDS_TO_EXPORT
+  );
 
-  const items = AGENT_FIELDS_TO_EXPORT
-    ? uniqBy([...INITIAL_AGENT_FIELDS_TO_EXPORT, ...AGENT_FIELDS_TO_EXPORT], 'field')
-    : INITIAL_AGENT_FIELDS_TO_EXPORT;
+  const items = uniqBy([...INITIAL_AGENT_FIELDS_TO_EXPORT, ...AGENT_FIELDS_TO_EXPORT], 'field');
 
-  const columns: Array<EuiBasicTableColumn<ExportField>> = [
+  const columns: Array<EuiBasicTableColumn<ExportFieldWithDescription>> = [
     {
       field: 'field',
       name: 'Field',
       truncateText: true,
     },
     {
-      field: 'field',
+      field: 'description',
       name: 'Description',
-      render: (field: string) => {
-        const lastSlice = field.slice(field.lastIndexOf('.') + 1);
-        const firstSlice = field.slice(0, field.lastIndexOf('.'));
-        const secondToLastSlice = firstSlice.slice(firstSlice.lastIndexOf('.') + 1);
-        const lastTwoSlices =
-          firstSlice === secondToLastSlice ? lastSlice : `${secondToLastSlice}.${lastSlice}`;
-        return startCase(lastTwoSlices);
-      },
       truncateText: true,
     },
   ];
 
-  const selectionValue: EuiTableSelectionType<ExportField> = {
+  const selectionValue: EuiTableSelectionType<ExportFieldWithDescription> = {
     selectable: () => true,
     onSelectionChange: (newSelection) => {
       setSelection(newSelection);
@@ -87,7 +83,7 @@ export const AgentExportCSVModal: React.FunctionComponent<Props> = ({
         />
       }
       onCancel={onClose}
-      onConfirm={() => onSubmit(selection)}
+      onConfirm={() => onSubmit(selection.map((s) => ({ field: s.field })))}
       cancelButtonText={
         <FormattedMessage id="xpack.fleet.exportCSV.cancelButtonLabel" defaultMessage="Cancel" />
       }
