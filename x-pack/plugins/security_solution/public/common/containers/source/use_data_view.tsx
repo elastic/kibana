@@ -51,20 +51,58 @@ export const getDataViewStateFromIndexFields = memoizeOne(
     type DangerCastForMutation = Record<string, {}>;
     if (fields == null) {
       return { browserFields: {} };
-    } else {
-      const browserFields: BrowserFields = {};
-      for (const [name, field] of Object.entries(fields)) {
+    }
+
+    const browserFields: BrowserFields = {};
+    for (const [name, field] of Object.entries(fields)) {
+      const category = getCategory(name);
+      if (browserFields[category] == null) {
+        (browserFields as DangerCastForMutation)[category] = { fields: {} };
+      }
+      const categoryFields = browserFields[category].fields;
+      if (categoryFields) {
+        categoryFields[name] = field;
+      }
+    }
+    return { browserFields: browserFields as DangerCastForBrowserFieldsMutation };
+  },
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1]?.length === lastArgs[1]?.length
+);
+
+// Categories fields in smaller chunks to avoid blocking the event loop
+export const getDataViewStateFromIndexFieldsAsync = memoizeOne(
+  async (_title: string, fields: DataViewSpec['fields']): Promise<DataViewInfo> => {
+    // Adds two dangerous casts to allow for mutations within this function
+    type DangerCastForMutation = Record<string, {}>;
+
+    if (fields == null) {
+      return { browserFields: {} };
+    }
+
+    const browserFields: BrowserFields = {};
+    const fieldEntries = Object.entries(fields);
+    const chunkSize = 10;
+
+    for (let i = 0; i < fieldEntries.length; i += chunkSize) {
+      const chunk = fieldEntries.slice(i, i + chunkSize);
+
+      chunk.forEach(([name, field]) => {
         const category = getCategory(name);
         if (browserFields[category] == null) {
-          (browserFields as DangerCastForMutation)[category] = { fields: {} };
+          browserFields[category] = { fields: {} };
         }
         const categoryFields = browserFields[category].fields;
         if (categoryFields) {
           categoryFields[name] = field;
         }
-      }
-      return { browserFields: browserFields as DangerCastForBrowserFieldsMutation };
+      });
+
+      // NOTE: this is where the "magic" happens. Because of this timeout schedule,
+      // main thread get to catch up with other tasks instead of blocking the entire ui while processing the fields.
+      await new Promise((resolve) => setTimeout(resolve, 0));
     }
+
+    return { browserFields: browserFields as DangerCastForBrowserFieldsMutation };
   },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1]?.length === lastArgs[1]?.length
 );
