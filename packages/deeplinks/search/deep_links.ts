@@ -54,7 +54,7 @@ export type ApplicationsLinkId = 'searchApplications';
 
 export type AppsearchLinkId = 'engines';
 
-export type RelevanceLinkId = 'inferenceEndpoints';
+export type SearchInferenceEndpointsLinkId = 'inferenceEndpoints';
 
 export type SearchIndicesLinkId = typeof SEARCH_INDICES_CREATE_INDEX;
 
@@ -74,7 +74,7 @@ export type DeepLinkId =
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
   | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`
-  | `${SearchInferenceEndpointsId}:${RelevanceLinkId}`
+  | `${SearchInferenceEndpointsId}:${SearchInferenceEndpointsLinkId}`
   | SearchStart
   | SearchIndices
   | SearchElasticsearch
