@@ -22,7 +22,7 @@ import { uniqBy } from 'lodash';
 import { AGENT_FIELDS_TO_EXPORT, INITIAL_AGENT_FIELDS_TO_EXPORT } from './columns';
 
 export interface ExportField {
-  description: string;
+  field: string;
 }
 
 export interface ExportFieldWithDescription extends ExportField {
