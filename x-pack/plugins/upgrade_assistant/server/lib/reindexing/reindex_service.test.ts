@@ -26,6 +26,7 @@ import { esIndicesStateCheck } from '../es_indices_state_check';
 import { versionService } from '../version';
 
 import { ReindexService, reindexServiceFactory } from './reindex_service';
+import { error } from './error';
 
 const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
@@ -111,7 +112,7 @@ describe('reindexService', () => {
             },
             {
               names: ['.tasks'],
-              privileges: ['read', 'delete'],
+              privileges: ['read'],
             },
           ],
         },
@@ -141,7 +142,7 @@ describe('reindexService', () => {
             },
             {
               names: ['.tasks'],
-              privileges: ['read', 'delete'],
+              privileges: ['read'],
             },
           ],
         },
@@ -611,11 +612,11 @@ describe('reindexService', () => {
           });
         });
 
-        it('fails if docs created is less than count in source index', async () => {
+        it('does not throw if task doc deletion returns a bad result', async () => {
           clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
             completed: true,
             // @ts-expect-error not full interface
-            task: { status: { created: 95, total: 95 } },
+            task: { status: { created: 100, total: 100 } },
           });
 
           clusterClient.asCurrentUser.count.mockResponseOnce(
@@ -625,11 +626,51 @@ describe('reindexService', () => {
             }
           );
 
+          clusterClient.asCurrentUser.delete.mockResponseOnce({
+            // @ts-expect-error not known result
+            result: '!?',
+          });
+
           const updatedOp = await service.processNextStep(reindexOp);
-          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
-          expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
-          expect(updatedOp.attributes.errorMessage).not.toBeNull();
-          expect(log.error).toHaveBeenCalledWith(expect.any(String));
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
+          expect(updatedOp.attributes.reindexTaskPercComplete).toEqual(1);
+          expect(clusterClient.asCurrentUser.delete).toHaveBeenCalledWith({
+            index: '.tasks',
+            id: 'xyz',
+          });
+          expect(log.warn).toHaveBeenCalledTimes(1);
+          expect(log.warn).toHaveBeenCalledWith(
+            error.reindexTaskCannotBeDeleted(
+              `Could not delete reindexing task xyz, got response "!?"`
+            )
+          );
+        });
+
+        it('does not throw if task doc deletion throws', async () => {
+          clusterClient.asCurrentUser.tasks.get.mockResponseOnce({
+            completed: true,
+            // @ts-expect-error not full interface
+            task: { status: { created: 100, total: 100 } },
+          });
+
+          clusterClient.asCurrentUser.count.mockResponseOnce(
+            // @ts-expect-error not full interface
+            {
+              count: 100,
+            }
+          );
+
+          clusterClient.asCurrentUser.delete.mockRejectedValue(new Error('FAILED!'));
+
+          const updatedOp = await service.processNextStep(reindexOp);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
+          expect(updatedOp.attributes.reindexTaskPercComplete).toEqual(1);
+          expect(clusterClient.asCurrentUser.delete).toHaveBeenCalledWith({
+            index: '.tasks',
+            id: 'xyz',
+          });
+          expect(log.warn).toHaveBeenCalledTimes(1);
+          expect(log.warn).toHaveBeenCalledWith(new Error('FAILED!'));
         });
       });
 

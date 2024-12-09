@@ -57,6 +57,7 @@ webpack_cli(
     "//conditions:default": {
       "NODE_ENV": "development",
       "NODE_OPTIONS": "--openssl-legacy-provider",
+      "REACT_18": "$(REACT_18)",
     },
   }),
   visibility = ["//visibility:public"],
