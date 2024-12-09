@@ -178,7 +178,7 @@ export const makeLensEmbeddableFactory =
                 } as unknown as SerializableRecord;
               },
               // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
-              // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/migrations/saved_object_migrations.ts
+              // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/platform/plugins/shared/lens/server/migrations/saved_object_migrations.ts
             }),
             getLensCustomVisualizationMigrations(customVisualizationMigrations)
           ),
