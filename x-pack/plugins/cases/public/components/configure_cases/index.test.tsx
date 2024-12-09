@@ -1312,6 +1312,13 @@ describe('ConfigureCases', () => {
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
     });
 
+    it('should not render observable types section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
+    });
+
     describe('when the previously selected connector doesnt appear due to license downgrade or because it was deleted', () => {
       beforeEach(() => {
         useGetCaseConfigurationMock.mockImplementation(() => ({
