@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useUsageTracker } from './use_usage_tracker';
 import { useController } from 'react-hook-form';
 import { useIndicesFields } from './use_indices_fields';
