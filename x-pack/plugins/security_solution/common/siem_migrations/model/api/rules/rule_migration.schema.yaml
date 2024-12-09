@@ -355,6 +355,33 @@ paths:
         204:
           description: Indicates the migration id was not found running.
 
+  /internal/siem_migrations/rules/{migration_id}/prebuilt_rules:
+    get:
+      summary: Retrieves all prebuilt rules for a specific migration
+      operationId: GetRuleMigrationPrebuiltRules
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves all available prebuilt rules (installed and installable)
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retrieve prebuilt rules for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates prebuilt rules have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The map of prebuilt rules, with the rules id as a key
+                additionalProperties:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/PrebuiltRuleVersion'
+
   # Rule migration resources APIs
 
   /internal/siem_migrations/rules/{migration_id}/resources:
