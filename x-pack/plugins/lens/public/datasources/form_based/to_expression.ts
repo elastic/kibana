@@ -173,8 +173,7 @@ function getExpressionForLayer(
 
     // esql mode variables
     const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
-    const canUseESQL =
-      !searchSessionId && lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
+    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
     const esqlLayer =
       canUseESQL &&
       getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
@@ -384,7 +383,7 @@ function getExpressionForLayer(
               : [],
           compact:
             format?.params && 'compact' in format.params && format.params.compact
-              ? [format.params.compact]
+              ? [format.params.compactx]
               : [],
           pattern:
             format?.params && 'pattern' in format.params && format.params.pattern
