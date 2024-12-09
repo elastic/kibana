@@ -5544,23 +5544,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-ast@link:packages/kbn-esql-ast":
+"@kbn/esql-ast@link:src/platform/packages/shared/kbn-esql-ast":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-datagrid@link:src/plugins/esql_datagrid":
+"@kbn/esql-datagrid@link:src/platform/plugins/shared/esql_datagrid":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-editor@link:packages/kbn-esql-editor":
+"@kbn/esql-editor@link:src/platform/packages/private/kbn-esql-editor":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-utils@link:packages/kbn-esql-utils":
+"@kbn/esql-utils@link:src/platform/packages/shared/kbn-esql-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/esql-validation-autocomplete@link:packages/kbn-esql-validation-autocomplete":
+"@kbn/esql-validation-autocomplete@link:src/platform/packages/shared/kbn-esql-validation-autocomplete":
   version "0.0.0"
   uid ""
 
@@ -5568,7 +5568,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql@link:src/plugins/esql":
+"@kbn/esql@link:src/platform/plugins/shared/esql":
   version "0.0.0"
   uid ""
 
@@ -6084,7 +6084,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/language-documentation@link:packages/kbn-language-documentation":
+"@kbn/language-documentation@link:src/platform/packages/private/kbn-language-documentation":
   version "0.0.0"
   uid ""
 
@@ -6677,6 +6677,10 @@
   uid ""
 
 "@kbn/react-kibana-mount@link:packages/react/kibana_mount":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-mute-legacy-root-warning@link:packages/kbn-react-mute-legacy-root-warning":
   version "0.0.0"
   uid ""
 
@@ -9136,12 +9140,12 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.25.14":
-  version "1.25.14"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.14.tgz#05810916bac2193137020ffbfa0bd766caca2258"
-  integrity sha512-HRDOoN3YpFe4+2rWrL/uTqRUDqqyrRtj1MVHFJ0heKTfBLOFEEfXXUYExw7R6yoiY3+GnptR96wePeFpH1gheg==
+"@redocly/cli@^1.25.15":
+  version "1.25.15"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.15.tgz#12e487dd7a45ceda38655f2a93721ac15868f4e6"
+  integrity sha512-ZD743CJX4FpMJvGNE9Cm3gNn8LNRzRjyrYNVPi1C4iIEtrFkr5Zq791qv6gUFehWns71svbVyzWD9ftVTdfqYg==
   dependencies:
-    "@redocly/openapi-core" "1.25.14"
+    "@redocly/openapi-core" "1.25.15"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9161,18 +9165,18 @@
     styled-components "^6.0.7"
     yargs "17.0.1"
 
-"@redocly/config@^0.16.0":
-  version "0.16.0"
-  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.16.0.tgz#4b7700a5cb6e04bc6d6fdb94b871c9e260a1fba6"
-  integrity sha512-t9jnODbUcuANRSl/K4L9nb12V+U5acIHnVSl26NWrtSdDZVtoqUXk2yGFPZzohYf62cCfEQUT8ouJ3bhPfpnJg==
+"@redocly/config@^0.17.0":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.17.1.tgz#2def04cecf440dd78c0f102f53f3444fac050768"
+  integrity sha512-CEmvaJuG7pm2ylQg53emPmtgm4nW2nxBgwXzbVEHpGas/lGnMyN8Zlkgiz6rPw0unASg6VW3wlz27SOL5XFHYQ==
 
-"@redocly/openapi-core@1.25.14", "@redocly/openapi-core@^1.4.0":
-  version "1.25.14"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.14.tgz#2c0c33e0226923ed428e8d43f37f80d48b26c8d1"
-  integrity sha512-B9ewI0KVC1yqyeoQzErVnV4kdnxaYfwRMctxk/YwJxZZc/nVZ3VOVE+r2kXIFaGbUgc4ZHFn+aE2qvzCRXTXHw==
+"@redocly/openapi-core@1.25.15", "@redocly/openapi-core@^1.4.0":
+  version "1.25.15"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.15.tgz#61d82b054340e080998efc3f701ca55c20f7fdb8"
+  integrity sha512-/dpr5zpGj2t1Bf7EIXEboRZm1hsJZBQfv3Q1pkivtdAEg3if2khv+b9gY68aquC6cM/2aQY2kMLy8LlY2tn+Og==
   dependencies:
     "@redocly/ajv" "^8.11.2"
-    "@redocly/config" "^0.16.0"
+    "@redocly/config" "^0.17.0"
     colorette "^1.2.0"
     https-proxy-agent "^7.0.4"
     js-levenshtein "^1.1.6"
@@ -27358,6 +27362,14 @@ re2js@0.4.3:
   resolved "https://registry.yarnpkg.com/re2js/-/re2js-0.4.3.tgz#1318cd0c12aa6ed3ba56d5e012311ffbfb2aef35"
   integrity sha512-EuNmh7jurhHEE8Ge/lBo9JuMLb3qf866Xjjfyovw3wPc7+hlqDkZq4LwhrCQMEI+ARWfrKrHozEndzlpNT0WDg==
 
+"react-18@npm:react@~18.2.0", "react@^17.0.0 || ^18.2.0":
+  name react-18
+  version "18.2.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
+  integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
+  dependencies:
+    loose-envify "^1.1.0"
+
 react-clientside-effect@^1.2.6:
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/react-clientside-effect/-/react-clientside-effect-1.2.6.tgz#29f9b14e944a376b03fb650eed2a754dd128ea3a"
@@ -27401,7 +27413,8 @@ react-docgen@^5.0.0:
     node-dir "^0.1.10"
     strip-indent "^3.0.0"
 
-"react-dom@^17.0.0 || ^18.2.0":
+"react-dom-18@npm:react-dom@~18.2.0", "react-dom@^17.0.0 || ^18.2.0":
+  name react-dom-18
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
@@ -27893,13 +27906,6 @@ react-window@^1.8.10:
   dependencies:
     "@babel/runtime" "^7.0.0"
     memoize-one ">=3.1.1 <6"
-
-"react@^17.0.0 || ^18.2.0":
-  version "18.2.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
-  integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
-  dependencies:
-    loose-envify "^1.1.0"
 
 react@^17.0.1, react@^17.0.2:
   version "17.0.2"
