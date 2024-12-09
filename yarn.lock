@@ -7264,7 +7264,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-button-toolbar@link:packages/shared-ux/button_toolbar":
+"@kbn/shared-ux-button-toolbar@link:src/platform/packages/shared/shared-ux/button_toolbar":
   version "0.0.0"
   uid ""
 

@@ -876,7 +876,7 @@
     "@kbn/shared-svg": "link:packages/kbn-shared-svg",
     "@kbn/shared-ux-avatar-solution": "link:src/platform/packages/shared/shared-ux/avatar/solution",
     "@kbn/shared-ux-button-exit-full-screen": "link:src/platform/packages/private/shared-ux/button/exit_full_screen",
-    "@kbn/shared-ux-button-toolbar": "link:packages/shared-ux/button_toolbar",
+    "@kbn/shared-ux-button-toolbar": "link:src/platform/packages/shared/shared-ux/button_toolbar",
     "@kbn/shared-ux-card-no-data": "link:packages/shared-ux/card/no_data/impl",
     "@kbn/shared-ux-card-no-data-mocks": "link:packages/shared-ux/card/no_data/mocks",
     "@kbn/shared-ux-card-no-data-types": "link:packages/shared-ux/card/no_data/types",
