@@ -66,7 +66,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
   const {
     groupingId,
     services,
-    featureIds,
+    ruleTypeIds,
     defaultGroupingOptions,
     defaultFilters,
     globalFilters,
@@ -79,7 +79,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
   const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
 
   const { dataView } = useAlertsDataView({
-    featureIds,
+    ruleTypeIds,
     dataViewsService: dataViews,
     http,
     toasts: notifications.toasts,
@@ -252,7 +252,7 @@ const typedMemo: <T>(c: T) => T = memo;
  *
  * return (
  *   <AlertsGrouping<YourAggregationsType>
- *     featureIds={[...]}
+ *     ruleTypeIds={[...]}
  *     globalQuery={{ query: ..., language: 'kql' }}
  *     globalFilters={...}
  *     from={...}

@@ -7,12 +7,12 @@
 
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import { CoreSetup, Logger } from '@kbn/core/server';
-import { AlertingSetup, StackAlertsStartDeps } from '../types';
+import { AlertingServerSetup, StackAlertsStartDeps } from '../types';
 
 export interface RegisterRuleTypesParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
-  alerting: AlertingSetup;
+  alerting: AlertingServerSetup;
   core: CoreSetup;
 }
 

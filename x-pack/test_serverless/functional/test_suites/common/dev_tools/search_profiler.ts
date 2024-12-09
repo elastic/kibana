@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'searchProfiler']);
   const retry = getService('retry');
   const es = getService('es');
+  const browser = getService('browser');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
@@ -81,6 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('profiles a simple query', async () => {
+        await browser.refresh();
         await PageObjects.searchProfiler.setIndexName(indexName);
         await PageObjects.searchProfiler.setQuery(testQuery);
 

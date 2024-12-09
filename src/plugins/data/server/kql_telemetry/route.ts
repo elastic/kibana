@@ -24,6 +24,12 @@ export function registerKqlTelemetryRoute(
     .addVersion(
       {
         version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             body: schema.object({

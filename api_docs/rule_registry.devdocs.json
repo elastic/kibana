@@ -139,7 +139,7 @@
             "label": "getAlertSummary",
             "description": [],
             "signature": [
-              "({ gte, lte, featureIds, filter, fixedInterval, }: GetAlertSummaryParams) => Promise<{ activeAlertCount: number; recoveredAlertCount: number; activeAlerts: ",
+              "({ gte, lte, ruleTypeIds, consumers, filter, fixedInterval, }: GetAlertSummaryParams) => Promise<{ activeAlertCount: number; recoveredAlertCount: number; activeAlerts: ",
               "AggregationsBuckets",
               "<",
               "AggregationsDateHistogramBucket",
@@ -158,7 +158,7 @@
                 "id": "def-server.AlertsClient.getAlertSummary.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    gte,\n    lte,\n    featureIds,\n    filter,\n    fixedInterval = '1m',\n  }",
+                "label": "{\n    gte,\n    lte,\n    ruleTypeIds,\n    consumers,\n    filter,\n    fixedInterval = '1m',\n  }",
                 "description": [],
                 "signature": [
                   "GetAlertSummaryParams"
@@ -401,7 +401,7 @@
               },
               " = never, TAggregations = Record<string, ",
               "AggregationsAggregate",
-              ">>({ aggs, featureIds, index, query, search_after: searchAfter, size, sort, track_total_hits: trackTotalHits, _source, runtimeMappings, }: { aggs?: object | undefined; featureIds?: string[] | undefined; index?: string | undefined; query?: object | undefined; search_after?: (string | number)[] | undefined; size?: number | undefined; sort?: ",
+              ">>({ aggs, ruleTypeIds, consumers, index, query, search_after: searchAfter, size, sort, track_total_hits: trackTotalHits, _source, runtimeMappings, }: { aggs?: object | undefined; ruleTypeIds?: string[] | undefined; consumers?: string[] | undefined; index?: string | undefined; query?: object | undefined; search_after?: (string | number)[] | undefined; size?: number | undefined; sort?: ",
               "SortOptions",
               "[] | undefined; track_total_hits?: number | boolean | undefined; _source?: false | string[] | undefined; runtimeMappings?: ",
               "MappingRuntimeFields",
@@ -426,7 +426,7 @@
                 "id": "def-server.AlertsClient.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    aggs,\n    featureIds,\n    index,\n    query,\n    search_after: searchAfter,\n    size,\n    sort,\n    track_total_hits: trackTotalHits,\n    _source,\n    runtimeMappings,\n  }",
+                "label": "{\n    aggs,\n    ruleTypeIds,\n    consumers,\n    index,\n    query,\n    search_after: searchAfter,\n    size,\n    sort,\n    track_total_hits: trackTotalHits,\n    _source,\n    runtimeMappings,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
@@ -448,10 +448,24 @@
                   },
                   {
                     "parentPluginId": "ruleRegistry",
-                    "id": "def-server.AlertsClient.find.$1.featureIds",
+                    "id": "def-server.AlertsClient.find.$1.ruleTypeIds",
                     "type": "Array",
                     "tags": [],
-                    "label": "featureIds",
+                    "label": "ruleTypeIds",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.find.$1.consumers",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "consumers",
                     "description": [],
                     "signature": [
                       "string[] | undefined"
@@ -589,7 +603,7 @@
               "\nPerforms a `find` query to extract aggregations on alert groups"
             ],
             "signature": [
-              "({ featureIds, groupByField, aggregations, filters, pageIndex, pageSize, sort, }: { featureIds: string[]; groupByField: string; aggregations?: { [x: string]: { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; } & BucketAggsSchemas & { aggs?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; aggregations?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; }; } | undefined; filters?: ",
+              "({ ruleTypeIds, consumers, groupByField, aggregations, filters, pageIndex, pageSize, sort, }: { ruleTypeIds: string[]; consumers?: string[] | undefined; groupByField: string; aggregations?: { [x: string]: { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; } & BucketAggsSchemas & { aggs?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; aggregations?: { [x: string]: BucketAggsSchemas & { avg?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; cardinality?: { field?: string | undefined; precision_threshold?: number | undefined; rehash?: boolean | undefined; missing?: string | number | boolean | undefined; } | undefined; min?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; max?: { field?: string | undefined; missing?: string | number | boolean | undefined; format?: string | undefined; } | undefined; sum?: { field?: string | undefined; missing?: string | number | boolean | undefined; } | undefined; top_hits?: { explain?: boolean | undefined; docvalue_fields?: string | string[] | undefined; stored_fields?: string | string[] | undefined; from?: number | undefined; size?: number | undefined; sort?: string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; } | (string | { [x: string]: \"asc\" | \"desc\" | \"_doc\" | { missing?: string | number | boolean | undefined; mode?: \"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | undefined; order?: \"asc\" | \"desc\" | \"_doc\" | undefined; }; })[] | undefined; seq_no_primary_term?: boolean | undefined; version?: boolean | undefined; track_scores?: boolean | undefined; highlight?: any; _source?: string | boolean | string[] | undefined; } | undefined; weighted_avg?: { format?: string | undefined; value_type?: string | undefined; value?: { field?: string | undefined; missing?: number | undefined; } | undefined; weight?: { field?: string | undefined; missing?: number | undefined; } | undefined; } | undefined; }; } | undefined; }; } | undefined; filters?: ",
               "QueryDslQueryContainer",
               "[] | undefined; sort?: ",
               "SortCombinations",
@@ -616,7 +630,7 @@
                 "id": "def-server.AlertsClient.getGroupAggregations.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    featureIds,\n    groupByField,\n    aggregations,\n    filters,\n    pageIndex,\n    pageSize,\n    sort = [{ unitsCount: { order: 'desc' } }],\n  }",
+                "label": "{\n    ruleTypeIds,\n    consumers,\n    groupByField,\n    aggregations,\n    filters,\n    pageIndex,\n    pageSize,\n    sort = [{ unitsCount: { order: 'desc' } }],\n  }",
                 "description": [],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
@@ -624,15 +638,31 @@
                 "children": [
                   {
                     "parentPluginId": "ruleRegistry",
-                    "id": "def-server.AlertsClient.getGroupAggregations.$1.featureIds",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.ruleTypeIds",
                     "type": "Array",
                     "tags": [],
-                    "label": "featureIds",
+                    "label": "ruleTypeIds",
                     "description": [
-                      "\nThe feature ids the alerts belong to, used for authorization"
+                      "\nThe rule type IDs the alerts belong to.\nUsed for filtering."
                     ],
                     "signature": [
                       "string[]"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getGroupAggregations.$1.consumers",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "consumers",
+                    "description": [
+                      "\nThe consumers the alerts belong to.\nUsed for filtering."
+                    ],
+                    "signature": [
+                      "string[] | undefined"
                     ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
@@ -740,7 +770,7 @@
             "label": "getAuthorizedAlertsIndices",
             "description": [],
             "signature": [
-              "(featureIds: string[]) => Promise<string[] | undefined>"
+              "(ruleTypeIds?: string[] | undefined) => Promise<string[] | undefined>"
             ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
@@ -751,47 +781,15 @@
                 "id": "def-server.AlertsClient.getAuthorizedAlertsIndices.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "featureIds",
+                "label": "ruleTypeIds",
                 "description": [],
                 "signature": [
-                  "string[]"
+                  "string[] | undefined"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertsClient.getFeatureIdsByRegistrationContexts",
-            "type": "Function",
-            "tags": [],
-            "label": "getFeatureIdsByRegistrationContexts",
-            "description": [],
-            "signature": [
-              "(RegistrationContexts: string[]) => Promise<string[]>"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.AlertsClient.getFeatureIdsByRegistrationContexts.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "RegistrationContexts",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -804,7 +802,7 @@
             "label": "getBrowserFields",
             "description": [],
             "signature": [
-              "({ featureIds, indices, metaFields, allowNoIndex, }: { featureIds: string[]; indices: string[]; metaFields: string[]; allowNoIndex: boolean; }) => Promise<{ browserFields: ",
+              "({ ruleTypeIds, indices, metaFields, allowNoIndex, }: { ruleTypeIds: string[]; indices: string[]; metaFields: string[]; allowNoIndex: boolean; }) => Promise<{ browserFields: ",
               {
                 "pluginId": "@kbn/alerting-types",
                 "scope": "common",
@@ -831,7 +829,7 @@
                 "id": "def-server.AlertsClient.getBrowserFields.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    featureIds,\n    indices,\n    metaFields,\n    allowNoIndex,\n  }",
+                "label": "{\n    ruleTypeIds,\n    indices,\n    metaFields,\n    allowNoIndex,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
@@ -839,10 +837,10 @@
                 "children": [
                   {
                     "parentPluginId": "ruleRegistry",
-                    "id": "def-server.AlertsClient.getBrowserFields.$1.featureIds",
+                    "id": "def-server.AlertsClient.getBrowserFields.$1.ruleTypeIds",
                     "type": "Array",
                     "tags": [],
-                    "label": "featureIds",
+                    "label": "ruleTypeIds",
                     "description": [],
                     "signature": [
                       "string[]"
@@ -1531,38 +1529,6 @@
           },
           {
             "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataService.findFeatureIdsByRegistrationContexts",
-            "type": "Function",
-            "tags": [],
-            "label": "findFeatureIdsByRegistrationContexts",
-            "description": [],
-            "signature": [
-              "(registrationContexts: string[]) => string[]"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.RuleDataService.findFeatureIdsByRegistrationContexts.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "registrationContexts",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "ruleRegistry",
             "id": "def-server.RuleDataService.findIndexByFeature",
             "type": "Function",
             "tags": [],
@@ -2225,7 +2191,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
+              "\"ml\" | \"monitoring\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"alerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"discover\" | \"AlertingExample\""
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
@@ -3063,40 +3029,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.IRuleDataService.findFeatureIdsByRegistrationContexts",
-            "type": "Function",
-            "tags": [],
-            "label": "findFeatureIdsByRegistrationContexts",
-            "description": [
-              "\nLooks up Kibana \"feature\" associated with the given registration context.\nNote: features are used in RBAC."
-            ],
-            "signature": [
-              "(registrationContexts: string[]) => string[]"
-            ],
-            "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.IRuleDataService.findFeatureIdsByRegistrationContexts.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "registrationContexts",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3322,8 +3254,8 @@
             "description": [],
             "signature": [
               "<T extends ",
-              "SuppressionFields8130",
-              ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
+              "SuppressionFields8170",
+              ">(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -3346,7 +3278,7 @@
                 "label": "alerts",
                 "description": [],
                 "signature": [
-                  "{ _id: string; _source: T; }[]"
+                  "{ _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[]"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
@@ -4058,8 +3990,8 @@
         "description": [],
         "signature": [
           "<T extends ",
-          "SuppressionFields8130",
-          ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
+          "SuppressionFields8170",
+          ">(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -4082,7 +4014,7 @@
             "label": "alerts",
             "description": [],
             "signature": [
-              "{ _id: string; _source: T; }[]"
+              "{ _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
@@ -4410,8 +4342,8 @@
               "pluginId": "alerting",
               "scope": "server",
               "docId": "kibAlertingPluginApi",
-              "section": "def-server.PluginStartContract",
-              "text": "PluginStartContract"
+              "section": "def-server.AlertingServerStart",
+              "text": "AlertingServerStart"
             }
           ],
           "path": "x-pack/plugins/rule_registry/server/plugin.ts",
@@ -4897,15 +4829,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          "> & { featureIds: ",
-          {
-            "pluginId": "@kbn/rule-data-utils",
-            "scope": "common",
-            "docId": "kibKbnRuleDataUtilsPluginApi",
-            "section": "def-common.AlertConsumers",
-            "text": "AlertConsumers"
-          },
-          "[]; fields?: ",
+          "> & { ruleTypeIds: string[]; consumers?: string[] | undefined; fields?: ",
           "QueryDslFieldAndFormat",
           "[] | undefined; query?: Pick<",
           "QueryDslQueryContainer",

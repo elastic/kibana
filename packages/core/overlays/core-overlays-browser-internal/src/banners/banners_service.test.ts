@@ -13,6 +13,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 describe('OverlayBannersService', () => {
   let service: InternalOverlayBannersStart;
@@ -22,6 +23,7 @@ describe('OverlayBannersService', () => {
       i18n: i18nServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
+      userProfile: userProfileServiceMock.createStart(),
     });
   });
 

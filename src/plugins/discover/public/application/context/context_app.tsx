@@ -9,7 +9,6 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import './context_app.scss';
-import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -19,11 +18,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  DOC_TABLE_LEGACY,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -60,9 +55,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     fieldsMetadata,
   } = services;
 
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-
   /**
    * Context app state
    */
@@ -85,7 +77,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    useNewFieldsApi,
     setAppState,
     columns: appState.columns,
     sort: appState.sort,
@@ -116,7 +107,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       anchorId,
       dataView,
       appState,
-      useNewFieldsApi,
     });
 
   /**
@@ -266,7 +256,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
+          <EuiPage className="dscDocsPage">
             <EuiPageBody
               panelled
               paddingSize="none"
@@ -290,8 +280,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
                 dataView={dataView}
-                useNewFieldsApi={useNewFieldsApi}
-                isLegacy={isLegacy}
                 columns={columns}
                 grid={appState.grid}
                 onAddColumn={onAddColumnWithTracking}

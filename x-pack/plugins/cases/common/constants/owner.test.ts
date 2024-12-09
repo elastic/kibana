@@ -10,7 +10,11 @@ import { OWNER_INFO } from './owners';
 
 describe('OWNER_INFO', () => {
   it('should use all available rule consumers', () => {
-    const allConsumers = new Set(Object.values(AlertConsumers));
+    const allConsumers = new Set(
+      // Alerts consumer fallbacks to producer so it is not counted as valid one
+      Object.values(AlertConsumers).filter((consumer) => consumer !== AlertConsumers.ALERTS)
+    );
+
     const ownersMappingConsumers = new Set(
       Object.values(OWNER_INFO)
         .map((value) => value.validRuleConsumers ?? [])

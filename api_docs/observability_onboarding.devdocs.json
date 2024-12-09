@@ -329,7 +329,7 @@
         "signature": [
           "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly serverless: Readonly<{} & { enabled: true; }>; }"
         ],
-        "path": "x-pack/plugins/observability_solution/observability_onboarding/server/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_onboarding/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

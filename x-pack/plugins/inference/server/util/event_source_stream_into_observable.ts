@@ -11,10 +11,10 @@ import { Observable } from 'rxjs';
 
 export function eventSourceStreamIntoObservable(readable: Readable) {
   return new Observable<string>((subscriber) => {
-    const parser = createParser((event) => {
-      if (event.type === 'event') {
+    const parser = createParser({
+      onEvent: (event) => {
         subscriber.next(event.data);
-      }
+      },
     });
 
     async function processStream() {

@@ -44,7 +44,7 @@ export const renderApp = async (
       );
 
     render(
-      <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+      <KibanaRenderContextProvider {...coreStart}>
         <RedirectAppLinks
           coreStart={{
             application: coreStart.application,

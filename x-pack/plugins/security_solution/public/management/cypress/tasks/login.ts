@@ -9,13 +9,12 @@ import type { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { Role } from '@kbn/security-plugin/common';
 import { ENDPOINT_SECURITY_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 import type { SecurityTestUser } from '../common/constants';
+import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
 import { COMMON_API_HEADERS, request } from './common';
 
 export const ROLE = Object.freeze<Record<SecurityTestUser, SecurityTestUser>>({
   ...ENDPOINT_SECURITY_ROLE_NAMES,
-  elastic: 'elastic',
-  elastic_serverless: 'elastic_serverless',
-  system_indices_superuser: 'system_indices_superuser',
+  ...KIBANA_KNOWN_DEFAULT_ACCOUNTS,
 });
 
 interface CyLoginTask {

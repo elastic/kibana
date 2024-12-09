@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
@@ -24,12 +24,14 @@ interface NavControlWithProviderDeps {
   appService: AIAssistantAppService;
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+  isServerless?: boolean;
 }
 
 export const NavControlWithProvider = ({
   appService,
   coreStart,
   pluginsStart,
+  isServerless,
 }: NavControlWithProviderDeps) => {
   return (
     <SharedProviders
@@ -38,12 +40,12 @@ export const NavControlWithProvider = ({
       service={appService}
       theme$={coreStart.theme.theme$}
     >
-      <NavControl />
+      <NavControl isServerless={isServerless} />
     </SharedProviders>
   );
 };
 
-export function NavControl() {
+export function NavControl({ isServerless }: { isServerless?: boolean }) {
   const service = useAIAssistantAppService();
 
   const {
@@ -140,22 +142,41 @@ export function NavControl() {
   return (
     <>
       <EuiToolTip content={buttonLabel}>
-        <EuiButton
-          aria-label={buttonLabel}
-          data-test-subj="observabilityAiAssistantAppNavControlButton"
-          css={buttonCss}
-          onClick={() => {
-            service.conversations.openNewConversation({
-              messages: [],
-            });
-          }}
-          color="primary"
-          size="s"
-          fullWidth={false}
-          minWidth={0}
-        >
-          {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
-        </EuiButton>
+        {isServerless ? (
+          <EuiButtonEmpty
+            aria-label={buttonLabel}
+            data-test-subj="observabilityAiAssistantAppNavControlButton"
+            css={css`
+              padding: 0px 8px;
+            `}
+            onClick={() => {
+              service.conversations.openNewConversation({
+                messages: [],
+              });
+            }}
+            color="primary"
+            size="s"
+          >
+            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiButton
+            aria-label={buttonLabel}
+            data-test-subj="observabilityAiAssistantAppNavControlButton"
+            css={buttonCss}
+            onClick={() => {
+              service.conversations.openNewConversation({
+                messages: [],
+              });
+            }}
+            color="primary"
+            size="s"
+            fullWidth={false}
+            minWidth={0}
+          >
+            {chatService.loading ? <EuiLoadingSpinner size="s" /> : <AssistantAvatar size="xs" />}
+          </EuiButton>
+        )}
       </EuiToolTip>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
