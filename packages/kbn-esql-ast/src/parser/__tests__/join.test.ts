@@ -184,19 +184,41 @@ describe('<TYPE> JOIN command', () => {
       const node2 = Walker.match(query.ast, { type: 'identifier', name: 'alias' });
       const node3 = Walker.match(query.ast, { type: 'column', name: 'on_1' });
       const node4 = Walker.match(query.ast, { type: 'column', name: 'on_2' });
+      const node5 = Walker.match(query.ast, { type: 'function', name: 'as' });
 
       expect(query.src.slice(node1?.location.min, node1?.location.max! + 1)).toBe('index');
       expect(query.src.slice(node2?.location.min, node2?.location.max! + 1)).toBe('alias');
       expect(query.src.slice(node3?.location.min, node3?.location.max! + 1)).toBe('on_1');
       expect(query.src.slice(node4?.location.min, node4?.location.max! + 1)).toBe('on_2');
+      expect(query.src.slice(node5?.location.min, node5?.location.max! + 1)).toBe('index AS alias');
+    });
+
+    it('correctly extracts JOIN command position', () => {
+      const text = `FROM employees | LOOKUP JOIN index AS alias ON on_1, on_2 | LIMIT 1`;
+      const query = EsqlQuery.fromSrc(text);
+      const join = Walker.match(query.ast, { type: 'command', name: 'join' });
+
+      expect(query.src.slice(join?.location.min, join?.location.max! + 1)).toBe(
+        'LOOKUP JOIN index AS alias ON on_1, on_2'
+      );
+    });
+
+    it('correctly extracts ON option position', () => {
+      const text = `FROM employees | LOOKUP JOIN index AS alias ON on_1, on_2 | LIMIT 1`;
+      const query = EsqlQuery.fromSrc(text);
+      const on = Walker.match(query.ast, { type: 'option', name: 'on' });
+
+      expect(query.src.slice(on?.location.min, on?.location.max! + 1)).toBe('ON on_1, on_2');
     });
   });
 
   describe('incorrectly formatted', () => {
-    const text = `FROM employees | LOOKUP JOIN index AAS alias ON on_1, on_2 | LIMIT 1`;
-    const query = EsqlQuery.fromSrc(text);
+    it('throws error on invalid "AS" keyword', () => {
+      const text = `FROM employees | LOOKUP JOIN index AAS alias ON on_1, on_2 | LIMIT 1`;
+      const query = EsqlQuery.fromSrc(text);
 
-    expect(query.errors.length > 0).toBe(true);
-    expect(query.errors[0].message.includes('AAS')).toBe(true);
+      expect(query.errors.length > 0).toBe(true);
+      expect(query.errors[0].message.includes('AAS')).toBe(true);
+    });
   });
 });
