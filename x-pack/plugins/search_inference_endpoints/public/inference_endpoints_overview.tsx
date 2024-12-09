@@ -6,17 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-
-import { EuiPageTemplate } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { App } from './components/app';
+import { useInferenceEndpointsBreadcrumbs } from './hooks/use_inference_endpoints_breadcrumbs';
 import { useKibana } from './hooks/use_kibana';
 import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
 
 export const InferenceEndpointsOverview: React.FC = () => {
   const {
-    services: { console: consolePlugin },
+    services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
+  useInferenceEndpointsBreadcrumbs();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -25,10 +26,16 @@ export const InferenceEndpointsOverview: React.FC = () => {
 
   return (
     <InferenceEndpointsProvider>
-      <EuiPageTemplate offset={0} restrictWidth={false} grow={false}>
+      <KibanaPageTemplate
+        offset={0}
+        restrictWidth={false}
+        grow={false}
+        data-test-subj="inferenceEndpointsPage"
+        solutionNav={searchNavigation?.useClassicNavigation(history)}
+      >
         <App />
         {embeddableConsole}
-      </EuiPageTemplate>
+      </KibanaPageTemplate>
     </InferenceEndpointsProvider>
   );
 };
