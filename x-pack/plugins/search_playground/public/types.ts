@@ -11,21 +11,19 @@ import {
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { HttpStart } from '@kbn/core-http-browser';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import React, { ComponentType } from 'react';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { AppMountParameters } from '@kbn/core/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ChatRequestData, MessageRole } from '../common/types';
-import type { App } from './components/app';
-import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
-import { PlaygroundHeaderDocs } from './components/playground_header_docs';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ChatRequestData, MessageRole } from '../common/types';
 
 export * from '../common/types';
 
@@ -36,13 +34,11 @@ export enum PlaygroundPageMode {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
-export interface SearchPlaygroundPluginStart {
-  PlaygroundProvider: React.FC<React.ComponentProps<typeof PlaygroundProviderComponent>>;
-  Playground: React.FC<React.ComponentProps<typeof App>>;
-  PlaygroundHeaderDocs: React.FC<React.ComponentProps<typeof PlaygroundHeaderDocs>>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchPlaygroundPluginStart {}
 
 export interface AppPluginSetupDependencies {
+  cloud?: CloudSetup;
   share: SharePluginSetup;
 }
 
@@ -52,20 +48,15 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   share: SharePluginStart;
+  cloud?: CloudStart;
   console?: ConsolePluginStart;
   data: DataPublicPluginStart;
+  searchNavigation?: SearchNavigationPluginStart;
+  security: SecurityPluginStart;
+  licensing: LicensingPluginStart;
 }
 
-export interface AppServicesContext {
-  http: HttpStart;
-  security: SecurityPluginStart;
-  share: SharePluginStart;
-  cloud?: CloudSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  usageCollection?: UsageCollectionStart;
-  console?: ConsolePluginStart;
-  data: DataPublicPluginStart;
-}
+export type AppServicesContext = CoreStart & AppPluginStartDependencies;
 
 export enum ChatFormFields {
   question = 'question',

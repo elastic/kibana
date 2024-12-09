@@ -82,7 +82,6 @@ function getProps(): UnifiedDataTableProps {
     settings: {},
     showTimeCol: true,
     sort: [],
-    useNewFieldsApi: true,
     services: {
       fieldFormats: services.fieldFormats,
       uiSettings: services.uiSettings,
@@ -124,7 +123,6 @@ const renderDataTable = async (props: Partial<UnifiedDataTableProps>) => {
           setSettings(state.settings);
         }
       }, []),
-      useNewFieldsApi: true,
       columns,
       settings,
     });

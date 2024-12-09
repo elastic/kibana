@@ -10,9 +10,11 @@
 import * as contexts from './contexts';
 import type {
   ESQLAstCommand,
+  ESQLAstJoinCommand,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
@@ -164,6 +166,10 @@ export class GlobalVisitorContext<
       case 'mv_expand': {
         if (!this.methods.visitMvExpandCommand) break;
         return this.visitMvExpandCommand(parent, commandNode, input as any);
+      }
+      case 'join': {
+        if (!this.methods.visitJoinCommand) break;
+        return this.visitJoinCommand(parent, commandNode as ESQLAstJoinCommand, input as any);
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
@@ -349,6 +355,15 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitMvExpandCommand', context, input);
   }
 
+  public visitJoinCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstJoinCommand,
+    input: types.VisitorInput<Methods, 'visitJoinCommand'>
+  ): types.VisitorOutput<Methods, 'visitJoinCommand'> {
+    const context = new contexts.JoinCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitJoinCommand', context, input);
+  }
+
   // Expression visiting -------------------------------------------------------
 
   public visitExpressionGeneric(
@@ -404,6 +419,10 @@ export class GlobalVisitorContext<
       case 'order': {
         if (!this.methods.visitOrderExpression) break;
         return this.visitOrderExpression(parent, expressionNode, input as any);
+      }
+      case 'identifier': {
+        if (!this.methods.visitIdentifierExpression) break;
+        return this.visitIdentifierExpression(parent, expressionNode, input as any);
       }
       case 'option': {
         switch (expressionNode.name) {
@@ -500,5 +519,14 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitOrderExpression'> {
     const context = new contexts.OrderExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitOrderExpression', context, input);
+  }
+
+  public visitIdentifierExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLIdentifier,
+    input: types.VisitorInput<Methods, 'visitIdentifierExpression'>
+  ): types.VisitorOutput<Methods, 'visitIdentifierExpression'> {
+    const context = new contexts.IdentifierExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitIdentifierExpression', context, input);
   }
 }

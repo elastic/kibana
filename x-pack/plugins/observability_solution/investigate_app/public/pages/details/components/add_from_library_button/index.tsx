@@ -7,7 +7,7 @@
 
 import type { OverlayRef } from '@kbn/core/public';
 import { v4 } from 'uuid';
-import { openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
+import { openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import React, { useMemo, useRef } from 'react';
@@ -107,7 +107,7 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
       data-test-subj="investigateAppAddFromLibraryButtonImportFromLibraryButton"
       iconType="importAction"
       onClick={() => {
-        panelRef.current = openAddPanelFlyout({
+        panelRef.current = openAddFromLibraryFlyout({
           container,
         });
 
