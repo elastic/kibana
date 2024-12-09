@@ -6012,7 +6012,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/item-buffer@link:packages/kbn-item-buffer":
+"@kbn/item-buffer@link:src/platform/packages/private/kbn-item-buffer":
   version "0.0.0"
   uid ""
 
