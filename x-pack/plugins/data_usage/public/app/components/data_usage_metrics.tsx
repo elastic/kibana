@@ -17,11 +17,7 @@ import { PLUGIN_NAME } from '../../translations';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
-import {
-  DEFAULT_DATE_RANGE_OPTIONS,
-  transformToUTCtime,
-  isDateRangeValid,
-} from '../../../common/utils';
+import { DEFAULT_DATE_RANGE_OPTIONS, transformToUTCtime } from '../../../common/utils';
 import { useDateRangePicker } from '../hooks/use_date_picker';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
 import { ChartsLoading } from './charts_loading';
@@ -114,16 +110,8 @@ export const DataUsageMetrics = memo(
       }));
     }, [metricTypesFromUrl, dataStreamsFromUrl, startDateFromUrl, endDateFromUrl]);
 
-    const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
-
-    const isValidDateRange = useMemo(
-      () =>
-        isDateRangeValid({
-          start: dateRangePickerState.startDate,
-          end: dateRangePickerState.endDate,
-        }),
-      [dateRangePickerState.endDate, dateRangePickerState.startDate]
-    );
+    const { dateRangePickerState, isValidDateRange, onRefreshChange, onTimeChange } =
+      useDateRangePicker();
 
     const enableFetchUsageMetricsData = useMemo(
       () =>
@@ -243,6 +231,7 @@ export const DataUsageMetrics = memo(
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isFetchingDataStreams}
             isUpdateDisabled={!enableFetchUsageMetricsData}
+            isValidDateRange={isValidDateRange}
             onClick={refetchDataUsageMetrics}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
