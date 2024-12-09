@@ -15,7 +15,6 @@ import type {
   FleetProxy,
   DownloadSource,
 } from '../../../../types';
-import type { InstalledIntegrationPolicy } from '../../../../../../components/agent_enrollment_flyout/use_get_agent_incoming_data';
 
 export interface MultiPageStep {
   title: string;
@@ -36,17 +35,9 @@ export interface MultiPageStepLayoutProps {
   cancelUrl: string;
   steps: MultiPageStep[];
   currentStep: number;
-  onNext: (params?: { selectedAgentPolicies?: AgentPolicy[]; toStep?: number }) => void;
+  onNext: () => void;
   setIsManaged: (isManaged: boolean) => void;
   isManaged: boolean;
   setEnrolledAgentIds: (agentIds: string[]) => void;
   enrolledAgentIds: string[];
-  onCancel?: () => void;
-  prerelease: boolean;
-  hasIncomingDataStep?: boolean;
-  installedPackagePolicy?: InstalledIntegrationPolicy;
-  selectedAgentPolicies?: AgentPolicy[];
-  isIntegrationFlow?: boolean;
-  withHeader?: boolean;
-  withBreadcrumb?: boolean;
 }

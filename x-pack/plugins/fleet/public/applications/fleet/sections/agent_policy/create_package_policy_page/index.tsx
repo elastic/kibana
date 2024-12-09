@@ -23,8 +23,7 @@ export const CreatePackagePolicyPage: React.FC<{
   integrationName?: string;
   setIntegrationStep?: (step: number) => void;
   onCancel?: () => void;
-  withHeader?: boolean;
-  withBreadcrumb?: boolean;
+  handleViewAssets?: () => void;
 }> = ({
   useMultiPageLayoutProp,
   originFrom,
@@ -32,8 +31,7 @@ export const CreatePackagePolicyPage: React.FC<{
   integrationName,
   setIntegrationStep,
   onCancel,
-  withHeader,
-  withBreadcrumb,
+  handleViewAssets,
 }) => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
@@ -79,12 +77,10 @@ export const CreatePackagePolicyPage: React.FC<{
     prerelease,
     setIntegrationStep,
     onCancel,
-    withHeader,
-    withBreadcrumb,
   };
 
   if (from === 'onboarding-hub') {
-    return <EmbeddedIntegrationFlow {...pageParams} />;
+    return <EmbeddedIntegrationFlow {...pageParams} handleViewAssets={handleViewAssets} />;
   }
 
   if (useMultiPageLayout) {

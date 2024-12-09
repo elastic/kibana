@@ -103,13 +103,13 @@ const CustomEuiBottomBar = styled(EuiBottomBar)`
   z-index: 50;
 `;
 
-export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
+export const CreatePackagePolicySinglePage: React.FC<CreatePackagePolicyParams> = ({
   from,
   queryParamsPolicyId,
   prerelease,
-  onNext,
+  onAddAgent,
   onCancel,
-  withHeader,
+  withHeader = true,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -196,14 +196,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   });
 
   const handleNavigateAddAgent = useCallback(() => {
-    if (onNext) {
-      onNext({ selectedAgentPolicies: agentPolicies });
+    if (onAddAgent) {
+      onAddAgent({ selectedAgentPolicies: agentPolicies });
     } else {
       if (savedPackagePolicy) {
         navigateAddAgent(savedPackagePolicy);
       }
     }
-  }, [onNext, agentPolicies, savedPackagePolicy, navigateAddAgent]);
+  }, [onAddAgent, agentPolicies, savedPackagePolicy, navigateAddAgent]);
 
   const handleCancellation = useCallback(() => {
     if (onCancel) {

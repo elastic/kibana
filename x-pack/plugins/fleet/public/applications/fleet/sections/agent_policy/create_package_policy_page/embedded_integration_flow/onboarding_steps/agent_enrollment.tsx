@@ -9,24 +9,21 @@ import { useCallback, useEffect, useState } from 'react';
 
 import React from 'react';
 
-import type { MultiPageStepLayoutProps } from '../../types';
 import type {
   FlyoutMode,
   SelectionType,
-} from '../../../../../../../../components/agent_enrollment_flyout/types';
-import {
-  useAgentEnrollmentFlyoutData,
-  useFleetServerHostsForPolicy,
-} from '../../../../../../hooks';
+} from '../../../../../../../components/agent_enrollment_flyout/types';
+import { useAgentEnrollmentFlyoutData, useFleetServerHostsForPolicy } from '../../../../../hooks';
 import {
   useAgentPolicyWithPackagePolicies,
   useCloudSecurityIntegration,
   useIsK8sPolicy,
-} from '../../../../../../../../components/agent_enrollment_flyout/hooks';
-import { usePollingAgentCount } from '../../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
-import type { PackagePolicy } from '../../../../../../types';
-import { FLEET_SERVER_PACKAGE } from '../../../../../../constants';
-import { Instructions, Loading } from '../../../../../../components';
+} from '../../../../../../../components/agent_enrollment_flyout/hooks';
+import { usePollingAgentCount } from '../../../../../../../components/agent_enrollment_flyout/confirm_agent_enrollment';
+import type { PackagePolicy } from '../../../../../types';
+import { FLEET_SERVER_PACKAGE } from '../../../../../constants';
+import { Instructions, Loading } from '../../../../../components';
+import type { EmbeddedIntegrationStepsLayoutProps } from '../types';
 
 export const AgentEnrollmentFromOnboardingHub = ({
   agentPolicy,
@@ -37,7 +34,7 @@ export const AgentEnrollmentFromOnboardingHub = ({
   onNext,
   setEnrolledAgentIds,
   steps,
-}: MultiPageStepLayoutProps) => {
+}: EmbeddedIntegrationStepsLayoutProps) => {
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
   const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
@@ -73,7 +70,7 @@ export const AgentEnrollmentFromOnboardingHub = ({
     onNext({ toStep: steps.length - 1 });
   }, [enrolledAgentIds, onNext, setEnrolledAgentIds, steps.length]);
 
-  const handleNext = useCallback(() => {
+  const handleAddFleetServer = useCallback(() => {
     setEnrolledAgentIds(enrolledAgentIds);
     onNext();
   }, [enrolledAgentIds, onNext, setEnrolledAgentIds]);
@@ -122,7 +119,7 @@ export const AgentEnrollmentFromOnboardingHub = ({
       onClickViewIncomingData={onClickViewIncomingData}
       installedPackagePolicy={installedPackagePolicy}
       hasIncomingDataStep={false}
-      handleAddFleetServer={handleNext}
+      handleAddFleetServer={handleAddFleetServer}
     />
   );
 };

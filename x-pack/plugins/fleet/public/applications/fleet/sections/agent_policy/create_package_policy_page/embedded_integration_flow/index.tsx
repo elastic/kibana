@@ -11,31 +11,27 @@ import { splitPkgKey } from '../../../../../../../common/services';
 
 import {
   useGetPackageInfoByKeyQuery,
-  useLink,
   useFleetServerHostsForPolicy,
   useStartServices,
 } from '../../../../hooks';
-
-import type { CreatePackagePolicyParams } from '../types';
 
 import { useIntegrationsStateContext } from '../../../../../integrations/hooks';
 
 import type { AgentPolicy } from '../../../../types';
 import { useGetAgentPolicyOrDefault } from '../multi_page_layout/hooks';
-import { onboardingSteps } from '../multi_page_layout/components/onboarding_steps';
 import { Loading } from '../../../../components';
 
-import { EmbeddedIntegrationStepsLayout } from './embedded_integration_steps_layout';
+import { onboardingManagedSteps } from './onboarding_steps';
 
-export const EmbeddedIntegrationFlow: CreatePackagePolicyParams = ({
-  queryParamsPolicyId,
+import { EmbeddedIntegrationStepsLayout } from './embedded_integration_steps_layout';
+import type { EmbeddedIntegrationFlowProps } from './types';
+
+export const EmbeddedIntegrationFlow: React.FC<EmbeddedIntegrationFlowProps> = ({
   prerelease,
-  from,
   integrationName,
   setIntegrationStep,
   onCancel,
-  withHeader,
-  withBreadcrumb,
+  handleViewAssets,
 }) => {
   const { notifications } = useStartServices();
 
@@ -44,7 +40,6 @@ export const EmbeddedIntegrationFlow: CreatePackagePolicyParams = ({
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
-  const { getHref } = useLink();
   const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<AgentPolicy[]>();
   const toggleIsManaged = (newIsManaged: boolean) => {
@@ -78,16 +73,9 @@ export const EmbeddedIntegrationFlow: CreatePackagePolicyParams = ({
 
   const { fleetServerHost, fleetProxy, downloadSource } = useFleetServerHostsForPolicy(agentPolicy);
 
-  const cancelUrl = getHref('add_integration_to_policy', {
-    pkgkey,
-    useMultiPageLayout: false,
-    ...(integration ? { integration } : {}),
-    ...(agentPolicyId ? { agentPolicyId } : {}),
-  });
-
   const stepsNext = useCallback(
     (props?: { selectedAgentPolicies?: AgentPolicy[]; toStep?: number }) => {
-      if (currentStep === onboardingSteps.length - 1) {
+      if (currentStep === onboardingManagedSteps.length - 1) {
         return;
       }
 
@@ -138,10 +126,9 @@ export const EmbeddedIntegrationFlow: CreatePackagePolicyParams = ({
       agentPolicy={selectedAgentPolicies?.[0] ?? agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
-      steps={onboardingSteps}
+      steps={onboardingManagedSteps}
       packageInfo={packageInfo}
       integrationInfo={integrationInfo}
-      cancelUrl={cancelUrl}
       onNext={stepsNext}
       onBack={stepsBack}
       isManaged={isManaged}
@@ -151,8 +138,7 @@ export const EmbeddedIntegrationFlow: CreatePackagePolicyParams = ({
       onCancel={onCancel}
       hasIncomingDataStep={false}
       prerelease={prerelease}
-      withHeader={withHeader}
-      withBreadcrumb={withBreadcrumb}
+      handleViewAssets={handleViewAssets}
     />
   ) : (
     <Loading />
