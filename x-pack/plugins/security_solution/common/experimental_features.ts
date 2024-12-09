@@ -257,6 +257,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Defend Insights feature
    */
   defendInsights: false,
+
+  /**
+   * Enables flyout history and new preview navigation
+   */
+  newExpandableFlyoutNavigationEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
