@@ -6440,7 +6440,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/object-versioning-utils@link:packages/kbn-object-versioning-utils":
+"@kbn/object-versioning-utils@link:src/platform/packages/shared/kbn-object-versioning-utils":
   version "0.0.0"
   uid ""
 

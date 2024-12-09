@@ -691,7 +691,7 @@
     "@kbn/no-data-page-plugin": "link:src/platform/plugins/private/no_data_page",
     "@kbn/notifications-plugin": "link:x-pack/platform/plugins/shared/notifications",
     "@kbn/object-versioning": "link:src/platform/packages/shared/kbn-object-versioning",
-    "@kbn/object-versioning-utils": "link:packages/kbn-object-versioning-utils",
+    "@kbn/object-versioning-utils": "link:src/platform/packages/shared/kbn-object-versioning-utils",
     "@kbn/observability-ai-assistant-app-plugin": "link:x-pack/plugins/observability_solution/observability_ai_assistant_app",
     "@kbn/observability-ai-assistant-management-plugin": "link:x-pack/plugins/observability_solution/observability_ai_assistant_management",
     "@kbn/observability-ai-assistant-plugin": "link:x-pack/plugins/observability_solution/observability_ai_assistant",
