@@ -15,7 +15,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         names: [
           '.alerts-security.alerts-default',
           '.alerts-security.alerts-*',
-          '.siemV2-signals-*',
+          '.siem-signals-*',
           '.items-*',
           '.lists-*',
           '.logs-*',

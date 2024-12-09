@@ -37,7 +37,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
         {
           names: [
             '.alerts-security*',
-            '.siemV2-signals-*',
+            '.siem-signals-*',
             '.preview.alerts-security*',
             '.internal.preview.alerts-security*',
           ],
