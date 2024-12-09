@@ -10,11 +10,11 @@
 import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { FetchStatus } from '../../types';
-import type {
+import {
   DataDocuments$,
   DataMain$,
+  DataMainMsgParams,
   DataMsg,
   DataTotalHits$,
   SavedSearchData,
@@ -49,13 +49,8 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
 /**
  * Send message when data fetching starts via main observable
  */
-export function sendFetchStartMsg(
-  main$: DataMain$,
-  timeRange: TimeRange,
-  timeRangeRelative?: TimeRange,
-  query?: AggregateQuery | Query | undefined
-) {
-  main$.next({ ...main$.getValue(), timeRange, timeRangeRelative, query });
+export function sendFetchStartMsg(main$: DataMain$, params: DataMainMsgParams) {
+  main$.next({ ...main$.getValue(), params, fetchStatus: FetchStatus.LOADING });
 }
 
 /**

@@ -53,23 +53,21 @@ async function mountComponent(
   main$: DataMain$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
-    timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
-    timeRangeRelative: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    params: {
+      dataView,
+      timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+      timeRangeRelative: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    },
   }) as DataMain$
 ) {
   const searchSourceMock = createSearchSourceMock({ index: dataView });
   const services = createDiscoverServicesMock();
-  const time = { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
 
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
     query: '',
   });
-  (services.data.query.getState as jest.Mock).mockReturnValue({
-    filters: [],
-    query,
-    time,
-  });
+
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );

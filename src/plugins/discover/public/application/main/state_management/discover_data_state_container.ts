@@ -53,9 +53,16 @@ export interface DataMsg {
 
 export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
+  params?: DataMainMsgParams;
+}
+
+export interface DataMainMsgParams {
+  customFilters?: Filter[];
+  dataView?: DataView;
+  filters?: Filter[];
   timeRange?: TimeRange;
   timeRangeRelative?: TimeRange;
-  filter?: Filter[];
+  query?: AggregateQuery | Query | undefined;
 }
 
 export interface DataDocumentsMsg extends DataMsg {
@@ -238,12 +245,14 @@ export function getDataStateContainer({
 
           abortController?.abort();
           abortControllerFetchMore?.abort();
-          sendFetchStartMsg(
-            dataSubjects.main$,
-            timefilter.getAbsoluteTime(),
-            timefilter.getTime(),
-            appStateContainer.getState().query
-          );
+          sendFetchStartMsg(dataSubjects.main$, {
+            customFilters: internalStateContainer.getState().customFilters,
+            dataView: internalStateContainer.getState().dataView,
+            filters: appStateContainer.getState().filters,
+            query: appStateContainer.getState().query,
+            timeRange: timefilter.getAbsoluteTime(),
+            timeRangeRelative: timefilter.getTime(),
+          });
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();

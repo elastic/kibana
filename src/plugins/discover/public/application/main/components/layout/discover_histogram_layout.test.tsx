@@ -80,8 +80,11 @@ const mountComponent = async ({
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
-    timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
-    timeRangeRelative: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    params: {
+      dataView,
+      timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+      timeRangeRelative: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    },
   }) as DataMain$;
 
   const documents$ = new BehaviorSubject({
