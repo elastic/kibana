@@ -12,12 +12,14 @@ import {
   getCommonUnitedFieldDefinitions,
   USER_DEFINITION_VERSION,
   HOST_DEFINITION_VERSION,
+  getServiceUnitedDefinition,
 } from './entity_types';
 import type { UnitedDefinitionBuilder } from './types';
 import { UnitedEntityDefinition } from './united_entity_definition';
 const unitedDefinitionBuilders: Record<EntityType, UnitedDefinitionBuilder> = {
   host: getHostUnitedDefinition,
   user: getUserUnitedDefinition,
+  service: getServiceUnitedDefinition,
 };
 
 interface Options {
@@ -57,8 +59,11 @@ export const getUnitedEntityDefinition = memoize(
   }
 );
 
-export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>
-  entityType === 'host' ? HOST_DEFINITION_VERSION : USER_DEFINITION_VERSION;
+const versionByEntityType: Record<EntityType, string> = {
+  host: HOST_DEFINITION_VERSION,
+  user: USER_DEFINITION_VERSION,
+  service: USER_DEFINITION_VERSION,
+};
 
-export const getAvailableEntityTypes = (): EntityType[] =>
-  Object.keys(unitedDefinitionBuilders) as EntityType[];
+export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>
+  versionByEntityType[entityType];

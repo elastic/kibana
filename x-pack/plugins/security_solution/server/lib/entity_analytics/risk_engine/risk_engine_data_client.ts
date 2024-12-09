@@ -10,7 +10,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { LegacyRiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
   updateSavedObjectAttribute,
@@ -24,6 +24,7 @@ import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks
 import { RiskEngineAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { getRiskScoringTaskStatus, scheduleNow } from '../risk_score/tasks/risk_scoring_task';
+import type { RiskEngineConfiguration } from '../types';
 
 interface InitOpts {
   namespace: string;
@@ -107,6 +108,12 @@ export class RiskEngineDataClient {
   public getConfiguration = () =>
     getConfiguration({
       savedObjectsClient: this.options.soClient,
+    });
+
+  public updateConfiguration = (config: Partial<RiskEngineConfiguration>) =>
+    updateSavedObjectAttribute({
+      savedObjectsClient: this.options.soClient,
+      attributes: config,
     });
 
   public async getStatus({
@@ -274,13 +281,14 @@ export class RiskEngineDataClient {
       namespace,
     });
 
-    const deleteDashboardsPromises = [RiskScoreEntity.host, RiskScoreEntity.user].map((entity) =>
-      bulkDeleteSavedObjects({
-        deleteAll: true,
-        savedObjectsClient: this.options.soClient,
-        spaceId: namespace,
-        savedObjectTemplate: `${entity}RiskScoreDashboards`,
-      })
+    const deleteDashboardsPromises = [LegacyRiskScoreEntity.host, LegacyRiskScoreEntity.user].map(
+      (entity) =>
+        bulkDeleteSavedObjects({
+          deleteAll: true,
+          savedObjectsClient: this.options.soClient,
+          spaceId: namespace,
+          savedObjectTemplate: `${entity}RiskScoreDashboards`,
+        })
     );
 
     await Promise.all(deleteDashboardsPromises);

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../common';
 import type {
   RiskScoresCalculationResponse,
   RiskScoresPreviewResponse,
@@ -23,6 +24,7 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
 import { scheduleLatestTransformNow } from '../utils/transforms';
+import { getDefaultRiskEngineConfiguration } from '../risk_engine/utils/saved_object_configuration';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
@@ -38,6 +40,7 @@ export interface RiskScoreService {
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
   refreshRiskScoreIndex: () => Promise<void>;
+  updateMappingsIfNeeded: () => Promise<void>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -48,6 +51,7 @@ export interface RiskScoreServiceFactoryParams {
   riskScoreDataClient: RiskScoreDataClient;
   spaceId: string;
   refresh?: 'wait_for';
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const riskScoreServiceFactory = ({
@@ -57,9 +61,16 @@ export const riskScoreServiceFactory = ({
   riskEngineDataClient,
   riskScoreDataClient,
   spaceId,
+  experimentalFeatures,
 }: RiskScoreServiceFactoryParams): RiskScoreService => ({
   calculateScores: (params) =>
-    calculateRiskScores({ ...params, assetCriticalityService, esClient, logger }),
+    calculateRiskScores({
+      ...params,
+      assetCriticalityService,
+      esClient,
+      logger,
+      experimentalFeatures,
+    }),
   calculateAndPersistScores: (params) =>
     calculateAndPersistRiskScores({
       ...params,
@@ -68,6 +79,7 @@ export const riskScoreServiceFactory = ({
       logger,
       riskScoreDataClient,
       spaceId,
+      experimentalFeatures,
     }),
   getConfigurationWithDefaults: async (entityAnalyticsConfig: EntityAnalyticsConfig) => {
     const savedObjectConfig = await riskEngineDataClient.getConfiguration();
@@ -89,4 +101,21 @@ export const riskScoreServiceFactory = ({
   scheduleLatestTransformNow: () =>
     scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
   refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
+  updateMappingsIfNeeded: async () => {
+    const newConfig = await getDefaultRiskEngineConfiguration({ namespace: spaceId });
+    const savedObjectConfig = await riskEngineDataClient.getConfiguration();
+    if (savedObjectConfig && savedObjectConfig.mappingsVersion !== newConfig.mappingsVersion) {
+      await riskScoreDataClient.createOrUpdateRiskScoreLatestIndex();
+      await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
+      await riskScoreDataClient.updateRiskScoreTimeSeriesIndexMappings();
+      await riskEngineDataClient.updateConfiguration({
+        mappingsVersion: newConfig.mappingsVersion,
+      });
+    }
+  },
 });
+
+// TODO WRITE DOCS ABOUT UPDATES
+// IF YOU ONLY NEED TO CHANGE TRANSFORM SETTINGS THAT ARE SUPPORTED BY THE UPDATE API, CHANGE THE CONFIG AND BUMP THE TRANSFORM M VERSION
+// IF YOU NEED TO UPDATE THE A TRANSFORM CONFIG THAT ISN'T SUPPORTED YOU NEED TO DELETE THE TRANSFORM AND CREATE A NEW ONE
+// IF YOU need to upgrade mapping?
