@@ -179,7 +179,7 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        ebtManager.enableContext();
+        ebtManager.onDiscoverAppMounted();
 
         const services = buildServices({
           core: coreStart,
@@ -228,7 +228,7 @@ export class DiscoverPlugin
         });
 
         return () => {
-          ebtManager.disableAndResetContext();
+          ebtManager.onDiscoverAppUnmounted();
           unlistenParentHistory();
           unmount();
           appUnMounted();
@@ -262,7 +262,7 @@ export class DiscoverPlugin
       registerFeature(plugins.home);
     }
 
-    this.registerEmbeddable(core, plugins);
+    this.registerEmbeddable(core, plugins, ebtManager);
 
     return {
       locator: this.locator,
@@ -390,9 +390,11 @@ export class DiscoverPlugin
     });
   };
 
-  private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
-
+  private registerEmbeddable(
+    core: CoreSetup<DiscoverStartPlugins>,
+    plugins: DiscoverSetupPlugins,
+    ebtManager: DiscoverEBTManager
+  ) {
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return {
