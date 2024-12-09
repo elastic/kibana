@@ -20,14 +20,14 @@ export const CreatePackagePolicyPage: React.FC<{
   originFrom?: EditPackagePolicyFrom;
   propPolicyId?: string;
   integrationName?: string;
-  setIntegrationStep?: (step: number) => void;
+  onSetIntegrationStep?: (step: number) => void;
   onCanceled?: () => void;
 }> = ({
   useMultiPageLayoutProp,
   originFrom,
   propPolicyId,
   integrationName,
-  setIntegrationStep,
+  onSetIntegrationStep,
   onCanceled,
 }) => {
   const { search } = useLocation();
@@ -72,7 +72,7 @@ export const CreatePackagePolicyPage: React.FC<{
     propPolicyId,
     integrationName,
     prerelease,
-    setIntegrationStep,
+    onSetIntegrationStep,
     onCanceled,
   };
 

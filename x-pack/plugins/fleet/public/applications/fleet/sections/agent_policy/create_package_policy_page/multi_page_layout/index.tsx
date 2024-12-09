@@ -73,14 +73,13 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   prerelease,
   from,
   integrationName,
-  setIntegrationStep,
+  onSetIntegrationStep,
   onCanceled,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
-  // fixme
   const { pkgkey: pkgkeyParam, policyId, integration: integrationParam } = params;
   const { pkgkey: pkgKeyContext } = useIntegrationsStateContext();
-  const pkgkey = pkgkeyParam || pkgKeyContext;
+  const pkgkey = pkgkeyParam || pkgKeyContext || '';
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const [onSplash, setOnSplash] = useState(from !== 'onboarding-integration');
   const [currentStep, setCurrentStep] = useState(0);
@@ -157,7 +156,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     }
 
     setCurrentStep(currentStep + 1);
-    setIntegrationStep(currentStep + 1);
+    onSetIntegrationStep?.(currentStep + 1);
     if (props?.selectedAgentPolicies) {
       setSelectedAgentPolicies(props?.selectedAgentPolicies);
     }

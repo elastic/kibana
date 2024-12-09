@@ -39,5 +39,7 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   propPolicyId?: string;
   integrationName?: string;
   prerelease: boolean;
+  onSetIntegrationStep?: (step: number) => void;
   onNext?: () => void;
+  onCanceled?: () => void;
 }>;
