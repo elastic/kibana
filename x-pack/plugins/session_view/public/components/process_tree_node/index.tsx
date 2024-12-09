@@ -316,7 +316,12 @@ export function ProcessTreeNode({
               <Nbsp />
               <span css={styles.jumpToTop}>
                 <EuiToolTip title={COLLAPSE_ALL}>
-                  <EuiButtonIcon size="xs" iconType="fold" onClick={handleCollapseProcessTree} />
+                  <EuiButtonIcon
+                    size="xs"
+                    iconType="fold"
+                    onClick={handleCollapseProcessTree}
+                    aria-label={COLLAPSE_ALL}
+                  />
                 </EuiToolTip>
               </span>
             </span>
