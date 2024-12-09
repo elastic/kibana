@@ -13,7 +13,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { FetchActionResponsesResult } from '../..';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -66,7 +66,7 @@ export interface NormalizedActionRequest {
   agents: string[];
   createdBy: string;
   createdAt: string;
-  command: ResponseActionsApiCommandNames;
+  command: EDRActionsApiCommandNames<'endpoint'>;
   comment?: string;
   parameters?: EndpointActionDataParameterTypes;
   alertIds?: string[];

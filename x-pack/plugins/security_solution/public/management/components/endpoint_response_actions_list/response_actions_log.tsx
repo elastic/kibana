@@ -13,7 +13,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
-  type ResponseActionsApiCommandNames,
+  type EDRActionsApiCommandNames,
   type ResponseActionStatus,
   type ResponseActionType,
 } from '../../../../common/endpoint/service/response_actions/constants';
@@ -181,7 +181,7 @@ export const ResponseActionsLog = memo<
       (selectedCommands: string[]) => {
         setQueryParams((prevState) => ({
           ...prevState,
-          commands: selectedCommands as ResponseActionsApiCommandNames[],
+          commands: selectedCommands as Array<EDRActionsApiCommandNames<'endpoint'>>,
         }));
       },
       [setQueryParams]

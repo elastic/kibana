@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -60,7 +60,7 @@ export const getActionListMock = async ({
     .map(() => uuidv4());
 
   const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
-    const command = (commands?.[0] ?? 'isolate') as ResponseActionsApiCommandNames;
+    const command = (commands?.[0] ?? 'isolate') as EDRActionsApiCommandNames<'endpoint'>;
     const actionDetailsOverrides = {
       agents: agentIds,
       hosts,
