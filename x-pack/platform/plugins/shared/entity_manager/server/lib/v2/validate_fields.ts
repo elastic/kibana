@@ -54,22 +54,20 @@ export async function validateFields({
 
   const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
   if (!sourceHasMandatoryFields) {
-    // we can't build entities without id fields
     // TODO filters should likely behave similarly
     const missingFields = mandatoryFields.filter((field) => !fields[field]);
     throw new Error(
-      `Ignoring source [${source.id}] because some mandatory fields [${missingFields.join(
-        ', '
-      )}] are not mapped in [${source.index_patterns.join(', ')}]`
+      `Mandatory fields [${missingFields.join(', ')}] are not mapped for source [${
+        source.id
+      }] with index patterns [${source.index_patterns.join(', ')}]`
     );
   }
 
-  // operations on an unmapped field result in a failing query so we ignore
-  // unavailable metadata
+  // operations on an unmapped field result in a failing query
   const availableMetadataFields = metaFields.filter((field) => fields[field]);
   if (availableMetadataFields.length < metaFields.length) {
     logger.info(
-      `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(
+      `Ignoring unmapped metadata fields [${without(metaFields, ...availableMetadataFields).join(
         ', '
       )}] for source [${source.id}]`
     );
