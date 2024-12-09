@@ -27,7 +27,7 @@ export interface UserProfileAvatarData {
   imageUrl?: string | null;
 }
 
-export type DarkModeValue = '' | 'dark' | 'light';
+export type DarkModeValue = 'system' | 'dark' | 'light' | 'space_default';
 
 /**
  * User settings stored in the data object of the User Profile
