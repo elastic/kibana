@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { now } from 'lodash';
 import { measureInteraction } from '.';
 import { perfomanceMarkers } from '../../performance_markers';
 
 describe('measureInteraction', () => {
-  const mockDate = new Date('2024-12-09T15:00:00Z').getTime(); // Hardcoded date (Jan 1, 2024)
-
   afterAll(() => {
-    // Restore the original Date.now() implementation after the tests
     jest.restoreAllMocks();
-    jest.spyOn(Date, 'now').mockReturnValue(mockDate);
   });
 
   beforeEach(() => {
