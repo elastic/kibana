@@ -21,6 +21,8 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
+  - wait
+
   - command: .buildkite/scripts/steps/test/ftr_configs.sh
     env:
       FTR_CONFIG: "x-pack/test/functional_gen_ai/inference/config.ts"
