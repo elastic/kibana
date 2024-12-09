@@ -21,6 +21,16 @@ export const CaseCustomFieldNumberWithValidationValueRt = ({ fieldName }: { fiel
     fieldName,
   });
 
+export const CaseCustomFieldListWithValidationValueRt = (fieldValue: string) =>
+  rt.record(
+    rt.string,
+    limitedStringSchema({
+      fieldName: fieldValue,
+      min: 1,
+      max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+    })
+  );
+
 /**
  * Update custom_field
  */
@@ -31,6 +41,7 @@ export const CustomFieldPutRequestRt = rt.strict({
     rt.null,
     CaseCustomFieldTextWithValidationValueRt('value'),
     CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'value' }),
+    CaseCustomFieldListWithValidationValueRt('value'),
   ]),
   caseVersion: rt.string,
 });
