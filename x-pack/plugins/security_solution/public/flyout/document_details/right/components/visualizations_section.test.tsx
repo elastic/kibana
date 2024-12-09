@@ -8,6 +8,7 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
@@ -26,7 +27,6 @@ import { useExpandSection } from '../hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
 
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
@@ -65,7 +65,7 @@ jest.mock('../../shared/hooks/use_graph_preview');
 
 const mockUseGraphPreview = useGraphPreview as jest.Mock;
 
-jest.mock('../../shared/hooks/use_fetch_graph_data', () => ({
+jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
 }));
 

@@ -6,6 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
+import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
@@ -13,7 +14,6 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -32,7 +32,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 jest.mock('../../shared/hooks/use_graph_preview');
-jest.mock('../../shared/hooks/use_fetch_graph_data', () => ({
+jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
 }));
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
