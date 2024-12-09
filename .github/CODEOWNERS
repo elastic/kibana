@@ -794,7 +794,6 @@ x-pack/packages/kbn-langchain @elastic/security-generative-ai
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
-x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/packages/ml/aiops_common @elastic/ml-ui
@@ -864,6 +863,7 @@ x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/packages/security/ui_components @elastic/kibana-security
 x-pack/performance @elastic/appex-qa
+x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
