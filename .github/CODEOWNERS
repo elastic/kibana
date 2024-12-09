@@ -1582,6 +1582,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/plugins/security_solution/public/assistant @elastic/security-generative-ai
 /x-pack/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
+/x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -1687,6 +1688,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-explore
+/x-pack/plugins/security_solution/public/common/hooks/use_form_with_warn @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
