@@ -114,7 +114,7 @@ export function StreamDetailRouting({
                   tabIndex={0}
                   paddingSize="s"
                   className={css`
-                    background-color: ${theme.colors.backgroundBaseSubdued};
+                    background-color: ${theme.colors.emptyShade};
                     overflow: auto;
                     display: flex;
                   `}
