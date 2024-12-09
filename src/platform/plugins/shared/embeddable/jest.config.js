@@ -14,5 +14,7 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/embeddable',
   coverageReporters: ['text', 'html'],
   setupFiles: ['<rootDir>/src/platform/plugins/shared/embeddable/jest_setup.ts'],
-  collectCoverageFrom: ['<rootDir>/src/platform/plugins/shared/embeddable/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/embeddable/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };
