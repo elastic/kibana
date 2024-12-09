@@ -6724,7 +6724,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-csv-share-panel@link:packages/kbn-reporting/get_csv_panel_actions":
+"@kbn/reporting-csv-share-panel@link:src/platform/packages/private/kbn-reporting/get_csv_panel_actions":
   version "0.0.0"
   uid ""
 

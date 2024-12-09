@@ -424,7 +424,6 @@ packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
 packages/kbn-reporting/export_types/pdf_common @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png @elastic/appex-sharedux
 packages/kbn-reporting/export_types/png_common @elastic/appex-sharedux
-packages/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 packages/kbn-reporting/public @elastic/appex-sharedux
 packages/kbn-reporting/server @elastic/appex-sharedux
@@ -590,6 +589,7 @@ src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
 src/platform/packages/private/kbn-item-buffer @elastic/appex-sharedux
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-reporting/common @elastic/appex-sharedux
+src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
 src/platform/packages/private/react/kibana_context/root @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux

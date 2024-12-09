@@ -744,7 +744,7 @@
     "@kbn/repo-info": "link:packages/kbn-repo-info",
     "@kbn/repo-packages": "link:packages/kbn-repo-packages",
     "@kbn/reporting-common": "link:src/platform/packages/private/kbn-reporting/common",
-    "@kbn/reporting-csv-share-panel": "link:packages/kbn-reporting/get_csv_panel_actions",
+    "@kbn/reporting-csv-share-panel": "link:src/platform/packages/private/kbn-reporting/get_csv_panel_actions",
     "@kbn/reporting-export-types-csv": "link:packages/kbn-reporting/export_types/csv",
     "@kbn/reporting-export-types-csv-common": "link:packages/kbn-reporting/export_types/csv_common",
     "@kbn/reporting-export-types-pdf": "link:packages/kbn-reporting/export_types/pdf",
