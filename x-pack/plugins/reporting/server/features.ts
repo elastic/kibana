@@ -5,29 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES, type Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 interface FeatureRegistrationOpts {
   features: FeaturesPluginSetup;
-  deprecatedRoles: string[] | false;
   isServerless: boolean;
-  logger: Logger;
 }
 
-/**
- * If xpack.reporting.roles.enabled === true, register Reporting as a feature
- * that is controlled by user role names. Also, for Serverless register a
- * 'shell' Reporting Kibana feature.
- */
-export function registerFeatures({
-  isServerless,
-  features,
-  deprecatedRoles,
-  logger,
-}: FeatureRegistrationOpts) {
+export function registerFeatures({ isServerless, features }: FeatureRegistrationOpts) {
   // Register a 'shell' feature specifically for Serverless. If granted, it will automatically provide access to
   // reporting capabilities in other features, such as Discover, Dashboards, and Visualizations. On its own, this
   // feature doesn't grant any additional privileges.
@@ -48,29 +36,5 @@ export function registerFeatures({
     });
   }
 
-  if (deprecatedRoles !== false) {
-    // refer to roles.allow configuration (deprecated path)
-    const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
-    const privileges = allowedRoles.map((role) => ({
-      requiredClusterPrivileges: [],
-      requiredRoles: [role],
-      ui: [],
-    }));
-
-    // self-register as an elasticsearch feature (deprecated)
-    features.registerElasticsearchFeature({
-      id: 'reporting',
-      catalogue: ['reporting'],
-      management: {
-        insightsAndAlerting: ['reporting'],
-      },
-      privileges,
-    });
-  } else {
-    logger.debug(
-      `Reporting roles configuration is disabled. Please assign access to Reporting use Kibana feature controls for applications.`
-    );
-    // trigger application to register Reporting as a subfeature
-    features.enableReportingUiCapabilities();
-  }
+  features.enableReportingUiCapabilities();
 }
