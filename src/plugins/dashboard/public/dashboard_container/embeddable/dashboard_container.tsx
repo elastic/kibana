@@ -11,6 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import {
   BehaviorSubject,
   Subject,
@@ -68,6 +69,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
+import { core } from '@kbn/embeddable-plugin/public/kibana_services';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
 import type { DashboardAttributes } from '../../../server/content_management';
 import { DashboardContainerInput, DashboardPanelMap, DashboardPanelState } from '../../../common';
@@ -113,6 +116,7 @@ import {
 } from './dashboard_container_factory';
 import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
 import type { DashboardCreationOptions } from '../..';
+import { ShowSourceFlyout } from '../component/showsource/show_source_flyout';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -966,4 +970,28 @@ export class DashboardContainer
     }
     if (resetChangedPanelCount) this.children$.next(currentChildren);
   };
+
+  public showSource() {
+    const flyout = coreServices.overlays.openFlyout(
+      toMountPoint(
+        <ShowSourceFlyout
+          onClose={() => {
+            this.clearOverlays();
+          }}
+          dashboardApi={this}
+        />,
+        coreServices
+      ),
+      {
+        size: 'm',
+        'data-test-subj': 'dashboardShowSourceFlyout',
+        onClose: (flyout) => {
+          this.clearOverlays();
+          flyout.close();
+        },
+      }
+    );
+
+    this.openOverlay(flyout);
+  }
 }

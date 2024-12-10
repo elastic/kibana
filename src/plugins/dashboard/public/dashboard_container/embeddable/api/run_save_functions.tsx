@@ -115,6 +115,8 @@ export async function runQuickSave(this: DashboardContainer) {
   this.setLastSavedInput(dashboardStateToSave);
   this.saveNotification$.next();
 
+  console.log('save result', saveResult);
+
   return saveResult;
 }
 
