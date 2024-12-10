@@ -21,13 +21,11 @@ import { reducer, initialState, ActionsProvider, type Actions } from './state';
 import { useTelemetry } from '../telemetry';
 import { ExperimentalFeaturesService } from '../../../services';
 
-type StepName = '1' | '2' | '3' | '4' | 'cel_input' | 'cel_review' | 'deploy';
-
-const stepNames: Record<StepName, string> = {
-  '1': 'Connector Step',
-  '2': 'Integration Step',
-  '3': 'DataStream Step',
-  '4': 'Review Step',
+const stepNames: Record<number | string, string> = {
+  1: 'Connector Step',
+  2: 'Integration Step',
+  3: 'DataStream Step',
+  4: 'Review Step',
   cel_input: 'CEL Input Step',
   cel_review: 'CEL Review Step',
   deploy: 'Deploy Step',
@@ -50,7 +48,9 @@ export const CreateIntegrationAssistant = React.memo(() => {
       ? stepNames.cel_review
       : state.step === celInputStepIndex
       ? stepNames.cel_input
-      : stepNames[state.step.toString() as StepName] || 'Unknown Step';
+      : state.step in stepNames
+      ? stepNames[state.step]
+      : 'Unknown Step';
 
   const telemetry = useTelemetry();
   useEffect(() => {
