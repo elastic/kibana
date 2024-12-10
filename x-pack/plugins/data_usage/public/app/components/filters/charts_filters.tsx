@@ -75,7 +75,7 @@ export const ChartsFilters = memo<ChartsFiltersProps>(
             data-test-subj={dataTestSubj}
           />
           {!isValidDateRange && (
-            <EuiText color="danger" size="s">
+            <EuiText color="danger" size="s" data-test-subj={getTestId('invalid-date-range')}>
               <EuiTextAlign textAlign="center">
                 <p>The date range should be within 10 days from now.</p>
               </EuiTextAlign>
