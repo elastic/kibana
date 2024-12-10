@@ -769,7 +769,7 @@
     "@kbn/router-to-openapispec": "link:packages/kbn-router-to-openapispec",
     "@kbn/router-utils": "link:packages/kbn-router-utils",
     "@kbn/routing-example-plugin": "link:examples/routing_example",
-    "@kbn/rrule": "link:packages/kbn-rrule",
+    "@kbn/rrule": "link:src/platform/packages/shared/kbn-rrule",
     "@kbn/rule-data-utils": "link:packages/kbn-rule-data-utils",
     "@kbn/rule-registry-plugin": "link:x-pack/plugins/rule_registry",
     "@kbn/runtime-fields-plugin": "link:x-pack/plugins/runtime_fields",
