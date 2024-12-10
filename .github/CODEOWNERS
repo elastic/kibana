@@ -2647,6 +2647,116 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
+# Sustainable kibana - Temporary placeholder for new folders
+# see https://github.com/elastic/kibana/pull/203682
+
+packages/deeplinks/ml @elastic/ml-ui
+packages/default-nav/ml @elastic/ml-ui
+packages/kbn-esql-ast @elastic/kibana-esql
+packages/kbn-esql-editor @elastic/kibana-esql
+packages/kbn-esql-utils @elastic/kibana-esql
+packages/kbn-esql-validation-autocomplete @elastic/kibana-esql
+packages/kbn-language-documentation @elastic/kibana-esql
+packages/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/private/default-nav/devtools @elastic/kibana-management
+src/platform/packages/private/default-nav/management @elastic/kibana-management
+src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
+src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
+src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management
+src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
+src/platform/packages/shared/deeplinks/management @elastic/kibana-management
+src/platform/packages/shared/kbn-doc-links @elastic/docs
+src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/components/field_input @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/components/field_row @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
+src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
+src/platform/plugins/shared/console @elastic/kibana-management
+src/platform/plugins/shared/dev_tools @elastic/kibana-management
+src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
+src/platform/plugins/shared/management @elastic/kibana-management
+src/plugins/esql @elastic/kibana-esql
+src/plugins/esql_datagrid @elastic/kibana-esql
+x-pack/packages/ai-infra/inference-common @elastic/appex-ai-infra
+x-pack/packages/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/packages/ml/agg_utils @elastic/ml-ui
+x-pack/packages/ml/aiops_change_point_detection @elastic/ml-ui
+x-pack/packages/ml/aiops_common @elastic/ml-ui
+x-pack/packages/ml/aiops_components @elastic/ml-ui
+x-pack/packages/ml/aiops_log_pattern_analysis @elastic/ml-ui
+x-pack/packages/ml/aiops_log_rate_analysis @elastic/ml-ui
+x-pack/packages/ml/aiops_test_utils @elastic/ml-ui
+x-pack/packages/ml/anomaly_utils @elastic/ml-ui
+x-pack/packages/ml/cancellable_search @elastic/ml-ui
+x-pack/packages/ml/category_validator @elastic/ml-ui
+x-pack/packages/ml/chi2test @elastic/ml-ui
+x-pack/packages/ml/creation_wizard_utils @elastic/ml-ui
+x-pack/packages/ml/data_frame_analytics_utils @elastic/ml-ui
+x-pack/packages/ml/data_grid @elastic/ml-ui
+x-pack/packages/ml/data_view_utils @elastic/ml-ui
+x-pack/packages/ml/date_picker @elastic/ml-ui
+x-pack/packages/ml/date_utils @elastic/ml-ui
+x-pack/packages/ml/error_utils @elastic/ml-ui
+x-pack/packages/ml/field_stats_flyout @elastic/ml-ui
+x-pack/packages/ml/in_memory_table @elastic/ml-ui
+x-pack/packages/ml/inference_integration_flyout @elastic/ml-ui
+x-pack/packages/ml/is_defined @elastic/ml-ui
+x-pack/packages/ml/is_populated_object @elastic/ml-ui
+x-pack/packages/ml/json_schemas @elastic/ml-ui
+x-pack/packages/ml/kibana_theme @elastic/ml-ui
+x-pack/packages/ml/local_storage @elastic/ml-ui
+x-pack/packages/ml/nested_property @elastic/ml-ui
+x-pack/packages/ml/number_utils @elastic/ml-ui
+x-pack/packages/ml/parse_interval @elastic/ml-ui
+x-pack/packages/ml/query_utils @elastic/ml-ui
+x-pack/packages/ml/random_sampler_utils @elastic/ml-ui
+x-pack/packages/ml/response_stream @elastic/ml-ui
+x-pack/packages/ml/route_utils @elastic/ml-ui
+x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
+x-pack/packages/ml/string_hash @elastic/ml-ui
+x-pack/packages/ml/time_buckets @elastic/ml-ui
+x-pack/packages/ml/trained_models_utils @elastic/ml-ui
+x-pack/packages/ml/ui_actions @elastic/ml-ui
+x-pack/packages/ml/url_state @elastic/ml-ui
+x-pack/packages/ml/validators @elastic/ml-ui
+x-pack/platform/packages/private/rollup @elastic/kibana-management
+x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
+x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
+x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
+x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
+x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
+x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
+x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
+x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
+x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
+x-pack/platform/plugins/private/rollup @elastic/kibana-management
+x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
+x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
+x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
+x-pack/platform/plugins/private/watcher @elastic/kibana-management
+x-pack/platform/plugins/shared/index_management @elastic/kibana-management
+x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
+x-pack/platform/plugins/shared/license_management @elastic/kibana-management
+x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
+x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
+x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
+x-pack/plugins/aiops @elastic/ml-ui
+x-pack/plugins/data_visualizer @elastic/ml-ui
+x-pack/plugins/inference @elastic/appex-ai-infra
+x-pack/plugins/ml @elastic/ml-ui
+x-pack/plugins/transform @elastic/ml-ui
+x-pack/plugins/translations @elastic/kibana-localization
+x-pack/plugins/triggers_actions_ui @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/security/config.examples.ts @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/kibana-data-discovery
+/x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-management
+/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-management
+/x-pack/test/api_integration/apis/upgrade_assistant @elastic/kibana-management
+/x-pack/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
+x-pack/plugins/translations/translations
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
