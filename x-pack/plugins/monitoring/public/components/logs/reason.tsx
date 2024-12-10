@@ -12,7 +12,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../../legacy_shims';
 import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 
-export const Reason = ({ reason }) => {
+export interface IReason {
+  indexPatternExists?: boolean;
+  indexPatternInTimeRangeExists?: boolean;
+  typeExists?: boolean;
+  typeExistsAtAnyTime?: boolean;
+  usingStructuredLogs?: boolean;
+  clusterExists?: boolean;
+  nodeExists?: boolean | null;
+  indexExists?: boolean;
+  correctIndexName?: boolean;
+}
+
+export const Reason = ({ reason }: { reason: IReason }) => {
   const filebeatUrl = Legacy.shims.docLinks.links.filebeat.installation;
   const elasticsearchUrl = Legacy.shims.docLinks.links.filebeat.elasticsearchModule;
   const troubleshootUrl = Legacy.shims.docLinks.links.monitoring.troubleshootKibana;
