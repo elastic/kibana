@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana.png';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 
@@ -20,6 +20,8 @@ export const AnalyticsEmptyPrompt: FC = () => {
   const {
     services: { docLinks },
   } = useMlKibana();
+
+  const mlLocator = useMlManagementLocator();
 
   const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics] = usePermissionCheck([
     'canCreateDataFrameAnalytics',
@@ -29,10 +31,13 @@ export const AnalyticsEmptyPrompt: FC = () => {
   const disabled =
     !mlNodesAvailable() || !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
 
-  const navigateToPath = useNavigateToPath();
-
   const navigateToSourceSelection = async () => {
-    await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
+    if (!mlLocator) return;
+
+    await mlLocator.navigate({
+      sectionId: 'ml',
+      appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION}`,
+    });
   };
 
   return (

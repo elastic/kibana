@@ -169,6 +169,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     pluginsSetup: MlSetupDependencies
   ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
     this.sharedMlServices = getMlSharedServices(core.http);
+    const deps = {
+      // embeddable: pluginsSetup.embeddable,
+      // embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+      home: pluginsSetup.home,
+      licenseManagement: pluginsSetup.licenseManagement,
+      management: pluginsSetup.management,
+      usageCollection: pluginsSetup.usageCollection,
+    };
 
     core.application.register({
       id: PLUGIN_ID,
@@ -195,12 +203,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             fieldFormats: pluginsStart.fieldFormats,
-            home: pluginsSetup.home,
             kibanaVersion: this.initializerContext.env.packageInfo.version,
             lens: pluginsStart.lens,
-            licenseManagement: pluginsSetup.licenseManagement,
             licensing: pluginsStart.licensing,
-            management: pluginsSetup.management,
             maps: pluginsStart.maps,
             observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
             presentationUtil: pluginsStart.presentationUtil,
@@ -211,7 +216,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             triggersActionsUi: pluginsStart.triggersActionsUi,
             uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
-            usageCollection: pluginsSetup.usageCollection,
+            ...deps,
           },
           params,
           this.isServerless,
@@ -230,11 +235,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       registerManagementSections(
         pluginsSetup.management,
         core,
-        {
-          usageCollection: pluginsSetup.usageCollection,
-        },
+        deps,
         this.isServerless,
-        this.enabledFeatures
+        this.enabledFeatures,
+        this.nlpSettings,
+        this.experimentalFeatures
       );
     }
 

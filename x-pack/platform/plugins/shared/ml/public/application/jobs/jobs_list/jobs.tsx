@@ -15,6 +15,7 @@ import { JobsListView } from './components/jobs_list_view';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
+import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
@@ -55,6 +56,9 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
     <>
+      <MlPageHeader>
+        <FormattedMessage id="xpack.ml.jobsList.title" defaultMessage="Anomaly Detection Jobs" />
+      </MlPageHeader>
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>

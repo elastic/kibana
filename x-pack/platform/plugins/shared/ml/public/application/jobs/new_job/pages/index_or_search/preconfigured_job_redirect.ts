@@ -26,7 +26,7 @@ export async function preConfiguredJobRedirect(
 
     try {
       const redirectUrl = await getWizardUrlFromCloningJob(createdBy, dataViewId);
-      await navigateToUrl(`${basePath}/app/ml/${redirectUrl}`);
+      await navigateToUrl(`${basePath}/app/management/ml/${redirectUrl}`);
       return Promise.reject();
     } catch (error) {
       return Promise.resolve();

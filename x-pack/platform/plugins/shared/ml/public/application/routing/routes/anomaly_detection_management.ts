@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { AnomalyDetectionJobsPage } from './anomaly_detection_jobs';
+export * from './new_job';
+export * from './datavisualizer';
+export * from './jobs_list';
