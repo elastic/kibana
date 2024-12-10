@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Global, css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
 import type { Subscription } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
-
-import './loading_indicator.scss';
 
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -60,6 +59,12 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
 
   render() {
     const className = classNames(!this.state.visible && 'kbnLoadingIndicator-hidden');
+    const indicatorHiddenCss = !this.state.visible
+      ? css({
+          visibility: 'hidden',
+          animationPlayState: 'paused',
+        })
+      : undefined;
 
     const testSubj = this.state.visible
       ? 'globalLoadingIndicator'
@@ -84,7 +89,6 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
         type={'logoElastic'}
         size="l"
         data-test-subj={testSubj}
-        className="chrHeaderLogo__cluster"
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
           defaultMessage: 'Elastic Logo',
         })}
@@ -102,18 +106,31 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       logoImage
     );
 
-    return !this.props.showAsBar ? (
-      logo
-    ) : (
-      <EuiProgress
-        className={className}
-        data-test-subj={testSubj}
-        max={this.props.maxAmount}
-        value={this.props.valueAmount}
-        position="fixed"
-        color="accent"
-        size="xs"
-      />
+    return (
+      <>
+        <Global
+          styles={{
+            '.euiHeaderSectionItem .euiButtonEmpty__text': {
+              // stop global header buttons from jumping during loading state
+              display: 'flex',
+            },
+          }}
+        />
+        {!this.props.showAsBar ? (
+          logo
+        ) : (
+          <EuiProgress
+            className={className}
+            css={indicatorHiddenCss}
+            data-test-subj={testSubj}
+            max={this.props.maxAmount}
+            value={this.props.valueAmount}
+            position="fixed"
+            color="accent"
+            size="xs"
+          />
+        )}
+      </>
     );
   }
 }

@@ -80,15 +80,12 @@ export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwi
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';
 export const DISCOVER_SAMPLE_ROWS_PER_PAGE_ID = 'discover:sampleRowsPerPage';
 export const DISCOVER_SAMPLE_SIZE_ID = 'discover:sampleSize';
-export const DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID = 'discover:searchFieldsFromSource';
 export const DISCOVER_SEARCH_ON_PAGE_LOAD_ID = 'discover:searchOnPageLoad';
 export const DISCOVER_SHOW_FIELD_STATISTICS_ID = 'discover:showFieldStatistics';
 export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
 export const DISCOVER_SORT_DEFAULT_ORDER_ID = 'discover:sort:defaultOrder';
 export const DOC_TABLE_HIDE_TIME_COLUMNS_ID = 'doc_table:hideTimeColumn';
 export const DOC_TABLE_HIGHLIGHT_ID = 'doc_table:highlight';
-export const DOC_TABLE_LEGACY_ID = 'doc_table:legacy';
-export const TRUNCATE_MAX_HEIGHT_ID = 'truncate:maxHeight';
 
 // Machine learning settings
 export const ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID =

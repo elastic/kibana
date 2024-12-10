@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   InfraFormatter,
   InfraWaffleMapBounds,
@@ -40,7 +39,7 @@ export const Legend: React.FC<Props> = ({ legend, bounds, formatter }) => {
   );
 };
 
-const LegendContainer = euiStyled.div`
+const LegendContainer = styled.div`
   margin: 0 10px;
   display: flex;
 `;
