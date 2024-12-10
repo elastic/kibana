@@ -111,6 +111,7 @@ export const searchEntities = async (
     start?: string;
     end?: string;
     metadata_fields?: string[];
+    filters?: string[];
   },
   expectedCode?: number
 ) => {

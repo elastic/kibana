@@ -10,12 +10,20 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createEntitySourceDefinition, searchEntities } from './helpers/request';
 import { createIndexWithDocuments } from './helpers/data_generation';
+import { clearEntityDefinitions } from './helpers/clear_entity_definitions';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
 
   describe('_search API', () => {
+    let cleanup: Function[] = [];
+
+    afterEach(async () => {
+      await Promise.all([clearEntityDefinitions(esClient), ...cleanup.map((fn) => fn())]);
+      cleanup = [];
+    });
+
     it('returns 404 when no matching sources', async () => {
       await searchEntities(supertest, { type: 'undefined-type' }, 404);
     });
@@ -23,27 +31,29 @@ export default function ({ getService }: FtrProviderContext) {
     it('resolves entities from sources with timestamp', async () => {
       const now = moment();
 
-      const deleteIndex = await createIndexWithDocuments(esClient, {
-        index: 'index-1-with-services',
-        properties: {
-          custom_timestamp: { type: 'date' },
-          'service.name': { type: 'keyword' },
-        },
-        documents: [
-          {
-            custom_timestamp: moment(now).subtract(1, 'minute').toISOString(),
-            'service.name': 'service-one',
+      cleanup.push(
+        await createIndexWithDocuments(esClient, {
+          index: 'index-1-with-services',
+          properties: {
+            custom_timestamp: { type: 'date' },
+            'service.name': { type: 'keyword' },
           },
-          {
-            custom_timestamp: moment(now).subtract(2, 'minute').toISOString(),
-            'service.name': 'service-two',
-          },
-          {
-            custom_timestamp: moment(now).subtract(1, 'hour').toISOString(),
-            'service.name': 'service-three',
-          },
-        ],
-      });
+          documents: [
+            {
+              custom_timestamp: moment(now).subtract(1, 'minute').toISOString(),
+              'service.name': 'service-one',
+            },
+            {
+              custom_timestamp: moment(now).subtract(2, 'minute').toISOString(),
+              'service.name': 'service-two',
+            },
+            {
+              custom_timestamp: moment(now).subtract(1, 'hour').toISOString(),
+              'service.name': 'service-three',
+            },
+          ],
+        })
+      );
 
       await createEntitySourceDefinition(supertest, {
         source: {
@@ -80,20 +90,20 @@ export default function ({ getService }: FtrProviderContext) {
           'service.name': 'service-two',
         },
       ]);
-
-      await deleteIndex();
     });
 
     it('resolves entities from sources without timestamp', async () => {
-      const deleteIndex = await createIndexWithDocuments(esClient, {
-        index: 'index-1-with-home-appliances',
-        properties: { 'appliance.name': { type: 'keyword' } },
-        documents: [
-          { 'appliance.name': 'rice cooker' },
-          { 'appliance.name': 'kettle' },
-          { 'appliance.name': 'dishwasher' },
-        ],
-      });
+      cleanup.push(
+        await createIndexWithDocuments(esClient, {
+          index: 'index-1-with-home-appliances',
+          properties: { 'appliance.name': { type: 'keyword' } },
+          documents: [
+            { 'appliance.name': 'rice cooker' },
+            { 'appliance.name': 'kettle' },
+            { 'appliance.name': 'dishwasher' },
+          ],
+        })
+      );
 
       await createEntitySourceDefinition(supertest, {
         source: {
@@ -131,14 +141,12 @@ export default function ({ getService }: FtrProviderContext) {
           'appliance.name': 'rice cooker',
         },
       ]);
-
-      await deleteIndex();
     });
 
     it('merges entities from different sources', async () => {
       const now = moment();
 
-      const deleteIndices = await Promise.all([
+      cleanup = await Promise.all([
         createIndexWithDocuments(esClient, {
           index: 'index-1-with-hosts',
           properties: {
@@ -264,33 +272,238 @@ export default function ({ getService }: FtrProviderContext) {
           'agent.name': null,
         },
       ]);
+    });
 
-      await Promise.all(deleteIndices.map((fn) => fn()));
+    it('includes source and additional metadata fields', async () => {
+      const now = moment();
+
+      cleanup = await Promise.all([
+        createIndexWithDocuments(esClient, {
+          index: 'index-1-with-services',
+          properties: {
+            '@timestamp': { type: 'date' },
+            'service.name': { type: 'keyword' },
+            'agent.name': { type: 'keyword' },
+            'host.name': { type: 'keyword' },
+          },
+          documents: [
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              'service.name': 'service-one',
+              'agent.name': 'agent-one',
+              'host.name': 'host-one',
+            },
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'service.name': 'service-one',
+              'agent.name': 'agent-one',
+              'host.name': 'host-one',
+            },
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'service.name': 'service-one',
+              'host.name': 'host-two',
+            },
+            {
+              '@timestamp': moment(now).subtract(3, 'minute').toISOString(),
+              'service.name': 'service-two',
+              'host.name': 'host-three',
+            },
+          ],
+        }),
+
+        createIndexWithDocuments(esClient, {
+          index: 'index-2-with-services',
+          properties: {
+            '@timestamp': { type: 'date' },
+            'service.name': { type: 'keyword' },
+            'agent.name': { type: 'keyword' },
+            'host.name': { type: 'keyword' },
+          },
+          documents: [
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              'service.name': 'service-one',
+              'agent.name': 'agent-one',
+              'host.name': 'host-one',
+            },
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'service.name': 'service-one',
+              'agent.name': 'agent-ten',
+              'host.name': 'host-ten',
+            },
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'service.name': 'service-two',
+              'agent.name': 'agent-nine',
+              'host.name': 'host-nine',
+            },
+          ],
+        }),
+      ]);
+
+      await Promise.all([
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'source-1-with-services',
+            type_id: 'services-with-hosts',
+            index_patterns: ['index-1-with-services'],
+            identity_fields: ['service.name'],
+            metadata_fields: ['host.name'],
+            filters: [],
+            timestamp_field: '@timestamp',
+          },
+        }),
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'source-2-with-services',
+            type_id: 'services-with-hosts',
+            index_patterns: ['index-2-with-services'],
+            identity_fields: ['service.name'],
+            metadata_fields: ['host.name'],
+            filters: [],
+            timestamp_field: '@timestamp',
+          },
+        }),
+      ]);
+
+      const { entities, errors } = await searchEntities(supertest, {
+        type: 'services-with-hosts',
+        metadata_fields: ['agent.name', 'non.existing.metadata.field'],
+        start: moment(now).subtract(5, 'minute').toISOString(),
+        end: moment(now).toISOString(),
+      });
+
+      expect(errors).toEqual([]);
+      expect(entities).toEqual([
+        {
+          'entity.last_seen_timestamp': moment(now).subtract(1, 'minute').toISOString(),
+          'entity.id': 'service-one',
+          'entity.display_name': 'service-one',
+          'entity.type': 'services-with-hosts',
+          'service.name': 'service-one',
+          'agent.name': expect.arrayContaining(['agent-one', 'agent-ten']),
+          'host.name': expect.arrayContaining(['host-one', 'host-two', 'host-ten']),
+        },
+        {
+          'entity.last_seen_timestamp': moment(now).subtract(2, 'minute').toISOString(),
+          'entity.id': 'service-two',
+          'entity.display_name': 'service-two',
+          'entity.type': 'services-with-hosts',
+          'service.name': 'service-two',
+          'agent.name': 'agent-nine',
+          'host.name': expect.arrayContaining(['host-three', 'host-nine']),
+        },
+      ]);
+    });
+
+    it('respects filters', async () => {
+      const now = moment();
+
+      cleanup.push(
+        await createIndexWithDocuments(esClient, {
+          index: 'index-1-with-services',
+          properties: {
+            '@timestamp': { type: 'date' },
+            'service.name': { type: 'keyword' },
+            'service.environment': { type: 'keyword' },
+            'service.url': { type: 'keyword' },
+          },
+          documents: [
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              'service.name': 'service-one',
+              'service.environment': 'prod',
+              'service.url': 'http://prod.service-one.com',
+            },
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'service.name': 'service-one',
+              'service.environment': 'staging',
+              'service.url': 'http://staging.service-one.com',
+            },
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'service.name': 'service-two',
+              'service.environment': 'prod',
+              'service.url': 'http://prod.service-two.com',
+            },
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              'service.name': 'service-two',
+              'service.environment': 'staging',
+              'service.url': 'http://staging.service-two.com',
+            },
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              'service.name': 'service-three',
+              'service.environment': 'prod',
+              'service.url': 'http://prod.service-three.com',
+            },
+          ],
+        })
+      );
+
+      await createEntitySourceDefinition(supertest, {
+        source: {
+          id: 'source-1-with-services',
+          type_id: 'service-one-type',
+          index_patterns: ['index-1-with-services'],
+          identity_fields: ['service.name'],
+          metadata_fields: [],
+          filters: ['service.name: service-one'],
+          timestamp_field: '@timestamp',
+        },
+      });
+
+      const { entities, errors } = await searchEntities(supertest, {
+        type: 'service-one-type',
+        start: moment(now).subtract(5, 'minute').toISOString(),
+        end: moment(now).toISOString(),
+        filters: ['service.environment: prod'],
+        metadata_fields: ['service.environment', 'service.url'],
+      });
+
+      expect(errors).toEqual([]);
+      expect(entities).toEqual([
+        {
+          'entity.last_seen_timestamp': moment(now).subtract(1, 'minute').toISOString(),
+          'entity.id': 'service-one',
+          'entity.display_name': 'service-one',
+          'entity.type': 'service-one-type',
+          'service.name': 'service-one',
+          'service.environment': 'prod',
+          'service.url': 'http://prod.service-one.com',
+        },
+      ]);
     });
 
     it('resolves entities with multiple identity fields', async () => {
       const now = moment();
 
-      const deleteIndex = await createIndexWithDocuments(esClient, {
-        index: 'index-1-with-cars',
-        properties: {
-          '@timestamp': { type: 'date' },
-          'car.brand': { type: 'keyword' },
-          'car.model': { type: 'keyword' },
-        },
-        documents: [
-          {
-            '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
-            'car.brand': 'Fiat',
-            'car.model': 'Multipla',
+      cleanup.push(
+        await createIndexWithDocuments(esClient, {
+          index: 'index-1-with-cars',
+          properties: {
+            '@timestamp': { type: 'date' },
+            'car.brand': { type: 'keyword' },
+            'car.model': { type: 'keyword' },
           },
-          {
-            '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
-            'car.brand': 'Citroen',
-            'car.model': 'ZX break',
-          },
-        ],
-      });
+          documents: [
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'car.brand': 'Fiat',
+              'car.model': 'Multipla',
+            },
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              'car.brand': 'Citroen',
+              'car.model': 'ZX break',
+            },
+          ],
+        })
+      );
 
       await createEntitySourceDefinition(supertest, {
         source: {
@@ -330,12 +543,10 @@ export default function ({ getService }: FtrProviderContext) {
           'car.model': 'Multipla',
         },
       ]);
-
-      await deleteIndex();
     });
 
     it('casts conflicting mappings to keywords', async () => {
-      const deleteIndices = await Promise.all([
+      cleanup = await Promise.all([
         await createIndexWithDocuments(esClient, {
           index: 'index-service-name-as-keyword',
           properties: { 'service.name': { type: 'keyword' } },
@@ -391,8 +602,6 @@ export default function ({ getService }: FtrProviderContext) {
           'service.name': 'service-name-as-text',
         },
       ]);
-
-      await Promise.all(deleteIndices.map((fn) => fn()));
     });
 
     it('returns error if index does not exist', async () => {
@@ -418,17 +627,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns error if mandatory fields are not mapped', async () => {
-      const deleteIndex = await createIndexWithDocuments(esClient, {
-        index: 'unmapped-id-fields',
-        properties: { 'service.environment': { type: 'keyword' } },
-        documents: [
-          {
-            '@timestamp': moment().toISOString(),
-            'service.name': 'service-one',
-            'service.environment': 'prod',
-          },
-        ],
-      });
+      cleanup.push(
+        await createIndexWithDocuments(esClient, {
+          index: 'unmapped-id-fields',
+          properties: { 'service.environment': { type: 'keyword' } },
+          documents: [
+            {
+              '@timestamp': moment().toISOString(),
+              'service.name': 'service-one',
+              'service.environment': 'prod',
+            },
+          ],
+        })
+      );
 
       await createEntitySourceDefinition(supertest, {
         source: {
@@ -449,8 +660,6 @@ export default function ({ getService }: FtrProviderContext) {
         'Mandatory fields [service.name, @timestamp] are not mapped for source [unmapped-fields] with index patterns [unmapped-id-fields]',
       ]);
       expect(entities).toEqual([]);
-
-      await deleteIndex();
     });
   });
 }
