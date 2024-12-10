@@ -8,10 +8,9 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { ThemeProvider } from 'styled-components';
+
+import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfileService } from '@kbn/core/public';
@@ -67,7 +66,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
 
   return (
     <I18nProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+      <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <AssistantProvider
             actionTypeRegistry={actionTypeRegistry}
