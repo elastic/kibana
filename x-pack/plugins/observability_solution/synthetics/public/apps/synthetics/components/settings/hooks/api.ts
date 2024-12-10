@@ -30,6 +30,14 @@ export const getDslPolicies = async (): Promise<{ data: DataStream[] }> => {
   );
 };
 
-export const getIndicesData = async (): Promise<{ data: CatIndicesResponse }> => {
-  return await apiService.get(SYNTHETICS_API_URLS.INDEX_SIZE);
+export const getIndicesData = async (
+  {
+    useMetering,
+  }: {
+    useMetering?: boolean;
+  } = { useMetering: false }
+): Promise<{ data: CatIndicesResponse }> => {
+  return await apiService.get(SYNTHETICS_API_URLS.INDEX_SIZE, {
+    use_metering: useMetering,
+  });
 };

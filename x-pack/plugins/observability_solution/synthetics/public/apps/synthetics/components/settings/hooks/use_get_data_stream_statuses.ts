@@ -9,7 +9,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { DataStream } from '@kbn/index-management-plugin/common';
 import { useContext } from 'react';
 import { keyBy } from 'lodash';
-import { getDslPolicies } from './api';
+import { getDslPolicies, getIndicesData } from './api';
 import { SyntheticsRefreshContext } from '../../../contexts';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
 import { formatAge } from '../data_retention/common';
@@ -34,6 +34,7 @@ export interface DataStreamStatusResponse {
 export function useGetDataStreamStatuses(): DataStreamStatusResponse {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
   const { data, error, loading } = useFetcher(getDslPolicies, [lastRefresh]);
+  const { data: indicesData } = useFetcher(() => getIndicesData({ useMetering: true }), []);
 
   if (!Array.isArray(data) || !!error) return { dataStreamStatuses: undefined, error, loading };
 
