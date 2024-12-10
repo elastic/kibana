@@ -8,16 +8,19 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
-import { buildMockDashboard } from '../mocks';
+import { buildMockDashboardApi } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
-import { DashboardApi } from '../dashboard_api/types';
 import { dataService, navigationService } from '../services/kibana_services';
 
+jest.mock('../dashboard_app/top_nav/dashboard_editing_toolbar', () => ({
+  DashboardEditingToolbar: () => {
+    return <div>mockDashboardEditingToolbar</div>;
+  },
+}));
 describe('Internal dashboard top nav', () => {
   const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
     if (badges) {
@@ -41,7 +44,7 @@ describe('Internal dashboard top nav', () => {
 
   it('should not render the managed badge by default', async () => {
     const component = render(
-      <DashboardContext.Provider value={buildMockDashboard() as DashboardApi}>
+      <DashboardContext.Provider value={buildMockDashboardApi().api}>
         <InternalDashboardTopNav redirectTo={jest.fn()} />
       </DashboardContext.Provider>
     );
@@ -50,11 +53,11 @@ describe('Internal dashboard top nav', () => {
   });
 
   it('should render the managed badge when the dashboard is managed', async () => {
-    const container = buildMockDashboard();
+    const { api } = buildMockDashboardApi();
     const dashboardApi = {
-      ...container,
-      managed$: new BehaviorSubject(true),
-    } as unknown as DashboardApi;
+      ...api,
+      isManaged: true,
+    };
     const component = render(
       <DashboardContext.Provider value={dashboardApi}>
         <InternalDashboardTopNav redirectTo={jest.fn()} />
