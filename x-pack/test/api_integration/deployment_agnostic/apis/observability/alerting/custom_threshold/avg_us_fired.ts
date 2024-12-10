@@ -57,7 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = samlAuth.getInternalRequestHeader();
       synthtraceEsClient = await getSyntraceClient({ esClient, kibanaUrl });
-      await generateData({ synthtraceEsClient, start, end });
+      await synthtraceEsClient.clean();
       await dataViewApi.create({
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
@@ -71,6 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         disabledFeatures: [],
         color: '#AABBCC',
       });
+      return generateData({ synthtraceEsClient, start, end });
     });
 
     after(async () => {
