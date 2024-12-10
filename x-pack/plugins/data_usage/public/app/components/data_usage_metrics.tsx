@@ -19,7 +19,7 @@ import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, transformToUTCtime } from '../../../common/utils';
 import { useDateRangePicker } from '../hooks/use_date_picker';
-import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
+import { ChartsFilters, ChartsFiltersProps } from './filters/charts_filters';
 import { ChartsLoading } from './charts_loading';
 import { NoDataCallout } from './no_data_callout';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -175,7 +175,7 @@ export const DataUsageMetrics = memo(
       [setMetricsFilters]
     );
 
-    const filterOptions: ChartFiltersProps['filterOptions'] = useMemo(() => {
+    const filterOptions: ChartsFiltersProps['filterOptions'] = useMemo(() => {
       const dataStreamsOptions = dataStreams?.reduce<Record<string, number>>((acc, ds) => {
         acc[ds.name] = ds.storageSizeBytes;
         return acc;
@@ -227,7 +227,7 @@ export const DataUsageMetrics = memo(
     return (
       <EuiFlexGroup alignItems="flexStart" direction="column" data-test-subj={getTestId()}>
         <FlexItemWithCss>
-          <ChartFilters
+          <ChartsFilters
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isFetchingDataStreams}
             isUpdateDisabled={!enableFetchUsageMetricsData}

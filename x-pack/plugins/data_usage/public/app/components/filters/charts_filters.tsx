@@ -21,7 +21,7 @@ import { type UsageMetricsDateRangePickerProps, UsageMetricsDateRangePicker } fr
 import { ChartsFilter, ChartsFilterProps } from './charts_filter';
 import { FilterName } from '../../hooks';
 
-export interface ChartFiltersProps extends UsageMetricsDateRangePickerProps {
+export interface ChartsFiltersProps extends UsageMetricsDateRangePickerProps {
   isUpdateDisabled: boolean;
   isValidDateRange: boolean;
   filterOptions: Record<FilterName, ChartsFilterProps['filterOptions']>;
@@ -29,7 +29,7 @@ export interface ChartFiltersProps extends UsageMetricsDateRangePickerProps {
   showMetricsTypesFilter?: boolean;
 }
 
-export const ChartFilters = memo<ChartFiltersProps>(
+export const ChartsFilters = memo<ChartsFiltersProps>(
   ({
     dateRangePickerState,
     isDataLoading,
@@ -97,4 +97,4 @@ export const ChartFilters = memo<ChartFiltersProps>(
   }
 );
 
-ChartFilters.displayName = 'ChartFilters';
+ChartsFilters.displayName = 'ChartsFilters';
