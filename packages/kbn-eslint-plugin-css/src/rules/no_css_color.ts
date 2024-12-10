@@ -8,20 +8,44 @@
  */
 
 import type { Rule } from 'eslint';
+import { CSSStyleDeclaration } from 'cssstyle';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
 /**
- * @description List of css properties that can that can apply color to html box element and text node
+ * @description List of superset css properties that can apply color to html box element elements and text nodes, leveraging the
+ * css style package allows us to directly singly check for these properties even if the actual declaration was written using the shorthand form
  */
-const propertiesSupportingCssColor = ['color', 'background', 'backgroundColor', 'borderColor'];
+const propertiesSupportingCssColor = ['color', 'background', 'border'];
 
 /**
- * @description Builds off the existing color definition regex to match css declarations that can apply color to
+ * @description Builds off the existing color definition to match css declarations that can apply color to
  * html elements and text nodes for string declarations
  */
 const htmlElementColorDeclarationRegex = RegExp(
-  String.raw`(${propertiesSupportingCssColor.join('|')}):\s?.*;`
+  String.raw`(${propertiesSupportingCssColor.join('|')})`
 );
+
+const checkPropertySpecifiesInvalidCSSColor = ([property, value]: string[]) => {
+  if (!property || !value) return false;
+
+  const style = new CSSStyleDeclaration();
+
+  // @ts-ignore the types for this packages specifics an index signature of number, alongside other valid CSS properties
+  style[property] = value;
+
+  const anchor = propertiesSupportingCssColor.find((resolvedProperty) =>
+    property.includes(resolvedProperty)
+  );
+
+  if (!anchor) return false;
+
+  // build the resolved color property to check if the value is a string after parsing the style declaration
+  const resolvedColorProperty = anchor === 'color' ? 'color' : anchor + 'Color';
+
+  // in trying to keep this rule simple, it's enough if a string is used to define a color to mark it as invalid
+  // @ts-ignore the types for this packages specifics an index signature of number, alongside other valid CSS properties
+  return typeof style[resolvedColorProperty] === 'string';
+};
 
 const resolveMemberExpressionRoot = (node: TSESTree.MemberExpression): TSESTree.Identifier => {
   if (node.object.type === 'MemberExpression') {
@@ -36,18 +60,28 @@ const raiseReportIfPropertyHasInvalidCssColor = (
   propertyNode: TSESTree.Property,
   messageToReport: Rule.ReportDescriptor
 ) => {
-  let didReport: boolean;
+  let didReport = false;
 
   if (
     propertyNode.key.type === 'Identifier' &&
-    propertiesSupportingCssColor.indexOf(propertyNode.key.name) < 0
+    !htmlElementColorDeclarationRegex.test(propertyNode.key.name)
   ) {
     return;
   }
 
-  if ((didReport = Boolean(propertyNode.value.type === 'Literal'))) {
-    // in trying to keep this rule simple, if a string is used to define a color we simply mark it as invalid
-    context.report(messageToReport);
+  if (propertyNode.value.type === 'Literal') {
+    if (
+      (didReport = checkPropertySpecifiesInvalidCSSColor(
+        // @ts-expect-error the key name is present in this scenario
+        propertyNode.key.name,
+        // @ts-expect-error we already ascertained that the value here is a literal
+        propertyNode.value.value
+      ))
+    ) {
+      context.report(messageToReport);
+    }
+
+    return;
   } else if (propertyNode.value.type === 'Identifier') {
     const identifierDeclaration = context.sourceCode
       // @ts-expect-error
@@ -56,7 +90,14 @@ const raiseReportIfPropertyHasInvalidCssColor = (
         (variable) => variable.name === (propertyNode.value as TSESTree.Identifier).name!
       );
 
-    if (identifierDeclaration?.defs[0].node.init.type === 'Literal') {
+    if (
+      identifierDeclaration?.defs[0].node.init.type === 'Literal' &&
+      checkPropertySpecifiesInvalidCSSColor([
+        // @ts-expect-error the key name is present in this scenario
+        propertyNode.key.name,
+        (identifierDeclaration.defs[0].node.init as TSESTree.Literal).value as string,
+      ])
+    ) {
       context.report({
         loc: propertyNode.value.loc,
         messageId: 'noCSSColorSpecificDeclaredVariable',
@@ -179,7 +220,10 @@ export const NoCssColor: Rule.RuleModule = {
     return {
       // accounts for instances where declarations are created using the template tagged css function
       TaggedTemplateExpression(node) {
-        if (node.tag.type === 'Identifier' && node.tag.name !== 'css') {
+        if (
+          node.tag.type !== 'Identifier' ||
+          (node.tag.type === 'Identifier' && node.tag.name !== 'css')
+        ) {
           return;
         }
 
@@ -187,12 +231,19 @@ export const NoCssColor: Rule.RuleModule = {
           const declarationTemplateNode = node.quasi.quasis[i];
 
           if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
-            context.report({
-              node: declarationTemplateNode,
-              messageId: 'noCssColor',
-            });
+            const cssText = declarationTemplateNode.value.raw.replace(/(\{|\}|\\n)/g, '').trim();
 
-            break;
+            cssText.split(';').forEach((declaration) => {
+              if (
+                declaration.length > 0 &&
+                checkPropertySpecifiesInvalidCSSColor(declaration.split(':'))
+              ) {
+                context.report({
+                  node: declarationTemplateNode,
+                  messageId: 'noCssColor',
+                });
+              }
+            });
           }
         }
       },
@@ -324,12 +375,21 @@ export const NoCssColor: Rule.RuleModule = {
               const declarationTemplateNode = node.value.expression.quasis[i];
 
               if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
-                context.report({
-                  node: declarationTemplateNode,
-                  messageId: 'noCssColor',
-                });
+                const cssText = declarationTemplateNode.value.raw
+                  .replace(/(\{|\}|\\n)/g, '')
+                  .trim();
 
-                break;
+                cssText.split(';').forEach((declaration) => {
+                  if (
+                    declaration.length > 0 &&
+                    checkPropertySpecifiesInvalidCSSColor(declaration.split(':'))
+                  ) {
+                    context.report({
+                      node: declarationTemplateNode,
+                      messageId: 'noCssColor',
+                    });
+                  }
+                });
               }
             }
           }
