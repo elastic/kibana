@@ -7,13 +7,11 @@
 import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  EuiButton,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiPortal,
   EuiSkeletonText,
@@ -24,6 +22,7 @@ import { noop } from 'lodash';
 
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DetailViewPanelName } from '@kbn/fleet-plugin/public/applications/integrations/sections/epm/screens/detail';
 import { withLazyHook } from '../../../../../common/components/with_lazy_hook';
 import {
   useStoredIntegrationSearchTerm,
@@ -77,11 +76,13 @@ const FleetIntegrationsStateContextProvider = lazy(async () => ({
     .then((pkg) => pkg.FleetIntegrationsStateContextProvider),
 }));
 
-const integrationStepMap = {
-  0: 'Add integration',
-  1: 'Install Elastic Agent',
-  2: 'Confirm incoming data',
-}
+const integrationStepMap = [
+  'Add integration',
+  'Check fleet server requirement',
+  'Add Fleet server',
+  'Install Elastic Agent',
+  'Confirm incoming data',
+];
 
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
@@ -108,18 +109,19 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     );
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [integrationName, setIntegrationName] = useState();
+    const [integrationName, setIntegrationName] = useState<string>();
     const [modalView, setModalView] = useState<'overview' | 'configure-integration' | 'add-agent'>(
       'overview'
     );
-    const [integrationStep, setIntegrationStep] = useState(0);
+    const [integrationStep, onStepNext] = useState(0);
     const onAddIntegrationPolicyClick = useCallback(() => {
       setModalView('configure-integration');
     }, []);
     const closeModal = useCallback(() => {
       setIsModalVisible(false);
       setModalView('overview');
-      setIntegrationStep(0);
+      setSelectedDetailsTab('overview');
+      onStepNext(0);
     }, []);
     const onCardClicked = useCallback((name: string) => {
       setIsModalVisible(true);
@@ -138,6 +140,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
+    const [selectedDetailsTab, setSelectedDetailsTab] = useState<DetailViewPanelName>('overview');
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
         setSearchTerm(searchQuery);
@@ -149,6 +152,15 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       },
       [selectedTab.showSearchTools, setSearchTerm, setSearchTermToStorage]
     );
+
+    const handleViewAssets = useCallback(() => {
+      setModalView('overview');
+      setSelectedDetailsTab('assets');
+    }, []);
+
+    const onDetailsTabClick = useCallback((detailsTab: DetailViewPanelName) => {
+      setSelectedDetailsTab(detailsTab);
+    }, []);
 
     useEffect(() => {
       setCategory(selectedTab.category ?? '');
@@ -261,30 +273,33 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
               aria-labelledby={modalTitleId}
               onClose={closeModal}
               css={css`
-                width: 85%;
+                width: 1024px;
               `}
-              maxWidth="90%"
             >
-              {modalView === 'configure-integration' && (<EuiModalHeader>{`step indicator place holder. Integration step: ${integrationStepMap[integrationStep]}`}</EuiModalHeader>)}
+              {modalView === 'configure-integration' && (
+                <EuiModalHeader>{`step indicator place holder. Integration step: ${integrationStepMap[integrationStep]}`}</EuiModalHeader>
+              )}
               <EuiModalBody>
                 <FleetIntegrationsStateContextProvider
-                  values={{ startServices, useMultiPageLayoutProp: true }}
+                  values={{ startServices, useMultiPageLayoutProp: true, kibanaVersion: '9.0.0' }}
                 >
                   {modalView === 'overview' && (
                     <Detail
                       onAddIntegrationPolicyClick={onAddIntegrationPolicyClick}
-                      originFrom="onboarding-integration"
+                      originFrom="onboarding-hub"
                       routesEnabled={false}
+                      onDetailsTabClick={onDetailsTabClick}
+                      selectedDetailsTab={selectedDetailsTab}
                     />
                   )}
                   {modalView === 'configure-integration' && (
                     <CreatePackagePolicyPage
                       useMultiPageLayoutProp={true}
-                      originFrom="onboarding-integration"
-                      propPolicyId=""
+                      originFrom="onboarding-hub"
                       integrationName={integrationName}
-                      setIntegrationStep={setIntegrationStep}
-                      onCanceled={closeModal}
+                      onStepNext={onStepNext}
+                      onCancel={closeModal}
+                      handleViewAssets={handleViewAssets}
                     />
                   )}
                 </FleetIntegrationsStateContextProvider>

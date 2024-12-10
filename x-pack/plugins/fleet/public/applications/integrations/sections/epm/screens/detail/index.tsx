@@ -134,21 +134,21 @@ export function Detail({
   originFrom,
   routesEnabled = true,
   onAddIntegrationPolicyClick,
+  onDetailsTabClick,
+  selectedDetailsTab = 'overview',
 }: {
   originFrom?: string;
   routesEnabled?: boolean;
   onAddIntegrationPolicyClick?: () => void;
+  onDetailsTabClick?: (tabId: DetailViewPanelName) => void;
+  selectedDetailsTab?: DetailViewPanelName;
 }) {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
-  const {
-    getFromIntegrations,
-    pkgkey: pkgKeyContext,
-    panel: panelContext,
-  } = useIntegrationsStateContext();
-  const [selectedPanel, setSelectedPanel] = useState<DetailViewPanelName>(panelContext);
+  const { getFromIntegrations, pkgkey: pkgKeyContext } = useIntegrationsStateContext();
+
   const { pkgkey: pkgkeyParam, panel: panelParam } = useParams<DetailParams>();
   const pkgkey = pkgkeyParam || pkgKeyContext;
-  const panel = panelParam || selectedPanel;
+  const panel = panelParam || selectedDetailsTab;
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
@@ -656,7 +656,7 @@ export function Detail({
         isSelected: panel === 'overview',
         'data-test-subj': `tab-overview`,
         href:
-          originFrom !== 'onboarding-integration'
+          originFrom !== 'onboarding-hub'
             ? getHref('integration_details_overview', {
                 pkgkey: packageInfoKey,
                 ...(integration ? { integration } : {}),
@@ -664,7 +664,7 @@ export function Detail({
             : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('overview');
+          onDetailsTabClick?.('overview');
         },
       },
     ];
@@ -680,7 +680,7 @@ export function Detail({
         ),
         isSelected: panel === 'policies',
         'data-test-subj': `tab-policies`,
-        href: routesEnabled
+        href: onDetailsTabClick
           ? getHref('integration_details_policies', {
               pkgkey: packageInfoKey,
               ...(integration ? { integration } : {}),
@@ -688,7 +688,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('policies');
+          onDetailsTabClick?.('policies');
         },
       });
     }
@@ -710,7 +710,7 @@ export function Detail({
         ),
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
-        href: routesEnabled
+        href: onDetailsTabClick
           ? getHref('integration_details_assets', {
               pkgkey: packageInfoKey,
               ...(integration ? { integration } : {}),
@@ -718,7 +718,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('assets');
+          onDetailsTabClick?.('assets');
         },
       });
     }
@@ -734,7 +734,7 @@ export function Detail({
         ),
         isSelected: panel === 'settings',
         'data-test-subj': `tab-settings`,
-        href: routesEnabled
+        href: onDetailsTabClick
           ? getHref('integration_details_settings', {
               pkgkey: packageInfoKey,
               ...(integration ? { integration } : {}),
@@ -742,7 +742,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('settings');
+          onDetailsTabClick?.('settings');
         },
       });
     }
@@ -758,7 +758,7 @@ export function Detail({
         ),
         isSelected: panel === 'configs',
         'data-test-subj': `tab-configs`,
-        href: routesEnabled
+        href: onDetailsTabClick
           ? getHref('integration_details_configs', {
               pkgkey: packageInfoKey,
               ...(integration ? { integration } : {}),
@@ -766,7 +766,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('configs');
+          onDetailsTabClick?.('configs');
         },
       });
     }
@@ -782,7 +782,7 @@ export function Detail({
         ),
         isSelected: panel === 'custom',
         'data-test-subj': `tab-custom`,
-        href: routesEnabled
+        href: onDetailsTabClick
           ? getHref('integration_details_custom', {
               pkgkey: packageInfoKey,
               ...(integration ? { integration } : {}),
@@ -790,7 +790,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('custom');
+          onDetailsTabClick?.('custom');
         },
       });
     }
@@ -806,7 +806,7 @@ export function Detail({
         ),
         isSelected: panel === 'api-reference',
         'data-test-subj': `tab-api-reference`,
-        href: routesEnabled
+        href: onDetailsTabClick
           ? getHref('integration_details_api_reference', {
               pkgkey: packageInfoKey,
               ...(integration ? { integration } : {}),
@@ -814,7 +814,7 @@ export function Detail({
           : undefined,
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
-          setSelectedPanel('api-reference');
+          onDetailsTabClick?.('api-reference');
         },
       });
     }
@@ -833,7 +833,7 @@ export function Detail({
     showConfigTab,
     showCustomTab,
     showDocumentationTab,
-    routesEnabled,
+    onDetailsTabClick,
     numOfDeferredInstallations,
   ]);
 
