@@ -51,7 +51,7 @@ export function createSessionRestorationDataProvider(
 ): SearchSessionInfoProvider<DashboardLocatorParams> {
   return {
     getName: async () =>
-      dashboardApi.panelTitle.value ?? dashboardApi.savedObjectId.value ?? dashboardApi.uuid$.value,
+      dashboardApi.panelTitle.value ?? dashboardApi.savedObjectId.value ?? dashboardApi.uuid,
     getLocatorData: async () => ({
       id: DASHBOARD_APP_LOCATOR,
       initialState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: false }),

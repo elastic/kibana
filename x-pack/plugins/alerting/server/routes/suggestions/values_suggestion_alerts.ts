@@ -11,15 +11,9 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  AlertConsumers,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE_ID,
-  SPACE_IDS,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
 
 import { verifyAccessAndContext } from '../lib';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
@@ -27,6 +21,7 @@ import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterOpts,
   AlertingAuthorizationFilterType,
+  AuthorizedRuleTypes,
 } from '../../authorization';
 import { AlertingRequestHandlerContext } from '../../types';
 import { GetAlertIndicesAlias, ILicenseState } from '../../lib';
@@ -45,20 +40,11 @@ export const AlertsSuggestionsSchema = {
   }),
 };
 
-const VALID_FEATURE_IDS = new Set([
-  AlertConsumers.APM,
-  AlertConsumers.INFRASTRUCTURE,
-  AlertConsumers.LOGS,
-  AlertConsumers.SLO,
-  AlertConsumers.UPTIME,
-]);
-
 export function registerAlertsValueSuggestionsRoute(
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
   config$: Observable<ConfigSchema>,
-  getAlertIndicesAlias?: GetAlertIndicesAlias,
-  usageCounter?: UsageCounter
+  getAlertIndicesAlias?: GetAlertIndicesAlias
 ) {
   router.post(
     {
@@ -73,19 +59,21 @@ export function registerAlertsValueSuggestionsRoute(
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const { savedObjects, elasticsearch } = await context.core;
 
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         let authorizationTuple;
-        let authorizedRuleType = [];
+        let authorizedRuleType: AuthorizedRuleTypes = new Map();
+
         try {
           const authorization = rulesClient.getAuthorization();
-          authorizationTuple = await authorization.getFindAuthorizationFilter(
-            AlertingAuthorizationEntity.Alert,
-            alertingAuthorizationFilterOpts
-          );
-          authorizedRuleType = await authorization.getAuthorizedRuleTypes(
-            AlertingAuthorizationEntity.Alert,
-            VALID_FEATURE_IDS
-          );
+          authorizationTuple = await authorization.getFindAuthorizationFilter({
+            authorizationEntity: AlertingAuthorizationEntity.Alert,
+            filterOpts: alertingAuthorizationFilterOpts,
+          });
+
+          authorizedRuleType = await authorization.getAllAuthorizedRuleTypesFindOperation({
+            authorizationEntity: AlertingAuthorizationEntity.Alert,
+          });
         } catch (error) {
           rulesClient.getAuditLogger()?.log(
             ruleAuditEvent({
@@ -93,8 +81,10 @@ export function registerAlertsValueSuggestionsRoute(
               error,
             })
           );
+
           throw error;
         }
+
         const spaceId = rulesClient.getSpaceId();
         const { filter: authorizationFilter } = authorizationTuple;
         const filters = [
@@ -103,9 +93,10 @@ export function registerAlertsValueSuggestionsRoute(
         ] as estypes.QueryDslQueryContainer[];
 
         const index = getAlertIndicesAlias!(
-          authorizedRuleType.map((art) => art.id),
+          Array.from(authorizedRuleType.keys()).map((id) => id),
           spaceId
         ).join(',');
+
         try {
           const body = await termsAggSuggestions(
             config,

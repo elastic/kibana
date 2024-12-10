@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { performance } from 'perf_hooks';
+
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
@@ -25,9 +26,10 @@ import type {
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
-  WrapSuppressedHits,
   CreateRuleOptions,
+  WrapSuppressedHits,
 } from '../types';
+import type { SharedParams } from '../utils/utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -44,11 +46,15 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+import {
+  bulkCreateSuppressedAlertsInMemory,
+  bulkCreateSuppressedSequencesInMemory,
+} from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
+import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -60,6 +66,7 @@ interface EqlExecutorParams {
   version: string;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  sharedParams: SharedParams;
   wrapSequences: WrapSequences;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
@@ -90,6 +97,7 @@ export const eqlExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   wrapSuppressedHits,
+  sharedParams,
   alertTimestampOverride,
   alertWithSuppression,
   isAlertSuppressionActive,
@@ -104,6 +112,7 @@ export const eqlExecutor = async ({
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
 
+  // eslint-disable-next-line complexity
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
@@ -179,12 +188,28 @@ export const eqlExecutor = async ({
           newSignals = wrapHits(events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
-        if (isAlertSuppressionActive) {
-          result.warningMessages.push(
-            'Suppression is not supported for EQL sequence queries. The rule will proceed without suppression.'
-          );
+        if (
+          isAlertSuppressionActive &&
+          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled &&
+          alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
+        ) {
+          await bulkCreateSuppressedSequencesInMemory({
+            sequences,
+            toReturn: result,
+            bulkCreate,
+            services,
+            buildReasonMessage: buildReasonMessageForEqlAlert,
+            ruleExecutionLogger,
+            tuple,
+            alertSuppression: completeRule.ruleParams.alertSuppression,
+            sharedParams,
+            alertTimestampOverride,
+            alertWithSuppression,
+            experimentalFeatures,
+          });
+        } else {
+          newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
         }
-        newSignals = wrapSequences(sequences, buildReasonMessageForEqlAlert);
       } else {
         throw new Error(
           'eql query response should have either `sequences` or `events` but had neither'

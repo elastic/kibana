@@ -42,8 +42,8 @@
     "@kbn/utility-types",
     "@kbn/task-manager-plugin",
     "@kbn/alerting-types",
-    "@kbn/alerts-ui-shared",
     "@kbn/core-notifications-browser",
+    "@kbn/response-ops-rule-form",
   ],
   "exclude": [
     "target/**/*",

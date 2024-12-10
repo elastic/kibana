@@ -8,8 +8,8 @@
  */
 
 import { defineConfig, PlaywrightTestConfig, devices } from '@playwright/test';
-import * as Path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { scoutPlaywrightReporter } from '@kbn/scout-reporting';
+import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
@@ -27,10 +27,11 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     reporter: [
       ['html', { outputFolder: './output/reports', open: 'never' }], // HTML report configuration
       ['json', { outputFile: './output/reports/test-results.json' }], // JSON report
+      scoutPlaywrightReporter({ name: 'scout-playwright' }), // Scout report
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
-      serversConfigDir: Path.resolve(REPO_ROOT, '.scout', 'servers'),
+      serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
