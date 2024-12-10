@@ -5272,7 +5272,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dataset-quality-plugin@link:x-pack/plugins/observability_solution/dataset_quality":
+"@kbn/dataset-quality-plugin@link:x-pack/solutions/observability/plugins/dataset_quality":
   version "0.0.0"
   uid ""
 

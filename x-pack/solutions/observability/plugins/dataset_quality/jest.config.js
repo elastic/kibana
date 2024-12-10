@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/dataset_quality'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/dataset_quality'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/dataset_quality',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/dataset_quality',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/dataset_quality/{common,public}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/observability/plugins/dataset_quality/{common,public}/**/*.{ts,tsx}',
   ],
 };
