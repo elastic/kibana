@@ -18,7 +18,7 @@ import {
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
-import { GETTING_STARTED_TITLE } from '../../../../common/constants';
+import { GETTING_STARTED_TITLE, APP_SEARCH_PLUGIN } from '../../../../common/constants';
 
 import { ClassicNavItem, BuildClassicNavParameters } from '../types';
 
@@ -175,6 +175,7 @@ export const buildBaseClassicNavItems = ({
         deepLink: {
           link: 'appSearch:engines',
         },
+        name: APP_SEARCH_PLUGIN.NAME,
         id: 'app_search',
       });
     }
