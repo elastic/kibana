@@ -48,5 +48,3 @@ export type {
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
 } from '@kbn/security-plugin-types-common';
-
-export { ReservedPrivilegesSet } from './types';
