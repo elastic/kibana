@@ -19,6 +19,6 @@ echo -e "\n[Security Solution OpenAPI Code Generation] Endpoint Exceptions Commo
 (cd packages/kbn-securitysolution-endpoint-exceptions-common && yarn openapi:generate)
 
 echo -e "\n[Security Solution OpenAPI Code Generation] Security Solution Plugin\n"
-(cd x-pack/plugins/security_solution && yarn openapi:generate)
+(cd x-pack/solutions/security/plugins/security_solution && yarn openapi:generate)
 
 check_for_changed_files "yarn openapi:generate" true
