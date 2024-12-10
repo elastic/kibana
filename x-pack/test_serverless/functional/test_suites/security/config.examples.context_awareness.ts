@@ -9,16 +9,20 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [require.resolve('./ftr/discover/context_awareness')],
+  testFiles: [require.resolve('../common/discover/context_awareness')],
   junit: {
     reportName:
-      'Serverless Security Discover Context Awareness Functional Tests - Security Profiles',
+      'Serverless Security Discover Context Awareness Functional Tests - Example Profiles',
   },
-  suiteTags: { exclude: ['skipSvlSec'] },
   kbnServerArgs: [
-    `--discover.experimental.enabledProfiles=${JSON.stringify(['security-root-profile'])}`,
+    `--discover.experimental.enabledProfiles=${JSON.stringify([
+      'example-root-profile',
+      'example-solution-view-root-profile',
+      'example-data-source-profile',
+      'example-document-profile',
+    ])}`,
   ],
   // include settings from project controller
-  // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
+  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
   esServerArgs: ['xpack.ml.dfa.enabled=false'],
 });
