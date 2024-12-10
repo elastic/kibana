@@ -9,12 +9,9 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
+import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_INDEX } from '../../../common/constants';
-import {
-  FieldDefinition,
-  StreamDefinition,
-  UnmanagedElasticsearchAsset,
-} from '../../../common/types';
+import { FieldDefinition, StreamDefinition } from '../../../common/types';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
@@ -263,15 +260,23 @@ interface ReadUnmanagedAssetsParams extends BaseParams {
 async function getUnmanagedElasticsearchAssets({
   name,
   scopedClusterClient,
-}: ReadUnmanagedAssetsParams): Promise<UnmanagedElasticsearchAsset[]> {
-  const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
-  if (response.data_streams.length !== 1) {
-    throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
+}: ReadUnmanagedAssetsParams) {
+  let dataStream: IndicesDataStream;
+  try {
+    const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name });
+    dataStream = response.data_streams[0];
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
+    }
+    throw e;
   }
-  const dataStream = response.data_streams[0];
+
+  // retrieve linked index template, component template and ingest pipeline
+  const templateName = dataStream.template;
   const componentTemplates: string[] = [];
-  const template = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
-    name: dataStream.template,
+  const template = await scopedClusterClient.asInternalUser.indices.getIndexTemplate({
+    name: templateName,
   });
   if (template.index_templates.length) {
     template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
@@ -279,30 +284,27 @@ async function getUnmanagedElasticsearchAssets({
     });
   }
   const writeIndexName = dataStream.indices.at(-1)?.index_name!;
-  const currentIndex = await scopedClusterClient.asCurrentUser.indices.get({
+  const currentIndex = await scopedClusterClient.asInternalUser.indices.get({
     index: writeIndexName,
   });
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
+
   return [
-    ...(ingestPipelineId
-      ? [
-          {
-            type: 'ingest_pipeline' as const,
-            id: ingestPipelineId,
-          },
-        ]
-      : []),
+    {
+      type: 'ingest_pipeline' as const,
+      id: ingestPipelineId,
+    },
     ...componentTemplates.map((componentTemplateName) => ({
       type: 'component_template' as const,
       id: componentTemplateName,
     })),
     {
-      type: 'index_template',
-      id: dataStream.template,
+      type: 'index_template' as const,
+      id: templateName,
     },
     {
-      type: 'data_stream',
-      id: dataStream.name,
+      type: 'data_stream' as const,
+      id: name,
     },
   ];
 }

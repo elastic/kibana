@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./full_flow'));
     loadTestFile(require.resolve('./enrichment'));
     loadTestFile(require.resolve('./classic'));
+    loadTestFile(require.resolve('./flush_config'));
   });
 }
