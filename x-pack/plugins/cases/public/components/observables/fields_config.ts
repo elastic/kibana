@@ -106,7 +106,7 @@ export const fieldsConfig = {
           validator: genericValidator,
         },
       ],
-      label: 'Value',
+      label: i18n.FIELD_LABEL_VALUE,
     },
     [OBSERVABLE_TYPE_EMAIL.key]: {
       validations: [
@@ -170,9 +170,9 @@ export const fieldsConfig = {
         validator: emptyField(i18n.REQUIRED_VALUE),
       },
     ],
-    label: 'Type',
+    label: i18n.FIELD_LABEL_TYPE,
   },
   description: {
-    label: 'Description',
+    label: i18n.FIELD_LABEL_DESCRIPTION,
   },
 };

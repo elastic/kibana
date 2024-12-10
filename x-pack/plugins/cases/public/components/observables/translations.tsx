@@ -115,3 +115,18 @@ export const INVALID_VALUE = i18n.translate('xpack.cases.caseView.observables.in
 export const INVALID_EMAIL = i18n.translate('xpack.cases.caseView.observables.invalidEmail', {
   defaultMessage: 'Value should be a valid email',
 });
+
+export const FIELD_LABEL_VALUE = i18n.translate('xpack.cases.caseView.observables.labelValue', {
+  defaultMessage: 'Value',
+});
+
+export const FIELD_LABEL_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.observables.labelDescription',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const FIELD_LABEL_TYPE = i18n.translate('xpack.cases.caseView.observables.labelType', {
+  defaultMessage: 'Type',
+});
