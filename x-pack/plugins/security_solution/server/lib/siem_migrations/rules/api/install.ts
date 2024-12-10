@@ -40,7 +40,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<InstallMigrationRulesResponse>> => {
           const { migration_id: migrationId } = req.params;
-          const ids = req.body;
+          const { ids, enabled = false } = req.body;
 
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
@@ -52,6 +52,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
             await installTranslated({
               migrationId,
               ids,
+              enabled,
               securitySolutionContext,
               savedObjectsClient,
               rulesClient,

@@ -46,6 +46,7 @@ export type FieldMap<T extends string = string> = Record<
     array?: boolean;
     doc_values?: boolean;
     enabled?: boolean;
+    fields?: Record<string, { type: string }>;
     format?: string;
     ignore_above?: number;
     multi_fields?: MultiField[];

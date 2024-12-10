@@ -12,7 +12,6 @@ import {
   HistoryWindowStart,
   InvestigationFields,
   InvestigationGuide,
-  KqlQueryLanguage,
   MachineLearningJobId,
   MaxSignals,
   NewTermsFields,
@@ -131,7 +130,6 @@ export const DiffableThreatMatchFields = z.object({
   threat_mapping: ThreatMapping,
   data_source: RuleDataSource.optional(), // NOTE: new field
   threat_indicator_path: ThreatIndicatorPath.optional(),
-  threat_language: KqlQueryLanguage.optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 
