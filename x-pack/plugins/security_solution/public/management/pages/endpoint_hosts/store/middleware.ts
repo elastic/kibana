@@ -14,6 +14,7 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
+import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/service/authz/authz';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
@@ -320,7 +321,7 @@ async function endpointListMiddleware({
       payload: endpointResponse,
     });
 
-    fetchNonExistingPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
+    fetchNonExistingPolicies({ coreStart, hosts: endpointResponse.data, store });
   } catch (error) {
     dispatch({
       type: 'serverFailedToReturnEndpointList',
@@ -366,25 +367,31 @@ async function endpointListMiddleware({
       payload: false,
     });
 
-    try {
-      const policyDataResponse: GetPolicyListResponse =
-        await sendGetEndpointSpecificPackagePolicies(http, {
-          query: {
-            perPage: 50, // Since this is an onboarding flow, we'll cap at 50 policies.
-            page: 1,
+    if (canFetchPackageAndAgentPolicies(coreStart.application.capabilities)) {
+      try {
+        const policyDataResponse: GetPolicyListResponse =
+          await sendGetEndpointSpecificPackagePolicies(http, {
+            query: {
+              perPage: 50, // Since this is an onboarding flow, we'll cap at 50 policies.
+              page: 1,
+            },
+          });
+
+        dispatch({
+          type: 'serverReturnedPoliciesForOnboarding',
+          payload: {
+            policyItems: policyDataResponse.items,
           },
         });
-
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnPoliciesForOnboarding',
+          payload: error.body ?? error,
+        });
+      }
+    } else {
       dispatch({
-        type: 'serverReturnedPoliciesForOnboarding',
-        payload: {
-          policyItems: policyDataResponse.items,
-        },
-      });
-    } catch (error) {
-      dispatch({
-        type: 'serverFailedToReturnPoliciesForOnboarding',
-        payload: error.body ?? error,
+        type: 'serverCancelledPolicyItemsLoading',
       });
     }
   } else {
@@ -440,16 +447,20 @@ export async function handleLoadMetadataTransformStats(http: HttpStart, store: E
 async function fetchNonExistingPolicies({
   store,
   hosts,
-  http,
+  coreStart,
 }: {
   store: EndpointPageStore;
   hosts: HostResultList['hosts'];
-  http: HttpStart;
+  coreStart: CoreStart;
 }) {
+  if (!canFetchPackageAndAgentPolicies(coreStart.application.capabilities)) {
+    return;
+  }
+
   const { getState, dispatch } = store;
   try {
     const missingPolicies = await getNonExistingPoliciesForEndpointList(
-      http,
+      coreStart.http,
       hosts,
       nonExistingPolicies(getState())
     );
