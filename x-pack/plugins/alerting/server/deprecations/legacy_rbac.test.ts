@@ -63,7 +63,7 @@ describe('getLegacyRbacDeprecationsInfo', () => {
         Object {
           "correctiveActions": Object {
             "manualSteps": Array [
-              "To identify the affected rules run the query in Dev Tools that is linked above under Learn more.",
+              "To identify the affected rules run the query in Dev Tools that is linked under Learn more.",
               "To use normal RBAC authorization, update the API key by editing the rule.",
             ],
           },
