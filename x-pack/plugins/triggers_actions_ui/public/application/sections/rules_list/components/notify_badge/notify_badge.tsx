@@ -31,7 +31,9 @@ import {
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
   UNITS_TRANSLATION,
-  INVALID_SNOOZE_ARIA_LABEL,
+  INVALID_SNOOZE,
+  INVALID_SNOOZE_TOOLTIP_TITLE,
+  INVALID_SNOOZE_TOOLTIP_CONTENT,
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
 
@@ -326,6 +328,14 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   ]);
 
   const buttonWithToolTip = useMemo(() => {
+    if (!isSnoozeValid) {
+      return (
+        <EuiToolTip title={INVALID_SNOOZE_TOOLTIP_TITLE} content={INVALID_SNOOZE_TOOLTIP_CONTENT}>
+          {button}
+        </EuiToolTip>
+      );
+    }
+
     const tooltipContent =
       typeof disabled === 'string'
         ? disabled
@@ -350,7 +360,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         {button}
       </EuiToolTip>
     );
-  }, [disabled, isPopoverOpen, button, showTooltipInline, snoozeTimeLeft]);
+  }, [isSnoozeValid, disabled, isPopoverOpen, showTooltipInline, snoozeTimeLeft, button]);
 
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {
@@ -422,14 +432,14 @@ const InvalidSnoozeButton: React.FC<InvalidSnoozeButtonProps> = memo(
         isLoading={isLoading}
         disabled={isLoading || isDisabled}
         data-test-subj="rulesListNotifyBadge-invalidSnooze"
-        aria-label={INVALID_SNOOZE_ARIA_LABEL}
+        aria-label={INVALID_SNOOZE_TOOLTIP_TITLE}
         minWidth={85}
-        iconType="error"
+        iconType="warning"
         color="danger"
         onClick={onClick}
         buttonRef={ref}
       >
-        <EuiText size="xs">{'invalid'}</EuiText>
+        <EuiText size="xs">{INVALID_SNOOZE}</EuiText>
       </EuiButton>
     );
   }
@@ -464,7 +474,7 @@ const getSnoozeScheduleIds = (snooze: NonNullable<RuleSnoozeSettings['snoozeSche
 const isValidateRRule = (rRule: RRuleParams): boolean => {
   const validWeekDays = new Set(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
 
-  if (moment.tz.zone(rRule.tzid) != null) {
+  if (moment.tz.zone(rRule.tzid) == null) {
     return false;
   }
 
