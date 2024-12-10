@@ -28,7 +28,6 @@ const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
 };
 
 describe('ruleType Params validate()', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
   beforeEach(() => {
     params = { ...DefaultParams };

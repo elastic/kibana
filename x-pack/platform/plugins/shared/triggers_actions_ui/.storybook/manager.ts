@@ -13,7 +13,8 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Triggers Actions UI Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/triggers_actions_ui',
+    brandUrl:
+      'https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/triggers_actions_ui',
   }),
   showPanel: true,
   selectedPanel: PANEL_ID,

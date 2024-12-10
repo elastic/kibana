@@ -221,7 +221,7 @@ describe('config validation', () => {
 
   test('config validation passes when valid headers are provided', () => {
     // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       headers: {
@@ -252,7 +252,7 @@ describe('config validation', () => {
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
     // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
@@ -277,7 +277,7 @@ describe('config validation', () => {
     };
 
     // any for testing
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
@@ -724,7 +724,6 @@ describe('execute()', () => {
       variables
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let paramsObject: any;
     try {
       paramsObject = JSON.parse(`${params.body}`);

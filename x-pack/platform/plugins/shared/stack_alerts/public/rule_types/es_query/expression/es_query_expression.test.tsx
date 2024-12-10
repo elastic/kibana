@@ -30,11 +30,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('@kbn/code-editor', () => ({
   // Mocking CodeEditor
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   CodeEditor: (props: any) => (
     <input
       data-test-subj="mockCodeEditor"
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onChange={(syntheticEvent: any) => {
         props.onChange(syntheticEvent.jsonString);
       }}
@@ -99,7 +98,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 
 const createDataPluginMock = () => {
   const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart & {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     search: ISearchStart & { search: jest.MockedFunction<any> };
   };
   return dataMock;

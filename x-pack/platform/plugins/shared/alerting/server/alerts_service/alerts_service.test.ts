@@ -2054,13 +2054,11 @@ describe('Alerts Service', () => {
           // leverage the outcome of the first retry
           expect(
             logger.info.mock.calls.filter(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
             ).length
           ).toEqual(1);
           expect(
             logger.info.mock.calls.filter(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) =>
                 calls[0] === `Resource installation for "test" succeeded after retry`
             ).length
@@ -2133,7 +2131,6 @@ describe('Alerts Service', () => {
           // Should only log the retry once because the second and third retries should be throttled
           expect(
             logger.info.mock.calls.filter(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
             ).length
           ).toEqual(1);

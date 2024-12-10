@@ -23,7 +23,7 @@ export function setGlobalDate() {
   const DateOriginal = Date;
   // A version of date that responds to `new Date(null|undefined)` and `Date.now()`
   // by returning a fixed date, otherwise should be same as Date.
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+
   (global as any).Date = class Date {
     constructor(...args: unknown[]) {
       // sometimes the ctor has no args, sometimes has a single `null` arg
