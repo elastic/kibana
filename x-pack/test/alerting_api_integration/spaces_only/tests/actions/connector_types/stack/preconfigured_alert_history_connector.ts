@@ -140,7 +140,7 @@ export default function preconfiguredAlertHistoryConnectorTests({
     const response = await supertest.get(`/api/alerting/rule/${id}`);
     expect(response.status).to.eql(200);
 
-    const { executionStatus } = response.body || {};
+    const { execution_status: executionStatus } = response.body || {};
     const { status } = executionStatus || {};
 
     const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
