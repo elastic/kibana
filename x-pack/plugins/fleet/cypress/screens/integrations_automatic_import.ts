@@ -15,7 +15,7 @@ export const CONNECTOR_OPENAI = 'actionType-.gen-ai';
 export const CONNECTOR_GEMINI = 'actionType-.gemini';
 
 export const BUTTON_FOOTER_NEXT = 'buttonsFooter-nextButton';
-export const BUTTON_FOOTER_PREV = 'buttonsFooter-prevButton';
+export const BUTTON_FOOTER_BACK = 'buttonsFooter-backButton';
 
 export const INTEGRATION_TITLE_INPUT = 'integrationTitleInput';
 export const INTEGRATION_DESCRIPTION_INPUT = 'integrationDescriptionInput';

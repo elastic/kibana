@@ -12,7 +12,7 @@ import {
   TECH_PREVIEW_BADGE,
   CREATE_INTEGRATION_LANDING_PAGE,
   BUTTON_FOOTER_NEXT,
-  BUTTON_FOOTER_PREV,
+  BUTTON_FOOTER_BACK,
   INTEGRATION_TITLE_INPUT,
   INTEGRATION_DESCRIPTION_INPUT,
   DATASTREAM_TITLE_INPUT,
@@ -91,7 +91,7 @@ describe('Add Integration - Automatic Import', () => {
     // Pressing Enter key in a single-line input should have moved us to the next step.
     // Now we can test the back and next buttons.
     cy.getBySel(DATASTREAM_TITLE_INPUT).should('exist');
-    cy.getBySel(BUTTON_FOOTER_PREV).click();
+    cy.getBySel(BUTTON_FOOTER_BACK).click();
     cy.getBySel(INTEGRATION_TITLE_INPUT).should('exist');
     cy.getBySel(BUTTON_FOOTER_NEXT).click();
 
