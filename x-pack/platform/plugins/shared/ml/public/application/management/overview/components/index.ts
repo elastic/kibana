@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { OverviewPage } from './overview_page';
+export { Overview } from './overview';

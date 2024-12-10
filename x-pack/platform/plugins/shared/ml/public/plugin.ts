@@ -234,7 +234,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           usageCollection: pluginsSetup.usageCollection,
         },
         this.isServerless,
-        this.enabledFeatures
+        this.enabledFeatures,
+        this.nlpSettings
       );
     }
 

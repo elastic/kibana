@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Settings } from './settings';
+export { DataFrameAnalyticsJobsPage } from './data_frame_analytics_jobs';

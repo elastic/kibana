@@ -15,9 +15,9 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { MlFeatures } from '../../../../common/constants/app';
+import type { MlFeatures, NLPSettings } from '../../../../common/constants/app';
 import type { MlStartDependencies } from '../../../plugin';
-import { OverviewPage } from './components';
+import { SuppliedConfigurationsPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
 
 const renderApp = (
@@ -30,11 +30,12 @@ const renderApp = (
   charts: ChartsPluginStart,
   isServerless: boolean,
   mlFeatures: MlFeatures,
+  nlpSettings: NLPSettings,
   spacesApi?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
   ReactDOM.render(
-    React.createElement(OverviewPage, {
+    React.createElement(SuppliedConfigurationsPage, {
       coreStart,
       history,
       share,
@@ -45,6 +46,7 @@ const renderApp = (
       fieldFormats,
       isServerless,
       mlFeatures,
+      nlpSettings,
     }),
     element
   );
@@ -58,7 +60,8 @@ export async function mountApp(
   params: ManagementAppMountParams,
   deps: { usageCollection?: UsageCollectionSetup },
   isServerless: boolean,
-  mlFeatures: MlFeatures
+  mlFeatures: MlFeatures,
+  nlpSettings: NLPSettings
 ) {
   const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -73,6 +76,7 @@ export async function mountApp(
     pluginsStart.charts,
     isServerless,
     mlFeatures,
+    nlpSettings,
     pluginsStart.spaces,
     deps.usageCollection
   );
