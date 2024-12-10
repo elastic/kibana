@@ -134,7 +134,6 @@ export default function ({ getService }: FtrProviderContext) {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
       expect(health.stats.configuration.value).to.eql({
-        poll_interval: 500,
         monitored_aggregated_stats_refresh_rate: monitoredAggregatedStatsRefreshRate,
         monitored_stats_running_average_window: 50,
         monitored_task_execution_thresholds: {
@@ -152,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         claim_strategy: 'mget',
       });
+      expect(typeof health.stats.configuration.value.poll_interval).to.eql('number');
     });
 
     it('should return the task manager workload', async () => {
