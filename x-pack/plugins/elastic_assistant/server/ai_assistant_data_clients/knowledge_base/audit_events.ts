@@ -49,18 +49,27 @@ const knowledgeBaseEventTypes: Record<KnowledgeBaseAuditAction, ArrayElement<Ecs
 
 export interface KnowledgeBaseAuditEventParams {
   action: KnowledgeBaseAuditAction;
-  outcome?: EcsEvent['outcome'];
-  id?: string;
   error?: Error;
+  id?: string;
+  name?: string;
+  outcome?: EcsEvent['outcome'];
 }
 
 export function knowledgeBaseAuditEvent({
   action,
-  id,
-  outcome,
   error,
+  id,
+  name,
+  outcome,
 }: KnowledgeBaseAuditEventParams): AuditEvent {
-  const doc = id ? `knowledge base entry [id=${id}]` : 'a knowledge base entry';
+  let doc = 'a knowledge base entry';
+  if (id && name) {
+    doc = `knowledge base entry [id=${id}, name="${name}"]`;
+  } else if (id) {
+    doc = `knowledge base entry [id=${id}]`;
+  } else if (name) {
+    doc = `knowledge base entry [name="${name}"]`;
+  }
   const [present, progressive, past] = knowledgeBaseEventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`

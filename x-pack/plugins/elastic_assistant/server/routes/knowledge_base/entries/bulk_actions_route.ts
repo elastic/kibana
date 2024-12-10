@@ -105,6 +105,7 @@ const buildBulkResponse = (
         knowledgeBaseAuditEvent({
           action: KnowledgeBaseAuditAction.CREATE,
           id: entry.id,
+          name: entry.name,
           outcome: AUDIT_OUTCOME.SUCCESS,
         })
       );
@@ -117,6 +118,7 @@ const buildBulkResponse = (
         knowledgeBaseAuditEvent({
           action: KnowledgeBaseAuditAction.UPDATE,
           id: entry.id,
+          name: entry.name,
           outcome: AUDIT_OUTCOME.SUCCESS,
         })
       );

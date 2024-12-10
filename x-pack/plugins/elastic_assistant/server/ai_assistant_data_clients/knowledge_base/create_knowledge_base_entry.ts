@@ -83,6 +83,7 @@ export const createKnowledgeBaseEntry = async ({
       knowledgeBaseAuditEvent({
         action: KnowledgeBaseAuditAction.CREATE,
         id: newKnowledgeBaseEntry?.id,
+        name: newKnowledgeBaseEntry?.name,
         outcome: AUDIT_OUTCOME.SUCCESS,
       })
     );

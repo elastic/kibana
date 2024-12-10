@@ -14,7 +14,7 @@ import {
 } from './audit_events';
 
 describe('knowledgeBaseAuditEvent', () => {
-  it('should generate a success event with id provided', () => {
+  it('should generate a success event with id', () => {
     const event = knowledgeBaseAuditEvent({
       action: KnowledgeBaseAuditAction.CREATE,
       id: '123',
@@ -31,8 +31,43 @@ describe('knowledgeBaseAuditEvent', () => {
       },
     });
   });
+  it('should generate a success event with name', () => {
+    const event = knowledgeBaseAuditEvent({
+      action: KnowledgeBaseAuditAction.CREATE,
+      name: 'My document',
+      outcome: AUDIT_OUTCOME.SUCCESS,
+    });
 
-  it('should generate a success event without id provided', () => {
+    expect(event).toEqual({
+      message: 'User has created knowledge base entry [name="My document"]',
+      event: {
+        action: KnowledgeBaseAuditAction.CREATE,
+        category: [AUDIT_CATEGORY.DATABASE],
+        type: [AUDIT_TYPE.CREATION],
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+  });
+  it('should generate a success event with name and id', () => {
+    const event = knowledgeBaseAuditEvent({
+      action: KnowledgeBaseAuditAction.CREATE,
+      name: 'My document',
+      id: '123',
+      outcome: AUDIT_OUTCOME.SUCCESS,
+    });
+
+    expect(event).toEqual({
+      message: 'User has created knowledge base entry [id=123, name="My document"]',
+      event: {
+        action: KnowledgeBaseAuditAction.CREATE,
+        category: [AUDIT_CATEGORY.DATABASE],
+        type: [AUDIT_TYPE.CREATION],
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+  });
+
+  it('should generate a success event without id or name', () => {
     const event = knowledgeBaseAuditEvent({
       action: KnowledgeBaseAuditAction.CREATE,
       outcome: AUDIT_OUTCOME.SUCCESS,
