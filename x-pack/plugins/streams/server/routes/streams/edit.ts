@@ -59,7 +59,7 @@ export const editStreamRoute = createServerRoute({
           rootDefinition: undefined,
           logger,
         });
-        return;
+        return { acknowledged: true };
       }
 
       await validateStreamChildren(scopedClusterClient, params.path.id, params.body.children);
