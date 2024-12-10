@@ -6,6 +6,7 @@
  */
 
 import { type ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { parseAddressList } from 'email-addresses';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   OBSERVABLE_TYPE_DOMAIN,
@@ -24,7 +25,6 @@ export const normalizeValueType = (value: string): keyof typeof fieldsConfig.val
 };
 
 const DOMAIN_REGEX = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\]+$/;
 
 // NOTE: consider if making this more sophisitcated makes sense
@@ -62,12 +62,6 @@ const validatorFactory =
     }
   };
 
-export const emailValidator = validatorFactory(
-  EMAIL_REGEX,
-  'Value should be an email',
-  'ERR_NOT_EMAIL'
-);
-
 export const genericValidator = validatorFactory(GENERIC_REGEX);
 export const domainValidator = validatorFactory(DOMAIN_REGEX);
 export const ipv4Validator = validatorFactory(IPV4_SIMPLIFIED);
@@ -88,6 +82,15 @@ export const urlValidator = (...args: Parameters<ValidationFunc>) => {
       message: 'Value is invalid',
       path,
     };
+  }
+};
+
+export const emailValidator = (...args: Parameters<ValidationFunc>) => {
+  const [{ value, path }] = args;
+  const emailAddresses = parseAddressList(value as string);
+
+  if (emailAddresses == null) {
+    return { message: 'Value should be an email', code: 'ERR_NOT_EMAIL', path };
   }
 };
 
