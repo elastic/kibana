@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         alert = alertsFromThisTest[0];
       });
 
-      const { actions, rule_type_id, consumer, tags } = alert ?? {};
+      const { actions, rule_type_id: alertTypeId, consumer, tags } = alert ?? {};
       expect(actions).to.eql([
         {
           connector_type_id: '.slack',
@@ -114,7 +114,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           uuid: actions[1].uuid,
         },
       ]);
-      expect(rule_type_id).to.eql('xpack.uptime.alerts.monitorStatus');
+      expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
       expect(consumer).to.eql('uptime');
       expect(tags).to.eql(['UPTIME_AUTO']);
     });
