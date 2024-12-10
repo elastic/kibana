@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe.skip('create and configure connector', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
-        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('zoom');
+        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('box');
         const connectorDetails =
           await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.getConnectorDetails();
         const connectorId = connectorDetails.match(/connector_id: (.*)/)?.[1];
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
       it('edit type', async () => {
-        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('zoom');
+        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editType('box');
       });
       it('confirm connector is created', async () => {
         await pageObjects.svlCommonNavigation.sidenav.clickLink({
