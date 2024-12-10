@@ -15,6 +15,7 @@ import {
   EuiProgress,
   EuiText,
   EuiTextBlockTruncate,
+  EuiThemeComputed,
   EuiToolTip,
   makeHighContrastColor,
   useEuiTheme,
@@ -144,7 +145,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               })}
               delay="long"
             >
-              <EuiText size="xs" textAlign="left" color={makeHighContrastColor(color)(euiTheme)}>
+              <EuiText size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
                 {formattedPercentage}
               </EuiText>
             </EuiToolTip>
@@ -209,6 +210,11 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     </EuiFlexGroup>
   );
 };
+
+const getPercentageColor = (euiTheme: EuiThemeComputed, color: string) =>
+  euiTheme.themeName?.toLowerCase().includes('borealis')
+    ? makeHighContrastColor(color)(euiTheme)
+    : color; // FIXME: remove in 9.x when Borealis becomes the default theme
 
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export
