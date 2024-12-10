@@ -11,7 +11,9 @@
         "label": "GridLayout",
         "description": [],
         "signature": [
-          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, }: GridLayoutProps) => React.JSX.Element"
+          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, }: ",
+          "GridLayoutProps",
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
         "deprecated": false,
