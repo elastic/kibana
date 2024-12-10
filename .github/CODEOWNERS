@@ -942,7 +942,6 @@ x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-l
 x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
-x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/synthetics/e2e @elastic/obs-ux-management-team
@@ -996,6 +995,7 @@ x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_servi
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
+x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/Users/gsoldevila/Work/kibana-quaternary/x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
 x-pack/test
 x-pack/test_serverless
