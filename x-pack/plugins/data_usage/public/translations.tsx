@@ -39,6 +39,19 @@ export const DATA_USAGE_PAGE = Object.freeze({
 });
 
 export const UX_LABELS = Object.freeze({
+  filters: {
+    dataStreams: {
+      label: i18n.translate('xpack.dataUsage.metrics.filter.dataStreams.label', {
+        defaultMessage: 'Name',
+      }),
+      append: i18n.translate('xpack.dataUsage.metrics.filter.dataStreams.append', {
+        defaultMessage: 'Size',
+      }),
+      appendTooltip: i18n.translate('xpack.dataUsage.metrics.filter.dataStreams.appendTooltip', {
+        defaultMessage: 'Storage size is not updated based on the selected date range.',
+      }),
+    },
+  },
   filterSelectAll: i18n.translate('xpack.dataUsage.metrics.filter.selectAll', {
     defaultMessage: 'Select all',
   }),
