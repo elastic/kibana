@@ -275,7 +275,6 @@ packages/default-nav/management @elastic/kibana-management
 packages/home/sample_data_card @elastic/appex-sharedux
 packages/home/sample_data_tab @elastic/appex-sharedux
 packages/home/sample_data_types @elastic/appex-sharedux
-packages/kbn-alerts-grouping @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
 packages/kbn-ambient-common-types @elastic/kibana-operations
 packages/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
@@ -995,6 +994,7 @@ x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
+x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/test
