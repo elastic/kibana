@@ -10,13 +10,13 @@ import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
-import type { RuleMigrationTask } from '../../types';
+import type { RuleMigrationStats } from '../../types';
 
 export interface HeaderButtonsProps {
   /**
    * Available rule migrations stats
    */
-  ruleMigrationsStats: RuleMigrationTask[];
+  ruleMigrationsStats: RuleMigrationStats[];
 
   /**
    * Selected rule migration id

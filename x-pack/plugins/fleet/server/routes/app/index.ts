@@ -237,7 +237,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: APP_API_ROUTES.AGENT_POLICIES_SPACES,
       access: 'internal',
       fleetAuthz: {
-        fleet: { allAgentPolicies: true },
+        fleet: { readAgentPolicies: true },
       },
     })
     .addVersion(
