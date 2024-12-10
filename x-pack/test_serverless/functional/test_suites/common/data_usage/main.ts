@@ -6,8 +6,8 @@
  */
 import expect from '@kbn/expect';
 import http from 'http';
+import { InterceptResponseFactory } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { interceptRequest } from './intercept_request';
 import { setupMockServer } from '../../../../api_integration/test_suites/common/data_usage/mock_api';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -19,7 +19,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const driver = getService('__webdriver__');
   const mockAutoopsApiService = setupMockServer();
   const es = getService('es');
   const browser = getService('browser');
@@ -67,10 +66,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // intercept the data_streams request to bypass waiting for the metering api to aggregate a response
       // otherwise storage sizes get filtered out if they are 0
-      await interceptRequest(
-        driver.driver,
+      await browser.interceptRequest(
         '*data_streams*',
-        (responseFactory) => {
+        (responseFactory: InterceptResponseFactory) => {
           return responseFactory.fulfill({
             responseCode: 200,
             responseHeaders: [{ name: 'Content-Type', value: 'application/json' }],
