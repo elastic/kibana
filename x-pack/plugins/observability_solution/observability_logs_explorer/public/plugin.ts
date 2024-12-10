@@ -36,13 +36,10 @@ import type {
 export class ObservabilityLogsExplorerPlugin
   implements Plugin<ObservabilityLogsExplorerPluginSetup, ObservabilityLogsExplorerPluginStart>
 {
-  private config: ObservabilityLogsExplorerConfig;
   private locators?: ObservabilityLogsExplorerLocators;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
-  constructor(context: PluginInitializerContext<ObservabilityLogsExplorerConfig>) {
-    this.config = context.config.get();
-  }
+  constructor(context: PluginInitializerContext<ObservabilityLogsExplorerConfig>) {}
 
   public setup(
     core: CoreSetup<ObservabilityLogsExplorerStartDeps, ObservabilityLogsExplorerPluginStart>,
@@ -56,9 +53,7 @@ export class ObservabilityLogsExplorerPlugin
       title: logsExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
-      visibleIn: this.config.navigation.showAppLink
-        ? ['globalSearch', 'sideNav']
-        : ['globalSearch'],
+      visibleIn: ['globalSearch'],
       keywords: ['logs', 'log', 'explorer', 'logs explorer'],
       updater$: this.appStateUpdater,
       mount: async (appMountParams: ObservabilityLogsExplorerAppMountParameters) => {

@@ -11,12 +11,7 @@ import React, { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-  isLegacyTableEnabled,
-} from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import {
   FetchContext,
   useBatchedOptionalPublishingSubjects,
@@ -28,7 +23,6 @@ import { DataGridDensity, DataLoadingState, useColumns } from '@kbn/unified-data
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
@@ -53,7 +47,6 @@ interface SavedSearchEmbeddableComponentProps {
   stateManager: SearchEmbeddableStateManager;
 }
 
-const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
 export function SearchEmbeddableGridComponent({
@@ -105,21 +98,12 @@ export function SearchEmbeddableGridComponent({
     );
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
-  const useLegacyTable = useMemo(
-    () =>
-      isLegacyTableEnabled({
-        uiSettings: discoverServices.uiSettings,
-        isEsqlMode: isEsql,
-      }),
-    [discoverServices, isEsql]
-  );
 
   const sort = useMemo(() => {
     return getSortForEmbeddable(savedSearch.sort, dataView, discoverServices.uiSettings, isEsql);
   }, [savedSearch.sort, dataView, isEsql, discoverServices.uiSettings]);
 
   const originalColumns = useMemo(() => savedSearch.columns ?? [], [savedSearch.columns]);
-  const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
@@ -137,7 +121,6 @@ export function SearchEmbeddableGridComponent({
         stateManager.grid.next(params.settings as DiscoverGridSettings);
       }
     },
-    useNewFieldsApi,
     columns: originalColumns,
     sort,
     settings: grid,
@@ -230,21 +213,7 @@ export function SearchEmbeddableGridComponent({
     searchDescription: panelDescription || savedSearchDescription,
     sort,
     totalHitCount,
-    useNewFieldsApi,
   };
-
-  if (useLegacyTable) {
-    return (
-      <DiscoverDocTableEmbeddableMemoized
-        {...sharedProps}
-        {...onStateEditedProps}
-        filters={savedSearchFilters}
-        isEsqlMode={isEsql}
-        isLoading={Boolean(loading)}
-        sharedItemTitle={panelTitle || savedSearchTitle}
-      />
-    );
-  }
 
   return (
     <DiscoverGridEmbeddableMemoized

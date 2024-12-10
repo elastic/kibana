@@ -9,6 +9,7 @@ import { addBasePath } from '../helpers';
 import { registerPolicyRoutes } from './policy';
 import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 import { ResolveIndexResponseFromES } from '../../types';
+import { SlmGetStatusResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('[Snapshot and Restore API Routes] Policy', () => {
   const mockEsPolicy = {
@@ -56,6 +57,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
   const executeLifecycleFn = router.getMockApiFn('slm.executeLifecycle');
   const deleteLifecycleFn = router.getMockApiFn('slm.deleteLifecycle');
   const resolveIndicesFn = router.getMockApiFn('indices.resolveIndex');
+  const getStatusFn = router.getMockApiFn('slm.getStatus');
 
   beforeAll(() => {
     registerPolicyRoutes({
@@ -433,6 +435,27 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should throw if ES error', async () => {
       putClusterSettingsFn.mockRejectedValue(new Error());
+
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+    });
+  });
+
+  describe('getSlmStatusHandler', () => {
+    const mockRequest: RequestMock = {
+      method: 'get',
+      path: addBasePath('policies/slm_status'),
+    };
+
+    it('should return successful ES response', async () => {
+      const mockEsResponse: SlmGetStatusResponse = { operation_mode: 'RUNNING' };
+      getStatusFn.mockResolvedValue(mockEsResponse);
+
+      const expectedResponse = { ...mockEsResponse };
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
+    });
+
+    it('should throw if ES error', async () => {
+      getStatusFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });

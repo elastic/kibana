@@ -71,6 +71,7 @@ tags:
       description: Connector documentation
       url: https://www.elastic.co/docs/current/serverless/action-connectors
     x-displayName: Connectors
+  - name: Dashboards
   - name: Data streams
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
@@ -153,14 +154,6 @@ paths:
       description: You do not need any Kibana feature privileges to run this API.
       operationId: get-actions-connector-types
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).
           in: query
           name: feature_id
@@ -184,14 +177,6 @@ paths:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
       operationId: delete-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -215,14 +200,6 @@ paths:
     get:
       operationId: get-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: An identifier for the connector.
           in: path
           name: id
@@ -279,14 +256,6 @@ paths:
     post:
       operationId: post-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -434,14 +403,6 @@ paths:
     put:
       operationId: put-actions-connector-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -572,14 +533,6 @@ paths:
       description: You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.
       operationId: post-actions-connector-id-execute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -696,15 +649,7 @@ paths:
   /api/actions/connectors:
     get:
       operationId: get-actions-connectors
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           description: Indicates a successful call.
@@ -721,14 +666,6 @@ paths:
     delete:
       operationId: delete-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -758,14 +695,6 @@ paths:
     get:
       operationId: get-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The identifier for the rule.
           in: path
           name: id
@@ -1419,14 +1348,6 @@ paths:
     post:
       operationId: post-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -2343,14 +2264,6 @@ paths:
     put:
       operationId: put-alerting-rule-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3226,14 +3139,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-disable
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3276,14 +3181,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-enable
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3314,14 +3211,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-mute-all
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3352,14 +3241,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-unmute-all
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3390,14 +3271,6 @@ paths:
     post:
       operationId: post-alerting-rule-id-update-api-key
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3430,14 +3303,6 @@ paths:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3474,14 +3339,6 @@ paths:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -3518,14 +3375,6 @@ paths:
     get:
       operationId: get-alerting-rules-find
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The number of rules to return per page.
           in: query
           name: per_page
@@ -5194,6 +5043,2281 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
+      x-beta: true
+  /api/dashboards/dashboard:
+    get:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: get-dashboards-dashboard
+      parameters:
+        - description: The page number to return. Default is "1".
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of dashboards to display on each page (max 1000). Default is "20".
+          in: query
+          name: perPage
+          required: false
+          schema:
+            maximum: 1000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        attributes:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              default: ''
+                              description: A short description.
+                              type: string
+                            timeRestore:
+                              default: false
+                              description: Whether to restore time upon viewing this dashboard
+                              type: boolean
+                            title:
+                              description: A human-readable title for the dashboard
+                              type: string
+                          required:
+                            - title
+                        createdAt:
+                          type: string
+                        createdBy:
+                          type: string
+                        error:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            error:
+                              type: string
+                            message:
+                              type: string
+                            metadata:
+                              additionalProperties: true
+                              type: object
+                              properties: {}
+                            statusCode:
+                              type: number
+                          required:
+                            - error
+                            - message
+                            - statusCode
+                        id:
+                          type: string
+                        managed:
+                          type: boolean
+                        namespaces:
+                          items:
+                            type: string
+                          type: array
+                        originId:
+                          type: string
+                        references:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                              - name
+                              - type
+                              - id
+                          type: array
+                        type:
+                          type: string
+                        updatedAt:
+                          type: string
+                        updatedBy:
+                          type: string
+                        version:
+                          type: string
+                      required:
+                        - id
+                        - type
+                        - attributes
+                        - references
+                    type: array
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+      summary: Get a list of dashboards
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+      x-beta: true
+  /api/dashboards/dashboard/{id}:
+    delete:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: delete-dashboards-dashboard-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Delete a dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+      x-beta: true
+    get:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: get-dashboards-dashboard-id
+      parameters:
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          controlGroupInput:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              autoApplySelections:
+                                default: true
+                                description: Show apply selections button in controls.
+                                type: boolean
+                              chainingSystem:
+                                default: HIERARCHICAL
+                                description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                                enum:
+                                  - NONE
+                                  - HIERARCHICAL
+                                type: string
+                              controls:
+                                default: []
+                                description: An array of control panels and their state in the control group.
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    controlConfig:
+                                      additionalProperties: {}
+                                      type: object
+                                    grow:
+                                      default: false
+                                      description: Expand width of the control panel to fit available space.
+                                      type: boolean
+                                    id:
+                                      description: The unique ID of the control.
+                                      type: string
+                                    order:
+                                      description: The order of the control panel in the control group.
+                                      type: number
+                                    type:
+                                      description: The type of the control panel.
+                                      type: string
+                                    width:
+                                      default: medium
+                                      description: Minimum width of the control panel in the control group.
+                                      enum:
+                                        - small
+                                        - medium
+                                        - large
+                                      type: string
+                                  required:
+                                    - type
+                                    - order
+                                type: array
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              ignoreParentSettings:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  ignoreFilters:
+                                    default: false
+                                    description: Ignore global filters in controls.
+                                    type: boolean
+                                  ignoreQuery:
+                                    default: false
+                                    description: Ignore the global query bar in controls.
+                                    type: boolean
+                                  ignoreTimerange:
+                                    default: false
+                                    description: Ignore the global time range in controls.
+                                    type: boolean
+                                  ignoreValidations:
+                                    default: false
+                                    description: Ignore validations in controls.
+                                    type: boolean
+                              labelPosition:
+                                default: oneLine
+                                description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                                enum:
+                                  - oneLine
+                                  - twoLine
+                                type: string
+                            required:
+                              - ignoreParentSettings
+                          description:
+                            default: ''
+                            description: A short description.
+                            type: string
+                          kibanaSavedObjectMeta:
+                            additionalProperties: false
+                            default: {}
+                            description: A container for various metadata
+                            type: object
+                            properties:
+                              searchSource:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  filter:
+                                    items:
+                                      additionalProperties: false
+                                      description: A filter for the search source.
+                                      type: object
+                                      properties:
+                                        $state:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            store:
+                                              description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                              enum:
+                                                - appState
+                                                - globalState
+                                              type: string
+                                          required:
+                                            - store
+                                        meta:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            alias:
+                                              nullable: true
+                                              type: string
+                                            controlledBy:
+                                              type: string
+                                            disabled:
+                                              type: boolean
+                                            field:
+                                              type: string
+                                            group:
+                                              type: string
+                                            index:
+                                              type: string
+                                            isMultiIndex:
+                                              type: boolean
+                                            key:
+                                              type: string
+                                            negate:
+                                              type: boolean
+                                            params: {}
+                                            type:
+                                              type: string
+                                            value:
+                                              type: string
+                                          required:
+                                            - params
+                                        query:
+                                          additionalProperties: {}
+                                          type: object
+                                      required:
+                                        - meta
+                                    type: array
+                                  query:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      language:
+                                        description: The query language such as KQL or Lucene.
+                                        type: string
+                                      query:
+                                        anyOf:
+                                          - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                            type: string
+                                          - additionalProperties: {}
+                                            type: object
+                                    required:
+                                      - query
+                                      - language
+                                  sort:
+                                    items:
+                                      additionalProperties:
+                                        anyOf:
+                                          - enum:
+                                              - asc
+                                              - desc
+                                            type: string
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              numeric_type:
+                                                enum:
+                                                  - double
+                                                  - long
+                                                  - date
+                                                  - date_nanos
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                          options:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              hidePanelTitles:
+                                default: false
+                                description: Hide the panel titles in the dashboard.
+                                type: boolean
+                              syncColors:
+                                default: true
+                                description: Synchronize colors between related panels in the dashboard.
+                                type: boolean
+                              syncCursor:
+                                default: true
+                                description: Synchronize cursor position between related panels in the dashboard.
+                                type: boolean
+                              syncTooltips:
+                                default: true
+                                description: Synchronize tooltips between related panels in the dashboard.
+                                type: boolean
+                              useMargins:
+                                default: true
+                                description: Show margins between panels in the dashboard layout.
+                                type: boolean
+                          panels:
+                            default: []
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                gridData:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    h:
+                                      default: 15
+                                      description: The height of the panel in grid units
+                                      minimum: 1
+                                      type: number
+                                    i:
+                                      type: string
+                                    w:
+                                      default: 24
+                                      description: The width of the panel in grid units
+                                      maximum: 48
+                                      minimum: 1
+                                      type: number
+                                    x:
+                                      description: The x coordinate of the panel in grid units
+                                      type: number
+                                    'y':
+                                      description: The y coordinate of the panel in grid units
+                                      type: number
+                                  required:
+                                    - x
+                                    - 'y'
+                                    - i
+                                id:
+                                  description: The saved object id for by reference panels
+                                  type: string
+                                panelConfig:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      description: The description of the panel
+                                      type: string
+                                    enhancements:
+                                      additionalProperties: {}
+                                      type: object
+                                    hidePanelTitles:
+                                      description: Set to true to hide the panel title in its container.
+                                      type: boolean
+                                    savedObjectId:
+                                      description: The unique id of the library item to construct the embeddable.
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    version:
+                                      description: The version of the embeddable in the panel.
+                                      type: string
+                                panelIndex:
+                                  type: string
+                                panelRefName:
+                                  type: string
+                                title:
+                                  description: The title of the panel
+                                  type: string
+                                type:
+                                  description: The embeddable type
+                                  type: string
+                                version:
+                                  deprecated: true
+                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                  type: string
+                              required:
+                                - panelConfig
+                                - type
+                                - gridData
+                                - panelIndex
+                            type: array
+                          refreshInterval:
+                            additionalProperties: false
+                            description: A container for various refresh interval settings
+                            type: object
+                            properties:
+                              display:
+                                deprecated: true
+                                description: A human-readable string indicating the refresh frequency. No longer used.
+                                type: string
+                              pause:
+                                description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                                type: boolean
+                              section:
+                                deprecated: true
+                                description: No longer used.
+                                type: number
+                              value:
+                                description: A numeric value indicating refresh frequency in milliseconds.
+                                type: number
+                            required:
+                              - pause
+                              - value
+                          timeFrom:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          timeRestore:
+                            default: false
+                            description: Whether to restore time upon viewing this dashboard
+                            type: boolean
+                          timeTo:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          title:
+                            description: A human-readable title for the dashboard
+                            type: string
+                          version:
+                            deprecated: true
+                            type: number
+                        required:
+                          - title
+                          - options
+                      createdAt:
+                        type: string
+                      createdBy:
+                        type: string
+                      error:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                          message:
+                            type: string
+                          metadata:
+                            additionalProperties: true
+                            type: object
+                            properties: {}
+                          statusCode:
+                            type: number
+                        required:
+                          - error
+                          - message
+                          - statusCode
+                      id:
+                        type: string
+                      managed:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                      originId:
+                        type: string
+                      references:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - name
+                            - type
+                            - id
+                        type: array
+                      type:
+                        type: string
+                      updatedAt:
+                        type: string
+                      updatedBy:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - id
+                      - type
+                      - attributes
+                      - references
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      aliasPurpose:
+                        enum:
+                          - savedObjectConversion
+                          - savedObjectImport
+                        type: string
+                      aliasTargetId:
+                        type: string
+                      outcome:
+                        enum:
+                          - exactMatch
+                          - aliasMatch
+                          - conflict
+                        type: string
+                    required:
+                      - outcome
+                required:
+                  - item
+                  - meta
+      summary: Get a dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+      x-beta: true
+    post:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: post-dashboards-dashboard-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                attributes:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    controlGroupInput:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        autoApplySelections:
+                          default: true
+                          description: Show apply selections button in controls.
+                          type: boolean
+                        chainingSystem:
+                          default: HIERARCHICAL
+                          description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                          enum:
+                            - NONE
+                            - HIERARCHICAL
+                          type: string
+                        controls:
+                          default: []
+                          description: An array of control panels and their state in the control group.
+                          items:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              controlConfig:
+                                additionalProperties: {}
+                                type: object
+                              grow:
+                                default: false
+                                description: Expand width of the control panel to fit available space.
+                                type: boolean
+                              id:
+                                description: The unique ID of the control.
+                                type: string
+                              order:
+                                description: The order of the control panel in the control group.
+                                type: number
+                              type:
+                                description: The type of the control panel.
+                                type: string
+                              width:
+                                default: medium
+                                description: Minimum width of the control panel in the control group.
+                                enum:
+                                  - small
+                                  - medium
+                                  - large
+                                type: string
+                            required:
+                              - type
+                              - order
+                          type: array
+                        enhancements:
+                          additionalProperties: {}
+                          type: object
+                        ignoreParentSettings:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ignoreFilters:
+                              default: false
+                              description: Ignore global filters in controls.
+                              type: boolean
+                            ignoreQuery:
+                              default: false
+                              description: Ignore the global query bar in controls.
+                              type: boolean
+                            ignoreTimerange:
+                              default: false
+                              description: Ignore the global time range in controls.
+                              type: boolean
+                            ignoreValidations:
+                              default: false
+                              description: Ignore validations in controls.
+                              type: boolean
+                        labelPosition:
+                          default: oneLine
+                          description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                          enum:
+                            - oneLine
+                            - twoLine
+                          type: string
+                      required:
+                        - ignoreParentSettings
+                    description:
+                      default: ''
+                      description: A short description.
+                      type: string
+                    kibanaSavedObjectMeta:
+                      additionalProperties: false
+                      default: {}
+                      description: A container for various metadata
+                      type: object
+                      properties:
+                        searchSource:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            filter:
+                              items:
+                                additionalProperties: false
+                                description: A filter for the search source.
+                                type: object
+                                properties:
+                                  $state:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      store:
+                                        description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                        enum:
+                                          - appState
+                                          - globalState
+                                        type: string
+                                    required:
+                                      - store
+                                  meta:
+                                    additionalProperties: true
+                                    type: object
+                                    properties:
+                                      alias:
+                                        nullable: true
+                                        type: string
+                                      controlledBy:
+                                        type: string
+                                      disabled:
+                                        type: boolean
+                                      field:
+                                        type: string
+                                      group:
+                                        type: string
+                                      index:
+                                        type: string
+                                      isMultiIndex:
+                                        type: boolean
+                                      key:
+                                        type: string
+                                      negate:
+                                        type: boolean
+                                      params: {}
+                                      type:
+                                        type: string
+                                      value:
+                                        type: string
+                                    required:
+                                      - params
+                                  query:
+                                    additionalProperties: {}
+                                    type: object
+                                required:
+                                  - meta
+                              type: array
+                            query:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                language:
+                                  description: The query language such as KQL or Lucene.
+                                  type: string
+                                query:
+                                  anyOf:
+                                    - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                      type: string
+                                    - additionalProperties: {}
+                                      type: object
+                              required:
+                                - query
+                                - language
+                            sort:
+                              items:
+                                additionalProperties:
+                                  anyOf:
+                                    - enum:
+                                        - asc
+                                        - desc
+                                      type: string
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        format:
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        numeric_type:
+                                          enum:
+                                            - double
+                                            - long
+                                            - date
+                                            - date_nanos
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                type: object
+                              type: array
+                            type:
+                              type: string
+                    options:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        hidePanelTitles:
+                          default: false
+                          description: Hide the panel titles in the dashboard.
+                          type: boolean
+                        syncColors:
+                          default: true
+                          description: Synchronize colors between related panels in the dashboard.
+                          type: boolean
+                        syncCursor:
+                          default: true
+                          description: Synchronize cursor position between related panels in the dashboard.
+                          type: boolean
+                        syncTooltips:
+                          default: true
+                          description: Synchronize tooltips between related panels in the dashboard.
+                          type: boolean
+                        useMargins:
+                          default: true
+                          description: Show margins between panels in the dashboard layout.
+                          type: boolean
+                    panels:
+                      default: []
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          gridData:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              h:
+                                default: 15
+                                description: The height of the panel in grid units
+                                minimum: 1
+                                type: number
+                              i:
+                                description: The unique identifier of the panel
+                                type: string
+                              w:
+                                default: 24
+                                description: The width of the panel in grid units
+                                maximum: 48
+                                minimum: 1
+                                type: number
+                              x:
+                                description: The x coordinate of the panel in grid units
+                                type: number
+                              'y':
+                                description: The y coordinate of the panel in grid units
+                                type: number
+                            required:
+                              - x
+                              - 'y'
+                          id:
+                            description: The saved object id for by reference panels
+                            type: string
+                          panelConfig:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                description: The description of the panel
+                                type: string
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              hidePanelTitles:
+                                description: Set to true to hide the panel title in its container.
+                                type: boolean
+                              savedObjectId:
+                                description: The unique id of the library item to construct the embeddable.
+                                type: string
+                              title:
+                                description: The title of the panel
+                                type: string
+                              version:
+                                description: The version of the embeddable in the panel.
+                                type: string
+                          panelIndex:
+                            description: The unique ID of the panel.
+                            type: string
+                          panelRefName:
+                            type: string
+                          title:
+                            description: The title of the panel
+                            type: string
+                          type:
+                            description: The embeddable type
+                            type: string
+                          version:
+                            deprecated: true
+                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                            type: string
+                        required:
+                          - panelConfig
+                          - type
+                          - gridData
+                      type: array
+                    refreshInterval:
+                      additionalProperties: false
+                      description: A container for various refresh interval settings
+                      type: object
+                      properties:
+                        display:
+                          deprecated: true
+                          description: A human-readable string indicating the refresh frequency. No longer used.
+                          type: string
+                        pause:
+                          description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                          type: boolean
+                        section:
+                          deprecated: true
+                          description: No longer used.
+                          type: number
+                        value:
+                          description: A numeric value indicating refresh frequency in milliseconds.
+                          type: number
+                      required:
+                        - pause
+                        - value
+                    timeFrom:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    timeRestore:
+                      default: false
+                      description: Whether to restore time upon viewing this dashboard
+                      type: boolean
+                    timeTo:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    title:
+                      description: A human-readable title for the dashboard
+                      type: string
+                    version:
+                      deprecated: true
+                      type: number
+                  required:
+                    - title
+                    - options
+                references:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - name
+                      - type
+                      - id
+                  type: array
+                spaces:
+                  items:
+                    type: string
+                  type: array
+              required:
+                - attributes
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          controlGroupInput:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              autoApplySelections:
+                                default: true
+                                description: Show apply selections button in controls.
+                                type: boolean
+                              chainingSystem:
+                                default: HIERARCHICAL
+                                description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                                enum:
+                                  - NONE
+                                  - HIERARCHICAL
+                                type: string
+                              controls:
+                                default: []
+                                description: An array of control panels and their state in the control group.
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    controlConfig:
+                                      additionalProperties: {}
+                                      type: object
+                                    grow:
+                                      default: false
+                                      description: Expand width of the control panel to fit available space.
+                                      type: boolean
+                                    id:
+                                      description: The unique ID of the control.
+                                      type: string
+                                    order:
+                                      description: The order of the control panel in the control group.
+                                      type: number
+                                    type:
+                                      description: The type of the control panel.
+                                      type: string
+                                    width:
+                                      default: medium
+                                      description: Minimum width of the control panel in the control group.
+                                      enum:
+                                        - small
+                                        - medium
+                                        - large
+                                      type: string
+                                  required:
+                                    - type
+                                    - order
+                                type: array
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              ignoreParentSettings:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  ignoreFilters:
+                                    default: false
+                                    description: Ignore global filters in controls.
+                                    type: boolean
+                                  ignoreQuery:
+                                    default: false
+                                    description: Ignore the global query bar in controls.
+                                    type: boolean
+                                  ignoreTimerange:
+                                    default: false
+                                    description: Ignore the global time range in controls.
+                                    type: boolean
+                                  ignoreValidations:
+                                    default: false
+                                    description: Ignore validations in controls.
+                                    type: boolean
+                              labelPosition:
+                                default: oneLine
+                                description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                                enum:
+                                  - oneLine
+                                  - twoLine
+                                type: string
+                            required:
+                              - ignoreParentSettings
+                          description:
+                            default: ''
+                            description: A short description.
+                            type: string
+                          kibanaSavedObjectMeta:
+                            additionalProperties: false
+                            default: {}
+                            description: A container for various metadata
+                            type: object
+                            properties:
+                              searchSource:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  filter:
+                                    items:
+                                      additionalProperties: false
+                                      description: A filter for the search source.
+                                      type: object
+                                      properties:
+                                        $state:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            store:
+                                              description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                              enum:
+                                                - appState
+                                                - globalState
+                                              type: string
+                                          required:
+                                            - store
+                                        meta:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            alias:
+                                              nullable: true
+                                              type: string
+                                            controlledBy:
+                                              type: string
+                                            disabled:
+                                              type: boolean
+                                            field:
+                                              type: string
+                                            group:
+                                              type: string
+                                            index:
+                                              type: string
+                                            isMultiIndex:
+                                              type: boolean
+                                            key:
+                                              type: string
+                                            negate:
+                                              type: boolean
+                                            params: {}
+                                            type:
+                                              type: string
+                                            value:
+                                              type: string
+                                          required:
+                                            - params
+                                        query:
+                                          additionalProperties: {}
+                                          type: object
+                                      required:
+                                        - meta
+                                    type: array
+                                  query:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      language:
+                                        description: The query language such as KQL or Lucene.
+                                        type: string
+                                      query:
+                                        anyOf:
+                                          - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                            type: string
+                                          - additionalProperties: {}
+                                            type: object
+                                    required:
+                                      - query
+                                      - language
+                                  sort:
+                                    items:
+                                      additionalProperties:
+                                        anyOf:
+                                          - enum:
+                                              - asc
+                                              - desc
+                                            type: string
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              numeric_type:
+                                                enum:
+                                                  - double
+                                                  - long
+                                                  - date
+                                                  - date_nanos
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                          options:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              hidePanelTitles:
+                                default: false
+                                description: Hide the panel titles in the dashboard.
+                                type: boolean
+                              syncColors:
+                                default: true
+                                description: Synchronize colors between related panels in the dashboard.
+                                type: boolean
+                              syncCursor:
+                                default: true
+                                description: Synchronize cursor position between related panels in the dashboard.
+                                type: boolean
+                              syncTooltips:
+                                default: true
+                                description: Synchronize tooltips between related panels in the dashboard.
+                                type: boolean
+                              useMargins:
+                                default: true
+                                description: Show margins between panels in the dashboard layout.
+                                type: boolean
+                          panels:
+                            default: []
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                gridData:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    h:
+                                      default: 15
+                                      description: The height of the panel in grid units
+                                      minimum: 1
+                                      type: number
+                                    i:
+                                      type: string
+                                    w:
+                                      default: 24
+                                      description: The width of the panel in grid units
+                                      maximum: 48
+                                      minimum: 1
+                                      type: number
+                                    x:
+                                      description: The x coordinate of the panel in grid units
+                                      type: number
+                                    'y':
+                                      description: The y coordinate of the panel in grid units
+                                      type: number
+                                  required:
+                                    - x
+                                    - 'y'
+                                    - i
+                                id:
+                                  description: The saved object id for by reference panels
+                                  type: string
+                                panelConfig:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      description: The description of the panel
+                                      type: string
+                                    enhancements:
+                                      additionalProperties: {}
+                                      type: object
+                                    hidePanelTitles:
+                                      description: Set to true to hide the panel title in its container.
+                                      type: boolean
+                                    savedObjectId:
+                                      description: The unique id of the library item to construct the embeddable.
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    version:
+                                      description: The version of the embeddable in the panel.
+                                      type: string
+                                panelIndex:
+                                  type: string
+                                panelRefName:
+                                  type: string
+                                title:
+                                  description: The title of the panel
+                                  type: string
+                                type:
+                                  description: The embeddable type
+                                  type: string
+                                version:
+                                  deprecated: true
+                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                  type: string
+                              required:
+                                - panelConfig
+                                - type
+                                - gridData
+                                - panelIndex
+                            type: array
+                          refreshInterval:
+                            additionalProperties: false
+                            description: A container for various refresh interval settings
+                            type: object
+                            properties:
+                              display:
+                                deprecated: true
+                                description: A human-readable string indicating the refresh frequency. No longer used.
+                                type: string
+                              pause:
+                                description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                                type: boolean
+                              section:
+                                deprecated: true
+                                description: No longer used.
+                                type: number
+                              value:
+                                description: A numeric value indicating refresh frequency in milliseconds.
+                                type: number
+                            required:
+                              - pause
+                              - value
+                          timeFrom:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          timeRestore:
+                            default: false
+                            description: Whether to restore time upon viewing this dashboard
+                            type: boolean
+                          timeTo:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          title:
+                            description: A human-readable title for the dashboard
+                            type: string
+                          version:
+                            deprecated: true
+                            type: number
+                        required:
+                          - title
+                          - options
+                      createdAt:
+                        type: string
+                      createdBy:
+                        type: string
+                      error:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                          message:
+                            type: string
+                          metadata:
+                            additionalProperties: true
+                            type: object
+                            properties: {}
+                          statusCode:
+                            type: number
+                        required:
+                          - error
+                          - message
+                          - statusCode
+                      id:
+                        type: string
+                      managed:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                      originId:
+                        type: string
+                      references:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - name
+                            - type
+                            - id
+                        type: array
+                      type:
+                        type: string
+                      updatedAt:
+                        type: string
+                      updatedBy:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - id
+                      - type
+                      - attributes
+                      - references
+                required:
+                  - item
+      summary: Create a dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
+      x-beta: true
+    put:
+      description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: put-dashboards-dashboard-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: A unique identifier for the dashboard.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                attributes:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    controlGroupInput:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        autoApplySelections:
+                          default: true
+                          description: Show apply selections button in controls.
+                          type: boolean
+                        chainingSystem:
+                          default: HIERARCHICAL
+                          description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                          enum:
+                            - NONE
+                            - HIERARCHICAL
+                          type: string
+                        controls:
+                          default: []
+                          description: An array of control panels and their state in the control group.
+                          items:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              controlConfig:
+                                additionalProperties: {}
+                                type: object
+                              grow:
+                                default: false
+                                description: Expand width of the control panel to fit available space.
+                                type: boolean
+                              id:
+                                description: The unique ID of the control.
+                                type: string
+                              order:
+                                description: The order of the control panel in the control group.
+                                type: number
+                              type:
+                                description: The type of the control panel.
+                                type: string
+                              width:
+                                default: medium
+                                description: Minimum width of the control panel in the control group.
+                                enum:
+                                  - small
+                                  - medium
+                                  - large
+                                type: string
+                            required:
+                              - type
+                              - order
+                          type: array
+                        enhancements:
+                          additionalProperties: {}
+                          type: object
+                        ignoreParentSettings:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            ignoreFilters:
+                              default: false
+                              description: Ignore global filters in controls.
+                              type: boolean
+                            ignoreQuery:
+                              default: false
+                              description: Ignore the global query bar in controls.
+                              type: boolean
+                            ignoreTimerange:
+                              default: false
+                              description: Ignore the global time range in controls.
+                              type: boolean
+                            ignoreValidations:
+                              default: false
+                              description: Ignore validations in controls.
+                              type: boolean
+                        labelPosition:
+                          default: oneLine
+                          description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                          enum:
+                            - oneLine
+                            - twoLine
+                          type: string
+                      required:
+                        - ignoreParentSettings
+                    description:
+                      default: ''
+                      description: A short description.
+                      type: string
+                    kibanaSavedObjectMeta:
+                      additionalProperties: false
+                      default: {}
+                      description: A container for various metadata
+                      type: object
+                      properties:
+                        searchSource:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            filter:
+                              items:
+                                additionalProperties: false
+                                description: A filter for the search source.
+                                type: object
+                                properties:
+                                  $state:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      store:
+                                        description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                        enum:
+                                          - appState
+                                          - globalState
+                                        type: string
+                                    required:
+                                      - store
+                                  meta:
+                                    additionalProperties: true
+                                    type: object
+                                    properties:
+                                      alias:
+                                        nullable: true
+                                        type: string
+                                      controlledBy:
+                                        type: string
+                                      disabled:
+                                        type: boolean
+                                      field:
+                                        type: string
+                                      group:
+                                        type: string
+                                      index:
+                                        type: string
+                                      isMultiIndex:
+                                        type: boolean
+                                      key:
+                                        type: string
+                                      negate:
+                                        type: boolean
+                                      params: {}
+                                      type:
+                                        type: string
+                                      value:
+                                        type: string
+                                    required:
+                                      - params
+                                  query:
+                                    additionalProperties: {}
+                                    type: object
+                                required:
+                                  - meta
+                              type: array
+                            query:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                language:
+                                  description: The query language such as KQL or Lucene.
+                                  type: string
+                                query:
+                                  anyOf:
+                                    - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                      type: string
+                                    - additionalProperties: {}
+                                      type: object
+                              required:
+                                - query
+                                - language
+                            sort:
+                              items:
+                                additionalProperties:
+                                  anyOf:
+                                    - enum:
+                                        - asc
+                                        - desc
+                                      type: string
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        format:
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        numeric_type:
+                                          enum:
+                                            - double
+                                            - long
+                                            - date
+                                            - date_nanos
+                                          type: string
+                                        order:
+                                          enum:
+                                            - asc
+                                            - desc
+                                          type: string
+                                      required:
+                                        - order
+                                type: object
+                              type: array
+                            type:
+                              type: string
+                    options:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        hidePanelTitles:
+                          default: false
+                          description: Hide the panel titles in the dashboard.
+                          type: boolean
+                        syncColors:
+                          default: true
+                          description: Synchronize colors between related panels in the dashboard.
+                          type: boolean
+                        syncCursor:
+                          default: true
+                          description: Synchronize cursor position between related panels in the dashboard.
+                          type: boolean
+                        syncTooltips:
+                          default: true
+                          description: Synchronize tooltips between related panels in the dashboard.
+                          type: boolean
+                        useMargins:
+                          default: true
+                          description: Show margins between panels in the dashboard layout.
+                          type: boolean
+                    panels:
+                      default: []
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          gridData:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              h:
+                                default: 15
+                                description: The height of the panel in grid units
+                                minimum: 1
+                                type: number
+                              i:
+                                description: The unique identifier of the panel
+                                type: string
+                              w:
+                                default: 24
+                                description: The width of the panel in grid units
+                                maximum: 48
+                                minimum: 1
+                                type: number
+                              x:
+                                description: The x coordinate of the panel in grid units
+                                type: number
+                              'y':
+                                description: The y coordinate of the panel in grid units
+                                type: number
+                            required:
+                              - x
+                              - 'y'
+                          id:
+                            description: The saved object id for by reference panels
+                            type: string
+                          panelConfig:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                description: The description of the panel
+                                type: string
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              hidePanelTitles:
+                                description: Set to true to hide the panel title in its container.
+                                type: boolean
+                              savedObjectId:
+                                description: The unique id of the library item to construct the embeddable.
+                                type: string
+                              title:
+                                description: The title of the panel
+                                type: string
+                              version:
+                                description: The version of the embeddable in the panel.
+                                type: string
+                          panelIndex:
+                            description: The unique ID of the panel.
+                            type: string
+                          panelRefName:
+                            type: string
+                          title:
+                            description: The title of the panel
+                            type: string
+                          type:
+                            description: The embeddable type
+                            type: string
+                          version:
+                            deprecated: true
+                            description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                            type: string
+                        required:
+                          - panelConfig
+                          - type
+                          - gridData
+                      type: array
+                    refreshInterval:
+                      additionalProperties: false
+                      description: A container for various refresh interval settings
+                      type: object
+                      properties:
+                        display:
+                          deprecated: true
+                          description: A human-readable string indicating the refresh frequency. No longer used.
+                          type: string
+                        pause:
+                          description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                          type: boolean
+                        section:
+                          deprecated: true
+                          description: No longer used.
+                          type: number
+                        value:
+                          description: A numeric value indicating refresh frequency in milliseconds.
+                          type: number
+                      required:
+                        - pause
+                        - value
+                    timeFrom:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    timeRestore:
+                      default: false
+                      description: Whether to restore time upon viewing this dashboard
+                      type: boolean
+                    timeTo:
+                      description: An ISO string indicating when to restore time from
+                      type: string
+                    title:
+                      description: A human-readable title for the dashboard
+                      type: string
+                    version:
+                      deprecated: true
+                      type: number
+                  required:
+                    - title
+                    - options
+                references:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                      - name
+                      - type
+                      - id
+                  type: array
+              required:
+                - attributes
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: true
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          controlGroupInput:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              autoApplySelections:
+                                default: true
+                                description: Show apply selections button in controls.
+                                type: boolean
+                              chainingSystem:
+                                default: HIERARCHICAL
+                                description: The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".
+                                enum:
+                                  - NONE
+                                  - HIERARCHICAL
+                                type: string
+                              controls:
+                                default: []
+                                description: An array of control panels and their state in the control group.
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    controlConfig:
+                                      additionalProperties: {}
+                                      type: object
+                                    grow:
+                                      default: false
+                                      description: Expand width of the control panel to fit available space.
+                                      type: boolean
+                                    id:
+                                      description: The unique ID of the control.
+                                      type: string
+                                    order:
+                                      description: The order of the control panel in the control group.
+                                      type: number
+                                    type:
+                                      description: The type of the control panel.
+                                      type: string
+                                    width:
+                                      default: medium
+                                      description: Minimum width of the control panel in the control group.
+                                      enum:
+                                        - small
+                                        - medium
+                                        - large
+                                      type: string
+                                  required:
+                                    - type
+                                    - order
+                                type: array
+                              enhancements:
+                                additionalProperties: {}
+                                type: object
+                              ignoreParentSettings:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  ignoreFilters:
+                                    default: false
+                                    description: Ignore global filters in controls.
+                                    type: boolean
+                                  ignoreQuery:
+                                    default: false
+                                    description: Ignore the global query bar in controls.
+                                    type: boolean
+                                  ignoreTimerange:
+                                    default: false
+                                    description: Ignore the global time range in controls.
+                                    type: boolean
+                                  ignoreValidations:
+                                    default: false
+                                    description: Ignore validations in controls.
+                                    type: boolean
+                              labelPosition:
+                                default: oneLine
+                                description: Position of the labels for controls. For example, "oneLine", "twoLine".
+                                enum:
+                                  - oneLine
+                                  - twoLine
+                                type: string
+                            required:
+                              - ignoreParentSettings
+                          description:
+                            default: ''
+                            description: A short description.
+                            type: string
+                          kibanaSavedObjectMeta:
+                            additionalProperties: false
+                            default: {}
+                            description: A container for various metadata
+                            type: object
+                            properties:
+                              searchSource:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  filter:
+                                    items:
+                                      additionalProperties: false
+                                      description: A filter for the search source.
+                                      type: object
+                                      properties:
+                                        $state:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            store:
+                                              description: Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').
+                                              enum:
+                                                - appState
+                                                - globalState
+                                              type: string
+                                          required:
+                                            - store
+                                        meta:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            alias:
+                                              nullable: true
+                                              type: string
+                                            controlledBy:
+                                              type: string
+                                            disabled:
+                                              type: boolean
+                                            field:
+                                              type: string
+                                            group:
+                                              type: string
+                                            index:
+                                              type: string
+                                            isMultiIndex:
+                                              type: boolean
+                                            key:
+                                              type: string
+                                            negate:
+                                              type: boolean
+                                            params: {}
+                                            type:
+                                              type: string
+                                            value:
+                                              type: string
+                                          required:
+                                            - params
+                                        query:
+                                          additionalProperties: {}
+                                          type: object
+                                      required:
+                                        - meta
+                                    type: array
+                                  query:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      language:
+                                        description: The query language such as KQL or Lucene.
+                                        type: string
+                                      query:
+                                        anyOf:
+                                          - description: A text-based query such as Kibana Query Language (KQL) or Lucene query language.
+                                            type: string
+                                          - additionalProperties: {}
+                                            type: object
+                                    required:
+                                      - query
+                                      - language
+                                  sort:
+                                    items:
+                                      additionalProperties:
+                                        anyOf:
+                                          - enum:
+                                              - asc
+                                              - desc
+                                            type: string
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              numeric_type:
+                                                enum:
+                                                  - double
+                                                  - long
+                                                  - date
+                                                  - date_nanos
+                                                type: string
+                                              order:
+                                                enum:
+                                                  - asc
+                                                  - desc
+                                                type: string
+                                            required:
+                                              - order
+                                      type: object
+                                    type: array
+                                  type:
+                                    type: string
+                          options:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              hidePanelTitles:
+                                default: false
+                                description: Hide the panel titles in the dashboard.
+                                type: boolean
+                              syncColors:
+                                default: true
+                                description: Synchronize colors between related panels in the dashboard.
+                                type: boolean
+                              syncCursor:
+                                default: true
+                                description: Synchronize cursor position between related panels in the dashboard.
+                                type: boolean
+                              syncTooltips:
+                                default: true
+                                description: Synchronize tooltips between related panels in the dashboard.
+                                type: boolean
+                              useMargins:
+                                default: true
+                                description: Show margins between panels in the dashboard layout.
+                                type: boolean
+                          panels:
+                            default: []
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                gridData:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    h:
+                                      default: 15
+                                      description: The height of the panel in grid units
+                                      minimum: 1
+                                      type: number
+                                    i:
+                                      type: string
+                                    w:
+                                      default: 24
+                                      description: The width of the panel in grid units
+                                      maximum: 48
+                                      minimum: 1
+                                      type: number
+                                    x:
+                                      description: The x coordinate of the panel in grid units
+                                      type: number
+                                    'y':
+                                      description: The y coordinate of the panel in grid units
+                                      type: number
+                                  required:
+                                    - x
+                                    - 'y'
+                                    - i
+                                id:
+                                  description: The saved object id for by reference panels
+                                  type: string
+                                panelConfig:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      description: The description of the panel
+                                      type: string
+                                    enhancements:
+                                      additionalProperties: {}
+                                      type: object
+                                    hidePanelTitles:
+                                      description: Set to true to hide the panel title in its container.
+                                      type: boolean
+                                    savedObjectId:
+                                      description: The unique id of the library item to construct the embeddable.
+                                      type: string
+                                    title:
+                                      description: The title of the panel
+                                      type: string
+                                    version:
+                                      description: The version of the embeddable in the panel.
+                                      type: string
+                                panelIndex:
+                                  type: string
+                                panelRefName:
+                                  type: string
+                                title:
+                                  description: The title of the panel
+                                  type: string
+                                type:
+                                  description: The embeddable type
+                                  type: string
+                                version:
+                                  deprecated: true
+                                  description: The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).
+                                  type: string
+                              required:
+                                - panelConfig
+                                - type
+                                - gridData
+                                - panelIndex
+                            type: array
+                          refreshInterval:
+                            additionalProperties: false
+                            description: A container for various refresh interval settings
+                            type: object
+                            properties:
+                              display:
+                                deprecated: true
+                                description: A human-readable string indicating the refresh frequency. No longer used.
+                                type: string
+                              pause:
+                                description: Whether the refresh interval is set to be paused while viewing the dashboard.
+                                type: boolean
+                              section:
+                                deprecated: true
+                                description: No longer used.
+                                type: number
+                              value:
+                                description: A numeric value indicating refresh frequency in milliseconds.
+                                type: number
+                            required:
+                              - pause
+                              - value
+                          timeFrom:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          timeRestore:
+                            default: false
+                            description: Whether to restore time upon viewing this dashboard
+                            type: boolean
+                          timeTo:
+                            description: An ISO string indicating when to restore time from
+                            type: string
+                          title:
+                            description: A human-readable title for the dashboard
+                            type: string
+                          version:
+                            deprecated: true
+                            type: number
+                        required:
+                          - title
+                          - options
+                      createdAt:
+                        type: string
+                      createdBy:
+                        type: string
+                      error:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                          message:
+                            type: string
+                          metadata:
+                            additionalProperties: true
+                            type: object
+                            properties: {}
+                          statusCode:
+                            type: number
+                        required:
+                          - error
+                          - message
+                          - statusCode
+                      id:
+                        type: string
+                      managed:
+                        type: boolean
+                      namespaces:
+                        items:
+                          type: string
+                        type: array
+                      originId:
+                        type: string
+                      references:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - name
+                            - type
+                            - id
+                        type: array
+                      type:
+                        type: string
+                      updatedAt:
+                        type: string
+                      updatedBy:
+                        type: string
+                      version:
+                        type: string
+                    required:
+                      - id
+                      - type
+                      - attributes
+                      - references
+                required:
+                  - item
+      summary: Update an existing dashboard
+      tags:
+        - Dashboards
+      x-state: Technical Preview
       x-beta: true
   /api/data_views:
     get:
@@ -9014,15 +11138,7 @@ paths:
   /api/fleet/agent_download_sources:
     get:
       operationId: get-fleet-agent-download-sources
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -9089,14 +11205,6 @@ paths:
     post:
       operationId: post-fleet-agent-download-sources
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -9185,14 +11293,6 @@ paths:
       description: Delete an agent binary download source by ID.
       operationId: delete-fleet-agent-download-sources-sourceid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -9241,14 +11341,6 @@ paths:
       description: Get an agent binary download source by ID.
       operationId: get-fleet-agent-download-sources-sourceid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: sourceId
           required: true
@@ -9310,14 +11402,6 @@ paths:
       description: Update an agent binary download source by ID.
       operationId: put-fleet-agent-download-sources-sourceid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -9410,14 +11494,6 @@ paths:
     get:
       operationId: get-fleet-agent-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -9628,8 +11704,6 @@ paths:
                               maximum: 65353
                               minimum: 0
                               type: number
-                          required:
-                            - enabled
                         monitoring_output_id:
                           nullable: true
                           type: string
@@ -9999,14 +12073,6 @@ paths:
     post:
       operationId: post-fleet-agent-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -10160,8 +12226,6 @@ paths:
                       maximum: 65353
                       minimum: 0
                       type: number
-                  required:
-                    - enabled
                 monitoring_output_id:
                   nullable: true
                   type: string
@@ -10342,8 +12406,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -10704,14 +12766,6 @@ paths:
     post:
       operationId: post-fleet-agent-policies-bulk-get
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -10896,8 +12950,6 @@ paths:
                               maximum: 65353
                               minimum: 0
                               type: number
-                          required:
-                            - enabled
                         monitoring_output_id:
                           nullable: true
                           type: string
@@ -11260,14 +13312,6 @@ paths:
       description: Get an agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -11430,8 +13474,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -11792,14 +13834,6 @@ paths:
       description: Update an agent policy by ID.
       operationId: put-fleet-agent-policies-agentpolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -11961,8 +13995,6 @@ paths:
                       maximum: 65353
                       minimum: 0
                       type: number
-                  required:
-                    - enabled
                 monitoring_output_id:
                   nullable: true
                   type: string
@@ -12143,8 +14175,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -12506,14 +14536,6 @@ paths:
       description: Copy an agent policy by ID.
       operationId: post-fleet-agent-policies-agentpolicyid-copy
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -12697,8 +14719,6 @@ paths:
                             maximum: 65353
                             minimum: 0
                             type: number
-                        required:
-                          - enabled
                       monitoring_output_id:
                         nullable: true
                         type: string
@@ -13060,14 +15080,6 @@ paths:
       description: Download an agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -13135,14 +15147,6 @@ paths:
       description: Get a full agent policy by ID.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -13492,14 +15496,6 @@ paths:
       description: Get a list of outputs associated with agent policy by policy id.
       operationId: get-fleet-agent-policies-agentpolicyid-outputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentPolicyId
           required: true
@@ -13597,14 +15593,6 @@ paths:
       description: Delete an agent policy by ID.
       operationId: post-fleet-agent-policies-delete
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -13666,14 +15654,6 @@ paths:
       description: Get a list of outputs associated with agent policies.
       operationId: post-fleet-agent-policies-outputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -13788,14 +15768,6 @@ paths:
     get:
       operationId: get-fleet-agent-status
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: policyId
           required: false
@@ -13884,14 +15856,6 @@ paths:
     get:
       operationId: get-fleet-agent-status-data
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: agentsIds
           required: true
@@ -13967,14 +15931,6 @@ paths:
     get:
       operationId: get-fleet-agents
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -14248,6 +16204,7 @@ paths:
                           type: array
                         upgrade_details:
                           additionalProperties: false
+                          nullable: true
                           type: object
                           properties:
                             action_id:
@@ -14353,14 +16310,6 @@ paths:
     post:
       operationId: post-fleet-agents
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -14420,14 +16369,6 @@ paths:
       description: Delete an agent by ID.
       operationId: delete-fleet-agents-agentid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -14478,14 +16419,6 @@ paths:
       description: Get an agent by ID.
       operationId: get-fleet-agents-agentid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentId
           required: true
@@ -14715,6 +16648,7 @@ paths:
                         type: array
                       upgrade_details:
                         additionalProperties: false
+                        nullable: true
                         type: object
                         properties:
                           action_id:
@@ -14807,14 +16741,6 @@ paths:
       description: Update an agent by ID.
       operationId: put-fleet-agents-agentid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15059,6 +16985,7 @@ paths:
                         type: array
                       upgrade_details:
                         additionalProperties: false
+                        nullable: true
                         type: object
                         properties:
                           action_id:
@@ -15151,14 +17078,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-actions
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15296,14 +17215,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-reassign
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15359,14 +17270,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-request-diagnostics
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15429,14 +17332,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15470,14 +17365,6 @@ paths:
     post:
       operationId: post-fleet-agents-agentid-upgrade
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15539,14 +17426,6 @@ paths:
     get:
       operationId: get-fleet-agents-agentid-uploads
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: agentId
           required: true
@@ -15620,14 +17499,6 @@ paths:
     get:
       operationId: get-fleet-agents-action-status
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -15786,14 +17657,6 @@ paths:
     post:
       operationId: post-fleet-agents-actions-actionid-cancel
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -15880,15 +17743,7 @@ paths:
   /api/fleet/agents/available_versions:
     get:
       operationId: get-fleet-agents-available-versions
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -15927,14 +17782,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-reassign
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16001,14 +17848,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-request-diagnostics
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16075,14 +17914,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16154,14 +17985,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-update-agent-tags
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16233,14 +18056,6 @@ paths:
     post:
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16319,14 +18134,6 @@ paths:
       description: Delete a file uploaded by an agent.
       operationId: delete-fleet-agents-files-fileid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16379,14 +18186,6 @@ paths:
       description: Get a file uploaded by an agent.
       operationId: get-fleet-agents-files-fileid-filename
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: fileId
           required: true
@@ -16426,15 +18225,7 @@ paths:
   /api/fleet/agents/setup:
     get:
       operationId: get-fleet-agents-setup
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -16495,14 +18286,6 @@ paths:
     post:
       operationId: post-fleet-agents-setup
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -16561,14 +18344,6 @@ paths:
     get:
       operationId: get-fleet-agents-tags
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: kuery
           required: false
@@ -16618,14 +18393,6 @@ paths:
     get:
       operationId: get-fleet-check-permissions
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: fleetServerSetup
           required: false
@@ -16672,15 +18439,7 @@ paths:
   /api/fleet/data_streams:
     get:
       operationId: get-fleet-data-streams
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -16778,14 +18537,6 @@ paths:
     get:
       operationId: get-fleet-enrollment-api-keys
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -16909,14 +18660,6 @@ paths:
     post:
       operationId: post-fleet-enrollment-api-keys
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17008,14 +18751,6 @@ paths:
       description: Revoke an enrollment API key by ID by marking it as inactive.
       operationId: delete-fleet-enrollment-api-keys-keyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17066,14 +18801,6 @@ paths:
       description: Get an enrollment API key by ID.
       operationId: get-fleet-enrollment-api-keys-keyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: keyId
           required: true
@@ -17142,14 +18869,6 @@ paths:
     post:
       operationId: post-fleet-epm-bulk-assets
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17241,14 +18960,6 @@ paths:
     get:
       operationId: get-fleet-epm-categories
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: prerelease
           required: false
@@ -17313,14 +19024,6 @@ paths:
     post:
       operationId: post-fleet-epm-custom-integrations
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -17456,14 +19159,6 @@ paths:
     get:
       operationId: get-fleet-epm-data-streams
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: type
           required: false
@@ -17539,14 +19234,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: category
           required: false
@@ -17939,14 +19626,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18067,14 +19746,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages-bulk
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18250,14 +19921,6 @@ paths:
     delete:
       operationId: delete-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18365,14 +20028,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -18845,14 +20500,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -18995,14 +20642,6 @@ paths:
     put:
       operationId: put-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19465,14 +21104,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -19517,14 +21148,6 @@ paths:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -19610,14 +21233,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -19665,14 +21280,6 @@ paths:
     get:
       operationId: get-fleet-epm-packages-installed
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: dataStreamType
           required: false
@@ -19818,15 +21425,7 @@ paths:
   /api/fleet/epm/packages/limited:
     get:
       operationId: get-fleet-epm-packages-limited
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -19865,14 +21464,6 @@ paths:
     get:
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: pkgName
           required: true
@@ -19972,15 +21563,7 @@ paths:
   /api/fleet/epm/verification_key_id:
     get:
       operationId: get-fleet-epm-verification-key-id
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -20017,15 +21600,7 @@ paths:
   /api/fleet/fleet_server_hosts:
     get:
       operationId: get-fleet-fleet-server-hosts
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -20098,14 +21673,6 @@ paths:
     post:
       operationId: post-fleet-fleet-server-hosts
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20206,14 +21773,6 @@ paths:
       description: Delete a Fleet Server host by ID.
       operationId: delete-fleet-fleet-server-hosts-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20262,14 +21821,6 @@ paths:
       description: Get a Fleet Server host by ID.
       operationId: get-fleet-fleet-server-hosts-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: itemId
           required: true
@@ -20337,14 +21888,6 @@ paths:
       description: Update a Fleet Server host by ID.
       operationId: put-fleet-fleet-server-hosts-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20442,14 +21985,6 @@ paths:
     post:
       operationId: post-fleet-health-check
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20524,14 +22059,6 @@ paths:
     get:
       operationId: get-fleet-kubernetes
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: download
           required: false
@@ -20583,14 +22110,6 @@ paths:
     get:
       operationId: get-fleet-kubernetes-download
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: download
           required: false
@@ -20652,14 +22171,6 @@ paths:
     post:
       operationId: post-fleet-logstash-api-keys
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20703,14 +22214,6 @@ paths:
     post:
       operationId: post-fleet-message-signing-service-rotate-key-pair
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -20775,15 +22278,7 @@ paths:
   /api/fleet/outputs:
     get:
       operationId: get-fleet-outputs
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -21509,14 +23004,6 @@ paths:
     post:
       operationId: post-fleet-outputs
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -22924,14 +24411,6 @@ paths:
       description: Delete output by ID.
       operationId: delete-fleet-outputs-outputid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -22996,14 +24475,6 @@ paths:
       description: Get output by ID.
       operationId: get-fleet-outputs-outputid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: outputId
           required: true
@@ -23724,14 +25195,6 @@ paths:
       description: Update output by ID.
       operationId: put-fleet-outputs-outputid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -25122,14 +26585,6 @@ paths:
     get:
       operationId: get-fleet-outputs-outputid-health
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: outputId
           required: true
@@ -25180,14 +26635,6 @@ paths:
     get:
       operationId: get-fleet-package-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: query
           name: page
           required: false
@@ -25653,14 +27100,6 @@ paths:
     post:
       operationId: post-fleet-package-policies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -26504,14 +27943,6 @@ paths:
     post:
       operationId: post-fleet-package-policies-bulk-get
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -26966,14 +28397,6 @@ paths:
       description: Delete a package policy by ID.
       operationId: delete-fleet-package-policies-packagepolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -27027,14 +28450,6 @@ paths:
       description: Get a package policy by ID.
       operationId: get-fleet-package-policies-packagepolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: packagePolicyId
           required: true
@@ -27468,14 +28883,6 @@ paths:
       description: Update a package policy by ID.
       operationId: put-fleet-package-policies-packagepolicyid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -28317,14 +29724,6 @@ paths:
     post:
       operationId: post-fleet-package-policies-delete
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -28455,14 +29854,6 @@ paths:
       description: Upgrade a package policy to a newer package version.
       operationId: post-fleet-package-policies-upgrade
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -28536,14 +29927,6 @@ paths:
     post:
       operationId: post-fleet-package-policies-upgrade-dryrun
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -29336,15 +30719,7 @@ paths:
   /api/fleet/proxies:
     get:
       operationId: get-fleet-proxies
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -29423,14 +30798,6 @@ paths:
     post:
       operationId: post-fleet-proxies
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -29543,14 +30910,6 @@ paths:
       description: Delete a proxy by ID
       operationId: delete-fleet-proxies-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -29599,14 +30958,6 @@ paths:
       description: Get a proxy by ID.
       operationId: get-fleet-proxies-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: itemId
           required: true
@@ -29680,14 +31031,6 @@ paths:
       description: Update a proxy by ID.
       operationId: put-fleet-proxies-itemid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -29801,14 +31144,6 @@ paths:
     post:
       operationId: post-fleet-service-tokens
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -29865,15 +31200,7 @@ paths:
   /api/fleet/settings:
     get:
       operationId: get-fleet-settings
-      parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
+      parameters: []
       responses:
         '200':
           content:
@@ -29962,14 +31289,6 @@ paths:
     put:
       operationId: put-fleet-settings
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -30097,14 +31416,6 @@ paths:
     post:
       operationId: post-fleet-setup
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -30176,14 +31487,6 @@ paths:
       description: List the metadata for the latest uninstall tokens per agent policy.
       operationId: get-fleet-uninstall-tokens
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Partial match filtering for policy IDs
           in: query
           name: policyId
@@ -30277,14 +31580,6 @@ paths:
       description: Get one decrypted uninstall token by its ID.
       operationId: get-fleet-uninstall-tokens-uninstalltokenid
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - in: path
           name: uninstallTokenId
           required: true
@@ -32922,14 +34217,6 @@ paths:
     get:
       operationId: get-security-role
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.
           in: query
           name: replaceDeprecatedPrivileges
@@ -32947,14 +34234,6 @@ paths:
     delete:
       operationId: delete-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -32978,14 +34257,6 @@ paths:
     get:
       operationId: get-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The role name.
           in: path
           name: name
@@ -33010,14 +34281,6 @@ paths:
       description: Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
       operationId: put-security-role-name
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -33225,14 +34488,6 @@ paths:
     post:
       operationId: post-security-roles
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -33433,14 +34688,6 @@ paths:
     get:
       operationId: get-spaces-space
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Specifies which authorization checks are applied to the API call. The default value is `any`.
           in: query
           name: purpose
@@ -33488,14 +34735,6 @@ paths:
     post:
       operationId: post-spaces-space
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -33556,14 +34795,6 @@ paths:
       description: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
       operationId: delete-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -33589,14 +34820,6 @@ paths:
     get:
       operationId: get-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The space identifier.
           in: path
           name: id
@@ -33618,14 +34841,6 @@ paths:
     put:
       operationId: put-spaces-space-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -33691,14 +34906,6 @@ paths:
     get:
       operationId: get-status
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: Set to "true" to get the response in v7 format.
           in: query
           name: v7format
@@ -45895,6 +47102,7 @@ components:
       enum:
         - user
         - host
+        - service
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
