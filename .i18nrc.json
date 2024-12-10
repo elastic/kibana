@@ -30,7 +30,7 @@
       "src/platform/packages/private/default-nav"
     ],
     "devTools": "src/plugins/dev_tools",
-    "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "packages/kbn-discover-contextual-components"],
+    "discover": ["src/plugins/discover", "packages/kbn-discover-utils", "src/platform/packages/shared/kbn-discover-contextual-components"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
     "presentationPanel": "src/plugins/presentation_panel",
