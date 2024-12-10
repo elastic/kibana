@@ -177,7 +177,7 @@ export const loadDashboardState = async ({
     dashboardInput: {
       ...DEFAULT_DASHBOARD_INPUT,
       ...options,
-  
+
       id: embeddableId,
       refreshInterval,
       timeRestore,
@@ -187,12 +187,13 @@ export const loadDashboardState = async ({
       panels: panelMap,
       query,
       title,
-  
+
       viewMode: ViewMode.VIEW, // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
-      tags: savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
-  
+      tags:
+        savedObjectsTaggingService?.getTaggingApi()?.ui.getTagIdsFromReferences(references) ?? [],
+
       controlGroupInput: attributes.controlGroupInput,
-  
+
       ...(version && { version: convertNumberToDashboardVersion(version) }),
     },
     dashboardFound: true,
