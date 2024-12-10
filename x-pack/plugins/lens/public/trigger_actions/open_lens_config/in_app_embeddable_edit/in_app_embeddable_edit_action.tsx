@@ -12,8 +12,6 @@ import type { InlineEditLensEmbeddableContext } from './types';
 
 const ACTION_EDIT_LENS_EMBEDDABLE = 'ACTION_EDIT_LENS_EMBEDDABLE';
 
-export const getAsyncHelpers = async () => await import('../../../async_services');
-
 export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddableContext> {
   public type = ACTION_EDIT_LENS_EMBEDDABLE;
   public id = ACTION_EDIT_LENS_EMBEDDABLE;
@@ -35,7 +33,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
   }
 
   public async isCompatible({ attributes }: InlineEditLensEmbeddableContext) {
-    const { isEmbeddableEditActionCompatible } = await getAsyncHelpers();
+    const { isEmbeddableEditActionCompatible } = await import('../../../async_services');
     return isEmbeddableEditActionCompatible(this.core, attributes);
   }
 
@@ -47,7 +45,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     onApply,
     onCancel,
   }: InlineEditLensEmbeddableContext) {
-    const { executeEditEmbeddableAction } = await getAsyncHelpers();
+    const { executeEditEmbeddableAction } = await import('../../../async_services');
     if (attributes) {
       executeEditEmbeddableAction({
         deps: this.startDependencies,

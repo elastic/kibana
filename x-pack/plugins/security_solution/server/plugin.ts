@@ -56,7 +56,11 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
-import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import {
+  EndpointArtifactClient,
+  ManifestManager,
+  securityWorkflowInsightsService,
+} from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
@@ -391,7 +395,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      this.telemetryReceiver
+      this.telemetryReceiver,
+      this.pluginContext.env.packageInfo.buildFlavor === 'serverless',
+      this.endpointContext
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -518,6 +524,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     featureUsageService.setup(plugins.licensing);
+
+    securityWorkflowInsightsService.setup({
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      isFeatureEnabled: config.experimentalFeatures.defendInsights,
+    });
 
     return {
       setProductFeaturesConfigurator:
@@ -672,6 +684,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
+    securityWorkflowInsightsService
+      .start({
+        esClient: core.elasticsearch.client.asInternalUser,
+      })
+      .catch(() => {});
+
     const endpointPkgInstallationPromise = this.endpointContext.service
       .getInternalFleetServices()
       .packages.getInstallation(FLEET_ENDPOINT_PACKAGE);
@@ -727,6 +745,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.policyWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
+    securityWorkflowInsightsService.stop();
     licenseService.stop();
   }
 }

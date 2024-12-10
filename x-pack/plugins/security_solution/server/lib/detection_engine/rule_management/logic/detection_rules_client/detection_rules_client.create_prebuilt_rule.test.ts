@@ -44,6 +44,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
+      isRuleCustomizationEnabled: true,
     });
   });
 

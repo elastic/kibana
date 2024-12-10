@@ -13,9 +13,15 @@ import type {
   RequestHandlerContext,
   KibanaRequest,
 } from '@kbn/core/server';
-import { MessageRole, ToolCall, ToolChoiceType } from '@kbn/inference-common';
+import {
+  MessageRole,
+  ToolCall,
+  ToolChoiceType,
+  InferenceTaskEventType,
+  isInferenceError,
+} from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
-import { createInferenceClient } from '../inference_client';
+import { createClient as createInferenceClient } from '../inference_client';
 import { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { observableIntoEventSourceStream } from '../util/observable_into_event_source_stream';
 
@@ -130,10 +136,22 @@ export function registerChatCompleteRoute({
       },
     },
     async (context, request, response) => {
-      const chatCompleteResponse = await callChatComplete({ request, stream: false });
-      return response.ok({
-        body: chatCompleteResponse,
-      });
+      try {
+        const chatCompleteResponse = await callChatComplete({ request, stream: false });
+        return response.ok({
+          body: chatCompleteResponse,
+        });
+      } catch (e) {
+        return response.custom({
+          statusCode: isInferenceError(e) ? e.meta?.status ?? 500 : 500,
+          bypassErrorFormat: true,
+          body: {
+            type: InferenceTaskEventType.error,
+            code: e.code ?? 'unknown',
+            message: e.message,
+          },
+        });
+      }
     }
   );
 
@@ -145,9 +163,9 @@ export function registerChatCompleteRoute({
       },
     },
     async (context, request, response) => {
-      const chatCompleteResponse = await callChatComplete({ request, stream: true });
+      const chatCompleteEvents$ = await callChatComplete({ request, stream: true });
       return response.ok({
-        body: observableIntoEventSourceStream(chatCompleteResponse, logger),
+        body: observableIntoEventSourceStream(chatCompleteEvents$, logger),
       });
     }
   );

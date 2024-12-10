@@ -25,7 +25,11 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     .delete({
       access: 'public',
       path: '/api/osquery/packs/{id}',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {

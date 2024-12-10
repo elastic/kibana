@@ -8,7 +8,6 @@
 import type { EuiSuperSelectOption, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiBetaBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -43,7 +42,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoElasticsearch" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
-            { defaultMessage: 'Search' }
+            { defaultMessage: 'Elasticsearch' }
           )}
         </>
       ),
@@ -181,21 +180,6 @@ export const SolutionView: FunctionComponent<Props> = ({
               isInvalid={validator.validateSolutionView(space, isEditing).isInvalid}
             />
           </EuiFormRow>
-
-          {showClassicDefaultViewCallout && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                color="primary"
-                size="s"
-                iconType="iInCircle"
-                title={i18n.translate(
-                  'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicDefaultViewCallout',
-                  { defaultMessage: 'By default your current view is Classic' }
-                )}
-              />
-            </>
-          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </SectionPanel>

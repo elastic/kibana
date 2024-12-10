@@ -26,7 +26,8 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-plugins-browser",
     "@kbn/ai-assistant",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/product-doc-base-plugin"
   ],
   "exclude": [
     "target/**/*"

@@ -7,18 +7,25 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import { PLUGIN_NAME } from '../../../common';
+import { DEFAULT_METRIC_TYPES, type UsageMetricsRequestBody } from '../../../common/rest_types';
+import { PLUGIN_NAME } from '../../translations';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
-import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
-import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
+import {
+  DEFAULT_DATE_RANGE_OPTIONS,
+  transformToUTCtime,
+  isDateRangeValid,
+} from '../../../common/utils';
+import { useDateRangePicker } from '../hooks/use_date_picker';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
+import { ChartsLoading } from './charts_loading';
+import { NoDataCallout } from './no_data_callout';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const EuiItemCss = css`
@@ -32,6 +39,8 @@ const FlexItemWithCss = ({ children }: { children: React.ReactNode }) => (
 export const DataUsageMetrics = memo(
   ({ 'data-test-subj': dataTestSubj = 'data-usage-metrics' }: { 'data-test-subj'?: string }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
 
     const {
       services: { chrome, appParams, notifications },
@@ -68,11 +77,13 @@ export const DataUsageMetrics = memo(
     });
 
     useEffect(() => {
-      if (!metricTypesFromUrl) {
+      if (!metricTypesFromUrl && isFirstPageLoad) {
         setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
       }
-      if (!dataStreamsFromUrl && dataStreams) {
-        setUrlDataStreamsFilter(dataStreams.map((ds) => ds.name).join(','));
+      if (!dataStreamsFromUrl && dataStreams && isFirstPageLoad) {
+        const hasMoreThan50 = dataStreams.length > 50;
+        const _dataStreams = hasMoreThan50 ? dataStreams.slice(0, 50) : dataStreams;
+        setUrlDataStreamsFilter(_dataStreams.map((ds) => ds.name).join(','));
       }
       if (!startDateFromUrl || !endDateFromUrl) {
         setUrlDateRangeFilter({ startDate: metricsFilters.from, endDate: metricsFilters.to });
@@ -81,6 +92,7 @@ export const DataUsageMetrics = memo(
       dataStreams,
       dataStreamsFromUrl,
       endDateFromUrl,
+      isFirstPageLoad,
       metricTypesFromUrl,
       metricsFilters.dataStreams,
       metricsFilters.from,
@@ -97,32 +109,69 @@ export const DataUsageMetrics = memo(
         ...prevState,
         metricTypes: metricTypesFromUrl?.length ? metricTypesFromUrl : prevState.metricTypes,
         dataStreams: dataStreamsFromUrl?.length ? dataStreamsFromUrl : prevState.dataStreams,
+        from: startDateFromUrl ?? prevState.from,
+        to: endDateFromUrl ?? prevState.to,
       }));
-    }, [metricTypesFromUrl, dataStreamsFromUrl]);
+    }, [metricTypesFromUrl, dataStreamsFromUrl, startDateFromUrl, endDateFromUrl]);
 
     const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
+    const isValidDateRange = useMemo(
+      () =>
+        isDateRangeValid({
+          start: dateRangePickerState.startDate,
+          end: dateRangePickerState.endDate,
+        }),
+      [dateRangePickerState.endDate, dateRangePickerState.startDate]
+    );
+
+    const enableFetchUsageMetricsData = useMemo(
+      () =>
+        isValidDateRange &&
+        metricsFilters.dataStreams.length > 0 &&
+        metricsFilters.metricTypes.length > 0,
+      [isValidDateRange, metricsFilters.dataStreams, metricsFilters.metricTypes]
+    );
+
+    const utcTimeRange = useMemo(
+      () =>
+        transformToUTCtime({
+          start: dateRangePickerState.startDate,
+          end: dateRangePickerState.endDate,
+          isISOString: true,
+        }),
+      [dateRangePickerState]
+    );
     const {
       error: errorFetchingDataUsageMetrics,
-      data,
+      data: usageMetricsData,
       isFetching,
-      isFetched,
+      isFetched: hasFetchedDataUsageMetricsData,
       refetch: refetchDataUsageMetrics,
     } = useGetDataUsageMetrics(
       {
         ...metricsFilters,
-        from: dateRangePickerState.startDate,
-        to: dateRangePickerState.endDate,
+        from: utcTimeRange.start as string,
+        to: utcTimeRange.end as string,
       },
       {
         retry: false,
-        enabled: !!metricsFilters.dataStreams.length,
+        enabled: enableFetchUsageMetricsData,
       }
     );
 
+    useEffect(() => {
+      if (!isFetching && hasFetchedDataUsageMetricsData) {
+        setIsFirstPageLoad(false);
+      }
+    }, [isFetching, hasFetchedDataUsageMetricsData]);
+
     const onRefresh = useCallback(() => {
+      if (!enableFetchUsageMetricsData) {
+        return;
+      }
       refetchDataUsageMetrics();
-    }, [refetchDataUsageMetrics]);
+    }, [enableFetchUsageMetricsData, refetchDataUsageMetrics]);
 
     const onChangeDataStreamsFilter = useCallback(
       (selectedDataStreams: string[]) => {
@@ -193,6 +242,7 @@ export const DataUsageMetrics = memo(
           <ChartFilters
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isFetchingDataStreams}
+            isUpdateDisabled={!enableFetchUsageMetricsData}
             onClick={refetchDataUsageMetrics}
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
@@ -202,13 +252,14 @@ export const DataUsageMetrics = memo(
             data-test-subj={getTestId('filter')}
           />
         </FlexItemWithCss>
-
         <FlexItemWithCss>
-          {isFetched && data?.metrics ? (
-            <Charts data={data} data-test-subj={dataTestSubj} />
+          {hasFetchedDataUsageMetricsData && usageMetricsData ? (
+            <Charts data={usageMetricsData} data-test-subj={dataTestSubj} />
           ) : isFetching ? (
-            <EuiLoadingElastic data-test-subj={getTestId('charts-loading')} />
-          ) : null}
+            <ChartsLoading data-test-subj={dataTestSubj} />
+          ) : (
+            <NoDataCallout data-test-subj={dataTestSubj} />
+          )}
         </FlexItemWithCss>
       </EuiFlexGroup>
     );

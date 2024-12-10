@@ -8,7 +8,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const observabilityFeatureId = 'observability';
 export const observabilityAppId = 'observability-overview';
-export const casesFeatureId = 'observabilityCases';
+export const casesFeatureId = 'observabilityCasesV2';
 export const sloFeatureId = 'slo';
 
 // SLO alerts table in slo detail page
@@ -219,4 +219,4 @@ export {
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
 
-export { ENTITY_TYPES, EntityDataStreamType } from './entity';
+export { BUILT_IN_ENTITY_TYPES, EntityDataStreamType } from './entity';

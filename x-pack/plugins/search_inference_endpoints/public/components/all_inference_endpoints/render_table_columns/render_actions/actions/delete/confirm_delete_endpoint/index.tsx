@@ -86,6 +86,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
               font-family: ${euiThemeVars.euiCodeFontFamily};
               font-weight: ${euiThemeVars.euiCodeFontWeightBold};
             `}
+            data-test-subj="deleteModalInferenceEndpointName"
           >
             {inferenceEndpoint.endpoint}
           </EuiText>

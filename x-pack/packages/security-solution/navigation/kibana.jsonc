@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/security-solution-navigation",
-  "owner": "@elastic/security-threat-hunting-explore"
+  "owner": [
+    "@elastic/security-threat-hunting-explore"
+  ],
+  "group": "security",
+  "visibility": "private"
 }

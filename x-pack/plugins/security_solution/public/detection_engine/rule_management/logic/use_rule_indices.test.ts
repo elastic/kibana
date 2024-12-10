@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useRuleIndices } from './use_rule_indices';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';

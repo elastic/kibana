@@ -1459,4 +1459,80 @@ describe('authorization', () => {
       });
     });
   });
+
+  describe('ensureAuthorized with operation arrays', () => {
+    let auth: Authorization;
+    let securityStart: ReturnType<typeof securityMock.createStart>;
+    let featuresStart: jest.Mocked<FeaturesPluginStart>;
+    let spacesStart: jest.Mocked<SpacesPluginStart>;
+
+    beforeEach(async () => {
+      securityStart = securityMock.createStart();
+      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async () => ({ hasAllRequested: true }))
+      );
+
+      featuresStart = featuresPluginMock.createStart();
+      featuresStart.getKibanaFeatures.mockReturnValue([
+        { id: '1', cases: ['a'] },
+      ] as unknown as KibanaFeature[]);
+
+      spacesStart = createSpacesDisabledFeaturesMock();
+
+      auth = await Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        spaces: spacesStart,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+    });
+
+    it('handles multiple operations successfully when authorized', async () => {
+      await expect(
+        auth.ensureAuthorized({
+          entities: [{ id: '1', owner: 'a' }],
+          operation: [Operations.createCase, Operations.getCase],
+        })
+      ).resolves.not.toThrow();
+
+      expect(mockLogger.log.mock.calls).toMatchSnapshot();
+    });
+
+    it('throws on first unauthorized operation in array', async () => {
+      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async () => ({ hasAllRequested: false }))
+      );
+
+      await expect(
+        auth.ensureAuthorized({
+          entities: [{ id: '1', owner: 'a' }],
+          operation: [Operations.createCase, Operations.getCase],
+        })
+      ).rejects.toThrow('Unauthorized to create, access case with owners: "a"');
+
+      expect(mockLogger.log.mock.calls).toMatchSnapshot();
+    });
+
+    it('logs each operation separately', async () => {
+      await auth.ensureAuthorized({
+        entities: [{ id: '1', owner: 'a' }],
+        operation: [Operations.createCase, Operations.getCase],
+      });
+
+      expect(mockLogger.log).toHaveBeenCalledTimes(2);
+      expect(mockLogger.log.mock.calls).toMatchSnapshot();
+    });
+
+    it('handles empty operation array', async () => {
+      await expect(
+        auth.ensureAuthorized({
+          entities: [{ id: '1', owner: 'a' }],
+          operation: [],
+        })
+      ).resolves.not.toThrow();
+    });
+  });
 });

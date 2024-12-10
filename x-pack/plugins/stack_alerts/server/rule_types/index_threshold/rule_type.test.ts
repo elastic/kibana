@@ -231,6 +231,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(alertServices.alertsClient.report).toHaveBeenCalledWith({
@@ -327,6 +328,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -397,6 +399,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -466,6 +469,7 @@ describe('ruleType', () => {
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       getTimeRange,
+      isServerless: false,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

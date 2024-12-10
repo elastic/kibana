@@ -36,6 +36,7 @@ describe('getCasesConnectorType', () => {
         'cases:my-owner/updateComment',
         'cases:my-owner/deleteComment',
         'cases:my-owner/findConfigurations',
+        'cases:my-owner/reopenCase',
       ]);
     });
 
@@ -356,6 +357,7 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/updateComment',
           'cases:securitySolution/deleteComment',
           'cases:securitySolution/findConfigurations',
+          'cases:securitySolution/reopenCase',
         ]);
       });
 
@@ -364,7 +366,7 @@ describe('getCasesConnectorType', () => {
 
         expect(
           adapter.getKibanaPrivileges?.({
-            consumer: 'alerting',
+            consumer: 'not-exist',
             producer: AlertConsumers.LOGS,
           })
         ).toEqual([
@@ -376,6 +378,7 @@ describe('getCasesConnectorType', () => {
           'cases:observability/updateComment',
           'cases:observability/deleteComment',
           'cases:observability/findConfigurations',
+          'cases:observability/reopenCase',
         ]);
       });
 
@@ -384,7 +387,7 @@ describe('getCasesConnectorType', () => {
 
         expect(
           adapter.getKibanaPrivileges?.({
-            consumer: 'alerting',
+            consumer: 'alerts',
             producer: AlertConsumers.LOGS,
           })
         ).toEqual([
@@ -396,6 +399,7 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/updateComment',
           'cases:securitySolution/deleteComment',
           'cases:securitySolution/findConfigurations',
+          'cases:securitySolution/reopenCase',
         ]);
       });
     });

@@ -215,7 +215,6 @@ xpack.task_manager.metrics_reset_interval: 120000
 # Reporting feature
 xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
-xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 
@@ -229,3 +228,8 @@ monitoring.ui.enabled: false
 xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
+
+## Data Usage in stack management
+xpack.dataUsage.enabled: true
+# This feature is disabled in Serverless until fully tested within a Serverless environment
+xpack.dataUsage.enableExperimental: ['dataUsageDisabled']

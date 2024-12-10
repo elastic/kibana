@@ -7,8 +7,12 @@
 
 import { SERVERLESS_DEFAULT_OUTPUT_ID } from '../../constants';
 import { agentPolicyService, appContextService, outputService } from '../../services';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { postOutputHandler, putOutputHandler } from './handler';
+
+const putOutputHandlerWithErrorHandler = withDefaultErrorHandler(putOutputHandler);
+const postOutputHandlerWithErrorHandler = withDefaultErrorHandler(postOutputHandler);
 
 describe('output handler', () => {
   const mockContext = {
@@ -41,7 +45,7 @@ describe('output handler', () => {
   it('should return error on post output using remote_elasticsearch in serverless', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await postOutputHandler(
+    const res = await postOutputHandlerWithErrorHandler(
       mockContext,
       { body: { id: 'output1', type: 'remote_elasticsearch' } } as any,
       mockResponse as any
@@ -58,7 +62,7 @@ describe('output handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await postOutputHandler(
+    const res = await postOutputHandlerWithErrorHandler(
       mockContext,
       { body: { type: 'remote_elasticsearch' } } as any,
       mockResponse as any
@@ -70,7 +74,7 @@ describe('output handler', () => {
   it('should return error on put output using remote_elasticsearch in serverless', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await putOutputHandler(
+    const res = await putOutputHandlerWithErrorHandler(
       mockContext,
       { body: { type: 'remote_elasticsearch' }, params: { outputId: 'output1' } } as any,
       mockResponse as any
@@ -87,7 +91,7 @@ describe('output handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await putOutputHandler(
+    const res = await putOutputHandlerWithErrorHandler(
       mockContext,
       { body: { type: 'remote_elasticsearch' }, params: { outputId: 'output1' } } as any,
       mockResponse as any
@@ -99,7 +103,7 @@ describe('output handler', () => {
   it('should return error on post elasticsearch output in serverless if host url is different from default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await postOutputHandler(
+    const res = await postOutputHandlerWithErrorHandler(
       mockContext,
       { body: { id: 'output1', type: 'elasticsearch', hosts: ['http://localhost:8080'] } } as any,
       mockResponse as any
@@ -117,7 +121,7 @@ describe('output handler', () => {
   it('should return ok on post elasticsearch output in serverless if host url is same as default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await postOutputHandler(
+    const res = await postOutputHandlerWithErrorHandler(
       mockContext,
       {
         body: { id: 'output1', type: 'elasticsearch', hosts: ['http://elasticsearch:9200'] },
@@ -133,7 +137,7 @@ describe('output handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await postOutputHandler(
+    const res = await postOutputHandlerWithErrorHandler(
       mockContext,
       { body: { id: 'output1', type: 'elasticsearch', hosts: ['http://localhost:8080'] } } as any,
       mockResponse as any
@@ -153,7 +157,7 @@ describe('output handler', () => {
       }
     });
 
-    const res = await putOutputHandler(
+    const res = await putOutputHandlerWithErrorHandler(
       mockContext,
       {
         body: { hosts: ['http://localhost:8080'] },
@@ -174,7 +178,7 @@ describe('output handler', () => {
   it('should return ok on put elasticsearch output in serverless if host url is same as default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await putOutputHandler(
+    const res = await putOutputHandlerWithErrorHandler(
       mockContext,
       {
         body: { hosts: ['http://elasticsearch:9200'] },
@@ -189,7 +193,7 @@ describe('output handler', () => {
   it('should return ok on put elasticsearch output in serverless if host url is not passed', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await putOutputHandler(
+    const res = await putOutputHandlerWithErrorHandler(
       mockContext,
       {
         body: { name: 'Renamed output' },
@@ -206,7 +210,7 @@ describe('output handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await putOutputHandler(
+    const res = await putOutputHandlerWithErrorHandler(
       mockContext,
       {
         body: { hosts: ['http://localhost:8080'] },
@@ -223,7 +227,7 @@ describe('output handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await postOutputHandler(
+    const res = await postOutputHandlerWithErrorHandler(
       mockContext,
       {
         body: {
@@ -246,7 +250,7 @@ describe('output handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await postOutputHandler(
+    const res = await postOutputHandlerWithErrorHandler(
       mockContext,
       { body: { type: 'remote_elasticsearch', secrets: { service_token: 'token2' } } } as any,
       mockResponse as any

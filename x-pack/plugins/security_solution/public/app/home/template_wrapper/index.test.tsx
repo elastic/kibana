@@ -22,32 +22,11 @@ jest.mock('./timeline', () => ({
   Timeline: () => <div>{'Timeline'}</div>,
 }));
 
-jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => {
-  return {
-    useSecuritySolutionNavigation: () => ({
-      icon: 'logoSecurity',
-      items: [
-        {
-          id: 'investigate',
-          name: 'Investigate',
-          items: [
-            {
-              'data-href': 'some-data-href',
-              'data-test-subj': 'navigation-cases',
-              disabled: false,
-              href: 'some-href',
-              id: 'cases',
-              isSelected: true,
-              name: 'Cases',
-            },
-          ],
-          tabIndex: undefined,
-        },
-      ],
-      name: 'Security',
-    }),
-  };
-});
+const navProps = { icon: 'logoSecurity', items: [], name: 'Security' };
+const mockUseSecuritySolutionNavigation = jest.fn();
+jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => ({
+  useSecuritySolutionNavigation: () => mockUseSecuritySolutionNavigation(),
+}));
 
 const mockUseRouteSpy = jest.fn((): [{ pageName: string }] => [
   { pageName: SecurityPageName.alerts },
@@ -69,6 +48,39 @@ const renderComponent = ({
 describe('SecuritySolutionTemplateWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSecuritySolutionNavigation.mockReturnValue(navProps);
+  });
+
+  describe('when navigation props are defined (classic nav)', () => {
+    beforeEach(() => {
+      mockUseSecuritySolutionNavigation.mockReturnValue(navProps);
+    });
+    it('should render the children', async () => {
+      const { queryByText } = renderComponent();
+      expect(queryByText('child of wrapper')).toBeInTheDocument();
+    });
+  });
+
+  describe('when navigation props are null (project nav)', () => {
+    beforeEach(() => {
+      mockUseSecuritySolutionNavigation.mockReturnValue(null);
+    });
+
+    it('should render the children', async () => {
+      const { queryByText } = renderComponent();
+      expect(queryByText('child of wrapper')).toBeInTheDocument();
+    });
+  });
+
+  describe('when navigation props are undefined (loading)', () => {
+    beforeEach(() => {
+      mockUseSecuritySolutionNavigation.mockReturnValue(undefined);
+    });
+
+    it('should not render the children', async () => {
+      const { queryByText } = renderComponent();
+      expect(queryByText('child of wrapper')).not.toBeInTheDocument();
+    });
   });
 
   it('Should render with bottom bar when user allowed', async () => {

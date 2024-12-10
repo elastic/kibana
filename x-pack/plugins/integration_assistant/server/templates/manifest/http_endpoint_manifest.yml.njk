@@ -32,7 +32,8 @@
       title: Dataset name
       description: |
         Dataset to write data to. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
-      default: http_endpoint.generic
+      default: |
+        {{ package_name }}.{{ data_stream_name }}
       required: true
       show_user: true
     - name: pipeline
@@ -40,12 +41,6 @@
       title: Ingest Pipeline
       description: |
         The Ingest Node pipeline ID to be used by the integration.
-      required: false
-      show_user: true
-    - name: preserve_original_event
-      type: bool
-      title: Preserve Original Event
-      description: This option copies the raw unmodified body of the incoming request to the event.original field as a string before sending the event to Elasticsearch.
       required: false
       show_user: true
     - name: prefix

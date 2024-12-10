@@ -262,12 +262,16 @@ export const getDiscoverAppStateContainer = ({
 
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
 
+    // Set the default profile state only if not loading a saved search,
+    // to avoid overwriting saved search state
     if (!currentSavedSearch.id) {
-      const { columns, rowHeight } = getCurrentUrlState(stateStorage, services);
+      const { breakdownField, columns, rowHeight } = getCurrentUrlState(stateStorage, services);
 
+      // Only set default state which is not already set in the URL
       internalStateContainer.transitions.setResetDefaultProfileState({
         columns: columns === undefined,
         rowHeight: rowHeight === undefined,
+        breakdownField: breakdownField === undefined,
       });
     }
 

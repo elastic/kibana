@@ -44,8 +44,6 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
      * Group all tests of a page into one "it" call to improve speed
      */
     it(`inspect ${pageName} page`, () => {
-      login();
-
       visitWithTimeRange(url, {
         visitOptions: {
           onLoad: () => {

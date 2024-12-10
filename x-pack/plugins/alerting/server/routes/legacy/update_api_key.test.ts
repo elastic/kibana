@@ -13,6 +13,7 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -28,11 +29,13 @@ beforeEach(() => {
 });
 
 describe('updateApiKeyRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('updates api key for an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateApiKeyRoute(router, licenseState);
+    updateApiKeyRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -69,7 +72,7 @@ describe('updateApiKeyRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateApiKeyRoute(router, licenseState, undefined, true);
+    updateApiKeyRoute(router, licenseState, docLinks, undefined, true);
 
     const [config] = router.post.mock.calls[0];
 
@@ -81,7 +84,7 @@ describe('updateApiKeyRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateApiKeyRoute(router, licenseState);
+    updateApiKeyRoute(router, licenseState, docLinks);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -105,12 +108,37 @@ describe('updateApiKeyRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    updateApiKeyRoute(router, licenseState, mockUsageCounter);
+    updateApiKeyRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('updateApiKey', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateApiKeyRoute(router, licenseState, docLinks);
+
+    const [config] = router.post.mock.calls[0];
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "POST",
+          "newApiPath": "/api/alerting/rule/{id}/_update_api_key",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

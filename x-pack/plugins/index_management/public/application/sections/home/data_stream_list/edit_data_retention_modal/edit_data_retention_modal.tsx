@@ -161,6 +161,8 @@ const MixedIndicesCallout = ({
   dataStreamName,
   history,
 }: MixedIndicesCalloutProps) => {
+  const { core } = useAppContext();
+
   return (
     <EuiCallOut
       title={i18n.translate(
@@ -177,7 +179,10 @@ const MixedIndicesCallout = ({
           defaultMessage="One or more indices are managed by an ILM policy ({viewAllIndicesLink}). Updating data retention for this data stream won't affect these indices. Instead you will have to update the {ilmPolicyLink} policy."
           values={{
             ilmPolicyLink: (
-              <EuiLink data-test-subj="viewIlmPolicyLink" href={ilmPolicyLink}>
+              <EuiLink
+                data-test-subj="viewIlmPolicyLink"
+                onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
+              >
                 {ilmPolicyName}
               </EuiLink>
             ),

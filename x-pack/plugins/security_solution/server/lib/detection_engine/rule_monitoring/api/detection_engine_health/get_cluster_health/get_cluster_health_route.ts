@@ -36,8 +36,10 @@ export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
     .get({
       access: 'internal',
       path: GET_CLUSTER_HEALTH_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -62,8 +64,10 @@ export const getClusterHealthRoute = (router: SecuritySolutionPluginRouter) => {
     .post({
       access: 'internal',
       path: GET_CLUSTER_HEALTH_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

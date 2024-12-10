@@ -106,7 +106,7 @@ const resolveDataViewReference = async (
   });
 
   return {
-    indices: dataView.title,
+    indices: dataView.getIndexPattern(),
     timestampField: dataView.timeFieldName ?? TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],

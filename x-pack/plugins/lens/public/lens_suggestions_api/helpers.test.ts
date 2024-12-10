@@ -7,7 +7,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { mergeSuggestionWithVisContext } from './helpers';
 import { mockAllSuggestions } from '../mocks';
-import type { TypedLensByValueInput } from '../embeddable/embeddable_component';
+import { TypedLensByValueInput } from '../react_embeddable/types';
 
 const context = {
   dataViewSpec: {

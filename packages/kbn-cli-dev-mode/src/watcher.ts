@@ -26,7 +26,8 @@ const packageMatcher = makeMatcher([
 /**
  * Any code that is outside of a package must match this in order to trigger a restart
  */
-const nonPackageMatcher = makeMatcher(['config/**/*.yml']);
+const nonPackageMatcher = makeMatcher(['config/**/*.yml', 'plugins/**/server/**/*']);
+const staticFileMatcher = makeMatcher(['plugins/**/kibana.json']);
 
 export interface Options {
   enabled: boolean;
@@ -86,6 +87,10 @@ export class Watcher {
 
           if (result.type === 'non-package') {
             return nonPackageMatcher(result.repoRel) && fire(result.repoRel);
+          }
+
+          if (result.type === 'static') {
+            return staticFileMatcher(result.repoRel) && fire(result.repoRel);
           }
         }
       },

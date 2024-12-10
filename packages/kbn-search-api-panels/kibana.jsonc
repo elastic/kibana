@@ -1,5 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/search-api-panels",
-  "owner": "@elastic/search-kibana"
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  // FIXME? @kbn/index-management-plugin depends on it
+  "group": "platform",
+  "visibility": "shared"
 }

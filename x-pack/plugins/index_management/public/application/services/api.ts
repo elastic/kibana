@@ -400,6 +400,16 @@ export async function getMatchingIndices(pattern: string) {
   return result;
 }
 
+export async function getMatchingDataStreams(pattern: string) {
+  const result = sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_data_streams`,
+    method: 'post',
+    body: JSON.stringify({ pattern }),
+  });
+
+  return result;
+}
+
 export async function getFieldsFromIndices(indices: string[]) {
   const result = sendRequest<FieldFromIndicesRequest>({
     path: `${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`,

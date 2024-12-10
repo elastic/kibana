@@ -11,7 +11,6 @@ import type {
   DataUsagePublicStart,
   DataUsageSetupDependencies,
   DataUsageStartDependencies,
-  ConfigSchema,
 } from './types';
 import { DataUsagePlugin } from './plugin';
 
@@ -22,4 +21,5 @@ export const plugin: PluginInitializer<
   DataUsagePublicStart,
   DataUsageSetupDependencies,
   DataUsageStartDependencies
-> = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) => new DataUsagePlugin();
+> = (pluginInitializerContext: PluginInitializerContext) =>
+  new DataUsagePlugin(pluginInitializerContext);

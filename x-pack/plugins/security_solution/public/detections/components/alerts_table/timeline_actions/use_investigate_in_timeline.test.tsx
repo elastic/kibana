@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+
+import { fireEvent, render, waitFor, renderHook, act } from '@testing-library/react';
 import { of } from 'rxjs';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -112,114 +112,110 @@ const mockSendAlertToTimeline = jest.spyOn(actions, 'sendAlertToTimelineAction')
 });
 
 const mockTimelineTemplateResponse = {
-  data: {
-    getOneTimeline: {
-      savedObjectId: '15bc8185-06ef-4956-b7e7-be8e289b13c2',
-      version: 'WzIzMzUsMl0=',
-      columns: [
-        {
-          columnHeaderType: 'not-filtered',
-          id: '@timestamp',
-          type: 'date',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'host.name',
-        },
-        {
-          columnHeaderType: 'not-filtered',
-          id: 'user.name',
-        },
-      ],
-      dataProviders: [
-        {
-          and: [],
-          enabled: true,
-          id: 'some-random-id',
-          name: 'host.name',
-          excluded: false,
-          kqlQuery: '',
-          queryMatch: {
-            field: 'host.name',
-            value: '{host.name}',
-            operator: ':',
-          },
-          type: 'template',
-        },
-      ],
-      dataViewId: 'security-solution-default',
-      description: '',
-      eqlOptions: {
-        eventCategoryField: 'event.category',
-        tiebreakerField: '',
-        timestampField: '@timestamp',
-        query: '',
-        size: 100,
+  savedObjectId: '15bc8185-06ef-4956-b7e7-be8e289b13c2',
+  version: 'WzIzMzUsMl0=',
+  columns: [
+    {
+      columnHeaderType: 'not-filtered',
+      id: '@timestamp',
+      type: 'date',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'host.name',
+    },
+    {
+      columnHeaderType: 'not-filtered',
+      id: 'user.name',
+    },
+  ],
+  dataProviders: [
+    {
+      and: [],
+      enabled: true,
+      id: 'some-random-id',
+      name: 'host.name',
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: 'host.name',
+        value: '{host.name}',
+        operator: ':',
       },
-      eventType: 'all',
-      excludedRowRendererIds: [
-        'alert',
-        'alerts',
-        'auditd',
-        'auditd_file',
-        'library',
-        'netflow',
-        'plain',
-        'registry',
-        'suricata',
-        'system',
-        'system_dns',
-        'system_endgame_process',
-        'system_file',
-        'system_fim',
-        'system_security_event',
-        'system_socket',
-        'threat_match',
-        'zeek',
-      ],
-      favorite: [],
-      filters: [],
-      indexNames: ['.alerts-security.alerts-default', 'auditbeat-*', 'filebeat-*', 'packetbeat-*'],
-      kqlMode: 'filter',
-      kqlQuery: {
-        filterQuery: {
-          kuery: {
-            kind: 'kuery',
-            expression: '*',
-          },
-          serializedQuery: '{"query_string":{"query":"*"}}',
-        },
+      type: 'template',
+    },
+  ],
+  dataViewId: 'security-solution-default',
+  description: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
+    query: '',
+    size: 100,
+  },
+  eventType: 'all',
+  excludedRowRendererIds: [
+    'alert',
+    'alerts',
+    'auditd',
+    'auditd_file',
+    'library',
+    'netflow',
+    'plain',
+    'registry',
+    'suricata',
+    'system',
+    'system_dns',
+    'system_endgame_process',
+    'system_file',
+    'system_fim',
+    'system_security_event',
+    'system_socket',
+    'threat_match',
+    'zeek',
+  ],
+  favorite: [],
+  filters: [],
+  indexNames: ['.alerts-security.alerts-default', 'auditbeat-*', 'filebeat-*', 'packetbeat-*'],
+  kqlMode: 'filter',
+  kqlQuery: {
+    filterQuery: {
+      kuery: {
+        kind: 'kuery',
+        expression: '*',
       },
-      title: 'Named Template',
-      templateTimelineId: 'c755cda6-8a65-4ec2-b6ff-35a5356de8b9',
-      templateTimelineVersion: 1,
-      dateRange: {
-        start: '2024-08-13T22:00:00.000Z',
-        end: '2024-08-14T21:59:59.999Z',
-      },
-      savedQueryId: null,
-      created: 1723625359467,
-      createdBy: 'elastic',
-      updated: 1723625359988,
-      updatedBy: 'elastic',
-      timelineType: 'template',
-      status: 'active',
-      sort: [
-        {
-          columnId: '@timestamp',
-          columnType: 'date',
-          sortDirection: 'desc',
-          esTypes: ['date'],
-        },
-      ],
-      savedSearchId: null,
-      eventIdToNoteIds: [],
-      noteIds: [],
-      notes: [],
-      pinnedEventIds: [],
-      pinnedEventsSaveObject: [],
+      serializedQuery: '{"query_string":{"query":"*"}}',
     },
   },
+  title: 'Named Template',
+  templateTimelineId: 'c755cda6-8a65-4ec2-b6ff-35a5356de8b9',
+  templateTimelineVersion: 1,
+  dateRange: {
+    start: '2024-08-13T22:00:00.000Z',
+    end: '2024-08-14T21:59:59.999Z',
+  },
+  savedQueryId: null,
+  created: 1723625359467,
+  createdBy: 'elastic',
+  updated: 1723625359988,
+  updatedBy: 'elastic',
+  timelineType: 'template',
+  status: 'active',
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      sortDirection: 'desc',
+      esTypes: ['date'],
+    },
+  ],
+  savedSearchId: null,
+  eventIdToNoteIds: [],
+  noteIds: [],
+  notes: [],
+  pinnedEventIds: [],
+  pinnedEventsSaveObject: [],
 };
 
 const props = {
