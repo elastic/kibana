@@ -85,7 +85,7 @@ export const ConnectorConfigurationFormItems: React.FC<ConnectorConfigurationFor
                 <EuiCallOut
                   size="s"
                   color="warning"
-                  title={`You will need to reenter you ${label} each time you edit the connector`}
+                  title={`You will need to reenter your ${label} each time you edit the connector`}
                 />
               </>
             ) : null}
