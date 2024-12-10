@@ -23,7 +23,7 @@ describe('FetchAnalyticsCollectionsApiLogic', () => {
       http.get.mockReturnValue(promise);
       const result = fetchAnalyticsCollections({});
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/analytics/collections', {
+      expect(http.get).toHaveBeenCalledWith('/internal/elasticsearch/analytics/collections', {
         query: { query: '' },
       });
       await expect(result).resolves.toEqual([{ name: 'result' }]);

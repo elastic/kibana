@@ -89,7 +89,7 @@ export const ANALYTICS_PLUGIN = {
     defaultMessage:
       'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
   }),
-  URL: '/app/enterprise_search/analytics',
+  URL: '/app/elasticsearch/analytics',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
@@ -162,7 +162,7 @@ export const APPLICATIONS_PLUGIN = {
     defaultMessage: 'Build',
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-  URL: '/app/enterprise_search/applications',
+  URL: '/app/elasticsearch/applications',
 };
 
 export const VECTOR_SEARCH_PLUGIN = {
