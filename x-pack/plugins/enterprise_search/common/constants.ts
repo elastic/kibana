@@ -72,7 +72,7 @@ export const AI_SEARCH_PLUGIN = {
     defaultMessage:
       'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
   }),
-  URL: '/app/enterprise_search/ai_search',
+  URL: '/app/elasticsearch/ai_search',
   LOGO: 'logoEnterpriseSearch',
 };
 
@@ -101,7 +101,7 @@ export const ELASTICSEARCH_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productDescription', {
     defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
   }),
-  URL: '/app/enterprise_search/elasticsearch',
+  URL: '/app/elasticsearch/elasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
 };
 
@@ -179,7 +179,7 @@ export const VECTOR_SEARCH_PLUGIN = {
     defaultMessage: 'Vector Search',
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-  URL: '/app/enterprise_search/vector_search',
+  URL: '/app/elasticsearch/vector_search',
 };
 
 export const SEMANTIC_SEARCH_PLUGIN = {
@@ -196,7 +196,7 @@ export const SEMANTIC_SEARCH_PLUGIN = {
     defaultMessage: 'Semantic Search',
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-  URL: '/app/enterprise_search/semantic_search',
+  URL: '/app/elasticsearch/semantic_search',
 };
 
 export const CREATE_CONNECTOR_PLUGIN = {
@@ -224,7 +224,7 @@ export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
 export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
-export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
+export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/elasticsearch/elasticsearch';
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
 export const PLAYGROUND_URL = '/playground';
