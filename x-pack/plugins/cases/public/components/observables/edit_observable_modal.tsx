@@ -11,20 +11,39 @@ import type { ObservablePatch } from '../../../common/types/api/observable/v1';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import { ObservableForm } from './observable_form';
 import * as i18n from './translations';
+import { usePatchObservable } from '../../containers/use_patch_observables';
+import { type CaseUI } from '../../containers/types';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useCasesToast } from '../../common/use_cases_toast';
 
 export interface EditObservableModalProps {
   closeModal: VoidFunction;
-  isLoading: boolean;
-  handleUpdateObservable: (observable: ObservablePatch) => Promise<void>;
   observable: Observable;
+  caseData: CaseUI;
 }
 
 export const EditObservableModal: FC<EditObservableModalProps> = ({
   closeModal,
-  isLoading,
-  handleUpdateObservable,
   observable,
+  caseData,
 }) => {
+  const { isLoading, mutateAsync: patchObservable } = usePatchObservable(
+    caseData.id,
+    observable.id as string
+  );
+  const refreshCaseViewPage = useRefreshCaseViewPage();
+  const { showSuccessToast } = useCasesToast();
+
+  const handleUpdateObservable = async (updatedObservable: ObservablePatch) => {
+    patchObservable({
+      observable: updatedObservable,
+    }).then(() => {
+      closeModal();
+      showSuccessToast(i18n.OBSERVABLE_UPDATED);
+      refreshCaseViewPage();
+    });
+  };
+
   return (
     <EuiModal data-test-subj="case-observables-edit-modal" onClose={closeModal}>
       <EuiModalHeader>

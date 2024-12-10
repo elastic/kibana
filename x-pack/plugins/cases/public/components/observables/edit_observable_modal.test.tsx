@@ -10,36 +10,24 @@ import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { EditObservableModal, type EditObservableModalProps } from './edit_observable_modal';
-import { type ObservableFormProps } from './observable_form';
-import type { ObservablePatch } from '../../../common/types/api/observable/v1';
+import { mockCase } from '../../containers/mock';
+import { patchObservable } from '../../containers/api';
 
-jest.mock('./observable_form', () => ({
-  ObservableForm: (props: ObservableFormProps) => (
-    <>
-      <button type="button" onClick={() => props.onSubmit({} as ObservablePatch)}>
-        {'Save observable'}
-      </button>
-      <button type="button" onClick={props.onCancel}>
-        {'Cancel'}
-      </button>
-    </>
-  ),
-}));
+jest.mock('../../containers/api');
 
 describe('EditObservableModal', () => {
   let appMock: AppMockRenderer;
   const props: EditObservableModalProps = {
-    isLoading: false,
     closeModal: jest.fn(),
+    caseData: mockCase,
     observable: {
-      value: '',
+      value: 'test',
       typeKey: '67ac7899-2cc0-4ce5-80d3-0f4a2d2af33e',
       id: '84279197-3746-47fb-ba4d-c7946a7feb88',
       createdAt: '2024-10-01',
       updatedAt: '2024-10-01',
       description: '',
     },
-    handleUpdateObservable: jest.fn(),
   };
 
   beforeEach(() => {
@@ -60,7 +48,7 @@ describe('EditObservableModal', () => {
     expect(result.getByText('Save observable')).toBeInTheDocument();
     await userEvent.click(result.getByText('Save observable'));
 
-    expect(props.handleUpdateObservable).toHaveBeenCalled();
+    expect(patchObservable).toHaveBeenCalled();
   });
 
   it('calls onCancel', async () => {

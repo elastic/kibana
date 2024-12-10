@@ -21,7 +21,6 @@ import { useDeletePropertyAction } from '../user_actions/property_actions/use_de
 import { type CaseUI } from '../../containers/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { EditObservableModal } from './edit_observable_modal';
-import { usePatchObservable } from '../../containers/use_patch_observables';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
 
 export const ObservableActionsPopoverButton: React.FC<{
@@ -33,17 +32,12 @@ export const ObservableActionsPopoverButton: React.FC<{
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const { isLoading: isUpdateLoading, mutateAsync: patchObservable } = usePatchObservable(
-    caseData.id,
-    observable.id as string
-  );
-
   const { isLoading: isDeleteLoading, mutateAsync: deleteObservable } = useDeleteObservable(
     caseData.id,
     observable.id as string
   );
 
-  const isLoading = isUpdateLoading || isDeleteLoading;
+  const isLoading = isDeleteLoading;
 
   const { showSuccessToast } = useCasesToast();
   const {
@@ -144,16 +138,7 @@ export const ObservableActionsPopoverButton: React.FC<{
       )}
       {showEditModal && (
         <EditObservableModal
-          isLoading={isLoading}
-          handleUpdateObservable={async (updatedObservable) => {
-            patchObservable({
-              observable: updatedObservable,
-            }).then(() => {
-              setShowEditModal(false);
-              showSuccessToast(i18n.OBSERVABLE_UPDATED);
-              refreshCaseViewPage();
-            });
-          }}
+          caseData={caseData}
           observable={observable}
           closeModal={() => setShowEditModal(false)}
         />
