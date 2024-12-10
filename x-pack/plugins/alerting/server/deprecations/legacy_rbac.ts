@@ -54,7 +54,7 @@ export const getLegacyRbacDeprecationsInfo = async ({
         deprecationType: 'feature',
         message: i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.message', {
           defaultMessage:
-            'The legacy RBAC exemption for Alerting rules has been removed in future versions, and this cluster has alerting rules triggering actions that rely on the legacy exemption. The affected alerting rules will fail to trigger connector actions whenever alerts are found',
+            'The legacy role-based action control exemption for alerting rules has been removed in future versions. This cluster has alerting rules triggering actions that rely on the legacy exemption. The rules will fail to trigger actions for alerts.',
         }),
         correctiveActions: {
           manualSteps: [
