@@ -246,7 +246,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
-  serviceEntityStoreEnabled: true,
+  serviceEntityStoreEnabled: false,
 
   /**
    * Enables the siem migrations feature
@@ -262,6 +262,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables flyout history and new preview navigation
    */
   newExpandableFlyoutNavigationEnabled: false,
+
+  /**
+   * Enables CrowdStrike's RunScript RTR command
+   */
+
+  crowdstrikeRunScriptEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
