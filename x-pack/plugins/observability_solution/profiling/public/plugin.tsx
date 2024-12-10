@@ -100,7 +100,7 @@ export class ProfilingPlugin
             appUpdater$.next(() => ({
               deepLinks: links.map((link) => ({
                 ...link,
-                path: coreStart.application.getUrlForApp(`${link.path}?kuery=${kuery ?? ''}`),
+                path: `${link.path}?kuery=${encodeURIComponent(kuery) ?? ''}`,
               })),
             }));
           }
