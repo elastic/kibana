@@ -80,8 +80,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.openSection('category-management');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
       await testSubjects.click('app-card-maintenanceWindows');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Maintenance Windows' });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Stack Management',
+        'Maintenance Windows',
+      ]);
     });
   });
 }
