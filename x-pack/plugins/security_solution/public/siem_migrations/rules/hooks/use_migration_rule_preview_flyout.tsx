@@ -15,6 +15,7 @@ import type {
 import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
 
 interface UseMigrationRuleDetailsFlyoutParams {
+  isLoading?: boolean;
   prebuiltRules: Record<string, PrebuiltRuleVersion>;
   getMigrationRule: (ruleId: string) => RuleMigration | undefined;
   ruleActionsFactory: (ruleMigration: RuleMigration, closeRulePreview: () => void) => ReactNode;
@@ -28,6 +29,7 @@ interface UseMigrationRuleDetailsFlyoutResult {
 }
 
 export function useMigrationRuleDetailsFlyout({
+  isLoading,
   prebuiltRules,
   getMigrationRule,
   extraTabsFactory,
@@ -67,13 +69,13 @@ export function useMigrationRuleDetailsFlyout({
   return {
     migrationRuleDetailsFlyout: ruleMigration && (
       <MigrationRuleDetailsFlyout
-        migrationId={ruleMigration.migration_id}
-        migrationRuleId={ruleMigration.id}
+        ruleMigration={ruleMigration}
         matchedPrebuiltRule={matchedPrebuiltRule}
         size="l"
         closeFlyout={closeMigrationRuleDetails}
         ruleActions={ruleActions}
         extraTabs={extraTabs}
+        isDataLoading={isLoading}
       />
     ),
     openMigrationRuleDetails,

@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   RuleOverviewTab,
@@ -45,7 +46,6 @@ import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
-import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
 import { useUpdateMigrationRules } from '../../logic/use_update_migration_rules';
 
 /*
@@ -68,41 +68,32 @@ export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) 
 );
 
 interface MigrationRuleDetailsFlyoutProps {
-  migrationId: string;
-  migrationRuleId: string;
+  ruleMigration: RuleMigration;
   ruleActions?: React.ReactNode;
   matchedPrebuiltRule?: RuleResponse;
   size?: EuiFlyoutProps['size'];
   extraTabs?: EuiTabbedContentTab[];
+  isDataLoading?: boolean;
   closeFlyout: () => void;
 }
 
 export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProps> = React.memo(
   ({
     ruleActions,
-    migrationId,
-    migrationRuleId,
+    ruleMigration,
     matchedPrebuiltRule,
     size = 'm',
     extraTabs = [],
+    isDataLoading,
     closeFlyout,
   }: MigrationRuleDetailsFlyoutProps) => {
     const { addError } = useAppToasts();
 
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-    const { data: { ruleMigrations } = { ruleMigrations: [] }, isLoading: isDataLoading } =
-      useGetMigrationRules({
-        migrationId,
-        ids: [migrationRuleId],
-      });
-    const ruleMigration = useMemo(() => {
-      if (!isDataLoading && ruleMigrations.length === 1) {
-        return ruleMigrations[0];
-      }
-    }, [isDataLoading, ruleMigrations]);
-
-    const { mutateAsync: updateMigrationRules } = useUpdateMigrationRules(migrationId);
+    const { mutateAsync: updateMigrationRules } = useUpdateMigrationRules(
+      ruleMigration.migration_id
+    );
 
     const [isUpdating, setIsUpdating] = useState(false);
     const isLoading = isDataLoading || isUpdating;

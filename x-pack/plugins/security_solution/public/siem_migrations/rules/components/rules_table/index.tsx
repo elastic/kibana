@@ -237,6 +237,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
     } = useMigrationRuleDetailsFlyout({
+      isLoading,
       prebuiltRules,
       getMigrationRule,
       ruleActionsFactory,
