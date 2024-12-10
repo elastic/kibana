@@ -101,7 +101,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#logger = logger;
     this.#timeout = timeout;
     this.#actionResultData = '';
-    this.streaming = streaming;
+    this.streaming = this.llmType === 'inference' ? true : streaming;
     this.#signal = signal;
     this.model = model ?? DEFAULT_OPEN_AI_MODEL;
     // to be passed to the actions client
@@ -149,6 +149,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       );
 
       const actionResult = await this.#actionsClient.execute(requestBody);
+      console.log('actionResult', actionResult);
 
       if (actionResult.status === 'error') {
         const error = new Error(
@@ -217,9 +218,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     const subAction =
       llmType === 'inference'
-        ? completionRequest.stream
-          ? 'completion_stream'
-          : 'completion'
+        ? 'unified_completion'
         : // langchain expects stream to be of type AsyncIterator<OpenAI.ChatCompletionChunk>
         // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
         // which may contain non-content messages like functions
@@ -227,20 +226,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         ? 'invokeAsyncIterator'
         : 'run';
     // create a new connector request body with the assistant message:
-    const subActionParams =
-      llmType === 'inference'
-        ? {
-            input: body.messages.reduce((acc, i) => {
-              return `${acc + i.content}\n`;
-            }, ''),
-          }
-        : {
-            ...(completionRequest.stream ? body : { body: JSON.stringify(body) }),
-            signal: this.#signal,
-            // This timeout is large because LangChain prompts can be complicated and take a long time
-            timeout: this.#timeout ?? DEFAULT_TIMEOUT,
-          };
-    console.log('==> body', JSON.stringify(body, null, 2));
+    const subActionParams = {
+      ...(completionRequest.stream ? body : { body: JSON.stringify(body) }),
+      signal: this.#signal,
+      // This timeout is large because LangChain prompts can be complicated and take a long time
+      timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+    };
+    console.log('==> subAction', subAction);
     console.log('==> subActionParams', JSON.stringify(subActionParams, null, 2));
     return {
       actionId: this.#connectorId,
