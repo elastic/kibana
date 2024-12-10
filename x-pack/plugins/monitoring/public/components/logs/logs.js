@@ -175,7 +175,7 @@ export class LogsContent extends PureComponent {
   }
 
   renderCallout() {
-    const { capabilities: uiCapabilities, infra, kibanaServices } = Legacy.shims;
+    const { capabilities: uiCapabilities, kibanaServices } = Legacy.shims;
     const show = uiCapabilities.discover && uiCapabilities.discover.show;
 
     const {
@@ -191,7 +191,7 @@ export class LogsContent extends PureComponent {
       return null;
     }
 
-    return infra ? (
+    return (
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
@@ -217,7 +217,7 @@ export class LogsContent extends PureComponent {
           />
         </RedirectAppLinks>
       </EuiCallOut>
-    ) : null;
+    );
   }
 
   render() {

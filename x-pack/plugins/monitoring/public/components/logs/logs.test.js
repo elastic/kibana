@@ -15,7 +15,6 @@ jest.mock('../../legacy_shims', () => ({
     shims: {
       getBasePath: () => '',
       capabilities: { discover: { show: true } },
-      infra: {},
     },
   },
 }));
