@@ -7638,14 +7638,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: get-dashboards-dashboard
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: The page number to return. Default is "1".
           in: query
           name: page
@@ -7768,14 +7760,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: delete-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -7798,14 +7782,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: get-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A unique identifier for the dashboard.
           in: path
           name: id
@@ -8269,14 +8245,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: post-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -9110,14 +9078,6 @@ paths:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: put-dashboards-dashboard-id
       parameters:
-        - description: The version of the API to use
-          in: header
-          name: elastic-api-version
-          schema:
-            default: '2023-10-31'
-            enum:
-              - '2023-10-31'
-            type: string
         - description: A required header to protect against CSRF attacks
           in: header
           name: kbn-xsrf
@@ -11445,6 +11405,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/finalize_migration:
     post:
+      deprecated: true
       description: |
         Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
         The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
@@ -11499,6 +11460,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration:
     delete:
+      deprecated: true
       description: |
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
         the migration process. A successful migration will result in both the old and new indices being present.
@@ -11556,6 +11518,7 @@ paths:
       tags:
         - Security Detections API
     post:
+      deprecated: true
       description: |
         Initiate a migration of detection alerts.
         Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
@@ -11619,6 +11582,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration_status:
     post:
+      deprecated: true
       description: Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
@@ -41073,6 +41037,7 @@ components:
       enum:
         - user
         - host
+        - service
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object

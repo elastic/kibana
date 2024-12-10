@@ -533,8 +533,8 @@ x-pack/plugins/index_management @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/platform/packages/private/ml/inference_integration_flyout @elastic/ml-ui
-x-pack/packages/ai-infra/inference-common @elastic/appex-ai-infra
-x-pack/plugins/inference @elastic/appex-ai-infra
+x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
@@ -581,7 +581,7 @@ src/plugins/links @elastic/kibana-presentation
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
-x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
@@ -703,8 +703,8 @@ src/plugins/presentation_panel @elastic/kibana-presentation
 packages/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
-x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
-x-pack/packages/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
+x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
@@ -965,7 +965,7 @@ packages/kbn-timerange @elastic/obs-ux-logs-team
 packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 x-pack/platform/plugins/private/transform @elastic/ml-ui
-x-pack/plugins/translations @elastic/kibana-localization
+x-pack/platform/plugins/private/translations @elastic/kibana-localization
 packages/kbn-transpose-utils @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
