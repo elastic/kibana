@@ -88,7 +88,6 @@ packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
 packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
 packages/core/logging/core-logging-server-mocks @elastic/kibana-core
 packages/core/metrics/core-metrics-collectors-server-mocks @elastic/kibana-core
-packages/core/metrics/core-metrics-server @elastic/kibana-core
 packages/core/metrics/core-metrics-server-internal @elastic/kibana-core
 packages/core/metrics/core-metrics-server-mocks @elastic/kibana-core
 packages/core/mount-utils/core-mount-utils-browser @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/logging/common-internal @elastic/kibana-core
 src/core/packages/logging/server @elastic/kibana-core
 src/core/packages/logging/server-internal @elastic/kibana-core
 src/core/packages/metrics/collectors-server-internal @elastic/kibana-core
+src/core/packages/metrics/server @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
