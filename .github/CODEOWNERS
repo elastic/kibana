@@ -1043,8 +1043,6 @@ x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana
 ##  https://help.github.com/articles/about-codeowners/
 ####
 
-test.js @elastic/appex-qa # This is added for ease of testing for packages/kbn-test/src/mocha/junit_report_generation.test.js
-
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
