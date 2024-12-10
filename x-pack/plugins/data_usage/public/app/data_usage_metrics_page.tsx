@@ -15,7 +15,7 @@ export interface DataUsageMetricsPageProps {
   'data-test-subj'?: string;
 }
 export const DataUsageMetricsPage = memo<DataUsageMetricsPageProps>(
-  ({ 'data-test-subj': dataTestSubj }) => {
+  ({ 'data-test-subj': dataTestSubj = 'DataUsagePage' }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
