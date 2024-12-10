@@ -11,15 +11,32 @@ import { AssistantNavLink } from './assistant_nav_link';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { ChromeNavControl } from '@kbn/core/public';
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { of } from 'rxjs';
 
 const MockNavigationBar = OutPortal;
 
 const mockShowAssistantOverlay = jest.fn();
 const mockNavControls = chromeServiceMock.createStartContract().navControls;
+const mockGetChromeStyle = jest.fn()
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  return {
+      ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+      useKibana: () => ({
+        services: {
+          chrome: {
+            getChromeStyle$: mockGetChromeStyle
+          }
+        }
+      })
+  };
+});
 
 describe('AssistantNavLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetChromeStyle.mockReturnValue(of("classic"))
   });
 
   it('should register link in nav bar', () => {
@@ -28,10 +45,57 @@ describe('AssistantNavLink', () => {
         hasAssistantPrivilege
         showAssistantOverlay={mockShowAssistantOverlay}
         navControls={mockNavControls}
-        isServerless={false}
       />
     );
     expect(mockNavControls.registerRight).toHaveBeenCalledTimes(1);
+  });
+
+  it('button has transparent background in project navigation', () => {
+    const { result: portalNode } = renderHook(() =>
+      React.useMemo(() => createHtmlPortalNode(), [])
+    );
+
+    mockGetChromeStyle.mockReturnValue(of("project"))
+
+    mockNavControls.registerRight.mockImplementation((chromeNavControl: ChromeNavControl) => {
+      chromeNavControl.mount(portalNode.current.element);
+    });
+
+    const { queryByTestId } = render(
+      <>
+        <MockNavigationBar node={portalNode.current} />
+        <AssistantNavLink
+          hasAssistantPrivilege
+          showAssistantOverlay={mockShowAssistantOverlay}
+          navControls={mockNavControls}
+        />
+      </>
+    );
+    expect(queryByTestId('assistantNavLink')).not.toHaveStyle("background-color: rgb(204, 228, 245)")
+  });
+
+  it('button has opaque background in classic navigation', () => {
+    const { result: portalNode } = renderHook(() =>
+      React.useMemo(() => createHtmlPortalNode(), [])
+    );
+
+    mockGetChromeStyle.mockReturnValue(of("classic"))
+
+    mockNavControls.registerRight.mockImplementation((chromeNavControl: ChromeNavControl) => {
+      chromeNavControl.mount(portalNode.current.element);
+    });
+
+    const { queryByTestId } = render(
+      <>
+        <MockNavigationBar node={portalNode.current} />
+        <AssistantNavLink
+          hasAssistantPrivilege
+          showAssistantOverlay={mockShowAssistantOverlay}
+          navControls={mockNavControls}
+        />
+      </>
+    );
+    expect(queryByTestId('assistantNavLink')).toHaveStyle("background-color: rgb(204, 228, 245)")
   });
 
   it('should render the header link text', () => {
@@ -50,7 +114,6 @@ describe('AssistantNavLink', () => {
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
           navControls={mockNavControls}
-          isServerless={false}
         />
       </>
     );
@@ -74,7 +137,6 @@ describe('AssistantNavLink', () => {
           hasAssistantPrivilege={false}
           showAssistantOverlay={mockShowAssistantOverlay}
           navControls={mockNavControls}
-          isServerless={false}
         />
       </>
     );
@@ -98,7 +160,6 @@ describe('AssistantNavLink', () => {
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
           navControls={mockNavControls}
-          isServerless={false}
         />
       </>
     );

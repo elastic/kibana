@@ -79,7 +79,6 @@ export interface AssistantProviderProps {
   currentAppId: string;
   userProfileService: UserProfileService;
   navControls: ChromeNavControls;
-  isServerless: boolean;
 }
 
 export interface UserAvatar {
@@ -155,7 +154,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   currentAppId,
   userProfileService,
   navControls,
-  isServerless,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -352,7 +350,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
         hasAssistantPrivilege={assistantAvailability.hasAssistantPrivilege}
         showAssistantOverlay={showAssistantOverlay}
         navControls={navControls}
-        isServerless={isServerless}
       />
       {children}
     </AssistantContext.Provider>

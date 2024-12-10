@@ -45,7 +45,6 @@ window.scrollTo = jest.fn();
 const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
   children,
   navControls = chromeServiceMock.createStartContract().navControls,
-  isServerless = false,
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
@@ -92,7 +91,6 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
             currentAppId={'securitySolutionUI'}
             userProfileService={jest.fn() as unknown as UserProfileService}
             navControls={navControls}
-            isServerless={isServerless}
           >
             {children}
           </AssistantProvider>

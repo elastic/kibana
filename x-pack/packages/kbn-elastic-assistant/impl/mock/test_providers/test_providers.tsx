@@ -21,7 +21,6 @@ import { AssistantAvailability } from '../../assistant_context/types';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
-  isServerless?: boolean;
   navControls?: ChromeNavControls;
   children: React.ReactNode;
   providerContext?: Partial<AssistantProviderProps>;
@@ -42,7 +41,6 @@ export const mockAssistantAvailability: AssistantAvailability = {
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
-  isServerless = false,
   navControls = chromeServiceMock.createStartContract().navControls,
   children,
   providerContext,
@@ -91,7 +89,6 @@ export const TestProvidersComponent: React.FC<Props> = ({
             currentAppId={'test'}
             userProfileService={jest.fn() as unknown as UserProfileService}
             navControls={navControls}
-            isServerless={isServerless}
           >
             {children}
           </AssistantProvider>
