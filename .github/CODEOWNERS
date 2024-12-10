@@ -60,7 +60,6 @@ packages/core/analytics/core-analytics-server-mocks @elastic/kibana-core
 packages/core/application/core-application-browser-mocks @elastic/kibana-core
 packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
 packages/core/base/core-base-browser-mocks @elastic/kibana-core
-packages/core/base/core-base-common @elastic/kibana-core
 packages/core/base/core-base-common-internal @elastic/kibana-core
 packages/core/base/core-base-server-internal @elastic/kibana-core
 packages/core/base/core-base-server-mocks @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/application/common @elastic/kibana-core
 src/core/packages/apps/browser-internal @elastic/kibana-core
 src/core/packages/apps/server-internal @elastic/kibana-core
 src/core/packages/base/browser-internal @elastic/kibana-core
+src/core/packages/base/common @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql

@@ -27,7 +27,7 @@ DEPS = [
 ]
 
 js_library(
-  name = "core-base-common",
+  name = "common",
   package_name = "@kbn/core-base-common",
   srcs = ["package.json"] + SRCS,
   deps = DEPS,
