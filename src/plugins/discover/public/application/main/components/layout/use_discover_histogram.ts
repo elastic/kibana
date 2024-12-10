@@ -46,7 +46,7 @@ import {
   useAppStateSelector,
   type DiscoverAppState,
 } from '../../state_management/discover_app_state_container';
-import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import { DataDocumentsMsg, DataMain$ } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
@@ -132,22 +132,20 @@ export const useDiscoverHistogram = ({
    */
 
   useEffect(() => {
-    const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
-      (changes) => {
-        if ('timeInterval' in changes && changes.timeInterval) {
-          unifiedHistogram?.setTimeInterval(changes.timeInterval);
-        }
-
-        if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogram?.setChartHidden(changes.chartHidden);
-        }
+    const subscription = createAppStateObservable(main$).subscribe((changes) => {
+      if ('timeInterval' in changes && changes.timeInterval) {
+        unifiedHistogram?.setTimeInterval(changes.timeInterval);
       }
-    );
+
+      if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
+        unifiedHistogram?.setChartHidden(changes.chartHidden);
+      }
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [stateContainer.appState.state$, unifiedHistogram]);
+  }, [unifiedHistogram, main$]);
 
   /**
    * Total hits
@@ -446,7 +444,7 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
   );
 };
 
-const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
+const createAppStateObservable = (state$: DataMain$) => {
   return state$.pipe(
     startWith(undefined),
     pairwise(),
@@ -457,12 +455,12 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
         return changes;
       }
 
-      if (prev?.interval !== curr.interval) {
-        changes.timeInterval = curr.interval;
+      if (prev?.params?.timeInterval !== curr.params?.timeInterval) {
+        changes.timeInterval = curr.params?.timeInterval;
       }
 
-      if (prev?.hideChart !== curr.hideChart) {
-        changes.chartHidden = curr.hideChart;
+      if (prev?.params?.hideChart !== curr.params?.hideChart) {
+        changes.chartHidden = curr.params?.hideChart;
       }
 
       return changes;

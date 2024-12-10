@@ -126,9 +126,13 @@ export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$,
  * Needed when data view is switched or a new runtime field is added
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
+  const dataView = data.main$.getValue().params?.dataView;
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,
+    params: {
+      dataView,
+    },
   });
   data.documents$.next({ fetchStatus: initialFetchStatus, result: [] });
   data.totalHits$.next({ fetchStatus: initialFetchStatus, result: undefined });

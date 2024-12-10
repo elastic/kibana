@@ -61,8 +61,10 @@ export interface DataMainMsgParams {
   customFilters?: Filter[];
   dataView?: DataView;
   filters?: Filter[];
+  hideChart?: boolean;
   timeRange?: TimeRange;
   timeRangeRelative?: TimeRange;
+  timeInterval?: string;
   query?: AggregateQuery | Query | undefined;
 }
 
@@ -250,9 +252,11 @@ export function getDataStateContainer({
             customFilters: internalStateContainer.getState().customFilters,
             dataView: internalStateContainer.getState().dataView,
             filters: appStateContainer.getState().filters,
+            hideChart: appStateContainer.getState().hideChart,
             query: appStateContainer.getState().query,
             timeRange: timefilter.getAbsoluteTime(),
             timeRangeRelative: timefilter.getTime(),
+            timeInterval: appStateContainer.getState().interval,
           });
 
           if (options.fetchMore) {

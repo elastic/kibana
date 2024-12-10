@@ -277,7 +277,7 @@ function DiscoverDocumentsComponent({
     dataView,
     query,
     filters,
-    timeRange: main$.getValue().timeRange,
+    timeRange: main$.getValue().params?.timeRange,
   });
 
   const renderDocumentView = useCallback(
