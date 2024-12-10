@@ -6524,7 +6524,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/open-telemetry-instrumented-plugin@link:test/common/plugins/otel_metrics":
+"@kbn/open-telemetry-instrumented-plugin@link:src/platform/plugins/shared/otel_metrics":
   version "0.0.0"
   uid ""
 
