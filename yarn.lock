@@ -4016,7 +4016,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/avc-banner@link:packages/kbn-avc-banner":
+"@kbn/avc-banner@link:src/platform/packages/shared/kbn-avc-banner":
   version "0.0.0"
   uid ""
 

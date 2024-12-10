@@ -291,7 +291,6 @@ packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-types @elastic/obs-ux-infra_services-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
-packages/kbn-avc-banner @elastic/security-defend-workflows
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
@@ -621,6 +620,7 @@ src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
+src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
