@@ -8,7 +8,9 @@
 export * from './constants';
 
 export * from './actions';
+export * from './author';
 export * from './name';
 export * from './risk_score';
 export * from './severity';
 export * from './status';
+export * from './updated';

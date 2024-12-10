@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import { ContainerMetricTypes } from '../charts/types';
+import { useChartSeriesColor } from './use_chart_series_color';
 
 const getSubtitleFromFormula = (value: string) =>
   value.startsWith('max')
@@ -106,6 +107,8 @@ export const useDockerContainerKpiCharts = ({
   dataViewId?: string;
   seriesColor?: string;
 }) => {
+  seriesColor = useChartSeriesColor(seriesColor);
+
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('container');
     const { cpu, memory } = await model.metrics.getCharts();
@@ -134,6 +137,8 @@ export const useK8sContainerKpiCharts = ({
   dataViewId?: string;
   seriesColor?: string;
 }) => {
+  seriesColor = useChartSeriesColor(seriesColor);
+
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('container');
     const { cpu, memory } = await model.metrics.getCharts();
