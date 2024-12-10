@@ -291,7 +291,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-i18n/,
         /^packages\/kbn-i18n-react/,
         /^packages\/kbn-expandable-flyout/,
-        /^packages\/kbn-grouping/,
+        /^src\/platform\/packages\/shared\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
         /^packages\/kbn-rule-data-utils/,
