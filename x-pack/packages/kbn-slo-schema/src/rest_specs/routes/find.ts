@@ -29,7 +29,7 @@ const findSLOParamsSchema = t.partial({
     sortBy: sortBySchema,
     sortDirection: sortDirectionSchema,
     hideStale: toBooleanRt,
-    // Used for API pagination
+    // Used for cursor pagination, searchAfter is a stringified JSON array
     searchAfter: t.string,
     size: t.string,
   }),
@@ -42,7 +42,7 @@ const findSLOResponseSchema = t.intersection([
     total: t.number,
     results: t.array(sloWithDataResponseSchema),
   }),
-  t.partial({ searchAfter: t.string, size: t.number }),
+  t.partial({ searchAfter: t.array(t.union([t.string, t.number])), size: t.number }),
 ]);
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
