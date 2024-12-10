@@ -23,7 +23,6 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +37,7 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
