@@ -23,10 +23,10 @@ import {
   type DataFrameAnalyticsId,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';
@@ -39,7 +39,7 @@ import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
-import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
 
 const filters: EuiSearchBarProps['filters'] = [

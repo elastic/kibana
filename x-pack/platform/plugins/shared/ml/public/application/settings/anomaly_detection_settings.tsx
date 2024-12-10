@@ -22,10 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlApi } from '../contexts/kibana';
 import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 import { useToastNotificationService } from '../services/toast_notification_service';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 import { separateCalendarsByType } from './calendars/dst_utils';
 

@@ -7,7 +7,6 @@
 
 import React, { type FC, useMemo } from 'react';
 import './_index.scss';
-import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -19,8 +18,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
-import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
-import { ML_STORAGE_KEYS } from '../../common/types/storage';
+import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '@kbn/ml-common-constants/app';
+import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
@@ -35,7 +34,7 @@ export type MlDependencies = Omit<
 > &
   MlStartDependencies;
 
-interface AppProps {
+export interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
   appMountParams: AppMountParameters;
@@ -53,7 +52,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({
+export const App: FC<AppProps> = ({
   coreStart,
   deps,
   appMountParams,
@@ -154,34 +153,4 @@ const App: FC<AppProps> = ({
       </ApplicationUsageTrackingProvider>
     </KibanaRenderContextProvider>
   );
-};
-
-export const renderApp = (
-  coreStart: CoreStart,
-  deps: MlDependencies,
-  appMountParams: AppMountParameters,
-  isServerless: boolean,
-  mlFeatures: MlFeatures,
-  experimentalFeatures: ExperimentalFeatures,
-  nlpSettings: NLPSettings
-) => {
-  appMountParams.onAppLeave((actions) => actions.default());
-
-  ReactDOM.render(
-    <App
-      coreStart={coreStart}
-      deps={deps}
-      appMountParams={appMountParams}
-      isServerless={isServerless}
-      mlFeatures={mlFeatures}
-      experimentalFeatures={experimentalFeatures}
-      nlpSettings={nlpSettings}
-    />,
-    appMountParams.element
-  );
-
-  return () => {
-    ReactDOM.unmountComponentAtNode(appMountParams.element);
-    deps.data.search.session.clear();
-  };
 };

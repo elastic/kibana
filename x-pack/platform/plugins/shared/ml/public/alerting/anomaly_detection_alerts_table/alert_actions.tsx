@@ -20,7 +20,7 @@ import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common'
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { PLUGIN_ID } from '../../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 
 export function AlertActions(props: AlertActionsProps) {

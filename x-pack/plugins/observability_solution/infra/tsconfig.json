@@ -119,7 +119,11 @@
     "@kbn/observability-utils-server",
     "@kbn/core-plugins-server",
     "@kbn/config",
-    "@kbn/observability-utils-common"
+    "@kbn/observability-utils-common",
+    "@kbn/ml-common-types",
+    "@kbn/ml-common-constants"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

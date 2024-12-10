@@ -129,6 +129,9 @@
     "@kbn/alerting-comparators",
     "@kbn/saved-search-component",
     "@kbn/saved-search-plugin",
+    "@kbn/ml-common-types",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

@@ -25,7 +25,7 @@ import type {
   AnomalyChartsEmbeddableServices,
   AnomalyChartsAttachmentState,
   AnomalyChartsAttachmentApi,
-} from '../embeddables';
+} from '../embeddables/types';
 
 interface AnomalyChartsCaseAttachmentProps extends AnomalyChartsAttachmentState {
   services: AnomalyChartsEmbeddableServices;
