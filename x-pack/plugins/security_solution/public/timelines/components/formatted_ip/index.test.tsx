@@ -113,6 +113,7 @@ describe('FormattedIp', () => {
         params: {
           ip: props.value,
           flowTarget: 'source',
+          scopeId: TimelineId.active,
         },
       },
     });
