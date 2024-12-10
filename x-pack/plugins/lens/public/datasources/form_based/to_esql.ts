@@ -79,7 +79,11 @@ export function getESQLForLayer(
           uiSettings,
           dateRange
         ) ??
-        ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
+        ('sourceField' in col
+          ? col.sourceField === '___records___'
+            ? { id: 'number' }
+            : indexPattern.getFormatterForField(col.sourceField)
+          : undefined);
 
       esAggsIdMap[esAggsId] = [
         {
