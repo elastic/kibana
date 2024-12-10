@@ -334,7 +334,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
-        /^x-pack\/plugins\/threat_intelligence/,
+        /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
         /^x-pack\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui/,
         /^x-pack\/plugins\/usage_collection\/public/,

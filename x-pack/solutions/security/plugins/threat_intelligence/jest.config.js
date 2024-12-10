@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../',
-  roots: ['<rootDir>/x-pack/plugins/threat_intelligence'],
+  rootDir: '../../../../../',
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/threat_intelligence'],
 };
