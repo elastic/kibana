@@ -14,8 +14,8 @@ import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 
+import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
 import { getDashboardContentManagementCache } from '..';
 import { convertPanelsArrayToPanelMap, injectReferences } from '../../../../common';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
