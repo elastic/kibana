@@ -393,7 +393,6 @@ describe('checkIndex', () => {
 
       mockFetchMappings = jest.fn(
         (_: { abortController: AbortController; patternOrIndexName: string }) =>
-          // eslint-disable-next-line prefer-promise-reject-errors
           Promise.reject(undefined)
       );
 

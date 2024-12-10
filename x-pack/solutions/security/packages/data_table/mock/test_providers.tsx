@@ -36,7 +36,6 @@ Object.defineProperty(window, 'localStorage', {
 });
 window.scrollTo = jest.fn();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createStore = (state: any) => createReduxStore(() => {}, state);
 
 /** A utility for wrapping children in the providers required to run most tests */
