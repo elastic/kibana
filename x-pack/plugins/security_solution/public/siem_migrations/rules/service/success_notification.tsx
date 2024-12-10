@@ -17,9 +17,9 @@ import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RuleMigrationTask } from '../types';
+import type { RuleMigrationStats } from '../types';
 
-export const getSuccessToast = (migration: RuleMigrationTask, core: CoreStart): ToastInput => ({
+export const getSuccessToast = (migration: RuleMigrationStats, core: CoreStart): ToastInput => ({
   color: 'success',
   iconType: 'check',
   toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
@@ -34,7 +34,7 @@ export const getSuccessToast = (migration: RuleMigrationTask, core: CoreStart): 
   ),
 });
 
-const SuccessToastContent: React.FC<{ migration: RuleMigrationTask }> = ({ migration }) => {
+const SuccessToastContent: React.FC<{ migration: RuleMigrationStats }> = ({ migration }) => {
   const navigation = { deepLinkId: SecurityPageName.siemMigrationsRules, path: migration.id };
 
   const { navigateTo, getAppUrl } = useNavigation();
