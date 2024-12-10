@@ -39,6 +39,12 @@ export function getESQLForLayer(
   if (timeZone !== 'UTC') return;
   if (Object.values(layer.columns).find((col) => col.operationType === 'formula')) return;
   if (Object.values(layer.columns).find((col) => col.timeShift)) return;
+  if (
+    Object.values(layer.columns).find(
+      (col) => 'sourceField' in col && indexPattern.getFieldByName(col.sourceField)?.runtime
+    )
+  )
+    return;
 
   let esql = `FROM ${indexPattern.title} | `;
   if (indexPattern.timeFieldName) {
