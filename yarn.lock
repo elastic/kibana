@@ -3856,31 +3856,31 @@
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-change-point-detection@link:x-pack/packages/ml/aiops_change_point_detection":
+"@kbn/aiops-change-point-detection@link:x-pack/platform/packages/private/ml/aiops_change_point_detection":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-common@link:x-pack/packages/ml/aiops_common":
+"@kbn/aiops-common@link:x-pack/platform/packages/shared/ml/aiops_common":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-components@link:x-pack/packages/ml/aiops_components":
+"@kbn/aiops-components@link:x-pack/platform/packages/private/ml/aiops_components":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-log-pattern-analysis@link:x-pack/packages/ml/aiops_log_pattern_analysis":
+"@kbn/aiops-log-pattern-analysis@link:x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-log-rate-analysis@link:x-pack/packages/ml/aiops_log_rate_analysis":
+"@kbn/aiops-log-rate-analysis@link:x-pack/platform/packages/shared/ml/aiops_log_rate_analysis":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-plugin@link:x-pack/plugins/aiops":
+"@kbn/aiops-plugin@link:x-pack/platform/plugins/shared/aiops":
   version "0.0.0"
   uid ""
 
-"@kbn/aiops-test-utils@link:x-pack/packages/ml/aiops_test_utils":
+"@kbn/aiops-test-utils@link:x-pack/platform/packages/private/ml/aiops_test_utils":
   version "0.0.0"
   uid ""
 
@@ -5268,7 +5268,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-visualizer-plugin@link:x-pack/plugins/data_visualizer":
+"@kbn/data-visualizer-plugin@link:x-pack/platform/plugins/private/data_visualizer":
   version "0.0.0"
   uid ""
 
@@ -5296,7 +5296,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-ml@link:packages/deeplinks/ml":
+"@kbn/deeplinks-ml@link:src/platform/packages/shared/deeplinks/ml":
   version "0.0.0"
   uid ""
 
@@ -5328,7 +5328,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-ml@link:packages/default-nav/ml":
+"@kbn/default-nav-ml@link:src/platform/packages/private/default-nav/ml":
   version "0.0.0"
   uid ""
 
@@ -5936,15 +5936,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inference-common@link:x-pack/packages/ai-infra/inference-common":
+"@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
   version "0.0.0"
   uid ""
 
-"@kbn/inference-plugin@link:x-pack/plugins/inference":
+"@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
   version "0.0.0"
   uid ""
 
-"@kbn/inference_integration_flyout@link:x-pack/packages/ml/inference_integration_flyout":
+"@kbn/inference_integration_flyout@link:x-pack/platform/packages/private/ml/inference_integration_flyout":
   version "0.0.0"
   uid ""
 
@@ -6028,7 +6028,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/json-schemas@link:x-pack/packages/ml/json_schemas":
+"@kbn/json-schemas@link:x-pack/platform/packages/private/ml/json_schemas":
   version "0.0.0"
   uid ""
 
@@ -6136,7 +6136,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/llm-tasks-plugin@link:x-pack/plugins/ai_infra/llm_tasks":
+"@kbn/llm-tasks-plugin@link:x-pack/platform/plugins/shared/ai_infra/llm_tasks":
   version "0.0.0"
   uid ""
 
@@ -6268,135 +6268,135 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ml-agg-utils@link:x-pack/packages/ml/agg_utils":
+"@kbn/ml-agg-utils@link:x-pack/platform/packages/private/ml/agg_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-anomaly-utils@link:x-pack/packages/ml/anomaly_utils":
+"@kbn/ml-anomaly-utils@link:x-pack/platform/packages/shared/ml/anomaly_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-cancellable-search@link:x-pack/packages/ml/cancellable_search":
+"@kbn/ml-cancellable-search@link:x-pack/platform/packages/private/ml/cancellable_search":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-category-validator@link:x-pack/packages/ml/category_validator":
+"@kbn/ml-category-validator@link:x-pack/platform/packages/private/ml/category_validator":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-chi2test@link:x-pack/packages/ml/chi2test":
+"@kbn/ml-chi2test@link:x-pack/platform/packages/shared/ml/chi2test":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-creation-wizard-utils@link:x-pack/packages/ml/creation_wizard_utils":
+"@kbn/ml-creation-wizard-utils@link:x-pack/platform/packages/private/ml/creation_wizard_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
+"@kbn/ml-data-frame-analytics-utils@link:x-pack/platform/packages/private/ml/data_frame_analytics_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-data-grid@link:x-pack/packages/ml/data_grid":
+"@kbn/ml-data-grid@link:x-pack/platform/packages/private/ml/data_grid":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-data-view-utils@link:x-pack/packages/ml/data_view_utils":
+"@kbn/ml-data-view-utils@link:x-pack/platform/packages/private/ml/data_view_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
+"@kbn/ml-date-picker@link:x-pack/platform/packages/private/ml/date_picker":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-date-utils@link:x-pack/packages/ml/date_utils":
+"@kbn/ml-date-utils@link:x-pack/platform/packages/private/ml/date_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-error-utils@link:x-pack/packages/ml/error_utils":
+"@kbn/ml-error-utils@link:x-pack/platform/packages/shared/ml/error_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-field-stats-flyout@link:x-pack/packages/ml/field_stats_flyout":
+"@kbn/ml-field-stats-flyout@link:x-pack/platform/packages/private/ml/field_stats_flyout":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-in-memory-table@link:x-pack/packages/ml/in_memory_table":
+"@kbn/ml-in-memory-table@link:x-pack/platform/packages/private/ml/in_memory_table":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-is-defined@link:x-pack/packages/ml/is_defined":
+"@kbn/ml-is-defined@link:x-pack/platform/packages/private/ml/is_defined":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-is-populated-object@link:x-pack/packages/ml/is_populated_object":
+"@kbn/ml-is-populated-object@link:x-pack/platform/packages/private/ml/is_populated_object":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-kibana-theme@link:x-pack/packages/ml/kibana_theme":
+"@kbn/ml-kibana-theme@link:x-pack/platform/packages/private/ml/kibana_theme":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-local-storage@link:x-pack/packages/ml/local_storage":
+"@kbn/ml-local-storage@link:x-pack/platform/packages/private/ml/local_storage":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-nested-property@link:x-pack/packages/ml/nested_property":
+"@kbn/ml-nested-property@link:x-pack/platform/packages/private/ml/nested_property":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-number-utils@link:x-pack/packages/ml/number_utils":
+"@kbn/ml-number-utils@link:x-pack/platform/packages/private/ml/number_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-parse-interval@link:x-pack/packages/ml/parse_interval":
+"@kbn/ml-parse-interval@link:x-pack/platform/packages/private/ml/parse_interval":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-plugin@link:x-pack/plugins/ml":
+"@kbn/ml-plugin@link:x-pack/platform/plugins/shared/ml":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-query-utils@link:x-pack/packages/ml/query_utils":
+"@kbn/ml-query-utils@link:x-pack/platform/packages/private/ml/query_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-random-sampler-utils@link:x-pack/packages/ml/random_sampler_utils":
+"@kbn/ml-random-sampler-utils@link:x-pack/platform/packages/shared/ml/random_sampler_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-response-stream@link:x-pack/packages/ml/response_stream":
+"@kbn/ml-response-stream@link:x-pack/platform/packages/shared/ml/response_stream":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-route-utils@link:x-pack/packages/ml/route_utils":
+"@kbn/ml-route-utils@link:x-pack/platform/packages/private/ml/route_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-runtime-field-utils@link:x-pack/packages/ml/runtime_field_utils":
+"@kbn/ml-runtime-field-utils@link:x-pack/platform/packages/shared/ml/runtime_field_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-string-hash@link:x-pack/packages/ml/string_hash":
+"@kbn/ml-string-hash@link:x-pack/platform/packages/private/ml/string_hash":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-time-buckets@link:x-pack/packages/ml/time_buckets":
+"@kbn/ml-time-buckets@link:x-pack/platform/packages/private/ml/time_buckets":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-trained-models-utils@link:x-pack/packages/ml/trained_models_utils":
+"@kbn/ml-trained-models-utils@link:x-pack/platform/packages/shared/ml/trained_models_utils":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-ui-actions@link:x-pack/packages/ml/ui_actions":
+"@kbn/ml-ui-actions@link:x-pack/platform/packages/private/ml/ui_actions":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+"@kbn/ml-url-state@link:x-pack/platform/packages/private/ml/url_state":
   version "0.0.0"
   uid ""
 
-"@kbn/ml-validators@link:x-pack/packages/ml/validators":
+"@kbn/ml-validators@link:x-pack/platform/packages/private/ml/validators":
   version "0.0.0"
   uid ""
 
@@ -6548,7 +6548,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/osquery-io-ts-types@link:packages/kbn-osquery-io-ts-types":
+"@kbn/osquery-io-ts-types@link:src/platform/packages/shared/kbn-osquery-io-ts-types":
   version "0.0.0"
   uid ""
 
@@ -6624,11 +6624,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
+"@kbn/product-doc-base-plugin@link:x-pack/platform/plugins/shared/ai_infra/product_doc_base":
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-common@link:x-pack/packages/ai-infra/product-doc-common":
+"@kbn/product-doc-common@link:x-pack/platform/packages/shared/ai-infra/product-doc-common":
   version "0.0.0"
   uid ""
 
@@ -7676,11 +7676,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/transform-plugin@link:x-pack/plugins/transform":
+"@kbn/transform-plugin@link:x-pack/platform/plugins/private/transform":
   version "0.0.0"
   uid ""
 
-"@kbn/translations-plugin@link:x-pack/plugins/translations":
+"@kbn/translations-plugin@link:x-pack/platform/plugins/private/translations":
   version "0.0.0"
   uid ""
 
