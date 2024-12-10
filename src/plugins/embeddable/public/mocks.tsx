@@ -36,7 +36,6 @@ import { setKibanaServices } from './kibana_services';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 import { EmbeddablePublicPlugin } from './plugin';
 import {
-  reactEmbeddableRegistryHasKey,
   registerReactEmbeddableFactory,
 } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
@@ -110,7 +109,6 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    reactEmbeddableRegistryHasKey: jest.fn().mockImplementation(reactEmbeddableRegistryHasKey),
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
     telemetry: jest.fn(),
