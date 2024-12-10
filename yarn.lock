@@ -7092,7 +7092,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-navigation@link:x-pack/packages/security-solution/navigation":
+"@kbn/security-solution-navigation@link:x-pack/solutions/security/packages/navigation":
   version "0.0.0"
   uid ""
 
