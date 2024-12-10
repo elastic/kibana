@@ -9,7 +9,7 @@ import { PREFIX } from '../../shared/test_ids';
 
 export const FLYOUT_BODY_TEST_ID = `${PREFIX}Body` as const;
 export const FLYOUT_FOOTER_TEST_ID = `${PREFIX}Footer` as const;
-export const FLYOUT_FOOTER_DEOPDOEN_BUTTON_TEST_ID =
+export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID =
   `${FLYOUT_FOOTER_TEST_ID}DropdownButton` as const;
 export const OVERVIEW_TAB_TEST_ID = `${PREFIX}OverviewTab` as const;
 export const TABLE_TAB_TEST_ID = `${PREFIX}TableTab` as const;
