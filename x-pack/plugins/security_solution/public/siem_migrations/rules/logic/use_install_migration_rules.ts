@@ -23,8 +23,8 @@ export const useInstallMigrationRules = (migrationId: string) => {
   const invalidateGetMigrationTranslationStats =
     useInvalidateGetMigrationTranslationStats(migrationId);
 
-  return useMutation<InstallMigrationRulesResponse, Error, string[]>(
-    (ids: string[]) => installMigrationRules({ migrationId, ids }),
+  return useMutation<InstallMigrationRulesResponse, Error, { ids: string[]; enabled: boolean }>(
+    ({ ids, enabled = false }) => installMigrationRules({ migrationId, ids, enabled }),
     {
       mutationKey: INSTALL_MIGRATION_RULES_MUTATION_KEY,
       onError: (error) => {
