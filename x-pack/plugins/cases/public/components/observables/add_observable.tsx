@@ -17,12 +17,10 @@ import React, { useState, useCallback } from 'react';
 
 import type { ObservablePost } from '../../../common/types/api/observable/v1';
 import type { CaseUI } from '../../../common';
-import { useCasesToast } from '../../common/use_cases_toast';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { usePostObservable } from '../../containers/use_post_observables';
 import { ObservableForm, type ObservableFormProps } from './observable_form';
-import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
 export interface AddObservableProps {
@@ -31,10 +29,8 @@ export interface AddObservableProps {
 
 const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
   const { permissions } = useCasesContext();
-  const { showSuccessToast } = useCasesToast();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { isLoading, mutateAsync: postObservables } = usePostObservable(caseData.id);
-  const refreshCaseViewPage = useRefreshCaseViewPage();
   const { observablesAuthorized: isObservablesEnabled } = useCasesFeatures();
 
   const closeModal = () => setIsModalVisible(false);
@@ -46,11 +42,9 @@ const AddObservableComponent: React.FC<AddObservableProps> = ({ caseData }) => {
         observable,
       });
 
-      showSuccessToast(i18n.OBSERVABLE_CREATED);
-      refreshCaseViewPage();
       closeModal();
     },
-    [postObservables, showSuccessToast, refreshCaseViewPage]
+    [postObservables]
   );
 
   return permissions.create && permissions.update ? (

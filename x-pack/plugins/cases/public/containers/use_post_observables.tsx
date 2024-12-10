@@ -12,11 +12,12 @@ import * as i18n from './translations';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
 import { casesMutationsKeys } from './constants';
-import { useRefreshCases } from '../components/all_cases/use_on_refresh_cases';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 export const usePostObservable = (caseId: string) => {
   const { showErrorToast } = useCasesToast();
-  const refreshCases = useRefreshCases();
+  const refreshCaseViewPage = useRefreshCaseViewPage();
+  const { showSuccessToast } = useCasesToast();
 
   return useMutation(
     (request: AddObservableRequest) => {
@@ -29,6 +30,7 @@ export const usePostObservable = (caseId: string) => {
       },
       onSuccess: () => {
         refreshCaseViewPage();
+        showSuccessToast(i18n.OBSERVABLE_CREATED);
       },
     }
   );

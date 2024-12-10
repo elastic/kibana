@@ -68,3 +68,7 @@ export const CATEGORIES_ERROR_TITLE = i18n.translate(
     defaultMessage: 'Error fetching categories',
   }
 );
+
+export const OBSERVABLE_CREATED = i18n.translate('xpack.cases.caseView.observables.created', {
+  defaultMessage: 'Observable created',
+});

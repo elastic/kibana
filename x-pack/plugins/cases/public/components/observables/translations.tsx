@@ -89,10 +89,6 @@ export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observabl
   defaultMessage: 'Observable updated',
 });
 
-export const OBSERVABLE_CREATED = i18n.translate('xpack.cases.caseView.observables.created', {
-  defaultMessage: 'Observable created',
-});
-
 export const SAVE_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.save', {
   defaultMessage: 'Save observable',
 });
