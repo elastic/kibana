@@ -103,12 +103,13 @@ const CustomEuiBottomBar = styled(EuiBottomBar)`
   z-index: 50;
 `;
 
-export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
+export const CreatePackagePolicySinglePage: React.FC<CreatePackagePolicyParams> = ({
   from,
   queryParamsPolicyId,
   prerelease,
-  onNext,
-  onCanceled,
+  onAddAgent,
+  onCancel,
+  withHeader = true,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -116,7 +117,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
   const { pkgkey: pkgKeyContext } = useIntegrationsStateContext();
-  const pkgkey = params.pkgkey || pkgKeyContext;
+  const pkgkey = params.pkgkey || pkgKeyContext || '';
 
   const fleetStatus = useFleetStatus();
   const { docLinks } = useStartServices();
@@ -195,22 +196,24 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   });
 
   const handleNavigateAddAgent = useCallback(() => {
-    if (onNext) {
-      onNext({ selectedAgentPolicies: agentPolicies });
+    if (onAddAgent) {
+      onAddAgent({ selectedAgentPolicies: agentPolicies });
     } else {
       if (savedPackagePolicy) {
         navigateAddAgent(savedPackagePolicy);
       }
     }
-  }, [onNext, agentPolicies, savedPackagePolicy, navigateAddAgent]);
+  }, [onAddAgent, agentPolicies, savedPackagePolicy, navigateAddAgent]);
 
   const handleCancellation = useCallback(() => {
-    if (onCanceled) {
-      onCanceled();
+    if (onCancel) {
+      onCancel();
     } else {
-      navigateAddAgentHelp(savedPackagePolicy);
+      if (savedPackagePolicy) {
+        navigateAddAgentHelp(savedPackagePolicy);
+      }
     }
-  }, [onCanceled, savedPackagePolicy, navigateAddAgentHelp]);
+  }, [onCancel, savedPackagePolicy, navigateAddAgentHelp]);
 
   const setPolicyValidation = useCallback(
     (selectedTab: SelectedPolicyTab, updatedAgentPolicy: NewAgentPolicy) => {
@@ -307,12 +310,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     () => ({
       from,
       cancelUrl,
-      onCancel: cancelClickHandler,
+      onCancel: onCancel ?? cancelClickHandler,
       agentPolicies,
       packageInfo,
       integrationInfo,
+      withHeader,
     }),
-    [agentPolicies, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [
+      agentPolicies,
+      cancelClickHandler,
+      cancelUrl,
+      from,
+      integrationInfo,
+      onCancel,
+      packageInfo,
+      withHeader,
+    ]
   );
 
   const stepSelectAgentPolicy = useMemo(
@@ -531,7 +544,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 onConfirm={onSubmit}
                 onCancel={() => {
                   setFormState('VALID');
-                  onCanceled?.();
+                  onCancel?.();
                 }}
               />
             )}
@@ -649,11 +662,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
-                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                       <EuiButtonEmpty
                         color="text"
-                        href={cancelUrl}
-                        onClick={cancelClickHandler}
+                        {...(onCancel ? {} : { href: cancelUrl })}
+                        onClick={onCancel ?? cancelClickHandler}
                         data-test-subj="createPackagePolicyCancelButton"
                       >
                         <FormattedMessage

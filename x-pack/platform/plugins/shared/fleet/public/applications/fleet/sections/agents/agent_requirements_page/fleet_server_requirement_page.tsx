@@ -36,12 +36,18 @@ export const FleetServerRequirementPage: React.FunctionComponent<
   | {
       showEnrollmentRecommendation?: false;
       showStandaloneTab?: never;
+      handleAddFleetServer?: () => void;
     }
   | {
       showEnrollmentRecommendation?: true;
       showStandaloneTab: () => void;
+      handleAddFleetServer?: () => void;
     }
-> = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
+> = ({
+  showStandaloneTab = () => {},
+  showEnrollmentRecommendation = true,
+  handleAddFleetServer,
+}) => {
   const startService = useStartServices();
   const deploymentUrl = startService.cloud?.deploymentUrl;
   const authz = useAuthz();
@@ -61,7 +67,10 @@ export const FleetServerRequirementPage: React.FunctionComponent<
           ) : permissionsError ? (
             <FleetServerMissingESPrivileges />
           ) : showEnrollmentRecommendation ? (
-            <EnrollmentRecommendation showStandaloneTab={showStandaloneTab} />
+            <EnrollmentRecommendation
+              showStandaloneTab={showStandaloneTab}
+              handleAddFleetServer={handleAddFleetServer}
+            />
           ) : (
             <AddFleetServerLanding />
           )}

@@ -57,6 +57,7 @@ export const MultiPageStepsLayout: React.FunctionComponent<MultiPageStepLayoutPr
   );
 
   const maxWidth = 866;
+
   return (
     <WithHeaderLayout
       topContent={topContent}

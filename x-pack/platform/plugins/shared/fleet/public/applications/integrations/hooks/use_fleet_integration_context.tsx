@@ -8,6 +8,7 @@ import React, { createContext } from 'react';
 
 import {
   FleetStatusProvider,
+  FlyoutContextProvider,
   KibanaVersionContext,
   UIExtensionsContextProvider,
 } from '../../../hooks';
@@ -38,7 +39,9 @@ export const FleetIntegrationsStateContextProvider: React.FC<{
         <UIExtensionsContextProvider values={{}}>
           <FleetStatusProvider>
             <PackageInstallProvider startServices={startServices}>
-              <IntegrationsStateContextProvider>{children}</IntegrationsStateContextProvider>
+              <FlyoutContextProvider>
+                <IntegrationsStateContextProvider>{children}</IntegrationsStateContextProvider>
+              </FlyoutContextProvider>
             </PackageInstallProvider>
           </FleetStatusProvider>
         </UIExtensionsContextProvider>

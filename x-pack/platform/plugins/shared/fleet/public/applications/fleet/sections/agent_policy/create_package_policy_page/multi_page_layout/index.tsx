@@ -18,12 +18,6 @@ import {
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
-import { useIntegrationsStateContext } from '../../../../../integrations/hooks';
-
-import { CreatePackagePolicySinglePage } from '../single_page_layout';
-
-import type { AgentPolicy } from '../../../../types';
-
 import { useGetAgentPolicyOrDefault } from './hooks';
 
 import {
@@ -48,13 +42,6 @@ const addIntegrationStep = {
   component: AddIntegrationPageStep,
 };
 
-const addIntegrationSingleLayoutStep = {
-  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.addIntegrationStepTitle', {
-    defaultMessage: 'Add the integration',
-  }),
-  component: CreatePackagePolicySinglePage,
-};
-
 const confirmDataStep = {
   title: i18n.translate('xpack.fleet.createFirstPackagePolicy.confirmDataStepTitle', {
     defaultMessage: 'Confirm incoming data',
@@ -66,35 +53,25 @@ const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep
 
 const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
-const onboardingSteps = [addIntegrationSingleLayoutStep, installAgentStep, confirmDataStep];
-
-export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
+export const CreatePackagePolicyMultiPage: React.FC<CreatePackagePolicyParams> = ({
   queryParamsPolicyId,
   prerelease,
-  from,
-  integrationName,
-  setIntegrationStep,
-  onCanceled,
 }) => {
   const { params } = useRouteMatch<AddToPolicyParams>();
-  // fixme
-  const { pkgkey: pkgkeyParam, policyId, integration: integrationParam } = params;
-  const { pkgkey: pkgKeyContext } = useIntegrationsStateContext();
-  const pkgkey = pkgkeyParam || pkgKeyContext;
+  const { pkgkey, policyId, integration } = params;
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-  const [onSplash, setOnSplash] = useState(from !== 'onboarding-integration');
+  const [onSplash, setOnSplash] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
   const { getHref } = useLink();
   const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
-  const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<AgentPolicy[]>();
+
   const toggleIsManaged = (newIsManaged: boolean) => {
     setIsManaged(newIsManaged);
     setCurrentStep(0);
   };
 
-  const integration = integrationName || integrationParam;
-  const agentPolicyId = selectedAgentPolicies?.[0]?.id || policyId || queryParamsPolicyId;
+  const agentPolicyId = policyId || queryParamsPolicyId;
   const {
     data: packageInfoData,
     error: packageInfoError,
@@ -131,6 +108,8 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(agentPolicyId ? { agentPolicyId } : {}),
   });
 
+  const steps = isManaged ? fleetManagedSteps : standaloneSteps;
+
   if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
@@ -144,23 +123,12 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     );
   }
 
-  const steps =
-    from === 'onboarding-integration'
-      ? onboardingSteps
-      : isManaged
-      ? fleetManagedSteps
-      : standaloneSteps;
-
-  const stepsNext = (props?: { selectedAgentPolicies: AgentPolicy[] }) => {
+  const stepsNext = () => {
     if (currentStep === steps.length - 1) {
       return;
     }
 
     setCurrentStep(currentStep + 1);
-    setIntegrationStep(currentStep + 1);
-    if (props?.selectedAgentPolicies) {
-      setSelectedAgentPolicies(props?.selectedAgentPolicies);
-    }
   };
 
   const stepsBack = () => {
@@ -189,7 +157,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       setIsManaged={toggleIsManaged}
       setEnrolledAgentIds={setEnrolledAgentIds}
       enrolledAgentIds={enrolledAgentIds}
-      onCanceled={onCanceled}
     />
   );
 };

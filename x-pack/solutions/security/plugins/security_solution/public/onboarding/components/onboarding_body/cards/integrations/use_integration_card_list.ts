@@ -101,6 +101,7 @@ const addSecuritySpecificProps = ({
       APP_UI_ID,
       { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey, onCancelUrl: onboardingLink } },
     ],
+    onDoneNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey } }],
     onCancelUrl: onboardingLink,
     onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey } }],
     pkgkey: card.pkgkey,

@@ -10,7 +10,6 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 
 import { FleetPlugin } from './plugin';
-import type { UIExtensionsStorage } from './types';
 export type { GetPackagesResponse } from './types';
 export { installationStatuses } from '../common/constants';
 

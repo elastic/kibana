@@ -8,27 +8,30 @@ import React, { useEffect } from 'react';
 import { useMemo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 
+import { noop } from 'lodash/fp';
+
 import { useGetSettings } from '../../../hooks';
 
 import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
 import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
+import { EmbeddedIntegrationFlow } from './embedded_integration_flow';
 
 export const CreatePackagePolicyPage: React.FC<{
   useMultiPageLayoutProp?: boolean;
   originFrom?: EditPackagePolicyFrom;
-  propPolicyId?: string;
   integrationName?: string;
-  setIntegrationStep?: (step: number) => void;
-  onCanceled?: () => void;
+  onStepNext?: (step: number) => void;
+  onCancel?: () => void;
+  handleViewAssets?: () => void;
 }> = ({
   useMultiPageLayoutProp,
   originFrom,
-  propPolicyId,
   integrationName,
-  setIntegrationStep,
-  onCanceled,
+  onStepNext,
+  onCancel = noop,
+  handleViewAssets = noop,
 }) => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
@@ -69,12 +72,20 @@ export const CreatePackagePolicyPage: React.FC<{
   const pageParams = {
     from,
     queryParamsPolicyId,
-    propPolicyId,
-    integrationName,
     prerelease,
-    setIntegrationStep,
-    onCanceled,
   };
+
+  if (from === 'onboarding-hub') {
+    return (
+      <EmbeddedIntegrationFlow
+        {...pageParams}
+        onCancel={onCancel}
+        handleViewAssets={handleViewAssets}
+        onStepNext={onStepNext}
+        integrationName={integrationName}
+      />
+    );
+  }
 
   if (useMultiPageLayout) {
     return <CreatePackagePolicyMultiPage {...pageParams} />;

@@ -19,9 +19,13 @@ import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
 interface Props {
   onClose: () => void;
+  handleContinueAddingAgentClick?: () => void;
 }
 
-export const QuickStartTab: React.FunctionComponent<Props> = ({ onClose }) => {
+export const QuickStartTab: React.FunctionComponent<Props> = ({
+  onClose,
+  handleContinueAddingAgentClick,
+}) => {
   const {
     fleetServerHost,
     setFleetServerHost,
@@ -62,6 +66,7 @@ export const QuickStartTab: React.FunctionComponent<Props> = ({ onClose }) => {
     getConfirmFleetServerConnectionStep({
       hasRecentlyEnrolledFleetServers,
       disabled: status !== 'success',
+      handleContinueAddingAgentClick,
     }),
   ];
 

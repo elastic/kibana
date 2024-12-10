@@ -43,6 +43,7 @@ export const AgentEnrollmentConfirmationStep = ({
   selectedPolicyId,
   troubleshootLink,
   onClickViewAgents,
+  onClickViewIncomingData,
   agentCount,
   showLoading,
   poll = true,
@@ -51,6 +52,7 @@ export const AgentEnrollmentConfirmationStep = ({
   selectedPolicyId?: string;
   troubleshootLink: string;
   onClickViewAgents?: () => void;
+  onClickViewIncomingData?: () => void;
   agentCount: number;
   poll?: boolean;
   showLoading?: boolean;
@@ -72,6 +74,7 @@ export const AgentEnrollmentConfirmationStep = ({
             policyId={selectedPolicyId}
             troubleshootLink={troubleshootLink}
             onClickViewAgents={onClickViewAgents}
+            onClickViewIncomingData={onClickViewIncomingData}
             agentCount={agentCount}
             showLoading={!isComplete || showLoading}
             isLongEnrollment={isLongEnrollment}

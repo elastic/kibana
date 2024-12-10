@@ -157,9 +157,11 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   setMode,
   selectionType,
   onClickViewAgents,
+  onClickViewIncomingData,
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
+  from,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -265,13 +267,14 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         AgentEnrollmentConfirmationStep({
           selectedPolicyId: selectedPolicy?.id,
           onClickViewAgents,
+          onClickViewIncomingData,
           troubleshootLink: link,
           agentCount: enrolledAgentIds.length,
           isLongEnrollment: cloudSecurityIntegration !== undefined,
         })
       );
     }
-    if (selectedPolicy) {
+    if (selectedPolicy && from !== 'onboarding-hub') {
       steps.push(
         IncomingDataConfirmationStep({
           agentIds: enrolledAgentIds,
@@ -295,18 +298,20 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     selectionType,
     cloudSecurityIntegration,
     apiKeyData,
+    from,
     mode,
     setMode,
     enrollToken,
-    installManagedCommands,
-    isK8s,
     fleetServerHost,
+    installManagedCommands,
+    gcpProjectId,
+    isK8s,
     onClickViewAgents,
+    onClickViewIncomingData,
     link,
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
-    gcpProjectId,
   ]);
 
   if (!agentVersion) {
