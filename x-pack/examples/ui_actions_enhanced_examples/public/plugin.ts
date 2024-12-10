@@ -157,7 +157,7 @@ export class UiActionsEnhancedExamplesPlugin
     const startServicesPromise = core.getStartServices();
     registerButtonEmbeddable(
       embeddable,
-      new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
+      startServicesPromise.then(([_, startDeps]) => startDeps)
     );
   }
 
