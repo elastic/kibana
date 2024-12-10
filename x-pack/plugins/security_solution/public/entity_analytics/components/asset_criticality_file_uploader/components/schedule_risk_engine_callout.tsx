@@ -55,7 +55,7 @@ export const ScheduleRiskEngineCallout: React.FC = () => {
         }),
     });
 
-  const countDownText = useRiskEngineCountdownTime();
+  const countDownText = useRiskEngineCountdownTime(riskEngineStatus);
 
   const scheduleRiskEngine = useCallback(() => {
     scheduleRiskEngineMutation();
