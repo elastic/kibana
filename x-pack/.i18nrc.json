@@ -10,7 +10,7 @@
       "platform/plugins/shared/aiops"
     ],
     "xpack.aiAssistant": "packages/kbn-ai-assistant",
-    "xpack.alerting": "plugins/alerting",
+    "xpack.alerting": "platform/plugins/shared/alerting",
     "xpack.eventLog": "plugins/event_log",
     "xpack.stackAlerts": "plugins/stack_alerts",
     "xpack.stackConnectors": "plugins/stack_connectors",
