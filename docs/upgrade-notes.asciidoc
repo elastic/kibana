@@ -336,7 +336,7 @@ Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
 
 [discrete]
 [[breaking-legacy-rbac]]
-[Alerting] Legacy RBAC exemption (9.0.0)
+.[Alerting] Legacy RBAC exemption (9.0.0)
 [%collapsible]
 ====
 *Details* +
@@ -347,7 +347,7 @@ Any alerting rules that rely on the legacy exemption will fail to trigger action
 from version 9.0.0.
 
 *Action* +
-To identify the affected rules run the query below in Dev Tools. To use normal RBAC authorization, update the API key by editing the rule.
+To identify the affected rules run the following query in *{dev-tools-app}*:
 
 [source,js]
 ----------------------------------
@@ -381,6 +381,8 @@ GET .kibana*/_search
   "_source": ["alert.name", "namespaces"]
 }
 ----------------------------------
+
+To use normal RBAC authorization, edit each affected rule to update the API key.
 ====
 
 // Data views
