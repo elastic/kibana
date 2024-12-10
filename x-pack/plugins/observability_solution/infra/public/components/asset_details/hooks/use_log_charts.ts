@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import { useChartSeriesColor } from './use_chart_series_color';
 
 const LOG_RATE = i18n.translate('xpack.infra.assetDetails.charts.logRate', {
   defaultMessage: 'Log Rate',
@@ -17,7 +18,7 @@ const LOG_ERROR_RATE = i18n.translate('xpack.infra.assetDetails.charts.logErrorR
   defaultMessage: 'Log Error Rate',
 });
 
-const logMetric: LensConfig & { id: string } = {
+const logRateMetric: LensConfig & { id: string } = {
   id: 'logMetric',
   chartType: 'metric',
   title: LOG_RATE,
@@ -29,7 +30,7 @@ const logMetric: LensConfig & { id: string } = {
   normalizeByUnit: 's',
 };
 
-const logErrorMetric: LensConfig & { id: string } = {
+const logErrorRateMetric: LensConfig & { id: string } = {
   id: 'logErrorMetric',
   chartType: 'metric',
   title: LOG_ERROR_RATE,
@@ -49,6 +50,8 @@ export const useLogsCharts = ({
   dataViewId?: string;
   seriesColor?: string;
 }) => {
+  seriesColor = useChartSeriesColor(seriesColor);
+
   return useMemo(() => {
     const dataset = dataViewId && {
       dataset: {
@@ -59,12 +62,12 @@ export const useLogsCharts = ({
     return {
       charts: [
         {
-          ...logMetric,
+          ...logRateMetric,
           ...dataset,
           seriesColor,
         },
         {
-          ...logErrorMetric,
+          ...logErrorRateMetric,
           ...dataset,
           seriesColor,
         },

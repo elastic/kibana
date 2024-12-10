@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   findInventoryFields,
   type InventoryItemType,
@@ -38,10 +38,8 @@ export const LogsContent = ({ assetId, assetType, dataView, dateRange }: Props) 
     ];
   }, [dataView, assetId, assetType]);
 
-  const { euiTheme } = useEuiTheme();
   const { charts } = useLogsCharts({
     dataViewId: dataView?.id,
-    seriesColor: euiTheme.colors.backgroundLightText,
   });
 
   return (

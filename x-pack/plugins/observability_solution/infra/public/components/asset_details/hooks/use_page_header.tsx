@@ -178,8 +178,7 @@ const useTabs = (tabs: Tab[]) => {
   const tabEntries: TabItem[] = useMemo(
     () =>
       tabs
-        .filter(isTabEnabled)
-        .filter(hasMetricsTab)
+        .filter((tab) => isTabEnabled(tab) && hasMetricsTab(tab))
         .map(({ name, ...tab }) => {
           return {
             ...tab,
