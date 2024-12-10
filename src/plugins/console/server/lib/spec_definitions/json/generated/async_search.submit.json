@@ -11,11 +11,6 @@
         "0"
       ],
       "keep_on_completion": "__flag__",
-      "keep_alive": [
-        "5d",
-        "-1",
-        "0"
-      ],
       "allow_no_indices": "__flag__",
       "allow_partial_search_results": "__flag__",
       "analyzer": "",
@@ -43,15 +38,8 @@
       "lenient": "__flag__",
       "max_concurrent_shard_requests": "",
       "preference": "",
-      "pre_filter_shard_size": [
-        "1"
-      ],
       "request_cache": "__flag__",
       "routing": "",
-      "scroll": [
-        "-1",
-        "0"
-      ],
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"

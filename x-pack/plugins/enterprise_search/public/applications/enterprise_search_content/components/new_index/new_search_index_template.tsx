@@ -154,7 +154,11 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                 optionally set a default {language_analyzer} for the index."
                   values={{
                     language_analyzer: (
-                      <EuiLink target="_blank" href={docLinks.languageAnalyzers}>
+                      <EuiLink
+                        data-test-subj="enterpriseSearchNewSearchIndexTemplateLanguageAnalyzerLink"
+                        target="_blank"
+                        href={docLinks.languageAnalyzers}
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.formDescription.linkText',
                           {
@@ -247,6 +251,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   )}
                 >
                   <EuiSelect
+                    data-test-subj="enterpriseSearchNewSearchIndexTemplateSelect"
                     data-telemetry-id={`entSearchContent-${type}-newIndex-languageAnalyzer`}
                     disabled={disabled}
                     options={SUPPORTED_LANGUAGES}
@@ -261,7 +266,11 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
         <EuiSpacer />
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            <EuiLink target="_blank" href={docLinks.elasticsearchGettingStarted}>
+            <EuiLink
+              data-test-subj="enterpriseSearchNewSearchIndexTemplateLearnMoreAboutIndicesLink"
+              target="_blank"
+              href={docLinks.elasticsearchGettingStarted}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreIndices.linkText',
                 {
@@ -273,7 +282,11 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
 
           {type === INGESTION_METHOD_IDS.CONNECTOR && (
             <EuiFlexItem grow={false}>
-              <EuiLink target="_blank" href={docLinks.connectors}>
+              <EuiLink
+                data-test-subj="enterpriseSearchNewSearchIndexTemplateLearnMoreAboutConnectorsLink"
+                target="_blank"
+                href={docLinks.connectors}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreConnectors.linkText',
                   {
@@ -285,11 +298,15 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           )}
           {type === INGESTION_METHOD_IDS.CRAWLER && (
             <EuiFlexItem grow={false}>
-              <EuiLink target="_blank" href={docLinks.crawlerOverview}>
+              <EuiLink
+                data-test-subj="enterpriseSearchNewSearchIndexTemplateLearnMoreAboutTheElasticWebCrawlerLink"
+                target="_blank"
+                href={docLinks.crawlerOverview}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreCrawler.linkText',
                   {
-                    defaultMessage: 'Learn more about the Elastic web crawler',
+                    defaultMessage: 'Learn more about the Elastic Web Crawler',
                   }
                 )}
               </EuiLink>
@@ -297,7 +314,11 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           )}
           {type === INGESTION_METHOD_IDS.API && (
             <EuiFlexItem grow={false}>
-              <EuiLink target="_blank" href={docLinks.ingestionApis}>
+              <EuiLink
+                data-test-subj="enterpriseSearchNewSearchIndexTemplateLearnMoreAboutIngestionApIsLink"
+                target="_blank"
+                href={docLinks.ingestionApis}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreApis.linkText',
                   {
@@ -312,6 +333,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchNewSearchIndexTemplateButton"
               data-telemetry-id={`entSearchContent-${type}-newIndex-goBack`}
               isDisabled={buttonLoading}
               onClick={() => history.back()}

@@ -21,7 +21,6 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
-        "maxEphemeralActionsPerAlert": 10,
         "rules": Object {
           "maxScheduledPerMinute": 32000,
           "minimumScheduleInterval": Object {

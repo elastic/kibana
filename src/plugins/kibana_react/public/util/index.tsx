@@ -15,6 +15,7 @@ import type { MountPoint } from '@kbn/core/public';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { CoreTheme, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { defaultTheme } from '@kbn/react-kibana-context-common';
 
 import { toMountPoint as _toMountPoint } from '@kbn/react-kibana-mount';
@@ -40,6 +41,7 @@ const i18n: I18nStart = {
 export interface ToMountPointOptions {
   analytics?: AnalyticsServiceStart;
   theme$?: Observable<CoreTheme>;
+  userProfile?: UserProfileService;
 }
 
 /**
@@ -47,8 +49,8 @@ export interface ToMountPointOptions {
  */
 export const toMountPoint = (
   node: React.ReactNode,
-  { analytics, theme$ }: ToMountPointOptions = {}
+  { analytics, theme$, userProfile }: ToMountPointOptions = {}
 ): MountPoint => {
   const theme = theme$ ? { theme$ } : themeStart;
-  return _toMountPoint(node, { analytics, theme, i18n });
+  return _toMountPoint(node, { analytics, theme, i18n, userProfile });
 };

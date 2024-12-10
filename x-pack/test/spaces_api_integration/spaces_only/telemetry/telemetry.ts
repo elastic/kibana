@@ -86,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
         apm: 0,
         enterpriseSearch: 0,
         searchInferenceEndpoints: 0,
+        searchPlayground: 0,
         siem: 0,
         securitySolutionCases: 0,
         securitySolutionCasesV2: 0,
@@ -103,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
         dataQuality: 0,
+        entityManager: 0,
       });
     });
 
