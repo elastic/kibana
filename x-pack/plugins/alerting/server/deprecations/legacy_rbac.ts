@@ -60,7 +60,7 @@ export const getLegacyRbacDeprecationsInfo = async ({
           manualSteps: [
             i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.manualStepOne', {
               defaultMessage:
-                'Look up the affected alerting rules by filtering for those that encountered action failures (via Stack Management > Rules)',
+                'The affected rules will have action failures in Stack Management > Rules.',
             }),
             i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.manualStepTwo', {
               defaultMessage:
