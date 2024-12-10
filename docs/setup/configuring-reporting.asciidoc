@@ -35,16 +35,20 @@ to enable the {kib} server to have screenshotting capabilities.
 [float]
 [[grant-user-access]]
 === Grant users access to reporting
-When security is enabled, you grant users access to {report-features} with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
+When security is enabled, the preferred method to grant users access to {report-features} is with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
 
-. Enable application privileges in Reporting. To enable, turn off the default user access control features in `kibana.yml`:
+. We recommend that you enable application privileges in Reporting. To do this, change a setting that controls the Reporting access control model in `kibana.yml`:
 +
 [source,yaml]
 ------------------------------------
 xpack.reporting.roles.enabled: false
 ------------------------------------
 +
-NOTE: If you use the default settings, you can still create a custom role that grants reporting privileges. The default role is `reporting_user`. This behavior is being deprecated and does not allow application-level access controls for {report-features}, and does not allow API keys or authentication tokens to authorize report generation. Refer to <<reporting-advanced-settings, reporting security settings>> for information and caveats about the deprecated access control features.
+NOTE: In Kibana 8.x versions, the default `xpack.reporting.roles.enabled: true` setting uses an older access control model separate from {kib} application
+privileges. The default model grants users with the built-in `reporting_user` role access to create any type of report in Kibana. Since the default model
+is not based on {kib} application privileges, users that do not have permission to create reports will see {report-features} in Kibana, but will receive an
+error if they attempt to request a report. The default model also does not allow API keys or authentication tokens to authorize report generation. Refer to
+<<reporting-advanced-settings, reporting security settings>> for information and caveats about the `xpack.reporting.roles.enabled` settings.
 
 . Create the reporting role.
 
