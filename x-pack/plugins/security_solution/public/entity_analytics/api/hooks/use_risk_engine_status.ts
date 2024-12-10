@@ -15,8 +15,6 @@ import { useEntityAnalyticsRoutes } from '../api';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
 
-const TEN_SECONDS = 10000;
-
 export const useInvalidateRiskEngineStatusQuery = () => {
   const queryClient = useQueryClient();
 
