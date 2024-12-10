@@ -47,7 +47,6 @@
     "@kbn/ui-theme",
     "@kbn/core-elasticsearch-server",
     "@kbn/share-plugin",
-    "@kbn/infra-plugin",
   ],
   "exclude": [
     "target/**/*",
