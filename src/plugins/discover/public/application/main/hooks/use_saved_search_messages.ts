@@ -50,7 +50,12 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
  * Send message when data fetching starts via main observable
  */
 export function sendFetchStartMsg(main$: DataMain$, params: DataMainMsgParams) {
-  main$.next({ ...main$.getValue(), params, fetchStatus: FetchStatus.LOADING });
+  main$.next({
+    ...main$.getValue(),
+    params,
+    fetchStatus: FetchStatus.LOADING,
+    fetchTime: new Date().toISOString(),
+  });
 }
 
 /**
@@ -122,7 +127,6 @@ export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$,
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
   data.main$.next({
-    ...data.main$.getValue(),
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,
   });

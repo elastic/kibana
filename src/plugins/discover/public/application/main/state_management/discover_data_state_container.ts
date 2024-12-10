@@ -54,6 +54,7 @@ export interface DataMsg {
 export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
   params?: DataMainMsgParams;
+  fetchTime?: string;
 }
 
 export interface DataMainMsgParams {

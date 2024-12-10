@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
   distinctUntilChanged,
+  distinctUntilKeyChanged,
   filter,
   map,
   merge,
@@ -215,11 +216,13 @@ export const useDiscoverHistogram = ({
    * Request params
    */
   const { params } = useObservable(
-    main$.pipe(filter(({ fetchStatus }) => fetchStatus === FetchStatus.LOADING)),
+    main$.pipe(
+      filter(({ fetchStatus }) => fetchStatus === FetchStatus.LOADING),
+      distinctUntilKeyChanged('fetchTime')
+    ),
     main$.getValue()
   );
   const { timeRangeRelative, timeRange, customFilters, query, filters, dataView } = params || {};
-  console.log('histogram params', params?.timeRange);
 
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
