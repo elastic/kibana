@@ -26,6 +26,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
+import { useSearchSessionContext } from '../../../hooks/use_search_session';
 
 export type RequestState = 'running' | 'done' | 'error';
 const WAIT_MS = 1000;
@@ -36,10 +37,15 @@ export const useLoadingState = () => {
   const {
     data: { search },
   } = services;
+  const { updateSearchSessionId } = useSearchSessionContext();
 
   const isAutoRefreshRequestPending$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
   const requestsCount$ = useMemo(() => new BehaviorSubject(0), []);
   const requestState$ = useMemo(() => new BehaviorSubject<RequestState | null>(null), []);
+
+  useEffect(() => {
+    updateSearchSessionId();
+  }, [updateSearchSessionId]);
 
   const waitUntilRequestsCompletes$ = useCallback(
     () =>
@@ -126,17 +132,27 @@ export const useLoadingState = () => {
 
       autoRefreshTick$.pipe(
         skipUntil(isAutoRefreshEnabled$()),
-        withLatestFrom(search.session.state$),
-        switchMap(([_, state]) => {
+        withLatestFrom(search.session.state$, isAutoRefreshRequestPending$),
+        switchMap(([_, state, isAutoRefreshRequestPending]) => {
           // if the current state$ value is not Completed
           if (state === SearchSessionState.Loading) {
             // Wait until queries using data.search complete before processing the next tick
             // This will only be called when Lens is used in the Asset Details page
-            return waitUntilNextSessionCompletes$(search.session);
+            return waitUntilNextSessionCompletes$(search.session).pipe(
+              tap(() => {
+                updateSearchSessionId();
+              })
+            );
           }
 
           // Else immediately emit true if session state is already completed
-          return of(null);
+          return of(null).pipe(
+            tap(() => {
+              if (!isAutoRefreshRequestPending) {
+                updateSearchSessionId();
+              }
+            })
+          );
         })
       )
     ).subscribe();
@@ -153,7 +169,7 @@ export const useLoadingState = () => {
     requestState$,
     requestsCount$,
     search.session,
-    // updateSearchSessionId,
+    updateSearchSessionId,
     waitUntilRequestsCompletes$,
   ]);
 
