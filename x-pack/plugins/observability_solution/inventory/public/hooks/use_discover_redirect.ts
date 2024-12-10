@@ -22,7 +22,7 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
       !isEntityDefinitionIndexPatternsLoading &&
       entityDefinitionIndexPatterns &&
       entityDefinitionIndexPatterns?.length > 0
-        ? entityDefinitionIndexPatterns[0].join(',')
+        ? entityDefinitionIndexPatterns[0].join()
         : '',
     [entityDefinitionIndexPatterns, isEntityDefinitionIndexPatternsLoading]
   );
