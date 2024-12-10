@@ -64,4 +64,4 @@ async function fetchData<ResponseType>(core: CoreStart) {
   ); 
 }
 ----
-Refer to {kib-repo}/blob/8.9/packages/core/http/core-http-browser/src/types.ts[the client-side APIs].
+Refer to {kib-repo}/blob/8.9/src/core/packages/http/browser/src/types.ts[the client-side APIs].
