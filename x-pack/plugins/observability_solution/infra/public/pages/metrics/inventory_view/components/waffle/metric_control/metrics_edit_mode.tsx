@@ -6,28 +6,35 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  withEuiTheme,
+  type WithEuiThemeProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
 
 interface Props {
-  theme: EuiTheme | undefined;
   customMetrics: SnapshotCustomMetricInput[];
   options: Array<{ text: string; value: string }>;
   onEdit: (metric: SnapshotCustomMetricInput) => void;
   onDelete: (metric: SnapshotCustomMetricInput) => void;
 }
+
+type PropsWithTheme = Props & WithEuiThemeProps;
+
 const ICON_WIDTH = 36;
 
-export const MetricsEditMode = withTheme(
-  ({ theme, customMetrics, options, onEdit, onDelete }: Props) => {
+export const MetricsEditMode = withEuiTheme(
+  ({ theme, customMetrics, options, onEdit, onDelete }: PropsWithTheme) => {
     return (
       <div style={{ width: 256 }}>
         {options.map((option) => (
           <div key={option.value} style={{ padding: '14px 14px 13px 36px' }}>
-            <span style={{ color: theme?.eui.euiButtonColorDisabled }}>{option.text}</span>
+            <span style={{ color: theme?.euiTheme.colors.disabled }}>{option.text}</span>
           </div>
         ))}
         {customMetrics.map((metric) => (
