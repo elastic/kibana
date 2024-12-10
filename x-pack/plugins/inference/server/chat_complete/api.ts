@@ -6,21 +6,24 @@
  */
 
 import { last } from 'lodash';
-import { Subject, defer, switchMap, takeUntil, throwError, finalize } from 'rxjs';
+import { defer, switchMap, throwError, identity } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   type ChatCompleteAPI,
   type ChatCompleteCompositeResponse,
   createInferenceRequestError,
-  createInferenceRequestAbortedError,
   type ToolOptions,
   ChatCompleteOptions,
 } from '@kbn/inference-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
-import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
+import {
+  getInferenceExecutor,
+  chunksIntoMessage,
+  streamToResponse,
+  handleCancellation,
+} from './utils';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -43,19 +46,11 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     ToolOptions,
     boolean
   > => {
-    const stop$ = new Subject<void>();
-    abortSignal?.addEventListener('abort', () => {
-      stop$.next();
-    });
-
     const inference$ = defer(async () => {
-      const actionsClient = await actions.getActionsClientWithRequest(request);
-      const connector = await getConnectorById({ connectorId, actionsClient });
-      const executor = createInferenceExecutor({ actionsClient, connector });
-      return { executor, connector };
+      return await getInferenceExecutor({ connectorId, request, actions });
     }).pipe(
-      switchMap(({ executor, connector }) => {
-        const connectorType = connector.type;
+      switchMap((executor) => {
+        const connectorType = executor.getConnector().type;
         const inferenceAdapter = getInferenceAdapter(connectorType);
 
         if (!inferenceAdapter) {
@@ -79,18 +74,10 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
         });
       }),
       chunksIntoMessage({
-        toolOptions: {
-          toolChoice,
-          tools,
-        },
+        toolOptions: { toolChoice, tools },
         logger,
       }),
-      takeUntil(stop$),
-      finalize(() => {
-        if (abortSignal?.aborted) {
-          throw createInferenceRequestAbortedError('Request was aborted');
-        }
-      })
+      abortSignal ? handleCancellation(abortSignal) : identity
     );
 
     if (stream) {
