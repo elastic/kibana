@@ -21,11 +21,9 @@ import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
 
 export interface DynamicSideNavItems {
-  appSearch?: Array<EuiSideNavItemType<unknown>>;
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
   searchApps?: Array<EuiSideNavItemType<unknown>>;
-  workplaceSearch?: Array<EuiSideNavItemType<unknown>>;
 }
 
 const title = i18n.translate(
