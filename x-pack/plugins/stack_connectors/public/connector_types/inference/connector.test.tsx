@@ -45,7 +45,6 @@ const providersSchemas = [
   {
     service: 'cohere',
     name: 'Cohere',
-    description: '',
     task_types: ['text_embedding', 'rerank', 'completion'],
     configurations: {
       api_key: {
@@ -71,7 +70,6 @@ const providersSchemas = [
   {
     service: 'elastic',
     name: 'Elastic',
-    description: '',
     task_types: ['sparse_embedding'],
     configurations: {
       'rate_limit.requests_per_minute': {
@@ -106,7 +104,6 @@ const providersSchemas = [
   {
     service: 'watsonxai',
     name: 'IBM Watsonx',
-    description: '',
     task_types: ['text_embedding'],
     configurations: {
       project_id: {
@@ -159,7 +156,6 @@ const providersSchemas = [
   {
     service: 'azureaistudio',
     name: 'Azure AI Studio',
-    description: '',
     task_types: ['text_embedding', 'completion'],
     configurations: {
       endpoint_type: {
@@ -212,7 +208,6 @@ const providersSchemas = [
   {
     service: 'hugging_face',
     name: 'Hugging Face',
-    description: '',
     task_types: ['text_embedding', 'sparse_embedding'],
     configurations: {
       api_key: {
@@ -247,7 +242,6 @@ const providersSchemas = [
   {
     service: 'amazonbedrock',
     name: 'Amazon Bedrock',
-    description: '',
     task_types: ['text_embedding', 'completion'],
     configurations: {
       secret_key: {
@@ -310,7 +304,6 @@ const providersSchemas = [
   {
     service: 'anthropic',
     name: 'Anthropic',
-    description: '',
     task_types: ['completion'],
     configurations: {
       api_key: {
@@ -346,7 +339,6 @@ const providersSchemas = [
   {
     service: 'googleaistudio',
     name: 'Google AI Studio',
-    description: '',
     task_types: ['text_embedding', 'completion'],
     configurations: {
       api_key: {
@@ -381,7 +373,6 @@ const providersSchemas = [
   {
     service: 'elasticsearch',
     name: 'Elasticsearch',
-    description: '',
     task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
     configurations: {
       num_allocations: {
@@ -417,7 +408,6 @@ const providersSchemas = [
   {
     service: 'openai',
     name: 'OpenAI',
-    description: '',
     task_types: ['text_embedding', 'completion'],
     configurations: {
       api_key: {
@@ -473,7 +463,6 @@ const providersSchemas = [
   {
     service: 'azureopenai',
     name: 'Azure OpenAI',
-    description: '',
     task_types: ['text_embedding', 'completion'],
     configurations: {
       api_key: {
@@ -536,7 +525,6 @@ const providersSchemas = [
   {
     service: 'mistral',
     name: 'Mistral',
-    description: '',
     task_types: ['text_embedding'],
     configurations: {
       api_key: {
@@ -581,7 +569,6 @@ const providersSchemas = [
   {
     service: 'googlevertexai',
     name: 'Google Vertex AI',
-    description: '',
     task_types: ['text_embedding', 'rerank'],
     configurations: {
       service_account_json: {
@@ -636,7 +623,6 @@ const providersSchemas = [
   {
     service: 'alibabacloud-ai-search',
     name: 'AlibabaCloud AI Search',
-    description: '',
     task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
     configurations: {
       workspace: {

@@ -42,7 +42,6 @@ export type FieldsConfiguration = Record<string, ConfigProperties>;
 
 export interface InferenceProvider {
   service: string;
-  description: string;
   name: string;
   task_types: string[];
   logo?: string;

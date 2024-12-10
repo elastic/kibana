@@ -47,7 +47,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'cohere',
         name: 'Cohere',
-        description: '',
         task_types: ['text_embedding', 'rerank', 'completion'],
         configurations: {
           api_key: {
@@ -73,7 +72,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'elastic',
         name: 'Elastic',
-        description: '',
         task_types: ['sparse_embedding'],
         configurations: {
           'rate_limit.requests_per_minute': {
@@ -108,7 +106,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'watsonxai',
         name: 'IBM Watsonx',
-        description: '',
         task_types: ['text_embedding'],
         configurations: {
           project_id: {
@@ -161,7 +158,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'azureaistudio',
         name: 'Azure AI Studio',
-        description: '',
         task_types: ['text_embedding', 'completion'],
         configurations: {
           endpoint_type: {
@@ -214,7 +210,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'hugging_face',
         name: 'Hugging Face',
-        description: '',
         task_types: ['text_embedding', 'sparse_embedding'],
         configurations: {
           api_key: {
@@ -249,7 +244,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'amazonbedrock',
         name: 'Amazon Bedrock',
-        description: '',
         task_types: ['text_embedding', 'completion'],
         configurations: {
           secret_key: {
@@ -313,7 +307,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'anthropic',
         name: 'Anthropic',
-        description: '',
         task_types: ['completion'],
         configurations: {
           api_key: {
@@ -349,7 +342,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'googleaistudio',
         name: 'Google AI Studio',
-        description: '',
         task_types: ['text_embedding', 'completion'],
         configurations: {
           api_key: {
@@ -384,7 +376,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'elasticsearch',
         name: 'Elasticsearch',
-        description: '',
         task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
         configurations: {
           num_allocations: {
@@ -421,7 +412,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'openai',
         name: 'OpenAI',
-        description: '',
         task_types: ['text_embedding', 'completion'],
         configurations: {
           api_key: {
@@ -477,7 +467,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'azureopenai',
         name: 'Azure OpenAI',
-        description: '',
         task_types: ['text_embedding', 'completion'],
         configurations: {
           api_key: {
@@ -540,7 +529,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'mistral',
         name: 'Mistral',
-        description: '',
         task_types: ['text_embedding'],
         configurations: {
           api_key: {
@@ -585,7 +573,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'googlevertexai',
         name: 'Google Vertex AI',
-        description: '',
         task_types: ['text_embedding', 'rerank'],
         configurations: {
           service_account_json: {
@@ -640,7 +627,6 @@ export const getInferenceServicesRoute = (router: IRouter) => {
       {
         service: 'alibabacloud-ai-search',
         name: 'AlibabaCloud AI Search',
-        description: '',
         task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
         configurations: {
           workspace: {
