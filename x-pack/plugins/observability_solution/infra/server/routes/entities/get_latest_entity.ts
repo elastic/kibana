@@ -5,32 +5,26 @@
  * 2.0.
  */
 
-import { ENTITY_LATEST, entitiesAliasPattern } from '@kbn/entities-schema';
-import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
-import { ENTITY_TYPE, SOURCE_DATA_STREAM_TYPE } from '@kbn/observability-shared-plugin/common';
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { Logger } from '@kbn/logging';
-
-const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
-  type: '*',
-  dataset: ENTITY_LATEST,
-});
 
 interface EntitySourceResponse {
   sourceDataStreamType?: string | string[];
 }
 
 export async function getLatestEntity({
-  inventoryEsClient,
   entityId,
   entityType,
   entityManagerClient,
+  from,
+  to,
   logger,
 }: {
-  inventoryEsClient: ObservabilityElasticsearchClient;
   entityType: 'host' | 'container';
   entityId: string;
   entityManagerClient: EntityClient;
+  from: string;
+  to: string;
   logger: Logger;
 }): Promise<EntitySourceResponse | undefined> {
   try {
@@ -44,25 +38,16 @@ export async function getLatestEntity({
       return undefined;
     }
 
-    const response = await inventoryEsClient.esql<
-      {
-        'source_data_stream.type'?: string | string;
-      },
-      { transform: 'plain' }
-    >(
-      'get_latest_entities',
-      {
-        query: `FROM ${ENTITIES_LATEST_ALIAS}
-        | WHERE ${ENTITY_TYPE} == ?
-        | WHERE ${hostOrContainerIdentityField} == ?
-        | KEEP ${SOURCE_DATA_STREAM_TYPE}
-      `,
-        params: [entityType, entityId],
-      },
-      { transform: 'plain' }
-    );
+    const entities = await entityManagerClient.v2.searchEntities({
+      type: entityType,
+      limit: 1,
+      metadata_fields: ['data_stream.type'],
+      filters: [`${hostOrContainerIdentityField}: "${entityId}"`],
+      start: from,
+      end: to,
+    });
 
-    return { sourceDataStreamType: response.hits[0]['source_data_stream.type'] };
+    return { sourceDataStreamType: entities[0]['data_stream.type'].filter(Boolean) };
   } catch (e) {
     logger.error(e);
   }

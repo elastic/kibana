@@ -29,6 +29,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
           ]),
           entityId: schema.string(),
         }),
+        query: schema.object({ from: schema.string(), to: schema.string() }),
       },
       options: {
         access: 'internal',
@@ -36,6 +37,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       const { entityId, entityType } = request.params;
+      const { from, to } = request.query;
       const [coreContext, infraContext] = await Promise.all([
         requestContext.core,
         requestContext.infra,
@@ -54,19 +56,21 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
         plugin: `@kbn/${METRICS_APP_ID}-plugin`,
       });
 
-      const entityCentriExperienceEnabled = await coreContext.uiSettings.client.get(
+      const entityCentricExperienceEnabled = await coreContext.uiSettings.client.get(
         entityCentricExperience
       );
 
       try {
         const sourceDataStreamTypes = await getDataStreamTypes({
-          entityCentriExperienceEnabled,
+          entityCentricExperienceEnabled,
           entityId,
           entityManagerClient,
           entityType,
           infraMetricsClient,
           obsEsClient,
           logger,
+          from,
+          to,
         });
 
         return response.ok({
