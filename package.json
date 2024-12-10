@@ -961,7 +961,7 @@
     "@kbn/timerange": "link:packages/kbn-timerange",
     "@kbn/tinymath": "link:packages/kbn-tinymath",
     "@kbn/transform-plugin": "link:x-pack/platform/plugins/private/transform",
-    "@kbn/translations-plugin": "link:x-pack/plugins/translations",
+    "@kbn/translations-plugin": "link:x-pack/platform/plugins/private/translations",
     "@kbn/transpose-utils": "link:packages/kbn-transpose-utils",
     "@kbn/triggers-actions-ui-example-plugin": "link:x-pack/examples/triggers_actions_ui_example",
     "@kbn/triggers-actions-ui-plugin": "link:x-pack/plugins/triggers_actions_ui",

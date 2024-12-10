@@ -965,7 +965,7 @@ packages/kbn-timerange @elastic/obs-ux-logs-team
 packages/kbn-tinymath @elastic/kibana-visualizations
 packages/kbn-tooling-log @elastic/kibana-operations
 x-pack/platform/plugins/private/transform @elastic/ml-ui
-x-pack/plugins/translations @elastic/kibana-localization
+x-pack/platform/plugins/private/translations @elastic/kibana-localization
 packages/kbn-transpose-utils @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
