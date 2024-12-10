@@ -22,7 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
 
-  describe('SyntheticsCustomStatusRule', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/202337
+  // Failing: See https://github.com/elastic/kibana/issues/196257
+  describe.skip('SyntheticsCustomStatusRule', () => {
     const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
 
     before(async () => {

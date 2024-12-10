@@ -51,7 +51,7 @@ export const disableRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const rulesClient = await (await context.alerting).getRulesClient();
         const { id }: DisableRuleRequestParamsV1 = req.params;
         const body: DisableRuleRequestBodyV1 = req.body || {};
         const { untrack = false } = body;

@@ -70,7 +70,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
       async (context, _, response): Promise<IKibanaResponse<GetRuleManagementFiltersResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const ctx = await context.resolve(['alerting']);
-        const rulesClient = ctx.alerting.getRulesClient();
+        const rulesClient = await ctx.alerting.getRulesClient();
 
         try {
           const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =

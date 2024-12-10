@@ -7,7 +7,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogEntry, convertISODateToNanoPrecision } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryFlyout,
@@ -341,7 +341,7 @@ export const StreamPageLogsContentForState = React.memo<{
   );
 });
 
-const LogPageMinimapColumn = euiStyled.div`
+const LogPageMinimapColumn = styled.div`
   flex: 1 0 0%;
   overflow: hidden;
   min-width: 100px;
