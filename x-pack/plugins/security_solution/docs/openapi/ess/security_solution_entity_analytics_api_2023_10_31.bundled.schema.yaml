@@ -972,6 +972,7 @@ components:
       enum:
         - user
         - host
+        - service
       type: string
     HostEntity:
       type: object
