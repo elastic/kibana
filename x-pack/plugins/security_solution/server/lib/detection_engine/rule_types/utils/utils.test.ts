@@ -48,6 +48,7 @@ import {
   addToSearchAfterReturn,
   getUnprocessedExceptionsWarnings,
   getDisabledActionsWarningText,
+  calculateFromValue,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -583,6 +584,23 @@ describe('utils', () => {
       expect(someTuple.maxSignals).toEqual(20);
       expect(tuples.length).toEqual(1);
       expect(warningStatusMessage).toEqual(undefined);
+    });
+  });
+
+  describe('calculateFromValue', () => {
+    test('should return formatted `from` value from rule schedule fields', () => {
+      const from = calculateFromValue('5m', '4m');
+      expect(from).toEqual('now-540s');
+    });
+
+    test('should return formatted `from` value from rule schedule fields with no lookback', () => {
+      const from = calculateFromValue('5m', '0m');
+      expect(from).toEqual('now-300s');
+    });
+
+    test('should return formatted `from` value from rule schedule fields with invalid moment fields', () => {
+      const from = calculateFromValue('5', '5');
+      expect(from).toEqual('now-0s');
     });
   });
 
