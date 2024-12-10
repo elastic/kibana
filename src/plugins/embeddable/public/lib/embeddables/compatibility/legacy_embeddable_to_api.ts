@@ -42,7 +42,6 @@ import {
   embeddableOutputToSubject,
   viewModeToSubject,
 } from './embeddable_compatibility_utils';
-import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
 export type CommonLegacyInput = EmbeddableInput & { savedObjectId?: string; timeRange: TimeRange };
 export type CommonLegacyOutput = EmbeddableOutput & { indexPatterns: DataView[] };
@@ -91,7 +90,9 @@ export const legacyEmbeddableToApi = (
   /**
    * Support editing of legacy embeddables
    */
-  const onEdit = () => { throw new Error('Edit legacy embeddable not supported') };
+  const onEdit = () => {
+    throw new Error('Edit legacy embeddable not supported');
+  };
   const getTypeDisplayName = () =>
     embeddableStart.getEmbeddableFactory(embeddable.type)?.getDisplayName() ??
     i18n.translate('embeddableApi.compatibility.defaultTypeDisplayName', {
@@ -285,10 +286,14 @@ export const legacyEmbeddableToApi = (
       defaultPanelDescription,
 
       canLinkToLibrary: async () => false,
-      linkToLibrary: () => { throw new Error('Link to library not supported for legacy embeddable') },
+      linkToLibrary: () => {
+        throw new Error('Link to library not supported for legacy embeddable');
+      },
 
       canUnlinkFromLibrary: async () => false,
-      unlinkFromLibrary: () => { throw new Error('Unlink from library not supported for legacy embeddable') },
+      unlinkFromLibrary: () => {
+        throw new Error('Unlink from library not supported for legacy embeddable');
+      },
 
       savedObjectId,
     },
