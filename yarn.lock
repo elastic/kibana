@@ -6552,7 +6552,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/osquery-plugin@link:x-pack/plugins/osquery":
+"@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
   version "0.0.0"
   uid ""
 

@@ -113,7 +113,7 @@
       "packages/observability/logs_overview/src/components"
     ],
     "xpack.osquery": [
-      "plugins/osquery"
+      "platform/plugins/shared/osquery"
     ],
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.profiling": [

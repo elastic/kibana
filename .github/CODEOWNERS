@@ -876,6 +876,7 @@ x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
+x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
@@ -956,7 +957,6 @@ x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/uptime @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/ux @elastic/obs-ux-infra_services-team
-x-pack/plugins/osquery @elastic/security-defend-workflows
 x-pack/plugins/painless_lab @elastic/kibana-management
 x-pack/plugins/remote_clusters @elastic/kibana-management
 x-pack/plugins/reporting @elastic/appex-sharedux

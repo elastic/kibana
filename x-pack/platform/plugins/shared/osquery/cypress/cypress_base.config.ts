@@ -25,7 +25,7 @@ export const getCypressBaseConfig = (
 ): Cypress.ConfigOptions =>
   merge(
     {
-      reporter: '../../../node_modules/cypress-multi-reporters',
+      reporter: '../../../../../node_modules/cypress-multi-reporters',
       reporterOptions: {
         configFile: './cypress/reporter_config.json',
       },
@@ -33,10 +33,10 @@ export const getCypressBaseConfig = (
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 12000,
-      screenshotsFolder: '../../../target/kibana-osquery/cypress/screenshots',
+      screenshotsFolder: '../../../../../target/kibana-osquery/cypress/screenshots',
       trashAssetsBeforeRuns: false,
       video: true,
-      videosFolder: '../../../target/kibana-osquery/cypress/videos',
+      videosFolder: '../../../../../target/kibana-osquery/cypress/videos',
 
       retries: {
         runMode: 1,
