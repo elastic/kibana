@@ -109,11 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
-      const result = await countEntities(
-        supertest,
-        { types: ['shleem', 'chumble', 'shmuckle'] },
-        200
-      );
+      const result = await countEntities(supertest, {}, 200);
 
       expect(result).toEqual({
         total: 60,
@@ -236,7 +232,6 @@ export default function ({ getService }: FtrProviderContext) {
       const result = await countEntities(
         supertest,
         {
-          types: ['grumbo'],
           start: moment(now).subtract(25, 'minute').toISOString(),
           end: now.toISOString(),
         },
@@ -244,6 +239,93 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(result).toEqual({ total: 3, types: { grumbo: 3 } });
+    });
+
+    it('respects filters parameters', async () => {
+      const sourceType1 = {
+        id: 'source-1-with-chumbles',
+        type_id: 'chumble',
+        index_patterns: ['index-1-with-chumbles'],
+        identity_fields: ['service.name'],
+        metadata_fields: [],
+        filters: [],
+      };
+      await createEntityTypeDefinition(supertest, { type: { id: 'chumble' } });
+      await createEntitySourceDefinition(supertest, { source: sourceType1 });
+
+      const sourceType2 = {
+        id: 'source-1-with-shleems',
+        type_id: 'shleem',
+        index_patterns: ['index-1-with-shleems'],
+        identity_fields: ['service.name'],
+        metadata_fields: [],
+        filters: [],
+      };
+      await createEntityTypeDefinition(supertest, { type: { id: 'shleem' } });
+      await createEntitySourceDefinition(supertest, { source: sourceType2 });
+
+      const sourceType3 = {
+        id: 'source-1-with-shmuckles',
+        type_id: 'shmuckle',
+        index_patterns: ['index-1-with-shmuckles'],
+        identity_fields: ['service.name'],
+        metadata_fields: [],
+        filters: [],
+      };
+      await createEntityTypeDefinition(supertest, { type: { id: 'shmuckle' } });
+      await createEntitySourceDefinition(supertest, { source: sourceType3 });
+
+      cleanup = await Promise.all([
+        createIndexWithDocuments(esClient, {
+          index: 'index-1-with-chumbles',
+          properties: {
+            'service.name': { type: 'keyword' },
+            'service.environment': { type: 'keyword' },
+          },
+          documents: [
+            { 'service.name': 'service-one', 'service.environment': 'prod' },
+            { 'service.name': 'service-one' },
+          ],
+        }),
+        createIndexWithDocuments(esClient, {
+          index: 'index-1-with-shleems',
+          properties: {
+            'service.name': { type: 'keyword' },
+            'service.environment': { type: 'keyword' },
+          },
+          documents: [
+            { 'service.name': 'service-two', 'service.environment': 'staging' },
+            { 'service.name': 'service-three', 'service.environment': 'prod' },
+            { 'service.name': 'service-three', 'service.environment': 'dev' },
+          ],
+        }),
+        createIndexWithDocuments(esClient, {
+          index: 'index-1-with-shmuckles',
+          properties: {
+            'service.name': { type: 'keyword' },
+          },
+          documents: [
+            { 'service.name': 'service-two' },
+            { 'service.name': 'service-three' },
+            { 'service.name': 'service-three' },
+          ],
+        }),
+      ]);
+
+      const result = await countEntities(
+        supertest,
+        { filters: ['service.environment: prod'] },
+        200
+      );
+
+      expect(result).toEqual({
+        total: 2,
+        types: {
+          chumble: 1,
+          shleem: 1,
+          shmuckle: 0,
+        },
+      });
     });
   });
 }

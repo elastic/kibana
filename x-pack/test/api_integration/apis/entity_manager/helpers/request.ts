@@ -121,6 +121,7 @@ export const countEntities = async (
   supertest: Agent,
   params: {
     types?: string[];
+    filters?: string[];
     start?: string;
     end?: string;
   },
