@@ -34,6 +34,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { cloneDeep } from 'lodash';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
@@ -51,7 +52,6 @@ import { DashboardState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { placeClonePanel } from '../dashboard_container/panel_placement';
-import { i18n } from '@kbn/i18n';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
