@@ -33,7 +33,6 @@ import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { GenericAggType, RuleConditionChart } from '@kbn/observability-plugin/public';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
-import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -61,7 +60,6 @@ export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
   const { services } = useKibanaContextForPlugin();
   const { data, dataViews, dataViewEditor } = services;
-  const { metricsView } = useMetricsDataViewContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
@@ -84,14 +82,13 @@ export const Expressions: React.FC<Props> = (props) => {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
-        const metricsDataViewFromSettings = metricsView?.dataViewReference;
+        const metricsDataView =
+          (await data.dataViews.get('infra_rules_data_view')) ??
+          (await data.dataViews.getDefaultDataView());
 
-        const defaultDataView =
-          metricsDataViewFromSettings ?? (await data.dataViews.getDefaultDataView());
-
-        if (defaultDataView) {
-          newSearchSource.setField('index', defaultDataView);
-          setDataView(defaultDataView);
+        if (metricsDataView) {
+          newSearchSource.setField('index', metricsDataView);
+          setDataView(metricsDataView);
         }
 
         initialSearchConfiguration = newSearchSource.getSerializedFields();
