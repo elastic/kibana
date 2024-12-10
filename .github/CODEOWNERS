@@ -879,6 +879,7 @@ x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
+x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
 x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/canvas @elastic/kibana-presentation
@@ -960,7 +961,6 @@ x-pack/plugins/painless_lab @elastic/kibana-management
 x-pack/plugins/remote_clusters @elastic/kibana-management
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/plugins/rollup @elastic/kibana-management
-x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/runtime_fields @elastic/kibana-management
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
 x-pack/plugins/screenshotting @elastic/kibana-reporting-services

@@ -52,7 +52,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/platform\/plugins\/shared\/event_log/,
-        /^x-pack\/plugins\/rule_registry/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/plugins\/task_manager/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -243,7 +243,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/plugins\/lists/,
-        /^x-pack\/plugins\/rule_registry\/common/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
@@ -329,7 +329,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/plugins\/elastic_assistant/,
         /^x-pack\/plugins\/lists/,
-        /^x-pack\/plugins\/rule_registry\/common/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
