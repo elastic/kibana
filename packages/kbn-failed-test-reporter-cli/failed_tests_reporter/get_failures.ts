@@ -9,8 +9,8 @@
 
 import stripAnsi from 'strip-ansi';
 
+import type { CodeOwnership } from '@kbn/code-owners';
 import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
-import type { CodeOwnership } from '@kbn/code-owners'
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
@@ -76,11 +76,11 @@ export function getFailures(report: TestReport) {
   const failures: TestFailure[] = [];
 
   const commandLine = getCommandLineFromReport(report);
-  const owners = getOwner(report);
 
   for (const testCase of makeFailedTestCaseIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
+    const owners = testCase.$.owners;
 
     const failureObj = {
       // unwrap xml weirdness
@@ -108,15 +108,4 @@ function getCommandLineFromReport(report: TestReport) {
   } else {
     return report.testsuite?.$['command-line'] || '';
   }
-}
-
-function getOwner(report: TestReport): CodeOwnership {
-  // TODO-TRE: Remove comments and update logic
-  // if ('testsuites' in report) {
-  //   return report.testsuites?.testsuite?.[0]?.$['command-line'] || '';
-  // } else {
-  //   return report.testsuite?.$['command-line'] || '';
-  // }
-  if ('testsuites' in report) return report.testsuites?.testsuite?.[0]?.testcase?.[0].$.owners;
-  return;
 }
