@@ -615,10 +615,14 @@ Notes:
 ### Error handling
 
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 #### **Scenario: Error is handled when any installation operation on prebuilt rules fails**
 =======
 #### **Scenario: Error is handled when any operation on prebuilt rules fails**
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+#### **Scenario: Error is handled when any installation operation on prebuilt rules fails**
+>>>>>>> 3815f2b555c (Edited test plans):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 
 **Automation**: e2e test with mock rules
 
@@ -633,11 +637,14 @@ Examples:
   | installing selected   |
   | installing individual |
 <<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+<<<<<<< HEAD:x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 =======
   | upgrading all         |
   | upgrading selected    |
   | upgrading individual  |
 >>>>>>> d44834d79cd (Split test install+upgrade test plans into 3):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
+=======
+>>>>>>> 3815f2b555c (Edited test plans):x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules/installation.md
 ```
 
 ### Authorization / RBAC
