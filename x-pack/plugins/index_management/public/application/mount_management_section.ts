@@ -73,7 +73,8 @@ export function getIndexManagementDependencies({
 }): AppDependencies {
   const { docLinks, application, uiSettings, settings } = core;
   const { url } = startDependencies.share;
-  const { monitor, manageEnrich, monitorEnrich } = application.capabilities.index_management;
+  const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+    application.capabilities.index_management;
 
   return {
     core: {
@@ -109,6 +110,7 @@ export function getIndexManagementDependencies({
       monitor: !!monitor,
       manageEnrich: !!manageEnrich,
       monitorEnrich: !!monitorEnrich,
+      manageIndexTemplates: !!manageIndexTemplates,
     },
   };
 }
