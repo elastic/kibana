@@ -63,7 +63,7 @@ export const getLegacyRbacDeprecationsInfo = async (
           manualSteps: [
             i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.manualStepOne', {
               defaultMessage:
-                'To identify the affected rules run the query in Dev Tools that is linked above under Learn more.',
+                'To identify the affected rules run the query in Dev Tools that is linked under Learn more.',
             }),
             i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.manualStepTwo', {
               defaultMessage:
