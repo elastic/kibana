@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { RuleCustomizationEnum, type FilterOptions } from '../../../../rule_management/logic/types';
 
 export type UpgradePrebuiltRulesTableFilterOptions = Pick<
@@ -15,14 +15,14 @@ export type UpgradePrebuiltRulesTableFilterOptions = Pick<
 >;
 
 interface UseFilterPrebuiltRulesToUpgradeParams {
-  data: RuleUpgradeInfoForReview[];
+  data: RuleUpgradeState[];
   filterOptions: UpgradePrebuiltRulesTableFilterOptions;
 }
 
 export const useFilterPrebuiltRulesToUpgrade = ({
   data,
   filterOptions,
-}: UseFilterPrebuiltRulesToUpgradeParams): RuleUpgradeInfoForReview[] => {
+}: UseFilterPrebuiltRulesToUpgradeParams): RuleUpgradeState[] => {
   return useMemo(() => {
     const { filter, tags, ruleSource } = filterOptions;
 
