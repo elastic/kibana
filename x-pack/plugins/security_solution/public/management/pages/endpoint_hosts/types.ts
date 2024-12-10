@@ -160,6 +160,7 @@ export interface TransformStatsResponse {
 export interface EndpointInsightRouteState {
   insight?: {
     back_url: string;
+    id?: string;
     item: CreateExceptionListItemSchema;
   };
 }

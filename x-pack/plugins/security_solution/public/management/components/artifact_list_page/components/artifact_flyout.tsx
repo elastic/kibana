@@ -27,6 +27,7 @@ import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useLocation } from 'react-router-dom';
+import { useMarkInsightAsRemediated } from '../hooks/use_mark_workflow_insight_as_remediated';
 import type { EndpointInsightRouteState } from '../../../pages/endpoint_hosts/types';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
@@ -198,11 +199,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       docLinks: {
         links: { securitySolution },
       },
-      application: { navigateToUrl },
     } = useKibana().services;
 
     const location = useLocation<EndpointInsightRouteState>();
-    const [sourceInsight, setSourceInsight] = useState<{ id: string; back_url: string } | null>(
+    const [sourceInsight, setSourceInsight] = useState<{ id?: string; back_url: string } | null>(
       null
     );
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -232,6 +232,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       mutateAsync: submitData,
       error: internalSubmitError,
     } = useWithArtifactSubmitData(apiClient, formMode);
+
+    const { mutateAsync: markInsightAsRemediated } = useMarkInsightAsRemediated(
+      sourceInsight?.back_url
+    );
 
     const isSubmittingData = useMemo(() => {
       return submitHandler ? externalIsSubmittingData : internalIsSubmittingData;
@@ -294,20 +298,25 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     );
 
     const handleSuccess = useCallback(
-      (result: ExceptionListItemSchema) => {
+      async (result: ExceptionListItemSchema) => {
         toasts.addSuccess(
           isEditFlow
             ? labels.flyoutEditSubmitSuccess(result)
             : labels.flyoutCreateSubmitSuccess(result)
         );
+        try {
+          if (sourceInsight?.id && sourceInsight?.back_url) {
+            await markInsightAsRemediated({ insightId: sourceInsight.id });
+            return;
+          }
+        } catch {
+          setSourceInsight(null);
+        }
 
-        if (sourceInsight?.back_url) {
-          navigateToUrl(sourceInsight.back_url);
-        } else if (isMounted()) {
+        if (isMounted()) {
           // Close the flyout
           // `undefined` will cause params to be dropped from url
           setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
-
           onSuccess();
         }
       },
@@ -315,10 +324,11 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         isEditFlow,
         isMounted,
         labels,
-        navigateToUrl,
+        markInsightAsRemediated,
         onSuccess,
         setUrlParams,
         sourceInsight?.back_url,
+        sourceInsight?.id,
         toasts,
         urlParams,
       ]
@@ -380,7 +390,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     // If this form was opened from an endpoint insight, prepopulate the form with the insight data
     useEffect(() => {
       if (location.state?.insight) {
-        setSourceInsight({ id: 'mocked', back_url: location.state.insight.back_url });
+        setSourceInsight({
+          id: location.state.insight.id,
+          back_url: location.state.insight.back_url,
+        });
         setFormState({ isValid: true, item: location.state.insight.item });
 
         location.state.insight = undefined;

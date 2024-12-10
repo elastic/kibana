@@ -56,7 +56,8 @@ export const WorkflowInsightsResults = ({
 
   const openArtifactCreationPage = ({
     remediation,
-  }: Pick<SecurityWorkflowInsight, 'remediation'>) => {
+    id,
+  }: Pick<SecurityWorkflowInsight, 'remediation' | 'id'>) => {
     const url = `${APP_PATH}${TRUSTED_APPS_PATH}?show=create`;
 
     // TODO: handle multiple exception list items
@@ -64,6 +65,7 @@ export const WorkflowInsightsResults = ({
       ...(remediation.exception_list_items && remediation.exception_list_items.length
         ? {
             insight: {
+              id,
               back_url: `${APP_PATH}${getEndpointDetailsPath({
                 name: 'endpointDetails',
                 selected_endpoint: endpointId,
@@ -91,10 +93,10 @@ export const WorkflowInsightsResults = ({
 
   const onInsightClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    { remediation }: Pick<SecurityWorkflowInsight, 'remediation'>
+    { remediation, id }: Pick<SecurityWorkflowInsight, 'remediation' | 'id'>
   ) => {
     e.preventDefault();
-    openArtifactCreationPage({ remediation });
+    openArtifactCreationPage({ remediation, id });
   };
 
   const renderContent = () => {
@@ -129,8 +131,12 @@ export const WorkflowInsightsResults = ({
                   aria-label="Navigate to create trusted app" // TODO: localize
                   iconType="popout"
                   href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
-                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) =>
-                    onInsightClick(e, { remediation: insight.remediation })
+                  onClick={
+                    (e: React.MouseEvent<HTMLAnchorElement>) =>
+                      onInsightClick(e, {
+                        remediation: insight.remediation,
+                        id: insight.id || 'test',
+                      }) // TODO: remove test
                   }
                 />
               </EuiFlexItem>

@@ -65,6 +65,12 @@ export const WORKFLOW_INSIGHTS = {
         defaultMessage: 'Failed to retrieve insights in the generation process',
       }
     ),
+    updateInsightError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.updateInsightError',
+      {
+        defaultMessage: 'Failed to mark insight as remediated',
+      }
+    ),
   },
 };
 
