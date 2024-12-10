@@ -16,10 +16,7 @@ import type {
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredRuleMigration } from '../types';
-import {
-  SiemMigrationRuleTranslationResult,
-  SiemMigrationStatus,
-} from '../../../../../common/siem_migrations/constants';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type {
   ElasticRule,
   RuleMigration,
@@ -27,6 +24,8 @@ import type {
   RuleMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { getSortingOptions, type RuleMigrationSort } from './sort';
+import { conditions as searchConditions } from './search';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -48,6 +47,7 @@ export interface RuleMigrationFilters {
 }
 export interface RuleMigrationGetOptions {
   filters?: RuleMigrationFilters;
+  sort?: RuleMigrationSort;
   from?: number;
   size?: number;
 }
@@ -123,13 +123,19 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Retrieves an array of rule documents of a specific migrations */
   async get(
     migrationId: string,
-    { filters = {}, from, size }: RuleMigrationGetOptions = {}
+    { filters = {}, sort = {}, from, size }: RuleMigrationGetOptions = {}
   ): Promise<{ total: number; data: StoredRuleMigration[] }> {
     const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId, filters);
 
     const result = await this.esClient
-      .search<RuleMigration>({ index, query, sort: '_doc', from, size })
+      .search<RuleMigration>({
+        index,
+        query,
+        sort: sort.sortField ? getSortingOptions(sort) : undefined,
+        from,
+        size,
+      })
       .catch((error) => {
         this.logger.error(`Error searching rule migrations: ${error.message}`);
         throw error;
@@ -257,8 +263,8 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const query = this.getFilterQuery(migrationId);
 
     const aggregations = {
-      prebuilt: { filter: conditions.isPrebuilt() },
-      installable: { filter: { bool: { must: conditions.isInstallable() } } },
+      prebuilt: { filter: searchConditions.isPrebuilt() },
+      installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
     };
     const result = await this.esClient
       .search({ index, query, aggregations, _source: false })
@@ -370,47 +376,14 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       filter.push({ terms: { _id: ids } });
     }
     if (installable) {
-      filter.push(...conditions.isInstallable());
+      filter.push(...searchConditions.isInstallable());
     }
     if (prebuilt) {
-      filter.push(conditions.isPrebuilt());
+      filter.push(searchConditions.isPrebuilt());
     }
     if (searchTerm?.length) {
-      filter.push(conditions.matchTitle(searchTerm));
+      filter.push(searchConditions.matchTitle(searchTerm));
     }
     return { bool: { filter } };
   }
 }
-
-const conditions = {
-  isFullyTranslated(): QueryDslQueryContainer {
-    return { term: { translation_result: SiemMigrationRuleTranslationResult.FULL } };
-  },
-  isNotInstalled(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
-      },
-    };
-  },
-  isPrebuilt(): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { exists: { field: 'elastic_rule.prebuilt_rule_id' } },
-      },
-    };
-  },
-  matchTitle(title: string): QueryDslQueryContainer {
-    return {
-      nested: {
-        path: 'elastic_rule',
-        query: { match: { 'elastic_rule.title': title } },
-      },
-    };
-  },
-  isInstallable(): QueryDslQueryContainer[] {
-    return [this.isFullyTranslated(), this.isNotInstalled()];
-  },
-};

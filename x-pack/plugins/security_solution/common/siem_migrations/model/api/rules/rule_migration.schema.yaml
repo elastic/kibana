@@ -133,6 +133,19 @@ paths:
           required: false
           schema:
             type: number
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
         - name: search_term
           in: query
           required: false
@@ -180,10 +193,18 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                description: The rule migration id
-                $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+              type: object
+              required:
+                - ids
+              properties:
+                ids:
+                  type: array
+                  items:
+                    description: The rule migration id
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                enabled:
+                  type: boolean
+                  description: Indicates whether installed rules should be enabled
       responses:
         200:
           description: Indicates rules migrations have been installed correctly.
