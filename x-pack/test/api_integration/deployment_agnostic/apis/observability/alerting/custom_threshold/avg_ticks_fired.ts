@@ -6,11 +6,9 @@
  */
 
 import { omit } from 'lodash';
-import moment from 'moment';
-import { format } from 'url';
 import expect from '@kbn/expect';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -18,37 +16,33 @@ import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { kbnTestConfig } from '@kbn/test';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { getSyntraceClient, generateData } from './helpers/syntrace';
 import { ISO_DATE_REGEX } from './constants';
 import { ActionDocument, LogsExplorerLocatorParsedParams } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const start = moment(Date.now()).subtract(10, 'minutes').valueOf();
-  const end = moment(Date.now()).add(15, 'minutes').valueOf();
   const esClient = getService('es');
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
+  const logger = getService('log');
   const config = getService('config');
-  const kibanaServerConfig = config.get('servers.kibana');
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'logs';
-  const kibanaUrl = format(kibanaServerConfig);
   const spacesService = getService('spaces');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  describe('AVG - US - FIRED', () => {
+  describe('AVG - TICKS - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATA_VIEW = 'traces-apm*,metrics-apm*,logs-apm*';
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
     const DATA_VIEW_NAME = 'test-data-view-name';
     const SPACE_ID = 'test-space';
-
-    let synthtraceEsClient: ApmSynthtraceEsClient;
+    let dataForgeConfig: PartialConfig;
+    let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
     let alertId: string;
@@ -56,8 +50,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = samlAuth.getInternalRequestHeader();
-      synthtraceEsClient = await getSyntraceClient({ esClient, kibanaUrl });
-      await synthtraceEsClient.clean();
+      dataForgeConfig = {
+        schedule: [
+          {
+            template: 'good',
+            start: 'now-10m',
+            end: 'now+5m',
+            metrics: [
+              {
+                name: 'system.core.system.ticks',
+                method: 'linear',
+                start: 10_000_000,
+                end: 10_000_000,
+              },
+            ],
+          },
+        ],
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 10000,
+          alignEventsToInterval: true,
+        },
+      };
+      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      await alertingApi.waitForDocumentInIndex({
+        indexName: dataForgeIndices.join(','),
+        docCountTarget: 270,
+      });
       await dataViewApi.create({
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
@@ -71,7 +91,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         disabledFeatures: [],
         color: '#AABBCC',
       });
-      return generateData({ synthtraceEsClient, start, end });
     });
 
     after(async () => {
@@ -83,7 +102,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .delete(`/api/actions/connector/${actionId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(internalReqHeader);
-      await esDeleteAllIndices([ALERT_ACTION_INDEX]);
+      await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -92,14 +111,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': expectedConsumer } },
       });
-      await synthtraceEsClient.clean();
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
         spaceId: SPACE_ID,
         roleAuthc,
       });
-      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await cleanup({ client: esClient, config: dataForgeConfig, logger });
       await spacesService.delete(SPACE_ID);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Rule creation', () => {
@@ -126,7 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 timeSize: 5,
                 timeUnit: 'm',
                 metrics: [
-                  { name: 'A', field: 'span.self_time.sum.us', aggType: Aggregators.AVERAGE },
+                  { name: 'A', field: 'system.core.system.ticks', aggType: Aggregators.AVERAGE },
                 ],
               },
             ],
@@ -222,7 +241,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 threshold: [7500000],
                 timeSize: 5,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', field: 'span.self_time.sum.us', aggType: 'avg' }],
+                metrics: [{ name: 'A', field: 'system.core.system.ticks', aggType: 'avg' }],
               },
             ],
             alertOnNoData: true,
@@ -244,7 +263,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           }/s/${SPACE_ID}/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average span.self_time.sum.us is 10,000,000, above the threshold of 7,500,000. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`
+          `Average system.core.system.ticks is 10,000,000, above the threshold of 7,500,000. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('10,000,000');
 
