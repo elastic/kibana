@@ -18,6 +18,10 @@ import { APP_UI_ID } from '../../../../../../common/constants';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import {
+  mockEndpointResultList,
+  setEndpointListApiMockImplementation,
+} from '../../../endpoint_hosts/store/mock_endpoint_result_list';
 
 jest.mock('../../../../services/policies/policies');
 jest.mock('../../../../../common/components/user_privileges');
@@ -25,20 +29,25 @@ jest.mock('../../../../../common/components/user_privileges');
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
-// Failing: See https://github.com/elastic/kibana/issues/169133
-describe.skip('When on the policy list page', () => {
+describe('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
+  let coreStart: AppContextTestRender['coreStart'];
   let mockedContext: AppContextTestRender;
 
   beforeEach(() => {
     useUserPrivilegesMock.mockReturnValue({
-      endpointPrivileges: { canReadEndpointList: true, canAccessFleet: true, loading: false },
+      endpointPrivileges: {
+        canReadEndpointList: true,
+        canAccessFleet: true,
+        canWriteIntegrationPolicies: true,
+        loading: false,
+      },
     });
 
     mockedContext = createAppRootMockRenderer();
-    ({ history } = mockedContext);
+    ({ history, coreStart } = mockedContext);
     render = () => (renderResult = mockedContext.render(<PolicyList />));
   });
 
@@ -56,9 +65,9 @@ describe.skip('When on the policy list page', () => {
     });
 
     it('should show table with error state', async () => {
-      expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
+      expect(renderResult.getByTestId('policyListTable')).toBeInTheDocument();
       await waitFor(() => {
-        expect(renderResult.getByText(policyListErrorMessage)).toBeTruthy();
+        expect(renderResult.getByText(policyListErrorMessage)).toBeInTheDocument();
       });
     });
   });
@@ -71,28 +80,61 @@ describe.skip('When on the policy list page', () => {
           count: 0,
         })
       );
-      render();
-      await waitFor(() => {
-        expect(getPackagePolicies).toHaveBeenCalled();
-      });
     });
+
     afterEach(() => {
       getPackagePolicies.mockReset();
     });
-    it('should show the empty page', async () => {
+
+    it('should show the empty page with onboarding instructions', async () => {
+      render();
+
       await waitFor(() => {
-        expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
-      });
-    });
-    it('should show instruction text and a button to add the Endpoint Security integration', async () => {
-      await waitFor(() => {
+        expect(renderResult.getByTestId('emptyPolicyTable')).toBeInTheDocument();
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
         expect(
           renderResult.getByText(
-            'From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend.'
+            'From this page, you can view and manage the Elastic Defend integration policies in your environment running Elastic Defend.'
           )
-        ).toBeTruthy();
+        ).toBeInTheDocument();
+      });
+    });
 
-        expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();
+    it('should show onboarding button with fleet access and integrations write privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { canAccessFleet: true, canWriteIntegrationPolicies: true },
+      });
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
+        expect(renderResult.getByTestId('onboardingStartButton')).toBeInTheDocument();
+      });
+    });
+
+    it('should not show onboarding button with integrations write privilege but without fleet access', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { canAccessFleet: false, canWriteIntegrationPolicies: true },
+      });
+
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('onboardingStartButton')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should not show onboarding button with fleet access but without integrations write privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { canAccessFleet: true, canWriteIntegrationPolicies: false },
+      });
+
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('policyOnboardingInstructions')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('onboardingStartButton')).not.toBeInTheDocument();
       });
     });
   });
@@ -108,22 +150,20 @@ describe.skip('When on the policy list page', () => {
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
         expect(getPackagePolicies).toHaveBeenCalled();
-        expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
+        expect(renderResult.getByTestId('policyListTable')).toBeInTheDocument();
       });
     });
     it('should display the policy list table', () => {
-      expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
+      expect(renderResult.getByTestId('policyListTable')).toBeInTheDocument();
     });
     it('should show a link for the policy name', () => {
       const policyNameCells = renderResult.getAllByTestId('policyNameCellLink');
-      expect(policyNameCells).toBeTruthy();
       expect(policyNameCells.length).toBe(5);
     });
     it('should show an avatar and name for the Created by column', () => {
       const expectedAvatarName = policies.items[0].created_by;
       const createdByCells = renderResult.getAllByTestId('created-by-avatar');
       const firstCreatedByName = renderResult.getAllByTestId('created-by-name')[0];
-      expect(createdByCells).toBeTruthy();
       expect(createdByCells.length).toBe(5);
       expect(createdByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
       expect(firstCreatedByName.textContent).toEqual(expectedAvatarName);
@@ -132,7 +172,6 @@ describe.skip('When on the policy list page', () => {
       const expectedAvatarName = policies.items[0].updated_by;
       const updatedByCells = renderResult.getAllByTestId('updated-by-avatar');
       const firstUpdatedByName = renderResult.getAllByTestId('updated-by-name')[0];
-      expect(updatedByCells).toBeTruthy();
       expect(updatedByCells.length).toBe(5);
       expect(updatedByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
       expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
@@ -158,6 +197,10 @@ describe.skip('When on the policy list page', () => {
           href: '/app/security/administration/policy',
         },
       };
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: mockEndpointResultList().data,
+      });
+
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink')[0];
       await userEvent.click(endpointCount);
 
@@ -192,7 +235,7 @@ describe.skip('When on the policy list page', () => {
     });
     it('should pass the correct page value to the api', async () => {
       await waitFor(() => {
-        expect(renderResult.getByTestId('pagination-button-next')).toBeTruthy();
+        expect(renderResult.getByTestId('pagination-button-next')).toBeInTheDocument();
       });
       await userEvent.click(renderResult.getByTestId('pagination-button-next'));
       await waitFor(() => {
@@ -207,7 +250,7 @@ describe.skip('When on the policy list page', () => {
 
     it('should pass the correct pageSize value to the api', async () => {
       await waitFor(() => {
-        expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
+        expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeInTheDocument();
       });
       await userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
       await waitForEuiPopoverOpen();
