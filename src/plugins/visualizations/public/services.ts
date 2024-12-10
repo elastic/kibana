@@ -43,7 +43,8 @@ export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClie
 export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>('Notifications');
+export const [getNotifications, setNotifications] =
+  createGetterSetter<NotificationsStart>('Notifications');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 

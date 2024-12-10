@@ -138,13 +138,10 @@ export class VisualizeEmbeddableFactory
 
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = new AttributeService(
-        this.type,
-        {
-          saveMethod: this.saveMethod.bind(this),
-          checkForDuplicateTitle: this.checkTitle.bind(this),
-        }
-      );
+      this.attributeService = new AttributeService(this.type, {
+        saveMethod: this.saveMethod.bind(this),
+        checkForDuplicateTitle: this.checkTitle.bind(this),
+      });
     }
     return this.attributeService!;
   }

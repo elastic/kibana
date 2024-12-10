@@ -82,7 +82,6 @@ export type {
   SelfStyledEmbeddable,
   ValueClickContext,
 } from './lib';
-export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 export type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,

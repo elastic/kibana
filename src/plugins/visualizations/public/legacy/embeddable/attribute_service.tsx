@@ -10,7 +10,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import { NotificationsStart } from '@kbn/core/public';
 import {
   SavedObjectSaveModal,
   OnSaveProps,
@@ -66,7 +65,7 @@ export class AttributeService<
 > {
   constructor(
     private type: string,
-    private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>,
+    private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>
   ) {}
 
   private async defaultUnwrapMethod(
