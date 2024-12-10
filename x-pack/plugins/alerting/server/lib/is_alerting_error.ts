@@ -7,9 +7,6 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isErrorWithReason } from './error_with_reason';
-import { getErrorType } from './error_with_type';
-
-export const CLUSTER_BLOCK_EXCEPTION = 'cluster_block_exception';
 
 export function isAlertSavedObjectNotFoundError(err: Error, ruleId: string) {
   // if this is an error with a reason, the actual error needs to be extracted
@@ -22,8 +19,4 @@ export function isEsUnavailableError(err: Error, ruleId: string) {
   // if this is an error with a reason, the actual error needs to be extracted
   const actualError = isErrorWithReason(err) ? err.error : err;
   return SavedObjectsErrorHelpers.isEsUnavailableError(actualError);
-}
-
-export function isClusterBlockError(err: Error) {
-  return getErrorType(err) === CLUSTER_BLOCK_EXCEPTION;
 }

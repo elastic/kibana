@@ -41,11 +41,7 @@ import {
 } from '../types';
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import {
-  isAlertSavedObjectNotFoundError,
-  isClusterBlockError,
-  isEsUnavailableError,
-} from '../lib/is_alerting_error';
+import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
@@ -76,6 +72,7 @@ import {
   processRunResults,
   clearExpiredSnoozes,
 } from './lib';
+import { isClusterBlockError } from '../lib/error_with_type';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const CLUSTER_BLOCK_EXCEPTION = 'cluster_block_exception';
 
 export class ErrorWithType extends Error {
   public readonly type: string;
@@ -31,4 +32,8 @@ export function getErrorType(error: Error): string | undefined {
 
 export function isErrorWithType(error: Error | ErrorWithType): error is ErrorWithType {
   return error instanceof ErrorWithType;
+}
+
+export function isClusterBlockError(err: Error) {
+  return getErrorType(err) === CLUSTER_BLOCK_EXCEPTION;
 }
