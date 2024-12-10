@@ -560,8 +560,8 @@ export interface ISavedObjectsRepository {
   getSearchableNamespaces: (namespaces: string[] | undefined) => Promise<string[]>;
 
   /**
-   * Returns a new Saved Objects repository scoped to the new namespace.
-   * @param namespace Space to switch to.
+   * Returns a new Saved Objects repository scoped to the specified namespace.
+   * @param namespace Space to which the repository should be scoped to.
    */
   asScopedToNamespace(namespace: string): ISavedObjectsRepository;
 }

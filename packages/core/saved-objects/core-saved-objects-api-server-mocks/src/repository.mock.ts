@@ -34,7 +34,7 @@ const create = () => {
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
     getSearchableNamespaces: jest.fn(),
-    asScopedToNamespace: jest.fn(),
+    asScopedToNamespace: jest.fn().mockImplementation(create),
   };
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({

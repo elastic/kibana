@@ -12,7 +12,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 
 const create = () => {
-  const mock = {
+  const mock: jest.Mocked<SavedObjectsClientContract> & { errors: SavedObjectsErrorHelpers } = {
     errors: SavedObjectsErrorHelpers,
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -33,7 +33,9 @@ const create = () => {
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
-  } as unknown as jest.Mocked<SavedObjectsClientContract>;
+    getSearchableNamespaces: jest.fn(),
+    asScopedToNamespace: jest.fn().mockImplementation(create),
+  };
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
     savedObjectsMock: mock,
