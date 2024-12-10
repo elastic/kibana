@@ -8,6 +8,7 @@
 import {
   ClusterPutComponentTemplateRequest,
   MappingDateProperty,
+  MappingFieldAliasProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { StreamDefinition } from '../../../../common/types';
@@ -18,7 +19,8 @@ import { getComponentTemplateName } from './name';
 
 export function generateLayer(
   id: string,
-  definition: StreamDefinition
+  definition: StreamDefinition,
+  rootDefinition: StreamDefinition | undefined
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   definition.fields.forEach((field) => {
@@ -28,6 +30,18 @@ export function generateLayer(
     if (field.name === '@timestamp') {
       // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
       (property as MappingDateProperty).ignore_malformed = false;
+    }
+    if (field.type === 'alias' && field.alias_path) {
+      (property as MappingFieldAliasProperty).path = field.alias_path;
+      // try to find the referenced field in the root definition and add it here as well to satisfy the Elasticsearch alias checker
+      if (rootDefinition) {
+        const rootField = rootDefinition.fields.find((f) => f.name === field.alias_path);
+        if (rootField) {
+          properties[field.alias_path] = {
+            type: rootField.type,
+          };
+        }
+      }
     }
     properties[field.name] = property;
   });
