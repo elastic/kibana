@@ -99,7 +99,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         rowHeight={headerRowHeight}
         rowHeightLines={headerRowHeightLines}
         label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
-          defaultMessage: 'Header row height',
+          defaultMessage: 'Max header cell lines',
         })}
         onChangeRowHeight={onChangeHeaderRowHeight}
         onChangeRowHeightLines={onChangeHeaderRowHeightLines}
@@ -115,7 +115,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         rowHeight={rowHeight}
         rowHeightLines={rowHeightLines}
         label={i18n.translate('unifiedDataTable.rowHeightLabel', {
-          defaultMessage: 'Cell row height',
+          defaultMessage: 'Max body cell lines',
         })}
         onChangeRowHeight={onChangeRowHeight}
         onChangeRowHeightLines={onChangeRowHeightLines}
