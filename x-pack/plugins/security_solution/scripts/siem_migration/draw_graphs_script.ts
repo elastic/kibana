@@ -16,9 +16,7 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
-import type { IntegrationRetriever } from '../../server/lib/siem_migrations/rules/task/util/integration_retriever';
-import type { PrebuiltRulesMapByName } from '../../server/lib/siem_migrations/rules/task/util/prebuilt_rules';
-import type { RuleResourceRetriever } from '../../server/lib/siem_migrations/rules/task/util/rule_resource_retriever';
+import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -30,9 +28,7 @@ const mockLlm = new FakeLLM({
 
 const inferenceClient = {} as InferenceClient;
 const connectorId = 'draw_graphs';
-const prebuiltRulesMap = {} as PrebuiltRulesMapByName;
-const resourceRetriever = {} as RuleResourceRetriever;
-const integrationRetriever = {} as IntegrationRetriever;
+const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
 
 const createLlmInstance = () => {
   return mockLlm;
@@ -43,9 +39,7 @@ async function getAgentGraph(logger: Logger): Promise<Drawable> {
   const graph = getRuleMigrationAgent({
     model,
     inferenceClient,
-    prebuiltRulesMap,
-    resourceRetriever,
-    integrationRetriever,
+    ruleMigrationsRetriever,
     connectorId,
     logger,
   });

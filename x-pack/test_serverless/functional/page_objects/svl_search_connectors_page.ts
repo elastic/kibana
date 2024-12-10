@@ -11,7 +11,18 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const es = getService('es');
   return {
+    helpers: {
+      async deleteAllConnectors() {
+        const connectors = await es.connector.list();
+        for (const connector of connectors.results) {
+          await es.connector.delete({
+            connector_id: connector.id!,
+          });
+        }
+      },
+    },
     connectorConfigurationPage: {
       async createConnector() {
         await testSubjects.click('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
@@ -53,15 +64,15 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
         await testSubjects.click('serverlessSearchEditConnectorTypeChoices');
-        await testSubjects.exists('serverlessSearchConnectorServiceType-zoom');
+        await testSubjects.setValue('serverlessSearchEditConnectorTypeChoices', type);
+        await testSubjects.exists(`serverlessSearchConnectorServiceType-${type}`);
         await testSubjects.click(`serverlessSearchConnectorServiceType-${type}`);
-        await testSubjects.existOrFail('serverlessSearchConnectorServiceType-zoom');
       },
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
       },
-      async getConnectorId() {
-        return await testSubjects.getVisibleText('serverlessSearchConnectorConnectorId');
+      async getConnectorDetails() {
+        return await testSubjects.getVisibleText('serverlessSearchConnectorConnectorDetails');
       },
     },
     connectorOverviewPage: {
@@ -70,8 +81,11 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchConnectorsTableSelect', option);
       },
       async connectorNameExists(connectorName: string) {
-        const connectorsList = await this.getConnectorsList();
-        return Boolean(connectorsList.find((name) => name === connectorName));
+        await retry.tryForTime(10000, async () => {
+          const connectorsList = await this.getConnectorsList();
+          const isFound = Boolean(connectorsList.find((name) => name === connectorName));
+          expect(isFound).to.be(true);
+        });
       },
       async confirmDeleteConnectorModalComponentsExists() {
         await testSubjects.existOrFail('serverlessSearchDeleteConnectorModalFieldText');
