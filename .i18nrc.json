@@ -120,7 +120,7 @@
     "searchTypes": "packages/kbn-search-types",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
-    "sse": ["packages/kbn-sse-utils"],
+    "sse": ["src/platform/packages/shared/kbn-sse-utils"],
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentation": "src/platform/packages/private/kbn-language-documentation/src",
     "esql": "src/platform/plugins/shared/esql",
