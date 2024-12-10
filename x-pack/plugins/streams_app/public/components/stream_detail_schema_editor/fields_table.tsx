@@ -314,6 +314,12 @@ export const ActionsCell = ({ panels }: { panels: EuiContextMenuPanelDescriptor[
       id={contextMenuPopoverId}
       button={
         <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailSchemaEditorFieldsTableActionsTriggerButton',
+            {
+              defaultMessage: 'Open actions menu',
+            }
+          )}
           data-test-subj="streamsAppActionsButton"
           iconType="boxesVertical"
           onClick={() => {

@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal } from '@hapi/boom';
+import { getFlattenedObject } from '@kbn/std';
 import { fieldDefinitionSchema } from '../../../../common/types';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
@@ -68,7 +69,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       });
 
       if (
-        sampleResults.hits.total?.value === 0 ||
+        (typeof sampleResults.hits.total === 'object' && sampleResults.hits.total?.value === 0) ||
         sampleResults.hits.total === 0 ||
         !sampleResults.hits.total
       ) {
@@ -92,7 +93,9 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         _index: params.path.id,
         _id: hit._id,
         _source: Object.fromEntries(
-          Object.entries(hit._source as any).filter(([k]) => fieldDefinitionKeys.includes(k))
+          Object.entries(getFlattenedObject(hit._source as Record<string, unknown>)).filter(
+            ([k]) => fieldDefinitionKeys.includes(k) || k === '@timestamp'
+          )
         ),
       }));
 
@@ -131,8 +134,19 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         };
       }
 
+      // Convert the field definitions to a format that can be used in runtime mappings (match_only_text -> keyword)
+      const propertiesCompatibleWithRuntimeMappings = Object.fromEntries(
+        params.body.field_definitions.map((field) => [
+          field.name,
+          {
+            type: field.type === 'match_only_text' ? 'keyword' : field.type,
+            ...(field.format ? { format: field.format } : {}),
+          },
+        ])
+      );
+
       const runtimeFieldsSearchBody = {
-        runtime_mappings: properties,
+        runtime_mappings: propertiesCompatibleWithRuntimeMappings,
         sort: [
           {
             '@timestamp': {

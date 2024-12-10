@@ -10,11 +10,11 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiSearchBar,
-  EuiSpacer,
   EuiPortal,
   Query,
 } from '@elastic/eui';
 import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
+import { css } from '@emotion/css';
 import { useEditingState } from './hooks/use_editing_state';
 import { SchemaEditorFlyout } from './flyout';
 import { useKibana } from '../../hooks/use_kibana';
@@ -95,40 +95,47 @@ const Content = ({
   }, [definition.id, reset]);
 
   return (
-    <EuiFlexGroup direction="column">
-      {isLoadingDefinition || isLoadingUnmappedFields ? (
-        <EuiPortal>
-          <EuiProgress size="xs" color="accent" position="fixed" />
-        </EuiPortal>
-      ) : null}
-      <EuiSpacer size="l" />
-      <EuiFlexItem grow={false}>
-        <SimpleSearchBar
-          query={query}
-          onChange={(nextQuery) => setQuery(nextQuery.query ?? undefined)}
-        />
-      </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFlexGroup direction="column">
+        {isLoadingDefinition || isLoadingUnmappedFields ? (
+          <EuiPortal>
+            <EuiProgress size="xs" color="accent" position="fixed" />
+          </EuiPortal>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <SimpleSearchBar
+            query={query}
+            onChange={(nextQuery) => setQuery(nextQuery.query ?? undefined)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          className={css`
+            overflow: auto;
+          `}
+          grow
+        >
+          <FieldsTableContainer
+            definition={definition}
+            query={query}
+            unmappedFieldsResult={unmappedFieldsValue?.unmappedFields}
+            isLoadingUnmappedFields={isLoadingUnmappedFields}
+            editingState={editingState}
+            unpromotingState={unpromotingState}
+          />
+        </EuiFlexItem>
 
-      <FieldsTableContainer
-        definition={definition}
-        query={query}
-        unmappedFieldsResult={unmappedFieldsValue?.unmappedFields}
-        isLoadingUnmappedFields={isLoadingUnmappedFields}
-        editingState={editingState}
-        unpromotingState={unpromotingState}
-      />
+        {editingState.selectedField && (
+          <SchemaEditorFlyout
+            definition={definition}
+            streamsRepositoryClient={streamsRepositoryClient}
+            {...editingState}
+          />
+        )}
 
-      {editingState.selectedField && (
-        <SchemaEditorFlyout
-          definition={definition}
-          streamsRepositoryClient={streamsRepositoryClient}
-          {...editingState}
-        />
-      )}
-
-      {unpromotingState.selectedField && (
-        <UnpromoteFieldModal unpromotingState={unpromotingState} />
-      )}
-    </EuiFlexGroup>
+        {unpromotingState.selectedField && (
+          <UnpromoteFieldModal unpromotingState={unpromotingState} />
+        )}
+      </EuiFlexGroup>
+    </EuiFlexItem>
   );
 };

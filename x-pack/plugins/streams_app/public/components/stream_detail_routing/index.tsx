@@ -78,7 +78,12 @@ export function StreamDetailRouting({
   const closeModal = () => routingAppState.setShowDeleteModal(false);
 
   return (
-    <>
+    <EuiFlexItem
+      className={css`
+        overflow: auto;
+      `}
+      grow
+    >
       {routingAppState.showDeleteModal && routingAppState.childUnderEdit && (
         <StreamDeleteModal
           closeModal={closeModal}
@@ -148,7 +153,7 @@ export function StreamDetailRouting({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </EuiFlexItem>
   );
 }
 

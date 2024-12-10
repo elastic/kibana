@@ -121,14 +121,7 @@ export function StreamDetailManagement({
           }))}
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        className={css`
-          overflow: auto;
-        `}
-        grow
-      >
-        {selectedTabObject.content}
-      </EuiFlexItem>
+      {selectedTabObject.content}
     </EuiFlexGroup>
   );
 }

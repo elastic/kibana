@@ -10,17 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { ReadStreamDefinition } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 
-export function StreamDetailOverview({
-  definition,
-}: {
-  definition?: APIReturnType<'GET /api/streams/{id}'>;
-}) {
+export function StreamDetailOverview({ definition }: { definition?: ReadStreamDefinition }) {
   const {
     dependencies: {
       start: {

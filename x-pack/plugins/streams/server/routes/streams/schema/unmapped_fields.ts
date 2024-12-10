@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { internal, notFound } from '@hapi/boom';
+import { getFlattenedObject } from '@kbn/std';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
-import { readStream } from '../../../lib/streams/stream_crud';
+import { readAncestors, readStream } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 
 const SAMPLE_SIZE = 500;
@@ -62,17 +63,27 @@ export const unmappedFieldsRoute = createServerRoute({
       const sourceFields = new Set<string>();
 
       results.hits.hits.forEach((hit) => {
-        Object.keys(hit._source as Record<string, unknown>).forEach((field) => {
-          if (!sourceFields.has(field)) {
-            sourceFields.add(field);
-          }
+        Object.keys(getFlattenedObject(hit._source as Record<string, unknown>)).forEach((field) => {
+          sourceFields.add(field);
         });
       });
 
-      const mappedFields = streamEntity.definition.fields.map((field) => field.name);
+      // Mapped fields from the stream's definition and inherited from ancestors
+      const mappedFields = new Set<string>();
+
+      streamEntity.definition.fields.forEach((field) => mappedFields.add(field.name));
+
+      const { ancestors } = await readAncestors({
+        id: params.path.id,
+        scopedClusterClient,
+      });
+
+      for (const ancestor of ancestors) {
+        ancestor.definition.fields.forEach((field) => mappedFields.add(field.name));
+      }
 
       const unmappedFields = Array.from(sourceFields)
-        .filter((field) => !mappedFields.includes(field))
+        .filter((field) => !mappedFields.has(field))
         .sort();
 
       return { unmappedFields };
