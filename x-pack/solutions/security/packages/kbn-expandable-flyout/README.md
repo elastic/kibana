@@ -42,11 +42,11 @@ The second way (done by setting the `urlKey` prop to a string value) saves the s
 
 ## Package API
 
-The ExpandableFlyout [React component](https://github.com/elastic/kibana/tree/main/packages/kbn-expandable-flyout/src/index.tsx) renders the UI, leveraging an [EuiFlyout](https://eui.elastic.co/#/layout/flyout).
+The ExpandableFlyout [React component](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/packages/kbn-expandable-flyout/src/index.tsx) renders the UI, leveraging an [EuiFlyout](https://eui.elastic.co/#/layout/flyout).
 
-To retrieve the flyout's layout (left, right and preview panels), you can utilize [useExpandableFlyoutState](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_state.ts).
+To retrieve the flyout's layout (left, right and preview panels), you can utilize [useExpandableFlyoutState](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_state.ts).
 
-To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_api.ts).
+To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_api.ts).
 
 **Expandable Flyout API** exposes the following methods:
 - **openFlyout**: open the flyout with a set of panels
@@ -63,7 +63,7 @@ To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi]
 
 ## Usage
 
-To use the expandable flyout in your plugin, first you need wrap your code with the [context provider](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx) at a high enough level as follows:
+To use the expandable flyout in your plugin, first you need wrap your code with the [context provider](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/kbn-expandable-flyout/src/context.tsx) at a high enough level as follows:
 ```typescript jsx
 // state stored in the url
 <ExpandableFlyoutProvider urlKey={'myUrlKey'}>
@@ -77,7 +77,7 @@ To use the expandable flyout in your plugin, first you need wrap your code with 
 </ExpandableFlyoutProvider>
 ```
 
-Then use the [React UI component](https://github.com/elastic/kibana/tree/main/packages/kbn-expandable-flyout/src/index.tsx) where you need:
+Then use the [React UI component](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/packages/kbn-expandable-flyout/src/index.tsx) where you need:
 
 ```typescript jsx
 <ExpandableFlyout registeredPanels={myPanels} />
@@ -107,4 +107,4 @@ One of the 3 areas of the flyout (**left**, **right** or **preview**).
 
 ### Panel
 
-A set of properties defining what's displayed in one of the flyout section (see interface [here](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/types.ts)).
+A set of properties defining what's displayed in one of the flyout section (see interface [here](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/packages/kbn-expandable-flyout/src/types.ts)).
