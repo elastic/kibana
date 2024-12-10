@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { BaseEdge, getBezierPath } from '@xyflow/react';
+import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { Color } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { EdgeProps } from '../types';
@@ -27,7 +27,7 @@ export function DefaultEdge({
   const { euiTheme } = useEuiTheme();
   const color: Color = data?.color ?? 'primary';
 
-  const [edgePath] = getBezierPath({
+  const [edgePath] = getSmoothStepPath({
     // sourceX and targetX are adjusted to account for the shape handle position
     sourceX: sourceX - getShapeHandlePosition(data?.sourceShape),
     sourceY,
@@ -35,6 +35,8 @@ export function DefaultEdge({
     targetX: targetX + getShapeHandlePosition(data?.targetShape),
     targetY,
     targetPosition,
+    borderRadius: 15,
+    offset: 0,
     curvature:
       0.1 *
       (data?.sourceShape === 'group' ||

@@ -89,6 +89,9 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: colorSchema,
+    badge: schema.number(),
+    lastEventId: schema.string(),
+    lastEventIdx: schema.string(),
   }),
 ]);
 
