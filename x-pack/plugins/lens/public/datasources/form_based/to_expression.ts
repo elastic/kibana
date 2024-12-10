@@ -383,7 +383,7 @@ function getExpressionForLayer(
               : [],
           compact:
             format?.params && 'compact' in format.params && format.params.compact
-              ? [format.params.compactx]
+              ? [format.params.compact]
               : [],
           pattern:
             format?.params && 'pattern' in format.params && format.params.pattern
