@@ -275,7 +275,6 @@ packages/default-nav/management @elastic/kibana-management
 packages/home/sample_data_card @elastic/appex-sharedux
 packages/home/sample_data_tab @elastic/appex-sharedux
 packages/home/sample_data_types @elastic/appex-sharedux
-packages/kbn-actions-types @elastic/response-ops
 packages/kbn-alerting-types @elastic/response-ops
 packages/kbn-alerts-as-data-utils @elastic/response-ops
 packages/kbn-alerts-grouping @elastic/response-ops
@@ -621,6 +620,7 @@ src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
+src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
