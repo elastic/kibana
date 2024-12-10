@@ -53,12 +53,16 @@ interface PanelFooterProps {
    * Boolean that indicates whether flyout is in preview and action should be hidden
    */
   isPreview: boolean;
+  /**
+   * Additional actions to be displayed in the footer
+   */
+  additionalActions?: React.ReactNode;
 }
 
 /**
  * Bottom section of the flyout that contains the take action button
  */
-export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
+export const PanelFooter: FC<PanelFooterProps> = ({ isPreview, additionalActions }) => {
   const { euiTheme } = useEuiTheme();
   // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
   const flyoutZIndex = useMemo(
@@ -178,7 +182,8 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
     <>
       <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
         <EuiPanel color="transparent">
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            {additionalActions && <EuiFlexItem>{additionalActions}</EuiFlexItem>}
             <EuiFlexItem grow={false}>
               {dataAsNestedObject && (
                 <TakeActionDropdown
