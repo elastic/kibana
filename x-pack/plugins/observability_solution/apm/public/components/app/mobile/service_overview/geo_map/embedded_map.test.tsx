@@ -35,12 +35,6 @@ describe('Embedded Map', () => {
       metaFields: [],
     } as unknown as DataView;
 
-    const styleColors = {
-      lineColor: '',
-      labelColor: '',
-      labelOutlineColor: '',
-    };
-
     const { findByTestId } = render(
       <MemoryRouter
         initialEntries={['/mobile-services/{serviceName}/overview?rangeFrom=now-15m&rangeTo=now&']}
@@ -53,7 +47,6 @@ describe('Embedded Map', () => {
               start="2022-12-20T10:00:00.000Z"
               end="2022-12-20T10:15:00.000Z"
               dataView={mockDataView}
-              styleColors={styleColors}
             />
           </KibanaContextProvider>
         </MockApmPluginContextWrapper>

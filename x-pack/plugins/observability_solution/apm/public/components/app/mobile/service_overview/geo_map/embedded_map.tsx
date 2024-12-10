@@ -22,7 +22,11 @@ function EmbeddedMapComponent({
   kuery = '',
   filters,
   dataView,
-  styleColors,
+  styleColors = {
+    lineColor: '',
+    labelColor: '',
+    labelOutlineColor: '',
+  },
 }: {
   selectedMap: MapTypes;
   start: string;
@@ -30,7 +34,7 @@ function EmbeddedMapComponent({
   kuery?: string;
   filters: Filter[];
   dataView?: DataView;
-  styleColors: StyleColorParams;
+  styleColors?: StyleColorParams;
 }) {
   const { maps } = useKibana<ApmPluginStartDeps>().services;
 
