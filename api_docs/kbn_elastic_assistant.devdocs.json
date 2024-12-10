@@ -2589,6 +2589,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.DEFEND_INSIGHTS_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "DEFEND_INSIGHTS_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"defendInsights\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.ELASTIC_AI_ASSISTANT_TITLE",
         "type": "string",
         "tags": [],

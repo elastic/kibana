@@ -13,5 +13,6 @@
   "kbn_references": [
     "@kbn/discover-utils",
     "@kbn/core",
+    "@kbn/unified-data-table",
   ]
 }

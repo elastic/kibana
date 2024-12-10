@@ -19,7 +19,8 @@ export const storybookAliases = {
   cloud_security_posture_packages: 'x-pack/packages/kbn-cloud-security-posture/storybook/config',
   cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
-  language_documentation_popover: 'packages/kbn-language-documentation/.storybook',
+  language_documentation_popover:
+    'src/platform/packages/private/kbn-language-documentation/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
   custom_icons: 'packages/kbn-custom-icons/.storybook',
@@ -61,7 +62,7 @@ export const storybookAliases = {
   observability_slo: 'x-pack/plugins/observability_solution/slo/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
-  esql_editor: 'packages/kbn-esql-editor/.storybook',
+  esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
   serverless: 'packages/serverless/storybook/config',

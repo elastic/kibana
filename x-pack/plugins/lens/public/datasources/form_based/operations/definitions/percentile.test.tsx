@@ -12,7 +12,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
@@ -402,7 +402,7 @@ describe('percentile', () => {
     it('should update order-by references for any terms columns', () => {
       const field1 = 'foo';
       const field2 = 'bar';
-      const percentile = faker.random.number(100);
+      const percentile = faker.number.int(100);
 
       const aggs = [
         makeEsAggBuilder('aggTerms', {

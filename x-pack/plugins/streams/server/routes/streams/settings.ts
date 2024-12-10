@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { STREAMS_INDEX } from '../../../common/constants';
+import { streamsEnabled } from '../../lib/streams/stream_crud';
 import { createServerRoute } from '../create_server_route';
 
 export const getStreamsStatusRoute = createServerRoute({
@@ -22,9 +22,7 @@ export const getStreamsStatusRoute = createServerRoute({
     const { scopedClusterClient } = await getScopedClients({ request });
 
     return {
-      enabled: await scopedClusterClient.asInternalUser.indices.exists({
-        index: STREAMS_INDEX,
-      }),
+      enabled: await streamsEnabled({ scopedClusterClient }),
     };
   },
 });

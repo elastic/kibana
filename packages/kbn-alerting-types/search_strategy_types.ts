@@ -8,7 +8,6 @@
  */
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   MappingRuntimeFields,
   QueryDslFieldAndFormat,
@@ -18,7 +17,8 @@ import type {
 import type { Alert } from './alert_type';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   fields?: QueryDslFieldAndFormat[];
   query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   sort?: SortCombinations[];

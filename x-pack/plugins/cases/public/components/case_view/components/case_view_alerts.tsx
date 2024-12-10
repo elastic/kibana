@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
-import type { ValidFeatureId } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CaseUI } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -49,14 +49,16 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
         )
       : '';
 
-  const alertStateProps = useMemo(
+  const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
       id: `case-details-alerts-${caseData.owner}`,
-      featureIds: (caseData.owner === SECURITY_SOLUTION_OWNER
-        ? [AlertConsumers.SIEM]
-        : alertData?.featureIds ?? []) as ValidFeatureId[],
+      ruleTypeIds:
+        caseData.owner === SECURITY_SOLUTION_OWNER
+          ? SECURITY_SOLUTION_RULE_TYPE_IDS
+          : alertData?.ruleTypeIds ?? [],
+      consumers: alertData?.featureIds,
       query: alertIdsQuery,
       showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
       onLoaded: onAlertsTableLoaded,
@@ -65,6 +67,7 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
       triggersActionsUi.alertsTableConfigurationRegistry,
       configId,
       caseData.owner,
+      alertData?.ruleTypeIds,
       alertData?.featureIds,
       alertIdsQuery,
       onAlertsTableLoaded,

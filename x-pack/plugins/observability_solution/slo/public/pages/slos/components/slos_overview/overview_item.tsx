@@ -9,7 +9,7 @@ import { EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
-export function OverViewItem({
+export function OverviewItem({
   title,
   description,
   titleColor,
