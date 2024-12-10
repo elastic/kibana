@@ -485,6 +485,7 @@ export class VisualizationsPlugin
     setSavedSearch(savedSearch);
     setDataViews(dataViews);
     setInspector(inspector);
+    setNotifications(core.notifications);
 
     if (spaces) {
       setSpaces(spaces);

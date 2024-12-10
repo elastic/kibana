@@ -118,7 +118,6 @@ const createStartContract = (): Start => {
     inject: jest.fn(),
     getAllMigrations: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
-    getAttributeService: jest.fn(),
   };
   return startContract;
 };
