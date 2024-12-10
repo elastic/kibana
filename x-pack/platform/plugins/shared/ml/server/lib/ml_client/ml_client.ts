@@ -472,7 +472,16 @@ export function getMlClient(
           throw error;
         }
         if (error.statusCode === 404) {
-          throw new MLJobNotFound(error.body.error.reason);
+          const failingJobMatch = error.body.error.reason.match(/No known job with id '([^']+)'/);
+          const failingJobIds = failingJobMatch?.[1]?.split(',');
+
+          const errorMessage = failingJobIds?.length
+            ? `No known job or group with ${
+                failingJobIds.length === 1 ? 'id' : 'ids'
+              } '${failingJobIds.join("', '")}'`
+            : error.body.error.reason;
+
+          throw new MLJobNotFound(errorMessage);
         }
         throw error;
       }
