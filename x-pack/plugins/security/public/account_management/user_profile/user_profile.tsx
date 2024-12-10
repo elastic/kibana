@@ -93,6 +93,10 @@ const rightSideItemsCSS = css`
   }
 `;
 
+const rightSideItemCSS = css`
+  min-width: 160px;
+`;
+
 export interface UserProfileProps {
   user: AuthenticatedUser;
   data?: UserProfileData;
@@ -815,6 +819,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       <EuiDescriptionList
                         key={item.testSubj}
                         textStyle="reverse"
+                        css={rightSideItemCSS}
                         listItems={[
                           {
                             title: (
