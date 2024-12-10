@@ -30,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // The following features are composed of other features in a way that is
         // specific to the security solution.
-        const compositeFeatureIds = ['dashboard', 'discover', 'reporting', 'siem'];
+        const compositeFeatureIds = ['dashboard', 'discover', 'reporting', 'siemV2'];
 
         const features = Object.fromEntries(
           Object.entries(body.features).filter(([key]) => compositeFeatureIds.includes(key))
@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:url/close_point_in_time",
               ],
             },
-            "siem": Object {
+            "siemV2": Object {
               "actions_log_management_all": Array [
                 "login:",
                 "api:securitySolution-writeActionsLogManagement",
