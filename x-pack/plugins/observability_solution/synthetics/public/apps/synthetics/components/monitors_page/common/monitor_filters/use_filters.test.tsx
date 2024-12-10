@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useFilters } from './use_filters';
 import { useDispatch } from 'react-redux';
 import { WrappedHelper } from '../../../../utils/testing';
@@ -20,7 +20,11 @@ describe('useMonitorListFilters', () => {
   jest.useFakeTimers();
 
   it('returns expected results', () => {
-    const { result } = renderHook(() => useFilters(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useFilters(), {
+      wrapper: ({ children }: React.PropsWithChildren) => (
+        <WrappedHelper>{React.createElement(React.Fragment, {}, children)}</WrappedHelper>
+      ),
+    });
 
     expect(result.current).toStrictEqual({
       locations: [],
@@ -32,7 +36,7 @@ describe('useMonitorListFilters', () => {
   });
 
   it('dispatches action when filters are null', () => {
-    const Wrapper = ({ children }: { children: React.ReactElement }) => {
+    const Wrapper = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper
           state={{
@@ -41,7 +45,7 @@ describe('useMonitorListFilters', () => {
             },
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, null, children)}
         </WrappedHelper>
       );
     };
@@ -67,7 +71,7 @@ describe('useMonitorListFilters', () => {
       projects: [],
       schedules: [],
     };
-    const Wrapper = ({ children }: { children: React.ReactElement }) => {
+    const Wrapper = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper
           state={{
@@ -76,7 +80,7 @@ describe('useMonitorListFilters', () => {
             },
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, null, children)}
         </WrappedHelper>
       );
     };

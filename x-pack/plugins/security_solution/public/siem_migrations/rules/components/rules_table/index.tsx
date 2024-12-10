@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
 import {
   EuiSkeletonLoading,
   EuiSkeletonTitle,
@@ -14,23 +14,31 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiBasicTable,
+  EuiButton,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { NoItemsMessage } from './no_items_message';
-import { useRulesTableColumns } from '../../hooks/use_rules_table_columns';
-import { useRulePreviewFlyout } from '../../hooks/use_rule_preview_flyout';
+import { EmptyMigration } from './empty_migration';
+import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
+import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
 import { useInstallMigrationRules } from '../../logic/use_install_migration_rules';
 import { useGetMigrationRules } from '../../logic/use_get_migration_rules';
 import { useInstallTranslatedMigrationRules } from '../../logic/use_install_translated_migration_rules';
-import { BulkActions } from './bulk_actions';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useGetMigrationPrebuiltRules } from '../../logic/use_get_migration_prebuilt_rules';
+import * as logicI18n from '../../logic/translations';
+import { BulkActions } from './bulk_actions';
 import { SearchField } from './search_field';
+import { SiemMigrationRuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import * as i18n from './translations';
 
 const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_SORT_FIELD = 'translation_result';
+const DEFAULT_SORT_DIRECTION = 'desc';
 
-export interface RulesTableComponentProps {
+export interface MigrationRulesTableProps {
   /**
    * Selected rule migration id
    */
@@ -40,143 +48,244 @@ export interface RulesTableComponentProps {
 /**
  * Table Component for displaying SIEM rules migrations
  */
-const RulesTableComponent: React.FC<RulesTableComponentProps> = ({ migrationId }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const [searchTerm, setSearchTerm] = useState<string | undefined>();
+export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.memo(
+  ({ migrationId }) => {
+    const { addError } = useAppToasts();
 
-  const { data: translationStats, isLoading: isStatsLoading } =
-    useGetMigrationTranslationStats(migrationId);
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+    const [sortField, setSortField] = useState<keyof RuleMigration>(DEFAULT_SORT_FIELD);
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
+    const [searchTerm, setSearchTerm] = useState<string | undefined>();
 
-  const {
-    data: { ruleMigrations, total } = { ruleMigrations: [], total: 0 },
-    isLoading: isDataLoading,
-  } = useGetMigrationRules({
-    migrationId,
-    page: pageIndex,
-    perPage: pageSize,
-    searchTerm,
-  });
+    const { data: translationStats, isLoading: isStatsLoading } =
+      useGetMigrationTranslationStats(migrationId);
 
-  const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);
+    const { data: prebuiltRules = {}, isLoading: isPrebuiltRulesLoading } =
+      useGetMigrationPrebuiltRules(migrationId);
 
-  const pagination = useMemo(() => {
-    return {
-      pageIndex,
-      pageSize,
-      totalItemCount: total,
-    };
-  }, [pageIndex, pageSize, total]);
+    const {
+      data: { ruleMigrations, total } = { ruleMigrations: [], total: 0 },
+      isLoading: isDataLoading,
+    } = useGetMigrationRules({
+      migrationId,
+      page: pageIndex,
+      perPage: pageSize,
+      sortField,
+      sortDirection,
+      searchTerm,
+    });
 
-  const onTableChange = useCallback(({ page, sort }: CriteriaWithPagination<RuleMigration>) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
-    }
-  }, []);
+    const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);
+    const tableSelection: EuiTableSelectionType<RuleMigration> = useMemo(
+      () => ({
+        selectable: (item: RuleMigration) => {
+          return (
+            !item.elastic_rule?.id &&
+            item.translation_result === SiemMigrationRuleTranslationResult.FULL
+          );
+        },
+        selectableMessage: (selectable: boolean, item: RuleMigration) => {
+          if (selectable) {
+            return '';
+          }
+          return item.elastic_rule?.id
+            ? i18n.ALREADY_TRANSLATED_RULE_TOOLTIP
+            : i18n.NOT_FULLY_TRANSLATED_RULE_TOOLTIP;
+        },
+        onSelectionChange: setSelectedRuleMigrations,
+        selected: selectedRuleMigrations,
+      }),
+      [selectedRuleMigrations]
+    );
 
-  const handleOnSearch = useCallback((value: string) => {
-    setSearchTerm(value.trim());
-  }, []);
+    const pagination = useMemo(() => {
+      return {
+        pageIndex,
+        pageSize,
+        totalItemCount: total,
+      };
+    }, [pageIndex, pageSize, total]);
 
-  const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
-  const { mutateAsync: installTranslatedMigrationRules } =
-    useInstallTranslatedMigrationRules(migrationId);
+    const sorting = useMemo(() => {
+      return {
+        sort: {
+          field: sortField,
+          direction: sortDirection,
+        },
+      };
+    }, [sortDirection, sortField]);
 
-  const [isTableLoading, setTableLoading] = useState(false);
-  const installSingleRule = useCallback(
-    async (migrationRule: RuleMigration, enable?: boolean) => {
-      setTableLoading(true);
-      try {
-        await installMigrationRules([migrationRule.id]);
-      } finally {
-        setTableLoading(false);
+    const onTableChange = useCallback(({ page, sort }: CriteriaWithPagination<RuleMigration>) => {
+      if (page) {
+        setPageIndex(page.index);
+        setPageSize(page.size);
       }
-    },
-    [installMigrationRules]
-  );
-
-  const installTranslatedRules = useCallback(
-    async (enable?: boolean) => {
-      setTableLoading(true);
-      try {
-        await installTranslatedMigrationRules();
-      } finally {
-        setTableLoading(false);
+      if (sort) {
+        const { field, direction } = sort;
+        setSortField(field);
+        setSortDirection(direction);
       }
-    },
-    [installTranslatedMigrationRules]
-  );
+    }, []);
 
-  const ruleActionsFactory = useCallback(
-    (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
-      // TODO: Add flyout action buttons
-      return null;
-    },
-    []
-  );
+    const handleOnSearch = useCallback((value: string) => {
+      setSearchTerm(value.trim());
+    }, []);
 
-  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
-    ruleActionsFactory,
-  });
+    const { mutateAsync: installMigrationRules } = useInstallMigrationRules(migrationId);
+    const { mutateAsync: installTranslatedMigrationRules } =
+      useInstallTranslatedMigrationRules(migrationId);
 
-  const rulesColumns = useRulesTableColumns({
-    disableActions: isTableLoading,
-    openMigrationRulePreview: openRulePreview,
-    installMigrationRule: installSingleRule,
-  });
-
-  return (
-    <>
-      <EuiSkeletonLoading
-        isLoading={isDataLoading}
-        loadingContent={
-          <>
-            <EuiSkeletonTitle />
-            <EuiSkeletonText />
-          </>
+    const [isTableLoading, setTableLoading] = useState(false);
+    const installSingleRule = useCallback(
+      async (migrationRule: RuleMigration, enabled = false) => {
+        setTableLoading(true);
+        try {
+          await installMigrationRules({ ids: [migrationRule.id], enabled });
+        } catch (error) {
+          addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
+        } finally {
+          setTableLoading(false);
         }
-        loadedContent={
-          !translationStats?.rules.total ? (
-            <NoItemsMessage />
-          ) : (
-            <>
-              <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
-                <EuiFlexItem>
-                  <SearchField initialValue={searchTerm} onSearch={handleOnSearch} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <BulkActions
-                    isTableLoading={isStatsLoading || isDataLoading || isTableLoading}
-                    numberOfTranslatedRules={translationStats?.rules.installable ?? 0}
-                    numberOfSelectedRules={0}
-                    installTranslatedRule={installTranslatedRules}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <EuiBasicTable<RuleMigration>
-                loading={isTableLoading}
-                items={ruleMigrations}
-                pagination={pagination}
-                onChange={onTableChange}
-                selection={{
-                  selectable: () => true,
-                  onSelectionChange: setSelectedRuleMigrations,
-                  initialSelected: selectedRuleMigrations,
+      },
+      [addError, installMigrationRules]
+    );
+
+    const installSelectedRule = useCallback(
+      async (enabled = false) => {
+        setTableLoading(true);
+        try {
+          await installMigrationRules({
+            ids: selectedRuleMigrations.map((rule) => rule.id),
+            enabled,
+          });
+        } catch (error) {
+          addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
+        } finally {
+          setTableLoading(false);
+          setSelectedRuleMigrations([]);
+        }
+      },
+      [addError, installMigrationRules, selectedRuleMigrations]
+    );
+
+    const installTranslatedRules = useCallback(
+      async (enable?: boolean) => {
+        setTableLoading(true);
+        try {
+          await installTranslatedMigrationRules();
+        } catch (error) {
+          addError(error, { title: logicI18n.INSTALL_MIGRATION_RULES_FAILURE });
+        } finally {
+          setTableLoading(false);
+        }
+      },
+      [addError, installTranslatedMigrationRules]
+    );
+
+    const isLoading = isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading;
+
+    const ruleActionsFactory = useCallback(
+      (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
+        const canMigrationRuleBeInstalled =
+          !isLoading &&
+          !ruleMigration.elastic_rule?.id &&
+          ruleMigration.translation_result === SiemMigrationRuleTranslationResult.FULL;
+        return (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButton
+                disabled={!canMigrationRuleBeInstalled}
+                onClick={() => {
+                  installSingleRule(ruleMigration);
+                  closeRulePreview();
                 }}
-                itemId={'id'}
-                data-test-subj={'rules-translation-table'}
-                columns={rulesColumns}
-              />
-            </>
-          )
-        }
-      />
-      {rulePreviewFlyout}
-    </>
-  );
-};
+                data-test-subj="installMigrationRuleFromFlyoutButton"
+              >
+                {i18n.INSTALL_WITHOUT_ENABLING_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                disabled={!canMigrationRuleBeInstalled}
+                onClick={() => {
+                  installSingleRule(ruleMigration, true);
+                  closeRulePreview();
+                }}
+                fill
+                data-test-subj="installAndEnableMigrationRuleFromFlyoutButton"
+              >
+                {i18n.INSTALL_AND_ENABLE_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
+      [installSingleRule, isLoading]
+    );
 
-export const RulesTable = React.memo(RulesTableComponent);
-RulesTable.displayName = 'RulesTable';
+    const {
+      migrationRuleDetailsFlyout: rulePreviewFlyout,
+      openMigrationRuleDetails: openRulePreview,
+    } = useMigrationRuleDetailsFlyout({
+      prebuiltRules,
+      ruleActionsFactory,
+    });
+
+    const rulesColumns = useMigrationRulesTableColumns({
+      disableActions: isTableLoading,
+      openMigrationRuleDetails: openRulePreview,
+      installMigrationRule: installSingleRule,
+    });
+
+    return (
+      <>
+        <EuiSkeletonLoading
+          isLoading={isDataLoading}
+          loadingContent={
+            <>
+              <EuiSkeletonTitle />
+              <EuiSkeletonText />
+            </>
+          }
+          loadedContent={
+            !translationStats?.rules.total ? (
+              <EmptyMigration />
+            ) : (
+              <>
+                <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
+                  <EuiFlexItem>
+                    <SearchField initialValue={searchTerm} onSearch={handleOnSearch} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <BulkActions
+                      isTableLoading={isLoading}
+                      numberOfTranslatedRules={translationStats?.rules.installable ?? 0}
+                      numberOfSelectedRules={selectedRuleMigrations.length}
+                      installTranslatedRule={installTranslatedRules}
+                      installSelectedRule={installSelectedRule}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiBasicTable<RuleMigration>
+                  loading={isTableLoading}
+                  items={ruleMigrations}
+                  pagination={pagination}
+                  sorting={sorting}
+                  onChange={onTableChange}
+                  selection={tableSelection}
+                  itemId={'id'}
+                  data-test-subj={'rules-translation-table'}
+                  columns={rulesColumns}
+                />
+              </>
+            )
+          }
+        />
+        {rulePreviewFlyout}
+      </>
+    );
+  }
+);
+MigrationRulesTable.displayName = 'MigrationRulesTable';

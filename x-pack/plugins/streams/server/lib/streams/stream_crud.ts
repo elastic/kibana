@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_INDEX } from '../../../common/constants';
 import { FieldDefinition, StreamDefinition } from '../../../common/types';
 import { generateLayer } from './component_templates/generate_layer';
@@ -89,7 +90,6 @@ async function upsertInternalStream({ definition, scopedClusterClient }: BasePar
 type ListStreamsParams = BaseParams;
 
 export interface ListStreamResponse {
-  total: number;
   definitions: StreamDefinition[];
 }
 
@@ -103,12 +103,14 @@ export async function listStreams({
   });
 
   const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
-  const definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
-  const total = response.hits.total!;
+  let definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
+  const hasAccess = await Promise.all(
+    definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
+  );
+  definitions = definitions.filter((_, index) => hasAccess[index]);
 
   return {
     definitions: [...definitions, ...dataStreams],
-    total: (typeof total === 'number' ? total : total.value) + dataStreams.length,
   };
 }
 
@@ -172,60 +174,67 @@ export async function readDataStreamAsStream({
   scopedClusterClient,
   skipAccessCheck,
 }: ReadStreamParams) {
-  const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name: id });
-  if (response.data_streams.length === 1) {
-    const definition: StreamDefinition = {
-      id,
-      managed: false,
-      children: [],
-      fields: [],
-      processing: [],
-    };
-    if (!skipAccessCheck) {
-      const hasAccess = await checkReadAccess({ id, scopedClusterClient });
-      if (!hasAccess) {
-        throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
-      }
+  let dataStream: IndicesDataStream;
+  try {
+    const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name: id });
+    dataStream = response.data_streams[0];
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
     }
-    // retrieve linked index template, component template and ingest pipeline
-    const templateName = response.data_streams[0].template;
-    const componentTemplates: string[] = [];
-    const template = await scopedClusterClient.asInternalUser.indices.getIndexTemplate({
-      name: templateName,
-    });
-    if (template.index_templates.length) {
-      template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
-        componentTemplates.push(componentTemplateName);
-      });
-    }
-    const writeIndexName = response.data_streams[0].indices.at(-1)?.index_name!;
-    const currentIndex = await scopedClusterClient.asInternalUser.indices.get({
-      index: writeIndexName,
-    });
-    const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
-
-    definition.unmanaged_elasticsearch_assets = [
-      {
-        type: 'ingest_pipeline',
-        id: ingestPipelineId,
-      },
-      ...componentTemplates.map((componentTemplateName) => ({
-        type: 'component_template' as const,
-        id: componentTemplateName,
-      })),
-      {
-        type: 'index_template',
-        id: templateName,
-      },
-      {
-        type: 'data_stream',
-        id,
-      },
-    ];
-
-    return { definition };
+    throw e;
   }
-  throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+
+  const definition: StreamDefinition = {
+    id,
+    managed: false,
+    children: [],
+    fields: [],
+    processing: [],
+  };
+  if (!skipAccessCheck) {
+    const hasAccess = await checkReadAccess({ id, scopedClusterClient });
+    if (!hasAccess) {
+      throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+    }
+  }
+  // retrieve linked index template, component template and ingest pipeline
+  const templateName = dataStream.template;
+  const componentTemplates: string[] = [];
+  const template = await scopedClusterClient.asInternalUser.indices.getIndexTemplate({
+    name: templateName,
+  });
+  if (template.index_templates.length) {
+    template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
+      componentTemplates.push(componentTemplateName);
+    });
+  }
+  const writeIndexName = dataStream.indices.at(-1)?.index_name!;
+  const currentIndex = await scopedClusterClient.asInternalUser.indices.get({
+    index: writeIndexName,
+  });
+  const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
+
+  definition.unmanaged_elasticsearch_assets = [
+    {
+      type: 'ingest_pipeline',
+      id: ingestPipelineId,
+    },
+    ...componentTemplates.map((componentTemplateName) => ({
+      type: 'component_template' as const,
+      id: componentTemplateName,
+    })),
+    {
+      type: 'index_template',
+      id: templateName,
+    },
+    {
+      type: 'data_stream',
+      id,
+    },
+  ];
+
+  return { definition };
 }
 
 interface ReadAncestorsParams extends BaseParams {
@@ -244,7 +253,9 @@ export async function readAncestors({
 
   return {
     ancestors: await Promise.all(
-      ancestorIds.map((ancestorId) => readStream({ scopedClusterClient, id: ancestorId }))
+      ancestorIds.map((ancestorId) =>
+        readStream({ scopedClusterClient, id: ancestorId, skipAccessCheck: true })
+      )
     ),
   };
 }
