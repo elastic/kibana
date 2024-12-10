@@ -31,56 +31,58 @@ jest.mock('../../../../hooks', () => ({
 const mockSendPutAgentTagsUpdate = sendPutAgentTagsUpdate as jest.Mock;
 const mockSendPostBulkAgentTagsUpdate = sendPostBulkAgentTagsUpdate as jest.Mock;
 
-describe('useUpdateTags', () => {
-  const mockOnSuccess = jest.fn();
-  beforeEach(() => {
-    mockSendPutAgentTagsUpdate.mockReset();
-    mockSendPostBulkAgentTagsUpdate.mockReset();
-    mockOnSuccess.mockReset();
+for (let i = 0; i < 100; i++) {
+  describe(`useUpdateTags - ${i + 1}`, () => {
+    const mockOnSuccess = jest.fn();
+    beforeEach(() => {
+      mockSendPutAgentTagsUpdate.mockReset();
+      mockSendPostBulkAgentTagsUpdate.mockReset();
+      mockOnSuccess.mockReset();
+    });
+    it('should call onSuccess when update tags succeeds', async () => {
+      mockSendPutAgentTagsUpdate.mockResolvedValueOnce({ data: {} });
+
+      const { result } = renderHook(() => useUpdateTags());
+      await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
+      expect(mockOnSuccess).toHaveBeenCalled();
+      expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
+        'Tag(s) updated'
+      );
+    });
+
+    it('should call show error toast when update tags fails', async () => {
+      mockSendPutAgentTagsUpdate.mockResolvedValueOnce({ error: 'error' });
+
+      const { result } = renderHook(() => useUpdateTags());
+      await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+      expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
+        'error',
+        { title: 'Tag(s) update failed' }
+      );
+    });
+
+    it('should call onSuccess when bulk update tags succeeds', async () => {
+      mockSendPostBulkAgentTagsUpdate.mockResolvedValueOnce({ data: { actionId: 'action' } });
+
+      const { result } = renderHook(() => useUpdateTags());
+      await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
+      expect(mockOnSuccess).toHaveBeenCalled();
+      expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
+        'Tag(s) updated'
+      );
+    });
+
+    it('should call show error toast when bulk update tags fails', async () => {
+      mockSendPostBulkAgentTagsUpdate.mockRejectedValueOnce({ error: 'error' });
+
+      const { result } = renderHook(() => useUpdateTags());
+      await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
+      expect(mockOnSuccess).not.toHaveBeenCalled();
+      expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
+        'error',
+        { title: 'Tag(s) update failed' }
+      );
+    });
   });
-  it('should call onSuccess when update tags succeeds', async () => {
-    mockSendPutAgentTagsUpdate.mockResolvedValueOnce({ data: {} });
-
-    const { result } = renderHook(() => useUpdateTags());
-    await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
-    expect(mockOnSuccess).toHaveBeenCalled();
-    expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
-      'Tag(s) updated'
-    );
-  });
-
-  it('should call show error toast when update tags fails', async () => {
-    mockSendPutAgentTagsUpdate.mockResolvedValueOnce({ error: 'error' });
-
-    const { result } = renderHook(() => useUpdateTags());
-    await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
-    expect(mockOnSuccess).not.toHaveBeenCalled();
-    expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
-      'error',
-      { title: 'Tag(s) update failed' }
-    );
-  });
-
-  it('should call onSuccess when bulk update tags succeeds', async () => {
-    mockSendPostBulkAgentTagsUpdate.mockResolvedValueOnce({ data: { actionId: 'action' } });
-
-    const { result } = renderHook(() => useUpdateTags());
-    await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
-    expect(mockOnSuccess).toHaveBeenCalled();
-    expect(useStartServices().notifications.toasts.addSuccess as jest.Mock).toHaveBeenCalledWith(
-      'Tag(s) updated'
-    );
-  });
-
-  it('should call show error toast when bulk update tags fails', async () => {
-    mockSendPostBulkAgentTagsUpdate.mockRejectedValueOnce({ error: 'error' });
-
-    const { result } = renderHook(() => useUpdateTags());
-    await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
-    expect(mockOnSuccess).not.toHaveBeenCalled();
-    expect(useStartServices().notifications.toasts.addError as jest.Mock).toHaveBeenCalledWith(
-      'error',
-      { title: 'Tag(s) update failed' }
-    );
-  });
-});
+}
