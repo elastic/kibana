@@ -152,7 +152,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         output = {
           type: 'json',
           content: {
-            code: 'ra_runscript_success_done',
+            code: '200',
           },
         };
       }

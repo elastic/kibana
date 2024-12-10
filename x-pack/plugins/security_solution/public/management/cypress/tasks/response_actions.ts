@@ -279,6 +279,11 @@ export const ensureResponseActionAuthzAccess = (
       Object.assign(apiPayload, { parameters: { Raw: 'ls' } });
       break;
 
+    case 'runscript':
+      url = RUN_SCRIPT_ROUTE;
+      Object.assign(apiPayload, { parameters: { Raw: 'ls' } });
+      break;
+
     default:
       throw new Error(`Response action [${responseAction}] has no API payload defined`);
   }
