@@ -230,7 +230,7 @@ These are the contracts exposed by the core services for each lifecycle:
 
 |_start_
 |{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-server/src/core_start.ts[CoreStart]
-|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts[CoreStart]
+|{kib-repo}blob/{branch}/src/core/packages/lifecycle/browser/src/core_start.ts[CoreStart]
 
 |_stop_ |
 |===

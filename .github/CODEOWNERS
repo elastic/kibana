@@ -83,7 +83,6 @@ packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
 packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
 packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
 packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
-packages/core/lifecycle/core-lifecycle-browser @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-internal @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
 packages/core/lifecycle/core-lifecycle-server @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/i18n/server-internal @elastic/kibana-core
 src/core/packages/injected-metadata/browser-internal @elastic/kibana-core
 src/core/packages/injected-metadata/common-internal @elastic/kibana-core
 src/core/packages/integrations/browser-internal @elastic/kibana-core
+src/core/packages/lifecycle/browser @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
