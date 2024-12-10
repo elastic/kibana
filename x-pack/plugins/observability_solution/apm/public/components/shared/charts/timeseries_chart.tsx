@@ -25,7 +25,7 @@ import {
   Tooltip,
   SettingsSpec,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -33,7 +33,6 @@ import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
 import {
@@ -75,11 +74,11 @@ export function TimeseriesChart({
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
-  const theme = useTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const chartThemes = useChartThemes();
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
-    theme,
+    euiTheme,
     anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
   const isEmpty = isTimeseriesEmpty(timeseries);
@@ -115,12 +114,14 @@ export function TimeseriesChart({
       }
     : undefined;
 
-  const endZoneColor = theme.darkMode ? theme.eui.euiColorLightShade : theme.eui.euiColorDarkShade;
+  const isDarkMode = colorMode === 'DARK';
+
+  const endZoneColor = isDarkMode ? euiTheme.colors.lightShade : euiTheme.colors.darkShade;
   const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: endZoneColor,
     fill: endZoneColor,
     strokeWidth: 0,
-    opacity: theme.darkMode ? 0.6 : 0.2,
+    opacity: isDarkMode ? 0.6 : 0.2,
   };
 
   function getChartType(type: string) {

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { useTheme } from '../../../../../hooks/use_theme';
 import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { ErrorDetailLink } from '../../../links/apm/error_detail_link';
 import { Legend, Shape } from '../legend';
@@ -51,7 +50,7 @@ function truncateMessage(errorMessage?: string) {
 }
 
 export function ErrorMarker({ mark }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { urlParams } = useLegacyUrlParams();
   const [isPopoverOpen, showPopover] = useState(false);
 
@@ -61,7 +60,7 @@ export function ErrorMarker({ mark }: Props) {
     <Button
       data-test-subj="popover"
       clickable
-      color={theme.eui.euiColorDanger}
+      color={euiTheme.colors.danger}
       shape={Shape.square}
       onClick={togglePopover}
     />
@@ -94,7 +93,7 @@ export function ErrorMarker({ mark }: Props) {
       <Popover>
         <TimeLegend
           text={asDuration(mark.offset)}
-          indicator={<div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>}
+          indicator={<div style={{ marginRight: euiTheme.size.xs }}>@</div>}
         />
         <Legend
           key={mark.serviceColor}

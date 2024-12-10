@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiTitle, EuiPageTemplate } from '@elastic/eui';
+import { EuiCallOut, EuiTitle, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -14,7 +14,10 @@ import { ColumnarPage, PageContent } from '../components/page';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
-  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+  background-color: ${() => {
+    const { euiTheme } = useEuiTheme();
+    return euiTheme.colors.lightestShade;
+  }};
 `;
 
 interface Props {

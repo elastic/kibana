@@ -13,7 +13,7 @@ import {
   YDomainRange,
 } from '@elastic/charts';
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
@@ -25,7 +25,6 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';
-import { useTheme } from '../../../hooks/use_theme';
 
 interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
   color?: string;
@@ -69,8 +68,8 @@ export function TimeseriesChartWithContext({
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
   const { core } = useApmPluginContext();
   const timeZone = getTimeZone(core.uiSettings);
-  const theme = useTheme();
-  const annotationColor = theme.eui.euiColorSuccess;
+  const { euiTheme } = useEuiTheme();
+  const annotationColor = euiTheme.colors.accentSecondary;
   const { annotations } = useAnnotationsContext();
 
   const timeseriesAnnotations = [

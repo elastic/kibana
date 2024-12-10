@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React, { useMemo, useState } from 'react';
@@ -48,8 +48,8 @@ const toggleFlyout = ({
   });
 };
 
-const WaterfallItemsContainer = euiStyled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
+const WaterfallItemsContainer = euiStyled.div<{ euiTheme: EuiThemeComputed }>`
+  border-bottom: 1px solid ${({ euiTheme }) => euiTheme.colors.mediumShade};
 `;
 
 interface Props {
@@ -91,6 +91,7 @@ const MAX_DEPTH_OPEN_LIMIT = 2;
 export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Props) {
   const history = useHistory();
   const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   const { duration } = waterfall;
@@ -135,8 +136,8 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
           position: sticky;
           top: var(--euiFixedHeadersOffset, 0);
           z-index: ${theme.eui.euiZLevel2};
-          background-color: ${theme.eui.euiColorEmptyShade};
-          border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
+          background-color: ${euiTheme.colors.emptyShade};
+          border-bottom: 1px solid ${euiTheme.colors.mediumShade};
         `}
       >
         <EuiButtonEmpty
@@ -162,7 +163,7 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
         xMax={duration}
         margins={timelineMargins}
       />
-      <WaterfallItemsContainer>
+      <WaterfallItemsContainer euiTheme={euiTheme}>
         {!waterfall.entryWaterfallTransaction ? null : (
           <AccordionWaterfall
             isOpen={isAccordionOpen}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks';
 import { PlotValues } from './plot_utils';
 
@@ -21,7 +21,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
 
   const markTimes = marks.filter((mark) => mark.verticalLine).map(({ offset }) => offset);
 
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const tickPositions = tickValues.reduce<number[]>((positions, tick) => {
     const position = xScale(tick);
@@ -53,7 +53,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x2={position}
             y1={0}
             y2="100%"
-            stroke={theme.eui.euiColorLightestShade}
+            stroke={euiTheme.colors.lightestShade}
           />
         ))}
         {markPositions.map((position) => (
@@ -63,7 +63,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x2={position}
             y1={0}
             y2="100%"
-            stroke={theme.eui.euiColorMediumShade}
+            stroke={euiTheme.colors.mediumShade}
           />
         ))}
         {Number.isFinite(topTraceDurationPosition) && (
@@ -73,7 +73,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x2={topTraceDurationPosition}
             y1={0}
             y2="100%"
-            stroke={theme.eui.euiColorMediumShade}
+            stroke={euiTheme.colors.mediumShade}
           />
         )}
       </g>
