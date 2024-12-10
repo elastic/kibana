@@ -7936,7 +7936,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/xstate-utils@link:packages/kbn-xstate-utils":
+"@kbn/xstate-utils@link:x-pack/solutions/observability/packages/kbn-xstate-utils":
   version "0.0.0"
   uid ""
 

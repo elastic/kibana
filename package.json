@@ -1022,7 +1022,7 @@
     "@kbn/visualization-utils": "link:packages/kbn-visualization-utils",
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
-    "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
+    "@kbn/xstate-utils": "link:x-pack/solutions/observability/packages/kbn-xstate-utils",
     "@kbn/zod": "link:packages/kbn-zod",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/aws": "^0.1.2",

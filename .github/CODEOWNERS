@@ -536,7 +536,6 @@ packages/kbn-visualization-ui-components @elastic/kibana-visualizations
 packages/kbn-visualization-utils @elastic/kibana-visualizations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
-packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/kbn-zod @elastic/kibana-core
 packages/kbn-zod-helpers @elastic/security-detection-rule-management
@@ -987,6 +986,7 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-timerange @elastic/obs-ux-logs-team
+x-pack/solutions/observability/packages/kbn-xstate-utils @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/logs_overview @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/data_quality @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/dataset_quality @elastic/obs-ux-logs-team
