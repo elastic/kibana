@@ -22,13 +22,17 @@ export const isMigrationCustomRule = (rule?: ElasticRule): rule is MigrationCust
   !isMigrationPrebuiltRule(rule) &&
   !!(rule?.title && rule?.description && rule?.query && rule?.query_language);
 
-export const convertMigrationCustomRuleToSecurityRulePayload = (rule: MigrationCustomRule) => {
+export const convertMigrationCustomRuleToSecurityRulePayload = (
+  rule: MigrationCustomRule,
+  enabled: boolean
+) => {
   return {
     type: rule.query_language,
     language: rule.query_language,
     query: rule.query,
     name: rule.title,
     description: rule.description,
+    enabled,
 
     ...DEFAULT_TRANSLATION_FIELDS,
     severity: (rule.severity as Severity) ?? DEFAULT_TRANSLATION_SEVERITY,
