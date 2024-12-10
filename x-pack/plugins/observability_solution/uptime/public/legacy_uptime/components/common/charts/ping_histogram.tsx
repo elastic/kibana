@@ -17,15 +17,15 @@ import {
   ElementClickListener,
   ScaleType,
 } from '@elastic/charts';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
-import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../../common/runtime_types';
 import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
@@ -34,6 +34,7 @@ import {
   STATUS_DOWN_LABEL,
   STATUS_UP_LABEL,
 } from '../../../../../common/translations/translations';
+import { ClientPluginsStart } from '../../../../plugin';
 
 export interface PingHistogramComponentProps {
   /**
@@ -72,9 +73,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   timeZone,
 }) => {
   const {
-    colors: { danger, gray },
-    chartTheme,
-  } = useContext(UptimeThemeContext);
+    services: { charts },
+  } = useKibana<ClientPluginsStart>();
+  const baseTheme = charts.theme.useChartsBaseTheme();
+
+  const theme = useEuiTheme();
+  const danger = theme.euiTheme.colors.danger;
+  const gray = theme.euiTheme.colors.lightShade;
 
   const [_getUrlParams, updateUrlParams] = useUrlParams();
 
@@ -143,8 +148,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             onBrushEnd={onBrushEnd}
             onElementClick={onBarClicked}
             locale={i18n.getLocale()}
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            {...chartTheme}
+            baseTheme={baseTheme}
           />
           <Axis
             id={i18n.translate('xpack.uptime.snapshotHistogram.xAxisId', {

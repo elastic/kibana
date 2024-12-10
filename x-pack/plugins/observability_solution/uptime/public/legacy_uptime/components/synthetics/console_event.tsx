@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import React, { useContext, FC } from 'react';
-import { UptimeThemeContext } from '../../contexts';
+import { EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import React, { FC } from 'react';
 import { JourneyStep } from '../../../../common/runtime_types/ping';
 
 interface Props {
@@ -15,9 +14,8 @@ interface Props {
 }
 
 export const ConsoleEvent: FC<Props> = ({ event }) => {
-  const {
-    colors: { danger },
-  } = useContext(UptimeThemeContext);
+  const theme = useEuiTheme();
+  const danger = theme.euiTheme.colors.danger;
 
   let typeColor: string | undefined;
   if (event.synthetics?.type === 'stderr') {
