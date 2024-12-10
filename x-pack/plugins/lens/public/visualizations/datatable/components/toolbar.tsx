@@ -78,7 +78,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}
           rowHeightLines={state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
-            defaultMessage: 'Header row height',
+            defaultMessage: 'Max header cell lines',
           })}
           onChangeRowHeight={(mode) =>
             onChangeHeight(
@@ -93,20 +93,18 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           }}
           data-test-subj="lnsHeaderHeightSettings"
           maxRowHeight={5}
-          compressed
         />
         <RowHeightSettings
           rowHeight={state.rowHeight}
           rowHeightLines={state.rowHeightLines}
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
-            defaultMessage: 'Cell row height',
+            defaultMessage: 'Max body cell lines',
           })}
           onChangeRowHeight={(mode) => onChangeHeight(mode, 'rowHeight', 'rowHeightLines')}
           onChangeRowHeightLines={(lines) => {
             onChangeHeightLines(lines, 'rowHeightLines');
           }}
           data-test-subj="lnsRowHeightSettings"
-          compressed
         />
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
