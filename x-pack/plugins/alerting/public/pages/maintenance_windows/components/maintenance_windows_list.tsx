@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   formatDate,
   EuiBasicTableColumn,
@@ -170,7 +170,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
         }
       `;
     }, [euiTheme.colors.highlight]);
-    useEffect(() => console.log('HERE2'), []);
+
     const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
         {
@@ -198,23 +198,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [actions, readOnly]
     );
 
-    // const onTableChange = useCallback((props: { page: { index: number, size: number } }) => {
-    //   onPageChange(props);
-    // }, []);
-
-    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //   // onInputTextChange(e.target.value);
-    //   // if (e.target.value === '') {
-    //   //   onFilterChange(e.target.value);
-    //   // }
-    // };
-
-    // const handleKeyup = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    //   // if (e.key === 'Enter') {
-    //   //   onFilterChange(inputText);
-    //   // }
-    // };
-
     return (
       <>
         <EuiFlexItem grow={false}>
@@ -224,7 +207,7 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
                 data-test-subj="maintenance-window-search"
                 fullWidth
                 isClearable
-                incremental={false} // which one is better? test!
+                incremental={false}
                 placeholder={i18n.SEARCH_PLACEHOLDER}
                 value={inputText}
                 onChange={onSearchChange}

@@ -34,11 +34,6 @@ import {
   MaintenanceWindowStatus,
 } from '../../../common';
 
-interface FilterOptions {
-  searchText: string;
-  selectedStatuses: MaintenanceWindowStatus[];
-}
-
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
     application: { capabilities },
@@ -51,12 +46,10 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const [page, setPage] = useState<number>(1);
   const [perPage, setPerPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_SEARCH_PAGE_SIZE);
 
-  // move to the list component
   const [inputText, setInputText] = useState<string>('');
   const [selectedStatuses, setSelectedStatuses] = useState<MaintenanceWindowStatus[]>([]);
   const [searchText, setSearchText] = useState<string>('');
 
-  console.log('selectedStatuses', selectedStatuses);
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
   const { isLoading, isInitialLoading, data, refetch } = useFindMaintenanceWindows({
