@@ -12,11 +12,11 @@ import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal'
 import { ChromeNavControls } from '@kbn/core/public';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AssistantAvatar } from '../..';
-import { UseAssistantContext } from '.';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { EMPTY } from "rxjs";
+import { EMPTY } from 'rxjs';
+import { UseAssistantContext } from '.';
+import { AssistantAvatar } from '../..';
 
 interface Props {
   hasAssistantPrivilege: UseAssistantContext['assistantAvailability']['hasAssistantPrivilege'];
@@ -44,8 +44,8 @@ export const AssistantNavLink: FC<Props> = ({
 }) => {
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
   const { chrome } = useKibana().services;
-  const chromeStyle$ = useMemo(() => chrome?.getChromeStyle$()??EMPTY, [chrome]);
-  const chromeStyle = useObservable(chromeStyle$, undefined); 
+  const chromeStyle$ = useMemo(() => chrome?.getChromeStyle$() ?? EMPTY, [chrome]);
+  const chromeStyle = useObservable(chromeStyle$, undefined);
 
   useEffect(() => {
     const registerPortalNode = () => {
@@ -71,7 +71,7 @@ export const AssistantNavLink: FC<Props> = ({
     return null;
   }
 
-  const EuiButtonBasicOrEmpty = chromeStyle === "project" ? EuiButtonEmpty : EuiButton;
+  const EuiButtonBasicOrEmpty = chromeStyle === 'project' ? EuiButtonEmpty : EuiButton;
 
   return (
     <InPortal node={portalNode}>
@@ -93,4 +93,3 @@ export const AssistantNavLink: FC<Props> = ({
     </InPortal>
   );
 };
-

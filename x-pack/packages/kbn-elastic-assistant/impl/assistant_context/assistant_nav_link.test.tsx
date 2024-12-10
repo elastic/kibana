@@ -17,25 +17,25 @@ const MockNavigationBar = OutPortal;
 
 const mockShowAssistantOverlay = jest.fn();
 const mockNavControls = chromeServiceMock.createStartContract().navControls;
-const mockGetChromeStyle = jest.fn()
+const mockGetChromeStyle = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   return {
-      ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-      useKibana: () => ({
-        services: {
-          chrome: {
-            getChromeStyle$: mockGetChromeStyle
-          }
-        }
-      })
+    ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+    useKibana: () => ({
+      services: {
+        chrome: {
+          getChromeStyle$: mockGetChromeStyle,
+        },
+      },
+    }),
   };
 });
 
 describe('AssistantNavLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetChromeStyle.mockReturnValue(of("classic"))
+    mockGetChromeStyle.mockReturnValue(of('classic'));
   });
 
   it('should register link in nav bar', () => {
@@ -54,7 +54,7 @@ describe('AssistantNavLink', () => {
       React.useMemo(() => createHtmlPortalNode(), [])
     );
 
-    mockGetChromeStyle.mockReturnValue(of("project"))
+    mockGetChromeStyle.mockReturnValue(of('project'));
 
     mockNavControls.registerRight.mockImplementation((chromeNavControl: ChromeNavControl) => {
       chromeNavControl.mount(portalNode.current.element);
@@ -70,7 +70,9 @@ describe('AssistantNavLink', () => {
         />
       </>
     );
-    expect(queryByTestId('assistantNavLink')).not.toHaveStyle("background-color: rgb(204, 228, 245)")
+    expect(queryByTestId('assistantNavLink')).not.toHaveStyle(
+      'background-color: rgb(204, 228, 245)'
+    );
   });
 
   it('button has opaque background in classic navigation', () => {
@@ -78,7 +80,7 @@ describe('AssistantNavLink', () => {
       React.useMemo(() => createHtmlPortalNode(), [])
     );
 
-    mockGetChromeStyle.mockReturnValue(of("classic"))
+    mockGetChromeStyle.mockReturnValue(of('classic'));
 
     mockNavControls.registerRight.mockImplementation((chromeNavControl: ChromeNavControl) => {
       chromeNavControl.mount(portalNode.current.element);
@@ -94,7 +96,7 @@ describe('AssistantNavLink', () => {
         />
       </>
     );
-    expect(queryByTestId('assistantNavLink')).toHaveStyle("background-color: rgb(204, 228, 245)")
+    expect(queryByTestId('assistantNavLink')).toHaveStyle('background-color: rgb(204, 228, 245)');
   });
 
   it('should render the header link text', () => {
