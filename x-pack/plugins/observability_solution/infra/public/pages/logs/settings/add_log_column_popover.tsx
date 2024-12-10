@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { useVisibilityState } from '../../../hooks/use_visibility_state';
 
@@ -162,6 +162,6 @@ const SystemColumnBadge: React.FunctionComponent = () => (
   </EuiBadge>
 );
 
-const SelectableContent = euiStyled.div`
+const SelectableContent = styled.div`
   width: 400px;
 `;
