@@ -11,7 +11,6 @@ import { AssistantNavLink } from './assistant_nav_link';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { ChromeNavControl } from '@kbn/core/public';
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
 
 const MockNavigationBar = OutPortal;
