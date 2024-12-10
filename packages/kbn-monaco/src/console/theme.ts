@@ -13,23 +13,22 @@ import { themeRuleGroupBuilderFactory } from '../common/theme';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 
-const getConsoleColorConfig = (themeVars: UseEuiTheme['euiTheme'], isDarkMode: boolean) => {
+const getConsoleColorConfig = (themeVars: UseEuiTheme['euiTheme']) => {
   return {
     background: themeVars.colors.backgroundBaseSubdued,
-    booleanTextColor: '#585CF6',
-    methodTextColor: '#DD0A73',
-    urlTextColor: '#00A69B',
-    defaultStatusBackgroundColor: isDarkMode ? '#191B20' : '#F7F8FA',
-    successStatusBackgroundColor: isDarkMode ? '#212B30' : '#E7F5F5',
-    primaryStatusBackgroundColor: isDarkMode ? '#1E232D' : '#EBF1F7',
-    warningStatusBackgroundColor: isDarkMode ? '#2C2B25' : '#FBF6E9',
-    dangerStatusBackgroundColor: isDarkMode ? '#2E2024' : '#F6E6E7',
+    booleanTextColor: themeVars.colors.textPrimary,
+    methodTextColor: themeVars.colors.textAccent,
+    urlTextColor: themeVars.colors.accentSecondary,
+    defaultStatusBackgroundColor: themeVars.colors.backgroundLightAccentSecondary,
+    successStatusBackgroundColor: themeVars.colors.backgroundLightSuccess,
+    primaryStatusBackgroundColor: themeVars.colors.backgroundLightPrimary,
+    warningStatusBackgroundColor: themeVars.colors.backgroundLightWarning,
+    dangerStatusBackgroundColor: themeVars.colors.backgroundLightDanger,
   };
 };
 
 export const buildConsoleTheme = ({ colorMode, euiTheme, ...rest }: UseEuiTheme) => {
-  const isDarkMode = colorMode === 'DARK';
-  const consoleColors = getConsoleColorConfig(euiTheme, isDarkMode);
+  const consoleColors = getConsoleColorConfig(euiTheme);
 
   const themeBase = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID]({
     colorMode,
