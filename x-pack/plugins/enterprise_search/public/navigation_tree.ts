@@ -79,7 +79,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ appSearch, indices, searchApps, collections, workplaceSearch }) => {
+      map(({ indices, searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {
@@ -213,50 +213,6 @@ export const getNavigationTreeDefinition = ({
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
-                  }),
-                },
-                {
-                  children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(
-                          prepend('/app/enterprise_search/app_search')
-                        );
-                      },
-                      link: 'appSearch:engines',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.entsearch.appSearch',
-                        {
-                          defaultMessage: 'App Search',
-                        }
-                      ),
-                      ...(appSearch
-                        ? {
-                            children: appSearch.map(euiItemTypeToNodeDefinition),
-                            isCollapsible: false,
-                            renderAs: 'accordion',
-                          }
-                        : {}),
-                    },
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(
-                          prepend('/app/enterprise_search/workplace_search')
-                        );
-                      },
-                      link: 'workplaceSearch',
-                      ...(workplaceSearch
-                        ? {
-                            children: workplaceSearch.map(euiItemTypeToNodeDefinition),
-                            isCollapsible: false,
-                            renderAs: 'accordion',
-                          }
-                        : {}),
-                    },
-                  ],
-                  id: 'entsearch',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.entsearch', {
-                    defaultMessage: 'Enterprise Search',
                   }),
                 },
                 {
