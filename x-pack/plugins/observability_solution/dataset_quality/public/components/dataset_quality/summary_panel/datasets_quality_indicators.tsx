@@ -8,7 +8,6 @@
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import * as rt from 'io-ts';
 import {
   EuiFlexGroup,
   EuiPanel,
@@ -20,7 +19,6 @@ import {
   EuiSkeletonTitle,
 } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { InfoIndicators } from '../../../../common/types';
 import { useSummaryPanelContext } from '../../../hooks';
 import {
@@ -32,13 +30,6 @@ import {
 } from '../../../../common/translations';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
-
-export const metaRt = rt.type({
-  rangeFrom: isoToEpochRt,
-  rangeTo: isoToEpochRt,
-});
-
-export type Meta = rt.TypeOf<typeof metaRt>;
 
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();
