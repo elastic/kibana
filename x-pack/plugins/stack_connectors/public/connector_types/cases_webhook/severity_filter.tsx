@@ -6,8 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
-import { severities, SeverityHealth } from '@kbn/cases-plugin/public/components/severity/config';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
+  useEuiTheme,
+} from '@elastic/eui';
+import * as i18n from './translations';
 
 export enum CaseSeverity {
   LOW = 'low',
@@ -22,6 +29,26 @@ interface Props {
 }
 
 export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const severities = {
+    [CaseSeverity.LOW]: {
+      color: euiTheme.colors.vis.euiColorVis0,
+      label: i18n.SEVERITY_LOW_LABEL,
+    },
+    [CaseSeverity.MEDIUM]: {
+      color: euiTheme.colors.vis.euiColorVis5,
+      label: i18n.SEVERITY_MEDIUM_LABEL,
+    },
+    [CaseSeverity.HIGH]: {
+      color: euiTheme.colors.vis.euiColorVis7,
+      label: i18n.SEVERITY_HIGH_LABEL,
+    },
+    [CaseSeverity.CRITICAL]: {
+      color: euiTheme.colors.vis.euiColorVis9,
+      label: i18n.SEVERITY_CRITICAL_LABEL,
+    },
+  };
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
     const severityData = severities[severity];
@@ -35,7 +62,7 @@ export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityCh
           data-test-subj={`case-severity-selection-${severity}`}
         >
           <EuiFlexItem grow={false}>
-            <SeverityHealth severity={severity} />
+            <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
