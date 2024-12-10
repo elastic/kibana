@@ -77,6 +77,7 @@ export class ProfilingPlugin
             .subscribe((style) => (isSidebarEnabled = style === 'classic'));
 
           if (isSidebarEnabled) {
+            // classic navigation
             const sections: NavigationSection[] = [
               {
                 label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
@@ -97,6 +98,7 @@ export class ProfilingPlugin
             ];
             return sections;
           } else {
+            // solution navigation
             appUpdater$.next(() => ({
               deepLinks: links.map((link) => ({
                 ...link,
