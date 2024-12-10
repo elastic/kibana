@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import styled from '@emotion/styled';
 
 import { AllowedStat } from './allowed_stat';
