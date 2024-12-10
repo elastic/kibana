@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { BehaviorSubject, type Subscription } from 'rxjs';
+
 import {
   AppMountParameters,
+  AppStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -15,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { docLinks } from '../common/doc_links';
-import { InferenceEndpoints, getInferenceEndpointsProvider } from './embeddable';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -23,7 +26,6 @@ import {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from './types';
-import { INFERENCE_ENDPOINTS_UI_FLAG } from '.';
 import { registerLocators } from './locators';
 import { INFERENCE_ENDPOINTS_PATH } from './components/routes';
 
@@ -31,6 +33,8 @@ export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
 {
   private config: SearchInferenceEndpointsConfigType;
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private licenseSubscription: Subscription | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
@@ -40,11 +44,7 @@ export class SearchInferenceEndpointsPlugin
     core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>,
     plugins: AppPluginSetupDependencies
   ): SearchInferenceEndpointsPluginSetup {
-    if (
-      !this.config.ui?.enabled &&
-      !core.uiSettings.get<boolean>(INFERENCE_ENDPOINTS_UI_FLAG, false)
-    )
-      return {};
+    if (!this.config.ui?.enabled) return {};
     core.application.register({
       id: PLUGIN_ID,
       appRoute: '/app/elasticsearch/relevance',
@@ -55,9 +55,12 @@ export class SearchInferenceEndpointsPlugin
           title: i18n.translate('xpack.searchInferenceEndpoints.InferenceEndpointsLinkLabel', {
             defaultMessage: 'Inference Endpoints',
           }),
+          visibleIn: ['globalSearch'],
         },
       ],
+      status: AppStatus.inaccessible,
       title: PLUGIN_NAME,
+      updater$: this.appUpdater$,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
@@ -66,8 +69,11 @@ export class SearchInferenceEndpointsPlugin
           history,
         };
 
+        depsStart.searchNavigation?.handleOnAppMount();
+
         return renderApp(coreStart, startDeps, element);
       },
+      visibleIn: [],
     });
 
     registerLocators(plugins.share);
@@ -79,13 +85,27 @@ export class SearchInferenceEndpointsPlugin
     core: CoreStart,
     deps: AppPluginStartDependencies
   ): SearchInferenceEndpointsPluginStart {
+    const { licensing } = deps;
     docLinks.setDocLinks(core.docLinks.links);
 
-    return {
-      InferenceEdnpointsProvider: getInferenceEndpointsProvider(core, deps),
-      InferenceEndpoints,
-    };
+    this.licenseSubscription = licensing.license$.subscribe((license) => {
+      const status: AppStatus =
+        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
+
+      this.appUpdater$.next(() => ({
+        status,
+      }));
+    });
+
+    return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
+    }
+  }
 }
