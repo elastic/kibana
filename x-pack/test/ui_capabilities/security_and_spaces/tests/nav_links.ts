@@ -47,12 +47,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('monitoring', {
-                feature: 'enterpriseSearch',
-                apps: ['appSearch', 'workplaceSearch'],
-              })
-            );
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.except('monitoring'));
             break;
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
