@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_integration',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/task_manager'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/task_manager'],
 };
