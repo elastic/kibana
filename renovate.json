@@ -2093,15 +2093,22 @@
       "groupName": "platform security modules",
       "matchDepNames": [
         "css.escape",
+        "dependency-check",
         "node-forge",
         "formik",
-        "@types/node-forge",
+        "handlebars",
+        "js-sha256",
         "require-in-the-middle",
+        "tape",
         "tough-cookie",
-        "@types/tough-cookie",
         "xml-crypto",
-        "@types/xml-crypto",
-        "@kayahr/text-encoding"
+        "@elastic/node-crypto",
+        "@kayahr/text-encoding",
+        "@types/lodash",
+        "@types/minimist",
+        "@types/node-forge",
+        "@types/tough-cookie",
+        "@types/xml-crypto"
       ],
       "reviewers": [
         "team:kibana-security"

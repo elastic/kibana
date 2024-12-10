@@ -23,7 +23,10 @@ import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowProps {
   rowIndex: number;
-  renderPanelContents: (panelId: string) => React.ReactNode;
+  renderPanelContents: (
+    panelId: string,
+    setDragHandles?: (refs: Array<HTMLElement | null>) => void
+  ) => React.ReactNode;
   setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }
@@ -32,18 +35,12 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
   ({ rowIndex, renderPanelContents, setInteractionEvent, gridLayoutStateManager }, gridRef) => {
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
 
-    const [panelIds, setPanelIds] = useState<string[]>(() => getKeysInOrder(currentRow.panels));
+    const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
+    const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
+      getKeysInOrder(currentRow.panels)
+    );
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
-
-    /** Syncs panel IDs in order after a change in the grid layout, such as adding, removing, or reordering panels. */
-    const syncPanelIds = useCallback(() => {
-      const newPanelIds = getKeysInOrder(gridLayoutStateManager.gridLayout$.value[rowIndex].panels);
-      const hasOrderChanged = JSON.stringify(panelIds) !== JSON.stringify(newPanelIds);
-      if (hasOrderChanged) {
-        setPanelIds(newPanelIds);
-      }
-    }, [setPanelIds, gridLayoutStateManager.gridLayout$, rowIndex, panelIds]);
 
     const getRowCount = useCallback(
       (row: GridRowData) => {
@@ -152,10 +149,6 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
          * - Title
          * - Collapsed state
          * - Panel IDs (adding/removing/replacing, but not reordering)
-         *
-         * Note: During dragging or resizing actions, the row should not re-render because panel positions are controlled via CSS styles for performance reasons.
-         * However, once the user finishes the interaction, the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
-         * This is handled in the syncPanelIds callback.
          */
         const rowStateSubscription = gridLayoutStateManager.gridLayout$
           .pipe(
@@ -163,7 +156,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               return {
                 title: gridLayout[rowIndex].title,
                 isCollapsed: gridLayout[rowIndex].isCollapsed,
-                panelIds: getKeysInOrder(gridLayout[rowIndex].panels),
+                panelIds: Object.keys(gridLayout[rowIndex].panels),
               };
             }),
             pairwise()
@@ -180,6 +173,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               )
             ) {
               setPanelIds(newRowData.panelIds);
+              setPanelIdsInOrder(
+                getKeysInOrder(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
+              );
             }
           });
 
@@ -194,64 +190,67 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     );
 
     /**
-     * Memoize panel children components to prevent unnecessary re-renders
+     * Memoize panel children components (independent of their order) to prevent unnecessary re-renders
      */
-    const children = useMemo(() => {
-      return panelIds.map((panelId) => (
-        <GridPanel
-          key={panelId}
-          panelId={panelId}
-          rowIndex={rowIndex}
-          gridLayoutStateManager={gridLayoutStateManager}
-          renderPanelContents={renderPanelContents}
-          interactionStart={(type, e) => {
-            e.preventDefault();
-            e.stopPropagation();
+    const children: { [panelId: string]: React.ReactNode } = useMemo(() => {
+      return panelIds.reduce(
+        (prev, panelId) => ({
+          ...prev,
+          [panelId]: (
+            <GridPanel
+              key={panelId}
+              panelId={panelId}
+              rowIndex={rowIndex}
+              gridLayoutStateManager={gridLayoutStateManager}
+              renderPanelContents={renderPanelContents}
+              interactionStart={(type, e) => {
+                e.stopPropagation();
 
-            // Disable interactions when a panel is expanded
-            const isInteractive = gridLayoutStateManager.expandedPanelId$.value === undefined;
-            if (!isInteractive) return;
+                // Disable interactions when a panel is expanded
+                const isInteractive = gridLayoutStateManager.expandedPanelId$.value === undefined;
+                if (!isInteractive) return;
 
-            const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            if (!panelRef) return;
+                const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+                if (!panelRef) return;
 
-            const panelRect = panelRef.getBoundingClientRect();
-            if (type === 'drop') {
-              setInteractionEvent(undefined);
-              // Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction.
-              // the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
-              syncPanelIds();
-            } else {
-              setInteractionEvent({
-                type,
-                id: panelId,
-                panelDiv: panelRef,
-                targetRowIndex: rowIndex,
-                mouseOffsets: {
-                  top: e.clientY - panelRect.top,
-                  left: e.clientX - panelRect.left,
-                  right: e.clientX - panelRect.right,
-                  bottom: e.clientY - panelRect.bottom,
-                },
-              });
-            }
-          }}
-          ref={(element) => {
-            if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
-              gridLayoutStateManager.panelRefs.current[rowIndex] = {};
-            }
-            gridLayoutStateManager.panelRefs.current[rowIndex][panelId] = element;
-          }}
-        />
-      ));
-    }, [
-      panelIds,
-      rowIndex,
-      gridLayoutStateManager,
-      renderPanelContents,
-      setInteractionEvent,
-      syncPanelIds,
-    ]);
+                const panelRect = panelRef.getBoundingClientRect();
+                if (type === 'drop') {
+                  setInteractionEvent(undefined);
+                  /**
+                   * Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction, since
+                   * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
+                   * reasons (screen readers and focus management).
+                   */
+                  setPanelIdsInOrder(
+                    getKeysInOrder(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
+                  );
+                } else {
+                  setInteractionEvent({
+                    type,
+                    id: panelId,
+                    panelDiv: panelRef,
+                    targetRowIndex: rowIndex,
+                    mouseOffsets: {
+                      top: e.clientY - panelRect.top,
+                      left: e.clientX - panelRect.left,
+                      right: e.clientX - panelRect.right,
+                      bottom: e.clientY - panelRect.bottom,
+                    },
+                  });
+                }
+              }}
+              ref={(element) => {
+                if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
+                  gridLayoutStateManager.panelRefs.current[rowIndex] = {};
+                }
+                gridLayoutStateManager.panelRefs.current[rowIndex][panelId] = element;
+              }}
+            />
+          ),
+        }),
+        {}
+      );
+    }, [panelIds, gridLayoutStateManager, renderPanelContents, rowIndex, setInteractionEvent]);
 
     return (
       <div ref={rowContainer}>
@@ -276,7 +275,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               ${initialStyles};
             `}
           >
-            {children}
+            {/* render the panels **in order** for accessibility, using the memoized panel components */}
+            {panelIdsInOrder.map((panelId) => children[panelId])}
             <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
           </div>
         )}

@@ -16,6 +16,7 @@ interface Props {
   state: State;
   setPreviousState?: (state: State) => void;
   isAddingFields?: boolean;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const FieldsList = React.memo(function FieldsListComponent({
@@ -24,6 +25,7 @@ export const FieldsList = React.memo(function FieldsListComponent({
   state,
   setPreviousState,
   isAddingFields,
+  pendingFieldsRef,
 }: Props) {
   if (fields === undefined) {
     return null;
@@ -39,6 +41,7 @@ export const FieldsList = React.memo(function FieldsListComponent({
           state={state}
           setPreviousState={setPreviousState}
           isAddingFields={isAddingFields}
+          pendingFieldsRef={pendingFieldsRef}
         />
       ))}
     </ul>
