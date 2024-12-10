@@ -106,7 +106,6 @@ packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-kbn-server @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-model-versions @elastic/kibana-core
-packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-test-utils @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
 packages/core/theme/core-theme-browser-internal @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/status/server @elastic/kibana-core
 src/core/packages/status/server-internal @elastic/kibana-core
 src/core/packages/test-helpers/deprecations-getters @elastic/kibana-core
 src/core/packages/test-helpers/http-setup-browser @elastic/kibana-core
+src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
