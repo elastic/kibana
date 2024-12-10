@@ -67,7 +67,7 @@ export class ScoutFTRReporter {
     const owners = getCodeOwnersForFile(filePath, this.pathsWithOwners);
 
     const concatenatedOwners = owners?.teams;
-    
+
     if (concatenatedOwners === undefined) {
       return [];
     }
