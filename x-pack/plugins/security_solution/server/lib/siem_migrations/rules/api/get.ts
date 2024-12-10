@@ -14,6 +14,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import type { RuleMigrationGetOptions } from '../data/rule_migrations_data_rules_client';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsGetRoute = (
@@ -38,25 +39,25 @@ export const registerSiemRuleMigrationsGetRoute = (
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
         const { migration_id: migrationId } = req.params;
-        const { page, per_page: perPage, search_term: searchTerm } = req.query;
+        const {
+          page,
+          per_page: perPage,
+          sort_field: sortField,
+          sort_direction: sortDirection,
+          search_term: searchTerm,
+        } = req.query;
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          let from = 0;
-          if (page && perPage) {
-            from = page * perPage;
-          }
-          const size = perPage;
+          const options: RuleMigrationGetOptions = {
+            filters: { searchTerm },
+            sort: { sortField, sortDirection },
+            size: perPage,
+            from: page && perPage ? page * perPage : 0,
+          };
 
-          const result = await ruleMigrationsClient.data.rules.get(
-            {
-              migrationId,
-              searchTerm,
-            },
-            from,
-            size
-          );
+          const result = await ruleMigrationsClient.data.rules.get(migrationId, options);
 
           return res.ok({ body: result });
         } catch (err) {

@@ -7270,7 +7270,7 @@
             "label": "resetUnsavedChanges",
             "description": [],
             "signature": [
-              "() => void"
+              "() => boolean"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
             "deprecated": false,
@@ -7992,7 +7992,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -8120,7 +8120,7 @@
             "section": "def-public.PublishesFilters",
             "text": "PublishesFilters"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
