@@ -338,7 +338,7 @@ export const useUrlStateService = <K extends Accessor, T>(
           replaceState
         );
       } else {
-        setCallback.current({ ...resultState, ...update });
+        setCallback.current({ ...resultState, ...update }, replaceState);
       }
     },
     [stateKey, resultState]
