@@ -13,7 +13,7 @@ import {
   AggregationsTopHitsAggregation,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis';
+import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import { ChangePointType } from '@kbn/es-types/src';
 import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_label';
 import { calculateAuto } from '@kbn/calculate-auto';
