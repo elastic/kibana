@@ -77,7 +77,6 @@ packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-browser-mocks @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
 packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
-packages/core/http/core-http-router-server-internal @elastic/kibana-core
 packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
 packages/core/http/core-http-server-internal @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/http/request-handler-context-server @elastic/kibana-core
 src/core/packages/http/request-handler-context-server-internal @elastic/kibana-core
 src/core/packages/http/resources-server @elastic/kibana-core
 src/core/packages/http/resources-server-internal @elastic/kibana-core
+src/core/packages/http/router-server-internal @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
