@@ -100,8 +100,7 @@ export const connectorTypesResponseSchema = schema.object({
   sub_feature_type: schema.maybe(
     schema.string({
       meta: {
-        description:
-          'Indicates whether the action the sub-feature type the connector is grouped under.',
+        description: 'Indicates the sub-feature type the connector is grouped under.',
       },
     })
   ),

@@ -187,7 +187,7 @@ export class ActionTypeRegistry {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
           defaultMessage:
-            'Kibana privilege authorization is only supported for system and action types that are registered under a sub feature',
+            'Kibana privilege authorization is only supported for system actions and action types that are registered under a sub feature',
         })
       );
     }
