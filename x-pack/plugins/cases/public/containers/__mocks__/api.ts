@@ -191,4 +191,4 @@ export const replaceCustomField = async ({
 
 export const getSimilarCases = async () => allCasesSnake;
 
-export const postObservable = async () => {};
+export const postObservable = jest.fn();

@@ -57,7 +57,14 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
       {!observable && (
         <UseField
           component={SelectField}
-          componentProps={{ euiFieldProps: { options, hasNoInitialSelection: true, isLoading } }}
+          componentProps={{
+            euiFieldProps: {
+              options,
+              hasNoInitialSelection: true,
+              isLoading,
+              'data-test-subj': 'observable-type-select',
+            },
+          }}
           onChange={handleSelectedTypeChange}
           path="typeKey"
           config={fieldsConfig.typeKey}
@@ -66,10 +73,20 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
       <UseField
         path="value"
         config={fieldsConfig.value[normalizeValueType(selectedTypeKey)]}
-        componentProps={{ placeholder: i18n.VALUE_PLACEHOLDER }}
+        componentProps={{
+          placeholder: i18n.VALUE_PLACEHOLDER,
+          euiFieldProps: {
+            'data-test-subj': 'observable-value-field',
+          },
+        }}
         component={TextField}
       />
-      <UseField path="description" config={fieldsConfig.description} component={TextAreaField} />
+      <UseField
+        path="description"
+        componentProps={{ euiFieldProps: { 'data-test-subj': 'observable-description-textarea' } }}
+        config={fieldsConfig.description}
+        component={TextAreaField}
+      />
     </>
   );
 });
