@@ -12,8 +12,7 @@ import { CaseSeverity } from '../../../common/types/domain';
 import { CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 
 interface Props {
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  label: string;
+  severity: CaseSeverity[];
 }
 
 export const severities = {
@@ -31,18 +30,18 @@ export const severities = {
   },
 };
 
-// eslint-disable-next-line react/display-name
-export const SeverityHealth: React.FC<Props> = ({ severity, label }) => {
+export const SeverityHealth: React.FC<Props> = ({ severity }) => {
   const { euiTheme } = useEuiTheme();
 
-  const severityColors = {
-    low: euiTheme.colors.vis.euiColorVis0,
-    medium: euiTheme.colors.vis.euiColorVis5,
-    high: euiTheme.colors.vis.euiColorVis7,
-    critical: euiTheme.colors.vis.euiColorVis9,
+  const severityData = {
+    low: { color: euiTheme.colors.vis.euiColorVis0, label: LOW },
+    medium: { color: euiTheme.colors.vis.euiColorVis5, label: MEDIUM },
+    high: { color: euiTheme.colors.vis.euiColorVis7, label: HIGH },
+    critical: { color: euiTheme.colors.vis.euiColorVis9, label: CRITICAL },
   };
 
-  const color = severityColors[severity];
+  const { color, label } = severityData[severity];
 
   return <EuiHealth color={color}>{label}</EuiHealth>;
 };
+SeverityHealth.displayName = 'SeverityHealth';

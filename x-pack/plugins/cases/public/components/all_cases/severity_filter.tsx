@@ -26,7 +26,7 @@ export const SeverityFilter: React.FC<Props> = ({ selectedOptionKeys, onChange }
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={false}>
-          <SeverityHealth severity={option.label} label={severityData.label} />
+          <SeverityHealth severity={option.label} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

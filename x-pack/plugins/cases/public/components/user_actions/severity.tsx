@@ -30,7 +30,7 @@ const getLabelTitle = (userAction: SnakeToCamelCase<SeverityUserAction>) => {
     >
       <EuiFlexItem grow={false}>{SET_SEVERITY_TO}</EuiFlexItem>
       <EuiFlexItem data-test-subj={`${userAction.id}-user-action-severity-title-${severity}`}>
-        <SeverityHealth severity={severity} label={severityData.label} />
+        <SeverityHealth severity={severity} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

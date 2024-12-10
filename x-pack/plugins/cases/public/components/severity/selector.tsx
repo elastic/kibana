@@ -6,7 +6,7 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import type { CaseSeverity } from '../../../common/types/domain';
 import { severities, SeverityHealth } from './config';
@@ -37,7 +37,7 @@ export const SeveritySelector: React.FC<Props> = ({
           data-test-subj={`case-severity-selection-${severity}`}
         >
           <EuiFlexItem grow={false}>
-            <SeverityHealth severity={severity} label={severityData.label} />
+            <SeverityHealth severity={severity} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),

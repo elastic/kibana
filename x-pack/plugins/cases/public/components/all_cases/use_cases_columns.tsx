@@ -301,7 +301,6 @@ export const useCasesColumns = ({
               <SeverityHealth
                 data-test-subj={`case-table-column-severity-${severity}`}
                 severity={severity}
-                label={severityData.label}
               />
             );
           }
