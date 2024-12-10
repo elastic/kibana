@@ -521,7 +521,6 @@ packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
 packages/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
-packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
 packages/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
@@ -617,6 +616,7 @@ src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
+src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-doc-links @elastic/docs
