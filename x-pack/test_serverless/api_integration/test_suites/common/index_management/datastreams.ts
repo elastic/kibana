@@ -81,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           hidden: false,
           indexMode: 'standard',
+          maxTimeStamp: 0,
         });
       });
 
@@ -123,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
           meteringStorageSize: '0b',
           meteringStorageSizeBytes: 0,
           indexMode: 'standard',
+          maxTimeStamp: 0,
         });
       });
     });

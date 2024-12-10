@@ -312,29 +312,10 @@ describe('Data Streams tab', () => {
       actions.sortTableOnName();
     });
 
-    test(`doesn't hide stats toggle if enableDataStreamStats===false`, async () => {
-      testBed = await setup(httpSetup, {
-        config: {
-          enableDataStreamStats: false,
-        },
-      });
-
-      const { actions, component, exists } = testBed;
-
-      await act(async () => {
-        actions.goToDataStreamsList();
-      });
-
-      component.update();
-
-      expect(exists('includeStatsSwitch')).toBeTruthy();
-    });
-
-    test('shows storage size and documents count if enableSizeAndDocCount===true, enableDataStreamStats==false', async () => {
+    test('shows storage size, documents count, last updated and storage size if enableSizeAndDocCount===true', async () => {
       testBed = await setup(httpSetup, {
         config: {
           enableSizeAndDocCount: true,
-          enableDataStreamStats: false,
         },
       });
 
@@ -350,15 +331,38 @@ describe('Data Streams tab', () => {
 
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', '156kb', '10000', '1', 'Standard', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '156kb', '10000', '1', 'Standard', '5 days ', 'Delete'],
+        [
+          '',
+          'dataStream1',
+          'green',
+          '156kb',
+          '10000',
+          'December 31st, 1969 7:00:00 PM',
+          '5b',
+          '1',
+          'Standard',
+          '7 days',
+          'Delete',
+        ],
+        [
+          '',
+          'dataStream2',
+          'green',
+          '156kb',
+          '10000',
+          'December 31st, 1969 7:00:00 PM',
+          '1kb',
+          '1',
+          'Standard',
+          '5 days ',
+          'Delete',
+        ],
       ]);
     });
 
-    test('shows last updated and storage size if enableDataStreamStats===true, enableSizeAndDocCount===false', async () => {
+    test('shows last updated and storage size if enableSizeAndDocCount===false', async () => {
       testBed = await setup(httpSetup, {
         config: {
-          enableDataStreamStats: true,
           enableSizeAndDocCount: false,
         },
       });
