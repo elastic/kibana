@@ -60,7 +60,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => {},
+      error: () => { },
     },
   });
 
