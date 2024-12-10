@@ -15,9 +15,6 @@ import { GRAPH_ROUTE_PATH } from '../../../common/constants';
 import { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getGraph as getGraphV1 } from './v1';
 
-const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
-  'securitySolution:enableVisualizationsInFlyout' as const;
-
 export const defineGraphRoute = (router: CspRouter) =>
   router.versioned
     .post({
