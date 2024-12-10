@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { InventoryView } from '../../../../../common/inventory_views';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -197,6 +197,6 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
   );
 });
 
-const TopActionContainer = euiStyled(EuiFlexItem)`
-  padding: ${(props) => `${props.theme.eui.euiSizeM} 0`};
+const TopActionContainer = styled(EuiFlexItem)`
+  padding: ${(props) => `${props.theme.euiTheme.size.m} 0`};
 `;
