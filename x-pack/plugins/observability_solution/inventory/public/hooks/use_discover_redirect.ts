@@ -19,8 +19,7 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
 
   const title = useMemo(
     () =>
-      !isEntityDefinitionIndexPatternsLoading &&
-      (entityDefinitionIndexPatterns ?? []).length > 0
+      !isEntityDefinitionIndexPatternsLoading && (entityDefinitionIndexPatterns ?? []).length > 0
         ? entityDefinitionIndexPatterns[0].join()
         : '',
     [entityDefinitionIndexPatterns, isEntityDefinitionIndexPatternsLoading]
