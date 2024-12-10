@@ -11,6 +11,19 @@ import { parse } from '..';
 import { ESQLLiteral } from '../../types';
 
 describe('literal expression', () => {
+  it('NULL', () => {
+    const text = 'ROW NULL';
+    const { ast } = parse(text);
+    const literal = ast[0].args[0] as ESQLLiteral;
+
+    expect(literal).toMatchObject({
+      type: 'literal',
+      literalType: 'null',
+      name: 'NULL',
+      value: 'NULL',
+    });
+  });
+
   it('numeric expression captures "value", and "name" fields', () => {
     const text = 'ROW 1';
     const { ast } = parse(text);
@@ -43,6 +56,57 @@ describe('literal expression', () => {
               literalType: 'integer',
             },
           ],
+        },
+      ],
+    });
+  });
+
+  // TODO: Un-skip once string parsing fixed: https://github.com/elastic/kibana/issues/203445
+  it.skip('single-quoted string', () => {
+    const text = 'ROW "abc"';
+    const { root } = parse(text);
+
+    expect(root.commands[0]).toMatchObject({
+      type: 'command',
+      args: [
+        {
+          type: 'literal',
+          literalType: 'keyword',
+          value: 'abc',
+        },
+      ],
+    });
+  });
+
+  // TODO: Un-skip once string parsing fixed: https://github.com/elastic/kibana/issues/203445
+  it.skip('unescapes characters', () => {
+    const text = 'ROW "a\\nbc"';
+    const { root } = parse(text);
+
+    expect(root.commands[0]).toMatchObject({
+      type: 'command',
+      args: [
+        {
+          type: 'literal',
+          literalType: 'keyword',
+          value: 'a\nbc',
+        },
+      ],
+    });
+  });
+
+  // TODO: Un-skip once string parsing fixed: https://github.com/elastic/kibana/issues/203445
+  it.skip('triple-quoted string', () => {
+    const text = 'ROW """abc"""';
+    const { root } = parse(text);
+
+    expect(root.commands[0]).toMatchObject({
+      type: 'command',
+      args: [
+        {
+          type: 'literal',
+          literalType: 'keyword',
+          value: 'abc',
         },
       ],
     });

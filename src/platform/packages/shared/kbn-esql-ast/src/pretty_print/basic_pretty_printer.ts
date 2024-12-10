@@ -289,7 +289,8 @@ export class BasicPrettyPrinter {
         case 'unary-expression': {
           operator = this.keyword(operator);
 
-          const formatted = `${operator} ${ctx.visitArgument(0, undefined)}`;
+          const separator = operator === '-' || operator === '+' ? '' : ' ';
+          const formatted = `${operator}${separator}${ctx.visitArgument(0, undefined)}`;
 
           return this.decorateWithComments(ctx.node, formatted);
         }

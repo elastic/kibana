@@ -119,19 +119,6 @@ export function createFakeMultiplyLiteral(
   };
 }
 
-export function createLiteralString(token: Token): ESQLLiteral {
-  const text = token.text!;
-  return {
-    type: 'literal',
-    literalType: 'keyword',
-    text,
-    name: text,
-    value: text,
-    location: getPosition(token),
-    incomplete: Boolean(token.text === ''),
-  };
-}
-
 function isMissingText(text: string) {
   return /<missing /.test(text);
 }
