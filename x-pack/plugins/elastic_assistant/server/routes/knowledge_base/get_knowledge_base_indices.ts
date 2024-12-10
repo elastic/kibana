@@ -26,8 +26,10 @@ export const getKnowledgeBaseIndicesRoute = (router: ElasticAssistantPluginRoute
     .get({
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

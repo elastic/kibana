@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
@@ -176,7 +176,7 @@ export const MetricsExplorerChart = ({
   );
 };
 
-const ChartTitleContainer = euiStyled.div`
+const ChartTitleContainer = styled.div`
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;

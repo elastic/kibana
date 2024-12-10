@@ -35,7 +35,10 @@ import {
 import type { SpacesManager } from '../../../spaces_manager';
 
 export interface EditSpaceProviderRootProps
-  extends Pick<CoreStart, 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'> {
+  extends Pick<
+    CoreStart,
+    'userProfile' | 'theme' | 'i18n' | 'overlays' | 'http' | 'notifications'
+  > {
   logger: Logger;
   capabilities: ApplicationStart['capabilities'];
   getUrlForApp: ApplicationStart['getUrlForApp'];

@@ -80,7 +80,7 @@ export function StreamDetailManagement({
     );
   }
 
-  if (!definition?.managed) {
+  if (definition && !definition.managed) {
     return (
       <RedirectTo
         path="/{key}/management/{subtab}"

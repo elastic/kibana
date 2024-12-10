@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  useEuiBackgroundColor,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -101,9 +100,9 @@ interface DiffColumnProps {
 }
 
 function DiffColumn({ diff, setCellProps }: DiffColumnProps) {
-  const theme = useEuiTheme();
-  const successColor = useEuiBackgroundColor('success');
-  const dangerColor = useEuiBackgroundColor('danger');
+  const { euiTheme } = useEuiTheme();
+  const successColor = euiTheme.colors.backgroundBaseSuccess;
+  const dangerColor = euiTheme.colors.backgroundBaseDanger;
 
   useEffect(() => {
     if (diff && diff.rank !== 0) {
@@ -116,7 +115,7 @@ function DiffColumn({ diff, setCellProps }: DiffColumnProps) {
 
   if (!diff) {
     return (
-      <EuiText size="xs" color={theme.euiTheme.colors.primaryText}>
+      <EuiText size="xs" color={euiTheme.colors.textPrimary}>
         {i18n.translate('xpack.profiling.functionsView.newLabel', {
           defaultMessage: 'New',
         })}

@@ -24,7 +24,10 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 export interface GridLayoutProps {
   layout: GridLayoutData;
   gridSettings: GridSettings;
-  renderPanelContents: (panelId: string) => React.ReactNode;
+  renderPanelContents: (
+    panelId: string,
+    setDragHandles?: (refs: Array<HTMLElement | null>) => void
+  ) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;

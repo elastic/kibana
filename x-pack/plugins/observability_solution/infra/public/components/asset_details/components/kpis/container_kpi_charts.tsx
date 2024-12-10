@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Kpi } from './kpi';
@@ -79,10 +79,8 @@ const DockerKpiCharts = ({
   searchSessionId,
   loading = false,
 }: ContainerKpiChartsProps) => {
-  const { euiTheme } = useEuiTheme();
   const charts = useDockerContainerKpiCharts({
     dataViewId: dataView?.id,
-    seriesColor: euiTheme.colors.lightestShade,
   });
 
   return (
@@ -112,10 +110,8 @@ const KubernetesKpiCharts = ({
   searchSessionId,
   loading = false,
 }: ContainerKpiChartsProps) => {
-  const { euiTheme } = useEuiTheme();
   const charts = useK8sContainerKpiCharts({
     dataViewId: dataView?.id,
-    seriesColor: euiTheme.colors.lightestShade,
   });
 
   return (

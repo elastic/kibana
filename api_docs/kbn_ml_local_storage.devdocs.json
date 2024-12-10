@@ -31,7 +31,7 @@
         "signature": [
           "({\n  children,\n  storage,\n  storageKeys,\n}: React.PropsWithChildren<StorageContextProviderProps<K>>) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+        "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "React.PropsWithChildren<StorageContextProviderProps<K>>"
             ],
-            "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,7 +66,7 @@
         "signature": [
           "(key: K, initValue: T | undefined) => [T | undefined extends undefined ? T | undefined : Exclude<T, undefined>, (value: T) => void]"
         ],
-        "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+        "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,7 +80,7 @@
             "signature": [
               "K"
             ],
-            "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +95,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/local_storage/src/storage_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

@@ -23,8 +23,10 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
       pageSize: schema.number(),
     }),
   },
-  options: {
-    tags: ['access:uptime-read'],
+  security: {
+    authz: {
+      requiredPrivileges: ['uptime-read'],
+    },
   },
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter, pageSize, query } =
