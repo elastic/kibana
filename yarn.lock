@@ -7688,7 +7688,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/translations-plugin@link:x-pack/plugins/translations":
+"@kbn/translations-plugin@link:x-pack/platform/plugins/private/translations":
   version "0.0.0"
   uid ""
 
