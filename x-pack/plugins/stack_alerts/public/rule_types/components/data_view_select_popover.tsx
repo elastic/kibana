@@ -18,6 +18,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiLoadingSpinner,
   EuiText,
   useEuiPaddingCSS,
   useIsWithinBreakpoints,
@@ -63,7 +64,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   onSelectDataView,
   onChangeMetaData,
 }) => {
-  const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
+  const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>();
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const isMobile = useIsWithinBreakpoints(['xs']);
@@ -71,7 +72,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allDataViewItems = useMemo(
-    () => [...dataViewItems, ...metadata.adHocDataViewList.map(toDataViewListItem)],
+    () => [...(dataViewItems ?? []), ...metadata.adHocDataViewList.map(toDataViewListItem)],
     [dataViewItems, metadata.adHocDataViewList]
   );
 
@@ -152,6 +153,12 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
     },
     [dataViews, onAddAdHocDataView, onChangeDataView]
   );
+
+  if (!dataViewItems) {
+    // If dataViewItem is nullish then the data views are still initially loading.
+    // The loading indicator is to make sure we don't render an empty popover
+    return <EuiLoadingSpinner />;
+  }
 
   if (!allDataViewItems) {
     return null;
