@@ -15,7 +15,7 @@ import {
   storeSourceDefinition,
 } from './definitions/source_definition';
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
-import { getEntityInstancesQuery } from './queries';
+import { getEntityInstancesQuery, getEntityCountQuery } from './queries';
 import { mergeEntitiesList } from './queries/utils';
 import {
   EntitySourceDefinition,
@@ -110,7 +110,7 @@ export class EntityClient {
           limit,
         });
         this.options.logger.debug(
-          () => `Entity query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+          () => `Entity instances query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
         );
 
         const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
@@ -125,6 +125,54 @@ export class EntityClient {
     ).then((results) => results.flat());
 
     return mergeEntitiesList(sources, entities).slice(0, limit);
+  }
+
+  async countEntities({
+    start,
+    end,
+    types = [],
+    filters = [],
+  }: {
+    types?: string[];
+    filters?: string[];
+    start: string;
+    end: string;
+  }) {
+    if (types.length === 0) {
+      types = (await this.readTypeDefinitions()).map((definition) => definition.id);
+    }
+
+    const counts = await Promise.all(
+      types.map(async (type) => {
+        const sources = await this.readSourceDefinitions({ type });
+        if (sources.length === 0) {
+          return { type, value: 0 };
+        }
+
+        const { query, filter } = getEntityCountQuery({ sources, filters, start, end });
+        this.options.logger.info(
+          `Entity count query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+        );
+
+        const [{ count }] = await runESQLQuery<{ count: number }>('count entities', {
+          query,
+          filter,
+          esClient: this.options.clusterClient.asCurrentUser,
+          logger: this.options.logger,
+        });
+
+        return { type, value: count };
+      })
+    );
+
+    return counts.reduce(
+      (result, count) => {
+        result.types[count.type] = count.value;
+        result.total += count.value;
+        return result;
+      },
+      { total: 0, types: {} as Record<string, number> }
+    );
   }
 
   async storeTypeDefinition(type: EntityTypeDefinition) {
