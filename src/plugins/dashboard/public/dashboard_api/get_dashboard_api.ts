@@ -100,7 +100,6 @@ export function getDashboardApi({
     timeRestore$: unifiedSearchManager.internalApi.timeRestore$,
   });
   const unsavedChangesManager = initializeUnsavedChangesManager({
-    anyMigrationRun: savedObjectResult?.anyMigrationRun ?? false,
     creationOptions,
     controlGroupApi$,
     lastSavedState: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
