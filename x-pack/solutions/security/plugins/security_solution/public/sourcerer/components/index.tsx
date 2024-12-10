@@ -28,7 +28,7 @@ import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButtonEmpty, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';
 import { useSourcererDataView } from '../containers';
-import { useUpdateDataView } from './use_update_data_view';
+import { useCreateAdhocDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
@@ -318,29 +318,24 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     resetDataSources();
   }, [resetDataSources]);
 
-  const updateDataView = useUpdateDataView(onOpenAndReset);
+  const createAdHocDataView = useCreateAdhocDataView(onOpenAndReset);
   const onUpdateDataView = useCallback(async () => {
-    const isUiSettingsSuccess = await updateDataView(missingPatterns);
+    const dataView = await createAdHocDataView(missingPatterns);
     setIsShowingUpdateModal(false);
     setPopoverIsOpen(false);
 
-    if (isUiSettingsSuccess) {
+    if (dataView && dataView.id) {
+      console.log("DISPATCHING DATAVIEW CREATION: ", dataView);
+      const patterns = dataView.getIndexPattern().split(',');
       dispatchChangeDataView(
-        defaultDataView.id,
+        dataView.id,
         // to be at this stage, activePatterns is defined, the ?? selectedPatterns is to make TS happy
-        activePatterns ?? selectedPatterns,
+        patterns,
         false
       );
       setIsTriggerDisabled(true);
     }
-  }, [
-    activePatterns,
-    defaultDataView.id,
-    missingPatterns,
-    dispatchChangeDataView,
-    selectedPatterns,
-    updateDataView,
-  ]);
+  }, [missingPatterns, dispatchChangeDataView, createAdHocDataView]);
 
   useEffect(() => {
     setDataViewId(selectedDataViewId);

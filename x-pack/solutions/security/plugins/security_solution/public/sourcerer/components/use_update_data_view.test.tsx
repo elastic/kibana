@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useUpdateDataView } from './use_update_data_view';
+import { useCreateAdhocDataView } from './use_update_data_view';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import * as i18n from './translations';
 const mockAddSuccess = jest.fn();
@@ -47,7 +47,7 @@ describe('use_update_data_view', () => {
   });
 
   test('Successful uiSettings updates with correct index pattern, and shows success toast', async () => {
-    const { result } = renderHook(() => useUpdateDataView(mockError));
+    const { result } = renderHook(() => useCreateAdhocDataView(mockError));
     const updateDataView = result.current;
     const isUiSettingsSuccess = await updateDataView(['missing-*']);
     expect(mockedUseKibana.services.uiSettings.set.mock.calls[0][1]).toEqual(
@@ -59,7 +59,7 @@ describe('use_update_data_view', () => {
 
   test('Failed uiSettings update returns false and shows error toast', async () => {
     mockedUseKibana.services.uiSettings.set.mockImplementation(() => false);
-    const { result } = renderHook(() => useUpdateDataView(mockError));
+    const { result } = renderHook(() => useCreateAdhocDataView(mockError));
     const updateDataView = result.current;
     const isUiSettingsSuccess = await updateDataView(['missing-*']);
     expect(mockedUseKibana.services.uiSettings.set.mock.calls[0][1]).toEqual(
@@ -74,7 +74,7 @@ describe('use_update_data_view', () => {
     mockedUseKibana.services.uiSettings.get.mockImplementation(() => {
       throw new Error('Uh oh bad times over here');
     });
-    const { result } = renderHook(() => useUpdateDataView(mockError));
+    const { result } = renderHook(() => useCreateAdhocDataView(mockError));
     const updateDataView = result.current;
     const isUiSettingsSuccess = await updateDataView(['missing-*']);
     expect(isUiSettingsSuccess).toEqual(false);

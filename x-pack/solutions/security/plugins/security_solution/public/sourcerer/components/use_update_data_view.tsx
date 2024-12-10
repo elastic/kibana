@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import * as i18n from './translations';
@@ -16,28 +17,33 @@ import { RefreshButton } from './refresh_button';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { ensurePatternFormat } from '../../../common/utils/sourcerer';
 
-export const useUpdateDataView = (
+export const useCreateAdhocDataView = (
   onOpenAndReset: () => void
-): ((missingPatterns: string[]) => Promise<boolean>) => {
-  const { uiSettings, ...startServices } = useKibana().services;
+): ((missingPatterns: string[]) => Promise<DataView | null>) => {
+  const { dataViews, uiSettings, ...startServices } = useKibana().services;
   const { addSuccess, addError } = useAppToasts();
   return useCallback(
-    async (missingPatterns: string[]): Promise<boolean> => {
-      const asyncSearch = async (): Promise<[boolean, Error | null]> => {
+    async (missingPatterns: string[]): Promise<DataView | null> => {
+      const asyncSearch = async (): Promise<[DataView | null, Error | null]> => {
         try {
           const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
-          const uiSettingsIndexPattern = [...defaultPatterns, ...missingPatterns];
-          const isSuccess = await uiSettings.set(
-            DEFAULT_INDEX_KEY,
-            ensurePatternFormat(uiSettingsIndexPattern)
-          );
-          return [isSuccess, null];
+          const combinedPatterns = [...defaultPatterns, ...missingPatterns];
+          const validatedPatterns = ensurePatternFormat(combinedPatterns);
+          const patternsString = validatedPatterns.join(',');
+          const adHocDataView = await dataViews.createAndSave({
+            id: patternsString,
+            title: patternsString,
+          });
+          if (adHocDataView.fields.getByName('@timestamp')?.type === 'date') {
+            adHocDataView.timeFieldName = '@timestamp';
+          }
+          return [adHocDataView, null];
         } catch (e) {
-          return [false, e];
+          return [null, e];
         }
       };
-      const [isUiSettingsSuccess, possibleError] = await asyncSearch();
-      if (isUiSettingsSuccess) {
+      const [dataView, possibleError] = await asyncSearch();
+      if (dataView) {
         addSuccess({
           color: 'success',
           title: toMountPoint(i18n.SUCCESS_TOAST_TITLE, startServices),
@@ -45,7 +51,7 @@ export const useUpdateDataView = (
           iconType: undefined,
           toastLifeTimeMs: 600000,
         });
-        return true;
+        return dataView;
       }
       addError(possibleError !== null ? possibleError : new Error(i18n.FAILURE_TOAST_TITLE), {
         title: i18n.FAILURE_TOAST_TITLE,
@@ -65,8 +71,8 @@ export const useUpdateDataView = (
           </>
         ) as unknown as string,
       });
-      return false;
+      return null;
     },
-    [addError, addSuccess, onOpenAndReset, uiSettings, startServices]
+    [addError, onOpenAndReset, uiSettings, dataViews, addSuccess, startServices]
   );
 };
