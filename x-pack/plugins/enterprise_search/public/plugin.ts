@@ -23,7 +23,7 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -85,6 +85,7 @@ interface PluginsSetup {
   licensing: LicensingPluginStart;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface PluginsStart {
@@ -104,6 +105,7 @@ export interface PluginsStart {
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
+  uiActions: UiActionsStart;
 }
 
 export interface ESConfig {
