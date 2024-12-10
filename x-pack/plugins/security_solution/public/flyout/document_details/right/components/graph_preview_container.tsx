@@ -42,7 +42,7 @@ export const GraphPreviewContainer: React.FC = () => {
     GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
   );
 
-  const allowFlyoutExpansion = !isPreviewMode && !isPreview;
+  const allowFlyoutExpansion = visualizationInFlyoutEnabled && !isPreviewMode && !isPreview;
 
   const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
     eventId,
