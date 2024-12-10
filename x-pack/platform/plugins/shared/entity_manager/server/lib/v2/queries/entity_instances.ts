@@ -9,7 +9,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { asKeyword } from './utils';
 import { EntitySourceDefinition, SortBy } from '../types';
 
-const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {
+const fromCommand = ({ source }: { source: EntitySourceDefinition }) => {
   let query = `FROM ${source.index_patterns.join(', ')}`;
 
   const esMetadataFields = source.metadata_fields.filter((field) =>
@@ -109,7 +109,7 @@ export function getEntityInstancesQuery({
   sort?: SortBy;
 }) {
   const commands = [
-    sourceCommand({ source }),
+    fromCommand({ source }),
     statsCommand({ source }),
     renameCommand({ source }),
     evalCommand({ source }),
