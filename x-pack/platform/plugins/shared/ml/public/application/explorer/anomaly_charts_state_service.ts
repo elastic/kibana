@@ -55,8 +55,8 @@ export class AnomalyChartsStateService extends StateService {
 
   private initChartDataSubscription() {
     return combineLatest([
-      this._anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this._anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
+      this._anomalyExplorerCommonStateService.selectedJobs$,
+      this._anomalyExplorerCommonStateService.influencerFilterQuery$,
       this._anomalyTimelineStateServices.getContainerWidth$().pipe(skipWhile((v) => v === 0)),
       this._anomalyTimelineStateServices.getSelectedCells$(),
       this._anomalyTimelineStateServices.getViewBySwimlaneFieldName$(),

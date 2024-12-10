@@ -23,12 +23,12 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
 
   const selectedJobs = useObservable(
-    anomalyExplorerCommonStateService.getSelectedJobs$(),
-    anomalyExplorerCommonStateService.getSelectedJobs()
+    anomalyExplorerCommonStateService.selectedJobs$,
+    anomalyExplorerCommonStateService.selectedJobs
   );
   const invalidJobIds = useObservable(
-    anomalyExplorerCommonStateService.getInvalidJobIds$(),
-    anomalyExplorerCommonStateService.getInvalidJobIds()
+    anomalyExplorerCommonStateService.invalidJobIds$,
+    anomalyExplorerCommonStateService.invalidJobIds
   );
 
   const getJobSelection = useJobSelectionFlyout();

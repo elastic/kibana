@@ -54,8 +54,56 @@ export class AnomalyExplorerCommonStateService extends StateService {
     private mlJobsService: MlJobService
   ) {
     super();
-
     this._init();
+  }
+
+  public readonly selectedGroups$: Observable<GroupObj[]> = this._selectedGroups$.pipe(
+    distinctUntilChanged(isEqual),
+    shareReplay(1)
+  );
+
+  public readonly invalidJobIds$: Observable<string[]> = this._invalidJobIds$.pipe(
+    distinctUntilChanged(isEqual),
+    shareReplay(1)
+  );
+
+  public readonly selectedJobs$: Observable<ExplorerJob[]> = this._selectedJobs$.pipe(
+    filter((v) => Array.isArray(v) && v.length > 0),
+    distinctUntilChanged(isEqual),
+    shareReplay(1)
+  );
+
+  public readonly singleMetricJobs$: Observable<ExplorerJob[]> = this._selectedJobs$.pipe(
+    map((jobs) => jobs.filter((j) => j.isSingleMetricViewerJob)),
+    shareReplay(1)
+  );
+
+  public readonly influencerFilterQuery$: Observable<InfluencersFilterQuery | undefined> =
+    this._filterSettings$.pipe(
+      map((v) => v?.influencersFilterQuery),
+      distinctUntilChanged(isEqual)
+    );
+
+  public readonly filterSettings$ = this._filterSettings$.asObservable();
+
+  public get selectedGroups(): GroupObj[] {
+    return this._selectedGroups$.getValue();
+  }
+
+  public get invalidJobIds(): string[] {
+    return this._invalidJobIds$.getValue();
+  }
+
+  public get selectedJobs(): ExplorerJob[] {
+    return this._selectedJobs$.getValue();
+  }
+
+  public get singleMetricJobs(): ExplorerJob[] {
+    return this._selectedJobs$.getValue().filter((j) => j.isSingleMetricViewerJob);
+  }
+
+  public get filterSettings(): FilterSettings {
+    return this._filterSettings$.getValue();
   }
 
   protected _initSubscriptions(): Subscription {
@@ -131,22 +179,6 @@ export class AnomalyExplorerCommonStateService extends StateService {
     );
   }
 
-  public getSelectedGroups$(): Observable<GroupObj[]> {
-    return this._selectedGroups$.pipe(distinctUntilChanged(isEqual), shareReplay(1));
-  }
-
-  public getSelectedGroups(): GroupObj[] {
-    return this._selectedGroups$.getValue();
-  }
-
-  public getInvalidJobIds$(): Observable<string[]> {
-    return this._invalidJobIds$.pipe(distinctUntilChanged(isEqual), shareReplay(1));
-  }
-
-  public getInvalidJobIds(): string[] {
-    return this._invalidJobIds$.getValue();
-  }
-
   public setSelectedJobs(jobIds: string[], time?: { from: string; to: string }) {
     this.globalUrlStateService.updateUrlState({
       ml: {
@@ -154,42 +186,6 @@ export class AnomalyExplorerCommonStateService extends StateService {
       },
       ...(time ? { time } : {}),
     });
-  }
-
-  public getSelectedJobs$(): Observable<ExplorerJob[]> {
-    return this._selectedJobs$.pipe(
-      filter((v) => Array.isArray(v) && v.length > 0),
-      distinctUntilChanged(isEqual),
-      shareReplay(1)
-    );
-  }
-
-  private readonly _smvJobs$ = this.getSelectedJobs$().pipe(
-    map((jobs) => jobs.filter((j) => j.isSingleMetricViewerJob)),
-    shareReplay(1)
-  );
-
-  public getSingleMetricJobs$(): Observable<ExplorerJob[]> {
-    return this._smvJobs$;
-  }
-
-  public getSelectedJobs(): ExplorerJob[] {
-    return this._selectedJobs$.getValue();
-  }
-
-  public getInfluencerFilterQuery$(): Observable<InfluencersFilterQuery | undefined> {
-    return this._filterSettings$.pipe(
-      map((v) => v?.influencersFilterQuery),
-      distinctUntilChanged(isEqual)
-    );
-  }
-
-  public getFilterSettings$(): Observable<FilterSettings> {
-    return this._filterSettings$.asObservable();
-  }
-
-  public getFilterSettings(): FilterSettings {
-    return this._filterSettings$.getValue();
   }
 
   public setFilterSettings(update: KQLFilterSettings) {

@@ -104,8 +104,8 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
   const { anomalyExplorerCommonStateService, chartsStateService } = useAnomalyExplorerContext();
   const { queryString } = useObservable(
-    anomalyExplorerCommonStateService.getFilterSettings$(),
-    anomalyExplorerCommonStateService.getFilterSettings()
+    anomalyExplorerCommonStateService.filterSettings$,
+    anomalyExplorerCommonStateService.filterSettings
   );
 
   const chartsData = useObservable(

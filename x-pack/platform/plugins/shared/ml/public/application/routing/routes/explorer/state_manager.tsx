@@ -123,7 +123,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   );
 
   const influencersFilterQuery = useObservable(
-    anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
+    anomalyExplorerContext.anomalyExplorerCommonStateService.influencerFilterQuery$
   );
 
   const loadExplorerDataConfig = useMemo(

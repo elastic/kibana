@@ -286,18 +286,18 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const [dataViews, setDataViews] = useState<DataView[] | undefined>();
 
   const filterSettings = useObservable(
-    anomalyExplorerCommonStateService.getFilterSettings$(),
-    anomalyExplorerCommonStateService.getFilterSettings()
+    anomalyExplorerCommonStateService.filterSettings$,
+    anomalyExplorerCommonStateService.filterSettings
   );
 
   const selectedJobs = useObservable(
-    anomalyExplorerCommonStateService.getSelectedJobs$(),
-    anomalyExplorerCommonStateService.getSelectedJobs()
+    anomalyExplorerCommonStateService.selectedJobs$,
+    anomalyExplorerCommonStateService.selectedJobs
   );
 
   const selectedGroups = useObservable(
-    anomalyExplorerCommonStateService.getSelectedGroups$(),
-    anomalyExplorerCommonStateService.getSelectedGroups()
+    anomalyExplorerCommonStateService.selectedGroups$,
+    anomalyExplorerCommonStateService.selectedGroups
   );
 
   const alertsData = useObservable(anomalyDetectionAlertsStateService.anomalyDetectionAlerts$, []);

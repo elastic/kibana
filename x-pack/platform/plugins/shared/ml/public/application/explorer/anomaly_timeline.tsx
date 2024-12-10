@@ -121,20 +121,20 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const { overallAnnotations } = explorerState;
 
     const { filterActive, queryString } = useObservable(
-      anomalyExplorerCommonStateService.getFilterSettings$(),
-      anomalyExplorerCommonStateService.getFilterSettings()
+      anomalyExplorerCommonStateService.filterSettings$,
+      anomalyExplorerCommonStateService.filterSettings
     );
 
     const swimlaneLimit = useObservable(anomalyTimelineStateService.getSwimLaneCardinality$());
 
     const selectedJobs = useObservable(
-      anomalyExplorerCommonStateService.getSelectedJobs$(),
-      anomalyExplorerCommonStateService.getSelectedJobs()
+      anomalyExplorerCommonStateService.selectedJobs$,
+      anomalyExplorerCommonStateService.selectedJobs
     );
 
     const selectedGroups = useObservable(
-      anomalyExplorerCommonStateService.getSelectedGroups$(),
-      anomalyExplorerCommonStateService.getSelectedGroups()
+      anomalyExplorerCommonStateService.selectedGroups$,
+      anomalyExplorerCommonStateService.selectedGroups
     );
 
     const mergedGroupsAndJobsIds = useMemo(
