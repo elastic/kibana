@@ -6,8 +6,6 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-scout-ui-tests
 
-echo "--- Running 'discover_enhanced' plugin UI Tests"
-
 TEST_CONFIG="x-pack/plugins/discover_enhanced/ui_tests/playwright.config.ts"
 KIBANA_DIR="$KIBANA_BUILD_LOCATION"
 
@@ -18,15 +16,18 @@ declare -A TESTS=(
   ["Serverless Security"]="--serverless=security"
 )
 
+ORDER=("Stateful" "Serverless Elasticsearch" "Serverless Observability" "Serverless Security")
+
 EXIT_CODE=0
 
-for TEST_NAME in "${!TESTS[@]}"; do
+for TEST_NAME in "${ORDER[@]}"; do
+  RUN_MODE="${TESTS[$TEST_NAME]}"
   echo "--- $TEST_NAME: 'discover_enhanced' plugin UI Tests"
-  if ! node scripts/scout run-tests ${TESTS[$TEST_NAME]} --config "$TEST_CONFIG" --kibana-install-dir "$KIBANA_DIR"; then
-    echo "--- $TEST_NAME: failed"
+  if ! node scripts/scout run-tests "$RUN_MODE" --config "$TEST_CONFIG" --kibana-install-dir "$KIBANA_DIR"; then
+    echo "$TEST_NAME: failed"
     EXIT_CODE=1
   else
-    echo "--- $TEST_NAME: passed"
+    echo "$TEST_NAME: passed"
   fi
 done
 
