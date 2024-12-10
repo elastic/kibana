@@ -10,7 +10,7 @@ import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/s
 import { Replacements } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { AllowedStat } from './allowed_stat';
 import { AnonymizedStat } from './anonymized_stat';
@@ -18,7 +18,7 @@ import { getStats } from '../get_stats';
 import { AvailableStat } from './available_stat';
 
 const StatFlexItem = styled(EuiFlexItem)`
-  margin-right: ${({ theme }) => theme.eui.euiSizeL};
+  margin-right: ${({ theme }) => theme.euiTheme.size.l};
 `;
 
 interface Props {

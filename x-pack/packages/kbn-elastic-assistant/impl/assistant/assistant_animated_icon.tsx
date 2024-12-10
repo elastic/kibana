@@ -17,8 +17,8 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: ${(props) => props.theme.euiTheme.size.xxl};
-  margin-bottom: ${(props) => props.theme.euiTheme.size.l};
+  margin-top: ${({ theme }) => theme.euiTheme.size.xxl};
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.l};
 
   :before,
   :after {
