@@ -19,7 +19,6 @@ export interface Dependency {
 export enum FieldType {
   STRING = 'str',
   INTEGER = 'int',
-  LIST = 'list',
   BOOLEAN = 'bool',
 }
 
@@ -35,16 +34,13 @@ export interface Validation {
 }
 
 export interface ConfigProperties {
-  category?: string;
   default_value: string | number | boolean | null;
+  description: string | null;
   label: string;
-  order?: number | null;
   required: boolean;
   sensitive: boolean;
-  description: string | null;
+  updatable: boolean;
   type: FieldType;
-  validations: Validation[];
-  value: string | number | boolean | null;
 }
 
 interface ConfigEntry extends ConfigProperties {
