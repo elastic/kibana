@@ -19,13 +19,12 @@ import {
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
+  mathWithUnits,
 } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-// @ts-expect-error no types declaration for module
-import { euiFormMaxWidth } from '@elastic/eui/lib/components/form/form.styles';
 
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 
@@ -70,8 +69,7 @@ export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
     },
     ref
   ) => {
-    const euiContext = useEuiTheme();
-    const { euiTheme } = euiContext;
+    const { euiTheme } = useEuiTheme();
     const uploadState = useUploadState();
     const uploading = useBehaviorSubject(uploadState.uploading$);
     const error = useBehaviorSubject(uploadState.error$);
@@ -82,12 +80,14 @@ export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
     const id = useGeneratedHtmlId({ prefix: 'filesFileUpload' });
     const errorId = `${id}_error`;
 
+    const formMaxWidth = mathWithUnits(euiTheme.size.base, (x) => x * 25);
+
     return (
       <div
         data-test-subj="filesFileUpload"
         css={[
           css`
-            max-width: ${fullWidth ? '100%' : euiFormMaxWidth(euiContext)};
+            max-width: ${fullWidth ? '100%' : formMaxWidth};
           `,
           fullWidth ? styles.fullWidth : undefined,
           compressed ? styles.horizontalContainer : undefined,
