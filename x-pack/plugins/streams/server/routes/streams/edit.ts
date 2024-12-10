@@ -50,15 +50,20 @@ export const editStreamRoute = createServerRoute({
   handler: async ({ response, params, logger, request, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
+      const streamDefinition = { ...params.body, id: params.path.id };
+
+      await syncStream({
+        scopedClusterClient,
+        definition: { ...streamDefinition, id: params.path.id },
+        rootDefinition: undefined,
+        logger,
+      });
 
       await validateStreamChildren(scopedClusterClient, params.path.id, params.body.children);
-      await validateAncestorFields(scopedClusterClient, params.path.id, params.body.fields);
-      await validateDescendantFields(scopedClusterClient, params.path.id, params.body.fields);
-
-      const parentId = getParentId(params.path.id);
-      let parentDefinition: StreamDefinition | undefined;
-
-      const streamDefinition = { ...params.body, id: params.path.id };
+      if (streamDefinition.managed) {
+        await validateAncestorFields(scopedClusterClient, params.path.id, params.body.fields);
+        await validateDescendantFields(scopedClusterClient, params.path.id, params.body.fields);
+      }
 
       // always need to go from the leaves to the parent when syncing ingest pipelines, otherwise data
       // will be routed before the data stream is ready
@@ -89,18 +94,21 @@ export const editStreamRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
-        definition: { ...streamDefinition, id: params.path.id, managed: true },
-        rootDefinition: parentDefinition,
+        definition: { ...streamDefinition, id: params.path.id },
         logger,
       });
 
-      if (parentId) {
-        parentDefinition = await updateParentStream(
-          scopedClusterClient,
-          parentId,
-          params.path.id,
-          logger
-        );
+      if (streamDefinition.managed) {
+        const parentId = getParentId(params.path.id);
+        let parentDefinition: StreamDefinition | undefined;
+        if (parentId) {
+          parentDefinition = await updateParentStream(
+            scopedClusterClient,
+            parentId,
+            params.path.id,
+            logger
+          );
+        }
       }
 
       return { acknowledged: true };

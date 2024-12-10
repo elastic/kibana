@@ -24,7 +24,15 @@ export function createStreamsIndex(scopedClusterClient: IScopedClusterClient) {
         },
         children: {
           type: 'object',
-          enabled: false,
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            condition: {
+              type: 'object',
+              enabled: false,
+            },
+          },
         },
         id: {
           type: 'keyword',
