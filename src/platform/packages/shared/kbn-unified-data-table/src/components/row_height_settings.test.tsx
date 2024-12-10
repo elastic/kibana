@@ -12,7 +12,10 @@ import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 import { RowHeightSettings, RowHeightSettingsProps } from '../..';
 
-const renderRowHeightSettings = ({ maxRowHeight }: { maxRowHeight?: number } = {}) => {
+const renderRowHeightSettings = ({
+  maxRowHeight,
+  onChangeRowHeightLines,
+}: { maxRowHeight?: number; onChangeRowHeightLines?: jest.Mock } = {}) => {
   const Wrapper = () => {
     const [rowHeight, setRowHeight] = useState<RowHeightSettingsProps['rowHeight']>();
     const [rowHeightLines, setRowHeightLines] = useState<number>();
@@ -24,7 +27,7 @@ const renderRowHeightSettings = ({ maxRowHeight }: { maxRowHeight?: number } = {
         rowHeightLines={rowHeightLines}
         maxRowHeight={maxRowHeight}
         onChangeRowHeight={setRowHeight}
-        onChangeRowHeightLines={setRowHeightLines}
+        onChangeRowHeightLines={onChangeRowHeightLines || setRowHeightLines}
         data-test-subj="rowHeightSettings"
       />
     );
@@ -34,43 +37,73 @@ const renderRowHeightSettings = ({ maxRowHeight }: { maxRowHeight?: number } = {
 };
 
 describe('RowHeightSettings', () => {
-  it('should set rowHeight when the selected button changes', async () => {
+  it('should set rowHight to Custom by default', async () => {
     renderRowHeightSettings();
-    expect(screen.getByRole('button', { name: 'Single', pressed: true })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Auto fit', pressed: false })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Custom', pressed: false })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Auto fit' }));
-    expect(screen.getByRole('button', { name: 'Single', pressed: false })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Auto fit', pressed: true })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Custom', pressed: false })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
-    expect(screen.getByRole('button', { name: 'Single', pressed: false })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Auto fit', pressed: false })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Auto', pressed: false })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Custom', pressed: true })).toBeInTheDocument();
   });
 
-  it('should show the range input when Custom is selected', async () => {
+  it('should set rowHeight when the selected button changes', async () => {
     renderRowHeightSettings();
-    expect(screen.queryByRole('slider', { hidden: true })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Auto', pressed: false })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Custom', pressed: true })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+    expect(screen.getByRole('button', { name: 'Auto', pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Custom', pressed: false })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
-    expect(screen.getByRole('slider', { hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Auto', pressed: false })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Custom', pressed: true })).toBeInTheDocument();
   });
 
-  it('should set rowHeightLines when the range input changes', async () => {
+  it('should disable FieldNumber when Auto is selected', async () => {
     renderRowHeightSettings();
-    await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
-    const slider = screen.getByRole('slider', { hidden: true });
-    expect(slider).toHaveValue('2');
-    fireEvent.change(slider, { target: { value: 10 } });
-    expect(slider).toHaveValue('10');
+    await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+    expect(screen.getByRole('spinbutton')).toBeDisabled();
   });
 
-  it('should limit the range input to the maxRowHeight', async () => {
-    renderRowHeightSettings({ maxRowHeight: 5 });
+  it('field number should persevere previously selected Custom number after changing rowHight to Auto', async () => {
+    renderRowHeightSettings();
+
+    const fieldNumber = screen.getByRole('spinbutton');
+    expect(fieldNumber).toHaveValue(2);
+    fireEvent.change(fieldNumber, {
+      target: { value: 10 },
+    });
+    expect(fieldNumber).toHaveValue(10);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+
+    expect(fieldNumber).toHaveValue(10);
+  });
+
+  it('should set rowHeightLines when the number input changes', async () => {
+    const onChangeRowHeightLines = jest.fn();
+    renderRowHeightSettings({ onChangeRowHeightLines });
+
+    const fieldNumber = screen.getByRole('spinbutton') as HTMLInputElement;
+    expect(fieldNumber).toHaveValue(2);
+    fireEvent.change(fieldNumber, {
+      target: { value: '10' },
+    });
+
+    expect(fieldNumber).toHaveValue(10);
+    expect(onChangeRowHeightLines).toHaveBeenCalledWith(10);
+  });
+
+  it('should set rowHeightLines to number input value after switching from Auto back to Custom', async () => {
+    const onChangeRowHeightLines = jest.fn();
+    renderRowHeightSettings({ onChangeRowHeightLines });
+
+    const fieldNumber = screen.getByRole('spinbutton') as HTMLInputElement;
+    expect(fieldNumber).toHaveValue(2);
+    fireEvent.change(fieldNumber, {
+      target: { value: 10 },
+    });
+    expect(fieldNumber).toHaveValue(10);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
     await userEvent.click(screen.getByRole('button', { name: 'Custom' }));
-    const slider = screen.getByRole('slider', { hidden: true });
-    expect(slider).toHaveValue('2');
-    fireEvent.change(slider, { target: { value: 10 } });
-    expect(slider).toHaveValue('5');
+
+    expect(onChangeRowHeightLines).toHaveBeenCalledWith(Number(fieldNumber.value));
   });
 });
