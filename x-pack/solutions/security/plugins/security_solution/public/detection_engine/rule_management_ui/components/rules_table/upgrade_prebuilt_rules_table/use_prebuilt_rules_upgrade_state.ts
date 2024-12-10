@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type {
   RulesUpgradeState,
@@ -27,6 +27,13 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
 type RulesResolvedConflicts = Record<RuleSignatureId, RuleResolvedConflicts>;
 
+interface RuleConcurrencyControl {
+  version: number;
+  revision: number;
+}
+
+type RulesConcurrencyControl = Record<RuleSignatureId, RuleConcurrencyControl>;
+
 interface UseRulesUpgradeStateResult {
   rulesUpgradeState: RulesUpgradeState;
   setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
@@ -37,6 +44,7 @@ export function usePrebuiltRulesUpgradeState(
 ): UseRulesUpgradeStateResult {
   const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
+  const concurrencyControl = useRef<RulesConcurrencyControl>({});
 
   const setRuleFieldResolvedValue = useCallback(
     (...[params]: Parameters<SetRuleFieldResolvedValueFn>) => {
@@ -50,6 +58,35 @@ export function usePrebuiltRulesUpgradeState(
     },
     []
   );
+
+  // Implements concurrency control.
+  // Rule may be edited or a new prebuilt rules package version gets released.
+  // In any case current rule's `revision` or target rule's version
+  // will have higher values.
+  // Reset resolved conflicts in case of revision`s or version`s mismatch.
+  useEffect(() => {
+    for (const {
+      rule_id: ruleId,
+      current_rule: { revision: nextRevision },
+      target_rule: { version: nextVersion },
+    } of ruleUpgradeInfos) {
+      const cc = concurrencyControl.current[ruleId];
+      const hasInconsistency = cc && (cc.version !== nextVersion || cc.revision !== nextRevision);
+
+      // Reset rule's resolved conflicts
+      if (hasInconsistency) {
+        setRulesResolvedConflicts((prevRulesResolvedConflicts) => ({
+          ...prevRulesResolvedConflicts,
+          [ruleId]: {},
+        }));
+      }
+
+      concurrencyControl.current[ruleId] = {
+        version: nextVersion,
+        revision: nextRevision,
+      };
+    }
+  }, [ruleUpgradeInfos, concurrencyControl, setRulesResolvedConflicts]);
 
   const rulesUpgradeState = useMemo(() => {
     const state: RulesUpgradeState = {};
