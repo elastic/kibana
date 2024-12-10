@@ -7270,7 +7270,7 @@
             "label": "resetUnsavedChanges",
             "description": [],
             "signature": [
-              "() => void"
+              "() => boolean"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
             "deprecated": false,
