@@ -493,7 +493,6 @@ packages/kbn-server-route-repository @elastic/obs-knowledge-team
 packages/kbn-server-route-repository-client @elastic/obs-knowledge-team
 packages/kbn-server-route-repository-utils @elastic/obs-knowledge-team
 packages/kbn-set-map @elastic/kibana-operations
-packages/kbn-shared-svg @elastic/obs-ux-infra_services-team
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
@@ -625,6 +624,7 @@ src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-es
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-shared-svg @elastic/obs-ux-infra_services-team
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/platform/plugins/shared/otel_metrics @elastic/obs-ux-infra_services-team
