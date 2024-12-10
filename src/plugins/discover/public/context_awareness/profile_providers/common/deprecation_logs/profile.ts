@@ -12,7 +12,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DataSourceCategory } from '../../../profiles';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import { type DataSourceProfileProvider } from '../../../profiles';
-import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
+import { DEPRECATION_LOGS_PATTERN_PREFIX, DEPRECATION_LOGS_PROFILE_ID } from './consts';
 
 export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -56,13 +56,17 @@ export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfil
   },
 });
 
+/*
+  This function returns true if the index pattern belongs to deprecation logs.
+  It also considers multiple patterns separated by commas.
+*/
 const checkAllIndicesInPatternAreDeprecationLogs = (indexPattern: string | undefined): boolean => {
   if (!indexPattern) {
     return false;
   }
   const indexPatternArray = indexPattern.split(',');
   const result = indexPatternArray.reduce(
-    (acc, val) => acc && val.startsWith('.logs-deprecation'),
+    (acc, val) => acc && val.startsWith(DEPRECATION_LOGS_PATTERN_PREFIX),
     true
   );
   return result;

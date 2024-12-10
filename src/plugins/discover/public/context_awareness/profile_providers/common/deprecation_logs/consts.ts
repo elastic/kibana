@@ -8,3 +8,4 @@
  */
 
 export const DEPRECATION_LOGS_PROFILE_ID = 'deprecation-logs-profile';
+export const DEPRECATION_LOGS_PATTERN_PREFIX = '.logs-deprecation';
