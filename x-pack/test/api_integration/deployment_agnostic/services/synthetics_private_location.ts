@@ -42,10 +42,10 @@ export class PrivateLocationTestService {
     }
   }
 
-  async addTestPrivateLocation() {
+  async addTestPrivateLocation(spaceId?: string) {
     const apiResponse = await this.addFleetPolicy(uuidv4());
     const testPolicyId = apiResponse.body.item.id;
-    return (await this.setTestLocations([testPolicyId]))[0];
+    return (await this.setTestLocations([testPolicyId], spaceId))[0];
   }
 
   async addFleetPolicy(name: string) {
@@ -63,7 +63,7 @@ export class PrivateLocationTestService {
     });
   }
 
-  async setTestLocations(testFleetPolicyIds: string[]) {
+  async setTestLocations(testFleetPolicyIds: string[], spaceId?: string) {
     const locations: SyntheticsPrivateLocations = testFleetPolicyIds.map((id, index) => ({
       label: `Test private location ${id}`,
       agentPolicyId: id,
@@ -76,7 +76,7 @@ export class PrivateLocationTestService {
     }));
 
     await this.supertestWithAuth
-      .post(`/api/saved_objects/_bulk_create`)
+      .post(`/s/${spaceId || 'default'}/api/saved_objects/_bulk_create`)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'true')
       .send(
@@ -84,7 +84,7 @@ export class PrivateLocationTestService {
           type: privateLocationSavedObjectName,
           id: location.id,
           attributes: location,
-          initialNamespaces: ['*'],
+          initialNamespaces: [spaceId ? spaceId : 'default'],
         }))
       )
       .expect(200);

@@ -22,7 +22,6 @@ import { getFixtureJson } from './helpers/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helpers/monitor';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
-import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditMonitorAPI', function () {
@@ -115,7 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name',
-        [ConfigKey.LOCATIONS]: [LOCAL_LOCATION],
+        [ConfigKey.LOCATIONS]: [privateLocations[0]],
         [ConfigKey.REQUEST_HEADERS_CHECK]: {
           sampleHeader2: 'sampleValue2',
         },
@@ -166,7 +165,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name like that',
-        [ConfigKey.LOCATIONS]: [LOCAL_LOCATION],
+        [ConfigKey.LOCATIONS]: [privateLocations[0]],
         [ConfigKey.REQUEST_HEADERS_CHECK]: {
           sampleHeader2: 'sampleValue2',
         },
@@ -306,17 +305,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('handles spaces', async () => {
       const name = 'Monitor with private location';
-      const newMonitor = {
-        name,
-        type: 'http',
-        urls: 'https://elastic.co',
-        locations: [LOCAL_LOCATION],
-      };
 
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
+      const newMonitor = {
+        name,
+        type: 'http',
+        urls: 'https://elastic.co',
+        locations: [spaceScopedPrivateLocation],
+      };
 
       const savedMonitor = await saveMonitor(newMonitor as MonitorFields, SPACE_ID);
 

@@ -16,8 +16,6 @@ import { SyntheticsMonitorTestService } from '../../../services/synthetics_monit
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitorsPrivateLocations', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
@@ -63,7 +61,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     beforeEach(() => {
       projectMonitors = setUniqueIds({
-        monitors: getFixtureJson('project_browser_monitor').monitors,
+        monitors: getFixtureJson('project_browser_monitor').monitors.map(
+          (monitor: Record<string, unknown>) => {
+            return {
+              ...monitor,
+              name: `test-monitor-${uuidv4()}`,
+              type: 'browser',
+              locations: [],
+              privateLocations: [testPrivateLocationName],
+            };
+          }
+        ),
       });
     });
 

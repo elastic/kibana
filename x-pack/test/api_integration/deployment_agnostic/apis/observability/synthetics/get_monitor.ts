@@ -13,6 +13,7 @@ import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -20,22 +21,22 @@ import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_mana
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 import { omitMonitorKeys } from './create_monitor';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('getSyntheticsMonitors', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
     const samlAuth = getService('samlAuth');
     const monitorTestService = new SyntheticsMonitorTestService(getService);
+    const privateLocationTestService = new PrivateLocationTestService(getService);
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
     let editorUser: RoleCredentials;
+    let privateLocation: PrivateLocation;
 
     const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
       let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?internal=true';
@@ -56,6 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      privateLocation = await privateLocationTestService.addTestPrivateLocation();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(editorUser.apiKeyHeader)
@@ -67,7 +69,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         getFixtureJson('tcp_monitor'),
         getFixtureJson('http_monitor'),
         getFixtureJson('browser_monitor'),
-      ];
+      ].map((mon) => ({
+        ...mon,
+        locations: [privateLocation],
+      }));
     });
 
     beforeEach(() => {
@@ -219,10 +224,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const SPACE_ID = `test-space-${uuidv4()}`;
         const SPACE_NAME = `test-space-name ${uuidv4()}`;
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+        const spaceScopedPrivateLocation = await privateLocationTestService.addTestPrivateLocation(
+          SPACE_ID
+        );
 
         const allMonitors = [...monitors, ...monitors];
         for (const mon of allMonitors) {
-          await saveMonitor({ ...mon, name: mon.name + Date.now() }, SPACE_ID);
+          await saveMonitor(
+            { ...mon, name: mon.name + Date.now(), locations: [spaceScopedPrivateLocation] },
+            SPACE_ID
+          );
         }
 
         const firstPageResp = await supertest
@@ -277,7 +288,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
             revision: 1,
-            locations: [LOCAL_LOCATION],
+            locations: [privateLocation],
             name: `${monitors[0].name}-${uuid}-0`,
           })
         );
@@ -302,7 +313,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...monitors[0],
               form_monitor_type: 'icmp',
               revision: 1,
-              locations: [LOCAL_LOCATION],
+              locations: [privateLocation],
               name: `${monitors[0].name}-${uuid}-0`,
               hosts: '192.33.22.111:3333',
               hash: '',

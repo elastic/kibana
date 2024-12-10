@@ -73,8 +73,6 @@ export const omitMonitorKeys = (monitor: any) => {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddNewMonitorsUI', function () {
-    this.tags('skipCloud');
-
     const supertestAPI = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
     const kibanaServer = getService('kibanaServer');
@@ -102,10 +100,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       _httpMonitorJson = getFixtureJson('http_monitor');
       await kibanaServer.savedObjects.cleanStandardList();
       editorRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-      privateLocation = await privateLocationsService.addTestPrivateLocation();
     });
 
     beforeEach(async () => {
+      privateLocation = await privateLocationsService.addTestPrivateLocation();
       httpMonitorJson = {
         ..._httpMonitorJson,
         locations: [privateLocation],
@@ -226,9 +224,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const EXPECTED_NAMESPACE = formatKibanaNamespace(SPACE_ID);
+      privateLocation = await privateLocationsService.addTestPrivateLocation(SPACE_ID);
       const monitor = {
         ...httpMonitorJson,
         [ConfigKey.NAMESPACE]: 'default',
+        locations: [privateLocation],
       };
       let monitorId = '';
 
@@ -251,9 +251,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('preserves the passed namespace when preserve_namespace is passed', async () => {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
+      privateLocation = await privateLocationsService.addTestPrivateLocation(SPACE_ID);
       const monitor = {
         ...httpMonitorJson,
         [ConfigKey.NAMESPACE]: 'default',
+        locations: [privateLocation],
       };
       let monitorId = '';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
@@ -276,7 +278,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('sets namespace to custom namespace when set', async () => {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
-      const monitor = httpMonitorJson;
+      privateLocation = await privateLocationsService.addTestPrivateLocation(SPACE_ID);
+      const monitor = {
+        ...httpMonitorJson,
+        locations: [privateLocation],
+      };
       let monitorId = '';
 
       try {

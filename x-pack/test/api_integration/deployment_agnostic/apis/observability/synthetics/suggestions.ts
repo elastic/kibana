@@ -11,19 +11,20 @@ import {
   MonitorFields,
   EncryptedSyntheticsSavedMonitor,
   ProjectMonitorsRequest,
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('SyntheticsSuggestions', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const privateLocationsTestService = new PrivateLocationTestService(getService);
 
     const SPACE_ID = `test-space-${uuidv4()}`;
     const SPACE_NAME = `test-space-name ${uuidv4()}`;
@@ -32,25 +33,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
     let editorUser: RoleCredentials;
+    let privateLocation: PrivateLocation;
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
+        monitors: request.monitors.map((monitor) => ({
+          ...monitor,
+          id: uuidv4(),
+          locations: [],
+          privateLocations: [privateLocation.label],
+        })),
       };
-    };
-
-    const deleteMonitor = async (id: string) => {
-      try {
-        await supertest
-          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .expect(200);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-      }
     };
 
     const saveMonitor = async (monitor: MonitorFields) => {
@@ -64,7 +58,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
+      await kibanaServer.savedObjects.clean({
+        types: [
+          syntheticsMonitorType,
+          'ingest-agent-policies',
+          'ingest-package-policies',
+          'synthetics-private-location',
+        ],
+      });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
@@ -72,30 +73,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
-      const { body } = await supertest
-        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .expect(200);
-      await Promise.all([
-        (body.monitors as EncryptedSyntheticsSavedMonitor[]).map((monitor) => {
-          return deleteMonitor(monitor.id);
-        }),
-      ]);
-
-      _monitors = [getFixtureJson('http_monitor')];
+      privateLocation = await privateLocationsTestService.addTestPrivateLocation(SPACE_ID);
+      _monitors = [getFixtureJson('http_monitor')].map((monitor) => ({
+        ...monitor,
+        locations: [privateLocation],
+      }));
       projectMonitors = setUniqueIds({
         monitors: getFixtureJson('project_icmp_monitor')
           .monitors.slice(0, 2)
-          .map((monitor: any) => ({ ...monitor, privateLocations: [] })),
+          .map((monitor: any) => ({
+            ...monitor,
+            privateLocations: [privateLocation.label],
+            locations: [],
+          })),
       });
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: [syntheticsMonitorType, 'ingest-package-policies'],
+      });
+
       monitors = [];
       for (let i = 0; i < 20; i++) {
         monitors.push({
           ..._monitors[0],
+          locations: [privateLocation],
           name: `${_monitors[0].name} ${i}`,
         });
       }
@@ -106,182 +109,168 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns the suggestions', async () => {
-      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
-      try {
-        savedMonitors = await Promise.all(monitors.map(saveMonitor));
-        const project = `test-project-${uuidv4()}`;
-        await supertest
-          .put(
-            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-              '{projectName}',
-              project
-            )}`
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send(projectMonitors)
-          .expect(200);
-        const apiResponse = await supertest
-          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SUGGESTIONS}`)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .expect(200);
-        expect(apiResponse.body).toEqual({
-          locations: [
-            {
-              count: 22,
-              label: 'Dev Service',
-              value: 'dev',
-            },
-          ],
-          monitorIds: expect.arrayContaining([
-            ...monitors.map((monitor) => ({
-              count: 1,
-              label: monitor.name,
-              value: expect.any(String),
-            })),
-            ...projectMonitors.monitors.slice(0, 2).map((monitor) => ({
-              count: 1,
-              label: monitor.name,
-              value: expect.any(String),
-            })),
-          ]),
-          monitorTypes: [
-            {
-              count: 20,
-              label: 'http',
-              value: 'http',
-            },
-            {
-              count: 2,
-              label: 'icmp',
-              value: 'icmp',
-            },
-          ],
-          projects: [
-            {
-              count: 2,
-              label: project,
-              value: project,
-            },
-          ],
-          tags: expect.arrayContaining([
-            {
-              count: 21,
-              label: 'tag1',
-              value: 'tag1',
-            },
-            {
-              count: 21,
-              label: 'tag2',
-              value: 'tag2',
-            },
-            {
-              count: 1,
-              label: 'org:google',
-              value: 'org:google',
-            },
-            {
-              count: 1,
-              label: 'service:smtp',
-              value: 'service:smtp',
-            },
-          ]),
-        });
-      } finally {
-        await Promise.all(
-          savedMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id);
-          })
-        );
+      const project = `test-project-${uuidv4()}`;
+      await supertest
+        .put(
+          `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            project
+          )}`
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(projectMonitors)
+        .expect(200);
+      for (let i = 0; i < monitors.length; i++) {
+        await saveMonitor(monitors[i]);
       }
+      const apiResponse = await supertest
+        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SUGGESTIONS}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+      expect(apiResponse.body).toEqual({
+        locations: [
+          {
+            count: 22,
+            label: privateLocation.label,
+            value: privateLocation.id,
+          },
+        ],
+        monitorIds: expect.arrayContaining([
+          ...monitors.map((monitor) => ({
+            count: 1,
+            label: monitor.name,
+            value: expect.any(String),
+          })),
+          ...projectMonitors.monitors.slice(0, 2).map((monitor) => ({
+            count: 1,
+            label: monitor.name,
+            value: expect.any(String),
+          })),
+        ]),
+        monitorTypes: [
+          {
+            count: 20,
+            label: 'http',
+            value: 'http',
+          },
+          {
+            count: 2,
+            label: 'icmp',
+            value: 'icmp',
+          },
+        ],
+        projects: [
+          {
+            count: 2,
+            label: project,
+            value: project,
+          },
+        ],
+        tags: expect.arrayContaining([
+          {
+            count: 21,
+            label: 'tag1',
+            value: 'tag1',
+          },
+          {
+            count: 21,
+            label: 'tag2',
+            value: 'tag2',
+          },
+          {
+            count: 1,
+            label: 'org:google',
+            value: 'org:google',
+          },
+          {
+            count: 1,
+            label: 'service:smtp',
+            value: 'service:smtp',
+          },
+        ]),
+      });
     });
 
     it('handles query params for projects', async () => {
-      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
-      try {
-        savedMonitors = await Promise.all(monitors.map(saveMonitor));
-        const project = `test-project-${uuidv4()}`;
-        await supertest
-          .put(
-            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-              '{projectName}',
-              project
-            )}`
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send(projectMonitors)
-          .expect(200);
-
-        const apiResponse = await supertest
-          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SUGGESTIONS}`)
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            projects: [project],
-          })
-          .expect(200);
-
-        expect(apiResponse.body).toEqual({
-          locations: [
-            {
-              count: 2,
-              label: 'Dev Service',
-              value: 'dev',
-            },
-          ],
-          monitorIds: expect.arrayContaining(
-            projectMonitors.monitors.map((monitor) => ({
-              count: 1,
-              label: monitor.name,
-              value: expect.any(String),
-            }))
-          ),
-          monitorTypes: [
-            {
-              count: 2,
-              label: 'icmp',
-              value: 'icmp',
-            },
-          ],
-          projects: [
-            {
-              count: 2,
-              label: project,
-              value: project,
-            },
-          ],
-          tags: expect.arrayContaining([
-            {
-              count: 1,
-              label: 'tag1',
-              value: 'tag1',
-            },
-            {
-              count: 1,
-              label: 'tag2',
-              value: 'tag2',
-            },
-            {
-              count: 1,
-              label: 'org:google',
-              value: 'org:google',
-            },
-            {
-              count: 1,
-              label: 'service:smtp',
-              value: 'service:smtp',
-            },
-          ]),
-        });
-      } finally {
-        await Promise.all(
-          savedMonitors.map((monitor) => {
-            return deleteMonitor(monitor.id);
-          })
-        );
+      for (let i = 0; i < monitors.length; i++) {
+        await saveMonitor(monitors[i]);
       }
+      const project = `test-project-${uuidv4()}`;
+      await supertest
+        .put(
+          `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            project
+          )}`
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(projectMonitors)
+        .expect(200);
+
+      const apiResponse = await supertest
+        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SUGGESTIONS}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .query({
+          projects: [project],
+        })
+        .expect(200);
+
+      expect(apiResponse.body).toEqual({
+        locations: [
+          {
+            count: 2,
+            label: privateLocation.label,
+            value: privateLocation.id,
+          },
+        ],
+        monitorIds: expect.arrayContaining(
+          projectMonitors.monitors.map((monitor) => ({
+            count: 1,
+            label: monitor.name,
+            value: expect.any(String),
+          }))
+        ),
+        monitorTypes: [
+          {
+            count: 2,
+            label: 'icmp',
+            value: 'icmp',
+          },
+        ],
+        projects: [
+          {
+            count: 2,
+            label: project,
+            value: project,
+          },
+        ],
+        tags: expect.arrayContaining([
+          {
+            count: 1,
+            label: 'tag1',
+            value: 'tag1',
+          },
+          {
+            count: 1,
+            label: 'tag2',
+            value: 'tag2',
+          },
+          {
+            count: 1,
+            label: 'org:google',
+            value: 'org:google',
+          },
+          {
+            count: 1,
+            label: 'service:smtp',
+            value: 'service:smtp',
+          },
+        ]),
+      });
     });
   });
 }

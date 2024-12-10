@@ -13,11 +13,20 @@ import { omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
-import { LOCAL_LOCATION } from './get_filters';
+
+export const LOCAL_LOCATION = {
+  id: 'dev',
+  label: 'Dev Service',
+  geo: {
+    lat: 0,
+    lon: 0,
+  },
+  isServiceManaged: true,
+};
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('RunTestManually', function () {
-    this.tags('skipCloud');
+    this.tags(['skipMKI', 'skipCloud']);
 
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');

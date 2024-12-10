@@ -17,8 +17,6 @@ import { PrivateLocationTestService } from '../../../services/synthetics_private
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddNewMonitorsPublicAPI', function () {
-    this.tags('skipCloud');
-
     const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
@@ -98,7 +96,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { message, attributes } = await addMonitorAPI(
           {
             type: 'http',
-            locations: ['dev'],
+            locations: [],
+            private_locations: [privateLocation.id],
           },
           400
         );

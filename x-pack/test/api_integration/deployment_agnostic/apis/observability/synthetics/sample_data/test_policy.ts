@@ -554,6 +554,10 @@ export const comparePolicies = (aPolicy: PackagePolicy, bPolicy: PackagePolicy) 
   delete a.inputs;
   delete b.inputs;
 
+  // delete package  to compare rest of policy
+  delete a.package;
+  delete b.package;
+
   expect(a).toEqual(b);
 };
 

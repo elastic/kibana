@@ -29,9 +29,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let projectMonitors: ProjectMonitorsRequest;
     let editorUser: RoleCredentials;
-    let testPrivateLocations: PrivateLocation[] = [];
+    let privateLocation: PrivateLocation;
 
-    let testPolicyId = '';
     const testPrivateLocationsService = new PrivateLocationTestService(getService);
 
     const setUniqueIdsAndLocations = (
@@ -40,26 +39,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     ) => {
       return {
         ...request,
-        locations: [],
-        privateLocations: privateLocations.map((location) => location.label),
-        monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuidv4() })),
+        monitors: request.monitors.map((monitor) => ({
+          ...monitor,
+          id: uuidv4(),
+          locations: [],
+          privateLocations: privateLocations.map((location) => location.label),
+        })),
       };
     };
 
     before(async () => {
       await testPrivateLocationsService.installSyntheticsPackage();
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocationsService.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      testPrivateLocations = await testPrivateLocationsService.setTestLocations([testPolicyId]);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
     });
 
-    beforeEach(() => {
-      projectMonitors = setUniqueIdsAndLocations(
-        getFixtureJson('project_browser_monitor'),
-        testPrivateLocations
-      );
+    beforeEach(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['synthetics-private-location'] });
+      privateLocation = await testPrivateLocationsService.addTestPrivateLocation();
+      projectMonitors = setUniqueIdsAndLocations(getFixtureJson('project_browser_monitor'), [
+        privateLocation,
+      ]);
     });
 
     it('only allows 250 requests at a time', async () => {
@@ -312,6 +311,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation(
+        SPACE_ID
+      );
 
       try {
         await supertest
@@ -320,7 +322,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors })
+          .send({
+            monitors: monitors.map((monitor) => ({
+              ...monitor,
+              privateLocations: [privateLocation.label],
+            })),
+          })
           .expect(200);
 
         await supertest
@@ -332,7 +339,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors })
+          .send({
+            monitors: monitors.map((monitor) => ({
+              ...monitor,
+              privateLocations: [spaceScopedPrivateLocation.label],
+            })),
+          })
           .expect(200);
 
         const savedObjectsResponse = await supertest
@@ -420,7 +432,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('deletes integration policies when project monitors are deleted', async () => {
       const monitors = [
-        { ...projectMonitors.monitors[0], privateLocations: [testPrivateLocations[0].label] },
+        { ...projectMonitors.monitors[0], privateLocations: [privateLocation.label] },
       ];
       const project = 'test-brower-suite';
 
@@ -453,9 +465,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
               '-' +
-              testPolicyId
+              privateLocation.id
         );
-        expect(packagePolicy.policy_id).to.be(testPolicyId);
+        expect(packagePolicy.policy_id).to.be(privateLocation.id);
 
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
@@ -489,7 +501,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
               '-' +
-              testPolicyId
+              privateLocation.id
         );
         expect(packagePolicy2).to.be(undefined);
       } finally {

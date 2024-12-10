@@ -20,7 +20,6 @@ function assertHas(actual: unknown, expected: object) {
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe.skip('AddEditParams', function () {
-    this.tags('skipCloud');
     const samlAuth = getService('samlAuth');
     const supertest = getService('supertestWithoutAuth');
     let adminRoleAuthc: RoleCredentials;

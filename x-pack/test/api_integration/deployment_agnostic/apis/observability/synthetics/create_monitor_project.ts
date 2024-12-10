@@ -6,6 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import rawExpect from 'expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
   ConfigKey,
@@ -34,8 +35,6 @@ import { SyntheticsMonitorTestService } from '../../../services/synthetics_monit
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddProjectMonitors', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
@@ -118,6 +117,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .send({ key: 'testGlobalParam2', value: 'testGlobalParamValue2' })
         .expect(200);
+      const spaces = (await kibanaServer.spaces.list()) as Array<{
+        id: string;
+      }>;
+      for (let i = 0; i < spaces.length; i++) {
+        if (spaces[i].id !== 'default') await kibanaServer.spaces.delete(spaces[i].id);
+      }
     });
 
     beforeEach(async () => {
@@ -840,6 +845,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
       try {
         await supertest
           .put(
@@ -850,7 +858,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send(projectMonitors)
+          .send({
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                privateLocations: [spaceScopedPrivateLocation.label],
+              },
+            ],
+          })
           .expect(200);
         // expect monitor not to have been deleted
         const getResponse = await supertest
@@ -875,6 +890,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom.namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
       try {
         await supertest
           .put(
@@ -885,7 +903,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: [{ ...projectMonitors.monitors[0], namespace: customNamespace }] })
+          .send({
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                namespace: customNamespace,
+                privateLocations: [spaceScopedPrivateLocation.label],
+              },
+            ],
+          })
           .expect(200);
         // expect monitor not to have been deleted
         const getResponse = await supertest
@@ -910,6 +936,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom.namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
       try {
         await supertest
           .put(
@@ -920,7 +949,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send({ monitors: [{ ...httpProjectMonitors.monitors[1], namespace: customNamespace }] })
+          .send({
+            monitors: [
+              {
+                ...httpProjectMonitors.monitors[1],
+                namespace: customNamespace,
+                privateLocations: [spaceScopedPrivateLocation.label],
+              },
+            ],
+          })
           .expect(200);
 
         // expect monitor not to have been deleted
@@ -947,6 +984,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom-namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
       const { body } = await supertest
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -956,7 +996,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ monitors: [{ ...projectMonitors.monitors[0], namespace: customNamespace }] })
+        .send({
+          monitors: [
+            {
+              ...projectMonitors.monitors[0],
+              namespace: customNamespace,
+              privateLocations: [spaceScopedPrivateLocation.label],
+            },
+          ],
+        })
         .expect(200);
       // expect monitor not to have been deleted
       expect(body).to.eql({
@@ -978,6 +1026,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const customNamespace = 'custom-namespace';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
       const { body } = await supertest
         .put(
           `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
@@ -987,7 +1038,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ monitors: [{ ...httpProjectMonitors.monitors[1], namespace: customNamespace }] })
+        .send({
+          monitors: [
+            {
+              ...httpProjectMonitors.monitors[1],
+              namespace: customNamespace,
+              privateLocations: [spaceScopedPrivateLocation.label],
+            },
+          ],
+        })
         .expect(200);
       // expect monitor not to have been deleted
       expect(body).to.eql({
@@ -1008,6 +1067,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
       try {
         await supertest
           .put(
@@ -1018,7 +1080,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send(projectMonitors)
+          .send({
+            monitors: projectMonitors.monitors.map((monitor) => ({
+              ...monitor,
+              privateLocations: [spaceScopedPrivateLocation.label],
+            })),
+          })
           .expect(200);
         // expect monitor not to have been deleted
         const getResponse = await supertest
@@ -1054,7 +1121,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .send({
             ...projectMonitors,
-            monitors: [{ ...projectMonitors.monitors[0], content: updatedSource }],
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                content: updatedSource,
+                privateLocations: [spaceScopedPrivateLocation.label],
+              },
+            ],
           })
           .expect(200);
         const getResponseUpdated = await supertest
@@ -1083,6 +1156,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
+        SPACE_ID
+      );
       try {
         await supertest
           .put(
@@ -1093,7 +1169,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           )
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send(projectMonitors)
+          .send({
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                privateLocations: [spaceScopedPrivateLocation.label],
+              },
+            ],
+          })
           .expect(200);
         const getResponse = await supertest
           .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
@@ -1864,8 +1947,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     });
 
-    // This test is skipped because it would fail in MKI and ESS
-    it.skip('project monitors - handles sending invalid public location', async () => {
+    it('project monitors - handles sending invalid public location', async () => {
       const project = `test-project-${uuidv4()}`;
       try {
         const response = await supertest
@@ -1886,12 +1968,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(response.body).eql({
+        rawExpect(response.body).toEqual({
           createdMonitors: [],
           failedMonitors: [
             {
-              details:
-                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev|dev2'",
+              details: rawExpect.stringContaining(
+                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found."
+              ),
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {

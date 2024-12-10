@@ -21,8 +21,6 @@ import { PrivateLocationTestService } from '../../../services/synthetics_private
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('GetProjectMonitors', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
 
@@ -45,6 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         monitors: request.monitors.map((monitor) => ({
           ...monitor,
           id: uuidv4(),
+          locations: [],
           privateLocations: privateLocations.map((location) => location.label),
         })),
       };

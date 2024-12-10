@@ -30,7 +30,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     },
   };
 
-  describe('SyntheticsEnablement', () => {
+  describe('SyntheticsEnablement', function () {
+    /* temporarily skip MKI. Public locations appear to be disabled in QA causing failures
+     * in isServiceAllowed check */
+    this.tags(['skipMKI']);
+
     const roleScopedSupertest = getService('roleScopedSupertest');
     const kibanaServer = getService('kibanaServer');
 

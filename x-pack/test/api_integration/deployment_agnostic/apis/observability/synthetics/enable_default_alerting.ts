@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import rawExpect from 'expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { omit } from 'lodash';
 import { HTTPFields, PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -18,8 +19,6 @@ import { PrivateLocationTestService } from '../../../services/synthetics_private
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
-    this.tags('skipCloud');
-
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
@@ -70,6 +69,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
 
       const omitFields = [
+        'apiKeyOwner',
+        'createdBy',
+        'updatedBy',
         'id',
         'updatedAt',
         'createdAt',
@@ -85,8 +87,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const statusRule = apiResponse.body.statusRule;
       const tlsRule = apiResponse.body.tlsRule;
 
-      expect(omit(statusRule, omitFields)).eql(omit(defaultAlertRules.statusRule, omitFields));
-      expect(omit(tlsRule, omitFields)).eql(omit(defaultAlertRules.tlsRule, omitFields));
+      rawExpect(omit(statusRule, omitFields)).toEqual(
+        omit(defaultAlertRules.statusRule, omitFields)
+      );
+      rawExpect(omit(tlsRule, omitFields)).toEqual(omit(defaultAlertRules.tlsRule, omitFields));
     });
 
     it('enables alert when new monitor is added', async () => {
@@ -268,10 +272,10 @@ const defaultAlertRules = {
     name: 'Synthetics status internal rule',
     enabled: true,
     throttle: null,
-    apiKeyOwner: 'elastic_admin',
+    apiKeyOwner: 'any',
     apiKeyCreatedByUser: true,
-    createdBy: 'elastic_admin',
-    updatedBy: 'elastic_admin',
+    createdBy: 'any',
+    updatedBy: 'any',
     muteAll: false,
     mutedInstanceIds: [],
     revision: 0,
