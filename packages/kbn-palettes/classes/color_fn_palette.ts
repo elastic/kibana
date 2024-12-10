@@ -41,6 +41,6 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
   }
 
   public colors = (n: number = this.#defaultNumberOfColors) => {
-    return this.#colorFn(n);
+    return this.#colorFn(Math.max(1, n));
   };
 }

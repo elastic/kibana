@@ -21,7 +21,11 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalettes } from '@kbn/palettes';
 import type { TagcloudState } from './types';
-import { PalettePanelContainer, PalettePicker, getColorStops } from '../../shared_components';
+import {
+  PalettePanelContainer,
+  PalettePicker,
+  getPaletteDisplayColors,
+} from '../../shared_components';
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
@@ -53,7 +57,7 @@ export function TagsDimensionEditor({
     });
   const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
 
-  const colors = getColorStops(
+  const colors = getPaletteDisplayColors(
     paletteService,
     palettes,
     isDarkMode,

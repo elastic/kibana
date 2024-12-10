@@ -23,7 +23,11 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { PalettePanelContainer, PalettePicker, getColorStops } from '../../shared_components';
+import {
+  PalettePanelContainer,
+  PalettePicker,
+  getPaletteDisplayColors,
+} from '../../shared_components';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import {
   getDefaultColorForMultiMetricDimension,
@@ -118,7 +122,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  const colors = getColorStops(
+  const colors = getPaletteDisplayColors(
     props.paletteService,
     props.palettes,
     props.isDarkMode,

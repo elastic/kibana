@@ -55,7 +55,7 @@ import {
 import {
   defaultPaletteParams,
   findMinMaxByColumnId,
-  getColorStops,
+  getPaletteDisplayColors,
   shouldColorByTerms,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
@@ -329,7 +329,7 @@ export const getDatatableVisualization = ({
                 hidden,
                 collapseFn,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(
+              const stops = getPaletteDisplayColors(
                 paletteService,
                 palettes,
                 theme.darkMode,
@@ -422,7 +422,7 @@ export const getDatatableVisualization = ({
                 colorMapping,
                 hidden,
               } = columnMap[accessor] ?? {};
-              const stops = getColorStops(
+              const stops = getPaletteDisplayColors(
                 paletteService,
                 palettes,
                 theme.darkMode,

@@ -63,22 +63,13 @@ const gradient = {
  * Enum of all kbn palette ids, including by type
  */
 export const KbnPalette = {
-  /**
-   * Categorical palettes
-   */
-  _categorical: categorical,
+  // Categorical palettes
   ...categorical,
 
-  /**
-   * Gradient palettes
-   */
-  _gradient: gradient,
+  // Gradient palettes
   ...gradient,
 
-  /**
-   * Semantic palettes
-   */
-  _semantic: semantic,
+  // Semantic palettes
   ...semantic,
 
   // ---- Deprecated palettes ----

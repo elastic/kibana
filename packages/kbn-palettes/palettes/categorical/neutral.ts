@@ -8,18 +8,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KbnCategoricalPalette } from '../../classes/categorical_palette';
+import {
+  KbnCategoricalPalette,
+  KbnCategoricalPaletteConfig,
+} from '../../classes/categorical_palette';
 import { KbnPalette } from '../../constants';
 
-const lightColors = ['#F6F9FC', '#D0D4DA', '#989FAA', '#666D78', '#373D45'];
-const darkColors = ['#F6F9FC', '#C9D4E6', '#89A0C4', '#546D95', '#283C5C'];
+const commonProps = {
+  id: KbnPalette.Neutral,
+  standalone: true,
+  name: i18n.translate('palettes.elastic.name', {
+    defaultMessage: 'Neutral',
+  }),
+} satisfies Omit<KbnCategoricalPaletteConfig, 'colors'>;
+
+const lightNeutralPalette = new KbnCategoricalPalette({
+  ...commonProps,
+  colors: ['#F6F9FC', '#D0D4DA', '#989FAA', '#666D78', '#373D45'],
+});
+
+const darkNeutralPalette = new KbnCategoricalPalette({
+  ...commonProps,
+  colors: ['#F6F9FC', '#C9D4E6', '#89A0C4', '#546D95', '#283C5C'],
+});
 
 export const getNeutralPalette = (darkMode: boolean) =>
-  new KbnCategoricalPalette({
-    id: KbnPalette.Neutral,
-    standalone: true,
-    name: i18n.translate('palettes.elastic.name', {
-      defaultMessage: 'Neutral',
-    }),
-    colors: darkMode ? darkColors : lightColors,
-  });
+  darkMode ? darkNeutralPalette : lightNeutralPalette;

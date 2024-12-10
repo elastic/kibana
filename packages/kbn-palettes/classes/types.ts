@@ -39,6 +39,8 @@ export interface IKbnPalette {
   aliases: string[];
   /**
    * Excluded from `getAll` but can still query for palette with `get`/`query`
+   *
+   * An example would be `KbnPalette.Neutral` palette. I want to exclude it from the list of all available palettes, but I still want to `get`/`query` the palette.
    */
   standalone?: boolean;
   /**

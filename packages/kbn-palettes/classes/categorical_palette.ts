@@ -26,7 +26,7 @@ export class KbnCategoricalPalette extends KbnBasePalette implements IKbnPalette
     this.#colors = colors;
   }
 
-  public colors = (n?: number) => {
-    return this.#colors.slice(0, n);
+  public colors = (n: number = 1) => {
+    return this.#colors.slice(0, Math.max(1, n));
   };
 }

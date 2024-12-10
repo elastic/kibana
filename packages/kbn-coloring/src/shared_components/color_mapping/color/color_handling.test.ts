@@ -340,9 +340,9 @@ describe('Color mapping - color generation', () => {
         categories: ['cat1', 'cat2', 'cat3'],
       }
     );
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[0])); // EUI green
-    expect(toHex(colorFactory('cat2'))).toBe('#a4908f'); // red gray green
-    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[2])); // EUI pink
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[0]));
+    expect(toHex(colorFactory('cat2'))).toBe('#a4908f');
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[2]));
   });
 
   it('returns divergent gradient [asc, darkMode]', () => {
@@ -376,10 +376,10 @@ describe('Color mapping - color generation', () => {
         categories: ['cat1', 'cat2', 'cat3'],
       }
     );
-    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[2])); // EUI pink
-    expect(toHex(colorFactory('cat2'))).toBe(neutralPaletteColors[0]); // NEUTRAL LIGHT GRAY
-    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[0])); // EUI green
-    // if the category is not available in the `categories` list then a default netural is used
+    expect(toHex(colorFactory('cat1'))).toBe(toHex(elasticPaletteColors[2]));
+    expect(toHex(colorFactory('cat2'))).toBe(neutralPaletteColors[0]);
+    expect(toHex(colorFactory('cat3'))).toBe(toHex(elasticPaletteColors[0]));
+    // if the category is not available in the `categories` list then a default neutral is used
     // this is an edge case and ideally never happen
     expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });

@@ -30,7 +30,7 @@ import { KbnPalettes } from '@kbn/palettes';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
-import { getColorStops } from './utils';
+import { getPaletteDisplayColors } from './utils';
 
 interface ColorMappingByTermsProps {
   isDarkMode: boolean;
@@ -69,7 +69,13 @@ export function ColorMappingByTerms({
       fullWidth
     >
       <PalettePanelContainer
-        palette={getColorStops(paletteService, palettes, isDarkMode, palette, colorMapping)}
+        palette={getPaletteDisplayColors(
+          paletteService,
+          palettes,
+          isDarkMode,
+          palette,
+          colorMapping
+        )}
         siblingRef={panelRef}
         title={
           useNewColorMapping

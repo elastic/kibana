@@ -29,7 +29,7 @@ import { DataType } from '../../types';
 /**
  * Returns array of colors for provided palette or colorMapping
  */
-export function getColorStops(
+export function getPaletteDisplayColors(
   paletteService: PaletteRegistry,
   palettes: KbnPalettes,
   isDarkMode: boolean,
