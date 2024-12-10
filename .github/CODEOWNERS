@@ -550,7 +550,6 @@ packages/react/kibana_context/theme @elastic/appex-sharedux
 packages/react/kibana_mount @elastic/appex-sharedux
 packages/response-ops/feature_flag_service @elastic/response-ops
 packages/response-ops/rule_form @elastic/response-ops
-packages/response-ops/rule_params @elastic/response-ops
 packages/serverless/project_switcher @elastic/appex-sharedux
 packages/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
@@ -613,6 +612,7 @@ src/core @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
+src/platform/packages/private/response-ops/rule_params @elastic/response-ops
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
