@@ -5,15 +5,14 @@
  * 2.0.
  */
 import { useMemo } from 'react';
+import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
-  GetEntityStoreStatusResponse,
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
-} from '../../../common/api/entity_analytics/entity_store/enablement.gen';
+} from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type {
   DeleteEntityEngineResponse,
   EntityType,
-  GetEntityEngineResponse,
   InitEntityEngineResponse,
   ListEntityEnginesResponse,
   StopEntityEngineResponse,
@@ -35,10 +34,11 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
-    const getEntityStoreStatus = async () => {
+    const getEntityStoreStatus = async (withComponents = false) => {
       return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
         method: 'GET',
         version: API_VERSIONS.public.v1,
+        query: { include_components: withComponents },
       });
     };
 
@@ -55,13 +55,6 @@ export const useEntityStoreRoutes = () => {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
-      });
-    };
-
-    const getEntityEngine = async (entityType: EntityType) => {
-      return http.fetch<GetEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
-        method: 'GET',
-        version: API_VERSIONS.public.v1,
       });
     };
 
@@ -85,7 +78,6 @@ export const useEntityStoreRoutes = () => {
       getEntityStoreStatus,
       initEntityEngine,
       stopEntityEngine,
-      getEntityEngine,
       deleteEntityEngine,
       listEntityEngines,
     };

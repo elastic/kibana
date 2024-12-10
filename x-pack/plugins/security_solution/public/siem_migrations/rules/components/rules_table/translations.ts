@@ -7,10 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SEARCH_PLACEHOLDER = i18n.translate(
+export const SEARCH_MIGRATION_RULES = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.searchAriaLabel',
+  {
+    defaultMessage: 'Search migration rules',
+  }
+);
+
+export const SEARCH_MIGRATION_RULES_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.searchBarPlaceholder',
   {
-    defaultMessage: 'Search by rule name',
+    defaultMessage: 'Search by migration rule name',
   }
 );
 
@@ -32,5 +39,72 @@ export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.goToMigrationsPageButton',
   {
     defaultMessage: 'Go back to SIEM Migrations',
+  }
+);
+
+export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.installSelectedRules', {
+    defaultMessage: 'Install selected ({numberOfSelectedRules})',
+    values: { numberOfSelectedRules },
+  });
+};
+
+export const INSTALL_TRANSLATED_RULES_EMPTY_STATE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRulesEmptyState',
+  {
+    defaultMessage: 'Install translated rules',
+  }
+);
+
+export const INSTALL_TRANSLATED_RULES = (numberOfAllRules: number) => {
+  return i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRules',
+    {
+      defaultMessage:
+        'Install translated {numberOfAllRules, plural, one {rule} other {rules}} ({numberOfAllRules})',
+      values: { numberOfAllRules },
+    }
+  );
+};
+
+export const INSTALL_SELECTED_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installSelectedButtonAriaLabel',
+  {
+    defaultMessage: 'Install selected translated rules',
+  }
+);
+
+export const INSTALL_TRANSLATED_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedButtonAriaLabel',
+  {
+    defaultMessage: 'Install all translated rules',
+  }
+);
+
+export const ALREADY_TRANSLATED_RULE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.alreadyTranslatedTooltip',
+  {
+    defaultMessage: 'Already translated migration rule',
+  }
+);
+
+export const NOT_FULLY_TRANSLATED_RULE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.notFullyTranslatedTooltip',
+  {
+    defaultMessage: 'Not fully translated migration rule',
+  }
+);
+
+export const INSTALL_WITHOUT_ENABLING_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installWithoutEnablingButtonLabel',
+  {
+    defaultMessage: 'Install without enabling',
+  }
+);
+
+export const INSTALL_AND_ENABLE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installAndEnableButtonLabel',
+  {
+    defaultMessage: 'Install and enable',
   }
 );

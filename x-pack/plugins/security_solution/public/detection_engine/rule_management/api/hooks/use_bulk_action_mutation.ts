@@ -101,6 +101,7 @@ export const useBulkActionMutation = (
           invalidateFetchRuleByIdQuery();
           invalidateFetchRuleManagementFilters();
           invalidateFetchCoverageOverviewQuery();
+          invalidateFetchPrebuiltRulesUpgradeReviewQuery();
           break;
       }
 

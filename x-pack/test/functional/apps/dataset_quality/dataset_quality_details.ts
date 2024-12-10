@@ -250,7 +250,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
       });
 
-      it('Should navigate to integration overview page on clicking integration overview action', async () => {
+      it('should navigate to integration overview page on clicking integration overview action', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: bitbucketAuditDataStreamName,
         });
@@ -359,7 +359,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
       });
 
-      it('should show the degraded fields table with data when present', async () => {
+      it('should show the degraded fields table with data and spark plots when present', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
         });
@@ -372,15 +372,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         expect(rows.length).to.eql(3);
-      });
-
-      it('should display Spark Plot for every row of degraded fields', async () => {
-        await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: degradedDataStreamName,
-        });
-
-        const rows =
-          await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         const sparkPlots = await testSubjects.findAll(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot

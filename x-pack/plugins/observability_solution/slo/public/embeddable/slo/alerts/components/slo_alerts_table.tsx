@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
@@ -105,7 +105,8 @@ export function SloAlertsTable({
       query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
       configurationId={SLO_ALERTS_TABLE_CONFIG_ID}
-      featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
+      ruleTypeIds={[SLO_BURN_RATE_RULE_TYPE_ID]}
+      consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}
       initialPageSize={ALERTS_PER_PAGE}

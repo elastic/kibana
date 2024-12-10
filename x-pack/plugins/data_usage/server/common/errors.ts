@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export class BaseError<MetaType = unknown> extends Error {
+export class DataUsageError<MetaType = unknown> extends Error {
   constructor(message: string, public readonly meta?: MetaType) {
     super(message);
     // For debugging - capture name of subclasses

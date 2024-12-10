@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const DATA_STREAM_PREFIX = '.security-workflow-insights';
+export const DATA_STREAM_PREFIX = '.edr-workflow-insights';
 export const COMPONENT_TEMPLATE_NAME = `${DATA_STREAM_PREFIX}-component-template`;
 export const INDEX_TEMPLATE_NAME = `${DATA_STREAM_PREFIX}-index-template`;
 export const INGEST_PIPELINE_NAME = `${DATA_STREAM_PREFIX}-ingest-pipeline`;

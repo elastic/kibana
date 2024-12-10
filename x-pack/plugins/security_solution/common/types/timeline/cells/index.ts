@@ -13,6 +13,10 @@ import type { BrowserFields, TimelineNonEcsData } from '../../../search_strategy
 
 /** The following props are provided to the function called by `renderCellValue` */
 export type CellValueElementProps = EuiDataGridCellValueElementProps & {
+  /**
+   * makes sure that field is not rendered as a plain text
+   * but according to the renderer.
+   */
   asPlainText?: boolean;
   browserFields?: BrowserFields;
   data: TimelineNonEcsData[];

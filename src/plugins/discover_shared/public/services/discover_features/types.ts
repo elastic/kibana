@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { FunctionComponent, PropsWithChildren } from 'react';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { FeaturesRegistry } from '../../../common';
 
 /**
@@ -38,8 +40,31 @@ export interface ObservabilityCreateSLOFeature {
   }) => React.ReactNode;
 }
 
+/** **************** Security Solution ****************/
+
+export interface SecuritySolutionCellRendererFeature {
+  id: 'security-solution-cell-renderer';
+  getRenderer: () => Promise<
+    (fieldName: string) => FunctionComponent<DataGridCellValueElementProps> | undefined
+  >;
+}
+
+export interface SecuritySolutionAppWrapperFeature {
+  id: 'security-solution-app-wrapper';
+  getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
+}
+
+export type SecuritySolutionFeature =
+  | SecuritySolutionCellRendererFeature
+  | SecuritySolutionAppWrapperFeature;
+
+/** ****************************************************************************************/
+
 // This should be a union of all the available client features.
-export type DiscoverFeature = ObservabilityLogsAIAssistantFeature | ObservabilityCreateSLOFeature;
+export type DiscoverFeature =
+  | ObservabilityLogsAIAssistantFeature
+  | ObservabilityCreateSLOFeature
+  | SecuritySolutionFeature;
 
 /**
  * Service types

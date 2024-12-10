@@ -308,13 +308,7 @@
           "() => (source: ",
           "Observable",
           "<",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.ChatCompletionChunkEvent",
-            "text": "ChatCompletionChunkEvent"
-          },
+          "ChatEvent",
           ">) => ",
           "Observable",
           "<",
@@ -1462,7 +1456,15 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<any>, \"name\" | \"description\" | \"parameters\">[] | undefined; functionCall?: string | undefined; signal: AbortSignal; scopes: ",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.CompatibleJSONSchema",
+                "text": "CompatibleJSONSchema"
+              },
+              ">, \"name\" | \"description\" | \"parameters\">[] | undefined; functionCall?: string | undefined; signal: AbortSignal; scopes: ",
               {
                 "pluginId": "@kbn/ai-assistant-common",
                 "scope": "common",
@@ -1560,7 +1562,15 @@
                         "section": "def-common.FunctionDefinition",
                         "text": "FunctionDefinition"
                       },
-                      "<any>, \"name\" | \"description\" | \"parameters\">[] | undefined"
+                      "<",
+                      {
+                        "pluginId": "observabilityAIAssistant",
+                        "scope": "common",
+                        "docId": "kibObservabilityAIAssistantPluginApi",
+                        "section": "def-common.CompatibleJSONSchema",
+                        "text": "CompatibleJSONSchema"
+                      },
+                      ">, \"name\" | \"description\" | \"parameters\">[] | undefined"
                     ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
@@ -1843,7 +1853,15 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<any>[]"
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.CompatibleJSONSchema",
+                "text": "CompatibleJSONSchema"
+              },
+              ">[]"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
@@ -1931,7 +1949,15 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<any>[]>"
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.CompatibleJSONSchema",
+                "text": "CompatibleJSONSchema"
+              },
+              ">[]>"
             ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
@@ -2418,18 +2444,8 @@
               "<{ id: ",
               "StringC",
               "; text: ",
-              "BrandC",
-              "<",
               "StringC",
-              ", ",
-              {
-                "pluginId": "@kbn/io-ts-utils",
-                "scope": "common",
-                "docId": "kibKbnIoTsUtilsPluginApi",
-                "section": "def-common.NonEmptyStringBrand",
-                "text": "NonEmptyStringBrand"
-              },
-              ">; public: ",
+              "; public: ",
               "Type",
               "<boolean, boolean, unknown>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
@@ -2659,7 +2675,15 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<any>[]; systemMessage: string; }, ",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.CompatibleJSONSchema",
+                "text": "CompatibleJSONSchema"
+              },
+              ">[]; systemMessage: string; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"GET /internal/observability_ai_assistant/connectors\": ",
               {
@@ -3398,18 +3422,8 @@
               "<{ id: ",
               "StringC",
               "; text: ",
-              "BrandC",
-              "<",
               "StringC",
-              ", ",
-              {
-                "pluginId": "@kbn/io-ts-utils",
-                "scope": "common",
-                "docId": "kibKbnIoTsUtilsPluginApi",
-                "section": "def-common.NonEmptyStringBrand",
-                "text": "NonEmptyStringBrand"
-              },
-              ">; public: ",
+              "; public: ",
               "Type",
               "<boolean, boolean, unknown>; }>; }>, ",
               "ObservabilityAIAssistantRouteHandlerResources",
@@ -3639,7 +3653,15 @@
                 "section": "def-common.FunctionDefinition",
                 "text": "FunctionDefinition"
               },
-              "<any>[]; systemMessage: string; }, ",
+              "<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.CompatibleJSONSchema",
+                "text": "CompatibleJSONSchema"
+              },
+              ">[]; systemMessage: string; }, ",
               "ObservabilityAIAssistantRouteCreateOptions",
               ">; \"GET /internal/observability_ai_assistant/connectors\": ",
               {
@@ -5115,18 +5137,8 @@
           "<{ id: ",
           "StringC",
           "; text: ",
-          "BrandC",
-          "<",
           "StringC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">; public: ",
+          "; public: ",
           "Type",
           "<boolean, boolean, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -5356,7 +5368,15 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          "<any>[]; systemMessage: string; }, ",
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.CompatibleJSONSchema",
+            "text": "CompatibleJSONSchema"
+          },
+          ">[]; systemMessage: string; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"GET /internal/observability_ai_assistant/connectors\": ",
           {
@@ -6322,18 +6342,8 @@
           "<{ id: ",
           "StringC",
           "; text: ",
-          "BrandC",
-          "<",
           "StringC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">; public: ",
+          "; public: ",
           "Type",
           "<boolean, boolean, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -6563,7 +6573,15 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          "<any>[]; systemMessage: string; }, ",
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.CompatibleJSONSchema",
+            "text": "CompatibleJSONSchema"
+          },
+          ">[]; systemMessage: string; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"GET /internal/observability_ai_assistant/connectors\": ",
           {
@@ -7301,7 +7319,17 @@
             "section": "def-common.AssistantScope",
             "text": "AssistantScope"
           },
-          "[]; }; }"
+          "[]; }; } | { type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "public",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-public.ObservabilityAIAssistantTelemetryEventType",
+            "text": "ObservabilityAIAssistantTelemetryEventType"
+          },
+          ".InsightResponse; payload: ",
+          "InsightResponse",
+          "; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts",
         "deprecated": false,
@@ -8062,18 +8090,8 @@
           "<{ id: ",
           "StringC",
           "; text: ",
-          "BrandC",
-          "<",
           "StringC",
-          ", ",
-          {
-            "pluginId": "@kbn/io-ts-utils",
-            "scope": "common",
-            "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-common.NonEmptyStringBrand",
-            "text": "NonEmptyStringBrand"
-          },
-          ">; public: ",
+          "; public: ",
           "Type",
           "<boolean, boolean, unknown>; }>; }>, ",
           "ObservabilityAIAssistantRouteHandlerResources",
@@ -8303,7 +8321,15 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          "<any>[]; systemMessage: string; }, ",
+          "<",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.CompatibleJSONSchema",
+            "text": "CompatibleJSONSchema"
+          },
+          ">[]; systemMessage: string; }, ",
           "ObservabilityAIAssistantRouteCreateOptions",
           ">; \"GET /internal/observability_ai_assistant/connectors\": ",
           {
@@ -9130,13 +9156,7 @@
           "() => (source: ",
           "Observable",
           "<",
-          {
-            "pluginId": "observabilityAIAssistant",
-            "scope": "common",
-            "docId": "kibObservabilityAIAssistantPluginApi",
-            "section": "def-common.ChatCompletionChunkEvent",
-            "text": "ChatCompletionChunkEvent"
-          },
+          "ChatEvent",
           ">) => ",
           "Observable",
           "<",
@@ -10109,6 +10129,29 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.ChatCompletionMessageEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompletionMessageEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".ChatCompletionMessage; } & { id: string; message: { content?: string | undefined; function_call?: { name?: string | undefined; arguments?: string | undefined; } | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.CompatibleJSONSchema",
         "type": "Type",
         "tags": [],
@@ -10346,11 +10389,25 @@
             "pluginId": "observabilityAIAssistant",
             "scope": "common",
             "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionMessageEvent",
+            "text": "ChatCompletionMessageEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
             "section": "def-common.ChatCompletionErrorEvent",
             "text": "ChatCompletionErrorEvent"
           },
           " | ",
-          "TokenCountEvent",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.TokenCountEvent",
+            "text": "TokenCountEvent"
+          },
           " | ",
           {
             "pluginId": "observabilityAIAssistant",
@@ -10405,7 +10462,21 @@
             "text": "ChatCompletionChunkEvent"
           },
           " | ",
-          "TokenCountEvent",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.ChatCompletionMessageEvent",
+            "text": "ChatCompletionMessageEvent"
+          },
+          " | ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.TokenCountEvent",
+            "text": "TokenCountEvent"
+          },
           " | ",
           {
             "pluginId": "observabilityAIAssistant",
@@ -10414,6 +10485,29 @@
             "section": "def-common.BufferFlushEvent",
             "text": "BufferFlushEvent"
           }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.TokenCountEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "TokenCountEvent",
+        "description": [],
+        "signature": [
+          "{ type: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.StreamingChatResponseEventType",
+            "text": "StreamingChatResponseEventType"
+          },
+          ".TokenCount; } & { tokens: { completion: number; prompt: number; total: number; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,

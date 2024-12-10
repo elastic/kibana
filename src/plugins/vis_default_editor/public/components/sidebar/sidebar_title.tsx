@@ -116,7 +116,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
               defaultMessage="Linked to saved search"
             />
           </EuiPopoverTitle>
-          <div style={{ width: 260 }}>
+          <div css={{ width: 260 }}>
             <EuiText size="s">
               <p>
                 <EuiButtonEmpty
