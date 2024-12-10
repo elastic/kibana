@@ -316,48 +316,88 @@ describe('update', () => {
       );
     });
 
-    it('returns updateCase operation when no reopened cases or changed assignees', () => {
-      const operations = getOperationsToAuthorize([], []);
+    it('returns only updateCase operation when no reopened cases or changed assignees', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: [],
+        allCases: cases.cases,
+      });
       expect(operations).toEqual([Operations.updateCase]);
     });
 
-    it('returns reopenCase operation when there are reopened cases', () => {
-      const reopenedCases = [
-        {
-          id: 'case-1',
-          version: '1',
-        },
-      ];
-      const operations = getOperationsToAuthorize(reopenedCases, []);
-      expect(operations).toEqual([Operations.reopenCase]);
-    });
-
-    it('returns assignCase operation when there are changed assignees', () => {
-      const changedAssignees = [
-        {
-          id: 'case-1',
-          version: '1',
-        },
-      ];
-      const operations = getOperationsToAuthorize([], changedAssignees);
+    it('returns only assignCase operation when all cases are assignee changes', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: cases.cases,
+        allCases: cases.cases,
+      });
       expect(operations).toEqual([Operations.assignCase]);
     });
 
-    it('returns both reopenCase and assignCase operations when both arrays have cases', () => {
-      const reopenedCases = [
-        {
-          id: 'case-1',
-          version: '1',
-        },
-      ];
-      const changedAssignees = [
-        {
-          id: 'case-2',
-          version: '1',
-        },
-      ];
-      const operations = getOperationsToAuthorize(reopenedCases, changedAssignees);
-      expect(operations).toEqual([Operations.reopenCase, Operations.assignCase]);
+    it('returns only reopenCase operation when all cases are being reopened', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [],
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([Operations.reopenCase]);
+    });
+
+    it('returns assignCase and updateCase when some cases have non-assignee changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: cases.cases,
+        allCases: [...cases.cases, case2],
+      });
+      expect(operations).toEqual([Operations.assignCase, Operations.updateCase]);
+    });
+
+    it('returns reopenCase and updateCase when some cases have non-reopen changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [],
+        allCases: [...cases.cases, case2],
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
+    });
+
+    it('returns all operations when cases have mixed changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const case3 = { id: 'case-3', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [case2],
+        allCases: [...cases.cases, case2, case3],
+      });
+      expect(operations).toEqual([
+        Operations.reopenCase,
+        Operations.assignCase,
+        Operations.updateCase,
+      ]);
+    });
+
+    it('handles empty casesToAuthorize array', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: [],
+        allCases: [],
+      });
+      expect(operations).toEqual([]);
+    });
+
+    it('returns only combined operations when all cases have both reopen and assignee changes', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: cases.cases,
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([
+        Operations.reopenCase,
+        Operations.assignCase,
+        Operations.updateCase,
+      ]);
     });
   });
 

@@ -10,6 +10,8 @@ import {
   casesAll,
   casesV2All,
   casesV3All,
+  casesV3NoAssignee,
+  casesV3ReadAndAssignee,
   casesNoDelete,
   casesOnlyDelete,
   casesOnlyReadDelete,
@@ -176,6 +178,18 @@ export const casesV3AllUser: User = {
   roles: [casesV3All.name],
 };
 
+export const casesV3NoAssigneeUser: User = {
+  username: 'cases_v3_no_assignee_user_api_int',
+  password: 'password',
+  roles: [casesV3NoAssignee.name],
+};
+
+export const casesV3ReadAndAssignUser: User = {
+  username: 'cases_v3_read_and_assignee_user_api_int',
+  password: 'password',
+  roles: [casesV3ReadAndAssignee.name],
+};
+
 export const casesV2NoReopenWithCreateCommentUser: User = {
   username: 'cases_v2_no_reopen_with_create_comment_user_api_int',
   password: 'password',
@@ -290,6 +304,8 @@ export const users = [
   casesAllUser,
   casesV2AllUser,
   casesV3AllUser,
+  casesV3NoAssigneeUser,
+  casesV3ReadAndAssignUser,
   casesV2NoReopenWithCreateCommentUser,
   casesV2NoCreateCommentWithReopenUser,
   casesReadUser,

@@ -323,11 +323,20 @@ function partitionPatchRequest(
   };
 }
 
-export function getOperationsToAuthorize(
-  reopenedCases: CasePatchRequest[],
-  changedAssignees: CasePatchRequest[]
-): OperationDetails[] {
+export function getOperationsToAuthorize({
+  reopenedCases,
+  changedAssignees,
+  allCases,
+}: {
+  reopenedCases: CasePatchRequest[];
+  changedAssignees: CasePatchRequest[];
+  allCases: CasePatchRequest[];
+}): OperationDetails[] {
   const operations: OperationDetails[] = [];
+  const onlyAssigneeOperations =
+    reopenedCases.length === 0 && changedAssignees.length === allCases.length;
+  const onlyReopenOperations =
+    changedAssignees.length === 0 && reopenedCases.length === allCases.length;
 
   if (reopenedCases.length > 0) {
     operations.push(Operations.reopenCase);
@@ -337,8 +346,8 @@ export function getOperationsToAuthorize(
     operations.push(Operations.assignCase);
   }
 
-  if (changedAssignees.length === 0 && reopenedCases.length === 0) {
-    return [Operations.updateCase];
+  if (!onlyAssigneeOperations && !onlyReopenOperations) {
+    operations.push(Operations.updateCase);
   }
 
   return operations;
@@ -393,7 +402,11 @@ export const bulkUpdate = async (
     const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
       partitionPatchRequest(casesMap, query.cases);
 
-    const operationsToAuthorize = getOperationsToAuthorize(reopenedCases, changedAssignees);
+    const operationsToAuthorize = getOperationsToAuthorize({
+      reopenedCases,
+      changedAssignees,
+      allCases: query.cases,
+    });
 
     await authorization.ensureAuthorized({
       entities: casesToAuthorize,

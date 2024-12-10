@@ -20,11 +20,14 @@ import {
   getCase,
   createComment,
   updateCaseStatus,
+  updateCaseAssignee,
 } from '../../../cases_api_integration/common/lib/api';
 import {
   casesAllUser,
   casesV2AllUser,
   casesV3AllUser,
+  casesV3NoAssigneeUser,
+  casesV3ReadAndAssignUser,
   casesNoDeleteUser,
   casesOnlyDeleteUser,
   obsCasesAllUser,
@@ -284,6 +287,36 @@ export default ({ getService }: FtrProviderContext): void => {
           params: comment,
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
+          expectedHttpCode: 200,
+          auth: { user, space: null },
+        });
+      });
+    }
+
+    for (const { user, owner } of [{ user: casesV3NoAssigneeUser, owner: CASES_APP_ID }]) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} CANNOT change assignee`, async () => {
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
+        await updateCaseAssignee({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          assigneeId: caseInfo.created_by.profile_uid ?? '',
+          expectedHttpCode: 403,
+          auth: { user, space: null },
+        });
+      });
+    }
+
+    for (const { user, owner } of [{ user: casesV3ReadAndAssignUser, owner: CASES_APP_ID }]) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} CAN change assignee`, async () => {
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
+        await updateCaseAssignee({
+          supertest: supertestWithoutAuth,
+          caseId: caseInfo.id,
+          assigneeId: caseInfo.created_by.profile_uid ?? '',
           expectedHttpCode: 200,
           auth: { user, space: null },
         });

@@ -22,7 +22,7 @@ export const getCasesFeature = (
       'xpack.observability.featureRegistry.linkObservabilityTitle.deprecationMessage',
       {
         defaultMessage:
-          'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
+          'The {currentId} permissions are deprecated, please see {casesFeatureIdV3}.',
         values: {
           currentId: casesFeatureId,
           casesFeatureIdV3,
@@ -52,6 +52,7 @@ export const getCasesFeature = (
         push: [observabilityFeatureId],
         createComment: [observabilityFeatureId],
         reopenCase: [observabilityFeatureId],
+        assignCase: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],

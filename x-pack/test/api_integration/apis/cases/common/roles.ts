@@ -534,6 +534,56 @@ export const casesV3All: Role = {
   },
 };
 
+export const casesV3NoAssignee: Role = {
+  name: 'cases_v3_no_assignee_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV3: ['read', 'update', 'create', 'delete', 'create_comment', 'case_reopen'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const casesV3ReadAndAssignee: Role = {
+  name: 'cases_v3_read_assignee_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV3: ['read', 'case_assign'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const casesV2NoReopenWithCreateComment: Role = {
   name: 'cases_v2_no_reopen_role_api_int',
   privileges: {
@@ -854,6 +904,8 @@ export const roles = [
   casesAll,
   casesV2All,
   casesV3All,
+  casesV3NoAssignee,
+  casesV3ReadAndAssignee,
   casesV2NoReopenWithCreateComment,
   casesV2NoCreateCommentWithReopen,
   casesRead,
