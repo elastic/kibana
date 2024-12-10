@@ -23,7 +23,7 @@ export const createDeprecationLogsDocumentProfileProvider = (): DataSourceProfil
       columns: [
         { name: 'log.level' },
         { name: 'message' },
-        { name: 'x-opaque-id' },
+        { name: 'elasticsearch.http.request.x_opaque_id' },
         { name: 'elasticsearch.cluster.name' },
         { name: 'elasticsearch.event.category' },
       ],
