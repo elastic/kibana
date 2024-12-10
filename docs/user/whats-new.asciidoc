@@ -69,7 +69,7 @@ _Exported CSV now_
 
 [discrete]
 ==== Alerting scalability improvements
-The Kibana alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all {ecloud} hosted deployments. These improvements will provide you with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new Kibana alerting framework:  
+The {kib} alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all {ecloud} hosted deployments. These improvements will provide you with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new {kib} alerting framework:  
 
 ** 10x reduction in alerting task delays
 ** 2x increase in task execution throughput on average
@@ -81,13 +81,13 @@ We are very excited to see how these enhancements empower your alerting strategi
 
 [discrete]
 ==== Support for case file attachments through API actions 
-The latest enhancements to Kibana Cases introduce highly requested functionality for managing security incidents and workflows. You can now use the public API to attach files to cases to enrich them with supporting documentation, evidence, and other critical information. This improvement marks a significant enhancement in case management, providing incident response teams with greater flexibility to include all relevant details directly within their cases.
+The latest enhancements to {kib} Cases introduce highly requested functionality for managing security incidents and workflows. You can now use the public API to attach files to cases to enrich them with supporting documentation, evidence, and other critical information. This improvement marks a significant enhancement in case management, providing incident response teams with greater flexibility to include all relevant details directly within their cases.
 
 Additionally, this release expands integration capabilities with third-party systems such as ServiceNow and Tines. You can now programmatically update cases through API calls from external platforms, streamlining workflows and fostering seamless collaboration across tools. These features make it easier to automate case updates and efficiently track complex security incidents in real time. For more details, check out the https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createcasedefaultspace[API documentation].
 
 [discrete]
-==== Kibana Connector now supports Jira Data Center
-This release introduces support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with Kibana, enabling more efficient workflows and streamlined incident management.
+==== Jira Connector now supports Jira Data Center
+This release introduces support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with {kib}, enabling more efficient workflows and streamlined incident management.
 
 With this update, users can create and manage Jira issues directly from {kib}, regardless of their Jira deployment model. This expanded compatibility highlights our commitment to supporting diverse customer deployment setups and delivering enhanced functionality tailored to enterprise environments.
 
