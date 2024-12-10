@@ -64,7 +64,6 @@ packages/core/base/core-base-server-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-browser-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-mocks @elastic/appex-sharedux
-packages/core/deprecations/core-deprecations-browser-internal @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
 packages/core/deprecations/core-deprecations-common @elastic/kibana-core
 packages/core/deprecations/core-deprecations-server @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/custom-branding/server @elastic/appex-sharedux
 src/core/packages/custom-branding/server-internal @elastic/appex-sharedux
 src/core/packages/custom-branding/server-mocks @elastic/appex-sharedux
 src/core/packages/deprecations/browser @elastic/kibana-core
+src/core/packages/deprecations/browser-internal @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
