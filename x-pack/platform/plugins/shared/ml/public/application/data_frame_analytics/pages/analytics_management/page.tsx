@@ -16,7 +16,7 @@ import { useRefreshInterval } from './components/analytics_list/use_refresh_inte
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-import { JobMap } from '../job_map';
+// import { JobMap } from '../job_map';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
@@ -71,16 +71,16 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} forceRefresh={isLoading} />
       <UpgradeWarning />
 
-      {selectedTabId === 'map' && (mapJobId || mapModelId) && (
+      {/* {selectedTabId === 'map' && (mapJobId || mapModelId) && (
         <JobMap analyticsId={mapJobId} modelId={mapModelId} />
-      )}
-      {selectedTabId === 'data_frame_analytics' && (
-        <DataFrameAnalyticsList
-          blockRefresh={blockRefresh}
-          pageState={dfaPageState}
-          updatePageState={setDfaPageState}
-        />
-      )}
+      )} */}
+      {/* {selectedTabId === 'data_frame_analytics' && ( */}
+      <DataFrameAnalyticsList
+        blockRefresh={blockRefresh}
+        pageState={dfaPageState}
+        updatePageState={setDfaPageState}
+      />
+      {/* )} */}
       <HelpMenu docLink={helpLink} />
     </>
   );

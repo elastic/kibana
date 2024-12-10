@@ -6,14 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
-import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
 import { MlPageHeader } from '../../../../components/page_header';
 
 export interface PageProps {
@@ -32,18 +32,16 @@ export const Page: FC<PageProps> = ({
   extraButtons?: React.ReactNode;
 }) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
-  const navigateToPath = useNavigateToPath();
+  const mlLocator = useMlManagementLocator();
 
-  const onObjectSelection = useCallback(
-    (id: string, type: string, name?: string) => {
-      navigateToPath(
-        `${nextStepPath}?${
-          type === 'index-pattern' ? 'index' : 'savedSearchId'
-        }=${encodeURIComponent(id)}`
-      );
-    },
-    [navigateToPath, nextStepPath]
-  );
+  const onObjectSelection = async (id: string, type: string, name?: string) => {
+    await mlLocator?.navigate({
+      sectionId: 'ml',
+      appId: `anomaly_detection/${nextStepPath}?${
+        type === 'index-pattern' ? 'index' : 'savedSearchId'
+      }=${encodeURIComponent(id)}`,
+    });
+  };
 
   return (
     <div data-test-subj="mlPageSourceSelection">
