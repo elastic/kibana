@@ -788,6 +788,10 @@
       }
     }
   },
+  "cloud": {
+    "dynamic": false,
+    "properties": {}
+  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}
@@ -1060,6 +1064,10 @@
   "entity-engine-status": {
     "dynamic": false,
     "properties": {
+      "fieldHistoryLength": {
+        "index": false,
+        "type": "integer"
+      },
       "filter": {
         "type": "keyword"
       },
@@ -1505,6 +1513,10 @@
       "favoriteIds": {
         "type": "keyword"
       },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
       "type": {
         "type": "keyword"
       },
@@ -1581,6 +1593,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1703,6 +1716,9 @@
   },
   "fleet-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -1770,6 +1786,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -1944,6 +1963,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -2288,6 +2308,9 @@
   },
   "ingest-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2356,6 +2379,9 @@
           }
         }
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "updated_at": {
         "type": "date"
       },
@@ -2369,6 +2395,18 @@
   },
   "ingest_manager_settings": {
     "properties": {
+      "delete_unenrolled_agents": {
+        "properties": {
+          "enabled": {
+            "index": false,
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "index": false,
+            "type": "boolean"
+          }
+        }
+      },
       "fleet_server_hosts": {
         "type": "keyword"
       },
@@ -2821,6 +2859,26 @@
       }
     }
   },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "date"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
+      }
+    }
+  },
   "query": {
     "dynamic": false,
     "properties": {
@@ -2846,6 +2904,9 @@
       },
       "enabled": {
         "type": "boolean"
+      },
+      "excludeAlertStatuses": {
+        "type": "keyword"
       },
       "filter": {
         "dynamic": false,
@@ -3530,6 +3591,10 @@
     }
   },
   "synthetics-param": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-private-location": {
     "dynamic": false,
     "properties": {}
   },

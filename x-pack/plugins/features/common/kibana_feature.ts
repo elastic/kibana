@@ -11,6 +11,7 @@ import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
+import { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
 
 /**
  * Enum for allowed feature scope values.
@@ -107,11 +108,12 @@ export interface KibanaFeatureConfig {
   catalogue?: readonly string[];
 
   /**
-   * If your feature grants access to specific Alert Types, you can specify them here to control visibility based on the current space.
-   * Include both Alert Types registered by the feature and external Alert Types such as built-in
-   * Alert Types and Alert Types provided by other features to which you wish to grant access.
+   * If your feature grants access to specific rule types, you can specify them here to control visibility based on the current space.
+   * Include both rule types registered by the feature and external rule types such as built-in
+   * rule types and rule types provided by other features to which you wish to grant access. For each rule type
+   * you can specify the consumers the feature has access to.
    */
-  alerting?: readonly string[];
+  alerting?: AlertingKibanaPrivilege;
 
   /**
    * If your feature grants access to specific case types, you can specify them here to control visibility based on the current space.
@@ -164,6 +166,18 @@ export interface KibanaFeatureConfig {
    * Indicates whether the feature is available in Security Feature Privileges and the Spaces Visibility Toggles.
    */
   scope?: readonly KibanaFeatureScope[];
+
+  /**
+   * If defined, the feature is considered deprecated and won't be available to users when configuring roles or Spaces.
+   */
+  readonly deprecated?: Readonly<{
+    /**
+     * The mandatory, localizable, user-facing notice that will be displayed to users whenever we need to explain why a
+     * feature is deprecated and what they should rely on instead. The notice can also include links to more detailed
+     * documentation.
+     */
+    notice: string;
+  }>;
 }
 
 export class KibanaFeature {
@@ -177,6 +191,10 @@ export class KibanaFeature {
 
   public get id() {
     return this.config.id;
+  }
+
+  public get deprecated() {
+    return this.config.deprecated;
   }
 
   public get hidden() {

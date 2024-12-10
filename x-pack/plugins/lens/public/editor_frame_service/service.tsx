@@ -24,7 +24,7 @@ import {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { Document } from '../persistence/saved_object_store';
+import { LensDocument } from '../persistence/saved_object_store';
 import {
   Datasource,
   Visualization,
@@ -93,7 +93,7 @@ export class EditorFrameService {
    * This is an asynchronous process.
    * @param doc parsed Lens saved object
    */
-  public documentToExpression = async (doc: Document, services: EditorFramePlugins) => {
+  public documentToExpression = async (doc: LensDocument, services: EditorFramePlugins) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       this.loadDatasources(),
       this.loadVisualizations(),

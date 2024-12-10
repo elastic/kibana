@@ -40,7 +40,6 @@ import type {
   TimeframePreviewOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
@@ -90,8 +89,6 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
 
-  const isLoggingRequestsFeatureEnabled = useIsExperimentalFeatureEnabled('loggingRequestsEnabled');
-
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
     if (spaces) {
@@ -110,6 +107,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const [showElasticsearchRequests, setShowElasticsearchRequests] = useState(false);
 
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+
+  const isLoggedRequestsSupported = RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType);
 
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
@@ -197,7 +196,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         interval: scheduleRuleData.interval,
         lookback: scheduleRuleData.from,
       },
-      enableLoggedRequests: showElasticsearchRequests,
+      enableLoggedRequests: showElasticsearchRequests && isLoggedRequestsSupported,
     });
     setIsRefreshing(true);
   }, [
@@ -208,6 +207,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     startDate,
     startTransaction,
     showElasticsearchRequests,
+    isLoggedRequestsSupported,
   ]);
 
   const isDirty = useMemo(
@@ -282,8 +282,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      {isLoggingRequestsFeatureEnabled &&
-      RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType) ? (
+      {isLoggedRequestsSupported ? (
         <EuiFormRow>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
             <EuiFlexItem grow>
@@ -316,7 +315,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         logs={logs}
         hasNoiseWarning={hasNoiseWarning}
         isAborted={isAborted}
-        showElasticsearchRequests={showElasticsearchRequests}
+        showElasticsearchRequests={showElasticsearchRequests && isLoggedRequestsSupported}
       />
     </div>
   );

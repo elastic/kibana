@@ -18,6 +18,7 @@ import {
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
+import { getOriginalId } from '@kbn/transpose-utils';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -83,10 +84,6 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   return displayStops;
 }
 
-function getId(id: string) {
-  return id;
-}
-
 export function getNumericValue(rowValue: number | number[] | undefined) {
   if (rowValue == null || Array.isArray(rowValue)) {
     return;
@@ -94,11 +91,7 @@ export function getNumericValue(rowValue: number | number[] | undefined) {
   return rowValue;
 }
 
-export const findMinMaxByColumnId = (
-  columnIds: string[],
-  table: Datatable | undefined,
-  getOriginalId: (id: string) => string = getId
-) => {
+export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | undefined) => {
   const minMax: Record<string, { min: number; max: number; fallback?: boolean }> = {};
 
   if (table != null) {

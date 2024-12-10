@@ -40,7 +40,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -57,11 +57,9 @@
           "\nThe Lazily-loaded `ColorPicker` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
         ],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, maxDepth, layerIndex, }: ",
           "ColorPickerProps",
-          "> & { readonly _result: ({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, maxDepth, layerIndex, }: ",
-          "ColorPickerProps",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
         "deprecated": false,
@@ -78,7 +76,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -130,7 +128,7 @@
           "\nRender current time line annotation on @elastic/charts `Chart`"
         ],
         "signature": [
-          "({ isDarkMode, domainEnd }: React.PropsWithChildren<CurrentTimeProps>) => JSX.Element"
+          "({ isDarkMode, domainEnd }: CurrentTimeProps) => React.JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/current_time.tsx",
         "deprecated": false,
@@ -139,12 +137,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.CurrentTime.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ isDarkMode, domainEnd }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<CurrentTimeProps>"
+              "CurrentTimeProps"
             ],
             "path": "src/plugins/charts/public/static/components/current_time.tsx",
             "deprecated": false,
@@ -165,7 +163,7 @@
         "signature": [
           "({ icon, iconColor, message, dataTestSubj, className, renderComplete, }: ",
           "EmptyPlaceholderProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
         "deprecated": false,
@@ -198,7 +196,7 @@
         "label": "Endzones",
         "description": [],
         "signature": [
-          "({ isDarkMode, domainStart, domainEnd, interval, domainMin, domainMax, hideTooltips, isFullBin, }: React.PropsWithChildren<EndzonesProps>) => JSX.Element"
+          "({ isDarkMode, domainStart, domainEnd, interval, domainMin, domainMax, hideTooltips, isFullBin, }: EndzonesProps) => React.JSX.Element"
         ],
         "path": "src/plugins/charts/public/static/components/endzones.tsx",
         "deprecated": false,
@@ -207,12 +205,12 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.Endzones.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  isDarkMode,\n  domainStart,\n  domainEnd,\n  interval,\n  domainMin,\n  domainMax,\n  hideTooltips = true,\n  isFullBin = false,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<EndzonesProps>"
+              "EndzonesProps"
             ],
             "path": "src/plugins/charts/public/static/components/endzones.tsx",
             "deprecated": false,
@@ -390,7 +388,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -407,11 +405,9 @@
           "\nThe Lazily-loaded `LegendToggle` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
         ],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<React.MemoExoticComponent<({ onClick, showLegend, legendPosition }: ",
           "LegendToggleProps",
-          "> & { readonly _result: React.MemoExoticComponent<({ onClick, showLegend, legendPosition }: ",
-          "LegendToggleProps",
-          ") => JSX.Element>; }"
+          ") => React.JSX.Element>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
         "deprecated": false,
@@ -428,7 +424,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -696,7 +692,7 @@
         "label": "Warnings",
         "description": [],
         "signature": [
-          "({\n  warnings,\n  compressed = false,\n  'data-test-subj': dataTestSubj = 'chart-inline-warning-button',\n}: { warnings: React.ReactNode[]; compressed?: boolean | undefined; 'data-test-subj'?: string | undefined; }) => JSX.Element | null"
+          "({\n  warnings,\n  compressed = false,\n  'data-test-subj': dataTestSubj = 'chart-inline-warning-button',\n}: { warnings: React.ReactNode[]; compressed?: boolean | undefined; 'data-test-subj'?: string | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/charts/public/static/components/warnings.tsx",
         "deprecated": false,
@@ -2225,22 +2221,6 @@
       "children": [
         {
           "parentPluginId": "charts",
-          "id": "def-public.ChartsPluginSetup.legacyColors",
-          "type": "Object",
-          "tags": [],
-          "label": "legacyColors",
-          "description": [],
-          "signature": [
-            "{ readonly seedColors: string[]; readonly mappedColors: ",
-            "MappedColors",
-            "; createColorLookupFunction: (arrayOfStringsOrNumbers?: (string | number)[] | undefined, colorMapping?: Partial<Record<string, string>>) => (value: string | number) => any; }"
-          ],
-          "path": "src/plugins/charts/public/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "charts",
           "id": "def-public.ChartsPluginSetup.theme",
           "type": "Object",
           "tags": [],
@@ -3378,7 +3358,7 @@
         "label": "AllowedSettingsOverrides",
         "description": [],
         "signature": [
-          "{ settings?: { theme?: ",
+          "{ settings?: { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -3414,7 +3394,7 @@
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabelledBy?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; } | undefined; }"
         ],

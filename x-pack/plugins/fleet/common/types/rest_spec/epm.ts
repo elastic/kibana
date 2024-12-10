@@ -7,6 +7,7 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
+import type { PackageSpecIcon } from '../models/package_spec';
 import type {
   AssetReference,
   CategorySummaryList,
@@ -24,8 +25,6 @@ import type {
 
 export interface GetCategoriesRequest {
   query: {
-    // deprecated in 8.6
-    experimental?: boolean;
     prerelease?: boolean;
     include_policy_templates?: boolean;
   };
@@ -33,15 +32,11 @@ export interface GetCategoriesRequest {
 
 export interface GetCategoriesResponse {
   items: CategorySummaryList;
-  // deprecated in 8.0
-  response?: CategorySummaryList;
 }
 
 export interface GetPackagesRequest {
   query: {
     category?: string;
-    // deprecated in 8.6
-    experimental?: boolean;
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
   };
@@ -49,8 +44,6 @@ export interface GetPackagesRequest {
 
 export interface GetPackagesResponse {
   items: PackageList;
-  // deprecated in 8.0
-  response?: PackageList;
 }
 
 export interface InstalledPackage {
@@ -61,6 +54,9 @@ export interface InstalledPackage {
     name: string;
     title: string;
   }>;
+  title?: string;
+  description?: string;
+  icons?: PackageSpecIcon[];
 }
 export interface GetInstalledPackagesResponse {
   items: InstalledPackage[];
@@ -75,8 +71,6 @@ export interface GetEpmDataStreamsResponse {
 }
 export interface GetLimitedPackagesResponse {
   items: string[];
-  // deprecated in 8.0
-  response?: string[];
 }
 
 export interface GetFileRequest {
@@ -89,8 +83,6 @@ export interface GetFileRequest {
 
 export interface GetInfoRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
   };
@@ -99,14 +91,10 @@ export interface GetInfoRequest {
 export interface GetInfoResponse {
   item: PackageInfo;
   metadata?: PackageMetadata;
-  // deprecated in 8.0
-  response?: PackageInfo;
 }
 
 export interface UpdatePackageRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
   };
@@ -117,8 +105,6 @@ export interface UpdatePackageRequest {
 
 export interface UpdatePackageResponse {
   item: PackageInfo;
-  // deprecated in 8.0
-  response?: PackageInfo;
 }
 
 export interface GetStatsRequest {
@@ -133,8 +119,6 @@ export interface GetStatsResponse {
 
 export interface InstallPackageRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
   };
@@ -145,8 +129,6 @@ export interface InstallPackageResponse {
   _meta: {
     install_source: InstallSource;
   };
-  // deprecated in 8.0
-  response?: AssetReference[];
 }
 
 export interface IBulkInstallPackageHTTPError {
@@ -160,7 +142,7 @@ export interface InstallResult {
   status?: InstallResultStatus;
   error?: Error;
   installType: InstallType;
-  installSource: InstallSource;
+  installSource?: InstallSource;
 }
 
 export interface BulkInstallPackageInfo {
@@ -171,8 +153,6 @@ export interface BulkInstallPackageInfo {
 
 export interface BulkInstallPackagesResponse {
   items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
-  // deprecated in 8.0
-  response?: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
 }
 
 export interface BulkInstallPackagesRequest {
@@ -187,16 +167,15 @@ export interface MessageResponse {
 
 export interface DeletePackageRequest {
   params: {
-    // deprecated in 8.0
-    pkgkey?: string;
     pkgName: string;
     pkgVersion: string;
+  };
+  query: {
+    force?: boolean;
   };
 }
 
 export interface DeletePackageResponse {
-  // deprecated in 8.0
-  response?: AssetReference[];
   items: AssetReference[];
 }
 export interface GetVerificationKeyIdResponse {

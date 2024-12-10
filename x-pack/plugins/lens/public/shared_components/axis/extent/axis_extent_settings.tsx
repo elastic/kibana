@@ -111,7 +111,7 @@ export function AxisBoundsControl({
           label={i18n.translate('xpack.lens.fullExtent.niceValues', {
             defaultMessage: 'Round to nice values',
           })}
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           fullWidth
         >
           <EuiSwitch

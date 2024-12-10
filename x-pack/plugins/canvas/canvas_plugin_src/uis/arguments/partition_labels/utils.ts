@@ -18,7 +18,7 @@ export const getFieldValue = (
   defaultValue?: unknown
 ) => {
   if (!ast) {
-    return null;
+    return undefined;
   }
 
   return get(ast, getFieldPath(field), defaultValue);

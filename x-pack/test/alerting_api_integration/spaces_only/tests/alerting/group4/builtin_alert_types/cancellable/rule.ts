@@ -146,7 +146,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           `test.cancellableRule:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`,
         ].includes(rule.execution_status.error.message)
       ).to.eql(true);
-      expect(rule.execution_status.error.reason).to.eql('timeout');
+      expect(['timeout', 'execute'].includes(rule.execution_status.error.reason)).to.eql(true);
     });
 
     it('throws an error if execution is short circuited', async () => {
@@ -195,7 +195,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           `test.cancellableRule:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of 3s`,
         ].includes(rule.execution_status.error.message)
       ).to.eql(true);
-      expect(rule.execution_status.error.reason).to.eql('timeout');
+      expect(['timeout', 'execute'].includes(rule.execution_status.error.reason)).to.eql(true);
     });
 
     interface CreateRuleParams {

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import {
-  GetPolicyResponseSchema,
-  GetAgentPolicySummaryRequestSchema,
-} from '../../../../common/api/endpoint';
+import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
 import type { EndpointAppContext } from '../../types';
-import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
-import {
-  AGENT_POLICY_SUMMARY_ROUTE,
-  BASE_POLICY_RESPONSE_ROUTE,
-} from '../../../../common/endpoint/constants';
+import { getHostPolicyResponseHandler } from './handlers';
+import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
-export function registerPolicyRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+export function registerPolicyRoutes(
+  router: SecuritySolutionPluginRouter,
+  endpointAppContext: EndpointAppContext
+) {
   const logger = endpointAppContext.logFactory.get('endpointPolicy');
 
   router.versioned
@@ -32,6 +29,11 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
     .addVersion(
       {
         version: '2023-10-31',
+        security: {
+          authz: {
+            requiredPrivileges: ['securitySolution'],
+          },
+        },
         validate: {
           request: GetPolicyResponseSchema,
         },
@@ -39,32 +41,7 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       withEndpointAuthz(
         { any: ['canReadSecuritySolution', 'canAccessFleet'] },
         logger,
-        getHostPolicyResponseHandler()
-      )
-    );
-
-  /**
-   * @deprecated
-   * @removeBy 9.0.0
-   *
-   */
-  router.versioned
-    .get({
-      access: 'public',
-      path: AGENT_POLICY_SUMMARY_ROUTE,
-      options: { authRequired: true },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: GetAgentPolicySummaryRequestSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canAccessEndpointManagement'] },
-        logger,
-        getAgentPolicySummaryHandler(endpointAppContext)
+        getHostPolicyResponseHandler(endpointAppContext.service)
       )
     );
 }

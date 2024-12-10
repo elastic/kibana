@@ -13,30 +13,44 @@ import {
   LICENCE_FOR_MULTIPLE_AGENT_POLICIES,
 } from '../../../common/constants';
 import { getAllowedOutputTypesForIntegration } from '../../../common/services/output_helpers';
-import type { PackagePolicy, NewPackagePolicy, PackagePolicySOAttributes } from '../../types';
-import { PackagePolicyMultipleAgentPoliciesError, PackagePolicyOutputError } from '../../errors';
+import type {
+  PackagePolicy,
+  NewPackagePolicy,
+  PackagePolicySOAttributes,
+  PackageInfo,
+} from '../../types';
+import {
+  PackagePolicyMultipleAgentPoliciesError,
+  PackagePolicyOutputError,
+  PackagePolicyContentPackageError,
+} from '../../errors';
 import { licenseService } from '../license';
 import { outputService } from '../output';
 import { appContextService } from '../app_context';
 
-export const mapPackagePolicySavedObjectToPackagePolicy = ({
-  id,
-  version,
-  attributes,
-  namespaces,
-}: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
+export const mapPackagePolicySavedObjectToPackagePolicy = (
+  { id, version, attributes }: SavedObject<PackagePolicySOAttributes>,
+  namespaces?: string[]
+): PackagePolicy => {
+  const { bump_agent_policy_revision: bumpAgentPolicyRevision, ...restAttributes } = attributes;
   return {
     id,
     version,
-    spaceIds: namespaces,
-    ...attributes,
+    ...(namespaces ? { spaceIds: namespaces } : {}),
+    ...restAttributes,
   };
 };
 
 export async function preflightCheckPackagePolicy(
   soClient: SavedObjectsClientContract,
-  packagePolicy: PackagePolicy | NewPackagePolicy
+  packagePolicy: PackagePolicy | NewPackagePolicy,
+  packageInfo?: Pick<PackageInfo, 'type'>
 ) {
+  // Package policies cannot be created for content type packages
+  if (packageInfo?.type === 'content') {
+    throw new PackagePolicyContentPackageError('Cannot create policy for content only packages');
+  }
+
   // If package policy has multiple agent policies IDs, or no agent policies (orphaned integration policy)
   // check if user can use multiple agent policies feature
   const { canUseReusablePolicies, errorMessage: canUseMultipleAgentPoliciesErrorMessage } =

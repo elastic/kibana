@@ -97,5 +97,21 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
     });
+
+    describe('POST /agent_policies', () => {
+      it('should create fleet-server-policy in the default space', async () => {
+        const res = await apiClient.createAgentPolicy('default', {
+          has_fleet_server: true,
+        });
+        expect(res.item.id).to.eql('fleet-server-policy');
+      });
+
+      it('should create fleet-server-policy in the test space', async () => {
+        const res = await apiClient.createAgentPolicy(TEST_SPACE_1, {
+          has_fleet_server: true,
+        });
+        expect(res.item.id).to.eql(`${TEST_SPACE_1}-fleet-server-policy`);
+      });
+    });
   });
 }

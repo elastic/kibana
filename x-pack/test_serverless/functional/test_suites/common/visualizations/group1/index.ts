@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens serverless - group 1', function () {
+  describe('lens serverless - group 1 - subgroup 1', function () {
     this.tags(['esGate']);
 
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
@@ -73,8 +73,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./smokescreen.ts'));
-    loadTestFile(require.resolve('./tsdb.ts'));
-    loadTestFile(require.resolve('./vega_chart.ts'));
+    loadTestFile(require.resolve('./smokescreen.ts')); // 14m 25s
+    loadTestFile(require.resolve('./vega_chart.ts')); // 3m
   });
 };

@@ -12,7 +12,8 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { InventoryContextProvider } from '../../context/inventory_context_provider';
-import { InventorySearchBarContextProvider } from '../../context/inventory_search_bar_context_provider';
+import { KibanaEnvironment } from '../../hooks/use_kibana';
+import { UnifiedSearchProvider } from '../../hooks/use_unified_search_context';
 import { inventoryRouter } from '../../routes/config';
 import { InventoryServices } from '../../services/types';
 import { InventoryStartDependencies } from '../../types';
@@ -23,10 +24,12 @@ export function AppRoot({
   pluginsStart,
   services,
   appMountParameters,
+  kibanaEnvironment,
 }: {
   coreStart: CoreStart;
   pluginsStart: InventoryStartDependencies;
   services: InventoryServices;
+  kibanaEnvironment: KibanaEnvironment;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
@@ -34,17 +37,18 @@ export function AppRoot({
     ...coreStart,
     ...pluginsStart,
     ...services,
+    kibanaEnvironment,
   };
 
   return (
     <InventoryContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <InventorySearchBarContextProvider>
-          <RouterProvider history={history} router={inventoryRouter}>
+        <RouterProvider history={history} router={inventoryRouter as any}>
+          <UnifiedSearchProvider>
             <RouteRenderer />
             <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
-          </RouterProvider>
-        </InventorySearchBarContextProvider>
+          </UnifiedSearchProvider>
+        </RouterProvider>
       </RedirectAppLinks>
     </InventoryContextProvider>
   );

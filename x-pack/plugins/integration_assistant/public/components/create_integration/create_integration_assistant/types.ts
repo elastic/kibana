@@ -35,4 +35,5 @@ export interface IntegrationSettings {
   inputTypes?: InputType[];
   logSamples?: string[];
   samplesFormat?: SamplesFormat;
+  apiDefinition?: string;
 }

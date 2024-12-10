@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarForm CalendarId shown as title when editing 1`] = `null`;
+
+exports[`CalendarForm Renders calendar form 1`] = `
+<EuiForm
+  data-test-subj="mlCalendarFormNew"
+>
+  <MlPageHeader>
+    <MemoizedFormattedMessage
+      defaultMessage="Create new calendar"
+      id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+    />
+  </MlPageHeader>
+  <EuiFormRow
+    error={
+      Array [
+        "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
+      ]
+    }
+    isInvalid={true}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Calendar ID"
+        id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
+      />
+    }
+  >
+    <EuiFieldText
+      data-test-subj="mlCalendarIdInput"
+      disabled={false}
+      name="calendarId"
+      onChange={[MockFunction]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFormRow
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Jobs"
+        id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+      />
+    }
+  >
+    <EuiComboBox
+      async={false}
+      compressed={false}
+      data-test-subj="mlCalendarJobSelection"
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[MockFunction]}
+      optionMatcher={[Function]}
+      options={Array []}
+      selectedOptions={Array []}
+      singleSelection={false}
+      sortMatchesBy="none"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Groups"
+        id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
+      />
+    }
+  >
+    <EuiComboBox
+      async={false}
+      compressed={false}
+      data-test-subj="mlCalendarJobGroupSelection"
+      fullWidth={false}
+      isClearable={true}
+      isDisabled={false}
+      onChange={[MockFunction]}
+      onCreateOption={[MockFunction]}
+      optionMatcher={[Function]}
+      options={Array []}
+      selectedOptions={Array []}
+      singleSelection={false}
+      sortMatchesBy="none"
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="xl"
+  />
+  <EuiFormRow
+    fullWidth={true}
+    label={
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Events"
+        id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
+      />
+    }
+  >
+    <EventsTable
+      eventsList={Array []}
+      onDeleteClick={[MockFunction]}
+      saving={false}
+      showImportModal={[MockFunction]}
+      showNewEventModal={[MockFunction]}
+      showSearchBar={false}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        isDisabled={false}
+      >
+        <MemoizedFormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
+        />
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="mlSaveCalendarButton"
+        fill={true}
+        isDisabled={true}
+        onClick={[MockFunction]}
+      >
+        <MemoizedFormattedMessage
+          defaultMessage="Save"
+          id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiForm>
+`;

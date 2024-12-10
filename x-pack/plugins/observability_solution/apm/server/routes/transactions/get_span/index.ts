@@ -7,7 +7,11 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { SPAN_ID, TRACE_ID } from '../../../../common/es_fields/apm';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { merge, omit } from 'lodash';
+import { maybe } from '../../../../common/utils/maybe';
+import { SPAN_ID, SPAN_STACKTRACE, TRACE_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../get_transaction';
@@ -38,6 +42,8 @@ export async function getSpan({
         track_total_hits: false,
         size: 1,
         terminate_after: 1,
+        fields: ['*'],
+        _source: [SPAN_STACKTRACE],
         query: {
           bool: {
             filter: asMutableArray([
@@ -60,5 +66,17 @@ export async function getSpan({
       : undefined,
   ]);
 
-  return { span: spanResp.hits.hits[0]?._source, parentTransaction };
+  const hit = maybe(spanResp.hits.hits[0]);
+  const spanFromSource = hit && 'span' in hit._source ? hit._source : undefined;
+
+  const event = unflattenKnownApmEventFields(hit?.fields as undefined | FlattenedApmEvent);
+
+  return {
+    span: event
+      ? merge({}, omit(event, 'span.links'), spanFromSource, {
+          processor: { event: 'span' as const, name: 'transaction' as const },
+        })
+      : undefined,
+    parentTransaction,
+  };
 }

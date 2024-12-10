@@ -31,7 +31,7 @@ export interface EmulatorServerPluginRegisterOptions<TServices extends Record<st
 }
 
 export interface EmulatorServerPlugin<TServices extends Record<string, any> = any>
-  extends Omit<HapiTypes.PluginBase<unknown>, 'register'> {
+  extends Omit<HapiTypes.PluginBase<unknown, unknown>, 'register'> {
   register: (options: EmulatorServerPluginRegisterOptions<TServices>) => void | Promise<void>;
   name: string;
   /**

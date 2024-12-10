@@ -18,6 +18,7 @@ import { PRECONFIGURED_CONNECTOR } from './translations';
 enum OpenAiProviderType {
   OpenAi = 'OpenAI',
   AzureAi = 'Azure OpenAI',
+  Other = 'Other',
 }
 
 interface GenAiConfig {

@@ -110,7 +110,7 @@ export interface IVectorStyle extends IStyle {
   getIconSvg(symbolId: string): string | undefined;
   isUsingCustomIcon(symbolId: string): boolean;
   hasLegendDetails: () => Promise<boolean>;
-  renderLegendDetails: () => ReactElement;
+  renderLegendDetails: () => ReactElement | null;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
   setFeatureStateAndStyleProps: (
     featureCollection: FeatureCollection,
@@ -721,14 +721,18 @@ export class VectorStyle implements IVectorStyle {
   };
 
   async hasLegendDetails() {
-    return this._getLegendDetailStyleProperties().length > 0;
+    return this._source.hasLegendDetails && this._source.renderLegendDetails
+      ? await this._source.hasLegendDetails()
+      : this._getLegendDetailStyleProperties().length > 0;
   }
 
   renderLegendDetails() {
     const symbolId = this._getSymbolId();
     const svg = symbolId ? this.getIconSvg(symbolId) : undefined;
 
-    return (
+    return this._source.renderLegendDetails ? (
+      this._source.renderLegendDetails(this)
+    ) : (
       <VectorStyleLegend
         masks={this._layer.getMasks()}
         styles={this._getLegendDetailStyleProperties()}

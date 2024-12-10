@@ -88,7 +88,7 @@ Object {
     "allowFromAnyIp": false,
     "ipAllowlist": Array [],
   },
-  "restrictInternalApis": false,
+  "restrictInternalApis": true,
   "rewriteBasePath": false,
   "securityResponseHeaders": Object {
     "crossOriginOpenerPolicy": "same-origin",

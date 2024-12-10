@@ -6135,13 +6135,52 @@
         "children": [
           {
             "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.TablesAdapter.logDatatable",
             "type": "Function",
             "tags": [],
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -6160,7 +6199,7 @@
                 "id": "def-public.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"
@@ -8634,11 +8673,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -9506,7 +9545,7 @@
             "label": "onData$",
             "description": [],
             "signature": [
-              "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
+              "(<TData, TInspectorAdapters extends unknown>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
@@ -12282,14 +12321,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-public.ExpressionRendererComponent.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12303,7 +12342,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -13588,7 +13627,7 @@
               "section": "def-public.ReactExpressionRendererProps",
               "text": "ReactExpressionRendererProps"
             },
-            ") => JSX.Element"
+            ") => React.JSX.Element"
           ],
           "path": "src/plugins/expressions/public/plugin.ts",
           "deprecated": false,
@@ -20111,11 +20150,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -28261,13 +28300,52 @@
         "children": [
           {
             "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.TablesAdapter.logDatatable",
             "type": "Function",
             "tags": [],
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -28286,7 +28364,7 @@
                 "id": "def-common.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"
@@ -33138,11 +33216,11 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/escount.ts"
+                "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/browser/esdocs.ts"
               },
               {
                 "plugin": "canvas",
@@ -38171,11 +38249,11 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
           },
           {
             "plugin": "canvas",
@@ -38187,19 +38265,19 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/public/functions/plot/index.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
           },
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/table.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/common/timefilterControl.ts"
           }
         ],
         "initialIsOpen": false
@@ -39704,9 +39782,7 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: ",
-              "Dictionary",
-              "<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -45633,7 +45709,7 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ">) => any"
+              ">) => string | number | boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
             "deprecated": false,

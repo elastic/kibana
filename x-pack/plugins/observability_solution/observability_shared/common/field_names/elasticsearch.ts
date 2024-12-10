@@ -107,6 +107,7 @@ export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname';
+export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';
@@ -144,3 +145,13 @@ export const PROFILE_ALLOC_OBJECTS = 'profile.alloc_objects.count';
 export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
 export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
 export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
+
+export const ENTITY = 'entity';
+export const ENTITY_ID = 'entity.id';
+export const ENTITY_TYPE = 'entity.type';
+export const ENTITY_LAST_SEEN = 'entity.last_seen_timestamp';
+export const ENTITY_FIRST_SEEN = 'entity.first_seen_timestamp';
+export const ENTITY_DISPLAY_NAME = 'entity.display_name';
+export const ENTITY_DEFINITION_ID = 'entity.definition_id';
+export const ENTITY_IDENTITY_FIELDS = 'entity.identity_fields';
+export const SOURCE_DATA_STREAM_TYPE = 'source_data_stream.type';

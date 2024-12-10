@@ -231,7 +231,7 @@ export const loadRule = (includeResponseActions = false) => {
       tags: [],
       license: '',
       interval: '1m',
-      from: 'now-120s',
+      from: 'now-360s',
       to: 'now',
       meta: { from: '1m', kibana_siem_app_url: 'http://localhost:5620/app/security' },
       actions: [],

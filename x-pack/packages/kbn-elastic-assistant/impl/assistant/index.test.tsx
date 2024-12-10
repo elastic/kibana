@@ -15,19 +15,20 @@ import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
 import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 
-import { useLocalStorage, useSessionStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
-import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
+import { TestProviders } from '../mock/test_providers/test_providers';
 import { useFetchCurrentUserConversations } from './api';
 import { Conversation } from '../assistant_context/types';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
 import { AIConnector } from '../connectorland/connector_selector';
-import { omit } from 'lodash';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
-jest.mock('react-use');
+jest.mock('react-use/lib/useLocalStorage');
+jest.mock('react-use/lib/useSessionStorage');
 
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
 jest.mock('./api/conversations/use_fetch_current_user_conversations');
@@ -53,7 +54,7 @@ const mockData = {
   },
 };
 
-const renderAssistant = async (extraProps = {}, providerProps = {}) => {
+const renderAssistant = async (extraProps = {}) => {
   const chatSendSpy = jest.spyOn(all, 'useChatSend');
   const assistant = render(
     <TestProviders>
@@ -140,84 +141,6 @@ describe('Assistant', () => {
   });
 
   describe('persistent storage', () => {
-    it('should refetchCurrentUserConversations after settings save button click', async () => {
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
-      await renderAssistant();
-
-      fireEvent.click(screen.getByTestId('settings'));
-
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: {
-          ...mockData,
-          welcome_id: {
-            ...mockData.welcome_id,
-            apiConfig: { newProp: true },
-          },
-        },
-        isLoading: false,
-        refetch: jest.fn().mockResolvedValue({
-          isLoading: false,
-          data: {
-            ...mockData,
-            welcome_id: {
-              ...mockData.welcome_id,
-              apiConfig: { newProp: true },
-            },
-          },
-        }),
-        isFetched: true,
-      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
-
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('save-button'));
-      });
-
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: {
-            apiConfig: { newProp: true },
-            category: 'assistant',
-            id: mockData.welcome_id.id,
-            messages: [],
-            title: 'Welcome',
-            replacements: {},
-          },
-        })
-      );
-    });
-
-    it('should refetchCurrentUserConversations after settings save button click, but do not update convos when refetch returns bad results', async () => {
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: mockData,
-        isLoading: false,
-        refetch: jest.fn().mockResolvedValue({
-          isLoading: false,
-          data: omit(mockData, 'welcome_id'),
-        }),
-        isFetched: true,
-      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
-      await renderAssistant();
-
-      fireEvent.click(screen.getByTestId('settings'));
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('save-button'));
-      });
-
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: {
-            apiConfig: { connectorId: '123' },
-            replacements: {},
-            category: 'assistant',
-            id: mockData.welcome_id.id,
-            messages: [],
-            title: 'Welcome',
-          },
-        })
-      );
-    });
-
     it('should delete conversation when delete button is clicked', async () => {
       await renderAssistant();
       const deleteButton = screen.getAllByTestId('delete-option')[0];
@@ -244,6 +167,7 @@ describe('Assistant', () => {
       });
     });
   });
+
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
       const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
@@ -386,12 +310,7 @@ describe('Assistant', () => {
 
   describe('when not authorized', () => {
     it('should be disabled', async () => {
-      const { queryByTestId } = await renderAssistant(
-        {},
-        {
-          assistantAvailability: { ...mockAssistantAvailability, isAssistantEnabled: false },
-        }
-      );
+      const { queryByTestId } = await renderAssistant({});
       expect(queryByTestId('prompt-textarea')).toHaveProperty('disabled');
     });
   });

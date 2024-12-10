@@ -16,12 +16,7 @@ import {
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import {
-  apiPublishesDataLoading,
-  ComparatorDefinition,
-  PhaseEvent,
-  StateComparators,
-} from '@kbn/presentation-publishing';
+import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switchMap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
@@ -31,6 +26,7 @@ import {
   DefaultEmbeddableApi,
   SetReactEmbeddableApiRegistration,
 } from './types';
+import { PhaseTracker } from './phase_tracker';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -69,6 +65,7 @@ export const ReactEmbeddableRenderer = <
     | 'hideLoader'
     | 'hideHeader'
     | 'hideInspector'
+    | 'getActions'
   >;
   hidePanelChrome?: boolean;
   /**
@@ -78,46 +75,21 @@ export const ReactEmbeddableRenderer = <
   onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
-  const firstLoadCompleteTime = useRef<number | null>(null);
+  const phaseTracker = useRef(new PhaseTracker());
 
   const componentPromise = useMemo(
     () => {
       const uuid = maybeId ?? generateId();
 
       /**
-       * Phase tracking instrumentation for telemetry
-       */
-      const phase$ = new BehaviorSubject<PhaseEvent | undefined>(undefined);
-      const embeddableStartTime = performance.now();
-      const reportPhaseChange = (loading: boolean) => {
-        if (firstLoadCompleteTime.current === null) {
-          firstLoadCompleteTime.current = performance.now();
-        }
-        const duration = firstLoadCompleteTime.current - embeddableStartTime;
-        phase$.next({ id: uuid, status: loading ? 'loading' : 'rendered', timeToEvent: duration });
-      };
-
-      /**
        * Build the embeddable promise
        */
       return (async () => {
         const parentApi = getParentApi();
-        const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
         const subscriptions = new Subscription();
 
-        const setApi = (
-          apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
-        ) => {
-          return {
-            ...apiRegistration,
-            uuid,
-            phase$,
-            parentApi,
-            type: factory.type,
-          } as unknown as Api;
-        };
-
         const buildEmbeddable = async () => {
+          const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
           const serializedState = parentApi.getSerializedStateForChild(uuid);
           const lastSavedRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
@@ -130,6 +102,23 @@ export const ReactEmbeddableRenderer = <
             : ({} as Partial<RuntimeState>);
 
           const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
+
+          const setApi = (
+            apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
+          ) => {
+            const hasLockedHoverActions$ = new BehaviorSubject(false);
+            return {
+              ...apiRegistration,
+              uuid,
+              phase$: phaseTracker.current.getPhase$(),
+              parentApi,
+              hasLockedHoverActions$,
+              lockHoverActions: (lock: boolean) => {
+                hasLockedHoverActions$.next(lock);
+              },
+              type: factory.type,
+            } as unknown as Api;
+          };
 
           const buildApi = (
             apiRegistration: BuildReactEmbeddableApiRegistration<
@@ -179,7 +168,11 @@ export const ReactEmbeddableRenderer = <
               ...unsavedChanges.api,
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
-            cleanupFunction.current = () => unsavedChanges.cleanup();
+            cleanupFunction.current = () => {
+              subscriptions.unsubscribe();
+              phaseTracker.current.cleanup();
+              unsavedChanges.cleanup();
+            };
             return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 
@@ -192,13 +185,8 @@ export const ReactEmbeddableRenderer = <
             lastSavedRuntimeState
           );
 
-          if (apiPublishesDataLoading(api)) {
-            subscriptions.add(
-              api.dataLoading.subscribe((loading) => reportPhaseChange(Boolean(loading)))
-            );
-          } else {
-            reportPhaseChange(false);
-          }
+          phaseTracker.current.trackPhaseEvents(uuid, api);
+
           return { api, Component };
         };
 

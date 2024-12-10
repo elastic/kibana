@@ -548,6 +548,8 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -557,9 +559,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -605,6 +609,7 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:read",
       ],
       "app": Array [
         "dashboards",
@@ -707,6 +712,8 @@ Array [
       },
       "api": Array [
         "fileUpload:analyzeFile",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -716,9 +723,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -753,6 +762,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -877,6 +889,9 @@ exports[`buildOSSFeatures with a basic license returns the indexPatterns feature
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "indexPatterns:manage",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -997,6 +1012,10 @@ exports[`buildOSSFeatures with a basic license returns the savedQueryManagement 
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1012,6 +1031,21 @@ Array [
       ],
     },
     "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "query",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
   },
 ]
 `;
@@ -1030,7 +1064,10 @@ Array [
           "read": Array [],
         },
       },
-      "api": Array [],
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",
@@ -1039,9 +1076,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1074,6 +1113,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",
@@ -1170,6 +1212,8 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -1179,9 +1223,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1227,6 +1273,7 @@ Array [
       "api": Array [
         "bulkGetUserProfiles",
         "dashboardUsageStats",
+        "savedQuery:read",
       ],
       "app": Array [
         "dashboards",
@@ -1329,6 +1376,8 @@ Array [
       },
       "api": Array [
         "fileUpload:analyzeFile",
+        "savedQuery:manage",
+        "savedQuery:read",
         "store_search_session",
       ],
       "app": Array [
@@ -1338,9 +1387,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1375,6 +1426,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -1499,6 +1553,9 @@ exports[`buildOSSFeatures with a enterprise license returns the indexPatterns fe
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "indexPatterns:manage",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1619,6 +1676,10 @@ exports[`buildOSSFeatures with a enterprise license returns the savedQueryManage
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1634,6 +1695,21 @@ Array [
       ],
     },
     "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "query",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
   },
 ]
 `;
@@ -1652,7 +1728,10 @@ Array [
           "read": Array [],
         },
       },
-      "api": Array [],
+      "api": Array [
+        "savedQuery:manage",
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",
@@ -1661,9 +1740,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1696,6 +1777,9 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "savedQuery:read",
+      ],
       "app": Array [
         "visualize",
         "lens",

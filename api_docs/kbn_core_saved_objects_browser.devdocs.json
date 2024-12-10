@@ -63,23 +63,23 @@
           },
           {
             "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
+            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
           },
           {
             "plugin": "transform",
-            "path": "x-pack/plugins/transform/public/app/app_dependencies.tsx"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-browser-mocks",
-            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+            "path": "x-pack/platform/plugins/private/transform/public/app/app_dependencies.tsx"
           },
           {
             "plugin": "@kbn/core",
             "path": "src/core/server/index.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-mocks",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
           }
         ],
         "children": [

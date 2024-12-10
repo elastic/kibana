@@ -14,8 +14,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5601",
-      "description": "local"
+      "url": "https://{kibana_url}",
+      "variables": {
+        "kibana_url": {
+          "default": "localhost:5601"
+        }
+      }
     }
   ],
   "tags": [
@@ -102,12 +106,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Get a paginated list of SLOs",
@@ -559,7 +558,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Successful request"
           },
           "400": {
@@ -625,7 +624,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Successful request",
             "content": {
               "application/json": {
@@ -738,12 +737,7 @@
               }
             }
           }
-        },
-        "servers": [
-          {
-            "url": "https://localhost:5601"
-          }
-        ]
+        }
       }
     }
   },
@@ -1653,20 +1647,25 @@
         "description": "Defines properties for SLO settings.",
         "type": "object",
         "properties": {
+          "syncField": {
+            "description": "The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.",
+            "type": "string",
+            "example": "event.ingested"
+          },
           "syncDelay": {
-            "description": "The synch delay to apply to the transform. Default 1m",
+            "description": "The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.",
             "type": "string",
             "default": "1m",
             "example": "5m"
           },
           "frequency": {
-            "description": "Configure how often the transform runs, default 1m",
+            "description": "The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.",
             "type": "string",
             "default": "1m",
             "example": "5m"
           },
           "preventInitialBackfill": {
-            "description": "Prevents the transform from backfilling data when it starts.",
+            "description": "Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.",
             "type": "boolean",
             "default": false,
             "example": true
@@ -1737,6 +1736,31 @@
             "$ref": "#/components/schemas/error_budget"
           }
         }
+      },
+      "group_by": {
+        "title": "Group by",
+        "description": "optional group by field or fields to use to generate an SLO per distinct value",
+        "example": [
+          [
+            "service.name"
+          ],
+          "service.name",
+          [
+            "service.name",
+            "service.environment"
+          ]
+        ],
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
       },
       "slo_with_summary_response": {
         "title": "SLO response",
@@ -1835,9 +1859,7 @@
             "example": true
           },
           "groupBy": {
-            "description": "optional group by field to use to generate an SLO per distinct value",
-            "type": "string",
-            "example": "some.field"
+            "$ref": "#/components/schemas/group_by"
           },
           "instanceId": {
             "description": "the value derived from the groupBy field, if present, otherwise '*'",
@@ -2046,9 +2068,7 @@
             "$ref": "#/components/schemas/settings"
           },
           "groupBy": {
-            "description": "optional group by field to use to generate an SLO per distinct value",
-            "type": "string",
-            "example": "some.field"
+            "$ref": "#/components/schemas/group_by"
           },
           "tags": {
             "description": "List of tags",
@@ -2141,6 +2161,9 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "groupBy": {
+            "$ref": "#/components/schemas/group_by"
           },
           "tags": {
             "description": "List of tags",
@@ -2243,9 +2266,7 @@
             "example": true
           },
           "groupBy": {
-            "description": "optional group by field to use to generate an SLO per distinct value",
-            "type": "string",
-            "example": "some.field"
+            "$ref": "#/components/schemas/group_by"
           },
           "tags": {
             "description": "List of tags",

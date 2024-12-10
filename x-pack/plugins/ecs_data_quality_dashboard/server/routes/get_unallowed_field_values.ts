@@ -19,6 +19,11 @@ export const getUnallowedFieldValuesRoute = (router: IRouter, logger: Logger) =>
     .post({
       path: GET_UNALLOWED_FIELD_VALUES,
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

@@ -79,8 +79,9 @@ Follow these steps to identify the header pattern:
 
  You ALWAYS follow these guidelines when writing your response:
  <guidelines>
- - Do not parse the message part in the regex. Just the header part should be in regex nad grok_pattern.
+ - Do not parse the message part in the regex. Just the header part should be in regex and grok_pattern.
  - Make sure to map the remaining message body to \'message\' in grok pattern.
+ - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 
@@ -121,8 +122,9 @@ Follow these steps to fix the errors in the header pattern:
 4. Make sure the regex and grok pattern matches all the header information. Only the structured message body should be under GREEDYDATA in grok pattern.
 You ALWAYS follow these guidelines when writing your response:
  <guidelines>
- - Do not parse the message part in the regex. Just the header part should be in regex nad grok_pattern.
+ - Do not parse the message part in the regex. Just the header part should be in regex and grok_pattern.
  - Make sure to map the remaining message body to \'message\' in grok pattern.
+ - Make sure to add \`{packageName}.{dataStreamName}\` as a prefix to each field in the pattern. Refer to example response.
  - Do not respond with anything except the processor as a JSON object enclosed with 3 backticks (\`), see example response above. Use strict JSON response format.
  </guidelines>
 

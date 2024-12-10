@@ -129,6 +129,60 @@ describe('PUT /internal/spaces/space/{id}/solution', () => {
     });
   });
 
+  it('should update the solution_type when it is search', async () => {
+    const payload = {
+      solution_type: 'search',
+    };
+
+    const { routeHandler, savedObjectsRepositoryMock } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      body: payload,
+      method: 'post',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status } = response;
+
+    expect(status).toEqual(200);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsRepositoryMock.update).toHaveBeenCalledWith('space', 'a-space', {
+      solution: 'es',
+      name: 'a space',
+      color: undefined,
+      description: undefined,
+      disabledFeatures: [],
+      imageUrl: undefined,
+      initials: undefined,
+    });
+  });
+
+  it('should failed when the solution_type is not the expected one', async () => {
+    const payload = {
+      solution_type: 'searchXoXo',
+    };
+
+    const { routeHandler } = await setup();
+
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        id: 'a-space',
+      },
+      body: payload,
+      method: 'post',
+    });
+
+    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+
+    const { status } = response;
+
+    expect(status).toEqual(500);
+  });
+
   it('should not allow a new space to be created', async () => {
     const payload = {
       solution: 'oblt',

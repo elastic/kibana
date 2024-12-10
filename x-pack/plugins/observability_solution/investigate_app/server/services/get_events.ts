@@ -6,7 +6,6 @@
  */
 
 import datemath from '@elastic/datemath';
-import { estypes } from '@elastic/elasticsearch';
 import {
   GetEventsParams,
   GetEventsResponse,
@@ -21,24 +20,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { AlertsClient } from './get_alerts_client';
-
-export function rangeQuery(
-  start: number,
-  end: number,
-  field = '@timestamp'
-): estypes.QueryDslQueryContainer[] {
-  return [
-    {
-      range: {
-        [field]: {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
-}
+import { rangeQuery } from '../lib/queries';
 
 export async function getAnnotationEvents(
   params: GetEventsParams,
@@ -113,7 +95,7 @@ export async function getAlertEvents(
       id: _source[ALERT_UUID],
       title: `${_source[ALERT_RULE_CATEGORY]} breached`,
       description: _source[ALERT_REASON],
-      timestamp: new Date(_source['@timestamp']).getTime(),
+      timestamp: new Date(_source[ALERT_START] as string).getTime(),
       eventType: 'alert',
       alertStatus: _source[ALERT_STATUS],
     };

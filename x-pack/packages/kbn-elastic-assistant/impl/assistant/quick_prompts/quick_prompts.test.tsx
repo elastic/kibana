@@ -32,15 +32,12 @@ const testTitle = 'SPL_QUERY_CONVERSION_TITLE';
 const testPrompt = 'SPL_QUERY_CONVERSION_PROMPT';
 const customTitle = 'A_CUSTOM_OPTION';
 
-jest.mock('react-use', () => ({
-  ...jest.requireActual('react-use'),
-  useMeasure: () => [
-    () => {},
-    {
-      width: 500,
-    },
-  ],
-}));
+jest.mock('react-use/lib/useMeasure', () => () => [
+  () => {},
+  {
+    width: 500,
+  },
+]);
 
 jest.mock('../../assistant_context', () => ({
   ...jest.requireActual('../../assistant_context'),

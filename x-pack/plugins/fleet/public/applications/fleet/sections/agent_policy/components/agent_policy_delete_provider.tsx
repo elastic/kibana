@@ -23,12 +23,13 @@ import {
   sendGetAgents,
 } from '../../../hooks';
 
-import type { PackagePolicy } from '../../../types';
+import type { AgentPolicy, PackagePolicy } from '../../../types';
 
 interface Props {
   children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
   hasFleetServer: boolean;
   packagePolicies?: PackagePolicy[];
+  agentPolicy: AgentPolicy;
 }
 
 export type DeleteAgentPolicy = (agentPolicy: string, onSuccess?: OnSuccessCallback) => void;
@@ -39,12 +40,13 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   children,
   hasFleetServer,
   packagePolicies,
+  agentPolicy,
 }) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
-  const [agentPolicy, setAgentPolicy] = useState<string>();
+  const [agentPolicyId, setAgentPolicyId] = useState<string>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
   const [agentsCount, setAgentsCount] = useState<number>(0);
@@ -56,20 +58,20 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const deleteAgentPolicyPrompt: DeleteAgentPolicy = (
-    agentPolicyToDelete,
+    agentPolicyIdToDelete,
     onSuccess = () => undefined
   ) => {
-    if (!agentPolicyToDelete) {
+    if (!agentPolicyIdToDelete) {
       throw new Error('No agent policy specified for deletion');
     }
     setIsModalOpen(true);
-    setAgentPolicy(agentPolicyToDelete);
-    fetchAgentsCount(agentPolicyToDelete);
+    setAgentPolicyId(agentPolicyIdToDelete);
+    fetchAgentsCount(agentPolicyIdToDelete);
     onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
-    setAgentPolicy(undefined);
+    setAgentPolicyId(undefined);
     setIsLoading(false);
     setIsLoadingAgentsCount(false);
     setIsModalOpen(false);
@@ -80,7 +82,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
     try {
       const { data } = await deleteAgentPolicyMutation.mutateAsync({
-        agentPolicyId: agentPolicy!,
+        agentPolicyId: agentPolicyId!,
       });
 
       if (data) {
@@ -91,13 +93,13 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
           })
         );
         if (onSuccessCallback.current) {
-          onSuccessCallback.current(agentPolicy!);
+          onSuccessCallback.current(agentPolicyId!);
         }
       } else {
         notifications.toasts.addDanger(
           i18n.translate('xpack.fleet.deleteAgentPolicy.failureSingleNotificationTitle', {
             defaultMessage: "Error deleting agent policy ''{id}''",
-            values: { id: agentPolicy },
+            values: { id: agentPolicyId },
           })
         );
       }
@@ -173,7 +175,9 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
           )
         }
         buttonColor="danger"
-        confirmButtonDisabled={isLoading || isLoadingAgentsCount || !!agentsCount}
+        confirmButtonDisabled={
+          isLoading || isLoadingAgentsCount || (!agentPolicy?.supports_agentless && !!agentsCount)
+        }
       >
         {packagePoliciesWithMultiplePolicies && (
           <>
@@ -206,13 +210,23 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
               }
             )}
           >
-            <FormattedMessage
-              id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
-              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy. This might include inactive agents."
-              values={{
-                agentsCount,
-              }}
-            />
+            {agentPolicy?.supports_agentless ? (
+              <FormattedMessage
+                id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentlessMessage"
+                defaultMessage="Deleting this agent policy will automatically delete integrations assign to {name} and unenroll elastic agent."
+                values={{
+                  name: <strong>{agentPolicy.name}</strong>,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
+                defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy. This might include inactive agents."
+                values={{
+                  agentsCount,
+                }}
+              />
+            )}
           </EuiCallOut>
         ) : hasFleetServer ? (
           <FormattedMessage

@@ -8,8 +8,8 @@ properties:
     maxLength: 30000
     example: A new comment.
   owner:
-    $ref: 'owners.yaml'
-  type: 
+    $ref: 'owner.yaml'
+  type:
     type: string
     description: The type of comment.
     example: user

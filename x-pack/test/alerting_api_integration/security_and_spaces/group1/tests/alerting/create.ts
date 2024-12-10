@@ -66,6 +66,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                     params: {},
                   },
                 ],
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
               })
             );
 
@@ -126,6 +130,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
                 revision: 0,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -253,18 +261,11 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
-                statusCode: 403,
-              });
-              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               break;

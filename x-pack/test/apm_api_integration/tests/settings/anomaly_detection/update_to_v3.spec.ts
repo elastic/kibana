@@ -58,7 +58,17 @@ export default function apiTest({ getService }: FtrProviderContext) {
     });
   }
 
+  function deleteJobs(jobIds: string[]) {
+    return Promise.allSettled(jobIds.map((jobId) => ml.deleteAnomalyDetectionJobES(jobId)));
+  }
+
   registry.when('Updating ML jobs to v3', { config: 'trial', archives: [] }, () => {
+    before(async () => {
+      const res = await getJobs();
+      const jobIds = res.body.jobs.map((job: any) => job.jobId);
+      await deleteJobs(jobIds);
+    });
+
     describe('when there are no v2 jobs', () => {
       it('returns a 200/true', async () => {
         const { status, body } = await callUpdateEndpoint();

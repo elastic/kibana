@@ -16,7 +16,7 @@ describe('LoadingMessages', () => {
   it('renders the expected loading message', () => {
     render(
       <TestProviders>
-        <LoadingMessages alertsCount={20} />
+        <LoadingMessages alertsContextCount={20} localStorageAttackDiscoveryMaxAlerts={'30'} />
       </TestProviders>
     );
     const attackDiscoveryGenerationInProgress = screen.getByTestId(
@@ -31,7 +31,7 @@ describe('LoadingMessages', () => {
   it('renders the loading message with the expected alerts count', () => {
     render(
       <TestProviders>
-        <LoadingMessages alertsCount={20} />
+        <LoadingMessages alertsContextCount={20} localStorageAttackDiscoveryMaxAlerts={'30'} />
       </TestProviders>
     );
     const aiCurrentlyAnalyzing = screen.getByTestId('aisCurrentlyAnalyzing');

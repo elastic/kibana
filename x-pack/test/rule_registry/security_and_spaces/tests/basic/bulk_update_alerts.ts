@@ -102,7 +102,6 @@ export default ({ getService }: FtrProviderContext) => {
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should bulk update alert with given id ${alertId} in ${space}/${index}`, async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
           const { body: updated } = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
@@ -119,7 +118,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it(`${username} should bulk update alerts which match KQL query string in ${space}/${index}`, async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
           const { body: updated } = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
@@ -134,7 +132,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it(`${username} should bulk update alerts which match query in DSL in ${space}/${index}`, async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
           const { body: updated } = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)

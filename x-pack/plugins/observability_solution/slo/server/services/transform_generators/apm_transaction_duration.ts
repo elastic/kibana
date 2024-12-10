@@ -8,30 +8,29 @@
 import { estypes } from '@elastic/elasticsearch';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
+import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
+  SLO_DESTINATION_INDEX_NAME,
   getSLOPipelineId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { APMTransactionDurationIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
-import { parseIndex } from './common';
-import { getTimesliceTargetComparator, getFilterRange } from './common';
+import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
-  public async getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -39,11 +38,11 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      await this.buildSource(slo, slo.indicator, dataViewService),
+      await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo, slo.indicator),
-      this.buildSettings(slo),
+      this.buildSettings(slo, '@timestamp'),
       slo
     );
   }
@@ -75,11 +74,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
-  private async buildSource(
-    slo: SLODefinition,
-    indicator: APMTransactionDurationIndicator,
-    dataViewService: DataViewsService
-  ) {
+  private async buildSource(slo: SLODefinition, indicator: APMTransactionDurationIndicator) {
     const queryFilter: estypes.QueryDslQueryContainer[] = [getFilterRange(slo, '@timestamp')];
 
     if (indicator.params.service !== ALL_VALUE) {
@@ -113,10 +108,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
         },
       });
     }
-    const dataView = await this.getIndicatorDataView({
-      dataViewService,
-      dataViewId: indicator.params.dataViewId,
-    });
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     if (!!indicator.params.filter) {
       queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
@@ -124,7 +116,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: [
@@ -185,9 +177,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
               goodEvents: 'slo.numerator.value',
               totalEvents: 'slo.denominator.value',
             },
-            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
               slo.objective.timesliceTarget!
-            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
           },
         },
       }),

@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { find } from 'lodash';
 
 import {
   API_VERSIONS,
@@ -17,6 +18,7 @@ import {
   FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { estypes } from '@elastic/elasticsearch';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 
@@ -24,7 +26,7 @@ import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
-import { ESQL_RESOURCE } from '../constants';
+import { SECURITY_LABS_RESOURCE } from '../constants';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -56,27 +58,20 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
-            capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
-            v2KnowledgeBaseEnabled: true,
-          });
-          const currentUser = ctx.elasticAssistant.getCurrentUser();
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          const currentUser = checkResponse.currentUser;
           const userFilter = getKBUserFilter(currentUser);
-          const systemFilter = ` AND NOT kb_resource:"${ESQL_RESOURCE}"`;
+          const systemFilter = ` AND (kb_resource:"user" OR type:"index")`;
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
 
-          // TODO: Either plumb through new `findDocuments` that takes query DSL so you can do agg + pagination to collapse
-          // TODO: system entries, use scoped esClient from request, or query them separate and mess with pagination...latter for now.
           const result = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
             perPage: query.per_page,
             page: query.page,
@@ -84,44 +79,83 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
             sortOrder: query.sort_order,
             filter: `${userFilter}${systemFilter}${additionalFilter}`,
             fields: query.fields,
-          });
-
-          const systemResult = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
-            perPage: 1000,
-            page: 1,
-            filter: `kb_resource:"${ESQL_RESOURCE}"`,
-          });
-
-          // Group system entries
-          const systemEntry = systemResult?.data.hits.hits?.[0]?._source;
-          const systemEntryCount = systemResult?.data.hits.hits?.length ?? 1;
-          const systemEntries: DocumentEntry[] =
-            systemEntry == null
-              ? []
-              : [
-                  {
-                    id: 'someID',
-                    createdAt: systemEntry.created_at,
-                    createdBy: systemEntry.created_by,
-                    updatedAt: systemEntry.updated_at,
-                    updatedBy: systemEntry.updated_by,
-                    users: [],
-                    name: 'ES|QL documents',
-                    namespace: systemEntry.namespace,
-                    type: DocumentEntryType.value,
-                    kbResource: ESQL_RESOURCE,
-                    source: '',
-                    required: true,
-                    text: `${systemEntryCount}`,
+            aggs: {
+              global_aggs: {
+                global: {},
+                aggs: {
+                  kb_resource_aggregation: {
+                    terms: {
+                      field: 'kb_resource',
+                      size: 10,
+                      exclude: ['user'],
+                    },
+                    aggs: {
+                      top_documents: {
+                        top_hits: {
+                          size: 1,
+                        },
+                      },
+                    },
                   },
-                ];
+                },
+              },
+            },
+          });
+
+          const systemEntries = [
+            {
+              bucketId: 'securityLabsId',
+              kbResource: SECURITY_LABS_RESOURCE,
+              name: 'Security Labs',
+              required: true,
+            },
+          ]
+            .map(({ bucketId, kbResource, name, required }) => {
+              const bucket = find(
+                (
+                  (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
+                    ?.kb_resource_aggregation as {
+                    buckets: estypes.AggregationsBuckets;
+                  }
+                )?.buckets,
+                ['key', kbResource]
+              ) as {
+                doc_count: number;
+                top_documents: estypes.AggregationsTopHitsAggregate;
+              };
+
+              const entry = bucket?.top_documents?.hits?.hits?.[0]?._source;
+              const entryCount = bucket?.doc_count;
+              const entries: DocumentEntry[] =
+                entry == null
+                  ? []
+                  : [
+                      {
+                        id: bucketId,
+                        createdAt: entry.created_at,
+                        createdBy: entry.created_by,
+                        updatedAt: entry.updated_at,
+                        updatedBy: entry.updated_by,
+                        users: [],
+                        name,
+                        namespace: entry.namespace,
+                        type: DocumentEntryType.value,
+                        kbResource,
+                        source: '',
+                        required,
+                        text: `${entryCount}`,
+                      },
+                    ];
+              return entries;
+            })
+            .flat();
 
           if (result) {
             return response.ok({
               body: {
                 perPage: result.perPage,
                 page: result.page,
-                total: result.total,
+                total: result.total + systemEntries.length,
                 data: [...transformESSearchToKnowledgeBaseEntry(result.data), ...systemEntries],
               },
             });

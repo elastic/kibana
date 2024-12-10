@@ -8,7 +8,6 @@
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
@@ -22,19 +21,10 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsAnalyzerPanelKey,
-} from '../../shared/constants/panel_keys';
-import { ANALYZE_GRAPH_ID, ANALYZER_PREVIEW_BANNER } from '../../left/components/analyze_graph';
+} from '../../../shared/components/test_ids';
 
-jest.mock('@kbn/expandable-flyout');
+import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
@@ -42,9 +32,19 @@ jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock('../../shared/hooks/use_which_flyout');
-const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
-const FLYOUT_KEY = 'securitySolution';
+
+const mockNavigateToAnalyzer = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_analyzer', () => {
+  return { useNavigateToAnalyzer: () => ({ navigateToAnalyzer: mockNavigateToAnalyzer }) };
+});
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -59,18 +59,19 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
 
 const NO_ANALYZER_MESSAGE =
-  'You can only visualize events triggered by hosts configured with the Elastic Defend integration or any sysmon data from winlogbeat. Refer to Visual event analyzerExternal link(opens in a new tab or window) for more information.';
+  'You can only visualize events triggered by hosts configured with the Elastic Defend integration or any sysmon data from winlogbeat. Refer to Visual event analyzer(external, opens in a new tab or window) for more information.';
 
-const panelContextValue = {
-  ...mockContextValue,
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-};
-
-const renderAnalyzerPreview = (context = panelContextValue) =>
+const renderAnalyzerPreview = (context = mockContextValue) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={context}>
@@ -82,9 +83,6 @@ const renderAnalyzerPreview = (context = panelContextValue) =>
 describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   it('should render component and link in header', () => {
@@ -170,7 +168,27 @@ describe('AnalyzerPreviewContainer', () => {
         investigateInTimelineAlertClick: jest.fn(),
       });
 
-      const { queryByTestId } = renderAnalyzerPreview({ ...panelContextValue, isPreview: true });
+      const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreview: true });
+      expect(
+        queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+      ).not.toBeInTheDocument();
+      const { investigateInTimelineAlertClick } = useInvestigateInTimeline({});
+      expect(investigateInTimelineAlertClick).not.toHaveBeenCalled();
+    });
+
+    it('should not navigate to analyzer when in preview mode', () => {
+      (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+      (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+        loading: false,
+        error: false,
+        alertIds: ['alertid'],
+        statsNodes: mock.mockStatsNodes,
+      });
+      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+        investigateInTimelineAlertClick: jest.fn(),
+      });
+
+      const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreviewMode: true });
       expect(
         queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
       ).not.toBeInTheDocument();
@@ -181,7 +199,7 @@ describe('AnalyzerPreviewContainer', () => {
 
   describe('when visualizationInFlyoutEnabled is enabled', () => {
     it('should open left flyout visualization tab when clicking on title', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseUiSetting.mockReturnValue([true]);
 
       (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
       (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
@@ -197,29 +215,11 @@ describe('AnalyzerPreviewContainer', () => {
       const { getByTestId } = renderAnalyzerPreview();
 
       getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
-      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsLeftPanelKey,
-        path: {
-          tab: 'visualize',
-          subTab: ANALYZE_GRAPH_ID,
-        },
-        params: {
-          id: mockContextValue.eventId,
-          indexName: mockContextValue.indexName,
-          scopeId: mockContextValue.scopeId,
-        },
-      });
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsAnalyzerPanelKey,
-        params: {
-          resolverComponentInstanceID: `${FLYOUT_KEY}-${mockContextValue.scopeId}`,
-          banner: ANALYZER_PREVIEW_BANNER,
-        },
-      });
+      expect(mockNavigateToAnalyzer).toHaveBeenCalled();
     });
 
-    it('should not disable link when in rule preview', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    it('should disable link when in rule preview', () => {
+      mockUseUiSetting.mockReturnValue([true]);
       (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
       (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
         loading: false,
@@ -231,7 +231,26 @@ describe('AnalyzerPreviewContainer', () => {
         investigateInTimelineAlertClick: jest.fn(),
       });
 
-      const { queryByTestId } = renderAnalyzerPreview({ ...panelContextValue, isPreview: true });
+      const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreview: true });
+      expect(
+        queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
+      ).not.toBeInTheDocument();
+    });
+
+    it('should disable link when in preview mode', () => {
+      mockUseUiSetting.mockReturnValue([true]);
+      (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+      (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+        loading: false,
+        error: false,
+        alertIds: ['alertid'],
+        statsNodes: mock.mockStatsNodes,
+      });
+      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+        investigateInTimelineAlertClick: jest.fn(),
+      });
+
+      const { queryByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreviewMode: true });
       expect(
         queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
       ).not.toBeInTheDocument();

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -15,10 +14,7 @@ import {
   TimelineTypeEnum,
 } from '../../../../../common/api/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 
@@ -27,7 +23,6 @@ import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 import type { DataProvidersAnd, QueryOperator } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
-import { timelineDefaults } from '../../../store/defaults';
 
 interface ProviderItemBadgeProps {
   andProviderId?: string;
@@ -86,10 +81,6 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       return getTimeline(state, timelineId)?.timelineType ?? TimelineTypeEnum.default;
     });
 
-    const { isLoading } = useDeepEqualSelector(
-      (state) => getTimeline(state, timelineId ?? '') ?? timelineDefaults
-    );
-
     const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
     }, [isPopoverOpen, setIsPopoverOpen]);
@@ -142,7 +133,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     const button = useMemo(
       () => (
         <ProviderBadge
-          deleteProvider={!isLoading ? deleteProvider : noop}
+          deleteProvider={deleteProvider}
           field={field}
           kqlQuery={kqlQuery}
           isEnabled={isEnabled}
@@ -163,7 +154,6 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
         field,
         isEnabled,
         isExcluded,
-        isLoading,
         kqlQuery,
         onToggleTypeProvider,
         operator,
@@ -186,7 +176,6 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
         kqlQuery={kqlQuery}
         isEnabled={isEnabled}
         isExcluded={isExcluded}
-        isLoading={isLoading}
         isOpen={isPopoverOpen}
         onDataProviderEdited={onDataProviderEdited}
         operator={operator}

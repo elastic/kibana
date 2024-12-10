@@ -35,7 +35,7 @@
             "section": "def-common.NotebookRendererProps",
             "text": "NotebookRendererProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-ipynb/components/index.tsx",
         "deprecated": false,

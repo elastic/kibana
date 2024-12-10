@@ -6,7 +6,6 @@
  */
 
 import type { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
-
 import type { Role } from '@kbn/security-plugin-types-common';
 
 export interface PrivilegeDeprecationsRolesByFeatureIdResponse {

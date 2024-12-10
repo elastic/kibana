@@ -13,12 +13,6 @@ describe.skip('[Observability onboarding] Navigation', () => {
   });
 
   describe('When user clicks on the card', () => {
-    it('navigates to system logs onboarding', () => {
-      cy.getByTestSubj('obltOnboardingHomeStartSystemLogStream').click();
-
-      cy.url().should('include', '/app/observabilityOnboarding/systemLogs');
-    });
-
     it('navigates to custom logs onboarding', () => {
       cy.getByTestSubj('obltOnboardingHomeStartLogFileStream').click();
 

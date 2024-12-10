@@ -43,6 +43,8 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(apiResponse.total).to.be(2);
         expect(apiResponse.items[0]).to.have.keys('id', 'api_key_id', 'name');
+        // Deprecated property list
+        expect(apiResponse.list[0]).to.have.keys('id', 'api_key_id', 'name');
         expect(apiResponse).to.have.keys('items');
       });
 
@@ -283,33 +285,6 @@ export default function (providerContext: FtrProviderContext) {
             write: false,
           },
         });
-      });
-    });
-
-    describe('deprecated API', () => {
-      let keyId: string;
-      before(async () => {
-        const { body: apiResponse } = await supertest
-          .post(`/api/fleet/enrollment-api-keys`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            policy_id: 'policy1',
-          })
-          .expect(200);
-        keyId = apiResponse.item.id;
-      });
-
-      it('should get and delete with deprecated API', async () => {
-        await supertest.get(`/api/fleet/enrollment-api-keys`).set('kbn-xsrf', 'xxx').expect(200);
-        await supertest
-          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-
-        await supertest
-          .delete(`/api/fleet/enrollment-api-keys/${keyId}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
       });
     });
   });

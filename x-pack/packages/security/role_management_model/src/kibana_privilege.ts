@@ -10,7 +10,7 @@ import _ from 'lodash';
 export class KibanaPrivilege {
   constructor(public readonly id: string, public readonly actions: string[] = []) {}
 
-  public get name() {
+  public get name(): string {
     return _.upperFirst(this.id);
   }
 

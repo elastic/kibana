@@ -8,3 +8,34 @@
 import path from 'path';
 
 export const KIBANA_ROOT = path.resolve(__dirname, '../../../..');
+
+export const argTypes = {
+  hasTemplates: {
+    name: 'Has templates?',
+    type: {
+      name: 'boolean',
+    },
+    defaultValue: true,
+    control: {
+      type: 'boolean',
+    },
+  },
+  useStaticData: {
+    name: 'Use static data?',
+    type: {
+      name: 'boolean',
+    },
+    defaultValue: false,
+    control: {
+      type: 'boolean',
+    },
+  },
+  workpadCount: {
+    name: 'Number of workpads',
+    type: { name: 'number' },
+    defaultValue: 5,
+    control: {
+      type: 'range',
+    },
+  },
+};

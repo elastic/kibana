@@ -16,6 +16,13 @@ function createRootWithRoles(roles: string[]) {
       roles,
     },
     logging: {
+      loggers: [
+        {
+          name: 'root',
+          appenders: ['test-console'],
+          level: 'info',
+        },
+      ],
       appenders: {
         'test-console': {
           type: 'console',
@@ -29,6 +36,7 @@ function createRootWithRoles(roles: string[]) {
         level: 'info',
       },
     },
+    server: { restrictInternalApis: false },
   });
 }
 

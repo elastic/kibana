@@ -131,10 +131,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Stack Management']);
       });
 
-      it(`index pattern listing doesn't show create button`, async () => {
+      it(`index pattern listing shows disabled create button`, async () => {
         await settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('noDataViewsPrompt');
-        await testSubjects.missingOrFail('createDataViewButton');
+        const createDataViewButton = await testSubjects.find('createDataViewButton');
+        const isDisabled = await createDataViewButton.getAttribute('disabled');
+        expect(isDisabled).to.be('true');
       });
 
       it(`shows read-only badge`, async () => {

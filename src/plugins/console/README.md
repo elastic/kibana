@@ -44,7 +44,7 @@ POST /_some_endpoint
 ```
 
 ## Architecture
-Console uses Ace editor that is wrapped with [`CoreEditor`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/types/core_editor.ts), so that if needed it can easily be replaced with another editor, for example Monaco.
+Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/packages/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.
 The autocomplete logic is located in [`autocomplete`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/autocomplete) folder. Autocomplete rules are computed by classes in `components` sub-folder.
 
 ## Autocomplete definitions
@@ -318,7 +318,3 @@ Another change is replacing jQuery with the core http client to communicate with
 #### Autocomplete suggestions for Kibana API endpoints
 Console currently supports autocomplete suggestions for Elasticsearch API endpoints. The autocomplete suggestions for Kibana API endpoints are not supported yet.
 Related issue: [#130661](https://github.com/elastic/kibana/issues/130661)
-
-#### Migration to Monaco Editor
-Console plugin is currently using Ace Editor and it is planned to migrate to Monaco Editor in the future.
-Related issue: [#57435](https://github.com/elastic/kibana/issues/57435)

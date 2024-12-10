@@ -6,7 +6,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,6 +16,7 @@ import { checkIndex } from '../../../utils/check_index';
 import { useDataQualityContext } from '../../../data_quality_context';
 import * as i18n from '../../../translations';
 import type { IndexToCheck } from '../../../types';
+import { useAbortControllerRef } from '../../../hooks/use_abort_controller_ref';
 
 const CheckAllButton = styled(EuiButton)`
   width: 112px;
@@ -50,20 +51,26 @@ const CheckAllComponent: React.FC<Props> = ({
   const { httpFetch, isILMAvailable, formatBytes, formatNumber, ilmPhases, patterns } =
     useDataQualityContext();
   const { onCheckCompleted, patternIndexNames } = useResultsRollupContext();
-  const abortController = useRef(new AbortController());
+  const abortControllerRef = useAbortControllerRef();
   const [isRunning, setIsRunning] = useState<boolean>(false);
 
   const cancelIfRunning = useCallback(() => {
     if (isRunning) {
-      if (!abortController.current.signal.aborted) {
+      if (!abortControllerRef.current.signal.aborted) {
         setIndexToCheck(null);
         setIsRunning(false);
         setCheckAllIndiciesChecked(0);
         setCheckAllTotalIndiciesToCheck(0);
-        abortController.current.abort();
+        abortControllerRef.current.abort();
       }
     }
-  }, [isRunning, setCheckAllIndiciesChecked, setCheckAllTotalIndiciesToCheck, setIndexToCheck]);
+  }, [
+    abortControllerRef,
+    isRunning,
+    setCheckAllIndiciesChecked,
+    setCheckAllTotalIndiciesToCheck,
+    setIndexToCheck,
+  ]);
 
   const onClick = useCallback(() => {
     async function beginCheck() {
@@ -76,14 +83,14 @@ const CheckAllComponent: React.FC<Props> = ({
       setCheckAllTotalIndiciesToCheck(allIndicesToCheck.length);
 
       for (const { indexName, pattern } of allIndicesToCheck) {
-        if (!abortController.current.signal.aborted) {
+        if (!abortControllerRef.current.signal.aborted) {
           setIndexToCheck({
             indexName,
             pattern,
           });
 
           await checkIndex({
-            abortController: abortController.current,
+            abortController: abortControllerRef.current,
             batchId,
             checkAllStartTime: startTime,
             formatBytes,
@@ -97,7 +104,7 @@ const CheckAllComponent: React.FC<Props> = ({
             pattern,
           });
 
-          if (!abortController.current.signal.aborted) {
+          if (!abortControllerRef.current.signal.aborted) {
             await wait(DELAY_AFTER_EVERY_CHECK_COMPLETES);
             incrementCheckAllIndiciesChecked();
             checked++;
@@ -105,7 +112,7 @@ const CheckAllComponent: React.FC<Props> = ({
         }
       }
 
-      if (!abortController.current.signal.aborted) {
+      if (!abortControllerRef.current.signal.aborted) {
         setIndexToCheck(null);
         setIsRunning(false);
       }
@@ -114,11 +121,12 @@ const CheckAllComponent: React.FC<Props> = ({
     if (isRunning) {
       cancelIfRunning();
     } else {
-      abortController.current = new AbortController();
+      abortControllerRef.current = new AbortController();
       setIsRunning(true);
       beginCheck();
     }
   }, [
+    abortControllerRef,
     cancelIfRunning,
     formatBytes,
     formatNumber,
@@ -138,12 +146,6 @@ const CheckAllComponent: React.FC<Props> = ({
       cancelIfRunning();
     };
   }, [cancelIfRunning, ilmPhases, patterns]);
-
-  useEffect(() => {
-    return () => {
-      abortController.current.abort();
-    };
-  }, [abortController]);
 
   const disabled = isILMAvailable && ilmPhases.length === 0;
 

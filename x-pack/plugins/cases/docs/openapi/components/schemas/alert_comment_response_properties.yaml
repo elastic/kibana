@@ -29,7 +29,7 @@ properties:
       type: string
       example: .internal.alerts-security.alerts-default-000001
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   pushed_at:
     type: string
     format: date-time

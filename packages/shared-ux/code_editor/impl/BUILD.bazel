@@ -24,7 +24,6 @@ SRCS = glob(
 BUNDLER_DEPS = [
   "@npm//react",
   "@npm//tslib",
-  "@npm//react-monaco-editor",
 ]
 
 js_library(

@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
 import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
@@ -841,15 +840,22 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       path: '/internal/enterprise_search/connectors/generate_connector_name',
       validate: {
         body: schema.object({
+          connectorName: schema.maybe(schema.string()),
           connectorType: schema.string(),
+          isManagedConnector: schema.maybe(schema.boolean()),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connectorType } = request.body;
+      const { connectorType, connectorName, isManagedConnector } = request.body;
       try {
-        const generatedNames = await generateConnectorName(client, connectorType ?? 'custom');
+        const generatedNames = await generateConnectorName(
+          client,
+          connectorType ?? 'custom',
+          connectorName,
+          isManagedConnector
+        );
         return response.ok({
           body: generatedNames,
           headers: { 'content-type': 'application/json' },

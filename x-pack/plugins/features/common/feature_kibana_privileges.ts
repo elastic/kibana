@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
 import { FeatureKibanaPrivilegesReference } from './feature_kibana_privileges_reference';
 
 /**
@@ -97,47 +98,47 @@ export interface FeatureKibanaPrivileges {
   alerting?: {
     rule?: {
       /**
-       * List of rule types which users should have full read/write access to when granted this privilege.
+       * List of rule types and consumers for which users should have full read/write access to when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    all: ['my-alert-type-within-my-feature']
+       *    all: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
-      all?: readonly string[];
+      all?: AlertingKibanaPrivilege;
       /**
-       * List of rule types which users should have read-only access to when granted this privilege.
+       * List of rule types and consumers for which users should have read-only access to when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    read: ['my-alert-type']
+       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
-      read?: readonly string[];
+      read?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
-       * List of rule types for which users should have full read/write access their alert data to when granted this privilege.
+       * List of rule types and consumers for which users should have full read/write access their alert data to when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    all: ['my-alert-type-within-my-feature']
+       *    all: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
-      all?: readonly string[];
+      all?: AlertingKibanaPrivilege;
       /**
-       * List of rule types for which users should have read-only access to their alert data when granted this privilege.
+       * List of rule types and consumers for which users should have read-only access to their alert data when granted this privilege.
        * @example
        * ```ts
        *  {
-       *    read: ['my-alert-type']
+       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
        *  }
        * ```
        */
-      read?: readonly string[];
+      read?: AlertingKibanaPrivilege;
     };
   };
 
@@ -188,6 +189,7 @@ export interface FeatureKibanaPrivileges {
     read?: readonly string[];
     /**
      * List of case owners which users should have update access to when granted this privilege.
+     * This privilege does NOT provide access to re-opening a case. Please see `reopenCase` for said functionality.
      * @example
      * ```ts
      *  {
@@ -216,6 +218,26 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     settings?: readonly string[];
+    /**
+     * List of case owners whose users should have createComment access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    createComment: ['securitySolution']
+     *  }
+     * ```
+     */
+    createComment?: readonly string[];
+    /**
+     * List of case owners whose users should have reopenCase access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    reopenCase: ['securitySolution']
+     *  }
+     * ```
+     */
+    reopenCase?: readonly string[];
   };
 
   /**
@@ -272,4 +294,17 @@ export interface FeatureKibanaPrivileges {
    * grant. This property can only be set in the feature configuration overrides.
    */
   composedOf?: readonly FeatureKibanaPrivilegesReference[];
+
+  /**
+   * An optional list of other registered feature or sub-feature privileges that, when combined, grant equivalent access
+   * if the feature this privilege belongs to becomes deprecated. The extended definition allows separate lists of
+   * privileges to be defined for the default and minimal (excludes any automatically granted sub-feature privileges)
+   * sets. This property can only be set if the feature is marked as deprecated.
+   */
+  replacedBy?:
+    | readonly FeatureKibanaPrivilegesReference[]
+    | {
+        default: readonly FeatureKibanaPrivilegesReference[];
+        minimal: readonly FeatureKibanaPrivilegesReference[];
+      };
 }

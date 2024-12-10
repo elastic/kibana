@@ -28,6 +28,7 @@
     "@kbn/chart-expressions-common",
     "@kbn/visualization-utils",
     "@kbn/react-kibana-context-render",
+    "@kbn/transpose-utils",
   ],
   "exclude": [
     "target/**/*",

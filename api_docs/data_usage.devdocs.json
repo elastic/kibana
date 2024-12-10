@@ -50,7 +50,7 @@
       "tags": [],
       "label": "DataUsageServerSetup",
       "description": [],
-      "path": "x-pack/plugins/data_usage/server/types.ts",
+      "path": "x-pack/plugins/data_usage/server/types/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +64,7 @@
       "tags": [],
       "label": "DataUsageServerStart",
       "description": [],
-      "path": "x-pack/plugins/data_usage/server/types.ts",
+      "path": "x-pack/plugins/data_usage/server/types/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -80,6 +80,60 @@
     "misc": [
       {
         "parentPluginId": "dataUsage",
+        "id": "def-common.DATA_USAGE_API_ROUTE_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_USAGE_API_ROUTE_PREFIX",
+        "description": [],
+        "signature": [
+          "\"/api/data_usage/\""
+        ],
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataUsage",
+        "id": "def-common.DATA_USAGE_DATA_STREAMS_API_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_USAGE_DATA_STREAMS_API_ROUTE",
+        "description": [],
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataUsage",
+        "id": "def-common.DATA_USAGE_METRICS_API_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_USAGE_METRICS_API_ROUTE",
+        "description": [],
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataUsage",
+        "id": "def-common.DEFAULT_SELECTED_OPTIONS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_SELECTED_OPTIONS",
+        "description": [],
+        "signature": [
+          "50"
+        ],
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataUsage",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -88,19 +142,7 @@
         "signature": [
           "\"data_usage\""
         ],
-        "path": "x-pack/plugins/data_usage/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataUsage",
-        "id": "def-common.PLUGIN_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_NAME",
-        "description": [],
-        "path": "x-pack/plugins/data_usage/common/index.ts",
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

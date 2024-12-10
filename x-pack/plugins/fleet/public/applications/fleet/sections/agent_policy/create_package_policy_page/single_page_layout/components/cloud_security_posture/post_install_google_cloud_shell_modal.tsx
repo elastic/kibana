@@ -43,7 +43,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
     sendGetEnrollmentAPIKeys({
       page: 1,
       perPage: 1,
-      kuery: `policy_id:${agentPolicy.id}`,
+      kuery: `policy_id:"${agentPolicy.id}"`,
     })
   );
   const { fleetServerHost, fleetProxy, downloadSource } = useFleetServerHostsForPolicy(agentPolicy);

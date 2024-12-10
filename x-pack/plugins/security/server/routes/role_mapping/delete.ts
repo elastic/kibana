@@ -15,6 +15,12 @@ export function defineRoleMappingDeleteRoutes({ router }: RouteDefinitionParams)
   router.delete(
     {
       path: '/internal/security/role_mapping/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),

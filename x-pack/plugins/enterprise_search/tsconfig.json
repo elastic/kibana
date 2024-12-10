@@ -70,7 +70,6 @@
     "@kbn/es-errors",
     "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
-    "@kbn/search-inference-endpoints",
     "@kbn/utility-types",
     "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
@@ -80,9 +79,10 @@
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
-    "@kbn/search-homepage",
     "@kbn/security-plugin-types-common",
     "@kbn/core-security-server",
-    "@kbn/core-security-server-mocks"
+    "@kbn/core-security-server-mocks",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/search-navigation",
   ]
 }

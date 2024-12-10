@@ -9,8 +9,8 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { ConversationViewWithProps } from './conversations/conversation_view_with_props';
 import { ObservabilityAIAssistantPageTemplate } from '../components/page_template';
-import { ConversationView } from './conversations/conversation_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -28,7 +28,7 @@ const observabilityAIAssistantRoutes = {
     ),
     children: {
       '/conversations/new': {
-        element: <ConversationView />,
+        element: <ConversationViewWithProps />,
       },
       '/conversations/{conversationId}': {
         params: t.intersection([
@@ -43,7 +43,7 @@ const observabilityAIAssistantRoutes = {
             }),
           }),
         ]),
-        element: <ConversationView />,
+        element: <ConversationViewWithProps />,
       },
       '/conversations': {
         element: <Redirect to="/conversations/new" />,

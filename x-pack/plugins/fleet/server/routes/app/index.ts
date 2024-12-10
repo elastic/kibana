@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
@@ -15,8 +15,8 @@ import { APP_API_ROUTES } from '../../constants';
 import { API_VERSIONS } from '../../../common/constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
-import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
-import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
+import { GenerateServiceTokenError } from '../../errors';
+import type { FleetRequestHandler } from '../../types';
 import { CheckPermissionsRequestSchema, CheckPermissionsResponseSchema } from '../../types';
 import { enableSpaceAwarenessMigration } from '../../services/spaces/enable_space_awareness';
 import { type FleetConfigType } from '../../config';
@@ -106,16 +106,11 @@ export const postEnableSpaceAwarenessHandler: FleetRequestHandler = async (
   request,
   response
 ) => {
-  try {
-    await enableSpaceAwarenessMigration();
+  await enableSpaceAwarenessMigration();
 
-    return response.ok({
-      body: {},
-    });
-  } catch (e) {
-    const error = new GenerateServiceTokenError(e);
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({
+    body: {},
+  });
 };
 
 export const generateServiceTokenHandler: RequestHandler<
@@ -125,7 +120,7 @@ export const generateServiceTokenHandler: RequestHandler<
 > = async (context, request, response) => {
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const serviceAccount = request.body.remote ? 'fleet-server-remote' : 'fleet-server';
+  const serviceAccount = request.body?.remote ? 'fleet-server-remote' : 'fleet-server';
   appContextService
     .getLogger()
     .debug(`Creating service token for account elastic/${serviceAccount}`);
@@ -145,11 +140,11 @@ export const generateServiceTokenHandler: RequestHandler<
       });
     } else {
       const error = new GenerateServiceTokenError('Unable to generate service token');
-      return defaultFleetErrorHandler({ error, response });
+      throw error;
     }
   } catch (e) {
     const error = new GenerateServiceTokenError(e);
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -158,37 +153,32 @@ export const getAgentPoliciesSpacesHandler: FleetRequestHandler<
   null,
   TypeOf<typeof GenerateServiceTokenRequestSchema.body>
 > = async (context, request, response) => {
-  try {
-    const spaces = await (await context.fleet).getAllSpaces();
-    const security = appContextService.getSecurity();
-    const spaceIds = spaces.map(({ id }) => id);
-    const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(spaceIds, {
-      kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
-    });
+  const spaces = await (await context.fleet).getAllSpaces();
+  const security = appContextService.getSecurity();
+  const spaceIds = spaces.map(({ id }) => id);
+  const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(spaceIds, {
+    kibana: [security.authz.actions.api.get(`fleet-agent-policies-all`)],
+  });
 
-    const authorizedSpaces = spaces.filter(
-      (space) =>
-        res.privileges.kibana.find((privilege) => privilege.resource === space.id)?.authorized ??
-        false
-    );
+  const authorizedSpaces = spaces.filter(
+    (space) =>
+      res.privileges.kibana.find((privilege) => privilege.resource === space.id)?.authorized ??
+      false
+  );
 
-    return response.ok({
-      body: {
-        items: authorizedSpaces,
-      },
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({
+    body: {
+      items: authorizedSpaces,
+    },
+  });
 };
 
-const serviceTokenBodyValidation = (data: any, validationResult: RouteValidationResultFactory) => {
-  const { ok } = validationResult;
-  if (!data) {
-    return ok({ remote: false });
-  }
-  const { remote } = data;
-  return ok({ remote });
+export const GenerateServiceTokenRequestSchema = {
+  body: schema.nullable(
+    schema.object({
+      remote: schema.boolean({ defaultValue: false }),
+    })
+  ),
 };
 
 export const GenerateServiceTokenResponseSchema = schema.object({
@@ -219,9 +209,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   router.versioned
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
-      description: `Check permissions`,
+      summary: `Check permissions`,
       options: {
-        tags: ['oas_tag:Fleet internals'],
+        tags: ['oas-tag:Fleet internals'],
       },
     })
     .addVersion(
@@ -264,16 +254,16 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       fleetAuthz: {
         fleet: { allAgents: true },
       },
-      description: `Create a service token`,
+      summary: `Create a service token`,
       options: {
-        tags: ['oas_tag:Fleet service tokens'],
+        tags: ['oas-tag:Fleet service tokens'],
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: { body: serviceTokenBodyValidation },
+          request: GenerateServiceTokenRequestSchema,
           response: {
             200: {
               body: () => GenerateServiceTokenResponseSchema,
@@ -283,22 +273,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
           },
         },
-      },
-      generateServiceTokenHandler
-    );
-
-  router.versioned
-    .post({
-      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-      description: `Create a service token`,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: {},
       },
       generateServiceTokenHandler
     );

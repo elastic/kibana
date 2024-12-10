@@ -12,14 +12,14 @@ import { UnallowedValuesError } from '../../utils/fetch_unallowed_values';
 import { checkIndex as _checkIndex, CheckIndexProps } from '../../utils/check_index';
 import { initialState, reducer } from './reducer';
 import { UseIndicesCheckReturnValue } from './types';
-import { useIsMounted } from '../use_is_mounted';
+import { useIsMountedRef } from '../use_is_mounted_ref';
 
 export const useIndicesCheck = ({
   onCheckCompleted,
 }: {
   onCheckCompleted: OnCheckCompleted;
 }): UseIndicesCheckReturnValue => {
-  const { isMountedRef } = useIsMounted();
+  const { isMountedRef } = useIsMountedRef();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const checkIndex = useCallback(

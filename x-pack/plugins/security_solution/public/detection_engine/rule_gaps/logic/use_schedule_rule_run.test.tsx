@@ -11,6 +11,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../../common/mock';
 import { useScheduleRuleRun } from './use_schedule_rule_run';
+import { ManualRuleRunEventTypes } from '../../../common/lib/telemetry';
 
 const mockUseScheduleRuleRunMutation = jest.fn();
 
@@ -28,7 +29,7 @@ const mockedUseKibana = {
   services: {
     ...mockUseKibana().services,
     telemetry: {
-      reportManualRuleRunExecute: jest.fn(),
+      reportEvent: jest.fn(),
     },
   },
 };
@@ -61,7 +62,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
     );
   });
 
-  it('should call reportManualRuleRunExecute with success status on success', async () => {
+  it('should call reportEvent with success status on success', async () => {
     const { result, waitFor } = renderHook(() => useScheduleRuleRun(), {
       wrapper: TestProviders,
     });
@@ -77,14 +78,17 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
       return mockUseScheduleRuleRunMutation.mock.calls.length > 0;
     });
 
-    expect(mockedUseKibana.services.telemetry.reportManualRuleRunExecute).toHaveBeenCalledWith({
-      rangeInMs: timeRange.endDate.diff(timeRange.startDate),
-      status: 'success',
-      rulesCount: 1,
-    });
+    expect(mockedUseKibana.services.telemetry.reportEvent).toHaveBeenCalledWith(
+      ManualRuleRunEventTypes.ManualRuleRunExecute,
+      {
+        rangeInMs: timeRange.endDate.diff(timeRange.startDate),
+        status: 'success',
+        rulesCount: 1,
+      }
+    );
   });
 
-  it('should call reportManualRuleRunExecute with error status on failure', async () => {
+  it('should call reportEvent with error status on failure', async () => {
     const { result, waitFor } = renderHook(() => useScheduleRuleRun(), {
       wrapper: TestProviders,
     });
@@ -100,10 +104,13 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
       return mockUseScheduleRuleRunMutation.mock.calls.length > 0;
     });
 
-    expect(mockedUseKibana.services.telemetry.reportManualRuleRunExecute).toHaveBeenCalledWith({
-      rangeInMs: timeRange.endDate.diff(timeRange.startDate),
-      status: 'error',
-      rulesCount: 1,
-    });
+    expect(mockedUseKibana.services.telemetry.reportEvent).toHaveBeenCalledWith(
+      ManualRuleRunEventTypes.ManualRuleRunExecute,
+      {
+        rangeInMs: timeRange.endDate.diff(timeRange.startDate),
+        status: 'error',
+        rulesCount: 1,
+      }
+    );
   });
 });

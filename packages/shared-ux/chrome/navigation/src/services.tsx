@@ -44,12 +44,12 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
       basePath,
       recentlyAccessed$: chrome.recentlyAccessed.get$(),
       navigateToUrl,
-      navIsOpen: true,
       activeNodes$,
       isSideNavCollapsed,
       eventTracker: new EventTracker({ reportEvent: analytics.reportEvent }),
       selectedPanelNode,
       setSelectedPanelNode: chrome.sideNav.setPanelSelectedNode,
+      isFeedbackBtnVisible$: chrome.sideNav.getIsFeedbackBtnVisible$(),
     }),
     [
       activeNodes$,
@@ -59,7 +59,7 @@ export const NavigationKibanaProvider: FC<PropsWithChildren<NavigationKibanaDepe
       isSideNavCollapsed,
       navigateToUrl,
       selectedPanelNode,
-      chrome.sideNav.setPanelSelectedNode,
+      chrome.sideNav,
     ]
   );
 

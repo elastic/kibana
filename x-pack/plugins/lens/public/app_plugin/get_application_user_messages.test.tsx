@@ -15,9 +15,13 @@ import {
   UserMessageGetterProps,
   filterAndSortUserMessages,
   getApplicationUserMessages,
+  handleMessageOverwriteFromConsumer,
 } from './get_application_user_messages';
 import { cleanup, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
+import { LensPublicCallbacks } from '../react_embeddable/types';
+import { getLongMessage } from '../user_messages_utils';
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
   const original = jest.requireActual('@kbn/shared-ux-link-redirect-app');
@@ -164,15 +168,9 @@ describe('application-level user messages', () => {
         visualization: {} as Visualization,
         visualizationState: { activeId: 'foo', state: {} },
       };
+      const firstMessage = getApplicationUserMessages({ ...props, ...propsOverrides }).at(0);
       const rtlRender = render(
-        <I18nProvider>
-          {
-            getApplicationUserMessages({
-              ...props,
-              ...propsOverrides,
-            })[0].longMessage as React.ReactNode
-          }
-        </I18nProvider>
+        <I18nProvider>{firstMessage && getLongMessage(firstMessage)}</I18nProvider>
       );
       return rtlRender;
     };
@@ -392,5 +390,101 @@ describe('filtering user messages', () => {
         "warning",
       ]
     `);
+  });
+
+  describe('override messages with custom callback', () => {
+    it('should override embeddableBadge message', async () => {
+      const getBadgeMessage = jest.fn(
+        (): ReturnType<NonNullable<LensPublicCallbacks['onBeforeBadgesRender']>> => [
+          {
+            uniqueId: FIELD_NOT_FOUND,
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [
+              { id: 'embeddableBadge' },
+              { id: 'dimensionButton', dimensionId: '1' },
+            ],
+            longMessage: 'custom',
+            shortMessage: '',
+            hidePopoverIcon: true,
+          },
+        ]
+      );
+
+      expect(
+        handleMessageOverwriteFromConsumer(
+          [
+            {
+              uniqueId: FIELD_NOT_FOUND,
+              severity: 'error',
+              fixableInEditor: true,
+              displayLocations: [
+                { id: 'embeddableBadge' },
+                { id: 'dimensionButton', dimensionId: '1' },
+              ],
+              longMessage: 'original',
+              shortMessage: '',
+            },
+            {
+              uniqueId: FIELD_WRONG_TYPE,
+              severity: 'error',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'visualization' }],
+              longMessage: 'original',
+              shortMessage: '',
+            },
+          ],
+          getBadgeMessage
+        )
+      ).toEqual(
+        expect.arrayContaining([
+          {
+            uniqueId: FIELD_WRONG_TYPE,
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'visualization' }],
+            longMessage: 'original',
+            shortMessage: '',
+          },
+          {
+            uniqueId: FIELD_NOT_FOUND,
+            severity: 'warning',
+            fixableInEditor: true,
+            displayLocations: [
+              { id: 'embeddableBadge' },
+              { id: 'dimensionButton', dimensionId: '1' },
+            ],
+            longMessage: 'custom',
+            shortMessage: '',
+            hidePopoverIcon: true,
+          },
+        ])
+      );
+    });
+
+    it('should not override embeddableBadge message if callback is not provided', async () => {
+      const messages: UserMessage[] = [
+        {
+          uniqueId: FIELD_NOT_FOUND,
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [
+            { id: 'embeddableBadge' },
+            { id: 'dimensionButton', dimensionId: '1' },
+          ],
+          longMessage: 'original',
+          shortMessage: '',
+        },
+        {
+          uniqueId: FIELD_WRONG_TYPE,
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          longMessage: 'original',
+          shortMessage: '',
+        },
+      ];
+      expect(handleMessageOverwriteFromConsumer(messages)).toEqual(messages);
+    });
   });
 });

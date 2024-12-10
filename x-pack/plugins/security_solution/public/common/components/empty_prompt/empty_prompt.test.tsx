@@ -10,7 +10,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { EmptyPromptComponent } from './empty_prompt';
 import { SecurityPageName } from '../../../../common';
 import { useNavigateTo } from '../../lib/kibana';
-import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
+import { OnboardingCardId } from '../../../onboarding/constants';
 
 const mockNavigateTo = jest.fn();
 const mockUseNavigateTo = useNavigateTo as jest.Mock;
@@ -37,7 +37,7 @@ describe('EmptyPromptComponent component', () => {
       fireEvent.click(link);
       expect(mockNavigateTo).toBeCalledWith({
         deepLinkId: SecurityPageName.landing,
-        path: `#${AddIntegrationsSteps.connectToDataSources}`,
+        path: `#${OnboardingCardId.integrations}`,
       });
     });
   });

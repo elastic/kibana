@@ -15,7 +15,8 @@
         "smile",
         "arrow"
       ],
-      "delimiter": ""
+      "delimiter": "",
+      "drop_null_columns": "__flag__"
     },
     "methods": [
       "POST"

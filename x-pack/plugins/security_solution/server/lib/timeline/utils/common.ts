@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as rt from 'io-ts';
+
 import { set } from '@kbn/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
@@ -13,7 +13,6 @@ import { createListStream } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 
 import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import type { FrameworkRequest } from '../../framework';
 
@@ -24,25 +23,24 @@ export const buildFrameworkRequest = async (
   const coreContext = await context.core;
   const savedObjectsClient = coreContext.savedObjects.client;
   const user = coreContext.security.authc.getCurrentUser();
+  const uiSettings = coreContext.uiSettings;
 
   return set<FrameworkRequest>(
-    'user',
-    user,
-    set<KibanaRequest & { context: RequestHandlerContext }>(
-      'context.core.savedObjects.client',
-      savedObjectsClient,
-      request
+    'context.core.uiSettings',
+    uiSettings,
+    set<FrameworkRequest>(
+      'user',
+      user,
+      set<KibanaRequest & { context: RequestHandlerContext }>(
+        'context.core.savedObjects.client',
+        savedObjectsClient,
+        request
+      )
     )
   );
 };
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
-type ErrorFactory = (message: string) => Error;
-
-export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
-  throw createError(formatErrors(errors).join('\n'));
-};
 
 export const getReadables = (dataPath: string): Promise<Readable> =>
   new Promise((resolved, reject) => {

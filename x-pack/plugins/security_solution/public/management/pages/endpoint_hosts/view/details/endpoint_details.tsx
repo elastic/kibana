@@ -141,7 +141,7 @@ export const EndpointDetails = memo(() => {
 
           {showFlyoutFooter && (
             <EuiFlyoutFooter className="eui-textRight" data-test-subj="endpointDetailsFlyoutFooter">
-              <ActionsMenu hostMetadata={hostInfo.metadata} />
+              <ActionsMenu hostInfo={hostInfo} />
             </EuiFlyoutFooter>
           )}
         </>

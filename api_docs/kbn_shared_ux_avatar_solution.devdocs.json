@@ -37,7 +37,7 @@
             "section": "def-common.KibanaSolutionAvatarProps",
             "text": "KibanaSolutionAvatarProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
         "deprecated": false,

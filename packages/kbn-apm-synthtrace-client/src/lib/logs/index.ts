@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { randomInt } from 'crypto';
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
@@ -26,6 +24,7 @@ const defaultLogsOptions: LogsOptions = {
 
 export type LogDocument = Fields &
   Partial<{
+    _index?: string;
     'input.type': string;
     'log.file.path'?: string;
     'service.name'?: string;
@@ -68,6 +67,7 @@ export type LogDocument = Fields &
     'event.duration': number;
     'event.start': Date;
     'event.end': Date;
+    labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;
     severity: string;
@@ -75,6 +75,14 @@ export type LogDocument = Fields &
     svc: string;
     hostname: string;
     [LONG_FIELD_NAME]: string;
+    'http.status_code'?: number;
+    'http.request.method'?: string;
+    'url.path'?: string;
+    'process.name'?: string;
+    'kubernetes.namespace'?: string;
+    'kubernetes.pod.name'?: string;
+    'kubernetes.container.name'?: string;
+    'orchestrator.resource.name'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {
@@ -156,6 +164,46 @@ function create(logsOptions: LogsOptions = defaultLogsOptions): Log {
   ).dataset('synth');
 }
 
+function createForIndex(index: string): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      _index: index,
+    },
+    defaultLogsOptions
+  );
+}
+
+function createMinimal({
+  dataset = 'synth',
+  namespace = 'default',
+}: {
+  dataset?: string;
+  namespace?: string;
+} = {}): Log {
+  return new Log(
+    {
+      'input.type': 'logs',
+      'data_stream.namespace': namespace,
+      'data_stream.type': 'logs',
+      'data_stream.dataset': dataset,
+      'event.dataset': dataset,
+    },
+    { isLogsDb: false }
+  );
+}
+
 export const log = {
   create,
+  createForIndex,
+  createMinimal,
 };
+
+function randomInt(min: number, max: number) {
+  if (min > max) {
+    throw new Error('Min value must be less than or equal to max value.');
+  }
+
+  const random = Math.floor(Math.random() * (max - min + 1)) + min;
+  return random;
+}

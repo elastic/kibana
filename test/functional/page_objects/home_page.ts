@@ -91,40 +91,46 @@ export class HomePageObject extends FtrService {
 
   async addSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    const isInstalled = await this.isSampleDataSetInstalled(id);
-    if (!isInstalled) {
+    await this.retry.waitFor('sample data to be installed', async () => {
+      // count for the edge case where some how installation completes just before the retry occurs
+      if (await this.isSampleDataSetInstalled(id)) {
+        return true;
+      }
+
       this.log.debug(`Attempting to add sample data: ${id}`);
-      await this.retry.waitFor('sample data to be installed', async () => {
-        // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
-        // https://github.com/elastic/kibana/issues/52714
-        await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
-        await this.common.sleep(1010);
-        await this.testSubjects.click(`addSampleDataSet${id}`);
-        await this.common.sleep(1010);
-        await this._waitForSampleDataLoadingAction(id);
-        return await this.isSampleDataSetInstalled(id);
-      });
-    }
+
+      // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
+      // https://github.com/elastic/kibana/issues/52714
+      await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
+      await this.common.sleep(1010);
+      await this.testSubjects.click(`addSampleDataSet${id}`);
+      await this.common.sleep(1010);
+      await this._waitForSampleDataLoadingAction(id);
+      return await this.isSampleDataSetInstalled(id);
+    });
   }
 
   async removeSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    const isInstalled = await this.isSampleDataSetInstalled(id);
-    if (isInstalled) {
+    await this.retry.waitFor('sample data to be removed', async () => {
+      // account for the edge case where some how data is uninstalled just before the retry occurs
+      if (!(await this.isSampleDataSetInstalled(id))) {
+        return true;
+      }
+
       this.log.debug(`Attempting to remove sample data: ${id}`);
-      await this.retry.waitFor('sample data to be removed', async () => {
-        // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
-        await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
-        // https://github.com/elastic/kibana/issues/65949
-        // Even after waiting for the "Remove" button to be enabled we still have failures
-        // where it appears the click just didn't work.
-        await this.common.sleep(1010);
-        await this.testSubjects.click(`removeSampleDataSet${id}`);
-        await this.common.sleep(1010);
-        await this._waitForSampleDataLoadingAction(id);
-        return !(await this.isSampleDataSetInstalled(id));
-      });
-    }
+
+      // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
+      await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+      // https://github.com/elastic/kibana/issues/65949
+      // Even after waiting for the "Remove" button to be enabled we still have failures
+      // where it appears the click just didn't work.
+      await this.common.sleep(1010);
+      await this.testSubjects.click(`removeSampleDataSet${id}`);
+      await this.common.sleep(1010);
+      await this._waitForSampleDataLoadingAction(id);
+      return !(await this.isSampleDataSetInstalled(id));
+    });
   }
 
   // loading action is either uninstall and install

@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RuleTypeModal } from '@kbn/alerts-ui-shared/src/rule_type_modal';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form/src/rule_type_modal';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,6 +42,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
       getAddRuleFlyout: AddRuleFlyout,
       getRulesSettingsLink: RulesSettingsLink,
     },
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
@@ -50,20 +51,23 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: http.basePath.prepend('/app/observability/alerts'),
-      deepLinkId: 'observability-overview:alerts',
-    },
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+          defaultMessage: 'Alerts',
+        }),
+        href: http.basePath.prepend('/app/observability/alerts'),
+        deepLinkId: 'observability-overview:alerts',
+      },
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+          defaultMessage: 'Rules',
+        }),
+      },
+    ],
+    { serverless }
+  );
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const {

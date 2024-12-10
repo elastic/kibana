@@ -8,7 +8,6 @@
 import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import React from 'react';
 import { TimelineDataTable } from '.';
-import { defaultUdtHeaders } from '../default_headers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -18,6 +17,7 @@ import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { timelineActions } from '../../../../store';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 jest.mock('../../../../../sourcerer/containers');
 
@@ -72,7 +72,7 @@ const TestComponent = (props: TestComponentProps) => {
         refetch={refetchMock}
         dataLoadingState={DataLoadingState.loaded}
         totalCount={mockTimelineData.length}
-        onChangePage={onChangePageMock}
+        onFetchMoreRecords={onChangePageMock}
         updatedAt={Date.now()}
         onSetColumns={jest.fn()}
         onFilter={jest.fn()}

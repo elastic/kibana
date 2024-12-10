@@ -18,8 +18,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { RefreshInterval } from '@kbn/data-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import { DashboardOptions } from '../types';
-import { GridData } from '../content_management';
+import type { DashboardOptions, GridData } from '../../server/content_management';
 
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;
@@ -59,7 +58,6 @@ export interface DashboardContainerInput extends EmbeddableInput {
   tags: string[];
   viewMode: ViewMode;
   description?: string;
-  isEmbeddedExternally?: boolean;
   executionContext: KibanaExecutionContext;
 
   // dashboard options: TODO, build a new system to avoid all shared state appearing here. See https://github.com/elastic/kibana/issues/144532 for more information.

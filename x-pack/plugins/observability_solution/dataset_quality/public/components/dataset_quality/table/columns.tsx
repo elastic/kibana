@@ -161,7 +161,6 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
-  isSizeStatsAvailable,
   isActiveDataset,
   timeRange,
   urlService,
@@ -172,7 +171,6 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
-  isSizeStatsAvailable: boolean;
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
   urlService: BrowserUrlService;
@@ -188,7 +186,11 @@ export const getDatasetQualityTableColumns = ({
         const { integration, name, rawName } = dataStreamStat;
 
         return (
-          <DatasetQualityDetailsLink urlService={urlService} dataStream={rawName}>
+          <DatasetQualityDetailsLink
+            urlService={urlService}
+            dataStream={rawName}
+            timeRange={timeRange}
+          >
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <IntegrationIcon integration={integration} />
@@ -226,7 +228,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    ...(isSizeStatsAvailable && canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
       ? [
           {
             name: (
@@ -274,7 +276,10 @@ export const getDatasetQualityTableColumns = ({
       field: 'degradedDocs.percentage',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
-        <DatasetQualityIndicator isLoading={loadingDegradedStats} dataStreamStat={dataStreamStat} />
+        <DatasetQualityIndicator
+          isLoading={loadingDegradedStats}
+          quality={dataStreamStat.quality}
+        />
       ),
       width: '140px',
     },

@@ -9,13 +9,18 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ComposableProfile, PartialProfile } from './composable_profile';
-import type { Profile } from './types';
+import { isFunction } from 'lodash';
+import type {
+  AppliedProfile,
+  ComposableAccessorParams,
+  ComposableProfile,
+  PartialProfile,
+} from './composable_profile';
 
 /**
  * The profile provider resolution result
  */
-export type ResolveProfileResult<TContext> =
+type ResolveProfileResult<TContext> =
   | {
       /**
        * `true` if the associated profile is a match
@@ -34,14 +39,9 @@ export type ResolveProfileResult<TContext> =
     };
 
 /**
- * Context object with an injected profile ID
- */
-export type ContextWithProfileId<TContext> = TContext & { profileId: string };
-
-/**
  * The base profile provider interface
  */
-export interface BaseProfileProvider<TProfile extends PartialProfile> {
+export interface BaseProfileProvider<TProfile extends PartialProfile, TContext> {
   /**
    * The unique profile ID
    */
@@ -49,7 +49,7 @@ export interface BaseProfileProvider<TProfile extends PartialProfile> {
   /**
    * The composable profile implementation
    */
-  profile: ComposableProfile<TProfile>;
+  profile: ComposableProfile<TProfile, TContext>;
   /**
    * Set the `isExperimental` flag to `true` for any profile which is under development and should not be enabled by default.
    *
@@ -68,7 +68,7 @@ export interface BaseProfileProvider<TProfile extends PartialProfile> {
  * A synchronous profile provider interface
  */
 export interface ProfileProvider<TProfile extends PartialProfile, TParams, TContext>
-  extends BaseProfileProvider<TProfile> {
+  extends BaseProfileProvider<TProfile, TContext> {
   /**
    * The method responsible for context resolution and determining if the associated profile is a match
    * @param params Parameters specific to the provider context level
@@ -81,7 +81,7 @@ export interface ProfileProvider<TProfile extends PartialProfile, TParams, TCont
  * An asynchronous profile provider interface
  */
 export interface AsyncProfileProvider<TProfile extends PartialProfile, TParams, TContext>
-  extends BaseProfileProvider<TProfile> {
+  extends BaseProfileProvider<TProfile, TContext> {
   /**
    * The method responsible for context resolution and determining if the associated profile is a match
    * @param params Parameters specific to the provider context level
@@ -92,12 +92,36 @@ export interface AsyncProfileProvider<TProfile extends PartialProfile, TParams, 
   ) => ResolveProfileResult<TContext> | Promise<ResolveProfileResult<TContext>>;
 }
 
+/**
+ * Context object with an injected profile ID
+ */
+export type ContextWithProfileId<TContext> = TContext &
+  Pick<BaseProfileProvider<{}, {}>, 'profileId'>;
+
+/**
+ * Used to extract the profile type from a profile provider
+ */
+type ExtractProfile<TProvider> = TProvider extends BaseProfileProvider<infer TProfile, {}>
+  ? TProfile
+  : never;
+
+/**
+ * Used to extract the context type from a profile provider
+ */
+type ExtractContext<TProvider> = TProvider extends BaseProfileProvider<{}, infer TContext>
+  ? TContext
+  : never;
+
 const EMPTY_PROFILE = {};
 
 /**
  * The base profile service implementation
  */
-export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{}>, TContext> {
+export abstract class BaseProfileService<
+  TProvider extends BaseProfileProvider<TProfile, TContext>,
+  TProfile extends PartialProfile = ExtractProfile<TProvider>,
+  TContext = ExtractContext<TProvider>
+> {
   protected readonly providers: TProvider[] = [];
 
   /**
@@ -114,31 +138,59 @@ export abstract class BaseProfileService<TProvider extends BaseProfileProvider<{
   }
 
   /**
-   * Returns the composable profile associated with the provided context object
+   * Returns the profile associated with the provided context object
    * @param context A context object returned by a provider's `resolve` method
-   * @returns The composable profile associated with the context
+   * @returns The profile associated with the context
    */
-  public getProfile(context: ContextWithProfileId<TContext>): ComposableProfile<Profile> {
-    const provider = this.providers.find((current) => current.profileId === context.profileId);
-    return provider?.profile ?? EMPTY_PROFILE;
+  public getProfile(
+    params: ComposableAccessorParams<ContextWithProfileId<TContext>>
+  ): AppliedProfile {
+    const provider = this.providers.find(
+      (current) => current.profileId === params.context.profileId
+    );
+
+    if (!provider?.profile) {
+      return EMPTY_PROFILE;
+    }
+
+    return new Proxy(provider.profile, {
+      get: (target, prop, receiver) => {
+        const accessor = Reflect.get(target, prop, receiver);
+
+        if (!isFunction(accessor)) {
+          return accessor;
+        }
+
+        return (prev: Parameters<typeof accessor>[0]) => accessor(prev, params);
+      },
+    }) as AppliedProfile;
   }
 }
+
+/**
+ * Used to extract the parameters type from a profile provider
+ */
+type ExtractParams<TProvider> = TProvider extends ProfileProvider<{}, infer P, {}>
+  ? P
+  : TProvider extends AsyncProfileProvider<{}, infer P, {}>
+  ? P
+  : never;
 
 /**
  * A synchronous profile service implementation
  */
 export class ProfileService<
-  TProfile extends PartialProfile,
-  TParams,
-  TContext
-> extends BaseProfileService<ProfileProvider<TProfile, TParams, TContext>, TContext> {
+  TProvider extends ProfileProvider<{}, TParams, TContext>,
+  TParams = ExtractParams<TProvider>,
+  TContext = ExtractContext<TProvider>
+> extends BaseProfileService<TProvider> {
   /**
    * Performs context resolution based on the provided context level parameters,
    * returning the resolved context from the first matching profile provider
    * @param params Parameters specific to the service context level
    * @returns The resolved context object with an injected profile ID
    */
-  public resolve(params: TParams) {
+  public resolve(params: TParams): ContextWithProfileId<TContext> {
     for (const provider of this.providers) {
       const result = provider.resolve(params);
 
@@ -158,17 +210,17 @@ export class ProfileService<
  * An asynchronous profile service implementation
  */
 export class AsyncProfileService<
-  TProfile extends PartialProfile,
-  TParams,
-  TContext
-> extends BaseProfileService<AsyncProfileProvider<TProfile, TParams, TContext>, TContext> {
+  TProvider extends AsyncProfileProvider<{}, TParams, TContext>,
+  TParams = ExtractParams<TProvider>,
+  TContext = ExtractContext<TProvider>
+> extends BaseProfileService<TProvider> {
   /**
    * Performs context resolution based on the provided context level parameters,
    * returning the resolved context from the first matching profile provider
    * @param params Parameters specific to the service context level
    * @returns The resolved context object with an injected profile ID
    */
-  public async resolve(params: TParams) {
+  public async resolve(params: TParams): Promise<ContextWithProfileId<TContext>> {
     for (const provider of this.providers) {
       const result = await provider.resolve(params);
 

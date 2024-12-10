@@ -130,7 +130,10 @@ export class FeatureTable extends Component<Props, {}> {
       const accordion = (
         <EuiFlexGroup key={category.id} alignItems="baseline" responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiCheckbox {...checkboxProps} />
+            <EuiCheckbox
+              {...checkboxProps}
+              data-test-subj={`featureCategoryCheckbox_${category.id}`}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <EuiAccordion

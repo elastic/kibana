@@ -82,7 +82,7 @@ export class DifferenceMetric extends ElasticsearchMetric {
     this.getFields = () => [`${fieldSource}.${metric}`, `${fieldSource}.${metric2}`];
 
     this.calculation = (bucket: object) => {
-      return _.get(bucket, 'metric_max.value') - _.get(bucket, 'metric2_max.value');
+      return _.get(bucket, 'metric_max.value', 0) - _.get(bucket, 'metric2_max.value', 0);
     };
   }
 }
@@ -369,7 +369,8 @@ export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
       const write = _.get(bucket, 'write_deriv.normalized_value', null);
 
       if (index !== null || bulk !== null || write !== null) {
-        const valueOrZero = (value: number) => (value < 0 ? 0 : value || 0);
+        const valueOrZero = (value: number | null) =>
+          value === null || value < 0 ? 0 : value || 0;
 
         return valueOrZero(index) + valueOrZero(bulk) + valueOrZero(write);
       }
@@ -394,7 +395,7 @@ export class MillisecondsToSecondsMetric extends ElasticsearchMetric {
       }),
     });
     this.calculation = (bucket: object) => {
-      return _.get(bucket, 'metric.value') / 1000;
+      return _.get(bucket, 'metric.value', 0) / 1000;
     };
   }
 }

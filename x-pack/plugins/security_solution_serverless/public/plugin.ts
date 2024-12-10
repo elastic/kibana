@@ -22,8 +22,8 @@ import {
   parseExperimentalConfigValue,
   type ExperimentalFeatures,
 } from '../common/experimental_features';
-import { getCloudUrl, getProjectFeaturesUrl } from './navigation/util';
 import { setOnboardingSettings } from './onboarding';
+import { getEnablementModalCallout } from './components/enablement_modal_callout';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -70,17 +70,9 @@ export class SecuritySolutionServerlessPlugin
 
     securitySolution.setComponents({
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
+      EnablementModalCallout: getEnablementModalCallout(services),
     });
-    securitySolution.setOnboardingPageSettings.setProductTypes(productTypes);
-    securitySolution.setOnboardingPageSettings.setProjectFeaturesUrl(
-      getProjectFeaturesUrl(services.cloud)
-    );
-    securitySolution.setOnboardingPageSettings.setProjectsUrl(
-      getCloudUrl('projects', services.cloud)
-    );
-    securitySolution.setOnboardingPageSettings.setUsersUrl(
-      getCloudUrl('usersAndRoles', services.cloud)
-    );
+
     setOnboardingSettings(services);
     startNavigation(services);
 

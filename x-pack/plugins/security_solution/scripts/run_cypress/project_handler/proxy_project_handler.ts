@@ -40,8 +40,18 @@ export class ProxyHandler extends ProjectHandler {
       body.product_types = productTypes;
     }
 
-    if (process.env.KIBANA_MKI_IMAGE_COMMIT || commit) {
-      const override = commit ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
+    // The qualityGate variable has been added here to ensure that when the quality gate runs, there will be
+    // no kibana image override unless it is running for the daily monitoring.
+    // The tests will be executed against the commit which is already promoted to QA.
+    const monitoringQualityGate =
+      process.env.KIBANA_MKI_QUALITY_GATE_MONITORING &&
+      process.env.KIBANA_MKI_QUALITY_GATE_MONITORING === '1';
+    const qualityGate =
+      process.env.KIBANA_MKI_QUALITY_GATE &&
+      process.env.KIBANA_MKI_QUALITY_GATE === '1' &&
+      !monitoringQualityGate;
+    const override = commit && commit !== '' ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
+    if (override && !qualityGate) {
       const kibanaOverrideImage = `${override?.substring(0, 12)}`;
       this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
       this.log.info(
@@ -100,8 +110,8 @@ export class ProxyHandler extends ProjectHandler {
   }
 
   // Method to reset the credentials for the created project.
-  resetCredentials(projectId: string, runnerId: string): Promise<Credentials | undefined> {
-    this.log.info(`${runnerId} : Reseting credentials`);
+  resetCredentials(projectId: string): Promise<Credentials | undefined> {
+    this.log.info(`${projectId} : Reseting credentials`);
 
     const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
       const response = await axios.post(
@@ -113,7 +123,7 @@ export class ProxyHandler extends ProjectHandler {
           },
         }
       );
-      this.log.info('Credentials have ben reset');
+      this.log.info('Credentials have been reset');
       return {
         password: response.data.password,
         username: response.data.username,

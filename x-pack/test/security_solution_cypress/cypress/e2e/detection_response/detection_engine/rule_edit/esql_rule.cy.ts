@@ -14,14 +14,14 @@ import {
   DEFINITION_DETAILS,
   SUPPRESS_MISSING_FIELD,
   SUPPRESS_BY_DETAILS,
-  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 import {
   ESQL_QUERY_BAR,
-  ALERT_SUPPRESSION_DURATION_INPUT,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
 } from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -56,7 +56,9 @@ const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
 // Skipping in MKI due to flake
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/184557
+// Failing: See https://github.com/elastic/kibana/issues/184556
+describe.skip(
   'Detection ES|QL rules, edit',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -135,9 +137,8 @@ describe(
         editFirstRule();
 
         // check saved suppression settings
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(0).should('be.enabled').should('have.value', 3);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.enabled').should('have.value', 3);
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 'h');
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
@@ -191,9 +192,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });

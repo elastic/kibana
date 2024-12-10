@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleToImport } from './rule_to_import';
+import type { RuleToImport, ValidatedRuleToImport } from './rule_to_import';
 
 export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): RuleToImport =>
   ({
@@ -15,11 +15,17 @@ export const getImportRulesSchemaMock = (rewrites?: Partial<RuleToImport>): Rule
     severity: 'high',
     type: 'query',
     risk_score: 55,
-    language: 'kuery',
     rule_id: 'rule-1',
     immutable: false,
     ...rewrites,
   } as RuleToImport);
+
+export const getValidatedRuleToImportMock = (
+  overrides?: Partial<ValidatedRuleToImport>
+): ValidatedRuleToImport => ({
+  version: 1,
+  ...getImportRulesSchemaMock(overrides),
+});
 
 export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport => ({
   id: '6afb8ce1-ea94-4790-8653-fd0b021d2113',
@@ -29,7 +35,6 @@ export const getImportRulesWithIdSchemaMock = (ruleId = 'rule-1'): RuleToImport 
   severity: 'high',
   type: 'query',
   risk_score: 55,
-  language: 'kuery',
   rule_id: ruleId,
   immutable: false,
 });
@@ -63,7 +68,6 @@ export const getImportThreatMatchRulesSchemaMock = (
     severity: 'high',
     type: 'threat_match',
     risk_score: 55,
-    language: 'kuery',
     rule_id: 'rule-1',
     threat_index: ['index-123'],
     threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],

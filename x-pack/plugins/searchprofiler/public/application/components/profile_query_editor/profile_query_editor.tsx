@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, memo, useCallback } from 'react';
+import React, { useRef, memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiForm,
@@ -16,14 +16,15 @@ import {
   EuiFlexGroup,
   EuiSpacer,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
-import { useRequestProfile } from '../../hooks';
+import { useHasIndices, useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
-import { Editor, EditorInstance } from './editor';
+import { Editor, type EditorProps } from './editor';
 
 const DEFAULT_INDEX_VALUE = '_all';
 
@@ -39,33 +40,38 @@ const INITIAL_EDITOR_VALUE = `{
  * Drives state changes for mine via profiler action context.
  */
 export const ProfileQueryEditor = memo(() => {
-  const editorRef = useRef<EditorInstance>(null as any);
+  const editorPropsRef = useRef<EditorProps>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
 
   const dispatch = useProfilerActionContext();
 
-  const { getLicenseStatus, notifications, location, ...startServices } = useAppContext();
+  const { getLicenseStatus, notifications, location } = useAppContext();
+
+  const { data: indicesData, isLoading, error: indicesDataError } = useHasIndices();
 
   const queryParams = new URLSearchParams(location.search);
   const indexName = queryParams.get('index');
   const searchProfilerQueryURI = queryParams.get('load_from');
+
   const searchProfilerQuery =
     searchProfilerQueryURI &&
     decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, ''));
+  const [editorValue, setEditorValue] = useState(
+    searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE
+  );
 
   const requestProfile = useRequestProfile();
 
   const handleProfileClick = async () => {
     dispatch({ type: 'setProfiling', value: true });
     try {
-      const { current: editor } = editorRef;
       const { data: result, error } = await requestProfile({
-        query: editorRef.current.getValue(),
+        query: editorValue,
         index: indexInputRef.current.value,
       });
       if (error) {
         notifications.addDanger(error);
-        editor.focus();
+        editorPropsRef.current.focus();
         return;
       }
       if (result === null) {
@@ -78,18 +84,39 @@ export const ProfileQueryEditor = memo(() => {
   };
 
   const onEditorReady = useCallback(
-    (editorInstance: any) => (editorRef.current = editorInstance),
+    (editorPropsInstance: EditorProps) => (editorPropsRef.current = editorPropsInstance),
     []
   );
   const licenseEnabled = getLicenseStatus().valid;
 
-  return (
-    <EuiFlexGroup
-      responsive={false}
-      className="prfDevTool__sense"
-      gutterSize="none"
-      direction="column"
+  const hasIndices = isLoading || indicesDataError ? false : indicesData?.hasIndices;
+
+  const isDisabled = !licenseEnabled || !hasIndices;
+  const tooltipContent = !licenseEnabled
+    ? i18n.translate('xpack.searchProfiler.formProfileButton.noLicenseTooltip', {
+        defaultMessage: 'You need an active license to use Search Profiler',
+      })
+    : i18n.translate('xpack.searchProfiler.formProfileButton.noIndicesTooltip', {
+        defaultMessage: 'You must have at least one index to use Search Profiler',
+      });
+
+  const button = (
+    <EuiButton
+      data-test-subj={isDisabled ? 'disabledProfileButton' : 'profileButton'}
+      fill
+      disabled={isDisabled}
+      onClick={!isDisabled ? handleProfileClick : undefined}
     >
+      <EuiText>
+        {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
+          defaultMessage: 'Profile',
+        })}
+      </EuiText>
+    </EuiButton>
+  );
+
+  return (
+    <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
@@ -120,9 +147,9 @@ export const ProfileQueryEditor = memo(() => {
       <EuiFlexItem grow={10}>
         <Editor
           onEditorReady={onEditorReady}
+          setEditorValue={setEditorValue}
+          editorValue={editorValue}
           licenseEnabled={licenseEnabled}
-          initialValue={searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE}
-          {...startServices}
         />
       </EuiFlexItem>
 
@@ -137,18 +164,13 @@ export const ProfileQueryEditor = memo(() => {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
-            <EuiButton
-              data-test-subj="profileButton"
-              fill
-              disabled={!licenseEnabled}
-              onClick={() => handleProfileClick()}
-            >
-              <EuiText>
-                {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
-                  defaultMessage: 'Profile',
-                })}
-              </EuiText>
-            </EuiButton>
+            {isDisabled ? (
+              <EuiToolTip position="top" content={tooltipContent}>
+                {button}
+              </EuiToolTip>
+            ) : (
+              button
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

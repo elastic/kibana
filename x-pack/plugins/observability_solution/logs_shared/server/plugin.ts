@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
-
+import { CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { defaultLogViewId } from '../common/log_views';
+import { LogsSharedConfig } from '../common/plugin_config';
+import { registerDeprecations } from './deprecations';
+import { featureFlagUiSettings } from './feature_flags';
+import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
+import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
+import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
+import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
+import { initLogsSharedServer } from './logs_shared_server';
+import { logViewSavedObjectType } from './saved_objects';
+import { LogEntriesService } from './services/log_entries';
+import { LogViewsService } from './services/log_views';
 import {
   LogsSharedPluginCoreSetup,
   LogsSharedPluginSetup,
@@ -15,17 +26,6 @@ import {
   LogsSharedServerPluginStartDeps,
   UsageCollector,
 } from './types';
-import { logViewSavedObjectType } from './saved_objects';
-import { initLogsSharedServer } from './logs_shared_server';
-import { LogViewsService } from './services/log_views';
-import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
-import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
-import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
-import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
-import { LogEntriesService } from './services/log_entries';
-import { LogsSharedConfig } from '../common/plugin_config';
-import { registerDeprecations } from './deprecations';
-import { defaultLogViewId } from '../common/log_views';
 
 export class LogsSharedPlugin
   implements
@@ -42,7 +42,7 @@ export class LogsSharedPlugin
   private logViews: LogViewsService;
   private usageCollector: UsageCollector;
 
-  constructor(context: PluginInitializerContext<LogsSharedConfig>) {
+  constructor(private readonly context: PluginInitializerContext<LogsSharedConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.usageCollector = {};
@@ -51,11 +51,13 @@ export class LogsSharedPlugin
   }
 
   public setup(core: LogsSharedPluginCoreSetup, plugins: LogsSharedServerPluginSetupDeps) {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
     const framework = new KibanaFramework(core, plugins);
 
     const logViews = this.logViews.setup();
 
-    if (this.config.savedObjects.logView.enabled) {
+    if (!isServerless) {
       // Conditionally register log view saved objects
       core.savedObjects.registerType(logViewSavedObjectType);
     } else {
@@ -78,6 +80,7 @@ export class LogsSharedPlugin
       getStartServices: () => core.getStartServices(),
       getUsageCollector: () => this.usageCollector,
       logger: this.logger,
+      isServerless,
     };
 
     // Register server side APIs
@@ -87,6 +90,8 @@ export class LogsSharedPlugin
     logEntriesService.setup(core, plugins);
 
     registerDeprecations({ core });
+
+    core.uiSettings.register(featureFlagUiSettings);
 
     return {
       ...domainLibs,

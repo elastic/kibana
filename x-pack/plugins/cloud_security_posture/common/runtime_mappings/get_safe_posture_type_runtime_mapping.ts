@@ -16,14 +16,16 @@ export const getSafePostureTypeRuntimeMapping = (): MappingRuntimeFields => ({
     type: 'keyword',
     script: {
       source: `
-        def postureTypeAvailable = doc.containsKey("rule.benchmark.posture_type") &&
-          !doc["rule.benchmark.posture_type"].empty;
+        def postureTypeAvailable = doc.containsKey("rule.benchmark.posture_type") && !doc["rule.benchmark.posture_type"].empty;
+        boolean isNativeCsp = doc.containsKey("data_stream.dataset") && !doc["data_stream.dataset"].empty && doc["data_stream.dataset"].value == "cloud_security_posture.findings";
 
-        if (!postureTypeAvailable) {
-          // Before 8.7 release
-          emit("kspm");
-        } else {
-          emit(doc["rule.benchmark.posture_type"].value);
+        if (isNativeCsp) {
+          if (!postureTypeAvailable) {
+            // Before 8.7 release
+            emit("kspm");
+          } else {
+            emit(doc["rule.benchmark.posture_type"].value);
+          }
         }
       `,
     },

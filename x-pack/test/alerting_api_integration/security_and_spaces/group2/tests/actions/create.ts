@@ -7,30 +7,41 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { checkAAD, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function createActionTests({ getService }: FtrProviderContext) {
+export default function createConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
+  const retry = getService('retry');
+  const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('create', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    after(() => objectRemover.removeAll());
+    before(async () => {
+      await esTestIndexTool.destroy();
+      await esTestIndexTool.setup();
+    });
+    after(async () => {
+      await esTestIndexTool.destroy();
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        it('should handle create action request appropriately', async () => {
+        it('should handle create connector request appropriately', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -56,14 +67,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'action', 'actions');
+              objectRemover.add(space.id, response.body.id, 'connector', 'actions');
               expect(response.body).to.eql({
                 id: response.body.id,
                 is_preconfigured: false,
                 is_system_action: false,
                 is_deprecated: false,
                 is_missing_secrets: false,
-                name: 'My action',
+                name: 'My Connector',
                 connector_type_id: 'test.index-record',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -83,13 +94,13 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`should handle create action request appropriately when action type isn't registered`, async () => {
+        it(`should handle create connector request appropriately when connector type isn't registered`, async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.unregistered-action-type',
               config: {},
             });
@@ -121,7 +132,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle create action request appropriately when payload is empty and invalid', async () => {
+        it('should handle create connector request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -148,7 +159,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`should handle create action request appropriately when config isn't valid`, async () => {
+        it(`should handle create connector request appropriately when config isn't valid`, async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -189,7 +200,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`should handle create action requests for action types that are not enabled`, async () => {
+        it(`should handle create connector requests for connector types that are not enabled`, async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -227,7 +238,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`should handle create action request appropriately when empty strings are submitted`, async () => {
+        it(`should handle create connector request appropriately when empty strings are submitted`, async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -260,14 +271,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle create action request appropriately with a predefined id', async () => {
+        it('should handle create connector request appropriately with a predefined id', async () => {
           const predefinedId = uuidv4();
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector/${predefinedId}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -293,14 +304,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'action', 'actions');
+              objectRemover.add(space.id, response.body.id, 'connector', 'actions');
               expect(response.body).to.eql({
                 id: predefinedId,
                 is_preconfigured: false,
                 is_system_action: false,
                 is_deprecated: false,
                 is_missing_secrets: false,
-                name: 'My action',
+                name: 'My Connector',
                 connector_type_id: 'test.index-record',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -320,13 +331,13 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it(`shouldn't create a preconfigured action with the same id as an existing one`, async () => {
+        it(`shouldn't create a preconfigured connector with the same id as an existing one`, async () => {
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/connector/custom-system-abc-connector`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              name: 'My action',
+              name: 'My Connector',
               connector_type_id: 'system-abc-action-type',
               config: {},
               secrets: {},
@@ -391,6 +402,74 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 error: 'Bad Request',
                 message: 'System action creation is forbidden. Action type: test.system-action.',
               });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle save hooks appropriately', async () => {
+          const source = uuidv4();
+          const encryptedValue = 'This value should be encrypted';
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'Hooked action',
+              connector_type_id: 'test.connector-with-hooks',
+              config: {
+                index: ES_TEST_INDEX_NAME,
+                source,
+              },
+              secrets: {
+                encrypted: encryptedValue,
+              },
+            });
+
+          const searchResult = await esTestIndexTool.search(source);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(searchResult.body.hits.hits.length).to.eql(0);
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'connector', 'actions');
+
+              const refs: string[] = [];
+              for (const hit of searchResult.body.hits.hits) {
+                const doc = hit._source as any;
+
+                const reference = doc.reference;
+                delete doc.reference;
+                refs.push(reference);
+
+                if (reference === 'post-save') {
+                  expect(doc.state.wasSuccessful).to.be(true);
+                  delete doc.state.wasSuccessful;
+                }
+
+                const expected = {
+                  state: {
+                    connectorId: response.body.id,
+                    config: { index: ES_TEST_INDEX_NAME, source },
+                    secrets: { encrypted: encryptedValue },
+                    isUpdate: false,
+                  },
+                  source,
+                };
+                expect(doc).to.eql(expected);
+              }
+
+              refs.sort();
+              expect(refs).to.eql(['post-save', 'pre-save']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

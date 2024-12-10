@@ -43,7 +43,7 @@ const percentageOptions = [
   {
     value: 'percentage_config_1',
     inputDisplay: (
-      <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="subdued" css={{ lineHeight: 'inherit' }}>
         Percentage 1
       </EuiHealth>
     ),
@@ -51,7 +51,7 @@ const percentageOptions = [
   {
     value: 'percentage_config_2',
     inputDisplay: (
-      <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="warning" css={{ lineHeight: 'inherit' }}>
         Percentage 2
       </EuiHealth>
     ),
@@ -59,7 +59,7 @@ const percentageOptions = [
   {
     value: 'percentage_config_3',
     inputDisplay: (
-      <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="danger" css={{ lineHeight: 'inherit' }}>
         Percentage 3
       </EuiHealth>
     ),
@@ -70,7 +70,7 @@ const valueOptions = [
   {
     value: 'value_config_1',
     inputDisplay: (
-      <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="subdued" css={{ lineHeight: 'inherit' }}>
         Value 1
       </EuiHealth>
     ),
@@ -78,7 +78,7 @@ const valueOptions = [
   {
     value: 'value_config_2',
     inputDisplay: (
-      <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="warning" css={{ lineHeight: 'inherit' }}>
         Value 2
       </EuiHealth>
     ),
@@ -86,7 +86,7 @@ const valueOptions = [
   {
     value: 'value_config_3',
     inputDisplay: (
-      <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="danger" css={{ lineHeight: 'inherit' }}>
         Value 3
       </EuiHealth>
     ),
@@ -188,7 +188,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                       component={TextField}
                       componentProps={{
                         euiFieldProps: {
-                          style: {
+                          css: {
                             maxWidth: '180px',
                           },
                         },
@@ -303,7 +303,7 @@ const percentageOptions = [
   {
     value: 'percentage_config_1',
     inputDisplay: (
-      <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="subdued" css={{ lineHeight: 'inherit' }}>
         Percentage 1
       </EuiHealth>
     ),
@@ -311,7 +311,7 @@ const percentageOptions = [
   {
     value: 'percentage_config_2',
     inputDisplay: (
-      <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="warning" css={{ lineHeight: 'inherit' }}>
         Percentage 2
       </EuiHealth>
     ),
@@ -319,7 +319,7 @@ const percentageOptions = [
   {
     value: 'percentage_config_3',
     inputDisplay: (
-      <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="danger" css={{ lineHeight: 'inherit' }}>
         Percentage 3
       </EuiHealth>
     ),
@@ -330,7 +330,7 @@ const valueOptions = [
   {
     value: 'value_config_1',
     inputDisplay: (
-      <EuiHealth color="subdued" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="subdued" css={{ lineHeight: 'inherit' }}>
         Value 1
       </EuiHealth>
     ),
@@ -338,7 +338,7 @@ const valueOptions = [
   {
     value: 'value_config_2',
     inputDisplay: (
-      <EuiHealth color="warning" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="warning" css={{ lineHeight: 'inherit' }}>
         Value 2
       </EuiHealth>
     ),
@@ -346,7 +346,7 @@ const valueOptions = [
   {
     value: 'value_config_3',
     inputDisplay: (
-      <EuiHealth color="danger" style={{ lineHeight: 'inherit' }}>
+      <EuiHealth color="danger" css={{ lineHeight: 'inherit' }}>
         Value 3
       </EuiHealth>
     ),
@@ -448,7 +448,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                       component={TextField}
                       componentProps={{
                         euiFieldProps: {
-                          style: {
+                          css: {
                             maxWidth: '180px',
                           },
                         },

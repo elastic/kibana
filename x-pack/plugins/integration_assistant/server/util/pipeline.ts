@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ESProcessorItem } from '../../common';
+import { createPassthroughFailureProcessor, createRemoveProcessor } from './processors';
 
 interface DocTemplate {
   _index: string;
@@ -29,15 +31,17 @@ export async function testPipeline(
   samples: string[],
   pipeline: object,
   client: IScopedClusterClient
-): Promise<{ pipelineResults: object[]; errors: object[] }> {
+): Promise<{ pipelineResults: Array<{ [key: string]: unknown }>; errors: object[] }> {
   const docs = samples.map((sample) => formatSample(sample));
-  const pipelineResults: object[] = [];
+  const pipelineResults: Array<{ [key: string]: unknown }> = [];
   const errors: object[] = [];
 
   try {
     const output = await client.asCurrentUser.ingest.simulate({ docs, pipeline });
     for (const doc of output.docs) {
-      if (doc.doc?._source?.error) {
+      if (!doc) {
+        // Nothing to do – the document was dropped.
+      } else if (doc.doc?._source?.error) {
         errors.push(doc.doc._source.error);
       } else if (doc.doc?._source) {
         pipelineResults.push(doc.doc._source);
@@ -47,5 +51,18 @@ export async function testPipeline(
     errors.push({ error: (e as Error).message });
   }
 
+  return { pipelineResults, errors };
+}
+
+export async function createJSONInput(
+  processors: ESProcessorItem[],
+  samples: string[],
+  client: IScopedClusterClient
+): Promise<{ pipelineResults: Array<{ [key: string]: unknown }>; errors: object[] }> {
+  const pipeline = {
+    processors: [...processors, createRemoveProcessor()],
+    on_failure: [createPassthroughFailureProcessor()],
+  };
+  const { pipelineResults, errors } = await testPipeline(samples, pipeline, client);
   return { pipelineResults, errors };
 }

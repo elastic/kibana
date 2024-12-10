@@ -20,16 +20,12 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
-import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import { DashboardApi } from '../../dashboard_api/types';
 import { embeddableService, screenshotModeService } from '../../services/kibana_services';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
-import {
-  DashboardContainerFactory,
-  DashboardContainerFactoryDefinition,
-  DashboardCreationOptions,
-} from '../embeddable/dashboard_container_factory';
+import { DashboardContainerFactoryDefinition } from '../embeddable/dashboard_container_factory';
+import type { DashboardCreationOptions } from '../..';
 import { DashboardLocatorParams, DashboardRedirect } from '../types';
 import { Dashboard404Page } from './dashboard_404';
 
@@ -91,12 +87,8 @@ export function DashboardRenderer({
     (async () => {
       const creationOptions = await getCreationOptions?.();
 
-      const dashboardFactory = embeddableService.getEmbeddableFactory(
-        DASHBOARD_CONTAINER_TYPE
-      ) as DashboardContainerFactory & {
-        create: DashboardContainerFactoryDefinition['create'];
-      };
-      const container = await dashboardFactory?.create(
+      const dashboardFactory = new DashboardContainerFactoryDefinition(embeddableService);
+      const container = await dashboardFactory.create(
         { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
         undefined,
         creationOptions,

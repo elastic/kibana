@@ -5,13 +5,6 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-update.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/note:
     patch:
@@ -57,24 +50,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [persistNote]
-                    properties:
-                      persistNote:
-                        $ref: '#/components/schemas/ResponseNote'
+                $ref: '#/components/schemas/ResponseNote'
 components:
   schemas:
     ResponseNote:
       type: object
-      required: [code, message, note]
+      required: [note]
       properties:
-        code:
-          type: number
-        message:
-          type: string
         note:
           $ref: '../model/components.schema.yaml#/components/schemas/Note'

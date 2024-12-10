@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common-internal';
+import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common';
 import { getLevelSortValue, groupByLevel, getHighestStatus } from './status_level';
 import { FormattedStatus, StatusState } from './load_status';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback } from 'react';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
-import { AlertStatusValues, ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { ALERT_RULE_UUID, AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
 import { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -71,6 +71,9 @@ export function RuleComponent({
 }: RuleComponentProps) {
   const { ruleTypeRegistry, actionTypeRegistry, alertsTableConfigurationRegistry } =
     useKibana().services;
+  // The lastReloadRequestTime should be updated when the refreshToken changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
 
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
@@ -103,13 +106,10 @@ export function RuleComponent({
           alertsTableConfigurationRegistry={
             alertsTableConfigurationRegistry as AlertTableConfigRegistry
           }
-          featureIds={
-            (rule.consumer === ALERTING_FEATURE_ID
-              ? [ruleType.producer]
-              : [rule.consumer]) as AlertConsumers[]
-          }
+          ruleTypeIds={[ruleType.id]}
           query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
           showAlertStatusWithFlapping
+          lastReloadRequestTime={lastReloadRequestTime}
         />
       );
     }
@@ -124,13 +124,13 @@ export function RuleComponent({
   }, [
     alerts,
     alertsTableConfigurationRegistry,
+    lastReloadRequestTime,
     onMuteAction,
     readOnly,
-    rule.consumer,
     rule.id,
     ruleType.hasAlertsMappings,
     ruleType.hasFieldsForAAD,
-    ruleType.producer,
+    ruleType.id,
   ]);
 
   const tabs = [
@@ -199,6 +199,7 @@ export function RuleComponent({
           actionTypeRegistry,
           ruleTypeRegistry,
           hideEditButton: true,
+          useNewRuleForm: true,
           onEditRule: requestRefresh,
         })}
       </EuiFlexGroup>

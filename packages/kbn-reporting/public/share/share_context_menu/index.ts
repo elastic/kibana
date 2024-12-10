@@ -11,7 +11,6 @@ import * as Rx from 'rxjs';
 
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
-import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 import type { ReportingAPIClient } from '../../reporting_api_client';
 
@@ -22,6 +21,7 @@ export type StartServices = [
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     // used extensively in Reporting share context menus and modal
     | 'notifications'
   >,
@@ -31,7 +31,6 @@ export type StartServices = [
 
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
-  usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
   startServices$: Rx.Observable<StartServices>;
@@ -39,7 +38,6 @@ export interface ExportModalShareOpts {
 
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
-  usesUiCapabilities: boolean;
   license: ILicense;
   application: ApplicationStart;
   startServices$: Rx.Observable<StartServices>;
@@ -47,13 +45,16 @@ export interface ExportPanelShareOpts {
 
 export interface ReportingSharingData {
   title: string;
-  layout: LayoutParams;
   reportingDisabled?: boolean;
-  [key: string]: unknown;
+  locatorParams: {
+    id: string;
+    params: unknown;
+  };
 }
 
 export interface JobParamsProviderOptions {
   sharingData: ReportingSharingData;
   shareableUrl?: string;
   objectType: string;
+  optimizedForPrinting?: boolean;
 }

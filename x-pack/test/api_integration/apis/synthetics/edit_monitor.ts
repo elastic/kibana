@@ -23,7 +23,7 @@ import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test
 import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('EditMonitor', function () {
+  describe('EditMonitorAPI', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -79,10 +79,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      const loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.id;
     });
 
     after(async () => {

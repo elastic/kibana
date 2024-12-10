@@ -43,6 +43,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           type: schema.string(),
           id: schema.string(),
         }),
+        query: schema.object({
+          scanUsage: schema.maybe(schema.boolean()),
+        }),
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -51,7 +54,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       } = (await context.core).elasticsearch;
 
       const { type, id } = request.params;
-      const result = await deleteInferenceEndpoint(asCurrentUser, type, id);
+      const { scanUsage } = request.query;
+      const result = await deleteInferenceEndpoint(asCurrentUser, type, id, scanUsage ?? false);
 
       return response.ok({ body: result });
     })

@@ -26,8 +26,10 @@ export const ALERT_SUPPRESSION_FIELDS_COMBO_BOX =
 
 export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_BOX} input`;
 
+export const ALERT_SUPPRESSION_WARNING = '[data-test-subj="alertSuppressionWarning"]';
+
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
-  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationOptions"]';
 
 export const ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-time-period`;
 
@@ -40,11 +42,14 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS = `${ALERT_SUPPRESSION_MI
 
 export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS = `${ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS} #doNotSuppress`;
 
-export const ALERT_SUPPRESSION_DURATION_INPUT =
-  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationInput"]';
+export const ALERT_SUPPRESSION_DURATION_VALUE_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="interval"]';
+
+export const ALERT_SUPPRESSION_DURATION_UNIT_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="timeType"]';
 
 export const THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX =
-  '[data-test-subj="detectionEngineStepDefineRuleThresholdEnableSuppression"] input';
+  '[data-test-subj="thresholdAlertSuppressionEnabled"] input';
 
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
@@ -263,10 +268,9 @@ export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
 
 export const ESQL_TYPE = '[data-test-subj="esqlRuleType"]';
 
-export const ESQL_QUERY_BAR_INPUT_AREA =
-  '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"] textarea';
+export const ESQL_QUERY_BAR_INPUT_AREA = '[data-test-subj="ruleEsqlQueryBar"] textarea';
 
-export const ESQL_QUERY_BAR = '[data-test-subj="detectionEngineStepDefineRuleEsqlQueryBar"]';
+export const ESQL_QUERY_BAR = '[data-test-subj="ruleEsqlQueryBar"]';
 
 export const NEW_TERMS_INPUT_AREA = '[data-test-subj="newTermsInput"]';
 

@@ -26,14 +26,14 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { MockLifecycle } from './test_helpers/test_types';
+import type { MockLifecycle } from './test_helpers/test_types';
 import { ApplicationService } from './application_service';
 import {
-  App,
-  AppDeepLink,
+  type App,
+  type AppDeepLink,
   AppStatus,
-  AppUpdater,
-  PublicAppInfo,
+  type AppUpdater,
+  type PublicAppInfo,
 } from '@kbn/core-application-browser';
 import { act } from 'react-dom/test-utils';
 import { DEFAULT_APP_VISIBILITY } from './utils';
@@ -615,6 +615,26 @@ describe('#start()', () => {
 
       expect(() => shallow(createElement(getComponent))).not.toThrow();
       expect(getComponent()).toMatchSnapshot();
+    });
+  });
+
+  describe('isAppRegistered', () => {
+    let isAppRegistered: any;
+    beforeEach(async () => {
+      const { register } = service.setup(setupDeps);
+      register(Symbol(), createApp({ id: 'one_app' }));
+      register(Symbol(), createApp({ id: 'another_app', appRoute: '/custom/path' }));
+
+      const start = await service.start(startDeps);
+      isAppRegistered = start.isAppRegistered;
+    });
+
+    it('returns false for unregistered apps', () => {
+      expect(isAppRegistered('oneApp')).toEqual(false);
+    });
+
+    it('returns true for registered apps', () => {
+      expect(isAppRegistered('another_app')).toEqual(true);
     });
   });
 

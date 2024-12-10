@@ -13,14 +13,21 @@ import createCache from '@emotion/cache';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
-import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
-import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import {
+  getColorMode,
+  defaultTheme,
+  getThemeConfigByName,
+  DEFAULT_THEME_CONFIG,
+} from '@kbn/react-kibana-context-common';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
 /**
  * Props for the KibanaEuiProvider.
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
+  userProfile?: Pick<UserProfileService, 'getUserProfile$'>; // TODO: use this to access a "high contrast mode" flag from user settings. Pass the flag to EuiProvider, when it is supported in EUI.
   globalStyles?: boolean;
 }
 
@@ -64,8 +71,13 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   modify,
   children,
 }) => {
-  const theme = useObservable(theme$, defaultTheme);
-  const themeColorMode = useMemo(() => getColorMode(theme), [theme]);
+  const kibanaTheme = useObservable(theme$, defaultTheme);
+  const themeColorMode = useMemo(() => getColorMode(kibanaTheme), [kibanaTheme]);
+
+  const theme = useMemo(() => {
+    const config = getThemeConfigByName(kibanaTheme.name) || DEFAULT_THEME_CONFIG;
+    return config.euiTheme;
+  }, [kibanaTheme.name]);
 
   // In some cases-- like in Storybook or testing-- we want to explicitly override the
   // colorMode provided by the `theme`.
@@ -76,7 +88,16 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   const globalStyles = globalStylesProp === false ? false : undefined;
 
   return (
-    <EuiProvider {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles }}>
+    <EuiProvider
+      {...{
+        cache,
+        modify,
+        colorMode,
+        globalStyles,
+        utilityClasses: globalStyles,
+        theme,
+      }}
+    >
       {children}
     </EuiProvider>
   );

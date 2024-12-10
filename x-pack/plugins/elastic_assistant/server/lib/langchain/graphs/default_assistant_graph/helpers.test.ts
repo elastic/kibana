@@ -49,6 +49,18 @@ describe('streamGraph', () => {
     streamEvents: mockStreamEvents,
   } as unknown as DefaultAssistantGraph;
   const mockOnLlmResponse = jest.fn().mockResolvedValue(null);
+  const requestArgs = {
+    apmTracer: mockApmTracer,
+    assistantGraph: mockAssistantGraph,
+    inputs: {
+      input: 'input',
+      responseLanguage: 'English',
+      llmType: 'openai',
+    },
+    logger: mockLogger,
+    onLlmResponse: mockOnLlmResponse,
+    request: mockRequest,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,8 +71,8 @@ describe('streamGraph', () => {
       transaction: { ids: { 'transaction.id': 'transactionId' } },
     });
   });
-  describe('ActionsClientChatOpenAI', () => {
-    it('should execute the graph in streaming mode', async () => {
+  describe('OpenAI Function Agent streaming', () => {
+    it('should execute the graph in streaming mode - OpenAI + isOssModel = false', async () => {
       mockStreamEvents.mockReturnValue({
         next: jest
           .fn()
@@ -93,19 +105,7 @@ describe('streamGraph', () => {
         return: jest.fn(),
       });
 
-      const response = await streamGraph({
-        apmTracer: mockApmTracer,
-        assistantGraph: mockAssistantGraph,
-        inputs: {
-          input: 'input',
-          bedrockChatEnabled: false,
-          llmType: 'openai',
-          responseLanguage: 'English',
-        },
-        logger: mockLogger,
-        onLlmResponse: mockOnLlmResponse,
-        request: mockRequest,
-      });
+      const response = await streamGraph(requestArgs);
 
       expect(response).toBe(mockResponseWithHeaders);
       expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
@@ -117,57 +117,28 @@ describe('streamGraph', () => {
         );
       });
     });
-  });
-
-  describe('ActionsClientSimpleChatModel', () => {
-    it('should execute the graph in streaming mode', async () => {
+    it('on_llm_end events with finish_reason != stop should not end the stream', async () => {
       mockStreamEvents.mockReturnValue({
         next: jest
           .fn()
           .mockResolvedValueOnce({
             value: {
-              name: 'ActionsClientSimpleChatModel',
+              name: 'ActionsClientChatOpenAI',
               event: 'on_llm_stream',
-              data: {
-                chunk: {
-                  content:
-                    '```json\n\n  "action": "Final Answer",\n  "action_input": "Look at these',
-                },
-              },
+              data: { chunk: { message: { content: 'content' } } },
               tags: [AGENT_NODE_TAG],
             },
             done: false,
           })
           .mockResolvedValueOnce({
             value: {
-              name: 'ActionsClientSimpleChatModel',
-              event: 'on_llm_stream',
-              data: {
-                chunk: {
-                  content: ' rare IP',
-                },
-              },
-              tags: [AGENT_NODE_TAG],
-            },
-            done: false,
-          })
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientSimpleChatModel',
-              event: 'on_llm_stream',
-              data: {
-                chunk: {
-                  content: ' addresses." }```',
-                },
-              },
-              tags: [AGENT_NODE_TAG],
-            },
-            done: false,
-          })
-          .mockResolvedValueOnce({
-            value: {
-              name: 'ActionsClientSimpleChatModel',
+              name: 'ActionsClientChatOpenAI',
               event: 'on_llm_end',
+              data: {
+                output: {
+                  generations: [[{ generationInfo: { finish_reason: 'function_call' }, text: '' }]],
+                },
+              },
               tags: [AGENT_NODE_TAG],
             },
           })
@@ -177,20 +148,145 @@ describe('streamGraph', () => {
         return: jest.fn(),
       });
 
-      const response = await streamGraph({
-        apmTracer: mockApmTracer,
-        assistantGraph: mockAssistantGraph,
-        inputs: {
-          input: 'input',
-          bedrockChatEnabled: false,
-          responseLanguage: 'English',
-          llmType: 'gemini',
-        },
-        logger: mockLogger,
-        onLlmResponse: mockOnLlmResponse,
-        request: mockRequest,
+      const response = await streamGraph(requestArgs);
+
+      expect(response).toBe(mockResponseWithHeaders);
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+      await waitFor(() => {
+        expect(mockOnLlmResponse).not.toHaveBeenCalled();
+      });
+    });
+    it('on_llm_end events without a finish_reason should end the stream', async () => {
+      mockStreamEvents.mockReturnValue({
+        next: jest
+          .fn()
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_stream',
+              data: { chunk: { message: { content: 'content' } } },
+              tags: [AGENT_NODE_TAG],
+            },
+            done: false,
+          })
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_end',
+              data: {
+                output: {
+                  generations: [[{ generationInfo: {}, text: 'final message' }]],
+                },
+              },
+              tags: [AGENT_NODE_TAG],
+            },
+          })
+          .mockResolvedValue({
+            done: true,
+          }),
+        return: jest.fn(),
       });
 
+      const response = await streamGraph(requestArgs);
+
+      expect(response).toBe(mockResponseWithHeaders);
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+      await waitFor(() => {
+        expect(mockOnLlmResponse).toHaveBeenCalledWith(
+          'final message',
+          { transactionId: 'transactionId', traceId: 'traceId' },
+          false
+        );
+      });
+    });
+    it('on_llm_end events is called with chunks if there is no final text value', async () => {
+      mockStreamEvents.mockReturnValue({
+        next: jest
+          .fn()
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_stream',
+              data: { chunk: { message: { content: 'content' } } },
+              tags: [AGENT_NODE_TAG],
+            },
+            done: false,
+          })
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_end',
+              data: {
+                output: {
+                  generations: [[{ generationInfo: {}, text: '' }]],
+                },
+              },
+              tags: [AGENT_NODE_TAG],
+            },
+          })
+          .mockResolvedValue({
+            done: true,
+          }),
+        return: jest.fn(),
+      });
+
+      const response = await streamGraph(requestArgs);
+
+      expect(response).toBe(mockResponseWithHeaders);
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+      await waitFor(() => {
+        expect(mockOnLlmResponse).toHaveBeenCalledWith(
+          'content',
+          { transactionId: 'transactionId', traceId: 'traceId' },
+          false
+        );
+      });
+    });
+  });
+
+  describe('Tool Calling Agent and Structured Chat Agent streaming', () => {
+    const mockAsyncIterator = {
+      async *[Symbol.asyncIterator]() {
+        yield {
+          event: 'on_chat_model_stream',
+          data: {
+            chunk: {
+              content: 'Look at these',
+            },
+          },
+          tags: [AGENT_NODE_TAG],
+        };
+        yield {
+          event: 'on_chat_model_stream',
+          data: {
+            chunk: {
+              content: ' rare IP',
+            },
+          },
+          tags: [AGENT_NODE_TAG],
+        };
+        yield {
+          event: 'on_chat_model_stream',
+          data: {
+            chunk: {
+              content: ' addresses.',
+            },
+          },
+          tags: [AGENT_NODE_TAG],
+        };
+        yield {
+          event: 'on_chat_model_end',
+          data: {
+            output: {
+              content: 'Look at these rare IP addresses.',
+            },
+          },
+          tags: [AGENT_NODE_TAG],
+        };
+      },
+    };
+
+    const expectConditions = async (response: unknown) => {
       expect(response).toBe(mockResponseWithHeaders);
 
       await waitFor(() => {
@@ -203,6 +299,50 @@ describe('streamGraph', () => {
           false
         );
       });
+    };
+    it('should execute the graph in streaming mode - Gemini', async () => {
+      const mockAssistantGraphAsyncIterator = {
+        streamEvents: () => mockAsyncIterator,
+      } as unknown as DefaultAssistantGraph;
+      const response = await streamGraph({
+        ...requestArgs,
+        assistantGraph: mockAssistantGraphAsyncIterator,
+        inputs: {
+          ...requestArgs.inputs,
+          llmType: 'gemini',
+        },
+      });
+
+      await expectConditions(response);
+    });
+    it('should execute the graph in streaming mode - Bedrock', async () => {
+      const mockAssistantGraphAsyncIterator = {
+        streamEvents: () => mockAsyncIterator,
+      } as unknown as DefaultAssistantGraph;
+      const response = await streamGraph({
+        ...requestArgs,
+        assistantGraph: mockAssistantGraphAsyncIterator,
+        inputs: {
+          ...requestArgs.inputs,
+          llmType: 'bedrock',
+        },
+      });
+
+      await expectConditions(response);
+    });
+    it('should execute the graph in streaming mode - OpenAI + isOssModel = false', async () => {
+      const mockAssistantGraphAsyncIterator = {
+        streamEvents: () => mockAsyncIterator,
+      } as unknown as DefaultAssistantGraph;
+      const response = await streamGraph({
+        ...requestArgs,
+        assistantGraph: mockAssistantGraphAsyncIterator,
+        inputs: {
+          ...requestArgs.inputs,
+          isOssModel: true,
+        },
+      });
+      await expectConditions(response);
     });
   });
 });

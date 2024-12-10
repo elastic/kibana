@@ -52,11 +52,17 @@ import {
   ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 
 const HOST_ICON = 'storage';
 
@@ -196,12 +202,12 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="m"
       responsive={false}
       data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}
     >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" responsive={false}>
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiIcon type={HOST_ICON} />
           </EuiFlexItem>
@@ -270,6 +276,22 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
+      <AlertCountInsight
+        fieldName={'host.name'}
+        name={hostName}
+        data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
+      />
+      <MisconfigurationsInsight
+        fieldName={'host.name'}
+        name={hostName}
+        data-test-subj={ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
+        telemetrySuffix={'host-entity-overview'}
+      />
+      <VulnerabilitiesInsight
+        hostName={hostName}
+        data-test-subj={ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID}
+        telemetrySuffix={'host-entity-overview'}
+      />
     </EuiFlexGroup>
   );
 };

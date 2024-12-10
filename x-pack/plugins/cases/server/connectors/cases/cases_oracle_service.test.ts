@@ -12,7 +12,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { CasesOracleService } from './cases_oracle_service';
 import { CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
-import { isEmpty, set } from 'lodash';
+import { isEmpty } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 describe('CasesOracleService', () => {
   const savedObjectsClient = savedObjectsClientMock.create();

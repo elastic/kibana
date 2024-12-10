@@ -84,14 +84,21 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onSearchQueryChange': {
-        if (action.data.text === state.searchQuery.text) {
+        if (
+          action.data.text === state.searchQuery.text &&
+          action.data.error === state.searchQuery.error
+        ) {
           return state;
         }
 
         return {
           ...state,
-          searchQuery: action.data,
-          isFetchingItems: true,
+          searchQuery: {
+            ...state.searchQuery,
+            ...action.data,
+          },
+          isFetchingItems:
+            action.data.error === null && action.data.text !== state.searchQuery.text,
         };
       }
       case 'onTableChange': {

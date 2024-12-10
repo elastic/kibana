@@ -26,14 +26,16 @@ import * as i18n from './translations';
 interface DeployStepProps {
   integrationSettings: State['integrationSettings'];
   result: State['result'];
+  celInputResult?: State['celInputResult'];
   connector: State['connector'];
 }
 
 export const DeployStep = React.memo<DeployStepProps>(
-  ({ integrationSettings, result, connector }) => {
+  ({ integrationSettings, result, celInputResult, connector }) => {
     const { isLoading, error, integrationFile, integrationName } = useDeployIntegration({
       integrationSettings,
       result,
+      celInputResult,
       connector,
     });
 

@@ -18,6 +18,7 @@ import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -30,6 +31,7 @@ beforeEach(() => {
 });
 
 describe('createRuleRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
   const createdAt = new Date();
   const updatedAt = new Date();
   const action: RuleAction = {
@@ -151,6 +153,7 @@ describe('createRuleRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -227,6 +230,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": undefined,
           },
@@ -263,6 +267,7 @@ describe('createRuleRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -343,6 +348,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -379,6 +385,7 @@ describe('createRuleRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -460,6 +467,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -496,6 +504,7 @@ describe('createRuleRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -577,6 +586,7 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
+          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -602,7 +612,7 @@ describe('createRuleRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects });
+    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -624,7 +634,7 @@ describe('createRuleRoute', () => {
       throw new Error('OMG');
     });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects });
+    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -642,7 +652,7 @@ describe('createRuleRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects });
+    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -673,6 +683,7 @@ describe('createRuleRoute', () => {
         licenseState,
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
+        docLinks,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -732,6 +743,7 @@ describe('createRuleRoute', () => {
               ],
               "throttle": "30s",
             },
+            "isFlappingEnabled": true,
             "options": Object {
               "id": undefined,
             },
@@ -754,6 +766,7 @@ describe('createRuleRoute', () => {
         licenseState,
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
+        docLinks,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -810,6 +823,7 @@ describe('createRuleRoute', () => {
         licenseState,
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
+        docLinks,
       });
 
       const [_, handler] = router.post.mock.calls[0];

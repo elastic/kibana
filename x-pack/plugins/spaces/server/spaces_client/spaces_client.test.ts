@@ -31,6 +31,66 @@ const createMockConfig = (
   return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
 };
 
+const features = [
+  {
+    id: 'feature_1',
+    name: 'Feature 1',
+    app: [],
+    category: { id: 'enterpriseSearch' },
+    scope: ['spaces', 'security'],
+  },
+  {
+    id: 'feature_2',
+    name: 'Feature 2',
+    app: ['feature2'],
+    scope: ['spaces', 'security'],
+    catalogue: ['feature2Entry'],
+    category: { id: 'observability' },
+  },
+  {
+    id: 'feature_3',
+    name: 'Feature 3',
+    app: ['feature3_app'],
+    scope: ['spaces', 'security'],
+    catalogue: ['feature3Entry'],
+    category: { id: 'securitySolution' },
+  },
+  {
+    deprecated: { notice: 'It was a mistake.' },
+    id: 'feature_4_deprecated',
+    name: 'Deprecated Feature',
+    app: ['feature2', 'feature3'],
+    catalogue: ['feature2Entry', 'feature3Entry'],
+    category: { id: 'deprecated', label: 'deprecated' },
+    scope: ['spaces', 'security'],
+    privileges: {
+      all: {
+        savedObject: { all: [], read: [] },
+        ui: [],
+        app: ['feature2', 'feature3'],
+        catalogue: ['feature2Entry', 'feature3Entry'],
+        replacedBy: [
+          { feature: 'feature_2', privileges: ['all'] },
+          { feature: 'feature_3', privileges: ['all'] },
+        ],
+      },
+      read: {
+        savedObject: { all: [], read: [] },
+        ui: [],
+        app: ['feature2', 'feature3'],
+        catalogue: ['feature2Entry', 'feature3Entry'],
+        replacedBy: [
+          { feature: 'feature_2', privileges: ['read'] },
+          { feature: 'feature_3', privileges: ['read'] },
+        ],
+      },
+    },
+  },
+] as unknown as KibanaFeature[];
+const featuresStart = featuresPluginMock.createStart();
+
+featuresStart.getKibanaFeatures.mockReturnValue([...features]);
+
 describe('#getAll', () => {
   const savedObjects: Array<SavedObject<unknown>> = [
     {
@@ -74,6 +134,17 @@ describe('#getAll', () => {
         bar: 'baz-bar', // an extra attribute that will be ignored during conversion
       },
     },
+    {
+      // alpha only has deprecated disabled features
+      id: 'alpha',
+      type: 'space',
+      references: [],
+      attributes: {
+        name: 'alpha-name',
+        description: 'alpha-description',
+        disabledFeatures: ['feature_1', 'feature_4_deprecated'],
+      },
+    },
   ];
 
   const expectedSpaces: Space[] = [
@@ -84,7 +155,7 @@ describe('#getAll', () => {
       color: '#FFFFFF',
       initials: 'FB',
       imageUrl: 'go-bots/predates/transformers',
-      disabledFeatures: [],
+      disabledFeatures: ['feature_2', 'feature_3'], // Added dynamically because solution is 'es'
       solution: 'es',
       _reserved: true,
     },
@@ -100,6 +171,12 @@ describe('#getAll', () => {
       name: 'baz-name',
       description: 'baz-description',
       disabledFeatures: [],
+    },
+    {
+      id: 'alpha',
+      name: 'alpha-name',
+      description: 'alpha-description',
+      disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     },
   ];
 
@@ -117,7 +194,7 @@ describe('#getAll', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const actualSpaces = await client.getAll();
 
@@ -145,13 +222,16 @@ describe('#getAll', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const [actualSpace] = await client.getAll();
-    const [{ solution, ...expectedSpace }] = expectedSpaces;
+    const [{ solution, disabledFeatures, ...expectedSpace }] = expectedSpaces;
 
     expect(actualSpace.solution).toBeUndefined();
-    expect(actualSpace).toEqual(expectedSpace);
+    expect(actualSpace).toEqual({
+      ...expectedSpace,
+      disabledFeatures: [], // And the disabledFeatures is not dynamically added
+    });
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
       type: 'space',
       page: 1,
@@ -170,7 +250,7 @@ describe('#getAll', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     await expect(
       client.getAll({ purpose: 'invalid_purpose' as GetAllSpacesPurpose })
@@ -218,7 +298,7 @@ describe('#get', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -242,7 +322,7 @@ describe('#get', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
@@ -266,12 +346,16 @@ describe('#get', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const id = savedObject.id;
     const actualSpace = await client.get(id);
 
-    expect(actualSpace).toEqual({ ...expectedSpace, solution: 'es' });
+    expect(actualSpace).toEqual({
+      ...expectedSpace,
+      solution: 'es',
+      disabledFeatures: ['feature_2', 'feature_3'], // Added dynamically because solution is 'es'
+    });
   });
 });
 
@@ -312,7 +396,10 @@ describe('#create', () => {
     const maxSpaces = 5;
     const mockDebugLogger = createMockDebugLogger();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+    mockCallWithRequestRepository.create.mockResolvedValue({
+      ...savedObject,
+      attributes: { ...(savedObject.attributes as object), solution: 'es' },
+    });
     mockCallWithRequestRepository.find.mockResolvedValue({
       total: maxSpaces - 1,
     } as any);
@@ -330,20 +417,28 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
 
-    const actualSpace = await client.create(spaceToCreate);
+    const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
 
-    expect(actualSpace).toEqual(expectedReturnedSpace);
+    expect(actualSpace).toEqual({
+      ...expectedReturnedSpace,
+      solution: 'es',
+      disabledFeatures: ['feature_2', 'feature_3'], // Added dynamically because solution is 'es'
+    });
     expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
       type: 'space',
       page: 1,
       perPage: 0,
     });
-    expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith('space', attributes, {
-      id,
-    });
+    expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith(
+      'space',
+      { ...attributes, solution: 'es' },
+      {
+        id,
+      }
+    );
   });
 
   test(`throws bad request when creating space with disabled features`, async () => {
@@ -355,7 +450,7 @@ describe('#create', () => {
     mockCallWithRequestRepository.find.mockResolvedValue({
       total: maxSpaces - 1,
     } as any);
-    const featuresMock = featuresPluginMock.createStart();
+    const featuresMock = featuresStart;
 
     featuresMock.getKibanaFeatures.mockReturnValue([
       new KibanaFeature({
@@ -422,7 +517,7 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
 
     await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -459,7 +554,7 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresPluginMock.createStart()
+      featuresStart
     );
 
     await expect(
@@ -507,7 +602,7 @@ describe('#create', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
 
     const actualSpace = await client.create({ ...spaceToCreate, solution: 'es' });
@@ -551,7 +646,7 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresPluginMock.createStart()
+        featuresStart
       );
 
       const actualSpace = await client.create(spaceToCreate);
@@ -589,7 +684,7 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresPluginMock.createStart()
+        featuresStart
       );
 
       await expect(
@@ -630,7 +725,7 @@ describe('#create', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresPluginMock.createStart()
+        featuresStart
       );
 
       await expect(
@@ -687,7 +782,11 @@ describe('#update', () => {
     const mockDebugLogger = createMockDebugLogger();
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+    mockCallWithRequestRepository.get.mockResolvedValueOnce({
+      ...savedObject,
+      attributes: { ...(savedObject.attributes as object), solution: 'es' },
+    });
+    featuresStart.getKibanaFeatures.mockReturnValue([...features]);
 
     const client = new SpacesClient(
       mockDebugLogger,
@@ -695,13 +794,20 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const id = savedObject.id;
-    const actualSpace = await client.update(id, spaceToUpdate);
+    const actualSpace = await client.update(id, { ...spaceToUpdate, solution: 'es' });
 
-    expect(actualSpace).toEqual(expectedReturnedSpace);
-    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
+    expect(actualSpace).toEqual({
+      ...expectedReturnedSpace,
+      solution: 'es',
+      disabledFeatures: ['feature_2', 'feature_3'], // Added dynamically because solution is 'es'
+    });
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, {
+      ...attributes,
+      solution: 'es',
+    });
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });
 
@@ -710,7 +816,7 @@ describe('#update', () => {
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
     mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
-    const featuresMock = featuresPluginMock.createStart();
+    const featuresMock = featuresStart;
 
     featuresMock.getKibanaFeatures.mockReturnValue([
       new KibanaFeature({
@@ -767,7 +873,7 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'serverless',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const id = savedObject.id;
 
@@ -800,7 +906,7 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const id = savedObject.id;
 
@@ -827,7 +933,7 @@ describe('#update', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const id = savedObject.id;
     await client.update(id, { ...spaceToUpdate, solution: 'es' });
@@ -857,7 +963,7 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresPluginMock.createStart()
+        featuresStart
       );
       const id = savedObject.id;
       const actualSpace = await client.update(id, spaceToUpdate);
@@ -884,7 +990,7 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresPluginMock.createStart()
+        featuresStart
       );
       const id = savedObject.id;
 
@@ -917,7 +1023,7 @@ describe('#update', () => {
         mockCallWithRequestRepository,
         [],
         'traditional',
-        featuresPluginMock.createStart()
+        featuresStart
       );
       const id = savedObject.id;
 
@@ -971,7 +1077,7 @@ describe('#delete', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
 
     await expect(client.delete(id)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -993,7 +1099,7 @@ describe('#delete', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
 
     await client.delete(id);
@@ -1016,7 +1122,7 @@ describe('#disableLegacyUrlAliases', () => {
       mockCallWithRequestRepository,
       [],
       'traditional',
-      featuresPluginMock.createStart()
+      featuresStart
     );
     const aliases = [
       { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },

@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteSecurity, RouteConfigOptions } from '@kbn/core-http-server';
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
 const privilegeSetSchema = schema.object(
@@ -48,6 +49,15 @@ const requiredPrivilegesSchema = schema.arrayOf(
           }
         }
       });
+
+      // Combining superuser with other privileges is redundant.
+      // If user is a superuser, they inherently have access to all the privileges that may come with other roles.
+      if (
+        anyRequired.includes(ReservedPrivilegesSet.superuser) ||
+        (allRequired.includes(ReservedPrivilegesSet.superuser) && allRequired.length > 1)
+      ) {
+        return 'Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege.';
+      }
 
       if (anyRequired.length && allRequired.length) {
         for (const privilege of anyRequired) {

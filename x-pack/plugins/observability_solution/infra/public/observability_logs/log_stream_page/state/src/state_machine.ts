@@ -10,6 +10,7 @@ import { TimeRange } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
 import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
 import type { LogViewNotificationChannel } from '@kbn/logs-shared-plugin/public';
+import { OmitDeprecatedState } from '@kbn/xstate-utils';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { createLogStreamPositionStateMachine } from '../../../log_stream_position_state/src/state_machine';
 import {
@@ -17,7 +18,6 @@ import {
   DEFAULT_TIMERANGE,
   LogStreamQueryStateMachineDependencies,
 } from '../../../log_stream_query_state';
-import { OmitDeprecatedState } from '../../../xstate_helpers';
 import {
   waitForInitialQueryParameters,
   waitForInitialPositionParameters,

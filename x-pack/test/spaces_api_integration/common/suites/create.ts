@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SuperTest } from 'supertest';
+
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import type { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface CreateTest {
   statusCode: number;
@@ -65,14 +67,33 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const expectSolutionSpecifiedResult = (resp: Record<string, any>) => {
-    expect(resp.body).to.eql({
+    const disabledFeatures = resp.body.disabledFeatures.sort();
+
+    const expected = {
       id: 'solution',
       name: 'space with solution',
       description: 'a description',
       color: '#5c5959',
-      disabledFeatures: [],
+      disabledFeatures: [
+        // Disabled features are automatically added to the space when a solution is set
+        'apm',
+        'infrastructure',
+        'inventory',
+        'logs',
+        'observabilityCases',
+        'observabilityCasesV2',
+        'securitySolutionAssistant',
+        'securitySolutionAttackDiscovery',
+        'securitySolutionCases',
+        'securitySolutionCasesV2',
+        'siem',
+        'slo',
+        'uptime',
+      ],
       solution: 'es',
-    });
+    };
+
+    expect({ ...resp.body, disabledFeatures }).to.eql(expected);
   };
 
   const makeCreateTest =

@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
-import type { NavFilter } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import type { NavFilter } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
 import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
@@ -40,13 +40,9 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => {
-  if (policyTemplate === CSPM_POLICY_TEMPLATE) {
-    return { 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE };
-  }
-
-  return { 'rule.benchmark.posture_type': { value: CSPM_POLICY_TEMPLATE, negate: true } };
-};
+export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => ({
+  'rule.benchmark.posture_type': policyTemplate,
+});
 
 export const SummarySection = ({
   dashboardType,

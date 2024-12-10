@@ -52,3 +52,8 @@ export const mockedRequestWithPipeline = {
   dataStreamName: 'audit',
   currentPipeline: currentPipelineMock,
 };
+
+export const mockedRequestWithApiDefinition = {
+  apiDefinition: '{ "openapi": "3.0.0" }',
+  dataStreamName: 'audit',
+};

@@ -245,6 +245,8 @@ export const legacyEmbeddableToApi = (
     return !isInputControl && !isMarkdown && !isImage && !isLinks;
   };
 
+  const hasLockedHoverActions$ = new BehaviorSubject<boolean>(false);
+
   return {
     api: {
       parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
@@ -269,6 +271,9 @@ export const legacyEmbeddableToApi = (
       dataViews,
       disabledActionIds,
       setDisabledActionIds: (ids) => disabledActionIds.next(ids),
+
+      hasLockedHoverActions$,
+      lockHoverActions: (lock: boolean) => hasLockedHoverActions$.next(lock),
 
       panelTitle,
       setPanelTitle,

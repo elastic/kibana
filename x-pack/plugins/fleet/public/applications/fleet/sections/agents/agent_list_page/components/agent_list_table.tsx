@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { type CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -35,8 +36,15 @@ import { AgentUpgradeStatus } from './agent_upgrade_status';
 
 import { EmptyPrompt } from './empty_prompt';
 
-const VERSION_FIELD = 'local_metadata.elastic.agent.version';
-const HOSTNAME_FIELD = 'local_metadata.host.hostname';
+const AGENTS_TABLE_FIELDS = {
+  ACTIVE: 'active',
+  HOSTNAME: 'local_metadata.host.hostname',
+  POLICY: 'policy_id',
+  METRICS: 'metrics',
+  VERSION: 'local_metadata.elastic.agent.version',
+  LAST_CHECKIN: 'last_checkin',
+};
+
 function safeMetadata(val: any) {
   if (typeof val !== 'string') {
     return '-';
@@ -96,14 +104,25 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
 
-  const isAgentSelectable = (agent: Agent) => {
-    if (!agent.active) return false;
-    if (!agent.policy_id) return true;
+  const isAgentSelectable = useCallback(
+    (agent: Agent) => {
+      if (!agent.active) return false;
+      if (!agent.policy_id) return true;
 
-    const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-    const isHosted = agentPolicy?.is_managed === true;
-    return !isHosted;
-  };
+      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
+      const isHosted = agentPolicy?.is_managed === true;
+      return !isHosted;
+    },
+    [agentPoliciesIndexedById]
+  );
+
+  const agentsShown = useMemo(() => {
+    return totalAgents
+      ? showUpgradeable
+        ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
+        : agents
+      : [];
+  }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
 
   const noItemsMessage =
     isLoading && isCurrentRequestIncremented ? (
@@ -140,9 +159,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     },
   };
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<Agent>> = [
     {
-      field: 'active',
+      field: AGENTS_TABLE_FIELDS.ACTIVE,
       sortable: false,
       width: '85px',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
@@ -151,7 +170,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
-      field: HOSTNAME_FIELD,
+      field: AGENTS_TABLE_FIELDS.HOSTNAME,
       sortable: true,
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
@@ -171,7 +190,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       ),
     },
     {
-      field: 'policy_id',
+      field: AGENTS_TABLE_FIELDS.POLICY,
       sortable: true,
       truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
@@ -208,7 +227,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     ...(displayAgentMetrics
       ? [
           {
-            field: 'metrics',
+            field: AGENTS_TABLE_FIELDS.METRICS,
             sortable: false,
             name: (
               <EuiToolTip
@@ -234,7 +253,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               ),
           },
           {
-            field: 'metrics',
+            field: AGENTS_TABLE_FIELDS.METRICS,
             sortable: false,
             name: (
               <EuiToolTip
@@ -264,19 +283,18 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           },
         ]
       : []),
-
     {
-      field: 'last_checkin',
+      field: AGENTS_TABLE_FIELDS.LAST_CHECKIN,
       sortable: true,
       name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
-      width: '180px',
-      render: (lastCheckin: string, agent: any) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
+      width: '100px',
+      render: (lastCheckin: string) =>
+        lastCheckin ? <FormattedRelative value={lastCheckin} /> : undefined,
     },
     {
-      field: VERSION_FIELD,
+      field: AGENTS_TABLE_FIELDS.VERSION,
       sortable: true,
       width: '220px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
@@ -322,13 +340,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       data-test-subj="fleetAgentListTable"
       loading={isLoading}
       noItemsMessage={noItemsMessage}
-      items={
-        totalAgents
-          ? showUpgradeable
-            ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
-            : agents
-          : []
-      }
+      items={agentsShown}
       itemId="id"
       columns={columns}
       pagination={{

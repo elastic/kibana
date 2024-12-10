@@ -694,6 +694,42 @@ describe('AlertsTable', () => {
 
         expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN)).toBeVisible();
       });
+
+      it('The column state is synced correctly between the column selector and the field selector', async () => {
+        const columnToHide = tableProps.columns[0];
+        render(
+          <AlertsTableWithProviders
+            {...tableProps}
+            toolbarVisibility={{
+              showColumnSelector: true,
+            }}
+            initialBulkActionsState={{
+              ...defaultBulkActionsState,
+              rowSelection: new Map(),
+            }}
+          />
+        );
+
+        const fieldBrowserBtn = await screen.findByTestId(TEST_ID.FIELD_BROWSER_BTN);
+        const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
+
+        // Open the column visibility selector and hide the column
+        fireEvent.click(columnSelectorBtn);
+        const columnVisibilityToggle = await screen.findByTestId(
+          `dataGridColumnSelectorToggleColumnVisibility-${columnToHide.id}`
+        );
+        fireEvent.click(columnVisibilityToggle);
+
+        // Open the field browser
+        fireEvent.click(fieldBrowserBtn);
+        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
+
+        // The column should be checked in the field browser, independent of its visibility status
+        const columnCheckbox: HTMLInputElement = await screen.findByTestId(
+          `field-${columnToHide.id}-checkbox`
+        );
+        expect(columnCheckbox).toBeChecked();
+      });
     });
 
     describe('cases column', () => {

@@ -11,7 +11,8 @@ import type { ConfigType } from '../../../../config';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
-  BaseFieldsLatest,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 
@@ -25,6 +26,7 @@ export const wrapSequencesFactory =
     spaceId,
     indicesToQuery,
     alertTimestampOverride,
+    intendedTimestamp,
   }: {
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
     completeRule: CompleteRule<RuleParams>;
@@ -34,22 +36,30 @@ export const wrapSequencesFactory =
     indicesToQuery: string[];
     alertTimestampOverride: Date | undefined;
     publicBaseUrl: string | undefined;
+    intendedTimestamp: Date | undefined;
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
-    sequences.reduce(
-      (acc: Array<WrappedFieldsLatest<BaseFieldsLatest>>, sequence) => [
-        ...acc,
-        ...buildAlertGroupFromSequence(
-          ruleExecutionLogger,
-          sequence,
-          completeRule,
-          mergeStrategy,
-          spaceId,
-          buildReasonMessage,
-          indicesToQuery,
-          alertTimestampOverride,
-          publicBaseUrl
-        ),
-      ],
-      []
-    );
+    sequences.reduce<
+      Array<
+        | WrappedFieldsLatest<EqlShellFieldsLatest>
+        | WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>
+      >
+    >((acc, sequence) => {
+      const { shellAlert, buildingBlocks } = buildAlertGroupFromSequence({
+        ruleExecutionLogger,
+        sequence,
+        completeRule,
+        mergeStrategy,
+        spaceId,
+        buildReasonMessage,
+        indicesToQuery,
+        alertTimestampOverride,
+        publicBaseUrl,
+        intendedTimestamp,
+      });
+      if (shellAlert) {
+        acc.push(shellAlert, ...buildingBlocks);
+        return acc;
+      }
+      return acc;
+    }, []);

@@ -44,6 +44,7 @@ describe('generateReactRouterProps', () => {
       expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test', {
         shouldNotCreateHref: false,
+        shouldNotPrepend: false,
       });
     });
 
@@ -63,6 +64,7 @@ describe('generateReactRouterProps', () => {
       expect(mockEvent.preventDefault).toHaveBeenCalled();
       expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/app/enterprise_search/test', {
         shouldNotCreateHref: true,
+        shouldNotPrepend: false,
       });
     });
 

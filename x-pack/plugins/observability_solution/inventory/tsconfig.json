@@ -20,7 +20,6 @@
     "@kbn/server-route-repository",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
-    "@kbn/observability-utils",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/deeplinks-observability",
@@ -42,6 +41,23 @@
     "@kbn/shared-svg",
     "@kbn/features-plugin",
     "@kbn/es-query",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/elastic-agent-utils",
+    "@kbn/custom-icons",
+    "@kbn/ui-theme",
+    "@kbn/rison",
+    "@kbn/rule-registry-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/storybook",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/react-hooks",
+    "@kbn/observability-utils-common",
+    "@kbn/observability-utils-browser",
+    "@kbn/observability-utils-server",
+    "@kbn/kibana-utils-plugin"
   ]
 }

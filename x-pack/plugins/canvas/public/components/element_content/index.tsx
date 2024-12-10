@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
-import { useExpressionsService } from '../../services';
+import { getSelectedPage, getPageById, getSelectedElementId } from '../../state/selectors/workpad';
 import { ElementContent as Component, Props as ComponentProps } from './element_content';
 import { State } from '../../../types';
+import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
 
 export type Props = Omit<ComponentProps, 'renderFunction' | 'backgroundColor'>;
 
 export const ElementContent = (props: Props) => {
-  const expressionsService = useExpressionsService();
   const selectedPageId = useSelector(getSelectedPage);
+  const selectedElementId = useSelector(getSelectedElementId);
   const backgroundColor =
     useSelector((state: State) => getPageById(state, selectedPageId)?.style.background) || '';
   const { renderable } = props;
 
-  const renderFunction = renderable ? expressionsService.getRenderer(renderable.as) : null;
+  const renderFunction = useMemo(() => {
+    return renderable ? getCanvasExpressionService().getRenderer(renderable.as) : null;
+  }, [renderable]);
 
-  return <Component {...{ ...props, renderFunction, backgroundColor }} />;
+  return <Component {...{ ...props, renderFunction, backgroundColor, selectedElementId }} />;
 };

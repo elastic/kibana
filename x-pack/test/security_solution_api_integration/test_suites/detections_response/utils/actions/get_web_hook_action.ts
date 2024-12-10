@@ -6,7 +6,7 @@
  */
 
 export const getWebHookAction = () => ({
-  actionTypeId: '.webhook',
+  connector_type_id: '.webhook',
   config: {
     method: 'post',
     url: 'http://localhost',

@@ -9,27 +9,18 @@ import objectHash from 'object-hash';
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { SignalSourceHit } from '../types';
 
+import type { SignalSourceHit } from '../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../config';
-import type {
-  CompleteRule,
-  EqlRuleParams,
-  MachineLearningRuleParams,
-  ThreatRuleParams,
-} from '../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
+import type { SharedParams } from './utils';
 import { generateId } from './utils';
-
 import type { BuildReasonMessage } from './reason_formatters';
-
-type RuleWithInMemorySuppression = ThreatRuleParams | EqlRuleParams | MachineLearningRuleParams;
 
 /**
  * wraps suppressed alerts
@@ -48,23 +39,15 @@ export const wrapSuppressedAlerts = ({
   publicBaseUrl,
   primaryTimestamp,
   secondaryTimestamp,
+  intendedTimestamp,
 }: {
   events: SignalSourceHit[];
-  spaceId: string;
-  completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+} & SharedParams): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
-      fields: event.fields,
+      input: event.fields,
     });
 
     const id = generateId(
@@ -91,6 +74,7 @@ export const wrapSuppressedAlerts = ({
       ruleExecutionLogger,
       alertUuid: id,
       publicBaseUrl,
+      intendedTimestamp,
     });
 
     return {

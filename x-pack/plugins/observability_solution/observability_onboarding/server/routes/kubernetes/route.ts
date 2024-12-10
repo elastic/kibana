@@ -10,17 +10,18 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
-import { getAgentVersion } from '../../lib/get_agent_version';
+import { getAgentVersionInfo } from '../../lib/get_agent_version';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
   onboardingId: string;
   elasticsearchUrl: string;
-  elasticAgentVersion: string;
+  elasticAgentVersionInfo: ElasticAgentVersionInfo;
 }
 
 export interface HasKubernetesDataRouteResponse {
@@ -29,10 +30,14 @@ export interface HasKubernetesDataRouteResponse {
 
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/kubernetes/flow',
+  params: t.type({
+    body: t.type({ pkgName: t.union([t.literal('kubernetes'), t.literal('kubernetes_otel')]) }),
+  }),
   options: { tags: [] },
   async handler({
     context,
     request,
+    params,
     plugins,
     services,
     kibanaVersion,
@@ -41,7 +46,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       elasticsearch: { client },
     } = await context.core;
 
-    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
 
     if (!hasPrivileges) {
       throw Boom.forbidden(
@@ -52,11 +57,17 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
-    const [{ encoded: apiKeyEncoded }, elasticAgentVersion] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding'),
-      getAgentVersion(fleetPluginStart, kibanaVersion),
-      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
+    const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
+      createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true),
+      getAgentVersionInfo(fleetPluginStart, kibanaVersion),
+      // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
+      // Kubernetes package is required for both classic kubernetes and otel
+      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
+      // Kubernetes otel package is required only for otel
+      params.body.pkgName === 'kubernetes_otel'
+        ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' })
+        : undefined,
     ]);
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
@@ -67,7 +78,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       onboardingId: uuidv4(),
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
-      elasticAgentVersion,
+      elasticAgentVersionInfo,
     };
   },
 });

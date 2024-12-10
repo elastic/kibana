@@ -96,9 +96,7 @@ export const RolesGridPage: FC<Props> = ({
   readOnly,
   buildFlavor,
   cloudOrgUrl,
-  analytics,
-  theme,
-  i18n: i18nStart,
+  ...startServices
 }) => {
   const [rolesResponse, setRolesResponse] = useState<QueryRolesResult>({} as QueryRolesResult);
 
@@ -475,9 +473,7 @@ export const RolesGridPage: FC<Props> = ({
             notifications={notifications}
             rolesAPIClient={rolesAPIClient}
             buildFlavor={buildFlavor}
-            theme={theme}
-            analytics={analytics}
-            i18n={i18nStart}
+            {...startServices}
           />
         ) : null}
 

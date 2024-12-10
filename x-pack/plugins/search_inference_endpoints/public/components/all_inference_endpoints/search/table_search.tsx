@@ -29,6 +29,7 @@ export const TableSearch: React.FC<TableSearchComponentProps> = ({ searchKey, se
       onChange={(e) => setSearchKey(e.target.value)}
       onSearch={onSearch}
       value={searchKey}
+      data-test-subj="search-field-endpoints"
     />
   );
 };

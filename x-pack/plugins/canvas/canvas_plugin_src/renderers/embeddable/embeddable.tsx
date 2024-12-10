@@ -19,7 +19,6 @@ import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { pluginServices } from '../../../public/services';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
 import {
@@ -32,6 +31,7 @@ import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { useGetAppContext } from './use_get_app_context';
+import { embeddableService } from '../../../public/services/kibana_services';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -132,13 +132,12 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
-      const { embeddables } = pluginServices.getServices();
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
 
-      if (embeddables.reactEmbeddableRegistryHasKey(embeddableType)) {
+      if (embeddableService.reactEmbeddableRegistryHasKey(embeddableType)) {
         /**
          * Prioritize React embeddables
          */

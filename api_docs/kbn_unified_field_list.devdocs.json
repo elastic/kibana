@@ -58,7 +58,7 @@
             "section": "def-public.FieldItemButtonProps",
             "text": "FieldItemButtonProps"
           },
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
         "deprecated": false,
@@ -102,7 +102,7 @@
           "\nA top level wrapper for field list components (filters and field list groups)"
         ],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubject, isProcessing, prepend, append, className, children, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ \"data-test-subj\": dataTestSubject, isProcessing, prepend, append, className, children, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -110,7 +110,7 @@
             "section": "def-public.FieldListProps",
             "text": "FieldListProps"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
         "deprecated": false,
@@ -124,7 +124,7 @@
             "label": "{\n  'data-test-subj': dataTestSubject = 'fieldList',\n  isProcessing,\n  prepend,\n  append,\n  className,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/unified-field-list",
                 "scope": "public",
@@ -132,7 +132,7 @@
                 "section": "def-public.FieldListProps",
                 "text": "FieldListProps"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "deprecated": false,
@@ -175,7 +175,7 @@
             "section": "def-public.FieldListFiltersProps",
             "text": "FieldListFiltersProps"
           },
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_list_filters/index.tsx",
         "deprecated": false,
@@ -238,7 +238,7 @@
             "section": "def-public.FieldListGroupedProps",
             "text": "FieldListGroupedProps"
           },
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_list_grouped/index.tsx",
         "deprecated": false,
@@ -277,7 +277,7 @@
         "label": "FieldPopover",
         "description": [],
         "signature": [
-          "({ isOpen, closePopover, renderHeader, renderContent, ...otherPopoverProps }: React.PropsWithChildren<",
+          "({ isOpen, closePopover, renderHeader, renderContent, renderFooter, ...otherPopoverProps }: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -285,7 +285,7 @@
             "section": "def-public.FieldPopoverProps",
             "text": "FieldPopoverProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover.tsx",
         "deprecated": false,
@@ -294,20 +294,18 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldPopover.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  isOpen,\n  closePopover,\n  renderHeader,\n  renderContent,\n  ...otherPopoverProps\n}",
+            "label": "{\n  isOpen,\n  closePopover,\n  renderHeader,\n  renderContent,\n  renderFooter,\n  ...otherPopoverProps\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/unified-field-list",
                 "scope": "public",
                 "docId": "kibKbnUnifiedFieldListPluginApi",
                 "section": "def-public.FieldPopoverProps",
                 "text": "FieldPopoverProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover.tsx",
             "deprecated": false,
@@ -326,7 +324,7 @@
         "label": "FieldPopoverFooter",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -334,7 +332,7 @@
             "section": "def-public.FieldVisualizeButtonProps",
             "text": "FieldVisualizeButtonProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_footer.tsx",
         "deprecated": false,
@@ -343,20 +341,18 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldPopoverFooter.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/unified-field-list",
                 "scope": "public",
                 "docId": "kibKbnUnifiedFieldListPluginApi",
                 "section": "def-public.FieldVisualizeButtonProps",
                 "text": "FieldVisualizeButtonProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_footer.tsx",
             "deprecated": false,
@@ -375,7 +371,7 @@
         "label": "FieldPopoverHeader",
         "description": [],
         "signature": [
-          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, services, }: React.PropsWithChildren<",
+          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddBreakdownField, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, services, }: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -383,7 +379,7 @@
             "section": "def-public.FieldPopoverHeaderProps",
             "text": "FieldPopoverHeaderProps"
           },
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element | null"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
         "deprecated": false,
@@ -392,20 +388,18 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldPopoverHeader.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n  services,\n}",
+            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddBreakdownField,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n  services,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/unified-field-list",
                 "scope": "public",
                 "docId": "kibKbnUnifiedFieldListPluginApi",
                 "section": "def-public.FieldPopoverHeaderProps",
                 "text": "FieldPopoverHeaderProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
@@ -442,14 +436,14 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldStats.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -463,7 +457,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -496,14 +490,14 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldTopValuesBucket.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -517,7 +511,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -550,14 +544,14 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldVisualizeButton.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -571,7 +565,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1244,7 +1238,7 @@
         "label": "SmartFieldFallbackTooltip",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<{ associatedSmartFields: string; } & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
+          "React.ForwardRefExoticComponent<{ associatedSmartFields: string; } & React.RefAttributes<{}>>"
         ],
         "path": "packages/kbn-unified-field-list/src/components/fallback_fields/index.tsx",
         "deprecated": false,
@@ -1261,7 +1255,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1634,7 +1628,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2826,7 +2820,7 @@
             "label": "infoIcon",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
@@ -3549,7 +3543,7 @@
             "label": "prepend",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "deprecated": false,
@@ -3563,7 +3557,7 @@
             "label": "append",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "deprecated": false,
@@ -3696,6 +3690,53 @@
             "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldPopoverHeaderProps.onAddBreakdownField",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddBreakdownField",
+            "description": [],
+            "signature": [
+              "((field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-field-list",
+                "id": "def-public.FieldPopoverHeaderProps.onAddBreakdownField.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
@@ -3897,6 +3938,22 @@
             "type": "Function",
             "tags": [],
             "label": "renderContent",
+            "description": [],
+            "signature": [
+              "(() => React.ReactNode) | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldPopoverProps.renderFooter",
+            "type": "Function",
+            "tags": [],
+            "label": "renderFooter",
             "description": [],
             "signature": [
               "(() => React.ReactNode) | undefined"

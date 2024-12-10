@@ -35,7 +35,7 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
   useEffect(() => {
     analytics?.reportEvent(OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT.eventType, {
       onboardingFlowType,
-      error,
+      error: error.body?.message ?? error.message,
       context: telemetryEventContext,
     });
   }, [analytics, error, onboardingFlowType, telemetryEventContext]);

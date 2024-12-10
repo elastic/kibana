@@ -32,11 +32,8 @@ export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
     title: 'Vega',
     getInfoMessage,
     description: i18n.translate('visTypeVega.type.vegaDescription', {
-      defaultMessage: 'Use Vega to create new types of visualizations.',
+      defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
       description: 'Vega and Vega-Lite are product names and should not be translated',
-    }),
-    note: i18n.translate('visTypeVega.type.vegaNote', {
-      defaultMessage: 'Requires knowledge of Vega syntax.',
     }),
     icon: 'visVega',
     group: VisGroups.PROMOTED,

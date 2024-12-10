@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiLink, EuiText } from '@elastic/eui';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../../common/constants';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
@@ -40,7 +39,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { VIEW_USERS_BY_SEVERITY } from '../../../../entity_analytics/components/user_risk_score_table/translations';
 import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
-import { useNavigateTo, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useNavigateTo } from '../../../../common/lib/kibana';
 
 const tableType = usersModel.UsersTableType.allUsers;
 
@@ -78,8 +77,7 @@ const rowItems: ItemsPerRow[] = [
 
 const getUsersColumns = (
   showRiskColumn: boolean,
-  dispatchSeverityUpdate: (s: RiskSeverity) => void,
-  isAssetCriticalityEnabled: boolean
+  dispatchSeverityUpdate: (s: RiskSeverity) => void
 ): UsersTableColumns => {
   const columns: UsersTableColumns = [
     {
@@ -148,24 +146,22 @@ const getUsersColumns = (
     });
   }
 
-  if (isAssetCriticalityEnabled) {
-    columns.push({
-      field: 'criticality',
-      name: i18n.ASSET_CRITICALITY,
-      truncateText: false,
-      mobileOptions: { show: true },
-      sortable: false,
-      render: (assetCriticality: CriticalityLevelWithUnassigned) => {
-        if (!assetCriticality) return getEmptyTagValue();
-        return (
-          <AssetCriticalityBadge
-            criticalityLevel={assetCriticality}
-            css={{ verticalAlign: 'middle' }}
-          />
-        );
-      },
-    });
-  }
+  columns.push({
+    field: 'criticality',
+    name: i18n.ASSET_CRITICALITY,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: false,
+    render: (assetCriticality: CriticalityLevelWithUnassigned) => {
+      if (!assetCriticality) return getEmptyTagValue();
+      return (
+        <AssetCriticalityBadge
+          criticalityLevel={assetCriticality}
+          css={{ verticalAlign: 'middle' }}
+        />
+      );
+    },
+  });
 
   return columns;
 };
@@ -246,11 +242,9 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [dispatch, navigateTo]
   );
 
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
   const columns = useMemo(
-    () =>
-      getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate, isAssetCriticalityEnabled),
-    [isPlatinumOrTrialLicense, dispatchSeverityUpdate, isAssetCriticalityEnabled]
+    () => getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
+    [isPlatinumOrTrialLicense, dispatchSeverityUpdate]
   );
 
   return (

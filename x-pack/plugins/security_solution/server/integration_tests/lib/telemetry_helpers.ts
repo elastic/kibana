@@ -30,6 +30,7 @@ import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
 
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import { bulkInsert, updateTimestamps } from './helpers';
 import { TelemetryEventsSender } from '../../lib/telemetry/sender';
 import type {
@@ -40,7 +41,6 @@ import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
 import { Plugin as SecuritySolutionPlugin } from '../../plugin';
 import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
 import { type ITelemetryReceiver, TelemetryReceiver } from '../../lib/telemetry/receiver';
-import { DEFAULT_DIAGNOSTIC_INDEX } from '../../lib/telemetry/constants';
 import mockEndpointAlert from '../__mocks__/endpoint-alert.json';
 import mockedRule from '../__mocks__/rule.json';
 import fleetAgents from '../__mocks__/fleet-agents.json';
@@ -147,7 +147,7 @@ export function getTelemetryTask(
 }
 
 export async function createMockedEndpointAlert(esClient: ElasticsearchClient) {
-  const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
+  const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
   await esClient.indices.create({ index, body: { settings: { hidden: true } } });
 
@@ -223,7 +223,7 @@ export async function dropEndpointIndices(esClient: ElasticsearchClient) {
 }
 
 export async function cleanupMockedEndpointAlerts(esClient: ElasticsearchClient) {
-  const index = `${DEFAULT_DIAGNOSTIC_INDEX.replace('-*', '')}-001`;
+  const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
   await esClient.indices.delete({ index }).catch(() => {
     // ignore errors

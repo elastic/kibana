@@ -12,4 +12,6 @@ export const PROTECTED_RULES = new Set([
   '@kbn/disable/no_protected_eslint_disable',
   '@kbn/disable/no_naked_eslint_disable',
   '@kbn/imports/no_unused_imports',
+  '@kbn/imports/no_group_crossing_imports',
+  '@kbn/imports/no_group_crossing_manifests',
 ]);

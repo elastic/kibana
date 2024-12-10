@@ -58,6 +58,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
         aria-label={i18n.DOCUMENT}
         key={i18n.DOCUMENT}
         icon="document"
+        data-test-subj="addDocument"
         onClick={handleDocumentClicked}
         disabled={!isDocumentAvailable}
       >
@@ -67,7 +68,12 @@ export const AddEntryButton: React.FC<Props> = React.memo(
     return onIndexClicked || onDocumentClicked ? (
       <EuiPopover
         button={
-          <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+          <EuiButton
+            data-test-subj="addEntry"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={onButtonClick}
+          >
             <EuiIcon type="plusInCircle" />
             {i18n.NEW}
           </EuiButton>

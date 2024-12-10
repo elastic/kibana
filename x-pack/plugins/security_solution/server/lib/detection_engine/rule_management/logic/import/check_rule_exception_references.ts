@@ -7,8 +7,7 @@
 import type { ListArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
-import type { BulkError } from '../../../routes/utils';
-import { createBulkErrorObject } from '../../../routes/utils';
+import { type RuleImportErrorObject, createRuleImportErrorObject } from './errors';
 
 /**
  * Helper to check if all the exception lists referenced on a
@@ -27,9 +26,9 @@ export const checkRuleExceptionReferences = ({
 }: {
   rule: RuleToImport;
   existingLists: Record<string, ExceptionListSchema>;
-}): [BulkError[], ListArray] => {
+}): [RuleImportErrorObject[], ListArray] => {
   let ruleExceptions: ListArray = [];
-  let errors: BulkError[] = [];
+  let errors: RuleImportErrorObject[] = [];
   const { rule_id: ruleId } = rule;
   const exceptionLists = rule.exceptions_list ?? [];
 
@@ -54,9 +53,8 @@ export const checkRuleExceptionReferences = ({
       // this error to notify a user of the action taken.
       errors = [
         ...errors,
-        createBulkErrorObject({
+        createRuleImportErrorObject({
           ruleId,
-          statusCode: 400,
           message: `Rule with rule_id: "${ruleId}" references a non existent exception list of list_id: "${exceptionList.list_id}". Reference has been removed.`,
         }),
       ];

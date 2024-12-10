@@ -90,6 +90,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.fleet.policyDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
+        'data-test-subj': 'agentPolicySettingsTab',
         href: getHref('policy_details', { policyId, tabId: 'settings' }),
         isSelected: tabId === 'settings',
       },

@@ -93,6 +93,9 @@ export type {
   IRouter,
   RouteRegistrar,
   RouterRoute,
+  RouterDeprecatedApiDetails,
+  RouterAccessDeprecatedApiDetails,
+  RouterRouteDeprecatedApiDetails,
   IKibanaSocket,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
@@ -119,6 +122,8 @@ export type {
   RouteSecurity,
   RouteSecurityGetter,
   InternalRouteSecurity,
+  RouteDeprecationInfo,
+  PostValidationMetadata,
 } from './src/router';
 export {
   validBodyOutput,
@@ -127,6 +132,7 @@ export {
   getResponseValidation,
   isFullValidatorContainer,
   isKibanaResponse,
+  ReservedPrivilegesSet,
 } from './src/router';
 
 export type { ICspConfig } from './src/csp';
@@ -170,6 +176,7 @@ export type {
   VersionedRouter,
   VersionedRouteCustomResponseBodyValidation,
   VersionedResponseBodyValidation,
+  VersionedRouterRoute,
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';

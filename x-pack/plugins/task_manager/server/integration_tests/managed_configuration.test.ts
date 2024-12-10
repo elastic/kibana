@@ -87,6 +87,7 @@ describe('managed configuration', () => {
         request_timeouts: {
           update_by_query: 1000,
         },
+        auto_calculate_default_ech_capacity: false,
       });
       logger = context.logger.get('taskManager');
 
@@ -209,6 +210,7 @@ describe('managed configuration', () => {
         request_timeouts: {
           update_by_query: 1000,
         },
+        auto_calculate_default_ech_capacity: false,
       });
       logger = context.logger.get('taskManager');
 
@@ -334,6 +336,7 @@ describe('managed configuration', () => {
         request_timeouts: {
           update_by_query: 1000,
         },
+        auto_calculate_default_ech_capacity: false,
       });
       logger = context.logger.get('taskManager');
 

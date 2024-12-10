@@ -107,7 +107,7 @@ export interface PluginConfigDescriptor<T = any> {
    */
   exposeToBrowser?: ExposedToBrowserDescriptor<T>;
   /**
-   * List of configuration properties that can be dynamically changed via the PUT /_settings API.
+   * List of configuration properties that can be dynamically changed via the PUT /internal/core/_settings API.
    */
   dynamicConfig?: DynamicConfigDescriptor<T>;
   /**
@@ -302,26 +302,6 @@ export interface Plugin<
 }
 
 /**
- * A plugin with asynchronous lifecycle methods.
- *
- * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
- * @removeBy 8.8.0
- * @public
- */
-export interface AsyncPlugin<
-  TSetup = void,
-  TStart = void,
-  TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
-> {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-
-  start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-
-  stop?(): MaybePromise<void>;
-}
-
-/**
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
@@ -478,7 +458,5 @@ export type PluginInitializer<
 > = (
   core: PluginInitializerContext
 ) => Promise<
-  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-  | PrebootPlugin<TSetup, TPluginsSetup>
-  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | PrebootPlugin<TSetup, TPluginsSetup>
 >;

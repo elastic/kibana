@@ -69,7 +69,7 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiText>
+                        <EuiText size="s">
                           <h4>{customField.label}</h4>
                         </EuiText>
                       </EuiFlexItem>

@@ -16,15 +16,17 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditSpaceContentTab } from './edit_space_content_tab';
-import { EditSpaceProvider } from './provider';
+import { EditSpaceProviderRoot } from './provider';
 import type { Space } from '../../../common';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import type { SpaceContentTypeSummaryItem } from '../../types';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
+import { getSecurityLicenseMock } from '../security_license.mock';
 
 const getUrlForApp = (appId: string) => appId;
 const navigateToUrl = jest.fn();
@@ -36,13 +38,14 @@ const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
+const userProfile = userProfileServiceMock.createStart();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
 
-const TestComponent: React.FC = ({ children }) => {
+const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <IntlProvider locale="en">
-      <EditSpaceProvider
+      <EditSpaceProviderRoot
         capabilities={{
           navLinks: {},
           management: {},
@@ -57,13 +60,16 @@ const TestComponent: React.FC = ({ children }) => {
         http={http}
         notifications={notifications}
         overlays={overlays}
+        getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
         getPrivilegesAPIClient={getPrivilegeAPIClient}
+        getSecurityLicense={getSecurityLicenseMock}
         theme={theme}
+        userProfile={userProfile}
         i18n={i18n}
         logger={logger}
       >
         {children}
-      </EditSpaceProvider>
+      </EditSpaceProviderRoot>
     </IntlProvider>
   );
 };
@@ -111,7 +117,7 @@ describe('EditSpaceContentTab', () => {
       </TestComponent>
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(getSpaceContentSpy).toHaveBeenCalledTimes(1);
     expect(getSpaceContentSpy).toHaveBeenCalledWith(space.id);

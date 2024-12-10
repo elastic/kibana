@@ -23,6 +23,8 @@ import {
   updateInvestigationParamsSchema,
   getEventsParamsSchema,
   GetEventsResponse,
+  getEntitiesParamsSchema,
+  GetEntitiesResponse,
 } from '@kbn/investigation-shared';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { createInvestigation } from '../services/create_investigation';
@@ -44,6 +46,8 @@ import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
 import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
+import { getEntitiesWithSource } from '../services/get_entities';
+import { createEntitiesESClient } from '../clients/create_entities_es_client';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -344,6 +348,39 @@ const getEventsRoute = createInvestigateAppServerRoute({
   },
 });
 
+const getEntitiesRoute = createInvestigateAppServerRoute({
+  endpoint: 'GET /api/observability/investigation/entities 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: getEntitiesParamsSchema,
+  handler: async ({ params, context, request }): Promise<GetEntitiesResponse> => {
+    const core = await context.core;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const entitiesEsClient = createEntitiesESClient({ request, esClient });
+
+    const {
+      'service.name': serviceName,
+      'service.environment': serviceEnvironment,
+      'container.id': containerId,
+      'host.name': hostName,
+    } = params?.query ?? {};
+
+    const { entities } = await getEntitiesWithSource({
+      serviceName,
+      serviceEnvironment,
+      containerId,
+      hostName,
+      entitiesEsClient,
+      esClient,
+    });
+
+    return {
+      entities,
+    };
+  },
+});
+
 export function getGlobalInvestigateAppServerRouteRepository() {
   return {
     ...createInvestigationRoute,
@@ -360,6 +397,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...updateInvestigationItemRoute,
     ...getInvestigationItemsRoute,
     ...getEventsRoute,
+    ...getEntitiesRoute,
     ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
   };

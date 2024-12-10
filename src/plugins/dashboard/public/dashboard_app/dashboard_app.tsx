@@ -19,14 +19,13 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardApi, DashboardRenderer } from '..';
+import { DashboardApi, DashboardCreationOptions, DashboardRenderer } from '..';
 import { SharedDashboardState } from '../../common';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_STATE_STORAGE_KEY,
   createDashboardEditUrl,
 } from '../dashboard_constants';
-import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
@@ -143,7 +142,6 @@ export function DashboardApp({
         embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
       // integrations
-      useControlGroupIntegration: true,
       useSessionStorageIntegration: true,
       useUnifiedSearchIntegration: true,
       unifiedSearchSettings: {
@@ -159,6 +157,9 @@ export function DashboardApp({
       },
       getInitialInput,
       validateLoadedSavedObject: validateOutcome,
+      fullScreenMode:
+        kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)
+          ?.fullScreenMode ?? false,
       isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
       getEmbeddableAppContext: (dashboardId) => ({
         currentAppId: DASHBOARD_APP_ID,

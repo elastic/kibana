@@ -221,7 +221,7 @@
         "label": "ActivityView",
         "description": [],
         "signature": [
-          "({ item }: ",
+          "({ item, entityNamePlural }: ",
           {
             "pluginId": "@kbn/content-management-content-insights-public",
             "scope": "public",
@@ -229,7 +229,7 @@
             "section": "def-public.ActivityViewProps",
             "text": "ActivityViewProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
         "deprecated": false,
@@ -240,7 +240,7 @@
             "id": "def-public.ActivityView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ item }",
+            "label": "{ item, entityNamePlural }",
             "description": [],
             "signature": [
               {
@@ -270,7 +270,7 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<Partial<",
+          "({ children, ...services }: React.PropsWithChildren<Partial<",
           {
             "pluginId": "@kbn/content-management-content-insights-public",
             "scope": "public",
@@ -278,7 +278,7 @@
             "section": "def-public.ContentInsightsServices",
             "text": "ContentInsightsServices"
           },
-          ">>>) => JSX.Element"
+          ">>) => React.JSX.Element"
         ],
         "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
         "deprecated": false,
@@ -292,7 +292,7 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<Partial<",
+              "React.PropsWithChildren<Partial<",
               {
                 "pluginId": "@kbn/content-management-content-insights-public",
                 "scope": "public",
@@ -300,7 +300,7 @@
                 "section": "def-public.ContentInsightsServices",
                 "text": "ContentInsightsServices"
               },
-              ">>>"
+              ">>"
             ],
             "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,
@@ -352,7 +352,7 @@
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },
-          "; }) => JSX.Element"
+          "; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/content_insights/content_insights_public/src/components/views_stats/views_stats.tsx",
         "deprecated": false,
@@ -417,6 +417,20 @@
             "description": [],
             "signature": [
               "{ createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; }"
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ActivityViewProps.entityNamePlural",
+            "type": "string",
+            "tags": [],
+            "label": "entityNamePlural",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/content-management/content_insights/content_insights_public/src/components/activity_view.tsx",
             "deprecated": false,
@@ -571,6 +585,19 @@
                 "section": "def-public.ContentInsightsClientPublic",
                 "text": "ContentInsightsClientPublic"
               }
+            ],
+            "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-content-insights-public",
+            "id": "def-public.ContentInsightsServices.isKibanaVersioningEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isKibanaVersioningEnabled",
+            "description": [
+              "\nWhether versioning is enabled for the current kibana instance. (aka is Serverless)\nThis is used to determine if we should show the version mentions in the help text."
             ],
             "path": "packages/content-management/content_insights/content_insights_public/src/services.tsx",
             "deprecated": false,

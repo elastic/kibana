@@ -49,6 +49,7 @@ export const checkIndexStatus = async (
       ],
     },
   };
+
   try {
     const queryResult = await esClient.search({
       index,

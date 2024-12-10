@@ -7,32 +7,23 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiStat,
 } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../common/types/domain';
-import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { StatusStats } from '../status/status_stats';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
-import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
+import { ATTC_DESCRIPTION, ATTC_STAT, ATTC_STAT_INFO_ARIA_LABEL } from './translations';
 
 export const CasesMetrics: React.FC = () => {
-  const {
-    data: { countOpenCases, countInProgressCases, countClosedCases } = {
-      countOpenCases: 0,
-      countInProgressCases: 0,
-      countClosedCases: 0,
-    },
-    isLoading: isCasesStatusLoading,
-  } = useGetCasesStatus();
-
-  const { data: { mttr } = { mttr: 0 }, isLoading: isCasesMetricsLoading } = useGetCasesMetrics();
+  const { data: { mttr, status } = { mttr: 0 }, isLoading: isCasesMetricsLoading } =
+    useGetCasesMetrics();
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : '-'),
@@ -46,45 +37,50 @@ export const CasesMetrics: React.FC = () => {
           <EuiFlexItem grow={true}>
             <StatusStats
               dataTestSubj="openStatsHeader"
-              caseCount={countOpenCases}
+              caseCount={status?.open ?? 0}
               caseStatus={CaseStatuses.open}
-              isLoading={isCasesStatusLoading}
+              isLoading={isCasesMetricsLoading}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <StatusStats
               dataTestSubj="inProgressStatsHeader"
-              caseCount={countInProgressCases}
+              caseCount={status?.inProgress ?? 0}
               caseStatus={CaseStatuses['in-progress']}
-              isLoading={isCasesStatusLoading}
+              isLoading={isCasesMetricsLoading}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <StatusStats
               dataTestSubj="closedStatsHeader"
-              caseCount={countClosedCases}
+              caseCount={status?.closed ?? 0}
               caseStatus={CaseStatuses.closed}
-              isLoading={isCasesStatusLoading}
+              isLoading={isCasesMetricsLoading}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiDescriptionList
+            <EuiStat
               data-test-subj={'mttrStatsHeader'}
-              textStyle="reverse"
-              listItems={[
-                {
-                  title: (
-                    <>
-                      {ATTC_STAT} <EuiIconTip content={ATTC_DESCRIPTION} position="right" />
-                    </>
-                  ),
-                  description: isCasesMetricsLoading ? (
-                    <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
-                  ) : (
-                    mttrValue
-                  ),
-                },
-              ]}
+              description={
+                <>
+                  {ATTC_STAT}
+                  &nbsp;
+                  <EuiIconTip
+                    content={ATTC_DESCRIPTION}
+                    position="right"
+                    aria-label={ATTC_STAT_INFO_ARIA_LABEL}
+                  />
+                </>
+              }
+              title={
+                isCasesMetricsLoading ? (
+                  <EuiLoadingSpinner data-test-subj={`mttr-stat-loading-spinner`} />
+                ) : (
+                  mttrValue
+                )
+              }
+              titleSize="xs"
+              text-align="left"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

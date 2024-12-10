@@ -15,6 +15,7 @@ import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RuleNotifyWhen, SanitizedRule, RuleSystemAction } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -30,6 +31,7 @@ beforeEach(() => {
 });
 
 describe('updateAlertRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
   const mockedResponse = {
     id: '1',
     alertTypeId: '1',
@@ -66,7 +68,7 @@ describe('updateAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.put.mock.calls[0];
 
@@ -145,7 +147,7 @@ describe('updateAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState, undefined, true);
+    updateAlertRoute(router, licenseState, docLinks, undefined, true);
 
     const [config] = router.put.mock.calls[0];
 
@@ -157,7 +159,7 @@ describe('updateAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.put.mock.calls[0];
 
@@ -204,7 +206,7 @@ describe('updateAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.put.mock.calls[0];
 
@@ -247,7 +249,7 @@ describe('updateAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.put.mock.calls[0];
 
@@ -269,7 +271,7 @@ describe('updateAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    updateAlertRoute(router, licenseState, mockUsageCounter);
+    updateAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.put.mock.calls[0];
     rulesClient.update.mockResolvedValueOnce(mockedResponse as unknown as SanitizedRule);
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
@@ -283,7 +285,7 @@ describe('updateAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    updateAlertRoute(router, licenseState);
+    updateAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.put.mock.calls[0];
 
@@ -358,5 +360,31 @@ describe('updateAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalled();
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    updateAlertRoute(router, licenseState, docLinks);
+
+    const [config] = router.put.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "PUT",
+          "newApiPath": "/api/alerting/rule/rule/{id}",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

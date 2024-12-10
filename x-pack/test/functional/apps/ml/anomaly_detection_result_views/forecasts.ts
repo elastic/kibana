@@ -87,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.forecast.assertForecastButtonExists();
         await ml.forecast.assertForecastButtonEnabled(true);
         await ml.forecast.openForecastModal();
+        await ml.forecast.assertForecastNeverExpireSwitchExists();
         await ml.forecast.assertForecastModalRunButtonEnabled(true);
 
         await ml.testExecution.logTestStep('should run the forecast and close the modal');

@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import type { BrowserFields } from '@kbn/alerting-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -68,7 +67,8 @@ export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   configurationId: string;
   id: string;
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   initialPageSize?: number;
   browserFields?: BrowserFields;
@@ -192,7 +192,8 @@ const AlertsTableStateWithQueryProvider = memo(
     alertsTableConfigurationRegistry,
     configurationId,
     id,
-    featureIds,
+    ruleTypeIds,
+    consumers,
     query,
     initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
     leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
@@ -211,6 +212,7 @@ const AlertsTableStateWithQueryProvider = memo(
     dynamicRowHeight,
     lastReloadRequestTime,
     emptyStateHeight,
+    height,
   }: AlertsTableStateProps) => {
     const {
       data,
@@ -291,7 +293,7 @@ const AlertsTableStateWithQueryProvider = memo(
       onColumnResize,
       fields,
     } = useColumns({
-      featureIds,
+      ruleTypeIds,
       storageAlertsTable,
       storage,
       id,
@@ -300,7 +302,8 @@ const AlertsTableStateWithQueryProvider = memo(
     });
 
     const [queryParams, setQueryParams] = useState({
-      featureIds,
+      ruleTypeIds,
+      consumers,
       fields,
       query,
       sort,
@@ -311,14 +314,16 @@ const AlertsTableStateWithQueryProvider = memo(
 
     useEffect(() => {
       setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         fields,
         query,
         sort,
         runtimeMappings,
         // Go back to the first page if the query changes
         pageIndex: !deepEqual(prevQueryParams, {
-          featureIds,
+          ruleTypeIds,
+          consumers,
           fields,
           query,
           sort,
@@ -328,7 +333,7 @@ const AlertsTableStateWithQueryProvider = memo(
           : oldPageIndex,
         pageSize: oldPageSize,
       }));
-    }, [featureIds, fields, query, runtimeMappings, sort]);
+    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers]);
 
     const {
       data: alertsData,
@@ -339,6 +344,7 @@ const AlertsTableStateWithQueryProvider = memo(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
@@ -361,11 +367,11 @@ const AlertsTableStateWithQueryProvider = memo(
       }
     }, [alerts, isLoading, isSuccess, onLoaded]);
 
-    const mutedAlertIds = useMemo(() => {
+    const mutedRuleIds = useMemo(() => {
       return [...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0]))];
     }, [alerts]);
 
-    const { data: mutedAlerts } = useGetMutedAlerts(mutedAlertIds);
+    const { data: mutedAlerts } = useGetMutedAlerts(mutedRuleIds);
     const overriddenActions = useMemo(() => {
       return { toggleColumn: onToggleColumn };
     }, [onToggleColumn]);
@@ -499,7 +505,7 @@ const AlertsTableStateWithQueryProvider = memo(
         toolbarVisibility,
         shouldHighlightRow,
         dynamicRowHeight,
-        featureIds,
+        ruleTypeIds,
         querySnapshot,
         pageIndex: queryParams.pageIndex,
         pageSize: queryParams.pageSize,
@@ -513,6 +519,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onSortChange,
         onPageChange,
         fieldFormats,
+        height,
       }),
       [
         alertsTableConfiguration,
@@ -538,7 +545,7 @@ const AlertsTableStateWithQueryProvider = memo(
         toolbarVisibility,
         shouldHighlightRow,
         dynamicRowHeight,
-        featureIds,
+        ruleTypeIds,
         querySnapshot,
         queryParams.pageIndex,
         queryParams.pageSize,
@@ -552,6 +559,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onSortChange,
         onPageChange,
         fieldFormats,
+        height,
       ]
     );
 
@@ -575,7 +583,7 @@ const AlertsTableStateWithQueryProvider = memo(
 
     return (
       <AlertsTableContext.Provider value={alertsTableContext}>
-        {!isLoading && alertsCount === 0 && (
+        {!isLoading && alertsCount <= 0 && (
           <InspectButtonContainer>
             <EmptyState
               controls={persistentControls}

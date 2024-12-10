@@ -17,11 +17,10 @@ export {
   DASHBOARD_GRID_COLUMN_COUNT,
   PanelPlacementStrategy,
 } from './dashboard_constants';
-export type { DashboardApi } from './dashboard_api/types';
+export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
 export {
   LazyDashboardRenderer as DashboardRenderer,
   DASHBOARD_CONTAINER_TYPE,
-  type DashboardCreationOptions,
   type DashboardLocatorParams,
   type IProvidesLegacyPanelPlacementSettings,
 } from './dashboard_container';

@@ -57,6 +57,16 @@ const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
   ...rest,
 });
 
+const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
+  if (!flapping) {
+    return flapping;
+  }
+  return {
+    lookBackWindow: flapping.look_back_window,
+    statusChangeThreshold: flapping.status_change_threshold,
+  };
+};
+
 export const transformRule: RewriteRequestCase<Rule> = ({
   rule_type_id: ruleTypeId,
   created_by: createdBy,
@@ -77,6 +87,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   last_run: lastRun,
   next_run: nextRun,
   alert_delay: alertDelay,
+  flapping,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -100,6 +111,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(nextRun ? { nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...(alertDelay ? { alertDelay } : {}),
+  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
   ...rest,
 });
 

@@ -66,6 +66,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   className: `unifiedDataTable ${className}`,
   role: 'rowgroup',
 }))`
+  .udtTimeline .euiDataGrid__virtualized {
+    ${({ theme }) =>
+      `scrollbar-color: ${theme.eui.euiColorMediumShade} ${theme.eui.euiColorLightShade}`};
+  }
+
   .udtTimeline [data-gridcell-column-id|='select'] {
     border-right: none;
   }
@@ -180,6 +185,10 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGrid__leftControls {
     display: flex;
     align-items: baseline;
+  }
+
+  .euiDataGrid__customRenderBody {
+    scrollbar-color: transparent !important;
   }
 
   ${leadingActionsColumnStyles}

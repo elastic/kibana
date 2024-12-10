@@ -19,5 +19,7 @@ module.exports = {
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),
     no_unsafe_console: require('./rules/no_unsafe_console'),
+    no_unsafe_hash: require('./rules/no_unsafe_hash'),
+    no_deprecated_authz_config: require('./rules/no_deprecated_authz_config'),
   },
 };

@@ -215,6 +215,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
     []
   );
 
+  const onAddNewConnector = useCallback(() => {
+    setFlyOutVisibility({ type: 'addConnector', visible: true });
+  }, []);
+
   const onChangeConnector = useCallback(
     (id: string) => {
       if (id === 'add-connector') {
@@ -476,15 +480,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
     flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible ? (
       <CommonFlyout<CustomFieldConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={
-          !permissions.create ||
-          !permissions.update ||
-          loadingCaseConfigure ||
-          isPersistingConfiguration
-        }
+        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
         onCloseFlyout={onCloseCustomFieldFlyout}
         onSaveField={onCustomFieldSave}
-        renderHeader={() => <span>{i18n.ADD_CUSTOM_FIELD}</span>}
+        renderHeader={() => (
+          <span>{customFieldToEdit ? i18n.EDIT_CUSTOM_FIELD : i18n.ADD_CUSTOM_FIELD} </span>
+        )}
       >
         {({ onChange }) => (
           <CustomFieldsForm onChange={onChange} initialValue={customFieldToEdit} />
@@ -496,15 +497,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
     flyOutVisibility?.type === 'template' && flyOutVisibility?.visible ? (
       <CommonFlyout<TemplateFormProps, TemplateConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
-        disabled={
-          !permissions.create ||
-          !permissions.update ||
-          loadingCaseConfigure ||
-          isPersistingConfiguration
-        }
+        disabled={!permissions.settings || loadingCaseConfigure || isPersistingConfiguration}
         onCloseFlyout={onCloseTemplateFlyout}
         onSaveField={onTemplateSave}
-        renderHeader={() => <span>{i18n.CREATE_TEMPLATE}</span>}
+        renderHeader={() => (
+          <span>{templateToEdit ? i18n.EDIT_TEMPLATE : i18n.CREATE_TEMPLATE}</span>
+        )}
       >
         {({ onChange }) => (
           <TemplateForm
@@ -557,7 +555,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
               <div css={sectionWrapperCss}>
                 <ClosureOptions
                   closureTypeSelected={closureType}
-                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  disabled={
+                    isPersistingConfiguration || isLoadingConnectors || !permissions.settings
+                  }
                   onChangeClosureType={onChangeClosureType}
                 />
               </div>
@@ -566,13 +566,16 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 <Connectors
                   actionTypes={actionTypes}
                   connectors={connectors ?? []}
-                  disabled={isPersistingConfiguration || isLoadingConnectors || !permissions.update}
+                  disabled={
+                    isPersistingConfiguration || isLoadingConnectors || !permissions.settings
+                  }
                   handleShowEditFlyout={onClickUpdateConnector}
                   isLoading={isLoadingAny}
                   mappings={mappings}
                   onChangeConnector={onChangeConnector}
                   selectedConnector={connector}
-                  updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
+                  updateConnectorDisabled={updateConnectorDisabled || !permissions.settings}
+                  onAddNewConnector={onAddNewConnector}
                 />
               </div>
               <EuiSpacer size="xl" />

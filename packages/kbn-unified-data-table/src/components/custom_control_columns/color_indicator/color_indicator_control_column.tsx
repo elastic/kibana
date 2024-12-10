@@ -42,6 +42,8 @@ const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({ getRowIndicato
       data-test-subj="unifiedDataTableRowColorIndicatorCell"
       title={label}
       css={css`
+        position: absolute;
+        top: 0;
         background: ${color};
         width: ${COLOR_INDICATOR_WIDTH}px;
         height: 100%;

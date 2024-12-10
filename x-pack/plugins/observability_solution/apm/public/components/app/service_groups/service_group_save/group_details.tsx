@@ -21,7 +21,7 @@ import {
   isValidHex,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { StagedServiceGroup } from './save_modal';
 
 interface Props {
@@ -31,6 +31,7 @@ interface Props {
   onClickNext: (serviceGroup: StagedServiceGroup) => void;
   onDeleteGroup: () => void;
   isLoading: boolean;
+  titleId?: string;
 }
 
 export function GroupDetails({
@@ -40,13 +41,16 @@ export function GroupDetails({
   onClickNext,
   onDeleteGroup,
   isLoading,
+  titleId,
 }: Props) {
-  const [name, setName] = useState<string>(serviceGroup?.groupName || '');
-  const [color, setColor, colorPickerErrors] = useColorPickerState(
-    serviceGroup?.color || '#5094C4'
-  );
-
+  const initialColor = serviceGroup?.color || '#5094C4';
+  const [name, setName] = useState(serviceGroup?.groupName);
+  const [color, setColor, colorPickerErrors] = useColorPickerState(initialColor);
   const [description, setDescription] = useState<string | undefined>(serviceGroup?.description);
+
+  const isNamePristine = name === serviceGroup?.groupName;
+  const isColorPristine = color === initialColor;
+
   useEffect(() => {
     if (serviceGroup) {
       setName(serviceGroup.groupName);
@@ -65,16 +69,10 @@ export function GroupDetails({
   const isInvalidName = !name;
   const isInvalid = isInvalidName || isInvalidColor;
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus(); // autofocus on initial render
-  }, []);
-
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={titleId}>
           {isEdit
             ? i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.edit.title', {
                 defaultMessage: 'Edit group',
@@ -93,15 +91,25 @@ export function GroupDetails({
                   label={i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.name', {
                     defaultMessage: 'Name',
                   })}
-                  isInvalid={isInvalidName}
+                  isInvalid={!isNamePristine && isInvalidName}
+                  error={
+                    !isNamePristine && isInvalidName
+                      ? i18n.translate(
+                          'xpack.apm.serviceGroups.groupDetailsForm.invalidNameError',
+                          {
+                            defaultMessage: 'Please provide a valid name value',
+                          }
+                        )
+                      : undefined
+                  }
                 >
                   <EuiFieldText
                     data-test-subj="apmGroupNameInput"
-                    value={name}
+                    value={name || ''}
                     onChange={(e) => {
                       setName(e.target.value);
                     }}
-                    inputRef={inputRef}
+                    isInvalid={!isNamePristine && isInvalidName}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -110,9 +118,9 @@ export function GroupDetails({
                   label={i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.color', {
                     defaultMessage: 'Color',
                   })}
-                  isInvalid={isInvalidColor}
+                  isInvalid={!isColorPristine && isInvalidColor}
                   error={
-                    isInvalidColor
+                    !isColorPristine && isInvalidColor
                       ? i18n.translate(
                           'xpack.apm.serviceGroups.groupDetailsForm.invalidColorError',
                           {
@@ -122,7 +130,11 @@ export function GroupDetails({
                       : undefined
                   }
                 >
-                  <EuiColorPicker onChange={setColor} color={color} isInvalid={isInvalidColor} />
+                  <EuiColorPicker
+                    onChange={setColor}
+                    color={color}
+                    isInvalid={!isColorPristine && isInvalidColor}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -144,7 +156,7 @@ export function GroupDetails({
               <EuiFieldText
                 data-test-subj="apmGroupDetailsFieldText"
                 fullWidth
-                value={description}
+                value={description || ''}
                 onChange={(e) => {
                   setDescription(e.target.value);
                 }}
@@ -164,6 +176,7 @@ export function GroupDetails({
                   onDeleteGroup();
                 }}
                 color="danger"
+                isLoading={isLoading}
                 isDisabled={isLoading}
                 data-test-subj="apmDeleteGroupButton"
               >
@@ -177,6 +190,7 @@ export function GroupDetails({
             <EuiButtonEmpty
               data-test-subj="apmGroupDetailsCancelButton"
               onClick={onCloseModal}
+              isLoading={isLoading}
               isDisabled={isLoading}
             >
               {i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.cancel', {
@@ -192,12 +206,13 @@ export function GroupDetails({
               iconSide="right"
               onClick={() => {
                 onClickNext({
-                  groupName: name,
+                  groupName: name || '',
                   color,
                   description,
                   kuery: serviceGroup?.kuery ?? '',
                 });
               }}
+              isLoading={isLoading}
               isDisabled={isInvalid || isLoading}
             >
               {i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.selectServices', {

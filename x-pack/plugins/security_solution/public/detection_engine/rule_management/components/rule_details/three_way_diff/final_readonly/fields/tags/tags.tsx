@@ -16,6 +16,10 @@ interface TagsReadOnlyProps {
 }
 
 export function TagsReadOnly({ tags }: TagsReadOnlyProps) {
+  if (tags.length === 0) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[

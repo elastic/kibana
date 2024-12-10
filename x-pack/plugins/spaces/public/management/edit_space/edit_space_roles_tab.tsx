@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -33,12 +33,15 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
   const {
     getUrlForApp,
     overlays,
+    userProfile,
     theme,
     i18n: i18nStart,
     logger,
     notifications,
     invokeClient,
   } = services;
+
+  const [removeRoleConfirm, setRemoveRoleConfirm] = useState<Role | null>(null);
 
   // Roles are already loaded in app state, refresh them when user navigates to this tab
   useEffect(() => {
@@ -62,7 +65,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
     (defaultSelected?: Role[]) => {
       const overlayRef = overlays.openFlyout(
         toMountPoint(
-          <EditSpaceProvider {...services}>
+          <EditSpaceProvider {...services} dispatch={dispatch} state={state}>
             <PrivilegesRolesForm
               {...{
                 space,
@@ -97,7 +100,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
               }}
             />
           </EditSpaceProvider>,
-          { theme, i18n: i18nStart }
+          { theme, i18n: i18nStart, userProfile }
         ),
         {
           size: 'm',
@@ -109,11 +112,13 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
     [
       overlays,
       services,
+      dispatch,
+      state,
       space,
       features,
-      dispatch,
       invokeClient,
       getUrlForApp,
+      userProfile,
       theme,
       i18nStart,
       notifications.toasts,
@@ -174,7 +179,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
   );
 
   return (
-    <React.Fragment>
+    <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiText>
@@ -193,8 +198,8 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
             onClickBulkRemove={async (selectedRoles) => {
               await removeRole(selectedRoles);
             }}
-            onClickRowRemoveAction={async (rowRecord) => {
-              await removeRole([rowRecord]);
+            onClickRemoveRoleConfirm={async (rowRecord) => {
+              setRemoveRoleConfirm(rowRecord);
             }}
             onClickAssignNewRole={async () => {
               showRolesPrivilegeEditor();
@@ -202,6 +207,36 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </React.Fragment>
+      {removeRoleConfirm && (
+        <EuiConfirmModal
+          aria-labelledby="remove-role-confirm-modal"
+          titleProps={{ id: 'remove-role-confirm-modal' }}
+          title={i18n.translate('xpack.spaces.management.spaceDetails.roles.removeRoleModalTitle', {
+            defaultMessage: 'Remove role "{roleName}" from the space?',
+            values: { roleName: removeRoleConfirm.name },
+          })}
+          cancelButtonText={i18n.translate(
+            'xpack.spaces.management.spaceDetails.roles.removeRoleModalCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.spaces.management.spaceDetails.roles.removeRoleModalConfirm',
+            { defaultMessage: 'Confirm' }
+          )}
+          onCancel={() => setRemoveRoleConfirm(null)}
+          onConfirm={() => {
+            removeRole([removeRoleConfirm]);
+            setRemoveRoleConfirm(null);
+          }}
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.spaces.management.spaceDetails.roles.removeRoleModalBody"
+              defaultMessage="You can't undo this operation."
+            />
+          </p>
+        </EuiConfirmModal>
+      )}
+    </>
   );
 };

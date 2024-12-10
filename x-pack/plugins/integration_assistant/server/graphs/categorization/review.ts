@@ -12,6 +12,8 @@ import type { CategorizationNodeParams } from './types';
 import type { SimplifiedProcessors, SimplifiedProcessor, CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
+import { selectResults } from './util';
+import { CATEROGIZATION_REVIEW_BATCH_SIZE } from '../../../common/constants';
 
 export async function handleReview({
   state,
@@ -21,9 +23,15 @@ export async function handleReview({
   const outputParser = new JsonOutputParser();
   const categorizationReview = categorizationReviewPrompt.pipe(model).pipe(outputParser);
 
+  const [pipelineResults, selectedIndices] = selectResults(
+    state.pipelineResults,
+    CATEROGIZATION_REVIEW_BATCH_SIZE,
+    new Set(state.stableSamples)
+  );
+
   const currentProcessors = (await categorizationReview.invoke({
     current_processors: JSON.stringify(state.currentProcessors, null, 2),
-    pipeline_results: JSON.stringify(state.pipelineResults, null, 2),
+    pipeline_results: JSON.stringify(pipelineResults, null, 2),
     previous_invalid_categorization: state.previousInvalidCategorization,
     previous_error: state.previousError,
     ex_answer: state?.exAnswer,
@@ -41,7 +49,8 @@ export async function handleReview({
   return {
     currentPipeline,
     currentProcessors,
-    reviewed: true,
+    reviewCount: state.reviewCount + 1,
+    lastReviewedSamples: selectedIndices,
     lastExecutedChain: 'review',
   };
 }

@@ -76,12 +76,14 @@ export class SyntheticsMonitorTestService {
         updated_at: updatedAt,
         id,
         config_id: configId,
+        spaceId,
       } = apiResponse.body;
       expect(id).not.empty();
       expect(configId).not.empty();
+      expect(spaceId).not.empty();
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
       return {
-        rawBody: apiResponse.body,
+        rawBody: omit(apiResponse.body, ['spaceId']),
         body: {
           ...omit(apiResponse.body, [
             'created_at',
@@ -89,6 +91,7 @@ export class SyntheticsMonitorTestService {
             'id',
             'config_id',
             'form_monitor_type',
+            'spaceId',
           ]),
         },
       };
@@ -172,7 +175,7 @@ export class SyntheticsMonitorTestService {
     }
   }
 
-  async addsNewSpace() {
+  async addsNewSpace(uptimePermissions: string[] = ['all']) {
     const username = 'admin';
     const password = `${username}-password`;
     const roleName = 'uptime-role';
@@ -187,7 +190,8 @@ export class SyntheticsMonitorTestService {
       kibana: [
         {
           feature: {
-            uptime: ['all'],
+            uptime: uptimePermissions,
+            slo: ['all'],
           },
           spaces: ['*'],
         },
@@ -199,7 +203,7 @@ export class SyntheticsMonitorTestService {
       full_name: 'a kibana user',
     });
 
-    return { username, password, SPACE_ID };
+    return { username, password, SPACE_ID, roleName };
   }
 
   async deleteMonitor(monitorId?: string | string[], statusCode = 200, spaceId?: string) {
@@ -223,6 +227,19 @@ export class SyntheticsMonitorTestService {
           : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId
       )
       .send()
+      .set('kbn-xsrf', 'true');
+    expect(deleteResponse.status).to.eql(statusCode);
+    return deleteResponse;
+  }
+
+  async deleteMonitorBulk(monitorIds: string[], statusCode = 200, spaceId?: string) {
+    const deleteResponse = await this.supertest
+      .post(
+        spaceId
+          ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/_bulk_delete`
+          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/_bulk_delete'
+      )
+      .send({ ids: monitorIds })
       .set('kbn-xsrf', 'true');
     expect(deleteResponse.status).to.eql(statusCode);
     return deleteResponse;

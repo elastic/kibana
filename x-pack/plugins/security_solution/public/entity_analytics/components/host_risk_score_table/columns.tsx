@@ -23,6 +23,7 @@ import { RiskScoreLevel } from '../severity/common';
 import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
 import { CELL_ACTIONS_TELEMETRY } from '../risk_score/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { formatRiskScore } from '../../common';
 
 export const getHostRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -82,7 +83,7 @@ export const getHostRiskScoreColumns = ({
       if (riskScore != null) {
         return (
           <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {Math.round(riskScore)}
+            {formatRiskScore(riskScore)}
           </span>
         );
       }

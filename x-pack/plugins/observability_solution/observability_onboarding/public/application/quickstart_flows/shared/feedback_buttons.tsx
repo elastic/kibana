@@ -53,7 +53,7 @@ export function FeedbackButtons({ flow }: { flow: string }) {
           <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="observabilityAiAssistantFeedbackButtonsPositiveButton"
+                data-test-subj="obltOnboardingFeedbackButtonsPositiveButton"
                 color="success"
                 iconType="faceHappy"
                 size="s"
@@ -67,7 +67,7 @@ export function FeedbackButtons({ flow }: { flow: string }) {
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="observabilityAiAssistantFeedbackButtonsNegativeButton"
+                data-test-subj="obltOnboardingFeedbackButtonsNegativeButton"
                 color="danger"
                 iconType="faceSad"
                 size="s"

@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      expect(apiResponse).eql(omitMonitorKeys(newMonitor));
+      expect(apiResponse).eql(omitMonitorKeys({ ...newMonitor, spaceId: 'default' }));
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest

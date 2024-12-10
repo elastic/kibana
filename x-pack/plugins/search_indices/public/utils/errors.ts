@@ -11,6 +11,7 @@ export function getErrorMessage(error: unknown, defaultMessage?: string): string
   if (typeof error === 'string') {
     return error;
   }
+
   if (isKibanaServerError(error)) {
     return error.body.message;
   }

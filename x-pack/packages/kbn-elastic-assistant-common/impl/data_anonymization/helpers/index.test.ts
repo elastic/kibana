@@ -123,6 +123,30 @@ describe('helpers', () => {
       expect(result).toEqual(messageContent);
     });
 
+    it('returns the original messageContent if replacements is null', () => {
+      const messageContent =
+        'User {{ user.name 3541b730-1dce-4937-b63f-0d618ea1cc5f }} added a member to the Administrators group on host {{ host.name b222e892-431e-4e4f-9295-2ba92ef9d12d }}';
+
+      const result = replaceAnonymizedValuesWithOriginalValues({
+        messageContent,
+        replacements: null, // <-- null
+      });
+
+      expect(result).toEqual(messageContent);
+    });
+
+    it('returns the original messageContent if replacements is undefined', () => {
+      const messageContent =
+        'User {{ user.name 3541b730-1dce-4937-b63f-0d618ea1cc5f }} added a member to the Administrators group on host {{ host.name b222e892-431e-4e4f-9295-2ba92ef9d12d }}';
+
+      const result = replaceAnonymizedValuesWithOriginalValues({
+        messageContent,
+        replacements: undefined, // <-- undefined
+      });
+
+      expect(result).toEqual(messageContent);
+    });
+
     it('replaces multiple occurrences of the same replacement key', () => {
       const messageContent =
         'User {{ user.name 3541b730-1dce-4937-b63f-0d618ea1cc5f }} added a member to the Administrators group on host {{ host.name b222e892-431e-4e4f-9295-2ba92ef9d12d }}, which is unusual because {{ user.name 3541b730-1dce-4937-b63f-0d618ea1cc5f }} is not a member of the Administrators group.';

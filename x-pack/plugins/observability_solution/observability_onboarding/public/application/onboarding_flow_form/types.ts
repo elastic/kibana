@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type Category = 'apm' | 'infra' | 'logs';
+export type Category = 'host' | 'kubernetes' | 'application' | 'cloud';

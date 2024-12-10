@@ -31,7 +31,7 @@ import { bulkActionBenchmarkRulesHandler } from './v1';
 	    // ... (additional benchmark rules)
 	  ];
 	}
-	
+
 	Response:
 	{
 	  updated_benchmark_rules: CspBenchmarkRulesStates; Benchmark rules object that were affected
@@ -44,8 +44,10 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
     .post({
       access: 'internal',
       path: CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-all'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-all'],
+        },
       },
     })
     .addVersion(
@@ -65,7 +67,7 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
 
           const benchmarkRulesToUpdate = requestBody.rules;
 
-          const detectionRulesClient = (await context.alerting).getRulesClient();
+          const detectionRulesClient = await (await context.alerting).getRulesClient();
 
           const handlerResponse = await bulkActionBenchmarkRulesHandler(
             cspContext.soClient,

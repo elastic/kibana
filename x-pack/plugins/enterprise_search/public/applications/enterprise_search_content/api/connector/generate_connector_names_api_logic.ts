@@ -4,23 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface GenerateConnectorNamesApiArgs {
+  connectorName?: string;
   connectorType?: string;
+  isManagedConnector?: boolean;
+}
+
+export interface GenerateConnectorNamesApiResponse {
+  apiKeyName: string;
+  connectorName: string;
+  indexName: string;
 }
 
 export const generateConnectorNames = async (
-  { connectorType }: GenerateConnectorNamesApiArgs = { connectorType: 'custom' }
+  { connectorType, connectorName, isManagedConnector }: GenerateConnectorNamesApiArgs = {
+    connectorType: 'custom',
+  }
 ) => {
+  if (connectorType === '') {
+    connectorType = 'custom';
+  }
   const route = `/internal/enterprise_search/connectors/generate_connector_name`;
   return await HttpLogic.values.http.post(route, {
-    body: JSON.stringify({ connectorType }),
+    body: JSON.stringify({ connectorName, connectorType, isManagedConnector }),
   });
 };
 
 export const GenerateConnectorNamesApiLogic = createApiLogic(
-  ['generate_config_api_logic'],
+  ['generate_connector_names_api_logic'],
   generateConnectorNames
 );
+
+export type GenerateConnectorNamesApiLogicActions = Actions<
+  GenerateConnectorNamesApiArgs,
+  GenerateConnectorNamesApiResponse
+>;

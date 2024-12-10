@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should find a single rule with a execute immediately action correctly', async () => {
       // create connector/action
       const { body: hookAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send(getWebHookAction())
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const action = {
         group: 'default',
         id: hookAction.id,
-        action_type_id: hookAction.actionTypeId,
+        action_type_id: hookAction.connector_type_id,
         params: {},
       };
 
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should be able to find a scheduled action correctly', async () => {
       // create connector/action
       const { body: hookAction } = await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send(getWebHookAction())
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const action = {
         group: 'default',
         id: hookAction.id,
-        action_type_id: hookAction.actionTypeId,
+        action_type_id: hookAction.connector_type_id,
         params: {},
       };
 

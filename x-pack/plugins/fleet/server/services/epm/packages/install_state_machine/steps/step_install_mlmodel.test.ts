@@ -22,6 +22,8 @@ import { createAppContextStartContractMock } from '../../../../../mocks';
 import { installMlModel } from '../../../elasticsearch/ml_model';
 import { deleteMLModels, deletePrerequisiteAssets } from '../../remove';
 
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
 import { stepInstallMlModel, cleanUpMlModelStep } from './step_install_mlmodel';
 
 jest.mock('../../../elasticsearch/ml_model');
@@ -53,6 +55,7 @@ const packageInstallContext = {
   } as any,
   paths: ['some/path/1', 'some/path/2'],
   assetsMap: new Map(),
+  archiveIterator: createArchiveIteratorFromMap(new Map()),
 };
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;

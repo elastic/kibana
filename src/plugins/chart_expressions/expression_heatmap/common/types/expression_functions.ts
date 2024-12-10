@@ -11,6 +11,8 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
+  DefaultInspectorAdapters,
+  ExecutionContext,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
@@ -114,7 +116,8 @@ export type HeatmapExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof EXPRESSION_HEATMAP_NAME,
   HeatmapInput,
   HeatmapArguments,
-  ExpressionValueRender<HeatmapExpressionProps>
+  ExpressionValueRender<HeatmapExpressionProps>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type HeatmapLegendExpressionFunctionDefinition = ExpressionFunctionDefinition<

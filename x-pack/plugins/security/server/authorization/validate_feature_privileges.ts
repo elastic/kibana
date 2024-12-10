@@ -6,13 +6,14 @@
  */
 
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import { getMinimalPrivilegeId } from '@kbn/security-authorization-core-common';
 
 export function validateFeaturePrivileges(features: KibanaFeature[]) {
   for (const feature of features) {
     const seenPrivilegeIds = new Set<string>();
     Object.keys(feature.privileges ?? {}).forEach((privilegeId) => {
       seenPrivilegeIds.add(privilegeId);
-      seenPrivilegeIds.add(`minimal_${privilegeId}`);
+      seenPrivilegeIds.add(getMinimalPrivilegeId(privilegeId));
     });
 
     const subFeatureEntries = feature.subFeatures ?? [];

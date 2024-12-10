@@ -19,8 +19,8 @@
 }
 
 .lnsSettingWithSiblingFlyout__content {
-  @include euiYScroll;
   flex: 1;
+  @include euiYScroll;
 }
 
 .lnsSettingWithSiblingFlyout__footer {

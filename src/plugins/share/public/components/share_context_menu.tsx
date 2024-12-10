@@ -17,7 +17,7 @@ import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
 import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
+import { ShareMenuItemLegacy, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
@@ -32,7 +32,7 @@ export interface ShareContextMenuProps {
     locator: LocatorPublic<any>;
     params: any;
   };
-  shareMenuItems: ShareMenuItem[];
+  shareMenuItems: ShareMenuItemLegacy[];
   sharingData: any;
   onClose: () => void;
   embedUrlParamExtensions?: UrlParamExtension[];

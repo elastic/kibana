@@ -48,7 +48,7 @@ export class BufferLines extends Readable {
         // we are at the end of the stream
         this.boundary = null;
         this.readableText = false;
-      } else {
+      } else if (this.readableText) {
         // we have actual content to push
         this.push(line);
       }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import {
   EuiExpression,
   EuiPopover,
@@ -20,6 +20,7 @@ import { IErrorObject } from '../../types';
 export interface ValueExpressionProps {
   description: string;
   value: number;
+  valueLabel?: string | ReactNode;
   onChangeSelectedValue: (updatedValue: number) => void;
   popupPosition?:
     | 'upCenter'
@@ -41,6 +42,7 @@ export interface ValueExpressionProps {
 export const ValueExpression = ({
   description,
   value,
+  valueLabel,
   onChangeSelectedValue,
   display = 'inline',
   popupPosition,
@@ -53,7 +55,7 @@ export const ValueExpression = ({
         <EuiExpression
           data-test-subj="valueExpression"
           description={description}
-          value={value}
+          value={valueLabel ?? value}
           isActive={valuePopoverOpen}
           display={display === 'inline' ? 'inline' : 'columns'}
           onClick={() => {

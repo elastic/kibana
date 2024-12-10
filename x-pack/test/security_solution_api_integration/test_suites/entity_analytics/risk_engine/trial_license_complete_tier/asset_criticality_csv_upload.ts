@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
-import omit from 'lodash/omit';
+import expect from 'expect';
 import {
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
-  disableAssetCriticalityAdvancedSetting,
-  enableAssetCriticalityAdvancedSetting,
   getAssetCriticalityDoc,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -19,7 +16,6 @@ export default ({ getService }: FtrProviderContext) => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
-    const kibanaServer = getService('kibanaServer');
     const log = getService('log');
     const expectAssetCriticalityDocMatching = async (expectedDoc: {
       id_field: string;
@@ -31,16 +27,11 @@ export default ({ getService }: FtrProviderContext) => {
         idField: expectedDoc.id_field,
         idValue: expectedDoc.id_value,
       });
-
-      expect(omit(esDoc, '@timestamp')).to.eql(expectedDoc);
+      expect(esDoc).toEqual(expect.objectContaining(expectedDoc));
     };
 
     before(async () => {
       await cleanAssetCriticality({ es: esClient, namespace: 'default', log });
-    });
-
-    beforeEach(async () => {
-      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     after(async () => {
@@ -51,8 +42,8 @@ export default ({ getService }: FtrProviderContext) => {
       it('should correctly upload a valid csv with one entity', async () => {
         const validCsv = 'host,host-1,low_impact';
         const { body } = await assetCriticalityRoutes.uploadCsv(validCsv);
-        expect(body.errors).to.eql([]);
-        expect(body.stats).to.eql({
+        expect(body.errors).toEqual([]);
+        expect(body.stats).toEqual({
           total: 1,
           successful: 1,
           failed: 0,
@@ -74,8 +65,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const validCsv = 'host,update-host-1,low_impact';
         const { body } = await assetCriticalityRoutes.uploadCsv(validCsv);
-        expect(body.errors).to.eql([]);
-        expect(body.stats).to.eql({
+        expect(body.errors).toEqual([]);
+        expect(body.stats).toEqual({
           total: 1,
           successful: 1,
           failed: 0,
@@ -103,44 +94,44 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { body } = await assetCriticalityRoutes.uploadCsv(invalidRows.join('\n'));
 
-      expect(body.stats).to.eql({
+      expect(body.stats).toEqual({
         total: 8,
         successful: 0,
         failed: 8,
       });
 
-      expect(body.errors).to.eql([
+      expect(body.errors).toEqual([
         {
-          index: 0,
+          index: 1,
           message:
             'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
         },
         {
-          index: 1,
+          index: 2,
           message: 'Invalid entity type "invalid_entity", expected host or user',
         },
         {
-          index: 2,
+          index: 3,
           message: 'Missing identifier',
         },
         {
-          index: 3,
+          index: 4,
           message: 'Missing criticality level',
         },
         {
-          index: 4,
+          index: 5,
           message: 'Missing entity type',
         },
         {
-          index: 5,
+          index: 6,
           message: 'Expected 3 columns, got 2',
         },
         {
-          index: 6,
+          index: 7,
           message: 'Expected 3 columns, got 4',
         },
         {
-          index: 7,
+          index: 8,
           message: `Identifier is too long, expected less than 1000 characters, got 1001`,
         },
       ]);
@@ -155,15 +146,15 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { body } = await assetCriticalityRoutes.uploadCsv(lines.join('\n'));
 
-      expect(body.stats).to.eql({
+      expect(body.stats).toEqual({
         total: 3,
         successful: 2,
         failed: 1,
       });
 
-      expect(body.errors).to.eql([
+      expect(body.errors).toEqual([
         {
-          index: 1,
+          index: 2,
           message:
             'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
         },
@@ -184,18 +175,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 200 if the csv is empty', async () => {
       const { body } = await assetCriticalityRoutes.uploadCsv('');
-      expect(body.stats).to.eql({
+      expect(body.stats).toEqual({
         total: 0,
         successful: 0,
         failed: 0,
-      });
-    });
-
-    it('should return 403 if the advanced setting is disabled', async () => {
-      await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
-
-      await assetCriticalityRoutes.uploadCsv('host,host-1,low_impact', {
-        expectStatusCode: 403,
       });
     });
   });

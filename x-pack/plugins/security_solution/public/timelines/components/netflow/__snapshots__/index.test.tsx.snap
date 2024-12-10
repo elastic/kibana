@@ -119,12 +119,13 @@ tr:hover .c3:focus::before {
   margin-right: 5px;
 }
 
-.c7 {
-  margin-right: 3px;
+.c15 {
+  position: relative;
+  top: 1px;
 }
 
-.c8 {
-  margin: 0 5px;
+.c14 {
+  margin-right: 5px;
 }
 
 .c17 {
@@ -155,13 +156,12 @@ tr:hover .c3:focus::before {
   margin: 0 5px;
 }
 
-.c15 {
-  position: relative;
-  top: 1px;
+.c7 {
+  margin-right: 3px;
 }
 
-.c14 {
-  margin-right: 5px;
+.c8 {
+  margin: 0 5px;
 }
 
 .c12 {
@@ -1012,13 +1012,12 @@ tr:hover .c3:focus::before {
                                             <span
                                               class="emotion-EuiExternalLinkIcon"
                                               data-euiicon-type="popout"
-                                            >
-                                              External link
-                                            </span>
+                                              role="presentation"
+                                            />
                                             <span
                                               class="emotion-euiScreenReaderOnly"
                                             >
-                                              (opens in a new tab or window)
+                                              (external, opens in a new tab or window)
                                             </span>
                                           </a>
                                         </div>
@@ -1755,13 +1754,12 @@ tr:hover .c3:focus::before {
                                             <span
                                               class="emotion-EuiExternalLinkIcon"
                                               data-euiicon-type="popout"
-                                            >
-                                              External link
-                                            </span>
+                                              role="presentation"
+                                            />
                                             <span
                                               class="emotion-euiScreenReaderOnly"
                                             >
-                                              (opens in a new tab or window)
+                                              (external, opens in a new tab or window)
                                             </span>
                                           </a>
                                         </div>
@@ -2135,13 +2133,12 @@ tr:hover .c3:focus::before {
                               <span
                                 class="emotion-EuiExternalLinkIcon"
                                 data-euiicon-type="popout"
-                              >
-                                External link
-                              </span>
+                                role="presentation"
+                              />
                               <span
                                 class="emotion-euiScreenReaderOnly"
                               >
-                                (opens in a new tab or window)
+                                (external, opens in a new tab or window)
                               </span>
                             </a>
                           </span>
@@ -2221,13 +2218,12 @@ tr:hover .c3:focus::before {
                               <span
                                 class="emotion-EuiExternalLinkIcon"
                                 data-euiicon-type="popout"
-                              >
-                                External link
-                              </span>
+                                role="presentation"
+                              />
                               <span
                                 class="emotion-euiScreenReaderOnly"
                               >
-                                (opens in a new tab or window)
+                                (external, opens in a new tab or window)
                               </span>
                             </a>
                           </span>
@@ -2307,13 +2303,12 @@ tr:hover .c3:focus::before {
                               <span
                                 class="emotion-EuiExternalLinkIcon"
                                 data-euiicon-type="popout"
-                              >
-                                External link
-                              </span>
+                                role="presentation"
+                              />
                               <span
                                 class="emotion-euiScreenReaderOnly"
                               >
-                                (opens in a new tab or window)
+                                (external, opens in a new tab or window)
                               </span>
                             </a>
                           </span>

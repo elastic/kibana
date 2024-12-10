@@ -25,7 +25,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/update_rule', () => ({
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/update_rule', () => ({
   updateRule: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
 }));
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => ({
@@ -35,7 +35,7 @@ jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health
   })),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config', () => ({
+jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
   fetchUiConfig: jest.fn().mockResolvedValue({
     isUsingSecurity: true,
     minimumScheduleInterval: { value: '1m', enforce: false },
@@ -63,6 +63,13 @@ jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => 
   fetchUiHealthStatus: jest.fn(() => ({ isRulesAvailable: true })),
 }));
 
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn().mockResolvedValue({
+    lookBackWindow: 20,
+    statusChangeThreshold: 20,
+  }),
+}));
+
 describe('rule_edit', () => {
   let wrapper: ReactWrapper<any>;
   let mockedCoreSetup: ReturnType<typeof coreMock.createSetup>;
@@ -80,6 +87,9 @@ describe('rule_edit', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.application.capabilities = {
       ...capabilities,
+      rulesSettings: {
+        writeFlappingSettingsUI: true,
+      },
       rules: {
         show: true,
         save: true,

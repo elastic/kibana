@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface Props {
   viewMode?: 'compact' | 'default';

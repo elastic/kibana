@@ -13,6 +13,7 @@ export {
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
   MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
+  HasEsDataFailureReason,
 } from './constants';
 
 export { LATEST_VERSION } from './content_management/v1/constants';

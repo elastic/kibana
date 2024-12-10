@@ -22,6 +22,7 @@ import type {
   CloudLinkId,
   CloudLinks,
   ItemDefinition,
+  SolutionId,
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import type { MouseEventHandler } from 'react';
@@ -274,11 +275,6 @@ function validateNodeProps<
       `[Chrome navigation] Error in node [${id}]. Only one of "href" or "cloudLink" can be provided.`
     );
   }
-  if (renderAs === 'panelOpener' && !link) {
-    throw new Error(
-      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "panelOpener", a "link" must also be provided.`
-    );
-  }
   if (renderAs === 'item' && !link && !onClick) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" or "onClick" must also be provided.`
@@ -369,6 +365,7 @@ const isRecentlyAccessedDefinition = (
 };
 
 export const parseNavigationTree = (
+  id: SolutionId,
   navigationTreeDef: NavigationTreeDefinition,
   { deepLinks, cloudLinks }: { deepLinks: Record<string, ChromeNavLink>; cloudLinks: CloudLinks }
 ): {
@@ -381,7 +378,7 @@ export const parseNavigationTree = (
   const navigationTree: ChromeProjectNavigationNode[] = [];
 
   // Contains UI layout information (body, footer) and render "special" blocks like recently accessed.
-  const navigationTreeUI: NavigationTreeDefinitionUI = { body: [] };
+  const navigationTreeUI: NavigationTreeDefinitionUI = { id, body: [] };
 
   const initNodeAndChildren = (
     node: GroupDefinition | ItemDefinition | NodeDefinition,

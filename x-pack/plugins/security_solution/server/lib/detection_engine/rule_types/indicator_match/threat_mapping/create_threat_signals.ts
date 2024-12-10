@@ -36,8 +36,8 @@ import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
-import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
+import { getQueryFields } from '../../utils/get_query_fields';
 
 export const createThreatSignals = async ({
   alertId,
@@ -72,9 +72,9 @@ export const createThreatSignals = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
-  inputIndexFields,
   licensing,
   experimentalFeatures,
+  scheduleNotificationResponseActionsService,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
   const threatFieldsLength = threatMatchedFields.threat.length;
@@ -115,6 +115,14 @@ export const createThreatSignals = async ({
   const allEventFilters = [...filters, eventMappingFilter, ...dataTiersFilters];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter, ...dataTiersFilters];
 
+  const dataViews = await services.getDataViews();
+  const inputIndexFields = await getQueryFields({
+    dataViews,
+    index: inputIndex,
+    query,
+    language,
+  });
+
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -134,18 +142,21 @@ export const createThreatSignals = async ({
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
       index: threatIndex,
       keep_alive: THREAT_PIT_KEEP_ALIVE,
+      // @ts-expect-error client support this option, but it is not documented and typed yet, but we need this fix in 8.16.2.
+      // once support added we should remove this expected type error
+      // https://github.com/elastic/elasticsearch-specification/issues/3144
+      allow_partial_search_results: true,
     })
   ).id;
   const reassignThreatPitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
     if (newPitId) threatPitId = newPitId;
   };
 
-  const dataViews = await services.getDataViews();
-  const threatIndexFields = await getFieldsForWildcard({
-    index: threatIndex,
-    language: threatLanguage ?? 'kuery',
+  const threatIndexFields = await getQueryFields({
     dataViews,
-    ruleExecutionLogger,
+    index: threatIndex,
+    query: threatQuery,
+    language: threatLanguage,
   });
 
   const threatListCount = await getThreatListCount({
@@ -454,7 +465,11 @@ export const createThreatSignals = async ({
       `Error trying to close point in time: "${threatPitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
     );
   }
-
+  scheduleNotificationResponseActionsService({
+    signals: results.createdSignals,
+    signalsCount: results.createdSignalsCount,
+    responseActions: completeRule.ruleParams.responseActions,
+  });
   ruleExecutionLogger.debug('Indicator matching rule has completed');
   return results;
 };

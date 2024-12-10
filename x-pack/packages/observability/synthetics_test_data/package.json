@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/observability-synthetics-test-data",
+  "descriptio": "Utils to generate observability synthetics test data",
+  "author": "UX Management",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

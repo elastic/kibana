@@ -10,6 +10,7 @@ import {
   connectorResponseSchemaV1,
   connectorTypesResponseSchemaV1,
   allConnectorsResponseSchema,
+  connectorExecuteResponseSchema,
 } from '..';
 
 type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;
@@ -40,4 +41,15 @@ export interface ConnectorTypesResponse {
   minimum_license_required: ConnectorTypesResponseSchemaType['minimum_license_required'];
   supported_feature_ids: ConnectorTypesResponseSchemaType['supported_feature_ids'];
   is_system_action_type: ConnectorTypesResponseSchemaType['is_system_action_type'];
+}
+
+type ConnectorExecuteResponseSchemaType = TypeOf<typeof connectorExecuteResponseSchema>;
+export interface ConnectorExecuteResponse {
+  connector_id: ConnectorExecuteResponseSchemaType['connector_id'];
+  status: ConnectorExecuteResponseSchemaType['status'];
+  message?: ConnectorExecuteResponseSchemaType['message'];
+  service_message?: ConnectorExecuteResponseSchemaType['service_message'];
+  data?: ConnectorExecuteResponseSchemaType['data'];
+  retry?: ConnectorExecuteResponseSchemaType['retry'];
+  errorSource?: ConnectorExecuteResponseSchemaType['errorSource'];
 }

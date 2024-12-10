@@ -62,8 +62,7 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     isNotSourcererOption(`${DEFAULT_ALERTS_INDEX}-default`);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173854
-  describe.skip('Modified badge', () => {
+  describe('Modified badge', () => {
     it('Selecting new data view does not add a modified badge', () => {
       openTimelineUsingToggle();
       cy.get(SOURCERER.badgeModified).should(`not.exist`);
@@ -101,11 +100,9 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     beforeEach(() => {
       login();
       deleteTimelines();
-      createTimeline().then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
-      );
+      createTimeline().then((response) => cy.wrap(response.body.savedObjectId).as('timelineId'));
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
+        cy.wrap(response.body.savedObjectId).as('auditbeatTimelineId')
       );
       visitWithTimeRange(TIMELINES_URL);
       refreshUntilAlertsIndexExists();

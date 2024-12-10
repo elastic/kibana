@@ -10,26 +10,26 @@
 export interface Cloud {
   availability_zone?: string;
   instance?: {
-    name: string;
-    id: string;
+    name?: string;
+    id?: string;
   };
   machine?: {
-    type: string;
+    type?: string;
   };
   project?: {
-    id: string;
-    name: string;
+    id?: string;
+    name?: string;
   };
   provider?: string;
   region?: string;
   account?: {
-    id: string;
-    name: string;
+    id?: string;
+    name?: string;
   };
   image?: {
-    id: string;
+    id?: string;
   };
   service?: {
-    name: string;
+    name?: string;
   };
 }

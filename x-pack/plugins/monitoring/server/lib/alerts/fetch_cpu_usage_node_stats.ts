@@ -11,7 +11,7 @@ import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
 import { createDatasetFilter } from './create_dataset_query_filter';
-import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
@@ -170,12 +170,12 @@ export async function fetchCpuUsageNodeStats(
       const stat = {
         clusterUuid: clusterBucket.key,
         nodeId: node.key,
-        nodeName: get(node, 'name.buckets[0].key'),
-        cpuUsage: get(node, 'average_cpu.value'),
-        containerUsage: get(lastBucket, 'usage_deriv.normalized_value'),
-        containerPeriods: get(lastBucket, 'periods_deriv.normalized_value'),
-        containerQuota: get(node, 'average_quota.value'),
-        ccs: indexName.includes(':') ? indexName.split(':')[0] : null,
+        nodeName: get(node, 'name.buckets[0].key') as unknown as string,
+        cpuUsage: get(node, 'average_cpu.value') as number,
+        containerUsage: get(lastBucket, 'usage_deriv.normalized_value') as unknown as number,
+        containerPeriods: get(lastBucket, 'periods_deriv.normalized_value') as unknown as number,
+        containerQuota: get(node, 'average_quota.value') as unknown as number,
+        ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
       };
       stats.push(stat);
     }

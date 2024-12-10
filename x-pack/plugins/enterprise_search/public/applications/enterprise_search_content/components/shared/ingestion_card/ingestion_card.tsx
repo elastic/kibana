@@ -18,13 +18,16 @@ import {
   IconType,
 } from '@elastic/eui';
 
-import { EuiLinkTo } from '../../../../shared/react_router_helpers';
+import { i18n } from '@kbn/i18n';
+
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 
 interface IngestionCardProps {
   buttonIcon: IconType;
   buttonLabel: string;
   description: string;
   href?: string;
+  isBeta?: boolean;
   isDisabled?: boolean;
   logo: IconType;
   onClick?: () => void;
@@ -37,6 +40,7 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
   description,
   href,
   isDisabled,
+  isBeta,
   logo,
   onClick,
   title,
@@ -44,6 +48,15 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
   return (
     <EuiCard
       hasBorder
+      betaBadgeProps={
+        isBeta
+          ? {
+              label: i18n.translate('xpack.enterpriseSearch.ingestionCard.betaBadgeLabel', {
+                defaultMessage: 'Beta',
+              }),
+            }
+          : undefined
+      }
       isDisabled={isDisabled}
       textAlign="left"
       titleElement="h3"
@@ -65,15 +78,25 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
       }
       footer={
         onClick ? (
-          <EuiButton isDisabled={isDisabled} iconType={buttonIcon} onClick={onClick} fullWidth>
+          <EuiButton
+            data-test-subj="enterpriseSearchIngestionCardButton"
+            isDisabled={isDisabled}
+            iconType={buttonIcon}
+            onClick={onClick}
+            fullWidth
+          >
             {buttonLabel}
           </EuiButton>
         ) : (
-          <EuiLinkTo to={href ?? ''} shouldNotCreateHref>
-            <EuiButton isDisabled={isDisabled} iconType={buttonIcon} fullWidth>
-              {buttonLabel}
-            </EuiButton>
-          </EuiLinkTo>
+          <EuiButtonTo
+            to={href ?? ''}
+            shouldNotCreateHref
+            isDisabled={isDisabled}
+            iconType={buttonIcon}
+            fullWidth
+          >
+            {buttonLabel}
+          </EuiButtonTo>
         )
       }
     />

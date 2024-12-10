@@ -77,10 +77,18 @@ export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_ava
 export { ConnectorSelectorInline } from './impl/connectorland/connector_selector_inline/connector_selector_inline';
 
 export {
+  /** The Attack discovery local storage key */
   ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
+  /** The default maximum number of alerts to be sent as context when generating Attack discoveries */
+  DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
   DEFAULT_LATEST_ALERTS,
+  DEFEND_INSIGHTS_STORAGE_KEY,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+  /** The local storage key that specifies the maximum number of alerts to send as context */
+  MAX_ALERTS_LOCAL_STORAGE_KEY,
+  /** The local storage key that specifies whether the settings tour should be shown */
+  SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
@@ -140,3 +148,16 @@ export { mergeBaseWithPersistedConversations } from './impl/assistant/helpers';
 
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
 export { getUserConversations, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
+
+export {
+  /** A range slider component, typically used to configure the number of alerts sent as context */
+  AlertsRange,
+  /** This event occurs when the `AlertsRange` slider is changed */
+  type SingleRangeChangeEvent,
+} from './impl/knowledge_base/alerts_range';
+export {
+  /** A label instructing the user to send fewer alerts */
+  SELECT_FEWER_ALERTS,
+  /** Your anonymization settings will apply to these alerts (label) */
+  YOUR_ANONYMIZATION_SETTINGS,
+} from './impl/knowledge_base/translations';

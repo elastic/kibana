@@ -68,8 +68,14 @@ export const EditSpace: FC<PageProps> = ({
 }) => {
   const { state, dispatch } = useEditSpaceStore();
   const { invokeClient } = useEditSpaceServices();
-  const { spacesManager, capabilities, serverBasePath, logger, notifications } =
-    useEditSpaceServices();
+  const {
+    spacesManager,
+    capabilities,
+    serverBasePath,
+    logger,
+    notifications,
+    isRoleManagementEnabled,
+  } = useEditSpaceServices();
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
@@ -80,6 +86,7 @@ export const EditSpace: FC<PageProps> = ({
   const [tabs, selectedTabContent] = useTabs({
     space,
     features,
+    isRoleManagementEnabled,
     rolesCount: state.roles.size,
     capabilities,
     history,
@@ -139,10 +146,18 @@ export const EditSpace: FC<PageProps> = ({
       setIsLoadingRoles(false);
     };
 
-    if (!state.roles.size && !state.fetchRolesError) {
+    if (isRoleManagementEnabled && !state.roles.size && !state.fetchRolesError) {
       getRoles();
     }
-  }, [dispatch, invokeClient, spaceId, state.roles, state.fetchRolesError, logger]);
+  }, [
+    dispatch,
+    invokeClient,
+    spaceId,
+    logger,
+    state.roles,
+    state.fetchRolesError,
+    isRoleManagementEnabled,
+  ]);
 
   useEffect(() => {
     const _getFeatures = async () => {
@@ -165,7 +180,7 @@ export const EditSpace: FC<PageProps> = ({
     return null;
   }
 
-  if (isLoadingSpace || isLoadingFeatures || isLoadingRoles) {
+  if (isLoadingSpace || isLoadingFeatures || (isRoleManagementEnabled && isLoadingRoles)) {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
@@ -197,12 +212,12 @@ export const EditSpace: FC<PageProps> = ({
       >
         <EuiFlexItem grow={true} css={{ flexBasis: '100%', width: '100%' }}>
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={{ marginTop: '4px' }}>
               <HeaderAvatar />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={true} al>
+              <EuiFlexGroup direction="column" gutterSize="none">
+                <EuiFlexItem grow={true}>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={true}>
                       <EuiTitle size="l">
@@ -231,7 +246,7 @@ export const EditSpace: FC<PageProps> = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} css={{ marginTop: '4px' }}>
                   <div>
                     {shouldShowSolutionBadge ? (
                       <SpaceSolutionBadge

@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { MAX_TEMPLATES_LENGTH } from '../../../common/constants';
 import type { CasesConfigurationUITemplate } from '../../../common/ui';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import * as i18n from './translations';
 import { TemplatesList } from './templates_list';
@@ -39,8 +38,6 @@ const TemplatesComponent: React.FC<Props> = ({
   onEditTemplate,
   onDeleteTemplate,
 }) => {
-  const { permissions } = useCasesContext();
-  const canAddTemplates = permissions.create && permissions.update;
   const [error, setError] = useState<boolean>(false);
 
   const handleAddTemplate = useCallback(() => {
@@ -82,6 +79,7 @@ const TemplatesComponent: React.FC<Props> = ({
       }
       description={<p>{i18n.TEMPLATE_DESCRIPTION}</p>}
       data-test-subj="templates-form-group"
+      css={{ alignItems: 'flex-start' }}
     >
       <EuiPanel paddingSize="s" color="subdued" hasBorder={false} hasShadow={false}>
         {templates.length ? (
@@ -91,16 +89,9 @@ const TemplatesComponent: React.FC<Props> = ({
               onEditTemplate={handleEditTemplate}
               onDeleteTemplate={handleDeleteTemplate}
             />
-            {error ? (
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiText color="danger">{i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : null}
           </>
         ) : null}
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         {!templates.length ? (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false} data-test-subj="empty-templates">
@@ -109,9 +100,9 @@ const TemplatesComponent: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
-        {canAddTemplates ? (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            {templates.length < MAX_TEMPLATES_LENGTH ? (
               <EuiButtonEmpty
                 isLoading={isLoading}
                 isDisabled={disabled || error}
@@ -122,9 +113,16 @@ const TemplatesComponent: React.FC<Props> = ({
               >
                 {i18n.ADD_TEMPLATE}
               </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null}
+            ) : (
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText>{i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiDescribedFormGroup>
   );

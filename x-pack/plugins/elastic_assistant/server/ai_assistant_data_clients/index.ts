@@ -99,6 +99,8 @@ export class AIAssistantDataClient {
     sortOrder,
     filter,
     fields,
+    aggs,
+    mSearch,
   }: {
     perPage: number;
     page: number;
@@ -106,6 +108,11 @@ export class AIAssistantDataClient {
     sortOrder?: string;
     filter?: string;
     fields?: string[];
+    aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+    mSearch?: {
+      filter: string;
+      perPage: number;
+    };
   }): Promise<Promise<FindResponse<TSearchSchema>>> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return findDocuments<TSearchSchema>({
@@ -118,6 +125,8 @@ export class AIAssistantDataClient {
       index: this.indexTemplateAndPattern.alias,
       sortOrder: sortOrder as estypes.SortOrder,
       logger: this.options.logger,
+      aggs,
+      mSearch,
     });
   };
 }

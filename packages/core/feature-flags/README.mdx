@@ -3,7 +3,7 @@ id: kibFeatureFlagsService
 slug: /kibana-dev-docs/tutorials/feature-flags-service
 title: Feature Flags service
 description: The Feature Flags service provides the necessary APIs to evaluate dynamic feature flags.
-date: 2024-07-26
+date: 2024-10-16
 tags: ['kibana', 'dev', 'contributor', 'api docs', 'a/b testing', 'feature flags', 'flags']
 ---
 
@@ -12,54 +12,61 @@ tags: ['kibana', 'dev', 'contributor', 'api docs', 'a/b testing', 'feature flags
 The Feature Flags service provides the necessary APIs to evaluate dynamic feature flags.
 
 The service is always enabled, however, it will return the fallback value if a feature flags provider hasn't been attached.
-Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless.
+Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless. And even in those scenarios, we expect that some customers might 
+have network restrictions that might not allow the flags to evaluate. The fallback value must provide a non-broken experience to users.
 
-For a code example, refer to the [Feature Flags Example plugin](../../../examples/feature_flags_example)
+⚠️Feature Flags are considered dynamic configuration and cannot be used for settings that require restarting Kibana.
+One example of invalid use cases are settings used during the `setup` lifecycle of the plugin, such as settings that define 
+if an HTTP route is registered or not. Instead, you should always register the route, and return `404 - Not found` in the route 
+handler if the feature flag returns a _disabled_ state.  
+
+In summary, Feature flagging is best suited for
+ - Phased rollout of the features (either to a specific customer, a subset of customers, or a % of overall users)
+ - Feature experimentation
+
+Feature flagging is NOT suitable for 
+ - Applying feature availability for licensing and/or tiers
+ - Restricting or applying customer entitlement to specific GA features
+
+For a code example, refer to the [Feature Flags Example plugin](https://github.com/elastic/kibana/blob/main/examples/feature_flags_example/README.md)
+
+## Key concepts
+
+### Feature Flag
+
+A config key that defines a set of [variations](#variations) that will be resolved at runtime when the app calls [the evaluation APIs](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#evaluating-feature-flags). The variation is decided at runtime based on static binary state (ON -> `variationA` vs. OFF -> `variationB`), or via [evaluation/segmentation rules](#evaluationsegmentation-rules).
+
+### Variations
+
+All the potential values that a feature flag can return based on the [evaluation rules](#evaluationsegmentation-rules). A feature flag should define at least 2 variations: the ON and the OFF states. The typical use case sets the OFF state to match the `fallback` value provided to [the evaluation APIs](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#evaluating-feature-flags), although it's not a hard requirement and Kibana contributors might require special configurations.
+
+### Evaluation/Segmentation rules
+
+Set of rules used to evaluate the variation to resolve, based on the [evaluation context](#evaluation-context) provided by the app.
+
+The rules can vary from a percentage rollout per evaluation context, or more complex IF...THEN filters and clauses.
+
+Refer to the [Evaluation Context guide's examples](https://github.com/elastic/kibana-feature-flags/blob/main/docs/evaluation-context.md#examples) for some typical scenarios.
+
+### Evaluation Context
+
+Kibana reports a set of properties specific to each ECH deployment/Serverless project to help define the [segmentation rules](#evaluationsegmentation-rules). A list of the currently reported context properties can be found in the [Evaluation Context guide](https://github.com/elastic/kibana-feature-flags/blob/main/docs/evaluation-context.md).
+
+### Feature Flag Code References
+
+In the Kibana repo we run a [GH Action](https://github.com/elastic/kibana/actions/workflows/launchdarkly-code-references.yml) that links existing Feature Flags to their code references. This helps us figure out which flags have been removed from the code and, which ones are still being used.
+
+> :information_source: New flags might take a few moments to be updated with their code references.
+> The job runs on every commit to the `main` branch of the [Kibana repository](https://github.com/elastic/kibana), so the wait can take from a few minutes to a few hours, depending on the Kibana repo's activity.
 
 ## Registering a feature flag
 
-Kibana follows a _gitops_ approach when managing feature flags. To declare a feature flag, add your flags definitions in
-your plugin's `server/index.ts` file:
-
-```typescript
-// <plugin>/server/index.ts
-import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
-import type { PluginInitializerContext } from '@kbn/core-plugins-server';
-
-export const featureFlags: FeatureFlagDefinitions = [
-  {
-    key: 'my-cool-feature',
-    name: 'My cool feature',
-    description: 'Enables the cool feature to auto-hide the navigation bar',
-    tags: ['my-plugin', 'my-service', 'ui'],
-    variationType: 'boolean',
-    variations: [
-      {
-        name: 'On',
-        description: 'Auto-hides the bar',
-        value: true,
-      },
-      {
-        name: 'Off',
-        description: 'Static always-on',
-        value: false,
-      },
-    ],
-  },
-  {...},
-];
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { FeatureFlagsExamplePlugin } = await import('./plugin');
-  return new FeatureFlagsExamplePlugin(initializerContext);
-}
-```
-
-After merging your PR, the CI will create/update the flags in our third-party feature flags provider.
+At the moment, we follow a manual process to manage our feature flags. Refer to [this repo](https://github.com/elastic/kibana-feature-flags) to learn more about our current internal process.
+Our goal is to achieve a _gitops_ approach eventually. But, at the moment, it's not available.
 
 ### Deprecation/removal strategy
 
-When your code doesn't use the feature flag anymore, it is recommended to clean up the feature flags when possible.
+When your code doesn't use the feature flag anymore, it is recommended to clean up the feature flags.
 There are a few considerations to take into account when performing this clean-up:
 
 1. Always deprecate first, remove after
@@ -114,7 +121,7 @@ async (context, request, response) => {
   const { featureFlags } = await context.core;
   return response.ok({
     body: {
-      number: await featureFlags.getNumberValue('example-number', 1),
+      number: await featureFlags.getNumberValue('myPlugin.exampleNumber', 1),
     },
   });
 }
@@ -138,7 +145,7 @@ provider. In the `kibana.yml`, the following config sets the overrides:
 
 ```yaml
 feature_flags.overrides:
-  my-feature-flag: 'my-forced-value'
+  myPlugin.myFeatureFlag: 'my-forced-value'
 ```
 
 > [!WARNING]  

@@ -47,6 +47,8 @@ const config: CasesWebhookPublicConfigurationType = {
   headers: { ['content-type']: 'application/json', foo: 'bar' },
   viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
+  getIncidentMethod: WebhookMethods.GET,
+  getIncidentJson: null,
   updateIncidentJson:
     '{"fields":{"title":{{{case.title}}},"description":{{{case.description}}},"tags":{{{case.tags}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: WebhookMethods.PUT,
@@ -239,6 +241,7 @@ describe('Cases webhook service', () => {
         configurationUtilities,
         sslOverrides: defaultSSLOverrides,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        method: WebhookMethods.GET,
       });
     });
 
@@ -282,6 +285,7 @@ describe('Cases webhook service', () => {
             "trace": [MockFunction],
             "warn": [MockFunction],
           },
+          "method": "get",
           "sslOverrides": Object {
             "cert": Object {
               "data": Array [
@@ -438,6 +442,271 @@ describe('Cases webhook service', () => {
 
       await expect(service.getIncident('1')).rejects.toThrow(
         '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: Response is missing the expected field: key'
+      );
+    });
+
+    it('it returns the incident correctly with POST', async () => {
+      const postService: ExternalService = createExternalService(
+        actionId,
+        {
+          config: {
+            ...config,
+            getIncidentMethod: WebhookMethods.POST,
+            getIncidentJson: '{"id": {{{external.system.id}}} }',
+            getIncidentUrl: 'https://coolsite.net/issue',
+          },
+          secrets,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
+      const res = await postService.getIncident('1');
+      expect(res).toEqual({
+        id: '1',
+        title: 'CK-1',
+      });
+    });
+
+    it('it should call request with correct arguments using POST', async () => {
+      const postService: ExternalService = createExternalService(
+        actionId,
+        {
+          config: {
+            ...config,
+            getIncidentMethod: WebhookMethods.POST,
+            getIncidentJson: '{"id": {{{external.system.id}}} }',
+            getIncidentUrl: 'https://coolsite.net/issue',
+          },
+          secrets,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
+
+      await postService.getIncident('1');
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        url: 'https://coolsite.net/issue',
+        logger,
+        configurationUtilities,
+        sslOverrides: defaultSSLOverrides,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        method: WebhookMethods.POST,
+        data: '{"id": "1" }',
+      });
+    });
+
+    it('it should call request with correct arguments when authType=SSL using POST', async () => {
+      const postSslService = createExternalService(
+        actionId,
+        {
+          config: {
+            ...sslConfig,
+            getIncidentMethod: WebhookMethods.POST,
+            getIncidentJson: '{"id": {{{external.system.id}}} }',
+            getIncidentUrl: 'https://coolsite.net/issue',
+          },
+          secrets: sslSecrets,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      requestMock.mockImplementation(() => createAxiosResponse(axiosRes));
+
+      await postSslService.getIncident('1');
+
+      // irrelevant snapshot content
+      delete requestMock.mock.calls[0][0].configurationUtilities;
+      expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "axios": [Function],
+          "connectorUsageCollector": ConnectorUsageCollector {
+            "connectorId": "test-connector-id",
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction],
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "isLevelEnabled": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
+            "usage": Object {
+              "requestBodyBytes": 0,
+            },
+          },
+          "data": "{\\"id\\": \\"1\\" }",
+          "logger": Object {
+            "context": Array [],
+            "debug": [MockFunction],
+            "error": [MockFunction],
+            "fatal": [MockFunction],
+            "get": [MockFunction],
+            "info": [MockFunction],
+            "isLevelEnabled": [MockFunction],
+            "log": [MockFunction],
+            "trace": [MockFunction],
+            "warn": [MockFunction],
+          },
+          "method": "post",
+          "sslOverrides": Object {
+            "cert": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                67,
+                69,
+                82,
+                84,
+                73,
+                70,
+                73,
+                67,
+                65,
+                84,
+                69,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "key": Object {
+              "data": Array [
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                66,
+                69,
+                71,
+                73,
+                78,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+                45,
+                45,
+                45,
+                45,
+                45,
+                69,
+                78,
+                68,
+                32,
+                80,
+                82,
+                73,
+                86,
+                65,
+                84,
+                69,
+                32,
+                75,
+                69,
+                89,
+                45,
+                45,
+                45,
+                45,
+                45,
+                10,
+              ],
+              "type": "Buffer",
+            },
+            "passphrase": "foobar",
+          },
+          "url": "https://coolsite.net/issue",
+        }
+      `);
+    });
+
+    it('it should throw if the request payload is not a valid JSON for POST', async () => {
+      const newService = createExternalService(
+        actionId,
+        {
+          config: {
+            ...config,
+            getIncidentMethod: WebhookMethods.POST,
+            getIncidentJson: '{"id": }',
+            getIncidentUrl: 'https://coolsite.net/issue',
+          },
+          secrets,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      await expect(newService.getIncident('1')).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to get case with id 1. Error: JSON Error: Get case JSON body must be valid JSON.  '
       );
     });
   });

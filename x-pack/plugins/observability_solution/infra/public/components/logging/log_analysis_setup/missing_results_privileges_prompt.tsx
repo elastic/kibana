@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   missingMlPrivilegesTitle,
   missingMlResultsPrivilegesDescription,
@@ -16,12 +16,13 @@ import { UserManagementLink } from './user_management_link';
 
 export const MissingResultsPrivilegesPrompt: React.FunctionComponent = () => (
   <EmptyPrompt
+    data-test-subj="logsMissingMLReadPrivileges"
     title={<h2>{missingMlPrivilegesTitle}</h2>}
     body={<p>{missingMlResultsPrivilegesDescription}</p>}
     actions={<UserManagementLink />}
   />
 );
 
-const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
+const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
 `;

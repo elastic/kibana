@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
-import { copyTimelineSchema } from '../../../../../../common/api/timeline';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  CopyTimelineRequestBody,
+  type CopyTimelineResponse,
+} from '../../../../../../common/api/timeline';
 import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';
@@ -16,12 +19,14 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 
-export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const copyTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_COPY_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'internal',
     })
@@ -29,10 +34,10 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: Confi
       {
         version: '1',
         validate: {
-          request: { body: buildRouteValidationWithExcess(copyTimelineSchema) },
+          request: { body: buildRouteValidationWithZod(CopyTimelineRequestBody) },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<CopyTimelineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -40,9 +45,16 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter, _: Confi
           const { timeline, timelineIdToCopy } = request.body;
           const copiedTimeline = await copyTimeline(frameworkRequest, timeline, timelineIdToCopy);
 
-          return response.ok({
-            body: { data: { persistTimeline: copiedTimeline } },
-          });
+          if (copiedTimeline.code === 200) {
+            return response.ok({
+              body: copiedTimeline.timeline,
+            });
+          } else {
+            return siemResponse.error({
+              body: copiedTimeline.message,
+              statusCode: copiedTimeline.code,
+            });
+          }
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

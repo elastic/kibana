@@ -11,7 +11,7 @@
         "label": "AddMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, onSelectEventHandler, showButtonTitle, }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, onSelectEventHandler, showButtonTitle, }: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/add_message_variables/index.tsx",
         "deprecated": false,
@@ -20,12 +20,12 @@
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
             "id": "def-public.AddMessageVariables.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  onSelectEventHandler,\n  showButtonTitle = false,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/add_message_variables/index.tsx",
             "deprecated": false,
@@ -62,7 +62,7 @@
             "section": "def-public.AlertFieldsTableProps",
             "text": "AlertFieldsTableProps"
           },
-          ") => JSX.Element; }"
+          ") => React.JSX.Element; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_fields_table/index.tsx",
         "deprecated": false,
@@ -79,7 +79,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -110,7 +110,7 @@
             "section": "def-public.AlertLifecycleStatusBadgeProps",
             "text": "AlertLifecycleStatusBadgeProps"
           },
-          ") => JSX.Element; }"
+          ") => React.JSX.Element; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
         "deprecated": false,
@@ -127,7 +127,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -142,7 +142,7 @@
         "label": "AlertsSearchBar",
         "description": [],
         "signature": [
-          "({ appName, disableQueryLanguageSwitcher, featureIds, ruleTypeId, query, filters, onQueryChange, onQuerySubmit, onFiltersUpdated, rangeFrom, rangeTo, showFilterBar, showDatePicker, showSubmitButton, placeholder, submitOnBlur, http, toasts, unifiedSearchBar, dataViewsService, }: ",
+          "({ appName, disableQueryLanguageSwitcher, ruleTypeIds, query, filters, onQueryChange, onQuerySubmit, onFiltersUpdated, rangeFrom, rangeTo, showFilterBar, showDatePicker, showSubmitButton, placeholder, submitOnBlur, http, toasts, unifiedSearchBar, dataService, }: ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
             "scope": "public",
@@ -161,7 +161,7 @@
             "id": "def-public.AlertsSearchBar.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  appName,\n  disableQueryLanguageSwitcher = false,\n  featureIds = EMPTY_FEATURE_IDS,\n  ruleTypeId,\n  query,\n  filters,\n  onQueryChange,\n  onQuerySubmit,\n  onFiltersUpdated,\n  rangeFrom,\n  rangeTo,\n  showFilterBar = false,\n  showDatePicker = true,\n  showSubmitButton = true,\n  placeholder = SEARCH_BAR_PLACEHOLDER,\n  submitOnBlur = false,\n  http,\n  toasts,\n  unifiedSearchBar,\n  dataViewsService,\n}",
+            "label": "{\n  appName,\n  disableQueryLanguageSwitcher = false,\n  ruleTypeIds = [],\n  query,\n  filters,\n  onQueryChange,\n  onQuerySubmit,\n  onFiltersUpdated,\n  rangeFrom,\n  rangeTo,\n  showFilterBar = false,\n  showDatePicker = true,\n  showSubmitButton = true,\n  placeholder = SEARCH_BAR_PLACEHOLDER,\n  submitOnBlur = false,\n  http,\n  toasts,\n  unifiedSearchBar,\n  dataService,\n}",
             "description": [],
             "signature": [
               {
@@ -178,6 +178,356 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.checkActionFormActionTypeEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "checkActionFormActionTypeEnabled",
+        "description": [],
+        "signature": [
+          "(actionType: ",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.ActionType",
+            "text": "ActionType"
+          },
+          ", preconfiguredConnectors: ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.ActionConnector",
+            "text": "ActionConnector"
+          },
+          "<Record<string, unknown>, Record<string, unknown>>[]) => ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.IsEnabledResult",
+            "text": "IsEnabledResult"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.IsDisabledResult",
+            "text": "IsDisabledResult"
+          }
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.checkActionFormActionTypeEnabled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "actionType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/actions-types",
+                "scope": "common",
+                "docId": "kibKbnActionsTypesPluginApi",
+                "section": "def-common.ActionType",
+                "text": "ActionType"
+              }
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.checkActionFormActionTypeEnabled.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "preconfiguredConnectors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ActionConnector",
+                "text": "ActionConnector"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>[]"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.checkActionTypeEnabled",
+        "type": "Function",
+        "tags": [],
+        "label": "checkActionTypeEnabled",
+        "description": [],
+        "signature": [
+          "(actionType?: ",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.ActionType",
+            "text": "ActionType"
+          },
+          " | undefined, isPreconfiguredConnector?: boolean) => ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.IsEnabledResult",
+            "text": "IsEnabledResult"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.IsDisabledResult",
+            "text": "IsDisabledResult"
+          }
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.checkActionTypeEnabled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "actionType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/actions-types",
+                "scope": "common",
+                "docId": "kibKbnActionsTypesPluginApi",
+                "section": "def-common.ActionType",
+                "text": "ActionType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.checkActionTypeEnabled.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPreconfiguredConnector",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.getAlwaysProvidedActionVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "getAlwaysProvidedActionVariables",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/transforms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.getAvailableActionVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "getAvailableActionVariables",
+        "description": [],
+        "signature": [
+          "(actionVariables: ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.ActionVariables",
+            "text": "ActionVariables"
+          },
+          ", summaryActionVariables?: ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.ActionVariables",
+            "text": "ActionVariables"
+          },
+          " | undefined, actionGroup?: ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.ActionGroupWithMessageVariables",
+            "text": "ActionGroupWithMessageVariables"
+          },
+          " | undefined, isSummaryAction?: boolean | undefined) => ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/get_available_action_variables.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.getAvailableActionVariables.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "actionVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.ActionVariables",
+                "text": "ActionVariables"
+              }
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/get_available_action_variables.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.getAvailableActionVariables.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "summaryActionVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.ActionVariables",
+                "text": "ActionVariables"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/get_available_action_variables.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.getAvailableActionVariables.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "actionGroup",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.ActionGroupWithMessageVariables",
+                "text": "ActionGroupWithMessageVariables"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/get_available_action_variables.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.getAvailableActionVariables.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSummaryAction",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/get_available_action_variables.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.getSummaryAlertActionVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "getSummaryAlertActionVariables",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/transforms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -252,7 +602,7 @@
         "signature": [
           "(props: ",
           "EuiTabbedContentProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_fields_table/index.tsx",
         "deprecated": false,
@@ -279,6 +629,136 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.transformActionVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "transformActionVariables",
+        "description": [],
+        "signature": [
+          "(actionVariables: ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.ActionVariables",
+            "text": "ActionVariables"
+          },
+          ", summaryActionVariables?: ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.ActionVariables",
+            "text": "ActionVariables"
+          },
+          " | undefined, omitMessageVariables?: ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.OmitMessageVariablesType",
+            "text": "OmitMessageVariablesType"
+          },
+          " | undefined, isSummaryAction?: boolean | undefined) => ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/transforms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.transformActionVariables.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "actionVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.ActionVariables",
+                "text": "ActionVariables"
+              }
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.transformActionVariables.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "summaryActionVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.ActionVariables",
+                "text": "ActionVariables"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.transformActionVariables.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "omitMessageVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.OmitMessageVariablesType",
+                "text": "OmitMessageVariablesType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.transformActionVariables.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSummaryAction",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/action_variables/transforms.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.useAlertsDataView",
         "type": "Function",
         "tags": [],
@@ -287,7 +767,7 @@
           "\nComputes a {@link DataViewBase} object for alerts indices based on the provided feature ids\n"
         ],
         "signature": [
-          "({ http, dataViewsService, toasts, featureIds, }: ",
+          "({ http, dataViewsService, toasts, ruleTypeIds, }: ",
           {
             "pluginId": "@kbn/alerts-ui-shared",
             "scope": "public",
@@ -313,7 +793,7 @@
             "id": "def-public.useAlertsDataView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  dataViewsService,\n  toasts,\n  featureIds,\n}",
+            "label": "{\n  http,\n  dataViewsService,\n  toasts,\n  ruleTypeIds,\n}",
             "description": [],
             "signature": [
               {
@@ -337,79 +817,37 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.useCreateRule",
+        "id": "def-public.useFetchFlappingSettings",
         "type": "Function",
         "tags": [],
-        "label": "useCreateRule",
+        "label": "useFetchFlappingSettings",
         "description": [],
         "signature": [
-          "(props: ",
+          "(props: UseFetchFlappingSettingsProps) => { isInitialLoading: boolean; isLoading: boolean; isError: boolean; data: ",
           {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseCreateRuleProps",
-            "text": "UseCreateRuleProps"
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.RulesSettingsFlapping",
+            "text": "RulesSettingsFlapping"
           },
-          ") => ",
-          "UseMutationResult",
-          "<",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.Rule",
-            "text": "Rule"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">, ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
-          "<{ message: string; }>, { formData: ",
-          "CreateRuleBody",
-          "<",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">; }, unknown>"
+          " | undefined; }"
         ],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
+        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.useCreateRule.$1",
+            "id": "def-public.useFetchFlappingSettings.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.UseCreateRuleProps",
-                "text": "UseCreateRuleProps"
-              }
+              "UseFetchFlappingSettingsProps"
             ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
+            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -425,7 +863,7 @@
         "tags": [],
         "label": "useGetAlertsGroupAggregationsQuery",
         "description": [
-          "\nFetches alerts aggregations for a given groupByField.\n\nSome default aggregations are applied:\n- `groupByFields`, to get the buckets based on the provided grouping field,\n  - `unitsCount`, to count the number of alerts in each bucket,\n- `unitsCount`, to count the total number of alerts targeted by the query,\n- `groupsCount`, to count the total number of groups.\n\nThe provided `aggregations` are applied within `groupByFields`. Here the `groupByField` runtime\nfield can be used to perform grouping-based aggregations.\n`groupByField` buckets computed over a field with a null/absent value are marked with the\n`isNullGroup` flag set to true and their key is set to the `--` string.\n\nApplies alerting RBAC through featureIds."
+          "\nFetches alerts aggregations for a given groupByField.\n\nSome default aggregations are applied:\n- `groupByFields`, to get the buckets based on the provided grouping field,\n  - `unitsCount`, to count the number of alerts in each bucket,\n- `unitsCount`, to count the total number of alerts targeted by the query,\n- `groupsCount`, to count the total number of groups.\n\nThe provided `aggregations` are applied within `groupByFields`. Here the `groupByField` runtime\nfield can be used to perform grouping-based aggregations.\n`groupByField` buckets computed over a field with a null/absent value are marked with the\n`isNullGroup` flag set to true and their key is set to the `--` string.\n\nApplies alerting RBAC through ruleTypeIds."
         ],
         "signature": [
           "<T>({ http, toasts, enabled, params, }: ",
@@ -575,116 +1013,6 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.useLoadConnectors",
-        "type": "Function",
-        "tags": [],
-        "label": "useLoadConnectors",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseLoadConnectorsProps",
-            "text": "UseLoadConnectorsProps"
-          },
-          ") => { data: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.ActionConnector",
-            "text": "ActionConnector"
-          },
-          "<Record<string, unknown>, Record<string, unknown>>[] | undefined; isInitialLoading: boolean; isLoading: boolean; }"
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.useLoadConnectors.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.UseLoadConnectorsProps",
-                "text": "UseLoadConnectorsProps"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.useLoadConnectorTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "useLoadConnectorTypes",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseLoadConnectorTypesProps",
-            "text": "UseLoadConnectorTypesProps"
-          },
-          ") => { data: ",
-          {
-            "pluginId": "@kbn/actions-types",
-            "scope": "common",
-            "docId": "kibKbnActionsTypesPluginApi",
-            "section": "def-common.ActionType",
-            "text": "ActionType"
-          },
-          "[] | undefined; isInitialLoading: boolean; isLoading: boolean; }"
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.useLoadConnectorTypes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.UseLoadConnectorTypesProps",
-                "text": "UseLoadConnectorTypesProps"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.useLoadRuleTypesQuery",
         "type": "Function",
         "tags": [],
@@ -701,18 +1029,18 @@
           },
           ") => { ruleTypesState: { isInitialLoad: boolean; isLoading: boolean; data: ",
           {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeIndexWithDescriptions",
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleTypeIndexWithDescriptions",
             "text": "RuleTypeIndexWithDescriptions"
           },
           "; error: Error | null; }; hasAnyAuthorizedRuleType: boolean; authorizedRuleTypes: ",
           {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeWithDescription",
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleTypeWithDescription",
             "text": "RuleTypeWithDescription"
           },
           "[]; authorizedToReadAnyRules: boolean; authorizedToCreateAnyRules: boolean; isSuccess: boolean; }"
@@ -738,55 +1066,6 @@
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_rule_types_query.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.useLoadUiConfig",
-        "type": "Function",
-        "tags": [],
-        "label": "useLoadUiConfig",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseLoadUiConfigProps",
-            "text": "UseLoadUiConfigProps"
-          },
-          ") => { data: ",
-          "UiConfig",
-          " | undefined; isLoading: boolean; isInitialLoading: boolean; isSuccess: boolean; isError: boolean; error: unknown; }"
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_ui_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.useLoadUiConfig.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.UseLoadUiConfigProps",
-                "text": "UseLoadUiConfigProps"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_ui_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -836,200 +1115,6 @@
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_ui_health.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.useResolveRule",
-        "type": "Function",
-        "tags": [],
-        "label": "useResolveRule",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseResolveProps",
-            "text": "UseResolveProps"
-          },
-          ") => { data: ",
-          "RuleFormData",
-          "<",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          "> | null | undefined; isLoading: boolean; isInitialLoading: boolean; isSuccess: boolean; isError: boolean; error: unknown; }"
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_resolve_rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.useResolveRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.UseResolveProps",
-                "text": "UseResolveProps"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_resolve_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.useRuleAADFields",
-        "type": "Function",
-        "tags": [],
-        "label": "useRuleAADFields",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseRuleAADFieldsProps",
-            "text": "UseRuleAADFieldsProps"
-          },
-          ") => ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseRuleAADFieldsResult",
-            "text": "UseRuleAADFieldsResult"
-          }
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.useRuleAADFields.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.UseRuleAADFieldsProps",
-                "text": "UseRuleAADFieldsProps"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.useUpdateRule",
-        "type": "Function",
-        "tags": [],
-        "label": "useUpdateRule",
-        "description": [],
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.UseUpdateRuleProps",
-            "text": "UseUpdateRuleProps"
-          },
-          ") => ",
-          "UseMutationResult",
-          "<",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.Rule",
-            "text": "Rule"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">, ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
-          "<{ message: string; }>, { id: string; formData: ",
-          "UpdateRuleBody",
-          "<",
-          {
-            "pluginId": "@kbn/alerts-ui-shared",
-            "scope": "public",
-            "docId": "kibKbnAlertsUiSharedPluginApi",
-            "section": "def-public.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          ">; }, unknown>"
-        ],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.useUpdateRule.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.UseUpdateRuleProps",
-                "text": "UseUpdateRuleProps"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1811,7 +1896,7 @@
             "label": "actionParamsFields",
             "description": [],
             "signature": [
-              "React.ExoticComponent<(",
+              "React.LazyExoticComponent<React.ComponentType<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -1819,31 +1904,7 @@
                 "section": "def-public.ActionParamsProps",
                 "text": "ActionParamsProps"
               },
-              "<ActionParams> & React.RefAttributes<React.Component<",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.ActionParamsProps",
-                "text": "ActionParamsProps"
-              },
-              "<ActionParams>, any, any>>) | (",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.ActionParamsProps",
-                "text": "ActionParamsProps"
-              },
-              "<ActionParams> & { children?: React.ReactNode; })> & { readonly _result: React.ComponentType<",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.ActionParamsProps",
-                "text": "ActionParamsProps"
-              },
-              "<ActionParams>>; }"
+              "<ActionParams>>>"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
@@ -1860,7 +1921,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2072,7 +2133,7 @@
                 "section": "def-common.BasicFields",
                 "text": "BasicFields"
               },
-              " & { \"@timestamp\"?: string[] | undefined; \"event.action\"?: string[] | undefined; tags?: string[] | undefined; kibana?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.workflow_assignee_ids\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_tags\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"kibana.alert.context\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.evaluation.values\"?: string[] | undefined; \"kibana.alert.group\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.suppression.docs_count\"?: string[] | undefined; \"kibana.alert.suppression.end\"?: string[] | undefined; \"kibana.alert.suppression.start\"?: string[] | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.group.field\"?: string[] | undefined; \"kibana.alert.group.value\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert.suppression.terms\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
+              " & { \"@timestamp\"?: string[] | undefined; \"event.action\"?: string[] | undefined; tags?: string[] | undefined; kibana?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.case_ids\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.alert.maintenance_window_ids\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.workflow_assignee_ids\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_tags\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"kibana.alert.context\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.evaluation.values\"?: string[] | undefined; \"kibana.alert.group\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.suppression.docs_count\"?: string[] | undefined; \"kibana.alert.suppression.end\"?: string[] | undefined; \"kibana.alert.suppression.start\"?: string[] | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.suppression.terms\"?: string[] | undefined; \"kibana.alert.group.field\"?: string[] | undefined; \"kibana.alert.group.value\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_fields_table/index.tsx",
             "deprecated": false,
@@ -2170,27 +2231,6 @@
             "description": [],
             "signature": [
               "boolean | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.AlertsSearchBarProps.featureIds",
-            "type": "Array",
-            "tags": [],
-            "label": "featureIds",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/rule-data-utils",
-                "scope": "common",
-                "docId": "kibKbnRuleDataUtilsPluginApi",
-                "section": "def-common.AlertConsumers",
-                "text": "AlertConsumers"
-              },
-              "[]"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
@@ -2331,13 +2371,13 @@
           },
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.AlertsSearchBarProps.ruleTypeId",
-            "type": "string",
+            "id": "def-public.AlertsSearchBarProps.ruleTypeIds",
+            "type": "Array",
             "tags": [],
-            "label": "ruleTypeId",
+            "label": "ruleTypeIds",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[] | undefined"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
@@ -2615,319 +2655,19 @@
           },
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.AlertsSearchBarProps.dataViewsService",
+            "id": "def-public.AlertsSearchBarProps.dataService",
             "type": "Object",
             "tags": [],
-            "label": "dataViewsService",
+            "label": "dataService",
             "description": [],
             "signature": [
-              "{ create: (spec: ",
               {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; get: (id: string, displayErrors?: boolean, refreshFields?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; delete: (indexPatternId: string) => Promise<void>; find: (search: string, size?: number) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; findLazy: (search: string, size?: number) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              "[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewListItem",
-                "text": "DataViewListItem"
-              },
-              "[]>; getAllDataViewLazy: (refresh?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSavedObjectAttrs",
-                "text": "DataViewSavedObjectAttrs"
-              },
-              ">[] | null | undefined>; getDefault: (displayErrors?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getMetaFields: () => Promise<string[] | undefined>; getShortDotsEnable: () => Promise<boolean | undefined>; getFieldsForWildcard: (options: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.GetFieldsOptions",
-                "text": "GetFieldsOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>; getFieldsForIndexPattern: (indexPattern: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ", options?: Omit<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.GetFieldsOptions",
-                "text": "GetFieldsOptions"
-              },
-              ", \"allowNoIndex\"> | undefined) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>; refreshFields: (dataView: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[], fieldAttrs?: ",
-              "FieldAttrsAsObject",
-              " | undefined) => ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewFieldMap",
-                "text": "DataViewFieldMap"
-              },
-              "; savedObjectToSpec: (savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ">) => ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              "; getDataViewLazy: (id: string) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              ">; getDataViewLazyFromCache: (id: string) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              " | undefined>; createDataViewLazy: (spec: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              ">; createAndSaveDataViewLazy: (spec: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ", overwrite?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              ">; createAndSave: (spec: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewSpec",
-                "text": "DataViewSpec"
-              },
-              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; createSavedObject: (dataView: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.AbstractDataView",
-                "text": "AbstractDataView"
-              },
-              ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.AbstractDataView",
-                "text": "AbstractDataView"
-              },
-              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              " | null>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | null>; toDataView: (dataViewLazy: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">; toDataViewLazy: (dataView: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewLazy",
-                "text": "DataViewLazy"
-              },
-              ">; }"
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
@@ -2955,7 +2695,7 @@
             "label": "message",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
@@ -3333,20 +3073,13 @@
           },
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.FilterGroupProps.featureIds",
+            "id": "def-public.FilterGroupProps.ruleTypeIds",
             "type": "Array",
             "tags": [],
-            "label": "featureIds",
+            "label": "ruleTypeIds",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/rule-data-utils",
-                "scope": "common",
-                "docId": "kibKbnRuleDataUtilsPluginApi",
-                "section": "def-common.AlertConsumers",
-                "text": "AlertConsumers"
-              },
-              "[]"
+              "string[]"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
@@ -3577,7 +3310,7 @@
                 "section": "def-public.ControlGroupRendererProps",
                 "text": "ControlGroupRendererProps"
               },
-              ") => JSX.Element"
+              ") => React.JSX.Element"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
@@ -3622,6 +3355,20 @@
                 "section": "def-public.Storage",
                 "text": "Storage"
               }
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.FilterGroupProps.storageKey",
+            "type": "string",
+            "tags": [],
+            "label": "storageKey",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
@@ -3709,6 +3456,87 @@
             "label": "hasPermanentEncryptionKey",
             "description": [],
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_health_check.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.IsDisabledResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IsDisabledResult",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.IsDisabledResult.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.IsDisabledResult.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.IsDisabledResult.messageCard",
+            "type": "Object",
+            "tags": [],
+            "label": "messageCard",
+            "description": [],
+            "signature": [
+              "JSX.Element"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.IsEnabledResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IsEnabledResult",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.IsEnabledResult.isEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/check_action_type_enabled/check_action_type_enabled.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4128,7 +3956,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4952,22 +4780,15 @@
           },
           {
             "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseAlertsDataViewParams.featureIds",
+            "id": "def-public.UseAlertsDataViewParams.ruleTypeIds",
             "type": "Array",
             "tags": [],
-            "label": "featureIds",
+            "label": "ruleTypeIds",
             "description": [
-              "\nArray of feature ids used for authorization and area-based filtering\n\nSecurity data views must be requested in isolation (i.e. `['siem']`). If mixed with\nother feature ids, the resulting data view will be empty."
+              "\nArray of rule type ids used for authorization and area-based filtering\n\nSecurity data views must be requested in isolation (i.e. `['siem']`). If mixed with\nother rule type ids, the resulting data view will be empty."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/rule-data-utils",
-                "scope": "common",
-                "docId": "kibKbnRuleDataUtilsPluginApi",
-                "section": "def-common.AlertConsumers",
-                "text": "AlertConsumers"
-              },
-              "[]"
+              "string[]"
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_alerts_data_view.ts",
             "deprecated": false,
@@ -5027,138 +4848,6 @@
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_alerts_data_view.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseCreateRuleProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseCreateRuleProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseCreateRuleProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseCreateRuleProps.onSuccess",
-            "type": "Function",
-            "tags": [],
-            "label": "onSuccess",
-            "description": [],
-            "signature": [
-              "((formData: ",
-              "CreateRuleBody",
-              "<",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.RuleTypeParams",
-                "text": "RuleTypeParams"
-              },
-              ">) => void) | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/alerts-ui-shared",
-                "id": "def-public.UseCreateRuleProps.onSuccess.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "formData",
-                "description": [],
-                "signature": [
-                  "CreateRuleBody",
-                  "<",
-                  {
-                    "pluginId": "@kbn/alerts-ui-shared",
-                    "scope": "public",
-                    "docId": "kibKbnAlertsUiSharedPluginApi",
-                    "section": "def-public.RuleTypeParams",
-                    "text": "RuleTypeParams"
-                  },
-                  ">"
-                ],
-                "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseCreateRuleProps.onError",
-            "type": "Function",
-            "tags": [],
-            "label": "onError",
-            "description": [],
-            "signature": [
-              "((error: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpFetchError",
-                "text": "IHttpFetchError"
-              },
-              "<{ message: string; }>) => void) | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/alerts-ui-shared",
-                "id": "def-public.UseCreateRuleProps.onError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.IHttpFetchError",
-                    "text": "IHttpFetchError"
-                  },
-                  "<{ message: string; }>"
-                ],
-                "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_create_rule.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5236,15 +4925,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ featureIds: ",
-              {
-                "pluginId": "@kbn/rule-data-utils",
-                "scope": "common",
-                "docId": "kibKbnRuleDataUtilsPluginApi",
-                "section": "def-common.AlertConsumers",
-                "text": "AlertConsumers"
-              },
-              "[]; groupByField: string; aggregations?: Record<string, ",
+              "{ ruleTypeIds: string[]; consumers?: string[] | undefined; groupByField: string; aggregations?: Record<string, ",
               "AggregationsAggregationContainer",
               "> | undefined; filters?: ",
               "QueryDslQueryContainer",
@@ -5369,164 +5050,6 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseLoadConnectorsProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseLoadConnectorsProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseLoadConnectorsProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseLoadConnectorsProps.includeSystemActions",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "includeSystemActions",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseLoadConnectorsProps.enabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "enabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseLoadConnectorTypesProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseLoadConnectorTypesProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseLoadConnectorTypesProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseLoadConnectorTypesProps.includeSystemActions",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "includeSystemActions",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseLoadConnectorTypesProps.enabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "enabled",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseLoadUiConfigProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseLoadUiConfigProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_ui_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseLoadUiConfigProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_ui_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.UseLoadUiHealthProps",
         "type": "Interface",
         "tags": [],
@@ -5553,168 +5076,6 @@
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_ui_health.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseResolveProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseResolveProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_resolve_rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseResolveProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_resolve_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseResolveProps.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_resolve_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseRuleAADFieldsProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseRuleAADFieldsProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseRuleAADFieldsProps.ruleTypeId",
-            "type": "string",
-            "tags": [],
-            "label": "ruleTypeId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseRuleAADFieldsProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseRuleAADFieldsProps.toasts",
-            "type": "Object",
-            "tags": [],
-            "label": "toasts",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseRuleAADFieldsResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseRuleAADFieldsResult",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseRuleAADFieldsResult.aadFields",
-            "type": "Array",
-            "tags": [],
-            "label": "aadFields",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              },
-              "[]"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseRuleAADFieldsResult.loading",
-            "type": "boolean",
-            "tags": [],
-            "label": "loading",
-            "description": [],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_rule_aad_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5819,138 +5180,6 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
-        "id": "def-public.UseUpdateRuleProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseUpdateRuleProps",
-        "description": [],
-        "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseUpdateRuleProps.http",
-            "type": "Object",
-            "tags": [],
-            "label": "http",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseUpdateRuleProps.onSuccess",
-            "type": "Function",
-            "tags": [],
-            "label": "onSuccess",
-            "description": [],
-            "signature": [
-              "((formData: ",
-              "UpdateRuleBody",
-              "<",
-              {
-                "pluginId": "@kbn/alerts-ui-shared",
-                "scope": "public",
-                "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-public.RuleTypeParams",
-                "text": "RuleTypeParams"
-              },
-              ">) => void) | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/alerts-ui-shared",
-                "id": "def-public.UseUpdateRuleProps.onSuccess.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "formData",
-                "description": [],
-                "signature": [
-                  "UpdateRuleBody",
-                  "<",
-                  {
-                    "pluginId": "@kbn/alerts-ui-shared",
-                    "scope": "public",
-                    "docId": "kibKbnAlertsUiSharedPluginApi",
-                    "section": "def-public.RuleTypeParams",
-                    "text": "RuleTypeParams"
-                  },
-                  ">"
-                ],
-                "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/alerts-ui-shared",
-            "id": "def-public.UseUpdateRuleProps.onError",
-            "type": "Function",
-            "tags": [],
-            "label": "onError",
-            "description": [],
-            "signature": [
-              "((error: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpFetchError",
-                "text": "IHttpFetchError"
-              },
-              "<{ message: string; }>) => void) | undefined"
-            ],
-            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/alerts-ui-shared",
-                "id": "def-public.UseUpdateRuleProps.onError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.IHttpFetchError",
-                    "text": "IHttpFetchError"
-                  },
-                  "<{ message: string; }>"
-                ],
-                "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_update_rule.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.ValidationResult",
         "type": "Interface",
         "tags": [],
@@ -5987,6 +5216,42 @@
         "label": "ActionConnectorMode",
         "description": [],
         "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.AlertProvidedActionVariables",
+        "type": "Enum",
+        "tags": [],
+        "label": "AlertProvidedActionVariables",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/action_variables.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.LegacyAlertProvidedActionVariables",
+        "type": "Enum",
+        "tags": [],
+        "label": "LegacyAlertProvidedActionVariables",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/action_variables.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.SummaryAlertProvidedActionVariables",
+        "type": "Enum",
+        "tags": [],
+        "label": "SummaryAlertProvidedActionVariables",
+        "description": [],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/action_variables.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6408,7 +5673,7 @@
         "signature": [
           "{ [x: string]: Pick<",
           "OptionsListControlState",
-          ", \"selectedOptions\" | \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\">; }"
+          ", \"title\" | \"fieldName\" | \"exclude\" | \"existsSelected\" | \"selectedOptions\">; }"
         ],
         "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
         "deprecated": false,
@@ -6771,6 +6036,21 @@
     "objects": [
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.AlertProvidedActionVariableDescriptions",
+        "type": "Object",
+        "tags": [],
+        "label": "AlertProvidedActionVariableDescriptions",
+        "description": [],
+        "signature": [
+          "{ [x: `rule.params.${string}`]: ActionVariablesWithoutName; params: ActionVariablesWithoutName; spaceId: ActionVariablesWithoutName; date: ActionVariablesWithoutName; tags: ActionVariablesWithoutName; alertId: ActionVariablesWithoutName; alertInstanceId: ActionVariablesWithoutName; \"rule.id\": ActionVariablesWithoutName; \"rule.name\": ActionVariablesWithoutName; \"alert.uuid\": ActionVariablesWithoutName; \"alert.flapping\": ActionVariablesWithoutName; \"rule.tags\": ActionVariablesWithoutName; \"rule.type\": ActionVariablesWithoutName; alertName: ActionVariablesWithoutName; alertActionGroup: ActionVariablesWithoutName; alertActionGroupName: ActionVariablesWithoutName; kibanaBaseUrl: ActionVariablesWithoutName; \"rule.spaceId\": ActionVariablesWithoutName; \"rule.url\": ActionVariablesWithoutName; \"alert.id\": ActionVariablesWithoutName; \"alert.actionGroup\": ActionVariablesWithoutName; \"alert.actionGroupName\": ActionVariablesWithoutName; \"alert.consecutiveMatches\": ActionVariablesWithoutName; \"rule.params\": ActionVariablesWithoutName; }"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/action_variables.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.search",
         "type": "Object",
         "tags": [],
@@ -6827,6 +6107,277 @@
             ]
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.SummarizedAlertProvidedActionVariableDescriptions",
+        "type": "Object",
+        "tags": [],
+        "label": "SummarizedAlertProvidedActionVariableDescriptions",
+        "description": [],
+        "signature": [
+          "{ [x: `rule.params.${string}`]: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; params: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; spaceId: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; date: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; tags: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; alertId: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; alertInstanceId: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"rule.id\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"rule.name\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alert.uuid\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alert.flapping\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"rule.tags\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"rule.type\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; alertName: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; alertActionGroup: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; alertActionGroupName: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; kibanaBaseUrl: Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"rule.spaceId\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"rule.url\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alert.id\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alert.actionGroup\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alert.actionGroupName\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alert.consecutiveMatches\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"rule.params\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.recovered.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.recovered.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.new.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.new.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.all.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.all.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.ongoing.count\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; \"alerts.ongoing.data\": Omit<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionVariable",
+            "text": "ActionVariable"
+          },
+          ", \"name\">; }"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/action_variables/action_variables.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

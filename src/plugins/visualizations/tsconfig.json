@@ -72,7 +72,8 @@
     "@kbn/presentation-containers",
     "@kbn/search-response-warnings",
     "@kbn/embeddable-enhanced-plugin",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/react-hooks"
   ],
   "exclude": ["target/**/*"]
 }

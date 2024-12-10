@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const logsPages = ['logs/stream', 'logs/anomalies', 'logs/log-categories', 'logs/settings'];
@@ -19,14 +20,22 @@ const metricsPages = [
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const find = getService('find');
   const pageObjects = getPageObjects(['common', 'infraHome']);
+  const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
   describe('Infra Not Found page', function () {
     this.tags('includeFirefox');
 
     describe('Logs', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
+      });
+      after(async () => {
+        await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
+      });
+
       it('should render the not found page when the route does not exist', async () => {
         await pageObjects.common.navigateToApp('logs/broken-link');
         await testSubjects.existOrFail('infraNotFoundPage');

@@ -8,7 +8,6 @@ import type { JSONSchema7TypeName } from 'json-schema';
 import type { Observable } from 'rxjs';
 import { ChatCompletionChunkEvent, MessageAddEvent } from '../conversation_complete';
 import { FunctionVisibility } from './function_visibility';
-import { AssistantScope } from '../types';
 export { FunctionVisibility };
 
 type JSONSchemaOrPrimitive = CompatibleJSONSchema | string | number | boolean;
@@ -36,13 +35,14 @@ export type FunctionResponse =
     }
   | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
 
-export interface FunctionDefinition<TParameters extends CompatibleJSONSchema = any> {
+export interface FunctionDefinition<
+  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
+> {
   name: string;
   description: string;
   visibility?: FunctionVisibility;
   descriptionForUser?: string;
   parameters?: TParameters;
-  scopes?: AssistantScope[];
 }
 
 export type FunctionRegistry = Map<string, FunctionDefinition>;

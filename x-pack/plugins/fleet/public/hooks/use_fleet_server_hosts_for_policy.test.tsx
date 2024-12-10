@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
 import { useGetEnrollmentSettings } from './use_request/settings';
@@ -42,12 +42,38 @@ describe('useFleetServerHostsForPolicy', () => {
             is_preconfigured: false,
           },
           has_active: true,
+          es_output: {
+            id: 'es-output',
+            name: 'es-output',
+            is_default: false,
+            is_default_monitoring: false,
+            type: 'elasticsearch',
+            hosts: ['https://elasticsearch:9200'],
+          },
+          es_output_proxy: {
+            id: 'es-output-proxy',
+            name: 'es-output-proxy',
+            url: 'https://es-output-proxy',
+            proxy_headers: {
+              'header-key': 'header-value',
+            },
+            is_preconfigured: false,
+          },
         },
         download_source: {
           id: 'default-source',
           name: 'default-source',
           host: 'https://defaultsource',
           is_default: false,
+        },
+        download_source_proxy: {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'https://download-src-proxy',
+          proxy_headers: {
+            'header-key': 'header-value',
+          },
+          is_preconfigured: false,
         },
       },
     });
@@ -64,11 +90,37 @@ describe('useFleetServerHostsForPolicy', () => {
         url: 'https://defaultproxy',
         is_preconfigured: false,
       },
+      esOutput: {
+        id: 'es-output',
+        name: 'es-output',
+        is_default: false,
+        is_default_monitoring: false,
+        type: 'elasticsearch',
+        hosts: ['https://elasticsearch:9200'],
+      },
+      esOutputProxy: {
+        id: 'es-output-proxy',
+        name: 'es-output-proxy',
+        url: 'https://es-output-proxy',
+        proxy_headers: {
+          'header-key': 'header-value',
+        },
+        is_preconfigured: false,
+      },
       downloadSource: {
         id: 'default-source',
         name: 'default-source',
         host: 'https://defaultsource',
         is_default: false,
+      },
+      downloadSourceProxy: {
+        id: 'download-src-proxy',
+        name: 'download-src-proxy',
+        url: 'https://download-src-proxy',
+        proxy_headers: {
+          'header-key': 'header-value',
+        },
+        is_preconfigured: false,
       },
     });
   });

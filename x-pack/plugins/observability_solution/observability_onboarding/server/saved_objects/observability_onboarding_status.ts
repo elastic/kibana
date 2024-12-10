@@ -19,13 +19,9 @@ export interface LogFilesState {
   namespace: string;
 }
 
-export interface SystemLogsState {
-  namespace: string;
-}
+type ObservabilityOnboardingFlowState = LogFilesState | undefined;
 
-type ObservabilityOnboardingFlowState = LogFilesState | SystemLogsState | undefined;
-
-type ObservabilityOnboardingType = 'logFiles' | 'systemLogs' | 'autoDetect' | 'kubernetes';
+type ObservabilityOnboardingType = 'logFiles' | 'autoDetect' | 'kubernetes';
 
 export interface ObservabilityOnboardingFlow {
   type: ObservabilityOnboardingType;
@@ -78,6 +74,13 @@ export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
         type: schema.string(),
         id: schema.string(),
       })
+    ),
+    metadata: schema.maybe(
+      schema.oneOf([
+        schema.object({
+          hostname: schema.string(),
+        }),
+      ])
     ),
   })
 );

@@ -39,7 +39,10 @@ import {
 } from '.';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  eventsIndexPattern,
+  SUGGESTIONS_INTERNAL_ROUTE,
+} from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
@@ -184,7 +187,7 @@ describe('when calling the Suggestions route handler', () => {
           routerMock,
           'post',
           routePrefix,
-          '2023-10-31'
+          '1'
         );
 
         await routeHandler(ctx as unknown as RequestHandlerContext, mockRequest, mockResponse);
@@ -192,7 +195,7 @@ describe('when calling the Suggestions route handler', () => {
     });
 
     it('should respond with forbidden', async () => {
-      await callRoute(SUGGESTIONS_ROUTE, {
+      await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
         params: { suggestion_type: 'eventFilters' },
         authz: { canReadEventFilters: true, canWriteEventFilters: false },
       });

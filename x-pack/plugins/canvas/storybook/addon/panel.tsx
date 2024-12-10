@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
 import { StateChange } from './components/state_change';
 
-import '@elastic/eui/dist/eui_theme_light.css';
 import './panel.css';
 
 import { RecordedAction } from './types';

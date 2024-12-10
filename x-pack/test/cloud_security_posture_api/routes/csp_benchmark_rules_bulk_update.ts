@@ -22,13 +22,14 @@ import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema
 import { generateBenchmarkRuleTags } from '@kbn/cloud-security-posture-plugin/common/utils/detection_rules';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
+import { waitForPluginInitialized } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const retry = getService('retry');
   const supertest = getService('supertest');
-  const log = getService('log');
+  const logger = getService('log');
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
@@ -83,26 +84,18 @@ export default function (providerContext: FtrProviderContext) {
     return detectionRule;
   };
 
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
   describe('Verify update csp rules states API', async () => {
     before(async () => {
-      await waitForPluginInitialized();
+      await waitForPluginInitialized({ retry, logger, supertest });
     });
 
     beforeEach(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['cloud-security-posture-settings', 'alert'],
+      });
+    });
+
+    afterEach(async () => {
       await kibanaServer.savedObjects.clean({
         types: ['cloud-security-posture-settings', 'alert'],
       });

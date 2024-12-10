@@ -11,7 +11,6 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,12 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callout';
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
-
-import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
 import { ResearchConfiguration } from '../search_index/connector/native_connector_configuration/research_configuration';
@@ -39,9 +34,7 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const NativeConnectorConfiguration: React.FC = () => {
   const { connector } = useValues(ConnectorViewLogic);
-  const { config, connectorTypes: connectors } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
-  const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
+  const { connectorTypes: connectors } = useValues(KibanaLogic);
 
   const NATIVE_CONNECTORS = useMemo(
     () => connectors.filter(({ isNative }) => isNative),
@@ -68,7 +61,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
   };
 
   const iconPath = nativeConnector.iconPath;
-  const hasApiKey = !!(connector.api_key_id ?? apiKeyData);
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
   const isBeta =
@@ -105,48 +97,17 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 {connector.is_native
                   ? i18n.translate(
                       'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.nativeConnector',
-                      { defaultMessage: 'Native connector' }
+                      { defaultMessage: 'Elastic managed connector' }
                     )
                   : i18n.translate(
                       'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.connectorClient',
-                      { defaultMessage: 'Connector client' }
+                      { defaultMessage: 'Self-managed connector' }
                     )}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {config.host && config.canDeployEntSearch && errorConnectingMessage && (
-            <>
-              <EuiCallOut
-                color="warning"
-                size="m"
-                title={i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.title',
-                  {
-                    defaultMessage: 'No running Enterprise Search instance detected',
-                  }
-                )}
-                iconType="warning"
-              >
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.text',
-                    {
-                      defaultMessage:
-                        'Native connectors require a running Enterprise Search instance to sync content from source.',
-                    }
-                  )}
-                </p>
-              </EuiCallOut>
-
-              <EuiSpacer />
-            </>
-          )}
-          {
-            <>
-              <EuiSpacer />
-              <AttachIndexBox connector={connector} />
-            </>
-          }
+          <EuiSpacer />
+          <AttachIndexBox connector={connector} />
           {connector.index_name && (
             <>
               <EuiSpacer />
@@ -168,23 +129,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   status={connector.status}
                 />
                 <EuiSpacer />
-              </EuiPanel>
-              <EuiSpacer />
-              <EuiPanel hasBorder>
-                <EuiTitle size="s">
-                  <h4>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.apiKey.title',
-                      { defaultMessage: 'API Key' }
-                    )}
-                  </h4>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <ApiKeyConfig
-                  indexName={connector.index_name || ''}
-                  hasApiKey={hasApiKey}
-                  isNative
-                />
               </EuiPanel>
               <EuiSpacer />
               <EuiPanel hasBorder>

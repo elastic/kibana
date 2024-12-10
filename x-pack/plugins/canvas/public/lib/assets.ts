@@ -6,8 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { AssetType, CanvasAsset } from '../../types';
-import { CanvasNotifyService } from '../services/notify';
 import { getId } from './get_id';
+import { getCanvasNotifyService } from '../services/canvas_notify_service';
 
 const strings = {
   getSaveFailureTitle: () =>
@@ -32,7 +32,8 @@ export const createAsset = (type: AssetType['type'], content: AssetType['value']
   '@created': new Date().toISOString(),
 });
 
-export const notifyError = (err: any, notifyErrorFn: CanvasNotifyService['error']) => {
+export const notifyError = (err: any) => {
+  const { error: notifyErrorFn } = getCanvasNotifyService();
   const statusCode = err.response && err.response.status;
   switch (statusCode) {
     case 400:

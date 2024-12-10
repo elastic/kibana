@@ -25,6 +25,7 @@ import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
+import type { UsageReportingService } from './common/services/usage_reporting_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -86,6 +87,7 @@ export interface SecurityUsageReportingTaskSetupContract {
   taskTitle: string;
   version: string;
   meteringCallback: MeteringCallback;
+  usageReportingService: UsageReportingService;
 }
 
 export interface SecurityUsageReportingTaskStartContract {

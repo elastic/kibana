@@ -25,7 +25,10 @@ export interface HandleUnstructuredNodeParams extends UnstructuredNodeParams {
 }
 
 export interface GrokResult {
-  [key: string]: unknown;
   grok_patterns: string[];
   message: string;
+}
+
+export interface LogResult {
+  [packageName: string]: { [dataStreamName: string]: unknown };
 }

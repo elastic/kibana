@@ -42,7 +42,7 @@ import {
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
-import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -66,7 +66,12 @@ import { RuleRunningHandler } from './rule_running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
-import { createTaskRunnerLogger, withAlertingSpan, processRunResults } from './lib';
+import {
+  createTaskRunnerLogger,
+  withAlertingSpan,
+  processRunResults,
+  clearExpiredSnoozes,
+} from './lib';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -204,7 +209,6 @@ export class TaskRunner<
 
   private async updateRuleSavedObjectPostRun(
     ruleId: string,
-    namespace: string | undefined,
     attributes: {
       executionStatus?: RawRuleExecutionStatus;
       monitoring?: RawRuleMonitoring;
@@ -212,7 +216,7 @@ export class TaskRunner<
       lastRun?: RawRuleLastRun | null;
     }
   ) {
-    const client = this.internalSavedObjectsRepository;
+    const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
       // the update of the attribute `running` in the rule's saved object
@@ -223,13 +227,12 @@ export class TaskRunner<
       // eslint-disable-next-line no-empty
     } catch {}
     try {
-      await partiallyUpdateRule(
+      await partiallyUpdateRuleWithEs(
         client,
         ruleId,
         { ...attributes, running: false },
         {
           ignore404: true,
-          namespace,
           refresh: false,
         }
       );
@@ -287,10 +290,21 @@ export class TaskRunner<
       state: { previousStartedAt },
     } = this.taskInstance;
 
-    const { queryDelaySettings, flappingSettings } =
+    const { queryDelaySettings, flappingSettings: spaceFlappingSettings } =
       await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);
     const ruleRunMetricsStore = new RuleRunMetricsStore();
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${rule.name}'`;
+
+    const ruleFlappingSettings = rule.flapping
+      ? {
+          enabled: true,
+          ...rule.flapping,
+        }
+      : null;
+
+    const flappingSettings = spaceFlappingSettings.enabled
+      ? ruleFlappingSettings || spaceFlappingSettings
+      : spaceFlappingSettings;
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
@@ -303,6 +317,7 @@ export class TaskRunner<
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
       spaceId,
+      isServerless: this.context.isServerless,
     };
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<
@@ -400,8 +415,8 @@ export class TaskRunner<
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
           actionSchedulerResult = await actionScheduler.run({
-            ...alertsClient.getProcessedAlerts('activeCurrent'),
-            ...alertsClient.getProcessedAlerts('recoveredCurrent'),
+            activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
+            recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
           });
         }
       })
@@ -505,6 +520,7 @@ export class TaskRunner<
         paramValidator: this.ruleType.validate.params,
         ruleId,
         spaceId,
+        logger: this.logger,
         context: this.context,
         ruleTypeRegistry: this.ruleTypeRegistry,
       });
@@ -524,7 +540,9 @@ export class TaskRunner<
 
       (async () => {
         try {
-          await runRuleParams.rulesClient.clearExpiredSnoozes({
+          await clearExpiredSnoozes({
+            esClient: this.context.elasticsearch.client.asInternalUser,
+            logger: this.logger,
             rule: runRuleParams.rule,
             version: runRuleParams.version,
           });
@@ -548,7 +566,7 @@ export class TaskRunner<
     const { executionStatus: execStatus, executionMetrics: execMetrics } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
         const {
-          params: { alertId: ruleId, spaceId },
+          params: { alertId: ruleId },
           startedAt,
           schedule: taskSchedule,
         } = this.taskInstance;
@@ -559,8 +577,6 @@ export class TaskRunner<
         } else if (taskSchedule) {
           nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
         }
-
-        const namespace = this.context.spaceIdToNamespace(spaceId);
 
         const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
           logger: this.logger,
@@ -602,7 +618,7 @@ export class TaskRunner<
               )} - ${JSON.stringify(lastRun)}`
             );
           }
-          await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
+          await this.updateRuleSavedObjectPostRun(ruleId, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,
             lastRun: lastRunToRaw(lastRun),
@@ -758,11 +774,10 @@ export class TaskRunner<
 
     // Write event log entry
     const {
-      params: { alertId: ruleId, spaceId, consumer },
+      params: { alertId: ruleId, consumer },
       schedule: taskSchedule,
       startedAt,
     } = this.taskInstance;
-    const namespace = this.context.spaceIdToNamespace(spaceId);
 
     if (consumer && !this.ruleConsumer) {
       this.ruleConsumer = consumer;
@@ -803,7 +818,7 @@ export class TaskRunner<
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
     const outcome = 'failed';
-    await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
+    await this.updateRuleSavedObjectPostRun(ruleId, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
         outcome,

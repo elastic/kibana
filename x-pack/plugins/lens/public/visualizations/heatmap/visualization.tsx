@@ -315,6 +315,8 @@ export const getHeatmapVisualization = ({
         isVisible: state.legend.isVisible,
         position: state.legend.position,
         legendSize: state.legend.legendSize,
+        shouldTruncate: state.legend.shouldTruncate,
+        maxLines: state.legend.maxLines,
       }
     );
 

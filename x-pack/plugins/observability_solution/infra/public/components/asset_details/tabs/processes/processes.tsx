@@ -16,11 +16,14 @@ import {
   Query,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { parseSearchString } from './parse_search_string';
@@ -36,6 +39,10 @@ import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
 import { ProcessListAPIResponseRT } from '../../../../../common/http_api';
 import { useRequestObservable } from '../../hooks/use_request_observable';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
+import { AddMetricsCallout } from '../../add_metrics_callout';
+import { useEntitySummary } from '../../hooks/use_entity_summary';
+import { isMetricsSignal } from '../../utils/get_data_stream_types';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -46,10 +53,19 @@ export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
+  const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
+    entityType: BUILT_IN_ENTITY_TYPES.HOST,
+    entityId: asset.name,
+  });
+  const addMetricsCalloutId: AddMetricsCalloutKey = 'hostProcesses';
+  const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(
+    `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
+    false
+  );
 
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
   const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
@@ -132,105 +148,124 @@ export const Processes = () => {
 
   const isLoading = isPending(status);
 
+  const showAddMetricsCallout =
+    dataStreamsStatus === 'success' &&
+    !isMetricsSignal(dataStreams) &&
+    !dismissedAddMetricsCallout &&
+    renderMode.mode === 'page';
+
   return (
-    <ProcessListContextProvider hostTerm={hostTerm} to={toTimestamp}>
-      <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
-        <EuiFlexItem grow={false}>
-          <SummaryTable
-            isLoading={isLoading}
-            processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
+    <>
+      {showAddMetricsCallout && (
+        <>
+          <AddMetricsCallout
+            id={addMetricsCalloutId}
+            onDismiss={() => {
+              setDismissedAddMetricsCallout(true);
+            }}
           />
-        </EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle data-test-subj="infraAssetDetailsTopProcessesTitle" size="xxs">
-                <span>
-                  <FormattedMessage
-                    id="xpack.infra.metrics.nodeDetails.processesHeader"
-                    defaultMessage="Top processes"
-                  />
-                </span>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <TopProcessesTooltip />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {!error && (
-            <EuiFlexGroup alignItems="flexStart">
-              <EuiFlexItem>
-                {isLoading ? (
-                  <EuiLoadingSpinner />
-                ) : (
-                  (data?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
-                )}
+          <EuiSpacer />
+        </>
+      )}
+      <ProcessListContextProvider hostTerm={hostTerm} to={toTimestamp}>
+        <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
+          <EuiFlexItem grow={false}>
+            <SummaryTable
+              isLoading={isLoading}
+              processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
+            />
+          </EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle data-test-subj="infraAssetDetailsTopProcessesTitle" size="xxs">
+                  <span>
+                    <FormattedMessage
+                      id="xpack.infra.metrics.nodeDetails.processesHeader"
+                      defaultMessage="Top processes"
+                    />
+                  </span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TopProcessesTooltip />
               </EuiFlexItem>
             </EuiFlexGroup>
-          )}
+            {!error && (
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  {isLoading ? (
+                    <EuiLoadingSpinner />
+                  ) : (
+                    (data?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiSearchBar
+              query={searchBarState}
+              onChange={searchBarOnChange}
+              box={{
+                'data-test-subj': 'infraAssetDetailsProcessesSearchBarInput',
+                incremental: true,
+                placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
+                  defaultMessage: 'Search for processes…',
+                }),
+              }}
+              filters={[
+                {
+                  type: 'field_value_selection',
+                  field: 'state',
+                  name: 'State',
+                  operator: 'exact',
+                  multiSelect: false,
+                  options,
+                },
+              ]}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {!error ? (
+              <ProcessesTable
+                currentTime={toTimestamp}
+                isLoading={isLoading}
+                processList={data?.processList ?? []}
+                sortBy={sortBy}
+                error={searchQueryError?.message}
+                setSortBy={setSortBy}
+                clearSearchBar={clearSearchBar}
+              />
+            ) : (
+              <EuiEmptyPrompt
+                iconType="warning"
+                title={
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.infra.metrics.nodeDetails.processListError"
+                      defaultMessage="Unable to load process data"
+                    />
+                  </h4>
+                }
+                actions={
+                  <EuiButton
+                    data-test-subj="infraAssetDetailsTabComponentTryAgainButton"
+                    color="primary"
+                    fill
+                    onClick={refetch}
+                  >
+                    <FormattedMessage
+                      id="xpack.infra.metrics.nodeDetails.processListRetry"
+                      defaultMessage="Try again"
+                    />
+                  </EuiButton>
+                }
+              />
+            )}
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiSearchBar
-            query={searchBarState}
-            onChange={searchBarOnChange}
-            box={{
-              'data-test-subj': 'infraAssetDetailsProcessesSearchBarInput',
-              incremental: true,
-              placeholder: i18n.translate('xpack.infra.metrics.nodeDetails.searchForProcesses', {
-                defaultMessage: 'Search for processes…',
-              }),
-            }}
-            filters={[
-              {
-                type: 'field_value_selection',
-                field: 'state',
-                name: 'State',
-                operator: 'exact',
-                multiSelect: false,
-                options,
-              },
-            ]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {!error ? (
-            <ProcessesTable
-              currentTime={toTimestamp}
-              isLoading={isLoading}
-              processList={data?.processList ?? []}
-              sortBy={sortBy}
-              error={searchQueryError?.message}
-              setSortBy={setSortBy}
-              clearSearchBar={clearSearchBar}
-            />
-          ) : (
-            <EuiEmptyPrompt
-              iconType="warning"
-              title={
-                <h4>
-                  <FormattedMessage
-                    id="xpack.infra.metrics.nodeDetails.processListError"
-                    defaultMessage="Unable to load process data"
-                  />
-                </h4>
-              }
-              actions={
-                <EuiButton
-                  data-test-subj="infraAssetDetailsTabComponentTryAgainButton"
-                  color="primary"
-                  fill
-                  onClick={refetch}
-                >
-                  <FormattedMessage
-                    id="xpack.infra.metrics.nodeDetails.processListRetry"
-                    defaultMessage="Try again"
-                  />
-                </EuiButton>
-              }
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ProcessListContextProvider>
+      </ProcessListContextProvider>
+    </>
   );
 };

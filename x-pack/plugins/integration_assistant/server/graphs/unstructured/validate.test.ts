@@ -28,9 +28,15 @@ describe('Testing unstructured validation without errors', () => {
   const client = {
     asCurrentUser: {
       ingest: {
-        simulate: jest
-          .fn()
-          .mockReturnValue({ docs: [{ doc: { _source: { message: 'dummy data' } } }] }),
+        simulate: jest.fn().mockReturnValue({
+          docs: [
+            {
+              doc: {
+                _source: { testPackage: { testDatastream: { message: 'dummy data' } } },
+              },
+            },
+          ],
+        }),
       },
     },
   } as unknown as IScopedClusterClient;

@@ -24,3 +24,4 @@ export type {
 } from './src/roles';
 export { PrivilegesAPIClientPublicContract } from './src/privileges';
 export type { PrivilegesAPIClientGetAllArgs } from './src/privileges';
+export type { SecurityLicense } from './src/license';

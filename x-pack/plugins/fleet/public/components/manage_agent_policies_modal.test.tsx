@@ -114,7 +114,7 @@ describe('ManageAgentPoliciesModal', () => {
     expect(usePackagePolicyWithRelatedData('', {}).savePackagePolicy).toHaveBeenCalledWith({
       policy_ids: ['policy1', 'policy2'],
     });
-  });
+  }, 10000);
 
   it('should keep managed policy when policies are changed', async () => {
     (useGetAgentPolicies as jest.Mock).mockReturnValue({

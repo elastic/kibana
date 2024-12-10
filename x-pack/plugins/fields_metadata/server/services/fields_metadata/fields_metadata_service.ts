@@ -6,17 +6,18 @@
  */
 
 import { EcsFlat as ecsFields } from '@elastic/ecs';
-import { Logger } from '@kbn/core/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
-import { IntegrationFieldsExtractor } from './repositories/types';
+import { IntegrationFieldsExtractor, IntegrationListExtractor } from './repositories/types';
 import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 import { MetadataFields as metadataFields } from '../../../common/metadata_fields';
 
 export class FieldsMetadataService {
   private integrationFieldsExtractor: IntegrationFieldsExtractor = () => Promise.resolve({});
+  private integrationListExtractor: IntegrationListExtractor = () => Promise.resolve([]);
 
   constructor(private readonly logger: Logger) {}
 
@@ -25,21 +26,30 @@ export class FieldsMetadataService {
       registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => {
         this.integrationFieldsExtractor = extractor;
       },
+      registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => {
+        this.integrationListExtractor = extractor;
+      },
     };
   }
 
-  public start(): FieldsMetadataServiceStart {
-    const { logger, integrationFieldsExtractor } = this;
+  public start(core: CoreStart): FieldsMetadataServiceStart {
+    const { logger, integrationFieldsExtractor, integrationListExtractor } = this;
 
     const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
     const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
     const integrationFieldsRepository = IntegrationFieldsRepository.create({
       integrationFieldsExtractor,
+      integrationListExtractor,
     });
 
     return {
-      getClient() {
+      getClient: async (request) => {
+        const { fleet, fleetv2 } = await core.capabilities.resolveCapabilities(request, {
+          capabilityPath: '*',
+        });
+
         return FieldsMetadataClient.create({
+          capabilities: { fleet, fleetv2 },
           logger,
           ecsFieldsRepository,
           metadataFieldsRepository,

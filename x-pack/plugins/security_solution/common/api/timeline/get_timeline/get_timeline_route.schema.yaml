@@ -5,13 +5,6 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/_get_timeline_or_timeline_template_by_savedobjectid.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timeline:
     get:
@@ -39,13 +32,4 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [getOneTimeline]
-                    properties:
-                      getOneTimeline:
-                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                        nullable: true
+                $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

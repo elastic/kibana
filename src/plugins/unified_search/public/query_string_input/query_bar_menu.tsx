@@ -267,7 +267,6 @@ function QueryBarMenuComponent({
       anchorPosition="downLeft"
       repositionOnScroll
       data-test-subj="queryBarMenuPopover"
-      hasDragDrop
     >
       {renderComponent()}
     </EuiPopover>

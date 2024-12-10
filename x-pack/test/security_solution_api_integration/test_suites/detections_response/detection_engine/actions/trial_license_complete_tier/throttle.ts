@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('When creating a new action and attaching it to a rule, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and with actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('When creating throttle with "1h" set and actions set, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to null', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('When creating a new action and attaching it to a rule, we should return "NOTIFICATION_THROTTLE_RULE" when doing a read', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -268,7 +268,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('When creating a new action and attaching it to a rule, if we change the alert to a "muteAll" through the kibana alerting API, we should get back "NOTIFICATION_THROTTLE_NO_ACTIONS" ', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -292,7 +292,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('will not change "NOTIFICATION_THROTTLE_RULE" if we update some part of the rule', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -309,7 +309,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('will not change the "muteAll" or "notifyWhen" if we update some part of the rule', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -333,7 +333,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('If we update a rule and remove just the actions array it will begin returning a throttle of "NOTIFICATION_THROTTLE_NO_ACTIONS"', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -352,7 +352,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('will not change "NOTIFICATION_THROTTLE_RULE" if we patch some part of the rule', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -376,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('will not change the "muteAll" or "notifyWhen" if we patch part of the rule', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -406,7 +406,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('If we patch a rule and remove just the actions array it will begin returning a throttle of "NOTIFICATION_THROTTLE_NO_ACTIONS"', async () => {
           // create a new action
           const { body: hookAction } = await supertest
-            .post('/api/actions/action')
+            .post('/api/actions/connector')
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

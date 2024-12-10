@@ -10,7 +10,7 @@ import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
 import { Readable } from 'stream';
-import { AssistantScope } from '../../../common/types';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
@@ -42,7 +42,7 @@ const chatCompleteBaseRt = t.type({
       ]),
       instructions: t.array(
         t.intersection([
-          t.partial({ doc_id: t.string }),
+          t.partial({ id: t.string }),
           t.type({
             text: t.string,
             instruction_type: t.union([
@@ -61,7 +61,7 @@ const chatCompleteInternalRt = t.intersection([
   t.type({
     body: t.type({
       screenContexts: t.array(screenContextRt),
-      scope: assistantScopeType,
+      scopes: t.array(assistantScopeType),
     }),
   }),
 ]);
@@ -83,11 +83,11 @@ async function initializeChatRequest({
   request,
   plugins: { cloud, actions },
   params: {
-    body: { connectorId, scope },
+    body: { connectorId, scopes },
   },
   service,
 }: ObservabilityAIAssistantRouteHandlerResources & {
-  params: { body: { connectorId: string; scope: AssistantScope } };
+  params: { body: { connectorId: string; scopes: AssistantScope[] } };
 }) {
   await withAssistantSpan('guard_against_invalid_connector', async () => {
     const actionsClient = await (await actions.start()).getActionsClientWithRequest(request);
@@ -101,7 +101,7 @@ async function initializeChatRequest({
   });
 
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-    service.getClient({ request, scope }),
+    service.getClient({ request, scopes }),
     cloud?.start(),
     (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
@@ -126,8 +126,10 @@ async function initializeChatRequest({
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: t.type({
     body: t.intersection([
@@ -136,7 +138,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(functionRt),
-        scope: assistantScopeType,
+        scopes: t.array(assistantScopeType),
       }),
       t.partial({
         functionCall: t.string,
@@ -174,15 +176,17 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
 const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat/recall',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: t.type({
     body: t.type({
       prompt: t.string,
       context: t.string,
       connectorId: t.string,
-      scope: assistantScopeType,
+      scopes: t.array(assistantScopeType),
     }),
   }),
   handler: async (resources): Promise<Readable> => {
@@ -194,7 +198,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
 
     const response$ = from(
       recallAndScore({
-        analytics: (await resources.context.core).coreStart.analytics,
+        analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
           client
             .chat(name, {
@@ -248,6 +252,7 @@ async function chatComplete(
       screenContexts,
       instructions,
       disableFunctions,
+      scopes,
     },
   } = params;
 
@@ -260,6 +265,7 @@ async function chatComplete(
     resources,
     client,
     screenContexts,
+    scopes,
   });
 
   const response$ = client.complete({
@@ -280,8 +286,10 @@ async function chatComplete(
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: chatCompleteInternalRt,
   handler: async (resources): Promise<Readable> => {
@@ -291,8 +299,10 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
 const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: chatCompletePublicRt,
   handler: async (resources): Promise<Readable> => {
@@ -310,7 +320,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       params: {
         body: {
           ...restOfBody,
-          scope: 'observability',
+          scopes: ['observability'],
           screenContexts: [
             {
               actions,

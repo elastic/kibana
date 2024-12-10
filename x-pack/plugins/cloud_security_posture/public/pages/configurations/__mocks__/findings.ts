@@ -118,6 +118,9 @@ export const mockFindingsHit: CspFinding = {
   data_stream: {
     dataset: 'cloud_security_posture.findings',
   },
+  observer: {
+    vendor: 'Elastic',
+  },
 };
 
 export const mockWizFinding = {
@@ -182,6 +185,9 @@ export const mockWizFinding = {
     namespace: 'default',
     type: 'logs',
     dataset: 'wiz.cloud_configuration_finding',
+  },
+  observer: {
+    vendor: 'Wiz',
   },
   event: {
     agent_id_status: 'auth_metadata_missing',

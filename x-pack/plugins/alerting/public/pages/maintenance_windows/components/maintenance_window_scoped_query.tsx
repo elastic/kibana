@@ -7,14 +7,13 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLoadingSpinner } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface MaintenanceWindowScopedQueryProps {
-  featureIds: AlertConsumers[];
+  ruleTypeIds: string[];
   query: string;
   filters: Filter[];
   errors?: string[];
@@ -27,7 +26,7 @@ export interface MaintenanceWindowScopedQueryProps {
 export const MaintenanceWindowScopedQuery = React.memo(
   (props: MaintenanceWindowScopedQueryProps) => {
     const {
-      featureIds,
+      ruleTypeIds,
       query,
       filters,
       errors = [],
@@ -76,7 +75,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
           <EuiFormRow fullWidth isInvalid={errors.length !== 0} error={errors[0]}>
             <AlertsSearchBar
               appName={PLUGIN.getI18nName(i18n)}
-              featureIds={featureIds}
+              ruleTypeIds={ruleTypeIds}
               disableQueryLanguageSwitcher={true}
               query={query}
               filters={filters}
@@ -90,7 +89,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
               http={http}
               toasts={toasts}
               unifiedSearchBar={SearchBar}
-              dataViewsService={data.dataViews}
+              dataService={data}
             />
           </EuiFormRow>
         </EuiFlexItem>

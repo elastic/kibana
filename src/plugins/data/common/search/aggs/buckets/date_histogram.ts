@@ -116,7 +116,14 @@ export const getDateHistogramBucketAgg = ({
               dateFormat: getConfig('dateFormat'),
               'dateFormat:scaled': getConfig('dateFormat:scaled'),
             });
-            updateTimeBuckets(this, calculateBounds, buckets);
+
+            try {
+              updateTimeBuckets(this, calculateBounds, buckets);
+            } catch (e) {
+              // swallow the error even though the agg is misconfigured
+              // eslint-disable-next-line no-console
+              console.error(e);
+            }
 
             return buckets;
           },

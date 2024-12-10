@@ -33,11 +33,13 @@ import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorNotFound } from './hooks/use_monitor_not_found';
+import { useGetUrlParams } from '../../hooks';
 
 export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { spaceId } = useGetUrlParams();
   useMonitorAddEditBreadcrumbs(true);
   const dispatch = useDispatch();
   const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
@@ -53,8 +55,8 @@ export const MonitorEditPage: React.FC = () => {
   const error = useSelector(selectSyntheticsMonitorError);
 
   useEffect(() => {
-    dispatch(getMonitorAction.get({ monitorId }));
-  }, [dispatch, monitorId]);
+    dispatch(getMonitorAction.get({ monitorId, spaceId }));
+  }, [dispatch, monitorId, spaceId]);
 
   const monitorNotFoundError = useMonitorNotFound(error, data?.id);
 

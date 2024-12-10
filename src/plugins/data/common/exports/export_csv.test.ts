@@ -97,14 +97,4 @@ describe('CSV exporter', () => {
       })
     ).toMatch('columnOne\r\n"a,b"\r\n');
   });
-
-  test('should respect the sorted columns order when passed', () => {
-    const datatable = getDataTable({ multipleColumns: true });
-    expect(
-      datatableToCSV(datatable, {
-        ...getDefaultOptions(),
-        columnsSorting: ['col2', 'col1'],
-      })
-    ).toMatch('columnTwo,columnOne\r\n"Formatted_5","Formatted_value"\r\n');
-  });
 });

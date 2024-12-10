@@ -37,7 +37,7 @@ describe('Gen AI Params Fields renders', () => {
     expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '{"message": "test"}');
     expect(getByTestId('bodyAddVariableButton')).toBeInTheDocument();
   });
-  test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi])(
+  test.each([OpenAiProviderType.OpenAi, OpenAiProviderType.AzureAi, OpenAiProviderType.Other])(
     'useEffect handles the case when subAction and subActionParams are undefined and apiProvider is %p',
     (apiProvider) => {
       const actionParams = {
@@ -78,6 +78,9 @@ describe('Gen AI Params Fields renders', () => {
       }
       if (apiProvider === OpenAiProviderType.AzureAi) {
         expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY_AZURE }, 0);
+      }
+      if (apiProvider === OpenAiProviderType.Other) {
+        expect(editAction).toHaveBeenCalledWith('subActionParams', { body: DEFAULT_BODY }, 0);
       }
     }
   );

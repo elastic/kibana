@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ImportedEvents Renders imported events 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexItem>
+    <EuiText>
+      <h4>
+        <MemoizedFormattedMessage
+          defaultMessage="Events to import: {eventsCount}"
+          id="xpack.ml.calendarsEdit.importedEvents.eventsToImportTitle"
+          values={
+            Object {
+              "eventsCount": 1,
+            }
+          }
+        />
+      </h4>
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EventsTable
+      eventsList={
+        Array [
+          Object {
+            "calendar_id": "test-calendar",
+            "description": "test description",
+            "end_time": 1486657800000,
+            "event_id": "test-event-one",
+            "start_time": 1486656600000,
+          },
+        ]
+      }
+      onDeleteClick={[MockFunction]}
+    />
+  </EuiFlexItem>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiCheckbox
+      checked={false}
+      id="ml-include-past-events"
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Include past events"
+          id="xpack.ml.calendarsEdit.importedEvents.includePastEventsLabel"
+        />
+      }
+      onChange={[MockFunction]}
+    />
+  </EuiFlexItem>
+</Fragment>
+`;

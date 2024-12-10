@@ -20,6 +20,8 @@ import azureOpenAIIcon from '../../../../assets/images/providers/azure_open_ai.s
 import googleAIStudioIcon from '../../../../assets/images/providers/google_ai_studio.svg';
 import mistralIcon from '../../../../assets/images/providers/mistral.svg';
 import amazonBedrockIcon from '../../../../assets/images/providers/amazon_bedrock.svg';
+import alibabaCloudAISearchIcon from '../../../../assets/images/providers/alibaba_cloud_ai_search.svg';
+import watsonxAIIcon from '../../../../assets/images/providers/watsonx_ai.svg';
 import { ServiceProviderKeys } from '../../types';
 import * as i18n from './translations';
 
@@ -33,6 +35,10 @@ interface ServiceProviderRecord {
 }
 
 export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
+  [ServiceProviderKeys['alibabacloud-ai-search']]: {
+    icon: alibabaCloudAISearchIcon,
+    name: 'AlibabaCloud AI Search',
+  },
   [ServiceProviderKeys.amazonbedrock]: {
     icon: amazonBedrockIcon,
     name: 'Amazon Bedrock',
@@ -72,6 +78,10 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.openai]: {
     icon: openAIIcon,
     name: 'OpenAI',
+  },
+  [ServiceProviderKeys.watsonxai]: {
+    icon: watsonxAIIcon,
+    name: 'WatsonxAI',
   },
 };
 

@@ -31,7 +31,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleetAuthz: {
           fleet: { allAgents: true },
         },
-        description: 'List metadata for latest uninstall tokens per agent policy',
+        summary: 'Get metadata for latest uninstall tokens',
+        description: 'List the metadata for the latest uninstall tokens per agent policy.',
         options: {
           tags: ['oas-tag:Fleet uninstall tokens'],
         },
@@ -60,7 +61,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         fleetAuthz: {
           fleet: { allAgents: true },
         },
-        description: 'Get one decrypted uninstall token by its ID',
+        summary: 'Get a decrypted uninstall token',
+        description: 'Get one decrypted uninstall token by its ID.',
         options: {
           tags: ['oas-tag:Fleet uninstall tokens'],
         },

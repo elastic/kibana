@@ -15,6 +15,7 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   CDR_VULNERABILITIES_INDEX_PATTERN,
+  CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type {
   CspSetupStatus,
@@ -218,13 +219,13 @@ export const getCspStatus = async ({
     checkIndexHasFindings(
       esClient,
       CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-      LATEST_FINDINGS_RETENTION_POLICY,
+      CDR_3RD_PARTY_RETENTION_POLICY,
       logger
     ),
     checkIndexHasFindings(
       esClient,
       CDR_VULNERABILITIES_INDEX_PATTERN,
-      LATEST_VULNERABILITIES_RETENTION_POLICY,
+      CDR_3RD_PARTY_RETENTION_POLICY,
       logger
     ),
     checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
@@ -436,8 +437,10 @@ export const defineGetCspStatusRoute = (
     .get({
       access: 'internal',
       path: STATUS_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(

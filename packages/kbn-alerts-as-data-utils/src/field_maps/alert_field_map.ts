@@ -23,6 +23,7 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -131,6 +132,11 @@ export const alertFieldMap = {
   },
   [ALERT_RULE_EXECUTION_TIMESTAMP]: {
     type: 'date',
+    array: false,
+    required: false,
+  },
+  [ALERT_RULE_EXECUTION_TYPE]: {
+    type: 'keyword',
     array: false,
     required: false,
   },

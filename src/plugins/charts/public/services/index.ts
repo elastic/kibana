@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LegacyColorsService } from './legacy_colors';
 export { ThemeService } from './theme';
 export { ActiveCursor, useActiveCursor } from './active_cursor';

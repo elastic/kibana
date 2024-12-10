@@ -71,6 +71,12 @@ jest.mock('../../lib/capabilities', () => ({
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
 }));
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn().mockResolvedValue({
+    lookBackWindow: 20,
+    statusChangeThreshold: 20,
+  }),
+}));
 
 describe('rule_form', () => {
   const ruleType = {
@@ -203,6 +209,9 @@ describe('rule_form', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.application.capabilities = {
         ...capabilities,
+        rulesSettings: {
+          writeFlappingSettingsUI: true,
+        },
         rules: {
           show: true,
           save: true,
@@ -320,6 +329,7 @@ describe('rule_form', () => {
             state: [],
           },
           enabledInLicense: true,
+          category: 'my-category',
         },
         {
           id: 'disabled-by-license',
@@ -343,6 +353,7 @@ describe('rule_form', () => {
             state: [],
           },
           enabledInLicense: false,
+          category: 'my-category',
         },
       ];
       useLoadRuleTypesQuery.mockReturnValue({
@@ -358,6 +369,9 @@ describe('rule_form', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.application.capabilities = {
         ...capabilities,
+        rulesSettings: {
+          writeFlappingSettingsUI: true,
+        },
         rules: {
           show: true,
           save: true,
@@ -567,6 +581,7 @@ describe('rule_form', () => {
               },
             ],
             enabledInLicense: true,
+            category: 'my-category',
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -640,6 +655,7 @@ describe('rule_form', () => {
               },
             ],
             enabledInLicense: true,
+            category: 'my-category',
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -718,6 +734,7 @@ describe('rule_form', () => {
               },
             ],
             enabledInLicense: true,
+            category: 'my-category',
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -777,6 +794,7 @@ describe('rule_form', () => {
               },
             ],
             enabledInLicense: true,
+            category: 'my-category',
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -836,6 +854,7 @@ describe('rule_form', () => {
               },
             ],
             enabledInLicense: true,
+            category: 'my-category',
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -895,6 +914,7 @@ describe('rule_form', () => {
               },
             ],
             enabledInLicense: true,
+            category: 'my-category',
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -954,6 +974,7 @@ describe('rule_form', () => {
               },
             ],
             enabledInLicense: true,
+            category: 'my-category',
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -1071,6 +1092,9 @@ describe('rule_form', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.application.capabilities = {
         ...capabilities,
+        rulesSettings: {
+          writeFlappingSettingsUI: true,
+        },
         rules: {
           show: true,
           save: true,

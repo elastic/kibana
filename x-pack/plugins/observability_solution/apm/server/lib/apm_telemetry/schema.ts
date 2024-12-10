@@ -7,7 +7,7 @@
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { AggregatedTransactionsCounts, APMUsage, APMPerService, DataStreamCombined } from './types';
-import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts, true> = {
   expected_metric_document_count: {
@@ -63,7 +63,7 @@ const dataStreamCombinedSchema: MakeSchemaFrom<DataStreamCombined, true> = {
   },
 };
 
-const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] = {
+const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][AgentName] = {
   agent: {
     version: {
       type: 'array',
@@ -460,6 +460,35 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
     python: agentSchema,
     ruby: agentSchema,
     'rum-js': agentSchema,
+    otlp: agentSchema,
+    opentelemetry: agentSchema,
+    'opentelemetry/cpp': agentSchema,
+    'opentelemetry/dotnet': agentSchema,
+    'opentelemetry/erlang': agentSchema,
+    'opentelemetry/go': agentSchema,
+    'opentelemetry/java': agentSchema,
+    'opentelemetry/nodejs': agentSchema,
+    'opentelemetry/php': agentSchema,
+    'opentelemetry/python': agentSchema,
+    'opentelemetry/ruby': agentSchema,
+    'opentelemetry/rust': agentSchema,
+    'opentelemetry/swift': agentSchema,
+    'opentelemetry/android': agentSchema,
+    'opentelemetry/webjs': agentSchema,
+    'otlp/cpp': agentSchema,
+    'otlp/dotnet': agentSchema,
+    'otlp/erlang': agentSchema,
+    'otlp/go': agentSchema,
+    'otlp/java': agentSchema,
+    'otlp/nodejs': agentSchema,
+    'otlp/php': agentSchema,
+    'otlp/python': agentSchema,
+    'otlp/ruby': agentSchema,
+    'otlp/rust': agentSchema,
+    'otlp/swift': agentSchema,
+    'otlp/android': agentSchema,
+    'otlp/webjs': agentSchema,
+    'ios/swift': agentSchema,
   },
 };
 

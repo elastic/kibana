@@ -28,10 +28,7 @@ import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
-import type { SearchHomepagePluginStart } from '@kbn/search-homepage/public';
-import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
-import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
+import { ConnectorDefinition } from '@kbn/search-connectors';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -56,20 +53,18 @@ export interface KibanaLogicProps {
   data?: DataPublicPluginStart;
   esConfig: ESConfig;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
+  getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
-  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
+  kibanaVersion?: string;
   lens?: LensPublicStart;
   ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
-  searchHomepage?: SearchHomepagePluginStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -90,21 +85,19 @@ export interface KibanaValues {
   data: DataPublicPluginStart | null;
   esConfig: ESConfig;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
+  getNavLinks: ChromeStart['navLinks']['getAll'];
   guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isCloud: boolean;
-  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
+  kibanaVersion: string | null;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
-  searchHomepage: SearchHomepagePluginStart | null;
-  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
-  searchPlayground: SearchPlaygroundPluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -131,11 +124,12 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     data: [props.data || null, {}],
     esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
     getChromeStyle$: [props.getChromeStyle$, {}],
+    getNavLinks: [props.getNavLinks, {}],
     guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
-    isSearchHomepageEnabled: [props.isSearchHomepageEnabled, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
+    kibanaVersion: [props.kibanaVersion || null, {}],
     lens: [props.lens || null, {}],
     ml: [props.ml || null, {}],
     navigateToUrl: [
@@ -149,9 +143,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
-    searchHomepage: [props.searchHomepage || null, {}],
-    searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
-    searchPlayground: [props.searchPlayground || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],

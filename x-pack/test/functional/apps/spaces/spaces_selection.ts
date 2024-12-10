@@ -21,6 +21,7 @@ export default function spaceSelectorFunctionalTests({
     'spaceSelector',
   ]);
   const spacesService = getService('spaces');
+  const sampleData = getService('sampleData');
 
   describe('Spaces', function () {
     const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
@@ -158,14 +159,7 @@ export default function spaceSelectorFunctionalTests({
       });
 
       after(async () => {
-        // No need to remove the same sample data in both spaces, the index
-        // data will be removed in the first call. By feature limitation,
-        // the created saved objects in the second space will be broken but removed
-        // when we call esArchiver.unload('x-pack/test/functional/es_archives/spaces').
-        await PageObjects.common.navigateToApp('home', {
-          hash: sampleDataHash,
-        });
-        await PageObjects.home.removeSampleDataSet('logs');
+        await sampleData.testResources.removeKibanaSampleData('logs');
         await PageObjects.security.forceLogout();
       });
 

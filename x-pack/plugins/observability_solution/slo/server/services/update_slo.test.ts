@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
@@ -16,6 +16,7 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, omit, pick } from 'lodash';
 
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -42,7 +43,7 @@ import { UpdateSLO } from './update_slo';
 describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockEsClient: ElasticsearchClientMock;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockLogger: jest.Mocked<MockedLogger>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
@@ -69,6 +70,8 @@ describe('UpdateSLO', () => {
 
   describe('when the update payload does not change the original SLO', () => {
     function expectNoCallsToAnyMocks() {
+      expect(mockEsClient.security.hasPrivileges).not.toBeCalled();
+
       expect(mockTransformManager.stop).not.toBeCalled();
       expect(mockTransformManager.uninstall).not.toBeCalled();
       expect(mockTransformManager.install).not.toBeCalled();
@@ -192,6 +195,12 @@ describe('UpdateSLO', () => {
   });
 
   describe('handles breaking changes', () => {
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
     it('consideres a settings change as a breaking change', async () => {
       const slo = createSLO();
       mockRepository.findById.mockResolvedValueOnce(slo);
@@ -204,7 +213,7 @@ describe('UpdateSLO', () => {
       await updateSLO.execute(slo.id, { settings: newSettings });
 
       expectDeletionOfOriginalSLOResources(slo);
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           ...slo,
           settings: newSettings,
@@ -302,6 +311,32 @@ describe('UpdateSLO', () => {
   });
 
   describe('when error happens during the update', () => {
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
+    it('throws a SecurityException error when the user does not have the required privileges on the source index', async () => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as SecurityHasPrivilegesResponse);
+
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ index: 'new-index-*' });
+
+      await expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrowError(
+        "Missing ['read', 'view_index_metadata'] privileges on the source index [new-index-*]"
+      );
+    });
+
     it('restores the previous SLO definition when updated summary transform install fails', async () => {
       const originalSlo = createSLO({
         id: 'original-id',
@@ -316,7 +351,7 @@ describe('UpdateSLO', () => {
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
       ).rejects.toThrowError('Transform install error');
 
-      expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(1); // for the sli only
@@ -343,7 +378,7 @@ describe('UpdateSLO', () => {
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
       ).rejects.toThrowError('summary transform start error');
 
-      expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
       expect(mockTransformManager.stop).toHaveBeenCalled();

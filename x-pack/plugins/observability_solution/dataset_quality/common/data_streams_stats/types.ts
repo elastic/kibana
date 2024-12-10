@@ -18,10 +18,14 @@ export type DataStreamStatServiceResponse = GetDataStreamsStatsResponse;
 export type GetDataStreamsDegradedDocsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
 export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsStatsParams['query'];
-export type GetDataStreamsDegradedDocsStatsResponse =
-  APIReturnType<`GET /internal/dataset_quality/data_streams/degraded_docs`>;
-export type DegradedDocsStatType = GetDataStreamsDegradedDocsStatsResponse['degradedDocs'][0];
-export type DataStreamDegradedDocsStatServiceResponse = DegradedDocsStatType[];
+
+/*
+Types for stats based in documents inside a DataStream
+*/
+
+export type GetDataStreamsTotalDocsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/total_docs`>['params'];
+export type GetDataStreamsTotalDocsQuery = GetDataStreamsTotalDocsParams['query'];
 
 /*
 Types for Degraded Fields inside a DataStream

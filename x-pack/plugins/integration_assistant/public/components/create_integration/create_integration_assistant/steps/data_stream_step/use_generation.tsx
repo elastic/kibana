@@ -16,6 +16,7 @@ import {
   type EcsMappingRequestBody,
   type RelatedRequestBody,
 } from '../../../../../../common';
+import { isGenerationErrorBody } from '../../../../../../common/api/generation_error';
 import {
   runCategorizationGraph,
   runEcsGraph,
@@ -26,8 +27,9 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
-import type { ErrorCode } from '../../../../../../common/constants';
 import type { AIConnector, IntegrationSettings } from '../../types';
+import type { ErrorMessageWithLink } from '../../../../../../common/api/generation_error';
+import { GenerationErrorCode } from '../../../../../../common/constants';
 
 export type OnComplete = (result: State['result']) => void;
 export const ProgressOrder = ['analyzeLogs', 'ecs', 'categorization', 'related'] as const;
@@ -46,6 +48,29 @@ interface RunGenerationProps {
   setProgress: (progress: ProgressItem) => void;
 }
 
+// If the result is classified as a generation error, produce an error message
+// as defined in the i18n file. Otherwise, return undefined.
+function generationErrorMessage(
+  body: unknown | undefined
+): string | ErrorMessageWithLink | undefined {
+  if (!isGenerationErrorBody(body)) {
+    return;
+  }
+
+  const errorCode = body.attributes.errorCode;
+  if (errorCode === GenerationErrorCode.CEF_ERROR) {
+    if (body.attributes.errorMessageWithLink !== undefined) {
+      return {
+        link: body.attributes.errorMessageWithLink.link,
+        errorMessage: i18n.DECODE_CEF_LINK,
+        linkText: body.attributes.errorMessageWithLink.linkText,
+      };
+    }
+  }
+  const translation = i18n.GENERATION_ERROR_TRANSLATION[errorCode];
+  return typeof translation === 'function' ? translation(body.attributes) : translation;
+}
+
 interface GenerationResults {
   pipeline: Pipeline;
   docs: Docs;
@@ -60,7 +85,7 @@ export const useGeneration = ({
   const { reportGenerationComplete } = useTelemetry();
   const { http, notifications } = useKibana().services;
   const [progress, setProgress] = useState<ProgressItem>();
-  const [error, setError] = useState<null | string>(null);
+  const [error, setError] = useState<null | string | ErrorMessageWithLink>(null);
   const [isRequesting, setIsRequesting] = useState<boolean>(true);
 
   useEffect(() => {
@@ -96,12 +121,7 @@ export const useGeneration = ({
           error: originalErrorMessage,
         });
 
-        let errorMessage = originalErrorMessage;
-        const errorCode = e.body?.attributes?.errorCode as ErrorCode | undefined;
-        if (errorCode != null) {
-          errorMessage = i18n.ERROR_TRANSLATION[errorCode];
-        }
-        setError(errorMessage);
+        setError(generationErrorMessage(e.body) ?? originalErrorMessage);
       } finally {
         setIsRequesting(false);
       }
@@ -145,6 +165,9 @@ async function runGeneration({
     const analyzeLogsRequest: AnalyzeLogsRequestBody = {
       packageName: integrationSettings.name ?? '',
       dataStreamName: integrationSettings.dataStreamName ?? '',
+      packageTitle: integrationSettings.title ?? integrationSettings.name ?? '',
+      dataStreamTitle:
+        integrationSettings.dataStreamTitle ?? integrationSettings.dataStreamName ?? '',
       logSamples: integrationSettings.logSamples ?? [],
       connectorId: connector.id,
       langSmithOptions: getLangSmithOptions(),

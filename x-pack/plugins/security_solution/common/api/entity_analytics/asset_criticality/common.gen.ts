@@ -53,8 +53,37 @@ export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
   })
 );
 
+export type AssetCriticalityRecordEcsParts = z.infer<typeof AssetCriticalityRecordEcsParts>;
+export const AssetCriticalityRecordEcsParts = z.object({
+  asset: z.object({
+    criticality: AssetCriticalityLevel.optional(),
+  }),
+  host: z
+    .object({
+      name: z.string(),
+      asset: z
+        .object({
+          criticality: AssetCriticalityLevel,
+        })
+        .optional(),
+    })
+    .optional(),
+  user: z
+    .object({
+      name: z.string(),
+      asset: z
+        .object({
+          criticality: AssetCriticalityLevel,
+        })
+        .optional(),
+    })
+    .optional(),
+});
+
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;
 export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
+  AssetCriticalityRecordEcsParts
+).merge(
   z.object({
     /**
      * The time the record was created or updated.

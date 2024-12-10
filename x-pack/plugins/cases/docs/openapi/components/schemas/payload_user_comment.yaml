@@ -6,7 +6,7 @@ properties:
       comment:
         type: string
       owner:
-        $ref: 'owners.yaml'
+        $ref: 'owner.yaml'
       type:
         type: string
         enum:

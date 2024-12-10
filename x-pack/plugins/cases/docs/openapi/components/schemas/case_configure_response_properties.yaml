@@ -45,7 +45,7 @@ mappings:
         type: string
         example: summary
 owner:
-  $ref: 'owners.yaml'
+  $ref: 'owner.yaml'
 templates:
   $ref: 'templates.yaml'
 updated_at:

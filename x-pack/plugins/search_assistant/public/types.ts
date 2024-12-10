@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { AppMountParameters } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchAssistantPluginSetup {}
@@ -16,7 +19,10 @@ export interface SearchAssistantPluginSetup {}
 export interface SearchAssistantPluginStart {}
 
 export interface SearchAssistantPluginStartDependencies {
-  history: AppMountParameters['history'];
+  licensing: LicensingPluginStart;
+  ml: MlPluginStart;
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  share: SharePluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection?: UsageCollectionStart;
 }

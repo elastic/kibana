@@ -25,6 +25,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -174,7 +175,7 @@ export const OptionsListControl = ({
   );
 
   return (
-    <EuiFilterGroup fullWidth compressed className={controlPanelClassName}>
+    <EuiFilterGroup fullWidth compressed={isCompressed(api)} className={controlPanelClassName}>
       <EuiInputPopover
         id={popoverId}
         ownFocus

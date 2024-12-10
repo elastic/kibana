@@ -11,6 +11,7 @@ import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '@kbn/core/server';
 import { KibanaFeatureConfig, KibanaFeatureScope } from '../common';
 import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
+import { AlertingKibanaPrivilege } from '../common/alerting_kibana_privilege';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -63,7 +64,13 @@ const managementSchema = schema.recordOf(
   listOfCapabilitiesSchema
 );
 const catalogueSchema = listOfCapabilitiesSchema;
-const alertingSchema = schema.arrayOf(schema.string());
+const alertingSchema = schema.arrayOf(
+  schema.object({
+    ruleTypeId: schema.string(),
+    consumers: schema.arrayOf(schema.string(), { minSize: 1 }),
+  })
+);
+
 const casesSchema = schema.arrayOf(schema.string());
 
 const appCategorySchema = schema.object({
@@ -83,6 +90,8 @@ const casesSchemaObject = schema.maybe(
     delete: schema.maybe(casesSchema),
     push: schema.maybe(casesSchema),
     settings: schema.maybe(casesSchema),
+    createComment: schema.maybe(casesSchema),
+    reopenCase: schema.maybe(casesSchema),
   })
 );
 
@@ -116,6 +125,21 @@ const kibanaPrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.oneOf([
+      schema.arrayOf(
+        schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+      ),
+      schema.object({
+        minimal: schema.arrayOf(
+          schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+        ),
+        default: schema.arrayOf(
+          schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+        ),
+      }),
+    ])
+  ),
 });
 
 const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
@@ -155,6 +179,11 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.arrayOf(
+      schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+    )
+  ),
 });
 
 const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
@@ -256,6 +285,7 @@ const kibanaFeatureSchema = schema.object({
       ),
     })
   ),
+  deprecated: schema.maybe(schema.object({ notice: schema.string() })),
 });
 
 const elasticsearchPrivilegeSchema = schema.object({
@@ -308,7 +338,14 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
   const unseenCatalogue = new Set(catalogue);
 
-  const unseenAlertTypes = new Set(alerting);
+  const alertingMap = new Map(
+    alerting.map(({ ruleTypeId, consumers }) => [ruleTypeId, new Set(consumers)])
+  );
+
+  const unseenAlertingRyleTypeIds = new Set(alertingMap.keys());
+  const unseenAlertingConsumers = new Set(
+    alerting.flatMap(({ consumers }) => Array.from(consumers.values()))
+  );
 
   const unseenCasesTypes = new Set(cases);
 
@@ -339,20 +376,40 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   }
 
   function validateAlertingEntry(privilegeId: string, entry: FeatureKibanaPrivileges['alerting']) {
-    const all: string[] = [...(entry?.rule?.all ?? []), ...(entry?.alert?.all ?? [])];
-    const read: string[] = [...(entry?.rule?.read ?? []), ...(entry?.alert?.read ?? [])];
+    const seenRuleTypeIds = new Set<string>();
+    const seenConsumers = new Set<string>();
 
-    all.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
-    read.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
+    const validateAlertingPrivilege = (alertingPrivilege?: AlertingKibanaPrivilege) => {
+      for (const { ruleTypeId, consumers } of alertingPrivilege ?? []) {
+        if (!alertingMap.has(ruleTypeId)) {
+          throw new Error(
+            `Feature privilege ${feature.id}.${privilegeId} has unknown ruleTypeId: ${ruleTypeId}`
+          );
+        }
 
-    const unknownAlertingEntries = difference([...all, ...read], alerting);
-    if (unknownAlertingEntries.length > 0) {
-      throw new Error(
-        `Feature privilege ${
-          feature.id
-        }.${privilegeId} has unknown alerting entries: ${unknownAlertingEntries.join(', ')}`
-      );
-    }
+        const alertingMapConsumers = alertingMap.get(ruleTypeId)!;
+
+        for (const consumer of consumers) {
+          if (!alertingMapConsumers.has(consumer)) {
+            throw new Error(
+              `Feature privilege ${feature.id}.${privilegeId}.${ruleTypeId} has unknown consumer: ${consumer}`
+            );
+          }
+
+          seenConsumers.add(consumer);
+        }
+
+        seenRuleTypeIds.add(ruleTypeId);
+      }
+    };
+
+    validateAlertingPrivilege(entry?.rule?.all);
+    validateAlertingPrivilege(entry?.rule?.read);
+    validateAlertingPrivilege(entry?.alert?.all);
+    validateAlertingPrivilege(entry?.alert?.read);
+
+    seenRuleTypeIds.forEach((ruleTypeId: string) => unseenAlertingRyleTypeIds.delete(ruleTypeId));
+    seenConsumers.forEach((consumer: string) => unseenAlertingConsumers.delete(consumer));
   }
 
   function validateCasesEntry(privilegeId: string, entry: FeatureKibanaPrivileges['cases']) {
@@ -487,12 +544,22 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
     );
   }
 
-  if (unseenAlertTypes.size > 0) {
+  if (unseenAlertingRyleTypeIds.size > 0) {
     throw new Error(
       `Feature ${
         feature.id
-      } specifies alerting entries which are not granted to any privileges: ${Array.from(
-        unseenAlertTypes.values()
+      } specifies alerting rule types which are not granted to any privileges: ${Array.from(
+        unseenAlertingRyleTypeIds.keys()
+      ).join(',')}`
+    );
+  }
+
+  if (unseenAlertingConsumers.size > 0) {
+    throw new Error(
+      `Feature ${
+        feature.id
+      } specifies alerting consumers which are not granted to any privileges: ${Array.from(
+        unseenAlertingConsumers.keys()
       ).join(',')}`
     );
   }

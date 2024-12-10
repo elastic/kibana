@@ -199,7 +199,7 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
     }: Pick<PackageInfo, 'name' | 'version' | 'title'> & { redirectToVersion: string }) => {
       setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
 
-      const res = await sendRemovePackage(name, version);
+      const res = await sendRemovePackage({ pkgName: name, pkgVersion: version });
       if (res.error) {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         notifications.toasts.addWarning({

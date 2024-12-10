@@ -7,6 +7,7 @@
 
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { notFound } from '@hapi/boom';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { ErrorDistributionResponse, getErrorDistribution } from './distribution/get_distribution';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -205,7 +206,7 @@ const errorGroupSampleDetailsRoute = createApmServerRoute({
     const { serviceName, errorId } = params.path;
     const { environment, kuery, start, end } = params.query;
 
-    return getErrorSampleDetails({
+    const { transaction, error } = await getErrorSampleDetails({
       environment,
       errorId,
       kuery,
@@ -214,6 +215,12 @@ const errorGroupSampleDetailsRoute = createApmServerRoute({
       start,
       end,
     });
+
+    if (!error) {
+      throw notFound();
+    }
+
+    return { error, transaction };
   },
 });
 

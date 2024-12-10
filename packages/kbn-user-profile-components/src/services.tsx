@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext } from 'react';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { NotificationsStart, ToastOptions } from '@kbn/core-notifications-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { UserProfileAPIClient } from './types';
 
@@ -46,6 +48,7 @@ export interface UserProfilesKibanaDependencies {
   core: {
     notifications: NotificationsStart;
     theme: ThemeServiceStart;
+    userProfile: UserProfileService;
     i18n: I18nStart;
   };
   security: {
@@ -69,7 +72,7 @@ export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibana
   ...services
 }) => {
   const {
-    core: { notifications, i18n, theme },
+    core: { notifications, ...startServices },
     security: { userProfiles: userProfileApiClient },
     toMountPoint: toMountPointUtility,
   } = services;
@@ -85,7 +88,7 @@ export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibana
         notifications.toasts.addSuccess(
           {
             title,
-            text: text ? toMountPointUtility(text, { i18n, theme }) : undefined,
+            text: text ? toMountPointUtility(text, startServices) : undefined,
           },
           toastOptions
         );

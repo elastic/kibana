@@ -147,6 +147,10 @@ export const getCertsRequestBody = ({
         'tls.server.hash.sha256',
         'tls.server.x509.not_after',
         'tls.server.x509.not_before',
+        'service',
+        'labels',
+        'tags',
+        'error',
       ],
       collapse: {
         field: 'tls.server.hash.sha256',
@@ -207,11 +211,18 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       not_before: notBefore,
       common_name: commonName,
       monitorName: ping?.monitor?.name,
+      monitorId: ping?.monitor?.id,
+      serviceName: ping?.service?.name,
       configId: ping.config_id!,
       monitorUrl: ping?.url?.full,
+      labels: ping?.labels,
+      tags: ping?.tags,
       '@timestamp': ping['@timestamp'],
       monitorType: ping?.monitor?.type,
+      locationId: ping?.observer?.name,
       locationName: ping?.observer?.geo?.name,
+      errorMessage: ping?.error?.message,
+      errorStackTrace: ping?.error?.stack_trace,
     };
   });
   const total = result.aggregations?.total?.value ?? 0;

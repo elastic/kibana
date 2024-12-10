@@ -64,12 +64,9 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders>
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
       <MockMlData>
-        <FieldReadOnly
-          fieldName="machine_learning_job_id"
-          finalDiffableRule={args.finalDiffableRule}
-        />
+        <FieldReadOnly fieldName="machine_learning_job_id" />
       </MockMlData>
     </ThreeWayDiffStorybookProviders>
   );

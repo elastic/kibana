@@ -17,7 +17,7 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 
 import { TIMELINES_PATH } from '../../../common/constants';
 
-const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineTypeEnum.default}|${TimelineTypeEnum.template}|notes)`;
+const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineTypeEnum.default}|${TimelineTypeEnum.template})`;
 const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineTypeEnum.default}`;
 
 export const Timelines = React.memo(() => (

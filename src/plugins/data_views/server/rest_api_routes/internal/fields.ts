@@ -21,7 +21,7 @@ import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for'
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
-  const hash = createHash('sha1');
+  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
   hash.update(srcBuffer);
   return hash.digest('hex');
 }
@@ -146,10 +146,17 @@ export const registerFields = (
   >,
   isRollupsEnabled: () => boolean
 ) => {
-  router.versioned
-    .get({ path, access: 'internal', enableQueryVersion: true })
-    .addVersion(
-      { version: '1', validate: { request: { query: querySchema }, response: validate.response } },
-      handler(isRollupsEnabled)
-    );
+  router.versioned.get({ path, access: 'internal', enableQueryVersion: true }).addVersion(
+    {
+      version: '1',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by Elasticsearch',
+        },
+      },
+      validate: { request: { query: querySchema }, response: validate.response },
+    },
+    handler(isRollupsEnabled)
+  );
 };

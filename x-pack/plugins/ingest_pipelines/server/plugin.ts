@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
+import { IngestPipelinesConfigType } from './config';
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
 import { Dependencies } from './types';
 
 export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
+  private readonly config: IngestPipelinesConfigType;
 
-  constructor() {
+  constructor(initContext: PluginInitializerContext<IngestPipelinesConfigType>) {
     this.apiRoutes = new ApiRoutes();
+    this.config = initContext.config.get();
   }
 
   public setup({ http }: CoreSetup, { security, features }: Dependencies) {
@@ -38,6 +41,7 @@ export class IngestPipelinesPlugin implements Plugin<void, void, any, any> {
       router,
       config: {
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
+        enableManageProcessors: this.config.enableManageProcessors !== false,
       },
       lib: {
         handleEsError,

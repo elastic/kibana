@@ -75,6 +75,36 @@ describe('licensing plugin', () => {
       });
     });
 
+    describe('#getLicense', () => {
+      it('awaits for the license and returns it', async () => {
+        const sessionStorage = coreMock.createStorage();
+        plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+        const coreSetup = coreMock.createSetup();
+        const firstLicense = licenseMock.createLicense({
+          license: { uid: 'first', type: 'basic' },
+        });
+        coreSetup.http.get.mockResolvedValueOnce(firstLicense);
+
+        await plugin.setup(coreSetup);
+        const { license$, getLicense, refresh } = await plugin.start(coreStart);
+        const getLicensePromise = getLicense();
+
+        let fromObservable;
+        license$.subscribe((license) => (fromObservable = license));
+        await refresh(); // force the license fetch
+
+        const licenseResult = await getLicensePromise;
+        expect(licenseResult.uid).toBe('first');
+        expect(licenseResult).toBe(fromObservable);
+
+        const secondResult = await getLicense(); // retrieves the same license without refreshing
+        expect(secondResult.uid).toBe('first');
+        expect(secondResult).toBe(fromObservable);
+        expect(coreSetup.http.get).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('#license$', () => {
       it('starts with license saved in sessionStorage if available', async () => {
         const sessionStorage = coreMock.createStorage();

@@ -9,7 +9,7 @@ import type { EventTypeOpts } from '@kbn/core/server';
 
 export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   model: string;
-  resourceAccessed: string;
+  resourceAccessed?: string;
   resultCount: number;
   responseTime: number;
 }> = {
@@ -25,6 +25,7 @@ export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Which knowledge base resource was accessed',
+        optional: true,
       },
     },
     resultCount: {
@@ -44,7 +45,7 @@ export const KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
 
 export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
   model: string;
-  resourceAccessed: string;
+  resourceAccessed?: string;
   errorMessage: string;
 }> = {
   eventType: 'knowledge_base_execution_error',
@@ -59,6 +60,7 @@ export const KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT: EventTypeOpts<{
       type: 'keyword',
       _meta: {
         description: 'Which knowledge base resource was accessed',
+        optional: true,
       },
     },
     errorMessage: {
@@ -74,7 +76,16 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   assistantStreamingEnabled: boolean;
   actionTypeId: string;
   isEnabledKnowledgeBase: boolean;
+  durationMs: number;
+  ['toolsInvoked.AlertCountsTool']?: number;
+  ['toolsInvoked.NaturalLanguageESQLTool']?: number;
+  ['toolsInvoked.KnowledgeBaseRetrievalTool']?: number;
+  ['toolsInvoked.KnowledgeBaseWriteTool']?: number;
+  ['toolsInvoked.OpenAndAcknowledgedAlertsTool']?: number;
+  ['toolsInvoked.SecurityLabsKnowledgeBaseTool']?: number;
+  ['toolsInvoked.CustomTool']?: number;
   model?: string;
+  isOssModel?: boolean;
 }> = {
   eventType: 'invoke_assistant_success',
   schema: {
@@ -101,6 +112,68 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: {
         description: 'Is knowledge base enabled',
+      },
+    },
+    isOssModel: {
+      type: 'boolean',
+      _meta: {
+        description: 'Is OSS model used on the request',
+        optional: true,
+      },
+    },
+    durationMs: {
+      type: 'integer',
+      _meta: {
+        description: 'The duration of the request.',
+      },
+    },
+    'toolsInvoked.AlertCountsTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.NaturalLanguageESQLTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.KnowledgeBaseRetrievalTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.KnowledgeBaseWriteTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.OpenAndAcknowledgedAlertsTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.SecurityLabsKnowledgeBaseTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
+      },
+    },
+    'toolsInvoked.CustomTool': {
+      type: 'long',
+      _meta: {
+        description: 'Number of times tool was invoked.',
+        optional: true,
       },
     },
   },
@@ -259,11 +332,188 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
+export const CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT: EventTypeOpts<{
+  entryType: 'index' | 'document';
+  required: boolean;
+  sharing: 'private' | 'global';
+  source?: string;
+}> = {
+  eventType: 'create_knowledge_base_entry_success',
+  schema: {
+    entryType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Index entry or document entry',
+      },
+    },
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description: 'Sharing setting: private or global',
+      },
+    },
+    required: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether this resource should always be included',
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the knowledge base document entry was created',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT: EventTypeOpts<{
+  entryType: 'index' | 'document';
+  required: boolean;
+  sharing: 'private' | 'global';
+  source?: string;
+  errorMessage: string;
+}> = {
+  eventType: 'create_knowledge_base_entry_error',
+  schema: {
+    entryType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Index entry or document entry',
+      },
+    },
+    sharing: {
+      type: 'keyword',
+      _meta: {
+        description: 'Sharing setting: private or global',
+      },
+    },
+    required: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether this resource should always be included',
+      },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the knowledge base document entry was created',
+        optional: true,
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message',
+      },
+    },
+  },
+};
+
+export const DEFEND_INSIGHT_SUCCESS_EVENT: EventTypeOpts<{
+  actionTypeId: string;
+  eventsContextCount: number;
+  insightsGenerated: number;
+  durationMs: number;
+  model?: string;
+  provider?: string;
+}> = {
+  eventType: 'defend_insight_success',
+  schema: {
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    eventsContextCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of events sent as context to the LLM',
+        optional: false,
+      },
+    },
+    insightsGenerated: {
+      type: 'integer',
+      _meta: {
+        description: 'Quantity of Defend insights generated',
+        optional: false,
+      },
+    },
+    durationMs: {
+      type: 'integer',
+      _meta: {
+        description: 'Duration of request in ms',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+  },
+};
+
+export const DEFEND_INSIGHT_ERROR_EVENT: EventTypeOpts<{
+  actionTypeId: string;
+  errorMessage: string;
+  model?: string;
+  provider?: string;
+}> = {
+  eventType: 'defend_insight_error',
+  schema: {
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana connector type',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message from Elasticsearch',
+      },
+    },
+
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'LLM model',
+        optional: true,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'OpenAI provider',
+        optional: true,
+      },
+    },
+  },
+};
+
 export const events: Array<EventTypeOpts<{ [key: string]: unknown }>> = [
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
+  CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
   INVOKE_ASSISTANT_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
   ATTACK_DISCOVERY_ERROR_EVENT,
+  DEFEND_INSIGHT_SUCCESS_EVENT,
+  DEFEND_INSIGHT_ERROR_EVENT,
 ];

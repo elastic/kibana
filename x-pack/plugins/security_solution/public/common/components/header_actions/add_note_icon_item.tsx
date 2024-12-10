@@ -6,11 +6,33 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
-import * as i18n from './translations';
 import { ActionIconItem } from './action_icon_item';
+
+const NOTES_DISABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
+  {
+    defaultMessage: 'Notes cannot be added here while editing a template Timeline.',
+  }
+);
+const NOTES_ADD_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.body.notes.addNoteTooltip',
+  {
+    defaultMessage: 'Add note',
+  }
+);
+const NOTES_COUNT_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
+  i18n.translate(
+    'xpack.securitySolution.timeline.body.notes.addNote.multipleNotesAvailableTooltip',
+    {
+      values: { notesCount },
+      defaultMessage:
+        '{notesCount} {notesCount, plural, one {note} other {notes}  } available. Click to view {notesCount, plural, one {it} other {them}} and add more.',
+    }
+  );
 
 interface AddEventNoteActionProps {
   ariaLabel?: string;
@@ -33,7 +55,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
   const NOTES_TOOLTIP = useMemo(
-    () => (notesCount > 0 ? i18n.NOTES_COUNT_TOOLTIP({ notesCount }) : i18n.NOTES_ADD_TOOLTIP),
+    () => (notesCount > 0 ? NOTES_COUNT_TOOLTIP({ notesCount }) : NOTES_ADD_TOOLTIP),
     [notesCount]
   );
 
@@ -45,9 +67,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
         isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
-        toolTip={
-          timelineType === TimelineTypeEnum.template ? i18n.NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP
-        }
+        toolTip={timelineType === TimelineTypeEnum.template ? NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP}
         eventId={eventId}
         notesCount={notesCount}
       />

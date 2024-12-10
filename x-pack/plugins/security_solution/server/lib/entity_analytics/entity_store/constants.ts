@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import type { EngineStatus } from '../../../../common/api/entity_analytics/entity_store/common.gen';
-import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import type { EngineStatus, StoreStatus } from '../../../../common/api/entity_analytics';
 
-/**
- * Default index pattern for entity store
- * This is the same as the default index pattern for the SIEM app but might diverge in the future
- */
-export const ENTITY_STORE_DEFAULT_SOURCE_INDICES = DEFAULT_INDEX_PATTERN;
+export const DEFAULT_LOOKBACK_PERIOD = '24h';
 
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
   INSTALLING: 'installing',
   STARTED: 'started',
   STOPPED: 'stopped',
+  UPDATING: 'updating',
+  ERROR: 'error',
+};
+
+export const ENTITY_STORE_STATUS: Record<Uppercase<StoreStatus>, StoreStatus> = {
+  RUNNING: 'running',
+  STOPPED: 'stopped',
+  INSTALLING: 'installing',
+  NOT_INSTALLED: 'not_installed',
+  ERROR: 'error',
 };
 
 export const MAX_SEARCH_RESPONSE_SIZE = 10_000;

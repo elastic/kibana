@@ -26,7 +26,9 @@ import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_
 
 const AGENT_BEAT_FILE_PATH_SUFFIX = '/components/agentbeat';
 
-describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/170370
+// FLAKY: https://github.com/elastic/kibana/issues/170371
+describe.skip('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -63,6 +65,15 @@ describe('Response console', { tags: ['@ess', '@serverless', '@skipInServerlessM
 
       if (createdHost) {
         deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+      }
+    });
+
+    afterEach(function () {
+      if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+        cy.task('captureHostVmAgentDiagnostics', {
+          hostname: createdHost.hostname,
+          fileNamePrefix: this.currentTest?.fullTitle(),
+        });
       }
     });
 

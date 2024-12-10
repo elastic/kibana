@@ -7,4 +7,3 @@
 
 export * from './unisolate';
 export * from './unisolate.gen';
-export * from './deprecated_unisolate.gen';

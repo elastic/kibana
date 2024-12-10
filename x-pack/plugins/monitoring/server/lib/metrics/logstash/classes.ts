@@ -7,11 +7,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ClusterMetric, Metric, MetricOptions } from '../classes';
-import { LARGE_FLOAT } from '../../../../common/formatting';
+import _ from 'lodash';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
+import { LARGE_FLOAT } from '../../../../common/formatting';
+import { ClusterMetric, Metric, MetricOptions } from '../classes';
 
 const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.msTimeUnitLabel', {
   defaultMessage: 'ms',
@@ -301,8 +301,8 @@ export class LogstashPipelineQueueSizeMetric extends LogstashMetric {
       },
     };
     this.calculation = (bucket: object) => {
-      const legacyQueueSize = _.get(bucket, 'pipelines.total_queue_size_for_node.value');
-      const mbQueueSize = _.get(bucket, 'pipelines_mb.total_queue_size_for_node.value');
+      const legacyQueueSize = _.get(bucket, 'pipelines.total_queue_size_for_node.value', 0);
+      const mbQueueSize = _.get(bucket, 'pipelines_mb.total_queue_size_for_node.value', 0);
       return Math.max(legacyQueueSize, mbQueueSize);
     };
   }
@@ -411,7 +411,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
 
 type LogstashPipelineNodeCountMetricOptions = Pick<
   MetricOptions,
-  'field' | 'label' | 'description' | 'format' | 'units'
+  'field' | 'label' | 'mbField' | 'description' | 'format' | 'units'
 > &
   Partial<Pick<MetricOptions, 'uuidField'>>;
 
@@ -427,15 +427,10 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
     }: {
       pageOfPipelines: Array<{ id: string }>;
     }) => {
-      const termAggExtras: {
-        include: string[];
-      } = {
-        include: [],
-      };
+      const include: string[] | undefined = pageOfPipelines?.length
+        ? pageOfPipelines.map((pipeline) => pipeline.id)
+        : undefined;
 
-      if (pageOfPipelines) {
-        termAggExtras.include = pageOfPipelines.map((pipeline) => pipeline.id);
-      }
       return {
         pipelines_nested: {
           nested: {
@@ -446,7 +441,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
               terms: {
                 field: 'logstash_stats.pipelines.id',
                 size: 1000,
-                ...termAggExtras,
+                include,
               },
               aggs: {
                 to_root: {
@@ -472,7 +467,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
               terms: {
                 field: 'logstash.node.stats.pipelines.id',
                 size: 1000,
-                ...termAggExtras,
+                include,
               },
               aggs: {
                 to_root: {
@@ -480,7 +475,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
                   aggs: {
                     node_count: {
                       cardinality: {
-                        field: this.field,
+                        field: this.mbField,
                       },
                     },
                   },

@@ -6,7 +6,6 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { getOr } from 'lodash/fp';
 import { v1 as uuidv1 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -16,7 +15,7 @@ import { identity } from 'fp-ts/lib/function';
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import { MAX_UNASSOCIATED_NOTES, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
   BareNote,
@@ -30,8 +29,6 @@ import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
-
-export const MAX_UNASSOCIATED_NOTES = 1000;
 
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -83,6 +80,11 @@ export const getNotesByTimelineId = async (
   return notesByTimelineId.notes;
 };
 
+export interface InternalNoteResponse extends ResponseNote {
+  message: string;
+  code: number;
+}
+
 export const persistNote = async ({
   request,
   noteId,
@@ -93,35 +95,18 @@ export const persistNote = async ({
   noteId: string | null;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}): Promise<ResponseNote> => {
-  try {
-    if (noteId == null) {
-      return await createNote({
-        request,
-        noteId,
-        note,
-        overrideOwner,
-      });
-    }
-
-    // Update existing note
-    return await updateNote({ request, noteId, note, overrideOwner });
-  } catch (err) {
-    if (getOr(null, 'output.statusCode', err) === 403) {
-      const noteToReturn: Note = {
-        ...note,
-        noteId: uuidv1(),
-        version: '',
-        timelineId: '',
-      };
-      return {
-        code: 403,
-        message: err.message,
-        note: noteToReturn,
-      };
-    }
-    throw err;
+}): Promise<InternalNoteResponse> => {
+  if (noteId == null) {
+    return createNote({
+      request,
+      noteId,
+      note,
+      overrideOwner,
+    });
   }
+
+  // Update existing note
+  return updateNote({ request, noteId, note, overrideOwner });
 };
 
 export const createNote = async ({
@@ -134,8 +119,11 @@ export const createNote = async ({
   noteId: string | null;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}): Promise<ResponseNote> => {
-  const savedObjectsClient = (await request.context.core).savedObjects.client;
+}): Promise<InternalNoteResponse> => {
+  const {
+    savedObjects: { client: savedObjectsClient },
+    uiSettings: { client: uiSettingsClient },
+  } = await request.context.core;
   const userInfo = request.user;
 
   const noteWithCreator = overrideOwner ? pickSavedNote(noteId, { ...note }, userInfo) : note;
@@ -145,15 +133,15 @@ export const createNote = async ({
       data: noteWithCreator,
     });
   if (references.length === 1 && references[0].id === '') {
-    // Limit unassociated events to 1000
+    const maxUnassociatedNotes = await uiSettingsClient.get<number>(MAX_UNASSOCIATED_NOTES);
     const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
       type: noteSavedObjectType,
       hasReference: { type: timelineSavedObjectType, id: '' },
     });
-    if (notesCount.total >= MAX_UNASSOCIATED_NOTES) {
+    if (notesCount.total >= maxUnassociatedNotes) {
       return {
         code: 403,
-        message: `Cannot create more than ${MAX_UNASSOCIATED_NOTES} notes without associating them to a timeline`,
+        message: `Cannot create more than ${maxUnassociatedNotes} notes without associating them to a timeline`,
         note: {
           ...note,
           noteId: uuidv1(),
@@ -202,7 +190,7 @@ export const updateNote = async ({
   noteId: string;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}): Promise<ResponseNote> => {
+}): Promise<InternalNoteResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 

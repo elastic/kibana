@@ -8,34 +8,24 @@
 import {
   Content,
   EnhancedGenerateContentResponse,
-  FunctionCallPart,
-  FunctionResponsePart,
   GenerateContentRequest,
   GenerateContentResult,
-  InlineDataPart,
-  POSSIBLE_ROLES,
-  Part,
-  TextPart,
-  FinishReason,
-  SafetyRating,
 } from '@google/generative-ai';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { ToolCallChunk } from '@langchain/core/dist/messages/tool';
-import {
-  AIMessageChunk,
-  BaseMessage,
-  ChatMessage,
-  isBaseMessage,
-  UsageMetadata,
-} from '@langchain/core/messages';
+import { BaseMessage, UsageMetadata } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { Logger } from '@kbn/logging';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { get } from 'lodash/fp';
 import { Readable } from 'stream';
+import {
+  convertBaseMessagesToContent,
+  convertResponseBadFinishReasonToErrorMsg,
+  convertResponseContentToChatGenerationChunk,
+} from '../utils/gemini';
 const DEFAULT_GEMINI_TEMPERATURE = 0;
 
 export interface CustomChatModelInput extends BaseChatModelParams {
@@ -46,12 +36,6 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   signal?: AbortSignal;
   model?: string;
   maxTokens?: number;
-}
-
-// not sure why these properties are not on the type, as they are on the data
-interface SafetyReason extends SafetyRating {
-  blocked: boolean;
-  severity: string;
 }
 
 export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
@@ -103,9 +87,13 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
         };
 
         if (actionResult.status === 'error') {
-          throw new Error(
+          const error = new Error(
             `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
           );
+          if (actionResult?.serviceMessage) {
+            error.name = actionResult?.serviceMessage;
+          }
+          throw error;
         }
 
         if (actionResult.data.candidates && actionResult.data.candidates.length > 0) {
@@ -178,9 +166,13 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
       const actionResult = await this.#actionsClient.execute(requestBody);
 
       if (actionResult.status === 'error') {
-        throw new Error(
+        const error = new Error(
           `ActionsClientGeminiChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
         );
+        if (actionResult?.serviceMessage) {
+          error.name = actionResult?.serviceMessage;
+        }
+        throw error;
       }
 
       const readable = get('data', actionResult) as Readable;
@@ -207,7 +199,11 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
         partialStreamChunk += nextChunk;
       }
 
-      if (parsedStreamChunk !== null && !parsedStreamChunk.candidates?.[0]?.finishReason) {
+      if (parsedStreamChunk !== null) {
+        const errorMessage = convertResponseBadFinishReasonToErrorMsg(parsedStreamChunk);
+        if (errorMessage != null) {
+          throw new Error(errorMessage);
+        }
         const response = {
           ...parsedStreamChunk,
           functionCalls: () =>
@@ -255,267 +251,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
           yield chunk;
           await runManager?.handleLLMNewToken(chunk.text ?? '');
         }
-      } else if (parsedStreamChunk) {
-        // handle bad finish reason
-        const errorMessage = convertResponseBadFinishReasonToErrorMsg(parsedStreamChunk);
-        if (errorMessage != null) {
-          throw new Error(errorMessage);
-        }
       }
     }
   }
 }
-
-export function convertResponseContentToChatGenerationChunk(
-  response: EnhancedGenerateContentResponse,
-  extra: {
-    usageMetadata?: UsageMetadata | undefined;
-    index: number;
-  }
-): ChatGenerationChunk | null {
-  if (!response.candidates || response.candidates.length === 0) {
-    return null;
-  }
-  const functionCalls = response.functionCalls();
-  const [candidate] = response.candidates;
-  const { content, ...generationInfo } = candidate;
-  const text = content?.parts[0]?.text ?? '';
-
-  const toolCallChunks: ToolCallChunk[] = [];
-  if (functionCalls) {
-    toolCallChunks.push(
-      ...functionCalls.map((fc) => ({
-        ...fc,
-        args: JSON.stringify(fc.args),
-        index: extra.index,
-        type: 'tool_call_chunk' as const,
-      }))
-    );
-  }
-  return new ChatGenerationChunk({
-    text,
-    message: new AIMessageChunk({
-      content: text,
-      name: !content ? undefined : content.role,
-      tool_call_chunks: toolCallChunks,
-      // Each chunk can have unique "generationInfo", and merging strategy is unclear,
-      // so leave blank for now.
-      additional_kwargs: {},
-      usage_metadata: extra.usageMetadata,
-    }),
-    generationInfo,
-  });
-}
-
-export function convertAuthorToRole(author: string): (typeof POSSIBLE_ROLES)[number] {
-  switch (author) {
-    /**
-     *  Note: Gemini currently is not supporting system messages
-     *  we will convert them to human messages and merge with following
-     * */
-    case 'ai':
-    case 'model': // getMessageAuthor returns message.name. code ex.: return message.name ?? type;
-      return 'model';
-    case 'system':
-    case 'human':
-      return 'user';
-    case 'tool':
-    case 'function':
-      return 'function';
-    default:
-      throw new Error(`Unknown / unsupported author: ${author}`);
-  }
-}
-export function convertBaseMessagesToContent(messages: BaseMessage[], isMultimodalModel: boolean) {
-  return messages.reduce<{
-    content: Content[];
-    mergeWithPreviousContent: boolean;
-  }>(
-    (acc, message, index) => {
-      if (!isBaseMessage(message)) {
-        throw new Error('Unsupported message input');
-      }
-      const author = getMessageAuthor(message);
-      if (author === 'system' && index !== 0) {
-        throw new Error('System message should be the first one');
-      }
-      const role = convertAuthorToRole(author);
-      const parts = convertMessageContentToParts(message, isMultimodalModel);
-
-      if (acc.mergeWithPreviousContent) {
-        const prevContent = acc.content[acc.content.length - 1];
-        if (!prevContent) {
-          throw new Error(
-            'There was a problem parsing your system message. Please try a prompt without one.'
-          );
-        }
-        prevContent.parts.push(...parts);
-
-        return {
-          mergeWithPreviousContent: false,
-          content: acc.content,
-        };
-      }
-      let actualRole = role;
-      if (actualRole === 'function') {
-        // GenerativeAI API will throw an error if the role is not "user" or "model."
-        actualRole = 'user';
-      }
-      const content: Content = {
-        role: actualRole,
-        parts,
-      };
-      return {
-        mergeWithPreviousContent: author === 'system',
-        content: [...acc.content, content],
-      };
-    },
-    { content: [], mergeWithPreviousContent: false }
-  ).content;
-}
-
-export function convertMessageContentToParts(
-  message: BaseMessage,
-  isMultimodalModel: boolean
-): Part[] {
-  if (typeof message.content === 'string' && message.content !== '') {
-    return [{ text: message.content }];
-  }
-
-  let functionCalls: FunctionCallPart[] = [];
-  let functionResponses: FunctionResponsePart[] = [];
-  let messageParts: Part[] = [];
-
-  if (
-    'tool_calls' in message &&
-    Array.isArray(message.tool_calls) &&
-    message.tool_calls.length > 0
-  ) {
-    functionCalls = message.tool_calls.map((tc) => ({
-      functionCall: {
-        name: tc.name,
-        args: tc.args,
-      },
-    }));
-  } else if (message._getType() === 'tool' && message.name && message.content) {
-    functionResponses = [
-      {
-        functionResponse: {
-          name: message.name,
-          response: message.content,
-        },
-      },
-    ];
-  } else if (Array.isArray(message.content)) {
-    messageParts = message.content.map((c) => {
-      if (c.type === 'text') {
-        return {
-          text: c.text,
-        } as TextPart;
-      }
-
-      if (c.type === 'image_url') {
-        if (!isMultimodalModel) {
-          throw new Error(`This model does not support images`);
-        }
-        let source;
-        if (typeof c.image_url === 'string') {
-          source = c.image_url;
-        } else if (typeof c.image_url === 'object' && 'url' in c.image_url) {
-          source = c.image_url.url;
-        } else {
-          throw new Error('Please provide image as base64 encoded data URL');
-        }
-        const [dm, data] = source.split(',');
-        if (!dm.startsWith('data:')) {
-          throw new Error('Please provide image as base64 encoded data URL');
-        }
-
-        const [mimeType, encoding] = dm.replace(/^data:/, '').split(';');
-        if (encoding !== 'base64') {
-          throw new Error('Please provide image as base64 encoded data URL');
-        }
-
-        return {
-          inlineData: {
-            data,
-            mimeType,
-          },
-        } as InlineDataPart;
-      } else if (c.type === 'media') {
-        return messageContentMedia(c);
-      } else if (c.type === 'tool_use') {
-        return {
-          functionCall: {
-            name: c.name,
-            args: c.input,
-          },
-        } as FunctionCallPart;
-      }
-      throw new Error(`Unknown content type ${(c as { type: string }).type}`);
-    });
-  }
-
-  return [...messageParts, ...functionCalls, ...functionResponses];
-}
-
-export function getMessageAuthor(message: BaseMessage) {
-  const type = message._getType();
-  if (ChatMessage.isInstance(message)) {
-    return message.role;
-  }
-  if (type === 'tool') {
-    return type;
-  }
-  return message.name ?? type;
-}
-
-// will be removed once FileDataPart is supported in @langchain/google-genai
-function messageContentMedia(content: Record<string, unknown>): InlineDataPart {
-  if ('mimeType' in content && 'data' in content) {
-    return {
-      inlineData: {
-        mimeType: content.mimeType,
-        data: content.data,
-      },
-    } as InlineDataPart;
-  }
-  throw new Error('Invalid media content');
-}
-
-const badFinishReasons = [FinishReason.RECITATION, FinishReason.SAFETY];
-function hadBadFinishReason(candidate: { finishReason?: FinishReason }) {
-  return !!candidate.finishReason && badFinishReasons.includes(candidate.finishReason);
-}
-
-export function convertResponseBadFinishReasonToErrorMsg(
-  response: EnhancedGenerateContentResponse
-): string | null {
-  if (response.candidates && response.candidates.length > 0) {
-    const candidate = response.candidates[0];
-    if (hadBadFinishReason(candidate)) {
-      if (
-        candidate.finishReason === FinishReason.SAFETY &&
-        candidate.safetyRatings &&
-        (candidate.safetyRatings?.length ?? 0) > 0
-      ) {
-        const safetyReasons = getSafetyReasons(candidate.safetyRatings as SafetyReason[]);
-        return `ActionsClientGeminiChatModel: action result status is error. Candidate was blocked due to ${candidate.finishReason} - ${safetyReasons}`;
-      } else {
-        return `ActionsClientGeminiChatModel: action result status is error. Candidate was blocked due to ${candidate.finishReason}`;
-      }
-    }
-  }
-  return null;
-}
-
-const getSafetyReasons = (safetyRatings: SafetyReason[]) => {
-  const reasons = safetyRatings.filter((t: SafetyReason) => t.blocked);
-  return reasons.reduce(
-    (acc: string, t: SafetyReason, i: number) =>
-      `${acc.length ? `${acc} ` : ''}${t.category}: ${t.severity}${
-        i < reasons.length - 1 ? ',' : ''
-      }`,
-    ''
-  );
-};

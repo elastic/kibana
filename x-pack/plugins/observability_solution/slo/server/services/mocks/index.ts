@@ -42,11 +42,13 @@ const createSummaryTransformManagerMock = (): jest.Mocked<TransformManager> => {
 
 const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
   return {
-    save: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
     findById: jest.fn(),
     findAllByIds: jest.fn(),
     deleteById: jest.fn(),
     search: jest.fn(),
+    exists: jest.fn(),
   };
 };
 

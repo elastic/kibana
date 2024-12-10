@@ -13,3 +13,4 @@ export const UIM_PIPELINE_UPDATE = 'pipeline_update';
 export const UIM_PIPELINE_DELETE = 'pipeline_delete';
 export const UIM_PIPELINE_DELETE_MANY = 'pipeline_delete_many';
 export const UIM_PIPELINE_SIMULATE = 'pipeline_simulate';
+export const UIM_MANAGE_PROCESSORS = 'manage_processes';

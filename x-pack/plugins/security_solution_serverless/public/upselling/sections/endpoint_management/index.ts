@@ -13,6 +13,12 @@ export const EndpointPolicyProtectionsLazy = lazy(() =>
   }))
 );
 
+export const EndpointCustomNotificationLazy = lazy(() =>
+  import('./endpoint_custom_notification').then(({ EndpointCustomNotification }) => ({
+    default: EndpointCustomNotification,
+  }))
+);
+
 export const RuleDetailsEndpointExceptionsLazy = lazy(() =>
   import('./rule_details_endpoint_exceptions').then(({ RuleDetailsEndpointExceptions }) => ({
     default: RuleDetailsEndpointExceptions,

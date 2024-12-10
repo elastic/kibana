@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { generateRandomIndexName, isValidIndexName } from './indices';
+import { generateRandomIndexName, isValidIndexName, getFirstNewIndexName } from './indices';
 
 describe('indices utils', function () {
   describe('generateRandomIndexName', function () {
@@ -44,6 +44,33 @@ describe('indices utils', function () {
       expect(indexName.startsWith(DEFAULT_PREFIX)).toBe(true);
       expect(indexName.length).toBe(DEFAULT_PREFIX.length + 1);
       expect(isValidIndexName(indexName)).toBe(true);
+    });
+  });
+
+  describe('getFirstNewIndexName', function () {
+    it('returns undefined when lists are the same', () => {
+      expect(getFirstNewIndexName([], [])).toEqual(undefined);
+      expect(getFirstNewIndexName(['index'], ['index'])).toEqual(undefined);
+      expect(getFirstNewIndexName(['index', 'test'], ['index', 'test'])).toEqual(undefined);
+    });
+
+    it('returns new item when it exists', () => {
+      expect(getFirstNewIndexName([], ['index'])).toEqual('index');
+      expect(getFirstNewIndexName(['index'], ['index', 'test'])).toEqual('test');
+      expect(getFirstNewIndexName(['index', 'test'], ['index', 'test', 'unit-test'])).toEqual(
+        'unit-test'
+      );
+      expect(getFirstNewIndexName(['index', 'test'], ['unit-test', 'index', 'test'])).toEqual(
+        'unit-test'
+      );
+    });
+    it('returns first new item when it multiple new indices exists', () => {
+      expect(getFirstNewIndexName([], ['index', 'test'])).toEqual('index');
+      expect(getFirstNewIndexName(['index'], ['test', 'index', 'unit-test'])).toEqual('test');
+    });
+    it('can handle old indices being removed', () => {
+      expect(getFirstNewIndexName(['index'], ['test'])).toEqual('test');
+      expect(getFirstNewIndexName(['test', 'index', 'unit-test'], ['index', 'new'])).toEqual('new');
     });
   });
 });

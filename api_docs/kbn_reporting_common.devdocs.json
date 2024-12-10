@@ -760,6 +760,62 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.ReportingSavedObjectNotFoundError",
+        "type": "Class",
+        "tags": [],
+        "label": "ReportingSavedObjectNotFoundError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingSavedObjectNotFoundError",
+            "text": "ReportingSavedObjectNotFoundError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.ReportingSavedObjectNotFoundError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"reporting_saved_object_not_found_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.ReportingSavedObjectNotFoundError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.UnknownError",
         "type": "Class",
         "tags": [],
@@ -1494,17 +1550,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "@kbn/reporting-common",
-            "id": "def-common.INTERNAL_ROUTES.DOWNLOAD_CSV",
-            "type": "string",
-            "tags": [],
-            "label": "DOWNLOAD_CSV",
-            "description": [],
-            "path": "packages/kbn-reporting/common/routes.ts",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/reporting-common",

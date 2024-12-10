@@ -18,6 +18,7 @@ import {
   AppUpdater,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
+  AppStatus,
 } from '@kbn/core/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -30,7 +31,6 @@ import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { CanvasAppLocatorDefinition } from '../common/locator';
 import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
 import { getSessionStorage } from './lib/storage';
@@ -38,6 +38,8 @@ import { initLoadingIndicator } from './lib/loading_indicator';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
+import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { getHasWorkpads } from './services/get_has_workpads';
 
 export type { CoreStart, CoreSetup };
 
@@ -121,21 +123,12 @@ export class CanvasPlugin
         setupExpressions({ coreSetup, setupPlugins });
 
         // Get start services
-        const [coreStart, startPlugins] = await coreSetup.getStartServices();
+        const [[coreStart, startPlugins]] = await Promise.all([
+          coreSetup.getStartServices(),
+          untilPluginStartServicesReady(),
+        ]);
 
         srcPlugin.start(coreStart, startPlugins);
-
-        const { pluginServices } = await import('./services');
-        const { pluginServiceRegistry } = await import('./services/kibana');
-
-        pluginServices.setRegistry(
-          pluginServiceRegistry.start({
-            coreStart,
-            startPlugins,
-            appUpdater: this.appUpdater,
-            initContext: this.initContext,
-          })
-        );
 
         const { expressions, presentationUtil } = startPlugins;
         await presentationUtil.registerExpressionsLanguage(
@@ -154,7 +147,13 @@ export class CanvasPlugin
           this.appUpdater
         );
 
-        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
+        const unmount = renderApp({
+          coreStart,
+          startPlugins,
+          params,
+          canvasStore,
+          appUpdater: this.appUpdater,
+        });
 
         return () => {
           unmount();
@@ -163,9 +162,11 @@ export class CanvasPlugin
       },
     });
 
-    if (setupPlugins.home) {
-      setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
-    }
+    getHasWorkpads(coreSetup.http).then((hasWorkpads) => {
+      this.appUpdater.next(() => ({
+        status: hasWorkpads ? AppStatus.accessible : AppStatus.inaccessible,
+      }));
+    });
 
     if (setupPlugins.share) {
       setupPlugins.share.url.locators.create(new CanvasAppLocatorDefinition());
@@ -190,6 +191,7 @@ export class CanvasPlugin
   }
 
   public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
+    setKibanaServices(coreStart, startPlugins, this.initContext);
     initLoadingIndicator(coreStart.http.addLoadingCountSource);
   }
 }

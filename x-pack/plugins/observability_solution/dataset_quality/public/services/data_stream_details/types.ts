@@ -6,7 +6,6 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   GetDataStreamSettingsParams,
   DataStreamSettings,
@@ -17,13 +16,24 @@ import {
   DegradedFieldResponse,
   GetDataStreamDegradedFieldValuesPathParams,
 } from '../../../common/data_streams_stats';
-import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
-import { Dashboard, DegradedFieldValues } from '../../../common/api_types';
+import {
+  AnalyzeDegradedFieldsParams,
+  IntegrationType,
+  CheckAndLoadIntegrationParams,
+  UpdateFieldLimitParams,
+} from '../../../common/data_stream_details/types';
+import {
+  Dashboard,
+  DataStreamRolloverResponse,
+  DegradedFieldAnalysis,
+  DegradedFieldValues,
+  UpdateFieldLimitResponse,
+} from '../../../common/api_types';
 
 export type DataStreamDetailsServiceSetup = void;
 
 export interface DataStreamDetailsServiceStart {
-  client: IDataStreamDetailsClient;
+  getClient: () => Promise<IDataStreamDetailsClient>;
 }
 
 export interface DataStreamDetailsServiceStartDeps {
@@ -39,8 +49,9 @@ export interface IDataStreamDetailsClient {
   getDataStreamDegradedFieldValues(
     params: GetDataStreamDegradedFieldValuesPathParams
   ): Promise<DegradedFieldValues>;
+  checkAndLoadIntegration(params: CheckAndLoadIntegrationParams): Promise<IntegrationType>;
   getIntegrationDashboards(params: GetIntegrationDashboardsParams): Promise<Dashboard[]>;
-  getDataStreamIntegration(
-    params: GetDataStreamIntegrationParams
-  ): Promise<Integration | undefined>;
+  analyzeDegradedField(params: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis>;
+  setNewFieldLimit(params: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse>;
+  rolloverDataStream(params: { dataStream: string }): Promise<DataStreamRolloverResponse>;
 }

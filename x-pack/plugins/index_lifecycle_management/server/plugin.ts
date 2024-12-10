@@ -27,7 +27,6 @@ const indexLifecycleDataEnricher = async (
 
   const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
     index: '*,.*',
-    only_managed: true,
   });
   return indicesList.map((index: Index) => {
     return {

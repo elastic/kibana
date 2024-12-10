@@ -26,3 +26,7 @@ export const GetTagsRequestSchema = {
     showInactive: schema.boolean({ defaultValue: false }),
   }),
 };
+
+export const GetTagsResponseSchema = schema.object({
+  items: schema.arrayOf(schema.string()),
+});

@@ -6,10 +6,11 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
-import { StorageResult } from '../types';
-import { formatStorageResult, getStorageResults, postStorageResult } from './storage';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+
+import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
+import { formatStorageResult, getStorageResults, postStorageResult } from './storage';
+import { StorageResult } from '../../../types';
 
 describe('formatStorageResult', () => {
   it('should correctly format the input data into a StorageResult object', () => {
@@ -198,5 +199,27 @@ describe('getStorageResults', () => {
 
     expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
     expect(results).toEqual([]);
+  });
+
+  it('should provide stad and end date', async () => {
+    await getStorageResults({
+      httpFetch: fetch,
+      abortController: new AbortController(),
+      pattern: 'auditbeat-*',
+      toasts,
+      startTime: 'now-7d',
+      endTime: 'now',
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/internal/ecs_data_quality_dashboard/results_latest/auditbeat-*',
+      expect.objectContaining({
+        method: 'GET',
+        query: {
+          startDate: 'now-7d',
+          endDate: 'now',
+        },
+      })
+    );
   });
 });

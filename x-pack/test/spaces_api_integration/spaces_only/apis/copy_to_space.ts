@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
 
 // eslint-disable-next-line import/no-default-export

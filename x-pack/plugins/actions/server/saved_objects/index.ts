@@ -13,7 +13,6 @@ import type {
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { actionTaskParamsModelVersions } from './model_versions';
 import { actionMappings, actionTaskParamsMappings, connectorTokenMappings } from './mappings';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
@@ -26,7 +25,11 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { connectorModelVersions } from './model_versions';
+import {
+  actionTaskParamsModelVersions,
+  connectorModelVersions,
+  connectorTokenModelVersions,
+} from './model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -121,6 +124,7 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
+    modelVersions: connectorTokenModelVersions,
   });
 
   encryptedSavedObjects.registerType({

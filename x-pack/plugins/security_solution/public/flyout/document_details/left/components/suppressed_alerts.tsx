@@ -12,7 +12,8 @@ import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/security-solution-common';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
   SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,
@@ -61,7 +62,7 @@ export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
           values={{ count: alertSuppressionCount }}
         />
       </EuiFlexItem>
-      {isSuppressionRuleInGA(ruleType) ? null : (
+      {isSuppressionRuleInGA(ruleType as Type) ? null : (
         <EuiFlexItem>
           <EuiBetaBadge
             label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}

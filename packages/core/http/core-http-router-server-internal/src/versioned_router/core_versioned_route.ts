@@ -18,17 +18,18 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
   ApiVersion,
-  AddVersionOpts,
   VersionedRoute,
   VersionedRouteConfig,
   IKibanaResponse,
   RouteConfigOptions,
   RouteSecurityGetter,
   RouteSecurity,
+  RouteMethod,
+  VersionedRouterRoute,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { Method, VersionedRouterRoute } from './types';
-import type { CoreVersionedRouter } from './core_versioned_router';
+import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import { validate } from './validate';
 import {
@@ -38,14 +39,19 @@ import {
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectResponseHeaders } from './inject_response_headers';
+import { getVersionHeader, injectVersionHeader } from '../util';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 import type { RequestLike } from './route_version_utils';
+import { Router } from '../router';
 
-type Options = AddVersionOpts<unknown, unknown, unknown>;
+interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedRouteConfig<M> {
+  isDev: boolean;
+  useVersionResolutionStrategyForInternalPaths: Map<string, boolean>;
+  defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
+}
 
 // This validation is a pass-through so that we can apply our version-specific validation later
 export const passThroughValidation = {
@@ -61,7 +67,7 @@ function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handl
 }
 
 export class CoreVersionedRoute implements VersionedRoute {
-  private readonly handlers = new Map<
+  public readonly handlers = new Map<
     ApiVersion,
     {
       fn: RequestHandler;
@@ -75,29 +81,43 @@ export class CoreVersionedRoute implements VersionedRoute {
     path,
     options,
   }: {
-    router: CoreVersionedRouter;
+    router: Router;
     method: Method;
     path: string;
-    options: VersionedRouteConfig<Method>;
+    options: InternalVersionedRouteConfig<Method>;
   }) {
     return new CoreVersionedRoute(router, method, path, options);
   }
 
+  public readonly options: VersionedRouteConfig<Method>;
+
   private useDefaultStrategyForPath: boolean;
   private isPublic: boolean;
+  private isDev: boolean;
   private enableQueryVersion: boolean;
   private defaultSecurityConfig: RouteSecurity | undefined;
+  private defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
   private constructor(
-    private readonly router: CoreVersionedRouter,
+    private readonly router: Router,
     public readonly method: Method,
     public readonly path: string,
-    public readonly options: VersionedRouteConfig<Method>
+    internalOptions: InternalVersionedRouteConfig<Method>
   ) {
-    this.useDefaultStrategyForPath = router.useVersionResolutionStrategyForInternalPaths.has(path);
-    this.isPublic = this.options.access === 'public';
-    this.enableQueryVersion = this.options.enableQueryVersion === true;
-    this.defaultSecurityConfig = validRouteSecurity(this.options.security, this.options.options);
-    this.router.router[this.method](
+    const {
+      isDev,
+      useVersionResolutionStrategyForInternalPaths,
+      defaultHandlerResolutionStrategy,
+      ...options
+    } = internalOptions;
+    this.isPublic = options.access === 'public';
+    this.isDev = isDev;
+    this.defaultHandlerResolutionStrategy = defaultHandlerResolutionStrategy;
+    this.useDefaultStrategyForPath =
+      this.isPublic || useVersionResolutionStrategyForInternalPaths.has(path);
+    this.enableQueryVersion = options.enableQueryVersion === true;
+    this.defaultSecurityConfig = validRouteSecurity(options.security, options.options);
+    this.options = options;
+    this.router[this.method](
       {
         path: this.path,
         validate: passThroughValidation,
@@ -106,7 +126,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         security: this.getSecurity,
       },
       this.requestHandler,
-      { isVersioned: true }
+      { isVersioned: true, events: false }
     );
   }
 
@@ -119,7 +139,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   /** This method assumes that one or more versions handlers are registered  */
   private getDefaultVersion(): undefined | ApiVersion {
-    return resolvers[this.router.defaultHandlerResolutionStrategy](
+    return resolvers[this.defaultHandlerResolutionStrategy](
       [...this.handlers.keys()],
       this.options.access
     );
@@ -132,8 +152,14 @@ export class CoreVersionedRoute implements VersionedRoute {
   private getVersion(req: RequestLike): ApiVersion | undefined {
     let version;
     const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
-      version = this.getDefaultVersion();
+    if (!maybeVersion) {
+      if (this.useDefaultStrategyForPath) {
+        version = this.getDefaultVersion();
+      } else if (!this.isDev && !this.isPublic) {
+        // When in production, we default internal routes to v1 to allow
+        // gracefully onboarding of un-versioned to versioned routes
+        version = '1';
+      }
     } else {
       version = maybeVersion;
     }
@@ -154,6 +180,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
     const req = originalReq as Mutable<KibanaRequest>;
     const version = this.getVersion(req);
+    req.apiVersion = version;
 
     if (!version) {
       return res.badRequest({
@@ -184,6 +211,12 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const validation = extractValidationSchemaFromHandler(handler);
+    const postValidateMetadata: PostValidationMetadata = {
+      deprecated: handler.options.options?.deprecated,
+      isInternalApiRequest: req.isInternalApiRequest,
+      isPublicAccess: this.isPublic,
+    };
+
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
@@ -194,9 +227,10 @@ export class CoreVersionedRoute implements VersionedRoute {
         req.params = params;
         req.query = query;
       } catch (e) {
-        return res.badRequest({
-          body: e.message,
-        });
+        // Emit onPostValidation even if validation fails.
+
+        this.router.emitPostValidate(req, postValidateMetadata);
+        return res.badRequest({ body: e.message, headers: getVersionHeader(version) });
       }
     } else {
       // Preserve behavior of not passing through unvalidated data
@@ -205,9 +239,11 @@ export class CoreVersionedRoute implements VersionedRoute {
       req.query = {};
     }
 
+    this.router.emitPostValidate(req, postValidateMetadata);
+
     const response = await handler.fn(ctx, req, res);
 
-    if (this.router.isDev && validation?.response?.[response.status]?.body) {
+    if (this.isDev && validation?.response?.[response.status]?.body) {
       const { [response.status]: responseValidation, unsafe } = validation.response;
       try {
         validate(
@@ -225,18 +261,13 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     }
 
-    return injectResponseHeaders(
-      {
-        [ELASTIC_HTTP_VERSION_HEADER]: version,
-      },
-      response
-    );
+    return injectVersionHeader(version, response);
   };
 
   private validateVersion(version: string) {
     // We do an additional check here while we only have a single allowed public version
     // for all public Kibana HTTP APIs
-    if (this.router.isDev && this.isPublic) {
+    if (this.isDev && this.isPublic) {
       const message = isAllowedPublicVersion(version);
       if (message) {
         throw new Error(message);
@@ -260,7 +291,6 @@ export class CoreVersionedRoute implements VersionedRoute {
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     this.validateVersion(options.version);
     options = prepareVersionedRouteValidation(options);
-
     this.handlers.set(options.version, {
       fn: handler,
       options,

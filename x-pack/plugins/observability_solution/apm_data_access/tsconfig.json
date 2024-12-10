@@ -20,6 +20,8 @@
     "@kbn/apm-utils",
     "@kbn/core-http-server",
     "@kbn/security-plugin-types-server",
-    "@kbn/observability-utils"
+    "@kbn/utility-types",
+    "@kbn/elastic-agent-utils",
+    "@kbn/observability-utils-common"
   ]
 }

@@ -24,7 +24,7 @@ properties:
   description:
     $ref: 'case_description.yaml'
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   settings:
     $ref: 'settings.yaml'
   severity:

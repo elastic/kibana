@@ -10,7 +10,7 @@ import { findIndex } from 'lodash';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getTestActionData, getTestAlertData } from '../../../lib/get_test_data';
+import { getTestConnectorData, getTestAlertData } from '../../../lib/get_test_data';
 
 export const createSlackConnectorAndObjectRemover = async ({
   getService,
@@ -20,12 +20,12 @@ export const createSlackConnectorAndObjectRemover = async ({
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
 
-  const testData = getTestActionData();
+  const testData = getTestConnectorData();
   const createdAction = await createSlackConnector({
     name: testData.name,
     getService,
   });
-  objectRemover.add(createdAction.id, 'action', 'actions');
+  objectRemover.add(createdAction.id, 'connector', 'actions');
 
   return objectRemover;
 };

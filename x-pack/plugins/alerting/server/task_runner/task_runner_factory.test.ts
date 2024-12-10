@@ -18,7 +18,6 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { rulesClientMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -101,7 +100,6 @@ describe('Task Runner Factory', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
-  const rulesClient = rulesClientMock.create();
   const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
@@ -118,20 +116,18 @@ describe('Task Runner Factory', () => {
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     eventLogger: eventLoggerMock.create(),
     executionContext,
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     kibanaBaseUrl: 'https://localhost:5601',
     logger: loggingSystemMock.create().get(),
     maintenanceWindowsService,
     maxAlerts: 1000,
-    maxEphemeralActionsPerRule: 10,
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     rulesSettingsService,
     savedObjects: savedObjectsService,
     share: {} as SharePluginStart,
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    supportsEphemeralTasks: true,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   beforeEach(() => {

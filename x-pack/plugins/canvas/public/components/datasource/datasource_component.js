@@ -20,7 +20,7 @@ import {
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { pluginServices } from '../../services';
+import { dataViewsService } from '../../services/kibana_services';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
@@ -67,12 +67,9 @@ export class DatasourceComponent extends PureComponent {
   state = { defaultIndex: '' };
 
   componentDidMount() {
-    pluginServices
-      .getServices()
-      .dataViews.getDefaultDataView()
-      .then((defaultDataView) => {
-        this.setState({ defaultIndex: defaultDataView.title });
-      });
+    dataViewsService.getDefaultDataView().then((defaultDataView) => {
+      this.setState({ defaultIndex: defaultDataView.title });
+    });
   }
 
   componentDidUpdate(prevProps) {

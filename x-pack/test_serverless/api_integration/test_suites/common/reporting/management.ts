@@ -5,74 +5,115 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
-const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 export default ({ getService }: FtrProviderContext) => {
-  const log = getService('log');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('svlReportingApi');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  let adminUser: RoleCredentials;
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
   let internalReqHeader: InternalRequestHeader;
 
+  const archives = {
+    ecommerce: {
+      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+    },
+  };
+
   describe('Reporting Management', function () {
+    let reportJob: ReportApiJSON;
+    let path: string;
+
     before(async () => {
-      adminUser = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
-    });
-    after(async () => {
-      await svlUserManager.invalidateM2mApiKeyWithRoleScope(adminUser);
-    });
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
 
-    describe('Deletion', () => {
-      let reportJob: ReportApiJSON;
+      await esArchiver.load(archives.ecommerce.data);
+      await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
 
-      const createJob = async (roleAuthc: RoleCredentials): Promise<ReportApiJSON> => {
-        log.info(`request report job with ApiKey ${adminUser.apiKey.name}`);
-        const { job } = await reportingAPI.createReportJobInternal(
-          'csv_searchsource',
-          {
-            browserTimezone: 'UTC',
-            objectType: 'search',
-            searchSource: {
-              index: '5193f870-d861-11e9-a311-0fa548c5f953',
-              query: { language: 'kuery', query: '' },
-              version: true,
-            },
-            title: 'Ecommerce Data',
-            version: '8.15.0',
+      // generate a report that can be deleted in the test
+      const result = await reportingAPI.createReportJobInternal(
+        'csv_searchsource',
+        {
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          searchSource: {
+            fields: [
+              { field: 'order_date', include_unmapped: true },
+              { field: 'order_id', include_unmapped: true },
+              { field: 'products.product_id', include_unmapped: true },
+            ],
+            filter: [
+              {
+                meta: {
+                  field: 'order_date',
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  params: {},
+                },
+                query: {
+                  range: {
+                    order_date: {
+                      format: 'strict_date_optional_time',
+                      gte: '2019-06-20T23:59:44.609Z',
+                      lte: '2019-06-21T00:01:06.957Z',
+                    },
+                  },
+                },
+              },
+              {
+                $state: { store: 'appState' },
+                meta: {
+                  alias: null,
+                  disabled: false,
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  key: 'products.product_id',
+                  negate: false,
+                  params: { query: 22599 },
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'products.product_id': 22599 } },
+              },
+            ],
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            query: { language: 'kuery', query: '' },
+            sort: [{ order_date: { format: 'strict_date_optional_time', order: 'desc' } }],
           },
-          roleAuthc,
-          internalReqHeader
-        );
-        log.info(`created report job ${job.id} with ApiKey ${adminUser.apiKey.name}`);
-        return job;
-      };
+          title: 'Ecommerce Data',
+          version: '8.15.0',
+        },
+        cookieCredentials,
+        internalReqHeader
+      );
 
-      before(async () => {
-        reportJob = await createJob(adminUser);
-      });
+      path = result.path;
+      reportJob = result.job;
 
-      it(`user can delete a report they've created`, async () => {
-        // for this test, we don't need to wait for the job to finish or verify the result
-        const response = await supertestWithoutAuth
-          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
-          .set(...API_HEADER)
-          .set(...INTERNAL_HEADER)
-          .set(adminUser.apiKeyHeader);
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
+    });
 
-        expect(response.status).to.be(200);
-        expect(response.body).to.eql({ deleted: true });
-      });
+    after(async () => {
+      await esArchiver.unload(archives.ecommerce.data);
+      await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
+    });
+
+    it(`user can delete a report they've created`, async () => {
+      const response = await supertestWithoutAuth
+        .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
+        .set(...API_HEADER)
+        .set(internalReqHeader)
+        .set(cookieCredentials);
+
+      expect(response.status).to.be(200);
+      expect(response.body).to.eql({ deleted: true });
     });
   });
 };

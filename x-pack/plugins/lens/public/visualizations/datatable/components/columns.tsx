@@ -51,7 +51,7 @@ export const createGridColumns = (
   formatFactory: FormatFactory,
   onColumnResize: (eventData: { columnId: string; width: number | undefined }) => void,
   onColumnHide: ((eventData: { columnId: string }) => void) | undefined,
-  alignments: Record<string, 'left' | 'right' | 'center'>,
+  alignments: Map<string, 'left' | 'right' | 'center'>,
   headerRowHeight: RowHeightMode,
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
@@ -261,7 +261,7 @@ export const createGridColumns = (
         });
       }
     }
-    const currentAlignment = alignments && alignments[field];
+    const currentAlignment = alignments && alignments.get(field);
     const hasMultipleRows = [RowHeightMode.auto, RowHeightMode.custom, undefined].includes(
       headerRowHeight
     );

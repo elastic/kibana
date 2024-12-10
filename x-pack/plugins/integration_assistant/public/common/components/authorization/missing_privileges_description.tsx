@@ -13,7 +13,7 @@ type MissingPrivilegesDescriptionProps = Partial<Authorization>;
 export const MissingPrivilegesDescription = React.memo<MissingPrivilegesDescriptionProps>(
   ({ canCreateIntegrations, canCreateConnectors, canExecuteConnectors }) => {
     return (
-      <EuiFlexGroup gutterSize="m" direction="column">
+      <EuiFlexGroup gutterSize="m" direction="column" data-test-subj="missingPrivilegesGroup">
         <EuiFlexItem>{i18n.PRIVILEGES_REQUIRED_TITLE}</EuiFlexItem>
         <EuiFlexItem>
           <EuiCode>

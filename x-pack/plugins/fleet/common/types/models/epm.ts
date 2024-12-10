@@ -124,10 +124,25 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
+}
+
+export interface ArchiveIterator {
+  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  getPaths: () => Promise<string[]>;
+}
+
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
+  /**
+   * @deprecated Use `archiveIterator` to access the package archive entries
+   * without loading them all into memory at once.
+   */
   assetsMap: AssetsMap;
   paths: string[];
+  archiveIterator: ArchiveIterator;
 }
 
 export type ArchivePackage = PackageSpecManifest &
@@ -156,9 +171,9 @@ type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'
 // and confirm with Registry if they are really optional. Can update types and ~4 places in code later if neccessary
 interface RegistryAdditionalProperties {
   assets?: string[];
-  download: string;
+  download?: string;
   signature_path?: string;
-  path: string;
+  path?: string;
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]
   data_streams?: RegistryDataStream[]; // Registry addition [0] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L65
@@ -178,12 +193,18 @@ export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
 
-export interface DeploymentsModesEnablement {
+export interface DeploymentsModesDefault {
   enabled: boolean;
 }
+
+export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
+  organization?: string;
+  division?: string;
+  team?: string;
+}
 export interface DeploymentsModes {
-  agentless: DeploymentsModesEnablement;
-  default?: DeploymentsModesEnablement;
+  agentless: DeploymentsModesAgentless;
+  default?: DeploymentsModesDefault;
 }
 
 export enum RegistryPolicyTemplateKeys {
@@ -290,6 +311,7 @@ export type RegistrySearchResult = Pick<
   | 'icons'
   | 'internal'
   | 'data_streams'
+  | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
 >;
@@ -317,9 +339,9 @@ export interface AssetParts {
 export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeToParts;
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
-  KibanaAssetTypeToParts
+  KibanaAssetTypeToParts | undefined
 > &
-  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts | undefined>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -525,8 +547,8 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  installationInfo?: InstallationInfo;
   savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -534,7 +556,7 @@ export type PackageInfo =
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 export interface PackageMetadata {
-  has_policies: true;
+  has_policies: boolean;
 }
 
 export type IntegrationCardReleaseLabel = 'beta' | 'preview' | 'ga' | 'rc';

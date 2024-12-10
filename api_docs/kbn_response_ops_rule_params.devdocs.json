@@ -1,0 +1,177 @@
+{
+  "id": "@kbn/response-ops-rule-params",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParams",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParams",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParams",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParams",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParamsWithDefaultValue",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParamsWithDefaultValue",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.RuleParamsWithDefaultValue",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleParamsWithDefaultValue",
+        "description": [],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleParamsSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleParamsSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchemaWithDefaultValue",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleParamsSchemaWithDefaultValue",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.ruleParamsSchemaWithDefaultValue",
+        "type": "Object",
+        "tags": [],
+        "label": "ruleParamsSchemaWithDefaultValue",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, any>>"
+        ],
+        "path": "packages/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -100,7 +100,7 @@ properties:
     type: string
     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
   owner:
-    $ref: 'owners.yaml'
+    $ref: 'owner.yaml'
   settings:
     $ref: 'settings.yaml'
   severity:

@@ -6,6 +6,7 @@
  */
 
 import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from './inference_endpoint';
 
 const keyword = {
   type: 'keyword' as const,
@@ -31,7 +32,16 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
     properties: {
       '@timestamp': date,
       id: keyword,
-      doc_id: { type: 'text', fielddata: true },
+      doc_id: { type: 'text', fielddata: true }, // deprecated but kept for backwards compatibility
+      title: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
+      },
       user: {
         properties: {
           id: keyword,
@@ -49,6 +59,10 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
       },
       namespace: keyword,
       text,
+      semantic_text: {
+        type: 'semantic_text',
+        inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
+      },
       'ml.tokens': {
         type: 'rank_features',
       },

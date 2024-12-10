@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
+import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import { dump } from 'js-yaml';
+import pMap from 'p-map';
+
+const pbkdf2Async = utils.promisify(crypto.pbkdf2);
 
 import type {
   PreconfiguredOutput,
@@ -28,6 +32,8 @@ import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 
 import { isDifferent } from './utils';
+
+export const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
@@ -71,103 +77,94 @@ export async function createOrUpdatePreconfiguredOutputs(
   }
 
   const existingOutputs = await outputService.bulkGet(
-    soClient,
     outputs.map(({ id }) => id),
     { ignoreNotFound: true }
   );
 
-  await Promise.all(
-    outputs.map(async (output) => {
-      const existingOutput = existingOutputs.find((o) => o.id === output.id);
+  const updateOrConfigureOutput = async (output: PreconfiguredOutput) => {
+    const existingOutput = existingOutputs.find((o) => o.id === output.id);
 
-      const { id, config, ...outputData } = output;
+    const { id, config, ...outputData } = output;
 
-      const configYaml = config ? dump(config) : undefined;
+    const configYaml = config ? dump(config) : undefined;
 
-      const data: NewOutput = {
-        ...outputData,
-        is_preconfigured: true,
-        config_yaml: configYaml ?? null,
-        // Set value to null to update these fields on update
-        ca_sha256: outputData.ca_sha256 ?? null,
-        ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
-        ssl: outputData.ssl ?? null,
-      } as NewOutput;
+    const data: NewOutput = {
+      ...outputData,
+      is_preconfigured: true,
+      config_yaml: configYaml ?? null,
+      // Set value to null to update these fields on update
+      ca_sha256: outputData.ca_sha256 ?? null,
+      ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
+      ssl: outputData.ssl ?? null,
+    } as NewOutput;
 
-      if (!data.hosts || data.hosts.length === 0) {
-        data.hosts = outputService.getDefaultESHosts();
+    if (!data.hosts || data.hosts.length === 0) {
+      data.hosts = outputService.getDefaultESHosts();
+    }
+
+    const isCreate = !existingOutput;
+
+    // field in allow edit are not updated through preconfiguration
+    if (!isCreate && output.allow_edit) {
+      for (const key of output.allow_edit) {
+        // @ts-expect-error
+        data[key] = existingOutput[key];
       }
+    }
 
-      const isCreate = !existingOutput;
+    const isUpdateWithNewData =
+      existingOutput && (await isPreconfiguredOutputDifferentFromCurrent(existingOutput, data));
 
-      // field in allow edit are not updated through preconfiguration
-      if (!isCreate && output.allow_edit) {
-        for (const key of output.allow_edit) {
-          // @ts-expect-error
-          data[key] = existingOutput[key];
+    if (isCreate || isUpdateWithNewData) {
+      const secretHashes = await hashSecrets(output);
+
+      if (isCreate) {
+        logger.debug(`Creating preconfigured output ${output.id}`);
+        await outputService.create(soClient, esClient, data, {
+          id,
+          fromPreconfiguration: true,
+          secretHashes,
+        });
+      } else if (isUpdateWithNewData) {
+        logger.debug(`Updating preconfigured output ${output.id}`);
+        await outputService.update(soClient, esClient, id, data, {
+          fromPreconfiguration: true,
+          secretHashes,
+        });
+        // Bump revision of all policies using that output
+        if (outputData.is_default || outputData.is_default_monitoring) {
+          await agentPolicyService.bumpAllAgentPolicies(esClient);
+        } else {
+          await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
         }
       }
+    }
+  };
 
-      const isUpdateWithNewData =
-        existingOutput && (await isPreconfiguredOutputDifferentFromCurrent(existingOutput, data));
-
-      if (isCreate || isUpdateWithNewData) {
-        const secretHashes = await hashSecrets(output);
-
-        if (isCreate) {
-          logger.debug(`Creating preconfigured output ${output.id}`);
-          await outputService.create(soClient, esClient, data, {
-            id,
-            fromPreconfiguration: true,
-            secretHashes,
-          });
-        } else if (isUpdateWithNewData) {
-          logger.debug(`Updating preconfigured output ${output.id}`);
-          await outputService.update(soClient, esClient, id, data, {
-            fromPreconfiguration: true,
-            secretHashes,
-          });
-          // Bump revision of all policies using that output
-          if (outputData.is_default || outputData.is_default_monitoring) {
-            await agentPolicyService.bumpAllAgentPolicies(esClient);
-          } else {
-            await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
-          }
-        }
-      }
-    })
-  );
+  await pMap(outputs, (output) => updateOrConfigureOutput(output), {
+    concurrency: MAX_CONCURRENT_OUTPUTS_OPERATIONS,
+  });
 }
 
 // Values recommended by NodeJS documentation
 const keyLength = 64;
 const saltLength = 16;
-
-// N=2^14 (16 MiB), r=8 (1024 bytes), p=5
-const scryptParams = {
-  cost: 16384,
-  blockSize: 8,
-  parallelization: 5,
-};
+const maxIteration = 100000;
 
 export async function hashSecret(secret: string) {
-  return new Promise((resolve, reject) => {
-    const salt = crypto.randomBytes(saltLength).toString('hex');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(`${salt}:${derivedKey.toString('hex')}`);
-    });
-  });
-}
+  const salt = crypto.randomBytes(saltLength).toString('hex');
+  const derivedKey = await pbkdf2Async(secret, salt, maxIteration, keyLength, 'sha512');
 
+  return `${salt}:${derivedKey.toString('hex')}`;
+}
 async function verifySecret(hash: string, secret: string) {
-  return new Promise((resolve, reject) => {
-    const [salt, key] = hash.split(':');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey));
-    });
-  });
+  const [salt, key] = hash.split(':');
+  const derivedKey = await pbkdf2Async(secret, salt, maxIteration, keyLength, 'sha512');
+  const keyBuffer = Buffer.from(key, 'hex');
+  if (keyBuffer.length !== derivedKey.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey);
 }
 
 async function hashSecrets(output: PreconfiguredOutput) {
@@ -325,7 +322,6 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
       isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
       isDifferent(existingOutput.topic, preconfiguredOutput.topic) ||
-      isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
       isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
       isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||

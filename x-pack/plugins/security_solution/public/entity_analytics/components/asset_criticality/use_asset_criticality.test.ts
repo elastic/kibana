@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { renderMutation, renderQuery } from '../../../management/hooks/test_utils';
+import {
+  renderMutation,
+  renderQuery,
+  renderWrappedHook,
+} from '../../../management/hooks/test_utils';
 import type { Entity } from './use_asset_criticality';
 import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
 
@@ -60,15 +64,6 @@ describe('useAssetCriticality', () => {
 
       expect(mockFetchAssetCriticalityPrivileges).toHaveBeenCalled();
     });
-
-    it('does not call privileges API when UI Settings is disabled', async () => {
-      mockUseHasSecurityCapability.mockReturnValue(true);
-      mockUseUiSettings.mockReturnValue([false]);
-
-      await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
-
-      expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
-    });
   });
 
   describe('useAssetCriticalityData', () => {
@@ -78,10 +73,7 @@ describe('useAssetCriticality', () => {
       mockCreateAssetCriticality.mockResolvedValue({});
       const entity: Entity = { name: 'test_entity_name', type: 'host' };
 
-      const { mutation } = await renderQuery(
-        () => useAssetCriticalityData({ entity }),
-        'isSuccess'
-      );
+      const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 
       await renderMutation(async () =>
         mutation.mutate({
@@ -100,10 +92,7 @@ describe('useAssetCriticality', () => {
       mockCreateAssetCriticality.mockResolvedValue({});
       const entity: Entity = { name: 'test_entity_name', type: 'host' };
 
-      const { mutation } = await renderQuery(
-        () => useAssetCriticalityData({ entity }),
-        'isSuccess'
-      );
+      const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 
       await renderMutation(async () =>
         mutation.mutate({

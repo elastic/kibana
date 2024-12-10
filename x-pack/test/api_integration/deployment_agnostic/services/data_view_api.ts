@@ -50,7 +50,7 @@ export function DataViewApiProvider({ getService }: DeploymentAgnosticFtrProvide
 
     async delete({ roleAuthc, id }: { roleAuthc: RoleCredentials; id: string }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/content_management/rpc/create`)
+        .post(`/api/content_management/rpc/delete`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .set(samlAuth.getCommonRequestHeader())

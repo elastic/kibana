@@ -10,8 +10,6 @@ import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
-import { flushContext, flushContextAfterIndex } from '../actions/elements';
-import { setWorkpad } from '../actions/workpad';
 
 const { set, del } = immutable;
 /*
@@ -114,14 +112,14 @@ export const resolvedArgsReducer = handleActions(
     /*
      * Flush all cached contexts
      */
-    [flushContext]: (transientState, { payload: elementId }) => {
+    ['flushContext']: (transientState, { payload: elementId }) => {
       return del(transientState, getFullPath([elementId, 'expressionContext']));
     },
 
     /*
      * Flush cached context indices from the given index to the last
      */
-    [flushContextAfterIndex]: (transientState, { payload }) => {
+    ['flushContextAfterIndex']: (transientState, { payload }) => {
       const { elementId, index } = payload;
       const expressionContext = get(transientState, getFullPath([elementId, 'expressionContext']));
 
@@ -139,7 +137,7 @@ export const resolvedArgsReducer = handleActions(
         return state;
       }, transientState);
     },
-    [setWorkpad]: (transientState, {}) => {
+    ['setWorkpad']: (transientState, {}) => {
       return set(transientState, 'resolvedArgs', {});
     },
   },

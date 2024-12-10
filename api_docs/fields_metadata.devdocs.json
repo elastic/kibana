@@ -277,6 +277,43 @@
               ]
             }
           ]
+        },
+        {
+          "parentPluginId": "fieldsMetadata",
+          "id": "def-server.FieldsMetadataServerSetup.registerIntegrationListExtractor",
+          "type": "Function",
+          "tags": [],
+          "label": "registerIntegrationListExtractor",
+          "description": [],
+          "signature": [
+            "(extractor: ",
+            "IntegrationListExtractor",
+            ") => void"
+          ],
+          "path": "x-pack/plugins/fields_metadata/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "fieldsMetadata",
+              "id": "def-server.FieldsMetadataServerSetup.registerIntegrationListExtractor.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "extractor",
+              "description": [],
+              "signature": [
+                "() => Promise<",
+                "ExtractedIntegration",
+                "[]>"
+              ],
+              "path": "x-pack/plugins/fields_metadata/server/services/fields_metadata/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "returnComment": [],
+              "children": []
+            }
+          ]
         }
       ],
       "lifecycle": "setup",
@@ -301,14 +338,45 @@
           "label": "getClient",
           "description": [],
           "signature": [
-            "() => ",
-            "IFieldsMetadataClient"
+            "(request: ",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => Promise<",
+            "IFieldsMetadataClient",
+            ">"
           ],
           "path": "x-pack/plugins/fields_metadata/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
-          "children": []
+          "children": [
+            {
+              "parentPluginId": "fieldsMetadata",
+              "id": "def-server.FieldsMetadataServerStart.getClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/plugins/fields_metadata/server/services/fields_metadata/types.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",

@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "src/**/*",
+    "types.ts",
+    "index.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-elasticsearch-server",
+    "@kbn/logging",
+    "@kbn/core",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

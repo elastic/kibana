@@ -8,6 +8,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { areFiltersEmpty } from '../common/utils';
 import { getStatsOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
 import { MonitorFilters } from '../monitors_overview/types';
@@ -26,7 +28,16 @@ export const StatsOverviewComponent = ({
 
   return (
     <SyntheticsEmbeddableContext reload$={reload$} reduxStore={statsOverviewStore.current}>
-      <WithFiltersComponent filters={filters} />
+      <EuiFlexGroup
+        alignItems="center"
+        css={{
+          height: '100%',
+        }}
+      >
+        <EuiFlexItem>
+          <WithFiltersComponent filters={filters ?? {}} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </SyntheticsEmbeddableContext>
   );
 };
@@ -36,14 +47,21 @@ const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
   useEffect(() => {
     dispatch(
       setOverviewPageStateAction({
-        tags: filters.tags.map((tag) => tag.value),
-        locations: filters.locations.map((location) => location.value),
-        monitorTypes: filters.monitorTypes.map((monitorType) => monitorType.value),
-        monitorQueryIds: filters.monitorIds.map((monitorId) => monitorId.value),
-        projects: filters.projects.map((project) => project.value),
+        tags: filters.tags?.map((tag) => tag.value),
+        locations: filters.locations?.map((location) => location.value),
+        monitorTypes: filters.monitorTypes?.map((monitorType) => monitorType.value),
+        monitorQueryIds: filters.monitorIds?.map((monitorId) => monitorId.value),
+        projects: filters.projects?.map((project) => project.value),
       })
     );
   }, [dispatch, filters]);
 
-  return <OverviewStatus titleAppend={<ShowSelectedFilters filters={filters ?? {}} />} />;
+  const hasFilters = !areFiltersEmpty(filters);
+
+  return (
+    <OverviewStatus
+      titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
+      hideTitle={true}
+    />
+  );
 };

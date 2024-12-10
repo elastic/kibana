@@ -7,7 +7,7 @@
 
 import { Theme } from '@elastic/charts';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider, useDataQualityContext } from '.';
@@ -65,6 +65,8 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       },
     ]}
     setSelectedIlmPhaseOptions={jest.fn()}
+    defaultStartTime="now-7d"
+    defaultEndTime="now"
   >
     {children}
   </DataQualityProvider>
@@ -76,9 +78,7 @@ describe('DataQualityContext', () => {
   });
 
   test('it throws an error when useDataQualityContext hook is used without a DataQualityContext', () => {
-    const { result } = renderHook(useDataQualityContext);
-
-    expect(result.error).toEqual(
+    expect(() => renderHook(useDataQualityContext)).toThrow(
       new Error('useDataQualityContext must be used within a DataQualityProvider')
     );
   });

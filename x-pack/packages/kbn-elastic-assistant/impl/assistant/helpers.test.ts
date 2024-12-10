@@ -110,7 +110,7 @@ describe('helpers', () => {
     };
     const conversationsData = {
       page: 1,
-      perPage: 10,
+      per_page: 10,
       total: 2,
       data: Object.values(baseConversations).map((c) => c),
     };

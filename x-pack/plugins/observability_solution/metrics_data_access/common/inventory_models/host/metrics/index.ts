@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { snapshot } from './snapshot';
-import { tsvb } from './tsvb';
 import { InventoryMetricsWithCharts } from '../../types';
 import type { HostFormulas } from './formulas';
 import type { HostCharts } from './charts';
@@ -18,7 +17,6 @@ export const hostSnapshotMetricTypes = Object.keys(exposedHostSnapshotMetrics) a
 >;
 
 export const metrics: InventoryMetricsWithCharts<HostFormulas, HostCharts> = {
-  tsvb,
   snapshot,
   getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
   getCharts: async () => await import('./charts').then(({ charts }) => charts),

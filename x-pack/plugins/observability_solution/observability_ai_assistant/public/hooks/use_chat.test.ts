@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { act, renderHook, type RenderHookResult } from '@testing-library/react-hooks';
-import { Subject } from 'rxjs';
+import { renderHook, act, type RenderHookResult } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import {
   MessageRole,
   type ObservabilityAIAssistantChatService,
@@ -14,6 +14,7 @@ import {
 } from '..';
 import {
   createInternalServerError,
+  FunctionDefinition,
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
 } from '../../common';
@@ -26,6 +27,7 @@ const mockChatService: MockedChatService = {
   chat: jest.fn(),
   complete: jest.fn(),
   sendAnalyticsEvent: jest.fn(),
+  functions$: new BehaviorSubject<FunctionDefinition[]>([]) as MockedChatService['functions$'],
   getFunctions: jest.fn().mockReturnValue([]),
   hasFunction: jest.fn().mockReturnValue(false),
   hasRenderFunction: jest.fn().mockReturnValue(true),
@@ -37,6 +39,7 @@ const mockChatService: MockedChatService = {
       role: MessageRole.System,
     },
   }),
+  getScopes: jest.fn(),
 };
 
 const addErrorMock = jest.fn();
@@ -54,7 +57,7 @@ jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   },
 } as any);
 
-let hookResult: RenderHookResult<UseChatProps, UseChatResult>;
+let hookResult: RenderHookResult<UseChatResult, UseChatProps>;
 
 describe('useChat', () => {
   beforeEach(() => {
@@ -80,7 +83,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
-          scope: 'observability',
+          scopes: ['observability'],
         } as UseChatProps,
       });
     });
@@ -110,7 +113,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
-          scope: 'observability',
+          scopes: ['observability'],
         } as UseChatProps,
       });
 

@@ -410,14 +410,14 @@
               {
                 "parentPluginId": "uiActionsEnhanced",
                 "id": "def-public.ActionFactory.CollectConfig.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -431,7 +431,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2204,9 +2204,9 @@
         "label": "UrlDrilldownCollectConfig",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           "UrlDrilldownCollectConfigProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
         "deprecated": false,
@@ -2215,14 +2215,12 @@
           {
             "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.UrlDrilldownCollectConfig.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "UrlDrilldownCollectConfigProps",
-              ">"
+              "UrlDrilldownCollectConfigProps"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
             "deprecated": false,
@@ -2241,9 +2239,9 @@
         "label": "UrlDrilldownOptionsComponent",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           "UrlDrilldownOptionsProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
         "deprecated": false,
@@ -2252,14 +2250,12 @@
           {
             "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.UrlDrilldownOptionsComponent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "UrlDrilldownOptionsProps",
-              ">"
+              "UrlDrilldownOptionsProps"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
             "deprecated": false,
@@ -2278,7 +2274,7 @@
         "label": "validateUrl",
         "description": [],
         "signature": [
-          "(url: string) => { isValid: boolean; error?: string | undefined; }"
+          "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
@@ -2319,7 +2315,7 @@
             "section": "def-public.UrlDrilldownScope",
             "text": "UrlDrilldownScope"
           },
-          "<object, object>) => Promise<{ isValid: boolean; error?: string | undefined; }>"
+          "<object, object>) => Promise<{ isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }>"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
@@ -2768,14 +2764,14 @@
               {
                 "parentPluginId": "uiActionsEnhanced",
                 "id": "def-public.DrilldownDefinition.CollectConfig.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2789,7 +2785,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3777,14 +3773,14 @@
             {
               "parentPluginId": "uiActionsEnhanced",
               "id": "def-public.StartContract.DrilldownManager.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -3798,7 +3794,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }

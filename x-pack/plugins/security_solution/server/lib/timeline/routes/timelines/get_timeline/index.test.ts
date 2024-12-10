@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  serverMock,
-  requestContextMock,
-  createMockConfig,
-} from '../../../../detection_engine/routes/__mocks__';
+import { serverMock, requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import { getTimelineOrNull, getTimelineTemplateOrNull } from '../../../saved_object/timelines';
 
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
@@ -33,7 +29,7 @@ describe('get timeline', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    getTimelineRoute(server.router, createMockConfig());
+    getTimelineRoute(server.router);
   });
 
   test('should call getTimelineTemplateOrNull if templateTimelineId is given', async () => {

@@ -20,17 +20,13 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewType } from '@kbn/data-views-plugin/public';
-import {
-  SEARCH_FIELDS_FROM_SOURCE,
-  SHOW_FIELD_STATISTICS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
@@ -78,6 +74,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
+    ebtManager,
+    fieldsMetadata,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -124,8 +122,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
   }, [dataView]);
 
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-
   const resultState = useMemo(
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
     [dataState.fetchStatus, dataState.foundDocuments]
@@ -148,11 +144,26 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataView,
     dataViews,
     setAppState,
-    useNewFieldsApi,
     columns,
     sort,
     settings: grid,
   });
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtManager, fieldsMetadata]
+  );
 
   // The assistant is getting the state from the url correctly
   // expect from the index pattern where we have only the dataview id
@@ -175,9 +186,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
+      void ebtManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
+    [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
   );
 
   const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
@@ -222,11 +238,31 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
+      void ebtManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
     },
-    [data.query.queryString, query, trackUiMetric]
+    [data.query.queryString, query, trackUiMetric, ebtManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
+
+  const canSetBreakdownField = useMemo(
+    () =>
+      isOfAggregateQueryType(query)
+        ? dataView?.isTimeBased() && !hasTransformationalCommand(query.esql)
+        : true,
+    [dataView, query]
+  );
+
+  const onAddBreakdownField = useCallback(
+    (field: DataViewField | undefined) => {
+      stateContainer.appState.update({ breakdownField: field?.name });
+    },
+    [stateContainer]
+  );
 
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
@@ -274,8 +310,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       return undefined;
     }
 
-    return () => onAddColumn(draggingFieldName);
-  }, [onAddColumn, draggingFieldName, currentColumns]);
+    return () => onAddColumnWithTracking(draggingFieldName);
+  }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
@@ -395,18 +431,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                documents$={stateContainer.dataState.data$.documents$}
-                onAddField={onAddColumn}
-                columns={currentColumns}
-                onAddFilter={onFilter}
-                onRemoveField={onRemoveColumn}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                selectedDataView={dataView}
-                trackUiMetric={trackUiMetric}
-                onFieldEdited={onFieldEdited}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                sidebarToggleState$={sidebarToggleState$}
                 additionalFilters={customFilters}
+                columns={currentColumns}
+                documents$={stateContainer.dataState.data$.documents$}
+                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
+                onAddField={onAddColumnWithTracking}
+                onAddFilter={onFilter}
+                onChangeDataView={stateContainer.actions.onChangeDataView}
+                onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                onFieldEdited={onFieldEdited}
+                onRemoveField={onRemoveColumnWithTracking}
+                selectedDataView={dataView}
+                sidebarToggleState$={sidebarToggleState$}
+                trackUiMetric={trackUiMetric}
               />
             }
             mainPanel={

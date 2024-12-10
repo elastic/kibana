@@ -10,10 +10,21 @@
 import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import {
+  ALL_DATASETS_LOCATOR_ID,
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+} from '@kbn/deeplinks-observability';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { LogsExplorerTabs, LogsExplorerTabsProps } from './logs_explorer_tabs';
 import { DISCOVER_APP_LOCATOR } from '../../../common';
-import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+
+const mockSetLastUsedViewer = jest.fn();
+jest.mock('react-use/lib/useLocalStorage', () => {
+  return jest.fn((key: string, _initialValue: string) => {
+    return [undefined, mockSetLastUsedViewer]; // Always use undefined as the initial value
+  });
+});
 
 const createMockLocator = (id: string) => ({
   navigate: jest.fn(),
@@ -46,11 +57,12 @@ describe('LogsExplorerTabs', () => {
       },
     } as unknown as typeof discoverServiceMock;
 
-    render(<LogsExplorerTabs services={services} selectedTab={selectedTab} />);
+    const { unmount } = render(<LogsExplorerTabs services={services} selectedTab={selectedTab} />);
 
     return {
       mockDiscoverLocator,
       mockLogsExplorerLocator,
+      unmount,
     };
   };
 
@@ -85,5 +97,15 @@ describe('LogsExplorerTabs', () => {
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'false');
     await userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith({});
+  });
+
+  it('should update the last used viewer in local storage for selectedTab', async () => {
+    const { unmount } = renderTabs('discover');
+    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(DISCOVER_APP_ID);
+
+    unmount();
+    mockSetLastUsedViewer.mockClear();
+    renderTabs('logs-explorer');
+    expect(mockSetLastUsedViewer).toHaveBeenCalledWith(OBSERVABILITY_LOGS_EXPLORER_APP_ID);
   });
 });

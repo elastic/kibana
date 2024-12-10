@@ -122,6 +122,9 @@ const ALERT_URL = `${ALERT_NAMESPACE}.url` as const;
 // kibana.alert.rule.uuid - rule ID for rule that generated this alert
 const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 
+// kibana.alert.rule.execution.type - rule execution type for rule that generated this alert (manual /scheduled)
+const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -144,6 +147,7 @@ const fields = {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
   ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
@@ -189,6 +193,7 @@ export {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_EXECUTION_TYPE,
   ALERT_INTENDED_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,

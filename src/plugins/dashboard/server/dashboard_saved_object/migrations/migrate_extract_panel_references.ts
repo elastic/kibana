@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectMigrationFn } from '@kbn/core/server';
+import { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
 
 import { extractReferences, injectReferences } from '../../../common';
-import { DashboardAttributes } from '../../../common/content_management';
-import { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
+import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
+import type { DashboardSavedObjectAttributes } from '../schema';
+import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from '../../content_management/latest';
 
 /**
  * In 7.8.0 we introduced dashboard drilldowns which are stored inside dashboard saved object as part of embeddable state
@@ -26,7 +27,7 @@ import { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object
  */
 export function createExtractPanelReferencesMigration(
   deps: DashboardSavedObjectTypeMigrationsDeps
-): SavedObjectMigrationFn<DashboardAttributes> {
+): SavedObjectMigrationFn<DashboardSavedObjectAttributes> {
   return (doc) => {
     const references = doc.references ?? [];
 
@@ -36,18 +37,31 @@ export function createExtractPanelReferencesMigration(
      */
     const oldNonPanelReferences = references.filter((ref) => !ref.name.startsWith('panel_'));
 
+    // Use Content Management to convert the saved object to the DashboardAttributes
+    // expected by injectReferences
+    const { item, error: itemError } = savedObjectToItem(
+      doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
+      false
+    );
+
+    if (itemError) throw itemError;
+
+    const parsedAttributes = item.attributes;
     const injectedAttributes = injectReferences(
       {
-        attributes: doc.attributes,
+        attributes: parsedAttributes,
         references,
       },
       { embeddablePersistableStateService: deps.embeddable }
     );
 
-    const { attributes, references: newPanelReferences } = extractReferences(
+    const { attributes: extractedAttributes, references: newPanelReferences } = extractReferences(
       { attributes: injectedAttributes, references: [] },
       { embeddablePersistableStateService: deps.embeddable }
     );
+
+    const { attributes, error: attributesError } = itemAttrsToSavedObjectAttrs(extractedAttributes);
+    if (attributesError) throw attributesError;
 
     return {
       ...doc,

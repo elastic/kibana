@@ -6,7 +6,7 @@
  */
 
 import './table_basic.scss';
-import { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
+import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -32,10 +32,11 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
-import { getOriginalId, isTransposeId, LensGridDirection } from '../../../../common/expressions';
+import { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
@@ -58,14 +59,19 @@ import {
 } from './table_actions';
 import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
-import { getFieldTypeFromDatatable } from '../../../../common/expressions/datatable/utils';
+import {
+  getFieldMetaFromDatatable,
+  isNumericField,
+} from '../../../../common/expressions/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import { getColumnAlignment } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
-  header: 'underline',
+  header: 'shade',
+  footer: 'shade',
 };
 
 export const DEFAULT_PAGE_SIZE = 10;
@@ -75,7 +81,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
+  const isDarkMode = useObservable(props.theme.theme$, {
+    darkMode: false,
+    name: 'amsterdam',
+  }).darkMode;
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -229,10 +238,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter((_col, index) => {
           const col = firstTableRef.current.columns[index];
-          return (
-            col?.meta?.sourceParams?.type &&
-            getType(col.meta.sourceParams.type as string)?.type === 'buckets'
-          );
+          return getType(col?.meta)?.type === 'buckets';
         })
         .map((col) => col.columnId),
     [firstTableRef, columnConfig, getType]
@@ -240,7 +246,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const isEmpty =
     firstLocalTable.rows.length === 0 ||
-    (bucketedColumns.length &&
+    (bucketedColumns.length > 0 &&
       props.data.rows.every((row) => bucketedColumns.every((col) => row[col] == null)));
 
   const visibleColumns = useMemo(
@@ -266,37 +272,28 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [onEditAction, setColumnConfig, columnConfig, isInteractive]
   );
 
-  const isNumericMap: Record<string, boolean> = useMemo(
+  const isNumericMap: Map<string, boolean> = useMemo(
     () =>
-      firstLocalTable.columns.reduce<Record<string, boolean>>(
-        (map, column) => ({
-          ...map,
-          [column.id]: column.meta.type === 'number',
-        }),
-        {}
-      ),
-    [firstLocalTable]
+      firstLocalTable.columns.reduce((acc, column) => {
+        acc.set(column.id, isNumericField(column.meta));
+        return acc;
+      }, new Map<string, boolean>()),
+    [firstLocalTable.columns]
   );
 
-  const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
-    const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
-    columnConfig.columns.forEach((column) => {
-      if (column.alignment) {
-        alignmentMap[column.columnId] = column.alignment;
-      } else {
-        alignmentMap[column.columnId] = isNumericMap[column.columnId] ? 'right' : 'left';
-      }
-    });
-    return alignmentMap;
-  }, [columnConfig, isNumericMap]);
+  const alignments: Map<string, 'left' | 'right' | 'center'> = useMemo(() => {
+    return columnConfig.columns.reduce((acc, column) => {
+      acc.set(column.columnId, getColumnAlignment(column, isNumericMap.get(column.columnId)));
+      return acc;
+    }, new Map<string, 'left' | 'right' | 'center'>());
+  }, [columnConfig.columns, isNumericMap]);
 
-  const minMaxByColumnId: Record<string, { min: number; max: number }> = useMemo(() => {
+  const minMaxByColumnId: Map<string, { min: number; max: number }> = useMemo(() => {
     return findMinMaxByColumnId(
       columnConfig.columns
-        .filter(({ columnId }) => isNumericMap[columnId])
+        .filter(({ columnId }) => isNumericMap.get(columnId))
         .map(({ columnId }) => columnId),
-      props.data,
-      getOriginalId
+      props.data
     );
   }, [props.data, isNumericMap, columnConfig]);
 
@@ -402,7 +399,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
-      const dataType = getFieldTypeFromDatatable(firstLocalTable, originalId);
+      const dataType = getFieldMetaFromDatatable(firstLocalTable, originalId)?.type;
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(dataType, isBucketed);
 
@@ -419,7 +416,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         : {
             type: 'ranges',
             bins: 0,
-            ...minMaxByColumnId[originalId],
+            ...(minMaxByColumnId.get(originalId) ?? getFallbackDataBounds()),
           };
       const colorFn = getCellColorFn(
         props.paletteService,
@@ -491,7 +488,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         ])
       );
       return ({ columnId }: { columnId: string }) => {
-        const currentAlignment = alignments && alignments[columnId];
+        const currentAlignment = alignments.get(columnId);
         const alignmentClassName = `lnsTableCell--${currentAlignment}`;
         const columnName =
           columns.find(({ id }) => id === columnId)?.displayAsText?.replace(/ /g, '-') || columnId;

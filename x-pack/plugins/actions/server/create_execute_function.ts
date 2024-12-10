@@ -6,13 +6,8 @@
  */
 
 import { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import {
-  RawAction,
-  ActionTypeRegistryContract,
-  InMemoryConnector,
-  ActionTaskExecutorParams,
-} from './types';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
@@ -31,6 +26,7 @@ interface CreateExecuteFunctionOptions {
 export interface ExecuteOptions
   extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects' | 'consumer'> {
   id: string;
+  uuid?: string;
   spaceId: string;
   apiKey: string | null;
   executionId: string;
@@ -71,6 +67,7 @@ export interface ExecutionResponse {
 
 export interface ExecutionResponseItem {
   id: string;
+  uuid?: string;
   actionTypeId: string;
   response: ExecutionResponseType;
 }
@@ -197,54 +194,19 @@ export function createBulkExecutionEnqueuerFunction({
       items: runnableActions
         .map((a) => ({
           id: a.id,
+          uuid: a.uuid,
           actionTypeId: a.actionTypeId,
           response: ExecutionResponseType.SUCCESS,
         }))
         .concat(
           actionsOverLimit.map((a) => ({
             id: a.id,
+            uuid: a.uuid,
             actionTypeId: a.actionTypeId,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
           }))
         ),
     };
-  };
-}
-
-export function createEphemeralExecutionEnqueuerFunction({
-  taskManager,
-  actionTypeRegistry,
-  inMemoryConnectors,
-  logger,
-}: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
-  return async function execute(
-    unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
-  ): Promise<RunNowResult> {
-    const { connector } = await getConnector(unsecuredSavedObjectsClient, inMemoryConnectors, id);
-
-    validateConnector({ id, connector, actionTypeRegistry });
-
-    const taskParams: ActionTaskExecutorParams = {
-      spaceId,
-      taskParams: {
-        actionId: id,
-        consumer,
-        // Saved Objects won't allow us to enforce unknown rather than any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        params: params as Record<string, any>,
-        ...(apiKey ? { apiKey } : {}),
-        ...(executionId ? { executionId } : {}),
-      },
-      ...executionSourceAsSavedObjectReferences(source),
-    };
-
-    return taskManager.ephemeralRunNow({
-      taskType: `actions:${connector.actionTypeId}`,
-      params: taskParams,
-      state: {},
-      scope: ['actions'],
-    });
   };
 }
 
@@ -281,21 +243,6 @@ function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorO
         ],
       }
     : {};
-}
-
-async function getConnector(
-  unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  inMemoryConnectors: InMemoryConnector[],
-  actionId: string
-): Promise<{ connector: InMemoryConnector | RawAction; isInMemory: boolean }> {
-  const inMemoryAction = inMemoryConnectors.find((action) => action.id === actionId);
-
-  if (inMemoryAction) {
-    return { connector: inMemoryAction, isInMemory: true };
-  }
-
-  const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
-  return { connector: attributes, isInMemory: false };
 }
 
 async function getConnectors(

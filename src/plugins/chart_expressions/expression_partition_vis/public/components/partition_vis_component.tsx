@@ -41,6 +41,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -378,22 +379,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getPartitionTheme(
         visType,
         visParams,
-        chartBaseTheme,
         containerDimensions,
         rescaleFactor,
         hasOpenedOnAggBasedEditor
       ),
-    [
-      visType,
-      visParams,
-      chartBaseTheme,
-      containerDimensions,
-      rescaleFactor,
-      hasOpenedOnAggBasedEditor,
-    ]
+    [visType, visParams, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
   );
 
-  const fixedViewPort = document.getElementById('app-fixed-viewport');
+  const fixedViewPort = useAppFixedViewport();
 
   const legendPosition = visParams.legendPosition ?? Position.Right;
 

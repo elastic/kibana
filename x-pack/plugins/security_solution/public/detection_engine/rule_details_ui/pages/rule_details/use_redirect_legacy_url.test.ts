@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable no-restricted-imports */
 
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react';
+// eslint-disable-next-line no-restricted-imports
 import type { UseLegacyUrlRedirectParams } from './use_redirect_legacy_url';
+// eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import type { Rule } from '../../../rule_management/logic';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
@@ -116,4 +117,5 @@ const mockRule: Rule = {
   related_integrations: [],
   required_fields: [],
   setup: '',
+  rule_source: { type: 'internal' },
 };

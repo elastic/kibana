@@ -27,6 +27,7 @@ import {
   DashboardPanelMap,
   prefixReferencesFromPanel,
 } from '../../../../common';
+import type { DashboardAttributes } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -80,12 +81,11 @@ const serializeAllPanelState = async (
  * Save the current state of this dashboard to a saved object without showing any save modal.
  */
 export async function runQuickSave(this: DashboardContainer) {
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId, managed },
-  } = this.getState();
+  const { explicitInput: currentState } = this.getState();
 
-  if (managed) return;
+  const lastSavedId = this.savedObjectId.value;
+
+  if (this.managed$.value) return;
 
   const { panels: nextPanels, references } = await serializeAllPanelState(this);
   const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
@@ -96,7 +96,11 @@ export async function runQuickSave(this: DashboardContainer) {
     const { rawState: controlGroupSerializedState, references: extractedReferences } =
       await controlGroupApi.serializeState();
     controlGroupReferences = extractedReferences;
-    stateToSave = { ...stateToSave, controlGroupInput: controlGroupSerializedState };
+    stateToSave = {
+      ...stateToSave,
+      controlGroupInput:
+        controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
+    };
   }
 
   const saveResult = await getDashboardContentManagementService().saveDashboardState({
@@ -108,7 +112,7 @@ export async function runQuickSave(this: DashboardContainer) {
   });
 
   this.savedObjectReferences = saveResult.references ?? [];
-  this.dispatch.setLastSavedInput(dashboardStateToSave);
+  this.setLastSavedInput(dashboardStateToSave);
   this.saveNotification$.next();
 
   return saveResult;
@@ -119,11 +123,10 @@ export async function runQuickSave(this: DashboardContainer) {
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
 export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId, managed },
-  } = this.getState();
+  const { explicitInput: currentState } = this.getState();
   const dashboardContentManagementService = getDashboardContentManagementService();
+  const lastSavedId = this.savedObjectId.value;
+  const managed = this.managed$.value;
 
   return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {
     if (interactionMode === ViewMode.EDIT && managed) {
@@ -188,7 +191,8 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           controlGroupReferences = references;
           dashboardStateToSave = {
             ...dashboardStateToSave,
-            controlGroupInput: controlGroupSerializedState,
+            controlGroupInput:
+              controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
           };
         }
 
@@ -242,12 +246,11 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           },
         });
 
-        stateFromSaveModal.lastSavedId = saveResult.id;
-
         if (saveResult.id) {
           batch(() => {
             this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-            this.dispatch.setLastSavedInput(dashboardStateToSave);
+            this.setSavedObjectId(saveResult.id);
+            this.setLastSavedInput(dashboardStateToSave);
           });
         }
 

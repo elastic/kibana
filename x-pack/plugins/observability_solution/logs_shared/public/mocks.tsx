@@ -6,12 +6,14 @@
  */
 
 import { createLogAIAssistantMock } from './components/log_ai_assistant/log_ai_assistant.mock';
+import { createLogsOverviewMock } from './components/logs_overview/logs_overview.mock';
 import { createLogViewsServiceStartMock } from './services/log_views/log_views_service.mock';
 import { LogsSharedClientStartExports } from './types';
 
 export const createLogsSharedPluginStartMock = (): jest.Mocked<LogsSharedClientStartExports> => ({
   logViews: createLogViewsServiceStartMock(),
   LogAIAssistant: createLogAIAssistantMock(),
+  LogsOverview: createLogsOverviewMock(),
 });
 
 export const _ensureTypeCompatibility = (): LogsSharedClientStartExports =>

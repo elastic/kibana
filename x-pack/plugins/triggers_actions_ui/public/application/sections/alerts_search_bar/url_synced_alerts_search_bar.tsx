@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { BoolQuery } from '@kbn/es-query';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
 import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
-import { nonNullable } from '../../../../common/utils';
 import { buildEsQuery } from './build_es_query';
 
 const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
@@ -35,16 +32,17 @@ export interface UrlSyncedAlertsSearchBarProps
   > {
   showFilterControls?: boolean;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
-  onActiveFeatureFiltersChange?: (value: AlertConsumers[]) => void;
+  onFilterSelected?: (filters: Filter[]) => void;
 }
 
 /**
  * An abstraction over AlertsSearchBar that syncs the query state with the url
  */
 export const UrlSyncedAlertsSearchBar = ({
+  ruleTypeIds,
   showFilterControls = false,
   onEsQueryChange,
-  onActiveFeatureFiltersChange,
+  onFilterSelected,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
@@ -61,17 +59,23 @@ export const UrlSyncedAlertsSearchBar = ({
   const [spaceId, setSpaceId] = useState<string>();
 
   const {
+    // KQL bar query
     kuery,
     onKueryChange,
+    // KQL bar filters
     filters,
     onFiltersChange,
+    // Controls bar filters
     controlFilters,
     onControlFiltersChange,
+    // Time range
     rangeFrom,
     onRangeFromChange,
     rangeTo,
     onRangeToChange,
+    // Controls bar configuration
     filterControls,
+    // Saved KQL query
     savedQuery,
     setSavedQuery,
     clearSavedQuery,
@@ -85,13 +89,6 @@ export const UrlSyncedAlertsSearchBar = ({
 
   useEffect(() => {
     try {
-      onActiveFeatureFiltersChange?.([
-        ...new Set(
-          filters
-            .flatMap((f) => (f as AlertsFeatureIdsFilter).meta.alertsFeatureIds)
-            .filter(nonNullable)
-        ),
-      ]);
       onEsQueryChange(
         buildEsQuery({
           timeRange: {
@@ -102,6 +99,8 @@ export const UrlSyncedAlertsSearchBar = ({
           filters: [...filters, ...controlFilters],
         })
       );
+
+      onFilterSelected?.(filters);
     } catch (error) {
       toasts.addError(error, {
         title: INVALID_QUERY_STRING_TOAST_TITLE,
@@ -112,8 +111,8 @@ export const UrlSyncedAlertsSearchBar = ({
     controlFilters,
     filters,
     kuery,
-    onActiveFeatureFiltersChange,
     onEsQueryChange,
+    onFilterSelected,
     onKueryChange,
     rangeFrom,
     rangeTo,
@@ -131,6 +130,11 @@ export const UrlSyncedAlertsSearchBar = ({
     [onKueryChange, onRangeFromChange, onRangeToChange, setSavedQuery, timeFilterService]
   );
 
+  const filterControlsStorageKey = useMemo(
+    () => ['alertsSearchBar', spaceId, 'filterControls'].filter(Boolean).join('.'),
+    [spaceId]
+  );
+
   return (
     <>
       <AlertsSearchBar
@@ -143,6 +147,7 @@ export const UrlSyncedAlertsSearchBar = ({
         savedQuery={savedQuery}
         onSavedQueryUpdated={setSavedQuery}
         onClearSavedQuery={clearSavedQuery}
+        ruleTypeIds={ruleTypeIds}
         {...rest}
       />
       {showFilterControls && (
@@ -156,6 +161,7 @@ export const UrlSyncedAlertsSearchBar = ({
           controlsUrlState={filterControls}
           filters={controlFilters}
           onFiltersChange={onControlFiltersChange}
+          storageKey={filterControlsStorageKey}
           services={{
             http,
             notifications,

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-import { of } from 'rxjs';
+import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -18,7 +18,7 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
-export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
+function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -34,12 +34,22 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'observability-overview',
           },
           {
-            link: 'discover',
+            title: i18n.translate('xpack.observability.obltNav.discover', {
+              defaultMessage: 'Discover',
+            }),
+            // 'last-used-logs-viewer' is wrapper app to handle the navigation between observability-log-explorer and discover
+            link: 'last-used-logs-viewer',
+            breadcrumbStatus: 'hidden', // avoid duplicate "Discover" breadcrumbs
             renderAs: 'item',
             children: [
               {
-                // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
-                link: 'observability-logs-explorer',
+                link: 'discover',
+                children: [
+                  {
+                    // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
+                    link: 'observability-logs-explorer',
+                  },
+                ],
               },
             ],
           },
@@ -68,103 +78,63 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'slo',
           },
           {
-            id: 'aiMl',
-            title: i18n.translate('xpack.observability.obltNav.ml.aiAndMlGroupTitle', {
-              defaultMessage: 'AI & ML',
+            link: 'observabilityAIAssistant',
+            title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
+              defaultMessage: 'AI Assistant',
             }),
-            renderAs: 'accordion',
-            children: [
-              {
-                link: 'observabilityAIAssistant',
-                title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
-                  defaultMessage: 'AI Assistant',
-                }),
-              },
-              {
-                link: 'ml:anomalyDetection',
-                renderAs: 'item',
-                children: [
-                  {
-                    link: 'ml:singleMetricViewer',
-                  },
-                  {
-                    link: 'ml:anomalyExplorer',
-                  },
-                  {
-                    link: 'ml:settings',
-                  },
-                ],
-              },
-              {
-                title: i18n.translate('xpack.observability.obltNav.ml.logRateAnalysis', {
-                  defaultMessage: 'Log rate analysis',
-                }),
-                link: 'ml:logRateAnalysis',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
-                },
-              },
-              {
-                link: 'logs:anomalies',
-              },
-              {
-                link: 'logs:log-categories',
-              },
-              {
-                title: i18n.translate('xpack.observability.obltNav.ml.changePointDetection', {
-                  defaultMessage: 'Change point detection',
-                }),
-                link: 'ml:changePointDetections',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.includes(
-                    prepend('/app/ml/aiops/change_point_detection')
-                  );
-                },
-              },
-              {
-                title: i18n.translate('xpack.observability.obltNav.ml.job.notifications', {
-                  defaultMessage: 'Job notifications',
-                }),
-                link: 'ml:notifications',
-              },
-            ],
           },
           {
             link: 'inventory',
             spaceBefore: 'm',
           },
+          ...(streamsAvailable
+            ? [
+                {
+                  link: 'streams' as const,
+                },
+              ]
+            : []),
           {
             id: 'apm',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
-            renderAs: 'accordion',
+            renderAs: 'panelOpener',
             children: [
               {
-                link: 'apm:services',
-                getIsActive: ({ pathNameSerialized }) => {
-                  const regex = /app\/apm\/.*service.*/;
-                  return regex.test(pathNameSerialized);
-                },
-              },
-              {
-                link: 'apm:traces',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
-                },
-              },
-              {
-                link: 'apm:dependencies',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
-                },
+                children: [
+                  {
+                    link: 'apm:services',
+                    getIsActive: ({ pathNameSerialized }) => {
+                      const regex = /app\/apm\/.*service.*/;
+                      return regex.test(pathNameSerialized);
+                    },
+                  },
+                  {
+                    link: 'apm:traces',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+                    },
+                  },
+                  {
+                    link: 'apm:dependencies',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                    },
+                  },
+                  {
+                    link: 'ux',
+                    title: i18n.translate('xpack.observability.obltNav.apm.ux', {
+                      defaultMessage: 'User experience',
+                    }),
+                  },
+                ],
               },
               {
                 id: 'synthetics',
                 title: i18n.translate('xpack.observability.obltNav.apm.syntheticsGroupTitle', {
                   defaultMessage: 'Synthetics',
                 }),
-                renderAs: 'accordion',
                 children: [
                   {
                     link: 'synthetics',
@@ -172,10 +142,17 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                       defaultMessage: 'Monitors',
                     }),
                   },
-                  { link: 'synthetics:certificates' },
+                  {
+                    link: 'synthetics:certificates',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.apm.synthetics.tlsCertificates',
+                      {
+                        defaultMessage: 'TLS certificates',
+                      }
+                    ),
+                  },
                 ],
               },
-              { link: 'ux' },
             ],
           },
           {
@@ -183,32 +160,44 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             title: i18n.translate('xpack.observability.obltNav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
-            renderAs: 'accordion',
+            renderAs: 'panelOpener',
             children: [
               {
-                link: 'metrics:inventory',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
-                },
-              },
-              {
-                link: 'metrics:hosts',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
-                },
-              },
-              {
-                link: 'metrics:metrics-explorer',
+                children: [
+                  {
+                    link: 'metrics:inventory',
+                    title: i18n.translate('xpack.observability.infrastructure.inventory', {
+                      defaultMessage: 'Infrastructure inventory',
+                    }),
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+                    },
+                  },
+                  {
+                    link: 'metrics:hosts',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+                    },
+                  },
+                  {
+                    link: 'metrics:metrics-explorer',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.infrastructure.metricsExplorer',
+                      {
+                        defaultMessage: 'Metrics explorer',
+                      }
+                    ),
+                  },
+                ],
               },
               {
                 id: 'profiling',
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.universalProfiling',
                   {
-                    defaultMessage: 'Universal Profiling',
+                    defaultMessage: 'Universal profiling',
                   }
                 ),
-                renderAs: 'accordion',
                 children: [
                   {
                     link: 'profiling:stacktraces',
@@ -224,11 +213,189 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             ],
           },
           {
+            id: 'machine_learning-landing',
+            renderAs: 'panelOpener',
+            title: i18n.translate('xpack.observability.obltNav.machineLearning', {
+              defaultMessage: 'Machine learning',
+            }),
+            children: [
+              {
+                children: [
+                  {
+                    link: 'ml:overview',
+                  },
+                  {
+                    link: 'ml:notifications',
+                  },
+                  {
+                    link: 'ml:memoryUsage',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.machineLearning.memoryUsage',
+                      {
+                        defaultMessage: 'Memory usage',
+                      }
+                    ),
+                  },
+                ],
+              },
+              {
+                id: 'category-anomaly_detection',
+                title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
+                  defaultMessage: 'Anomaly detection',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    link: 'ml:anomalyDetection',
+                    title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection.jobs', {
+                      defaultMessage: 'Jobs',
+                    }),
+                  },
+                  {
+                    link: 'ml:anomalyExplorer',
+                  },
+                  {
+                    link: 'ml:singleMetricViewer',
+                  },
+                  {
+                    link: 'ml:settings',
+                  },
+                  {
+                    link: 'ml:suppliedConfigurations',
+                  },
+                ],
+              },
+              {
+                id: 'category-data_frame analytics',
+                title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
+                  defaultMessage: 'Data frame analytics',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    link: 'ml:dataFrameAnalytics',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_frame_analytics.jobs',
+                      {
+                        defaultMessage: 'Jobs',
+                      }
+                    ),
+                  },
+                  {
+                    link: 'ml:resultExplorer',
+                  },
+                  {
+                    link: 'ml:analyticsMap',
+                  },
+                ],
+              },
+              {
+                id: 'category-model_management',
+                title: i18n.translate('xpack.observability.obltNav.ml.model_management', {
+                  defaultMessage: 'Model management',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    link: 'ml:nodesOverview',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.model_management.trainedModels',
+                      {
+                        defaultMessage: 'Trained models',
+                      }
+                    ),
+                  },
+                ],
+              },
+              {
+                id: 'category-data_visualizer',
+                title: i18n.translate('xpack.observability.obltNav.ml.data_visualizer', {
+                  defaultMessage: 'Data visualizer',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    link: 'ml:fileUpload',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
+                      {
+                        defaultMessage: 'File data visualizer',
+                      }
+                    ),
+                  },
+                  {
+                    link: 'ml:indexDataVisualizer',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.data_view_data_visualizer',
+                      {
+                        defaultMessage: 'Data view data visualizer',
+                      }
+                    ),
+                  },
+                  {
+                    link: 'ml:esqlDataVisualizer',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.esql_data_visualizer',
+                      {
+                        defaultMessage: 'ES|QL data visualizer',
+                      }
+                    ),
+                  },
+                  {
+                    link: 'ml:dataDrift',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.data_drift',
+                      {
+                        defaultMessage: 'Data drift',
+                      }
+                    ),
+                  },
+                ],
+              },
+              {
+                id: 'category-aiops_labs',
+                title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
+                  defaultMessage: 'Aiops labs',
+                }),
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    link: 'ml:logRateAnalysis',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.aiops_labs.log_rate_analysis',
+                      {
+                        defaultMessage: 'Log rate analysis',
+                      }
+                    ),
+                  },
+                  {
+                    link: 'ml:logPatternAnalysis',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.aiops_labs.log_pattern_analysis',
+                      {
+                        defaultMessage: 'Log pattern analysis',
+                      }
+                    ),
+                  },
+                  {
+                    link: 'ml:changePointDetections',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.aiops_labs.change_point_detection',
+                      {
+                        defaultMessage: 'Change point detection',
+                      }
+                    ),
+                  },
+                ],
+              },
+            ],
+          },
+          {
             id: 'otherTools',
             title: i18n.translate('xpack.observability.obltNav.otherTools', {
               defaultMessage: 'Other tools',
             }),
-            renderAs: 'accordion',
+            renderAs: 'panelOpener',
             children: [
               {
                 link: 'logs:stream',
@@ -236,9 +403,33 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                   defaultMessage: 'Logs stream',
                 }),
               },
+              {
+                link: 'logs:anomalies',
+                title: i18n.translate('xpack.observability.obltNav.otherTools.logsAnomalies', {
+                  defaultMessage: 'Logs anomalies',
+                }),
+              },
+              {
+                link: 'logs:log-categories',
+                title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
+                  defaultMessage: 'Logs categories',
+                }),
+              },
+              {
+                link: 'logs:settings',
+                title: i18n.translate('xpack.observability.obltNav.otherTools.logsSettings', {
+                  defaultMessage: 'Logs settings',
+                }),
+              },
               { link: 'maps' },
               { link: 'canvas' },
               { link: 'graph' },
+              {
+                link: 'visualize',
+                title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
+                  defaultMessage: 'Visualize library',
+                }),
+              },
             ],
           },
         ],
@@ -248,8 +439,8 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
       { type: 'recentlyAccessed' },
       {
         type: 'navItem',
-        title: i18n.translate('xpack.observability.obltNav.getStarted', {
-          defaultMessage: 'Get started',
+        title: i18n.translate('xpack.observability.obltNav.addData', {
+          defaultMessage: 'Add data',
         }),
         link: 'observabilityOnboarding',
         icon: 'launch',
@@ -292,6 +483,7 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                 title: 'Data',
                 children: [
                   { link: 'management:index_management' },
+                  { link: 'management:data_quality' },
                   { link: 'management:index_lifecycle_management' },
                   { link: 'management:snapshot_restore' },
                   { link: 'management:rollup_jobs' },
@@ -351,135 +543,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'fleet',
           },
           {
-            id: 'machine_learning-landing',
-            link: 'securitySolutionUI:machine_learning-landing',
-            renderAs: 'panelOpener',
-            spaceBefore: null,
-            children: [
-              {
-                children: [
-                  {
-                    link: 'ml:overview',
-                  },
-                  {
-                    link: 'ml:notifications',
-                  },
-                  {
-                    link: 'ml:memoryUsage',
-                  },
-                ],
-              },
-              {
-                id: 'category-anomaly_detection',
-                title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
-                  defaultMessage: 'Anomaly detection',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:anomalyDetection',
-                    title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection.jobs', {
-                      defaultMessage: 'Jobs',
-                    }),
-                  },
-                  {
-                    link: 'ml:anomalyExplorer',
-                  },
-                  {
-                    link: 'ml:singleMetricViewer',
-                  },
-                  {
-                    link: 'ml:settings',
-                  },
-                ],
-              },
-              {
-                id: 'category-data_frame analytics',
-                title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
-                  defaultMessage: 'Data frame analytics',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:dataFrameAnalytics',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_frame_analytics.jobs',
-                      {
-                        defaultMessage: 'Jobs',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:resultExplorer',
-                  },
-                  {
-                    link: 'ml:analyticsMap',
-                  },
-                ],
-              },
-              {
-                id: 'category-model_management',
-                title: i18n.translate('xpack.observability.obltNav.ml.model_management', {
-                  defaultMessage: 'Model management',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:nodesOverview',
-                  },
-                ],
-              },
-              {
-                id: 'category-data_visualizer',
-                title: i18n.translate('xpack.observability.obltNav.ml.data_visualizer', {
-                  defaultMessage: 'Data visualizer',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:fileUpload',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
-                      {
-                        defaultMessage: 'File data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:indexDataVisualizer',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
-                      {
-                        defaultMessage: 'Data view data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:dataDrift',
-                  },
-                ],
-              },
-              {
-                id: 'category-aiops_labs',
-                title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:logRateAnalysis',
-                  },
-                  {
-                    link: 'ml:logPatternAnalysis',
-                  },
-                  {
-                    link: 'ml:changePointDetections',
-                  },
-                ],
-              },
-            ],
-          },
-          {
             id: 'cloudLinkUserAndRoles',
             cloudLink: 'userAndRoles',
           },
@@ -502,6 +565,8 @@ export const createDefinition = (
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: of(createNavTree(pluginsStart)),
+  navigationTree$: (pluginsStart.streams?.status$ || of({ status: 'disabled' as const })).pipe(
+    map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))
+  ),
   dataTestSubj: 'observabilitySideNav',
 });

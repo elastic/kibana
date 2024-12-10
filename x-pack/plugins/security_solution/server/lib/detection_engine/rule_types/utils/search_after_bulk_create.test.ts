@@ -48,7 +48,7 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import type { QueryRuleParams } from '../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: RuleExecutorServicesMock;
@@ -58,7 +58,7 @@ describe('searchAfterAndBulkCreate', () => {
   let wrapHits: WrapHits;
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
-  let alerting: PluginSetupContract;
+  let alerting: AlertingServerSetup;
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   const someGuids = Array.from({ length: 13 }).map(() => uuidv4());
   const sampleParams = getQueryRuleParams();
@@ -120,6 +120,7 @@ describe('searchAfterAndBulkCreate', () => {
       alertTimestampOverride: undefined,
       ruleExecutionLogger,
       publicBaseUrl: 'http://testkibanabaseurl.com',
+      intendedTimestamp: undefined,
     });
   });
 

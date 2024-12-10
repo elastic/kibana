@@ -57,7 +57,11 @@ export const PolicyTemplateSelector = ({
       </EuiText>
       <EuiSpacer size="m" />
       <RadioGroup
-        options={Array.from(policyTemplates, (v) => ({ id: v, label: getPolicyTemplateLabel(v) }))}
+        options={Array.from(policyTemplates, (v) => ({
+          id: v,
+          label: getPolicyTemplateLabel(v),
+          testId: `policy-template-radio-button-${v}`,
+        }))}
         idSelected={selectedTemplate}
         onChange={(id: CloudSecurityPolicyTemplate) => setPolicyTemplate(id)}
         disabled={disabled}
@@ -153,8 +157,16 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
         </EuiCallOut>
         <EuiSpacer size="m" />
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.cnvm.configureIntegrationDescription"
-          defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
+          id="xpack.csp.fleetIntegration.cnvm.awsSupportText"
+          defaultMessage="We currently support <b>AWS(Amazon Web Services)</b> cloud provider"
+          values={{
+            b: (chunks) => <b>{chunks}</b>,
+          }}
+        />
+        <EuiSpacer size="s" />
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.cnvm.chooseNameAndDescriptionText"
+          defaultMessage="Choose a name and description to help identify this integration"
         />
       </>
     )}

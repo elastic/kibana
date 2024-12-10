@@ -1,0 +1,7 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/asset-inventory-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0"
+}

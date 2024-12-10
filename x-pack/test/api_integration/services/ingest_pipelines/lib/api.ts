@@ -70,5 +70,20 @@ export function IngestPipelinesAPIProvider({ getService }: FtrProviderContext) {
 
       return await es.indices.delete({ index: indexName });
     },
+
+    async deleteGeoipDatabases() {
+      const { databases } = await es.ingest.getGeoipDatabase();
+      // Remove all geoip databases
+      const databaseIds = databases.map((database: { id: string }) => database.id);
+
+      const deleteDatabase = (id: string) =>
+        es.ingest.deleteGeoipDatabase({
+          id,
+        });
+
+      return Promise.all(databaseIds.map(deleteDatabase)).catch((err) => {
+        log.debug(`[Cleanup error] Error deleting ES resources: ${err.message}`);
+      });
+    },
   };
 }

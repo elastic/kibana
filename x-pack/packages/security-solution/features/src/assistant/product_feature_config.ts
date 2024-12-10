@@ -28,6 +28,9 @@ export const assistantDefaultProductFeaturesConfig: Record<
         ui: ['ai-assistant'],
       },
     },
-    subFeatureIds: [AssistantSubFeatureId.updateAnonymization],
+    subFeatureIds: [
+      AssistantSubFeatureId.updateAnonymization,
+      AssistantSubFeatureId.manageGlobalKnowledgeBase,
+    ],
   },
 };

@@ -128,6 +128,13 @@ export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
   defaultMessage: 'Average time to close',
 });
 
+export const ATTC_STAT_INFO_ARIA_LABEL = i18n.translate(
+  'xpack.cases.casesStats.mttr.info.ariaLabel',
+  {
+    defaultMessage: 'More about average time to close',
+  }
+);
+
 export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
   defaultMessage: 'The average duration (from creation to closure) for your current cases',
 });

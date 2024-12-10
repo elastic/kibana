@@ -11,7 +11,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
-import { DataTableRowControl, Size } from './data_table_row_control';
 import { useControlColumn } from '../hooks/use_control_column';
 
 /**
@@ -49,25 +48,28 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   }
 
   return (
-    <DataTableRowControl size={Size.normal}>
-      <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
-        <EuiButtonIcon
-          id={rowIndex === 0 ? tourStep : undefined}
-          size="xs"
-          iconSize="s"
-          aria-label={buttonLabel}
-          data-test-subj={testSubj}
-          onClick={() => {
-            const nextHit = isCurrentRowExpanded ? undefined : record;
-            toolTipRef.current?.hideToolTip();
-            setPressed(Boolean(nextHit));
-            setExpanded?.(nextHit);
-          }}
-          color={isCurrentRowExpanded ? 'primary' : 'text'}
-          iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
-          isSelected={isCurrentRowExpanded}
-        />
-      </EuiToolTip>
-    </DataTableRowControl>
+    <EuiToolTip
+      content={buttonLabel}
+      delay="long"
+      ref={toolTipRef}
+      anchorClassName="unifiedDataTable__rowControl"
+    >
+      <EuiButtonIcon
+        id={rowIndex === 0 ? tourStep : undefined}
+        size="xs"
+        iconSize="s"
+        aria-label={buttonLabel}
+        data-test-subj={testSubj}
+        onClick={() => {
+          const nextHit = isCurrentRowExpanded ? undefined : record;
+          toolTipRef.current?.hideToolTip();
+          setPressed(Boolean(nextHit));
+          setExpanded?.(nextHit);
+        }}
+        color={isCurrentRowExpanded ? 'primary' : 'text'}
+        iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
+        isSelected={isCurrentRowExpanded}
+      />
+    </EuiToolTip>
   );
 };

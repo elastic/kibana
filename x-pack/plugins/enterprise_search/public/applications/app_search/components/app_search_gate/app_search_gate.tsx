@@ -554,7 +554,7 @@ export const AppSearchGate: React.FC = () => {
           )}
         >
           <EuiSelect
-            hasNoInitialSelection
+            hasNoInitialSelection={participateInUXLabs === null}
             options={[
               {
                 text: i18n.translate(

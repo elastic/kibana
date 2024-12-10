@@ -2,6 +2,14 @@
 
 exports[`extend index management ilm banner extension should return extension when any index has lifecycle error 1`] = `
 Object {
+  "action": Object {
+    "buttonLabel": "Retry lifecycle step",
+    "indexNames": Array [
+      "testy3",
+    ],
+    "requestMethod": [Function],
+    "successMessage": "Called retry lifecycle step for: \\"testy3\\"",
+  },
   "filter": Query {
     "ast": _AST {
       "_clauses": Array [
@@ -132,13 +140,12 @@ exports[`extend index management ilm summary extension should render a phase def
             <span
               class="emotion-EuiExternalLinkIcon"
               data-euiicon-type="popout"
-            >
-              External link
-            </span>
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              (opens in a new tab or window)
+              (external, opens in a new tab or window)
             </span>
           </a>
         </div>
@@ -303,13 +310,12 @@ exports[`extend index management ilm summary extension should render a step info
             <span
               class="emotion-EuiExternalLinkIcon"
               data-euiicon-type="popout"
-            >
-              External link
-            </span>
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              (opens in a new tab or window)
+              (external, opens in a new tab or window)
             </span>
           </a>
         </div>
@@ -470,13 +476,12 @@ exports[`extend index management ilm summary extension should render an error pa
             <span
               class="emotion-EuiExternalLinkIcon"
               data-euiicon-type="popout"
-            >
-              External link
-            </span>
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              (opens in a new tab or window)
+              (external, opens in a new tab or window)
             </span>
           </a>
         </div>
@@ -638,13 +643,12 @@ exports[`extend index management ilm summary extension should render the tab whe
             <span
               class="emotion-EuiExternalLinkIcon"
               data-euiicon-type="popout"
-            >
-              External link
-            </span>
+              role="presentation"
+            />
             <span
               class="emotion-euiScreenReaderOnly"
             >
-              (opens in a new tab or window)
+              (external, opens in a new tab or window)
             </span>
           </a>
         </div>

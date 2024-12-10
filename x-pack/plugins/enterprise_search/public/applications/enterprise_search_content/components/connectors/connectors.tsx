@@ -36,16 +36,14 @@ import {
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
-import { CannotConnect } from '../search_index/components/cannot_connect';
-
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
 import { CrawlerEmptyState } from './crawler_empty_state';
+import { CreateConnector } from './create_connector';
 import { DeleteConnectorModal } from './delete_connector_modal';
-import { SelectConnector } from './select_connector/select_connector';
 
 export const connectorsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
@@ -55,7 +53,7 @@ export const connectorsBreadcrumbs = [
 
 export const crawlersBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.crawlers.breadcrumb', {
-    defaultMessage: 'Web crawlers',
+    defaultMessage: 'Web Crawlers',
   }),
 ];
 
@@ -81,7 +79,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
   }, [searchParams.from, searchParams.size, searchQuery, isCrawler]);
 
   return !isLoading && isEmpty && !isCrawler ? (
-    <SelectConnector />
+    <CreateConnector />
   ) : (
     <>
       <DeleteConnectorModal isCrawler={isCrawler} />
@@ -95,7 +93,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                 defaultMessage: 'Elasticsearch connectors',
               })
             : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
-                defaultMessage: 'Elasticsearch web crawlers',
+                defaultMessage: 'Elastic Web Crawler',
               }),
           rightSideGroupProps: {
             gutterSize: 's',
@@ -160,7 +158,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
                               {
-                                defaultMessage: 'New Native Connector',
+                                defaultMessage: 'New Elastic managed Connector',
                               }
                             )}
                           </EuiContextMenuItem>,
@@ -176,7 +174,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                              { defaultMessage: 'New Connector Client' }
+                              { defaultMessage: 'New Self-managed Connector' }
                             )}
                           </EuiContextMenuItem>,
                         ]}
@@ -240,12 +238,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
       >
         {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
           <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
-        )}
-        {Boolean(errorConnectingMessage) && (
-          <>
-            <CannotConnect />
-            <EuiSpacer />
-          </>
         )}
         <ConnectorStats isCrawler={isCrawler} />
         <EuiSpacer />

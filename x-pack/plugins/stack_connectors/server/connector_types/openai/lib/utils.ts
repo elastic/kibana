@@ -16,6 +16,10 @@ import {
   sanitizeRequest as azureAiSanitizeRequest,
   getRequestWithStreamOption as azureAiGetRequestWithStreamOption,
 } from './azure_openai_utils';
+import {
+  sanitizeRequest as otherOpenAiSanitizeRequest,
+  getRequestWithStreamOption as otherOpenAiGetRequestWithStreamOption,
+} from './other_openai_utils';
 
 export const sanitizeRequest = (
   provider: string,
@@ -28,6 +32,8 @@ export const sanitizeRequest = (
       return openAiSanitizeRequest(url, body, defaultModel!);
     case OpenAiProviderType.AzureAi:
       return azureAiSanitizeRequest(url, body);
+    case OpenAiProviderType.Other:
+      return otherOpenAiSanitizeRequest(body);
     default:
       return body;
   }
@@ -42,7 +48,7 @@ export function getRequestWithStreamOption(
 ): string;
 
 export function getRequestWithStreamOption(
-  provider: OpenAiProviderType.AzureAi,
+  provider: OpenAiProviderType.AzureAi | OpenAiProviderType.Other,
   url: string,
   body: string,
   stream: boolean
@@ -68,6 +74,8 @@ export function getRequestWithStreamOption(
       return openAiGetRequestWithStreamOption(url, body, stream, defaultModel!);
     case OpenAiProviderType.AzureAi:
       return azureAiGetRequestWithStreamOption(url, body, stream);
+    case OpenAiProviderType.Other:
+      return otherOpenAiGetRequestWithStreamOption(body, stream);
     default:
       return body;
   }
@@ -81,6 +89,7 @@ export const getAxiosOptions = (
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
   switch (provider) {
     case OpenAiProviderType.OpenAi:
+    case OpenAiProviderType.Other:
       return {
         headers: { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' },
         ...responseType,

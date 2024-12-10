@@ -72,7 +72,7 @@
                 "section": "def-server.RouteConfigOptions",
                 "text": "RouteConfigOptions"
               },
-              "<any>, \"description\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
+              "<any>, \"description\" | \"summary\" | \"deprecated\" | \"access\" | \"discontinued\"> | undefined; access: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -80,7 +80,15 @@
                 "section": "def-server.RouteAccess",
                 "text": "RouteAccess"
               },
-              "; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; deprecated?: boolean | undefined; discontinued?: string | undefined; }"
+              "; security?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
+              },
+              " | undefined; enableQueryVersion?: boolean | undefined; summary?: string | undefined; description?: string | undefined; discontinued?: string | undefined; }"
             ],
             "path": "packages/core/http/core-http-router-server-mocks/src/versioned_router.mock.ts",
             "deprecated": false,
@@ -329,7 +337,15 @@
             "section": "def-server.VersionedRouteConfig",
             "text": "VersionedRouteConfig"
           },
-          "<\"delete\">], unknown>; } & ",
+          "<\"delete\">], unknown>; getRoutes: jest.MockInstance<",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.VersionedRouterRoute",
+            "text": "VersionedRouterRoute"
+          },
+          "<unknown, unknown, unknown>[], [], unknown>; } & ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -337,23 +353,7 @@
             "section": "def-server.VersionedRouter",
             "text": "VersionedRouter"
           },
-          "<any> & { getRoute: (method: keyof ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.VersionedRouter",
-            "text": "VersionedRouter"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
-          ">, path: string) => ",
+          "<any> & { getRoute: (method: \"get\" | \"delete\" | \"post\" | \"put\" | \"patch\", path: string) => ",
           {
             "pluginId": "@kbn/core-http-router-server-mocks",
             "scope": "server",
@@ -568,7 +568,7 @@
             "section": "def-server.RouterRoute",
             "text": "RouterRoute"
           },
-          "[], [], unknown>; versioned: ",
+          "[], [options?: { excludeVersionedRoutes?: boolean | undefined; } | undefined], unknown>; versioned: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",

@@ -27,7 +27,7 @@ import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palett
 import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v}`;
@@ -561,6 +561,7 @@ describe('MetricVisComponent', function () {
         componentWithSecondaryDimension
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
@@ -602,6 +603,7 @@ describe('MetricVisComponent', function () {
         componentWithExtraText
           .find(Metric)
           .props()
+          // @ts-expect-error @types/react@18 - Parameter 'datum' implicitly has an 'any' type.
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
@@ -823,47 +825,47 @@ describe('MetricVisComponent', function () {
       // Raw values here, not formatted
       const trends: Record<string, MetricWTrend['trend']> = {
         Friday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Wednesday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Saturday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Sunday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         Thursday: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         __other__: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
         // this one shouldn't show up!
         [DEFAULT_TRENDLINE_NAME]: [
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
-          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
+          { x: faker.number.int(), y: faker.number.int() },
         ],
       };
 
@@ -1002,7 +1004,7 @@ describe('MetricVisComponent', function () {
   });
 
   it('should convert null values to NaN', () => {
-    const metricId = faker.random.word();
+    const metricId = faker.lorem.word();
 
     const tableWNull: Datatable = {
       type: 'datatable',

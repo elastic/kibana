@@ -1232,6 +1232,23 @@ describe('ServiceNow service', () => {
       `);
       });
 
+      test('it should return null if no incident found, when incident to be closed is null', async () => {
+        requestMock.mockImplementationOnce(() => ({
+          data: {
+            result: [],
+          },
+        }));
+
+        const res = await service.closeIncident({ incidentId: '2', correlationId: null });
+        expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "[ServiceNow][CloseIncident] No incident found with correlation_id: null or incidentId: 2.",
+          ]
+        `);
+
+        expect(res).toBeNull();
+      });
+
       test('it should return null if found incident with correlation id is null', async () => {
         requestMock.mockImplementationOnce(() => ({
           data: {

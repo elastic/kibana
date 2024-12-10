@@ -19,7 +19,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
-import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
+import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 import {
   getDashboardBackupService,
@@ -151,7 +151,7 @@ export function ShowShareModal({
       ...latestPanels,
       ...modifiedPanels,
     };
-    return convertPanelMapToSavedPanels(allUnsavedPanelsMap);
+    return convertPanelMapToPanelsArray(allUnsavedPanelsMap);
   })();
 
   if (unsavedDashboardState) {

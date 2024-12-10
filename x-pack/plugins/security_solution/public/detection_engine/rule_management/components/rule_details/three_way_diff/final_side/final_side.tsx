@@ -7,29 +7,47 @@
 
 import React from 'react';
 import { EuiTitle } from '@elastic/eui';
-import type { DiffableRule } from '../../../../../../../common/api/detection_engine';
-import { FieldReadOnly } from '../final_readonly/field_readonly';
 import { SideHeader } from '../components/side_header';
 import { FinalSideHelpInfo } from './final_side_help_info';
 import * as i18n from './translations';
+import { FinalReadOnly } from '../final_readonly/final_readonly';
+import { FinalEdit } from '../final_edit/final_edit';
+import { FinalSideMode } from './constants';
+import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
+import { FinalSideContextProvider, useFinalSideContext } from './final_side_context';
 
 interface FinalSideProps {
-  fieldName: string;
-  finalDiffableRule: DiffableRule;
+  fieldName: UpgradeableDiffableFields;
 }
 
-export function FinalSide({ fieldName, finalDiffableRule }: FinalSideProps): JSX.Element {
+export function FinalSide({ fieldName }: FinalSideProps): JSX.Element {
   return (
     <>
       <SideHeader>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
           <h3>
-            {i18n.UPGRADED_VERSION}
+            {i18n.FINAL_UPDATE}
             <FinalSideHelpInfo />
           </h3>
         </EuiTitle>
       </SideHeader>
-      <FieldReadOnly fieldName={fieldName} finalDiffableRule={finalDiffableRule} />
+      <FinalSideContextProvider fieldName={fieldName}>
+        <FinalSideContent />
+      </FinalSideContextProvider>
     </>
   );
+}
+
+function FinalSideContent(): JSX.Element {
+  const { mode } = useFinalSideContext();
+
+  switch (mode) {
+    case FinalSideMode.READONLY:
+      return <FinalReadOnly />;
+    case FinalSideMode.EDIT:
+      return <FinalEdit />;
+    default:
+      return assertUnreachable(mode);
+  }
 }

@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             `parser errors to match expectation: HAS ${expectation ? 'ERRORS' : 'NO ERRORS'}`,
             async () => {
               const actual = await PageObjects.searchProfiler.editorHasParseErrors();
-              return expectation === actual;
+              return expectation === actual?.length > 0;
             }
           );
         }

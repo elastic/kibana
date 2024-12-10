@@ -27,6 +27,7 @@ import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_det
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
 import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
 import { setupCdrDataViews } from '../saved_objects/data_views';
+import { defineGraphRoute } from './graph/route';
 
 /**
  * 1. Registers routes
@@ -50,6 +51,7 @@ export function setupRoutes({
   defineGetDetectionEngineAlertsStatus(router);
   defineBulkActionCspBenchmarkRulesRoute(router);
   defineGetCspBenchmarkRulesStatesRoute(router);
+  defineGraphRoute(router);
 
   core.http.registerOnPreRouting(async (request, response, toolkit) => {
     if (request.url.pathname.includes(CLOUD_SECURITY_INTERTAL_PREFIX_ROUTE_PATH)) {

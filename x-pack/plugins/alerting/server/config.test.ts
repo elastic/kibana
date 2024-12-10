@@ -21,7 +21,6 @@ describe('config validation', () => {
           "interval": "5m",
           "removalDelay": "1h",
         },
-        "maxEphemeralActionsPerAlert": 10,
         "rules": Object {
           "maxScheduledPerMinute": 32000,
           "minimumScheduleInterval": Object {
@@ -113,5 +112,14 @@ describe('config validation', () => {
         `"[rules.run.actions.max]: Value must be equal to or lower than [100000]."`
       );
     });
+  });
+
+  test('maxScheduledPerMinute allows more than 32000', () => {
+    const config: Record<string, unknown> = {
+      rules: {
+        maxScheduledPerMinute: 50000,
+      },
+    };
+    expect(() => configSchema.validate(config)).not.toThrow();
   });
 });

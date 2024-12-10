@@ -4,7 +4,6 @@ exports[`cases feature_privilege_builder within feature grants all privileges un
 Array [
   "cases:observability/pushCase",
   "cases:observability/createCase",
-  "cases:observability/createComment",
   "cases:observability/getCase",
   "cases:observability/getComment",
   "cases:observability/getTags",
@@ -17,12 +16,19 @@ Array [
   "cases:observability/deleteComment",
   "cases:observability/createConfiguration",
   "cases:observability/updateConfiguration",
+  "cases:observability/createComment",
+  "cases:observability/reopenCase",
 ]
 `;
 
 exports[`cases feature_privilege_builder within feature grants create privileges under feature with id securitySolution 1`] = `
 Array [
   "cases:securitySolution/createCase",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants createComment privileges under feature with id securitySolution 1`] = `
+Array [
   "cases:securitySolution/createComment",
 ]
 `;
@@ -48,6 +54,12 @@ Array [
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
   "cases:observability/findConfigurations",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants reopenCase privileges under feature with id observability 1`] = `
+Array [
+  "cases:observability/reopenCase",
 ]
 `;
 

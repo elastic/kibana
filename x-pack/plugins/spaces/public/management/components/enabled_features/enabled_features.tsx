@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { FeatureTable } from './feature_table';
 import type { Space } from '../../../../common';
@@ -25,16 +23,8 @@ interface Props {
 }
 
 export const EnabledFeatures: FunctionComponent<Props> = (props) => {
-  const { services } = useKibana();
-  const canManageRoles = services.application?.capabilities.management?.security?.roles === true;
-
   return (
-    <SectionPanel
-      title={i18n.translate('xpack.spaces.management.manageSpacePage.featuresTitle', {
-        defaultMessage: 'Features',
-      })}
-      data-test-subj="enabled-features-panel"
-    >
+    <SectionPanel dataTestSubj="enabled-features-panel">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -49,24 +39,13 @@ export const EnabledFeatures: FunctionComponent<Props> = (props) => {
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
-                defaultMessage="Hidden features are removed from the user interface, but not disabled. To secure access to features, {manageRolesLink}."
+                id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplayMessage"
+                defaultMessage="Choose the features to display in the navigation menu for users of this space. If you want to focus on a single solution, you can simplify the navigation even more by selecting a {solutionView}."
                 values={{
-                  manageRolesLink: canManageRoles ? (
-                    <EuiLink
-                      href={services.application?.getUrlForApp('management', {
-                        path: '/security/roles',
-                      })}
-                    >
-                      <FormattedMessage
-                        id="xpack.spaces.management.enabledSpaceFeatures.manageRolesLinkText"
-                        defaultMessage="manage security roles"
-                      />
-                    </EuiLink>
-                  ) : (
+                  solutionView: (
                     <FormattedMessage
-                      id="xpack.spaces.management.enabledSpaceFeatures.manageRolesLinkText"
-                      defaultMessage="manage security roles"
+                      id="xpack.spaces.management.enabledSpaceFeatures.chooseFeaturesToDisplaySolutionViewText"
+                      defaultMessage="Solution view"
                     />
                   ),
                 }}

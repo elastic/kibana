@@ -295,7 +295,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -329,7 +329,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -344,7 +344,7 @@
         "label": "LogColumnHeadersWrapper",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -352,7 +352,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -360,7 +360,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -377,7 +377,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -392,7 +392,7 @@
         "label": "LogEntryColumn",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -400,7 +400,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -408,7 +408,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -425,7 +425,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -442,7 +442,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "LogEntryContextMenuProps",
-          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -459,7 +459,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -476,7 +476,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "LogEntryFieldColumnProps",
-          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -493,7 +493,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -527,7 +527,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -561,7 +561,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -576,7 +576,7 @@
         "label": "LogEntryRowWrapper",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -584,7 +584,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -592,7 +592,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -609,7 +609,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -643,7 +643,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -668,14 +668,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogHighlightsStateProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -689,7 +689,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -718,14 +718,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogPositionStateProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -739,7 +739,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -779,7 +779,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -804,14 +804,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogStreamProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -825,7 +825,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1028,14 +1028,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogViewProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1049,7 +1049,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1093,7 +1093,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1108,7 +1108,7 @@
         "label": "ScrollableLogTextStreamView",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<Pick<",
+          "React.ForwardRefExoticComponent<Omit<",
           "ScrollableLogTextStreamViewProps",
           " & React.RefAttributes<",
           {
@@ -1118,9 +1118,7 @@
             "section": "def-public.ScrollableLogTextStreamView",
             "text": "ScrollableLogTextStreamView"
           },
-          ">, \"key\" | \"css\" | keyof ",
-          "ScrollableLogTextStreamViewProps",
-          "> & React.RefAttributes<{}>>"
+          ">, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -1137,7 +1135,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1257,7 +1255,7 @@
             "section": "def-public.LogEntryColumnWidths",
             "text": "LogEntryColumnWidths"
           },
-          "; CharacterDimensionsProbe: () => JSX.Element; }"
+          "; CharacterDimensionsProbe: () => React.JSX.Element; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
         "deprecated": false,
@@ -2585,7 +2583,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2891,6 +2889,29 @@
         "children": [
           {
             "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.charts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "charts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "public",
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
             "id": "def-public.LogsSharedClientStartDeps.data",
             "type": "Object",
             "tags": [],
@@ -3109,6 +3130,76 @@
                 "text": "UiActionsService"
               },
               "; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.fieldFormats",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsRegistry",
+                "text": "FieldFormatsRegistry"
+              },
+              ", \"init\" | \"register\"> & { deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.savedSearch",
+            "type": "Object",
+            "tags": [],
+            "label": "savedSearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearchPublicPluginStart",
+                "text": "SavedSearchPublicPluginStart"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
             "deprecated": false,
@@ -3435,6 +3526,31 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.LogsOverviewProps",
+        "type": "Type",
+        "tags": [],
+        "label": "LogsOverviewProps",
+        "description": [],
+        "signature": [
+          "{ timeRange: { start: string; end: string; }; documentFilters?: ",
+          "QueryDslQueryContainer",
+          "[] | undefined; logsSource?: ",
+          {
+            "pluginId": "@kbn/observability-logs-overview",
+            "scope": "public",
+            "docId": "kibKbnObservabilityLogsOverviewPluginApi",
+            "section": "def-public.LogsSourceConfiguration",
+            "text": "LogsSourceConfiguration"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logs_overview/logs_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.LogSummaryBuckets",
         "type": "Type",
         "tags": [],
@@ -3668,6 +3784,22 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "logsShared",
+          "id": "def-public.LogsSharedClientStartExports.LogsOverview",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "LogsOverview",
+          "description": [],
+          "signature": [
+            "SelfContainedLogsOverviewComponent",
+            " & ",
+            "SelfContainedLogsOverviewHelpers"
+          ],
+          "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

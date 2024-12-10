@@ -13,7 +13,7 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { appIds } from '@kbn/management-cards-navigation';
+import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
 import { of } from 'rxjs';
@@ -43,9 +43,6 @@ export class ServerlessSearchPlugin
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
-    const { searchHomepage } = setupDeps;
-    const useSearchHomepage = searchHomepage && searchHomepage.isHomepageFeatureEnabled();
-
     const queryClient = new QueryClient({
       mutationCache: new MutationCache({
         onError: (error) => {
@@ -72,23 +69,10 @@ export class ServerlessSearchPlugin
         },
       }),
     });
-    if (useSearchHomepage) {
-      core.application.register({
-        id: 'serverlessHomeRedirect',
-        title: i18n.translate('xpack.serverlessSearch.app.home.title', {
-          defaultMessage: 'Home',
-        }),
-        appRoute: '/app/elasticsearch',
-        euiIconType: 'logoElastic',
-        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-        visibleIn: [],
-        async mount({}: AppMountParameters) {
-          const [coreStart] = await core.getStartServices();
-          coreStart.application.navigateToApp('searchHomepage');
-          return () => {};
-        },
-      });
-    }
+
+    const homeTitle = i18n.translate('xpack.serverlessSearch.app.home.title', {
+      defaultMessage: 'Home',
+    });
 
     core.application.register({
       id: 'serverlessElasticsearch',
@@ -97,11 +81,12 @@ export class ServerlessSearchPlugin
       }),
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: useSearchHomepage ? '/app/elasticsearch/getting_started' : '/app/elasticsearch',
+      appRoute: '/app/elasticsearch/getting_started',
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
         docLinks.setDocLinks(coreStart.docLinks.links);
+        coreStart.chrome.docTitle.change(homeTitle);
         let user: AuthenticatedUser | undefined;
         try {
           const response = await coreStart.security.authc.getCurrentUser();
@@ -114,11 +99,13 @@ export class ServerlessSearchPlugin
       },
     });
 
+    const connectorsTitle = i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+      defaultMessage: 'Connectors',
+    });
+
     core.application.register({
       id: 'serverlessConnectors',
-      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
-        defaultMessage: 'Connectors',
-      }),
+      title: connectorsTitle,
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -126,9 +113,47 @@ export class ServerlessSearchPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
-
+        coreStart.chrome.docTitle.change(connectorsTitle);
         docLinks.setDocLinks(coreStart.docLinks.links);
+
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
+      },
+    });
+
+    const webCrawlersTitle = i18n.translate('xpack.serverlessSearch.app.webCrawlers.title', {
+      defaultMessage: 'Web Crawlers',
+    });
+
+    core.application.register({
+      id: 'serverlessWebCrawlers',
+      title: webCrawlersTitle,
+      appRoute: '/app/web_crawlers',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({ element, history }: AppMountParameters) {
+        const { renderApp } = await import('./application/web_crawlers');
+        const [coreStart, services] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(webCrawlersTitle);
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        return await renderApp(element, coreStart, { history, ...services }, queryClient);
+      },
+    });
+
+    const { searchIndices } = setupDeps;
+    core.application.register({
+      id: 'serverlessHomeRedirect',
+      title: homeTitle,
+      appRoute: '/app/elasticsearch',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(homeTitle);
+        coreStart.application.navigateToApp(searchIndices.startAppId);
+        return () => {};
       },
     });
 
@@ -141,16 +166,33 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement, security, searchHomepage } = services;
-    const useSearchHomepage = searchHomepage && searchHomepage.isHomepageFeatureEnabled();
+    const { serverless, management, indexManagement, security } = services;
+    serverless.setProjectHome(services.searchIndices.startRoute);
+    const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
-    serverless.setProjectHome(useSearchHomepage ? '/app/elasticsearch/home' : '/app/elasticsearch');
-
-    const navigationTree$ = of(navigationTree(searchHomepage?.isHomepageFeatureEnabled() ?? false));
-    serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    const navigationTree$ = of(navigationTree(core.application));
+    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
-      security.authz.isRoleManagementEnabled()
+      security.authz.isRoleManagementEnabled(),
+      aiAssistantIsEnabled
+        ? {
+            observabilityAiAssistantManagement: {
+              category: appCategories.OTHER,
+              title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
+                defaultMessage: 'AI Assistant Settings',
+              }),
+              description: i18n.translate(
+                'xpack.serverlessSearch.aiAssistantManagementDescription',
+                {
+                  defaultMessage:
+                    'Manage knowledge base and control assistant behavior, including response language.',
+                }
+              ),
+              icon: 'sparkles',
+            },
+          }
+        : undefined
     );
 
     management.setupCardsNavigation({

@@ -105,14 +105,14 @@ describe('fetchMissingMonitoringData', () => {
         nodeName: 'nodeName1',
         clusterUuid: 'clusterUuid1',
         gapDuration: 1,
-        ccs: null,
+        ccs: undefined,
       },
       {
         nodeId: 'nodeUuid2',
         nodeName: 'nodeName2',
         clusterUuid: 'clusterUuid1',
         gapDuration: 8,
-        ccs: null,
+        ccs: undefined,
       },
     ]);
   });

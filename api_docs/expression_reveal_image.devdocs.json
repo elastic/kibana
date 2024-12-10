@@ -11,7 +11,7 @@
         "label": "getRevealImageRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {

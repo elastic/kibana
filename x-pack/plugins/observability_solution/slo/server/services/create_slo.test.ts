@@ -23,6 +23,7 @@ import {
 } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('CreateSLO', () => {
   let mockEsClient: ElasticsearchClientMock;
@@ -55,17 +56,25 @@ describe('CreateSLO', () => {
   });
 
   describe('happy path', () => {
+    beforeEach(() => {
+      mockRepository.exists.mockResolvedValue(false);
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
     it('calls the expected services', async () => {
       const sloParams = createSLOParams({
         id: 'unique-id',
         indicator: createAPMTransactionErrorRateIndicator(),
       });
+
       mockTransformManager.install.mockResolvedValue('slo-id-revision');
       mockSummaryTransformManager.install.mockResolvedValue('slo-summary-id-revision');
 
       const response = await createSLO.execute(sloParams);
 
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: 'unique-id',
@@ -80,17 +89,14 @@ describe('CreateSLO', () => {
           version: 2,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        }),
-        { throwOnConflict: true }
+        })
       );
 
       expect(mockTransformManager.install).toHaveBeenCalled();
-      expect(mockTransformManager.start).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.calls[0]
       ).toMatchSnapshot();
       expect(mockSummaryTransformManager.install).toHaveBeenCalled();
-      expect(mockSummaryTransformManager.start).toHaveBeenCalled();
       expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
 
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
@@ -108,7 +114,7 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: expect.any(String),
@@ -122,8 +128,7 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        }),
-        { throwOnConflict: true }
+        })
       );
     });
 
@@ -141,7 +146,7 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ...sloParams,
           id: expect.any(String),
@@ -155,13 +160,39 @@ describe('CreateSLO', () => {
           enabled: true,
           createdAt: expect.any(Date),
           updatedAt: expect.any(Date),
-        }),
-        { throwOnConflict: true }
+        })
       );
     });
   });
 
   describe('unhappy path', () => {
+    beforeEach(() => {
+      mockRepository.exists.mockResolvedValue(false);
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
+    it('throws a SLOIdConflict error when the SLO already exists', async () => {
+      mockRepository.exists.mockResolvedValue(true);
+
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError(/SLO \[.*\] already exists/);
+    });
+
+    it('throws a SecurityException error when the user does not have the required privileges', async () => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as SecurityHasPrivilegesResponse);
+
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
+        "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
+      );
+    });
+
     it('rollbacks completed operations when rollup transform install fails', async () => {
       mockTransformManager.install.mockRejectedValue(new Error('Rollup transform install error'));
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
@@ -173,16 +204,16 @@ describe('CreateSLO', () => {
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
-      ).toHaveBeenCalledTimes(1);
+      ).toHaveBeenCalledTimes(2);
 
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
-      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
-      expect(mockTransformManager.stop).not.toHaveBeenCalled();
-      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.stop).toHaveBeenCalledTimes(0);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockTransformManager.stop).toHaveBeenCalledTimes(0);
+      expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
     });
 
-    it('rollbacks completed operations when summary transform start fails', async () => {
-      mockSummaryTransformManager.start.mockRejectedValue(
+    it('rollbacks completed operations when summary transform install fails', async () => {
+      mockSummaryTransformManager.install.mockRejectedValue(
         new Error('Summary transform install error')
       );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
@@ -192,7 +223,7 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(mockTransformManager.stop).toHaveBeenCalled();
+      expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
@@ -211,12 +242,12 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(mockTransformManager.stop).toHaveBeenCalled();
+      expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
-      expect(mockSummaryTransformManager.stop).toHaveBeenCalled();
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
     });
   });

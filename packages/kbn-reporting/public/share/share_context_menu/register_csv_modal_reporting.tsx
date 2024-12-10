@@ -16,7 +16,7 @@ import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-c
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
-import { ShareContext, ShareMenuItem } from '@kbn/share-plugin/public';
+import { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
@@ -24,7 +24,6 @@ export const reportingCsvShareProvider = ({
   apiClient,
   application,
   license,
-  usesUiCapabilities,
   startServices$,
 }: ExportModalShareOpts) => {
   const getShareMenuItems = ({ objectType, sharingData, toasts }: ShareContext) => {
@@ -69,19 +68,14 @@ export const reportingCsvShareProvider = ({
       };
     };
 
-    const shareActions: ShareMenuItem[] = [];
+    const shareActions: ShareMenuItemV2[] = [];
 
     const licenseCheck = checkLicense(license.check('reporting', 'basic'));
     const licenseToolTipContent = licenseCheck.message;
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
 
-    let capabilityHasCsvReporting = false;
-    if (usesUiCapabilities) {
-      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
-    } else {
-      capabilityHasCsvReporting = true; // deprecated
-    }
+    const capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
 
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
@@ -177,8 +171,8 @@ export const reportingCsvShareProvider = ({
           />
         ),
         generateExport: generateReportingJobCSV,
+        generateExportUrl: () => absoluteUrl,
         generateCopyUrl: reportingUrl,
-        absoluteUrl,
         renderCopyURLButton: true,
       });
     }

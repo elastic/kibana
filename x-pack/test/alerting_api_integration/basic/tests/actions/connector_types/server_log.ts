@@ -11,14 +11,14 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function serverLogTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('server-log action', () => {
-    it('should return 200 when creating a server-log action', async () => {
+  describe('server-log connector', () => {
+    it('should return 200 when creating a server-log connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'A server.log action',
-          actionTypeId: '.server-log',
+          name: 'A server.log connector',
+          connector_type_id: '.server-log',
         })
         .expect(200);
     });

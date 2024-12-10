@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/search-assistant",
   "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
   "description": "AI Assistant for Search",
   "plugin": {
     "id": "searchAssistant",
@@ -12,13 +14,19 @@
       "searchAssistant"
     ],
     "requiredPlugins": [
+      "actions",
+      "licensing",
       "observabilityAIAssistant",
-      "observabilityAIAssistantApp"
+      "triggersActionsUi",
+      "share"
     ],
     "optionalPlugins": [
       "cloud",
+      "serverless",
       "usageCollection",
     ],
-    "requiredBundles": []
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

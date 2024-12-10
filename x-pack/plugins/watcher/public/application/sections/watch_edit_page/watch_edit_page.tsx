@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useReducer } from 'react';
-import { isEqual } from 'lodash';
+import { isEqual, has, isFunction } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,6 +45,12 @@ const watchReducer = (state: any, action: any) => {
   const { command, payload } = action;
   const { watch } = state;
 
+  const watchTypes = Watch.getWatchTypes();
+  const WatchType =
+    watch && has(watchTypes, watch.type) && isFunction(watchTypes[watch.type])
+      ? watchTypes[watch.type]
+      : null;
+
   switch (command) {
     case 'setWatch':
       return {
@@ -57,23 +63,33 @@ const watchReducer = (state: any, action: any) => {
       if (isEqual(watch[property], value)) {
         return state;
       } else {
-        return {
-          ...state,
-          watch: new (Watch.getWatchTypes()[watch.type])({
-            ...watch,
-            [property]: value,
-          }),
-        };
+        if (WatchType) {
+          return {
+            ...state,
+            watch: new WatchType({
+              ...watch,
+              [property]: value,
+            }),
+          };
+        }
+
+        return state;
       }
 
     case 'addAction':
       const { type, defaults } = payload;
-      const newWatch = new (Watch.getWatchTypes()[watch.type])(watch);
-      newWatch.createAction(type, defaults);
-      return {
-        ...state,
-        watch: newWatch,
-      };
+
+      if (WatchType) {
+        const newWatch = new WatchType(watch);
+        newWatch.createAction(type, defaults);
+
+        return {
+          ...state,
+          watch: newWatch,
+        };
+      } else {
+        return state;
+      }
 
     case 'setError':
       return {
@@ -117,9 +133,13 @@ export const WatchEditPage = ({
           dispatch({ command: 'setError', payload: error.body });
         }
       } else if (type) {
-        const WatchType = Watch.getWatchTypes()[type];
-        if (WatchType) {
+        const watchTypes = Watch.getWatchTypes();
+
+        if (has(watchTypes, type) && isFunction(watchTypes[type])) {
+          const WatchType = watchTypes[type];
           dispatch({ command: 'setWatch', payload: new WatchType() });
+        } else {
+          dispatch({ command: 'setError', payload: { message: 'Invalid watch type' } });
         }
       }
     };

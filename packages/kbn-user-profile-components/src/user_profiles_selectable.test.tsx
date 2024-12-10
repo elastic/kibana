@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { UserProfile } from './user_profile';
 
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+
+import type { UserProfile } from './user_profile';
 import { UserProfilesSelectable } from './user_profiles_selectable';
 
 const userProfiles: UserProfile[] = [

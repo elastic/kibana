@@ -11,7 +11,7 @@
         "label": "ManagedAvatarTip",
         "description": [],
         "signature": [
-          "({\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}: { entityName?: string | undefined; }) => JSX.Element"
+          "({\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}: { entityName?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
         "deprecated": false,
@@ -58,7 +58,7 @@
         "signature": [
           "(props: { iconType?: ",
           "IconType",
-          " | undefined; }) => JSX.Element"
+          " | undefined; includeVersionTip?: boolean | undefined; entityNamePlural?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
@@ -89,6 +89,34 @@
                 "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoCreatorTip.$1.includeVersionTip",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeVersionTip",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoCreatorTip.$1.entityNamePlural",
+                "type": "string",
+                "tags": [],
+                "label": "entityNamePlural",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -104,7 +132,7 @@
         "label": "NoUpdaterTip",
         "description": [],
         "signature": [
-          "(props: { iconType?: string | undefined; }) => JSX.Element"
+          "(props: { iconType?: string | undefined; includeVersionTip?: boolean | undefined; entityNamePlural?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
         "deprecated": false,
@@ -134,6 +162,34 @@
                 "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoUpdaterTip.$1.includeVersionTip",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "includeVersionTip",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-public.NoUpdaterTip.$1.entityNamePlural",
+                "type": "string",
+                "tags": [],
+                "label": "entityNamePlural",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -149,7 +205,7 @@
         "label": "UserAvatarTip",
         "description": [],
         "signature": [
-          "(props: { uid: string; }) => JSX.Element | null"
+          "(props: { uid: string; }) => React.JSX.Element | null"
         ],
         "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
         "deprecated": false,
@@ -191,7 +247,7 @@
         "label": "UserProfilesKibanaProvider",
         "description": [],
         "signature": [
-          "({ children, core, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, core, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-user-profiles",
             "scope": "public",
@@ -199,7 +255,7 @@
             "section": "def-public.UserProfilesKibanaDependencies",
             "text": "UserProfilesKibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
@@ -213,7 +269,7 @@
             "label": "{\n  children,\n  core,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/content-management-user-profiles",
                 "scope": "public",
@@ -221,7 +277,7 @@
                 "section": "def-public.UserProfilesKibanaDependencies",
                 "text": "UserProfilesKibanaDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/user_profiles/src/services.tsx",
             "deprecated": false,
@@ -240,7 +296,7 @@
         "label": "UserProfilesProvider",
         "description": [],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-user-profiles",
             "scope": "public",
@@ -248,7 +304,7 @@
             "section": "def-public.UserProfilesServices",
             "text": "UserProfilesServices"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/user_profiles/src/services.tsx",
         "deprecated": false,
@@ -262,7 +318,7 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/content-management-user-profiles",
                 "scope": "public",
@@ -270,7 +326,7 @@
                 "section": "def-public.UserProfilesServices",
                 "text": "UserProfilesServices"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/user_profiles/src/services.tsx",
             "deprecated": false,

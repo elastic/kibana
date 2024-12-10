@@ -12,7 +12,7 @@ import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
-import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import { noCasesSettingsPermission, TestProviders, createAppMockRenderer } from '../../common/mock';
 import { customFieldsConfigurationMock, templatesConfigurationMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
@@ -200,10 +200,10 @@ describe('ConfigureCases', () => {
       expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(false);
     });
 
-    test('it disables correctly when the user cannot update', () => {
+    test('it disables correctly when the user does not have settings privilege', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-        wrappingComponentProps: { permissions: noUpdateCasesPermissions() },
+        wrappingComponentProps: { permissions: noCasesSettingsPermission() },
       });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
@@ -565,8 +565,7 @@ describe('ConfigureCases', () => {
         wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
       });
 
-      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-      wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').simulate('click');
+      wrapper.find('button[data-test-subj="add-new-connector"]').simulate('click');
 
       await waitFor(() => {
         wrapper.update();
@@ -716,6 +715,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[1] },
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
+            { ...customFieldsConfigurationMock[4] },
+            { ...customFieldsConfigurationMock[5] },
           ],
           templates: [],
           id: '',
@@ -775,6 +776,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[1] },
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
+            { ...customFieldsConfigurationMock[4] },
+            { ...customFieldsConfigurationMock[5] },
           ],
           templates: [
             {
@@ -869,6 +872,16 @@ describe('ConfigureCases', () => {
                     value: false,
                   },
                   {
+                    key: customFieldsConfigurationMock[4].key,
+                    type: customFieldsConfigurationMock[4].type,
+                    value: customFieldsConfigurationMock[4].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[5].key,
+                    type: customFieldsConfigurationMock[5].type,
+                    value: null,
+                  },
+                  {
                     key: expect.anything(),
                     type: CustomFieldTypes.TEXT as const,
                     value: 'This is a default value',
@@ -902,6 +915,10 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.EDIT_CUSTOM_FIELD
+      );
+
       await userEvent.click(screen.getByTestId('custom-field-label-input'));
       await userEvent.paste('!!');
       await userEvent.click(screen.getByTestId('text-custom-field-required'));
@@ -927,6 +944,8 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[1] },
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
+            { ...customFieldsConfigurationMock[4] },
+            { ...customFieldsConfigurationMock[5] },
           ],
           templates: [],
           id: '',
@@ -941,6 +960,10 @@ describe('ConfigureCases', () => {
       await userEvent.click(screen.getByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.ADD_CUSTOM_FIELD
+      );
     });
 
     it('closes fly out for when click on cancel', async () => {
@@ -1100,6 +1123,16 @@ describe('ConfigureCases', () => {
                     type: customFieldsConfigurationMock[3].type,
                     value: false, // when no default value for toggle, we set it to false
                   },
+                  {
+                    key: customFieldsConfigurationMock[4].key,
+                    type: customFieldsConfigurationMock[4].type,
+                    value: customFieldsConfigurationMock[4].defaultValue,
+                  },
+                  {
+                    key: customFieldsConfigurationMock[5].key,
+                    type: customFieldsConfigurationMock[5].type,
+                    value: null,
+                  },
                 ],
               },
             },
@@ -1176,6 +1209,10 @@ describe('ConfigureCases', () => {
       );
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.EDIT_TEMPLATE
+      );
 
       await userEvent.clear(await screen.findByTestId('template-name-input'));
       await userEvent.click(await screen.findByTestId('template-name-input'));

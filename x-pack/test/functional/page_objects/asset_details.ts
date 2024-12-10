@@ -25,6 +25,11 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail(`infraAssetDetailsHostChartsSection${metric}`);
     },
 
+    // Add metrics callout
+    async addMetricsCalloutExists() {
+      return testSubjects.existOrFail('infraAddMetricsCallout');
+    },
+
     // Overview
     async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
@@ -32,6 +37,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getOverviewTab() {
       return testSubjects.find('infraAssetDetailsOverviewTab');
+    },
+
+    async assetDetailsKPITileMissing(type: string) {
+      return testSubjects.missingOrFail(`infraAssetDetailsKPI${type}`);
     },
 
     async getAssetDetailsKPITileValue(type: string) {

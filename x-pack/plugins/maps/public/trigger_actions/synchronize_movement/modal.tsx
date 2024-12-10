@@ -42,7 +42,7 @@ class SynchronizeMovementModal extends Component<Props> {
       const hasErrors = synchronizedPanels.length === 1 && mapPanel.getIsMovementSynchronized();
       return (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           key={mapPanel.id}
           isInvalid={hasErrors}
           error={

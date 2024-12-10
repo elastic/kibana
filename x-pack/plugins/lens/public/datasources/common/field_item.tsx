@@ -74,6 +74,8 @@ export type FieldItemProps = FieldItemIndexPatternFieldProps | FieldItemDatatabl
 
 export function InnerFieldItem(props: FieldItemProps) {
   const {
+    query,
+    filters,
     field,
     indexPattern,
     highlight,
@@ -193,6 +195,56 @@ export function InnerFieldItem(props: FieldItemProps) {
     onAddFieldToWorkspace,
   };
 
+  const renderFooter = useMemo(() => {
+    if (hideDetails || !indexPattern) {
+      return;
+    }
+
+    if (dataViewField.type === 'geo_point' || dataViewField.type === 'geo_shape') {
+      return () => (
+        <FieldPopoverFooter
+          field={dataViewField}
+          dataView={{ ...indexPattern, toSpec: () => indexPattern.spec } as unknown as DataView}
+          originatingApp={APP_ID}
+          uiActions={services.uiActions}
+          buttonProps={{
+            'data-test-subj': `lensVisualize-GeoField-${dataViewField.name}`,
+          }}
+        />
+      );
+    }
+
+    return function ExplorerInDiscover() {
+      const exploreInDiscover = useMemo(
+        () =>
+          getExploreInDiscover({
+            query,
+            filters,
+            indexPattern,
+            dataViewField,
+            services,
+          }),
+        []
+      );
+
+      return exploreInDiscover ? (
+        <EuiPopoverFooter>
+          <EuiButton
+            fullWidth
+            size="s"
+            href={exploreInDiscover}
+            target="_blank"
+            data-test-subj={`lnsFieldListPanel-exploreInDiscover-${dataViewField.name}`}
+          >
+            {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
+              defaultMessage: 'Explore in Discover',
+            })}
+          </EuiButton>
+        </EuiPopoverFooter>
+      ) : null;
+    };
+  }, [dataViewField, filters, hideDetails, indexPattern, query, services]);
+
   return (
     <li>
       <FieldPopover
@@ -248,6 +300,7 @@ export function InnerFieldItem(props: FieldItemProps) {
               )
             : undefined
         }
+        renderFooter={renderFooter}
       />
     </li>
   );
@@ -264,108 +317,86 @@ function FieldItemPopoverContents(
   const { query, filters, indexPattern, dataViewField, dateRange, onAddFilter } = props;
   const services = useKibana<LensAppServices>().services;
 
-  const exploreInDiscover = useMemo(() => {
-    if (!indexPattern) {
-      return null;
-    }
-    const meta = {
-      id: indexPattern.id,
-      columns: [dataViewField.name],
-      filters: {
-        enabled: {
-          lucene: [],
-          kuery: [],
-        },
-        disabled: {
-          lucene: [],
-          kuery: [],
-        },
-      },
-    };
-    const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
-      query,
-      filters,
-      meta,
-      [indexPattern],
-      getEsQueryConfig(services.uiSettings)
-    );
-    const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
-    if (!discoverLocator || !services.application.capabilities.discover.show) {
-      return;
-    }
-    return discoverLocator.getRedirectUrl({
-      dataViewSpec: indexPattern?.spec,
-      timeRange: services.data.query.timefilter.timefilter.getTime(),
-      filters: newFilters,
-      query: newQuery,
-      columns: meta.columns,
-    });
-  }, [dataViewField.name, filters, indexPattern, query, services]);
-
   if (!indexPattern) {
     return null;
   }
 
   return (
-    <>
-      <FieldStats
-        services={services}
-        query={query}
-        filters={filters}
-        fromDate={dateRange.fromDate}
-        toDate={dateRange.toDate}
-        dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
-        onAddFilter={onAddFilter}
-        field={dataViewField}
-        data-test-subj="lnsFieldListPanel"
-        overrideMissingContent={(params) => {
-          if (params.reason === 'no-data') {
-            // TODO: should we replace this with a default message "Analysis is not available for this field?"
-            return (
-              <EuiText size="s" data-test-subj="lnsFieldListPanel-missingFieldStats">
-                {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
-                  defaultMessage:
-                    'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
-                })}
-              </EuiText>
-            );
-          }
-          if (params.reason === 'unsupported') {
-            return (
-              <EuiText data-test-subj="lnsFieldListPanel-missingFieldStats">
-                {params.element}
-              </EuiText>
-            );
-          }
-          return params.element;
-        }}
-      />
-
-      {dataViewField.type === 'geo_point' || dataViewField.type === 'geo_shape' ? (
-        <FieldPopoverFooter
-          field={dataViewField}
-          dataView={{ ...indexPattern, toSpec: () => indexPattern.spec } as unknown as DataView}
-          originatingApp={APP_ID}
-          uiActions={services.uiActions}
-          buttonProps={{
-            'data-test-subj': `lensVisualize-GeoField-${dataViewField.name}`,
-          }}
-        />
-      ) : exploreInDiscover ? (
-        <EuiPopoverFooter>
-          <EuiButton
-            fullWidth
-            size="s"
-            href={exploreInDiscover}
-            target="_blank"
-            data-test-subj={`lnsFieldListPanel-exploreInDiscover-${dataViewField.name}`}
-          >
-            {i18n.translate('xpack.lens.indexPattern.fieldExploreInDiscover', {
-              defaultMessage: 'Explore in Discover',
-            })}
-          </EuiButton>
-        </EuiPopoverFooter>
-      ) : null}
-    </>
+    <FieldStats
+      services={services}
+      query={query}
+      filters={filters}
+      fromDate={dateRange.fromDate}
+      toDate={dateRange.toDate}
+      dataViewOrDataViewId={indexPattern.id} // TODO: Refactor to pass a variable with DataView type instead of IndexPattern
+      onAddFilter={onAddFilter}
+      field={dataViewField}
+      data-test-subj="lnsFieldListPanel"
+      overrideMissingContent={(params) => {
+        if (params.reason === 'no-data') {
+          // TODO: should we replace this with a default message "Analysis is not available for this field?"
+          return (
+            <EuiText size="s" data-test-subj="lnsFieldListPanel-missingFieldStats">
+              {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
+                defaultMessage:
+                  'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.',
+              })}
+            </EuiText>
+          );
+        }
+        if (params.reason === 'unsupported') {
+          return (
+            <EuiText data-test-subj="lnsFieldListPanel-missingFieldStats">{params.element}</EuiText>
+          );
+        }
+        return params.element;
+      }}
+    />
   );
+}
+
+function getExploreInDiscover({
+  query,
+  filters,
+  indexPattern,
+  dataViewField,
+  services,
+}: Pick<FieldItemProps, 'query'> & {
+  filters: NonNullable<FieldItemProps['filters']>;
+  indexPattern: NonNullable<FieldItemProps['indexPattern']>;
+  dataViewField: DataViewField;
+  services: LensAppServices;
+}) {
+  const meta = {
+    id: indexPattern.id,
+    columns: [dataViewField.name],
+    filters: {
+      enabled: {
+        lucene: [],
+        kuery: [],
+      },
+      disabled: {
+        lucene: [],
+        kuery: [],
+      },
+    },
+  };
+  const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
+    query,
+    filters,
+    meta,
+    [indexPattern],
+    getEsQueryConfig(services.uiSettings)
+  );
+  const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+  if (!discoverLocator || !services.application.capabilities.discover.show) {
+    return;
+  }
+  return discoverLocator.getRedirectUrl({
+    dataViewSpec: indexPattern?.spec,
+    timeRange: services.data.query.timefilter.timefilter.getTime(),
+    filters: newFilters,
+    query: newQuery,
+    columns: meta.columns,
+  });
 }

@@ -13,6 +13,8 @@ export { NavigationPanel, PanelProvider } from './panel';
 
 export type { Props as RecentlyAccessedProps } from './recently_accessed';
 
+export { FeedbackBtn } from './feedback_btn';
+
 export type {
   PanelContent,
   PanelComponentProps,

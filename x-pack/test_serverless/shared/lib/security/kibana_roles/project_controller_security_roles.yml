@@ -34,6 +34,7 @@ viewer:
         - ".fleet-actions*"
         - "risk-score.risk-score-*"
         - ".asset-criticality.asset-criticality-*"
+        - ".entities.v1.latest.security_*"
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -98,6 +99,7 @@ editor:
         - "maintenance"
     - names:
         - ".asset-criticality.asset-criticality-*"
+        - ".entities.v1.latest.security_*"
       privileges:
         - "read"
         - "write"
@@ -149,6 +151,8 @@ t1_analyst:
         - write
         - maintenance
     - names:
+        - .lists*
+        - .items*
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -162,6 +166,7 @@ t1_analyst:
         - ".fleet-actions*"
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -212,6 +217,7 @@ t2_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -271,11 +277,13 @@ t3_analyst:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -344,6 +352,7 @@ threat_intelligence_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -400,11 +409,13 @@ rule_author:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -449,6 +460,7 @@ soc_manager:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -467,11 +479,13 @@ soc_manager:
       privileges:
         - read
         - write
+        - view_index_metadata
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - .asset-criticality.asset-criticality-*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -479,6 +493,7 @@ soc_manager:
     - application: "kibana-.kibana"
       privileges:
         - feature_ml.read
+        - feature_generalCases.all
         - feature_siem.all
         - feature_siem.read_alerts
         - feature_siem.crud_alerts
@@ -495,6 +510,7 @@ soc_manager:
         - feature_siem.execute_operations_all
         - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
+        - feature_observabilityCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
         - feature_actions.all
@@ -544,6 +560,7 @@ detections_admin:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -592,6 +609,7 @@ platform_engineer:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
+        - .entities.v1.latest.security_*
       privileges:
         - read
         - write
@@ -651,6 +669,7 @@ endpoint_operations_analyst:
         - .lists*
         - .items*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read
@@ -721,6 +740,7 @@ endpoint_policy_manager:
         - packetbeat-*
         - winlogbeat-*
         - risk-score.risk-score-*
+        - .entities.v1.latest.security_*
         - ".ml-anomalies-*"
       privileges:
         - read

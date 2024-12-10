@@ -43,3 +43,18 @@ export const THIS_INDEX_HAS_NOT_BEEN_CHECKED = i18n.translate(
     defaultMessage: 'This index has not been checked',
   }
 );
+
+export const FAIL = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.fail', {
+  defaultMessage: 'Fail',
+});
+
+export const PASS = i18n.translate('securitySolutionPackages.ecsDataQualityDashboard.pass', {
+  defaultMessage: 'Pass',
+});
+
+export const CHECK_NOW: string = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.checkNow',
+  {
+    defaultMessage: 'Check now',
+  }
+);

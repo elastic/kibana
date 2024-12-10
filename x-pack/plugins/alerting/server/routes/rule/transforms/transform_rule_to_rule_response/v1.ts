@@ -30,7 +30,7 @@ export const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
         success: history.success,
         timestamp: history.timestamp,
         ...(history.duration !== undefined ? { duration: history.duration } : {}),
-        ...(history.outcome ? { outcome: transformRuleLastRun(history.outcome) } : {}),
+        ...(history.outcome !== undefined ? { outcome: history.outcome } : {}),
       })),
       calculated_metrics: monitoring.run.calculated_metrics,
       last_run: monitoring.run.last_run,
@@ -86,6 +86,17 @@ export const transformRuleActions = (
       };
     }),
   ];
+};
+
+export const transformFlapping = (flapping: Rule['flapping']) => {
+  if (!flapping) {
+    return flapping;
+  }
+
+  return {
+    look_back_window: flapping.lookBackWindow,
+    status_change_threshold: flapping.statusChangeThreshold,
+  };
 };
 
 export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
@@ -144,4 +155,5 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
     : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
+  ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
 });

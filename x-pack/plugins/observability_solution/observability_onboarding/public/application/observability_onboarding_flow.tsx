@@ -16,7 +16,7 @@ import {
   KubernetesPage,
   LandingPage,
   OtelLogsPage,
-  SystemLogsPage,
+  OtelKubernetesPage,
   FirehosePage,
 } from './pages';
 import { ObservabilityOnboardingAppServices } from '..';
@@ -41,14 +41,14 @@ export function ObservabilityOnboardingFlow() {
         <Route path="/auto-detect">
           <AutoDetectPage />
         </Route>
-        <Route path="/systemLogs">
-          <SystemLogsPage />
-        </Route>
         <Route path="/customLogs">
           <CustomLogsPage />
         </Route>
         <Route path="/kubernetes">
           <KubernetesPage />
+        </Route>
+        <Route path="/otel-kubernetes">
+          <OtelKubernetesPage />
         </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />

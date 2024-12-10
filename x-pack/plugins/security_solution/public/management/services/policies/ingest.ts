@@ -10,9 +10,12 @@ import type {
   GetAgentStatusResponse,
   GetPackagePoliciesResponse,
   GetInfoResponse,
+  BulkGetAgentPoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import { epmRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { epmRouteService, API_VERSIONS, agentPolicyRouteService } from '@kbn/fleet-plugin/common';
 
+import type { BulkGetAgentPoliciesRequestSchema } from '@kbn/fleet-plugin/server/types';
+import type { TypeOf } from '@kbn/config-schema';
 import type { NewPolicyData } from '../../../../common/endpoint/types';
 import type { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
 
@@ -120,3 +123,15 @@ export const sendGetEndpointSecurityPackage = async (
   }
   return endpointPackageInfo;
 };
+
+export const sendBulkGetAgentPolicies = async ({
+  http,
+  requestBody,
+}: {
+  http: HttpStart;
+  requestBody: TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>;
+}): Promise<BulkGetAgentPoliciesResponse> =>
+  http.post<BulkGetAgentPoliciesResponse>(agentPolicyRouteService.getBulkGetPath(), {
+    version: API_VERSIONS.public.v1,
+    body: JSON.stringify(requestBody),
+  });

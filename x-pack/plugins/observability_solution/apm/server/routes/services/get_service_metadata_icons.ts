@@ -7,26 +7,29 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { getAgentName } from '@kbn/elastic-agent-utils';
+import { maybe } from '../../../common/utils/maybe';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   CONTAINER_ID,
-  KUBERNETES,
   SERVICE_NAME,
   KUBERNETES_POD_NAME,
   HOST_OS_PLATFORM,
   LABEL_TELEMETRY_AUTO_VERSION,
   AGENT_VERSION,
   SERVICE_FRAMEWORK_NAME,
+  TELEMETRY_SDK_NAME,
+  TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
-import { ContainerType } from '../../../common/service_metadata';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { ContainerType, SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
-
-type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 
 export interface ServiceMetadataIcons {
   agentName?: string;
@@ -61,6 +64,16 @@ export async function getServiceMetadataIcons({
 }): Promise<ServiceMetadataIcons> {
   const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
 
+  const fields = asMutableArray([
+    CLOUD_PROVIDER,
+    CONTAINER_ID,
+    AGENT_NAME,
+    CLOUD_SERVICE_NAME,
+    TELEMETRY_SDK_NAME,
+    TELEMETRY_SDK_LANGUAGE,
+    ...SERVICE_METADATA_KUBERNETES_KEYS,
+  ] as const);
+
   const params = {
     apm: {
       events: [
@@ -72,14 +85,14 @@ export async function getServiceMetadataIcons({
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
       query: { bool: { filter, should } },
+      fields,
     },
   };
 
-  const response = await apmEventClient.search('get_service_metadata_icons', params);
+  const data = await apmEventClient.search('get_service_metadata_icons', params);
 
-  if (response.hits.total.value === 0) {
+  if (data.hits.total.value === 0) {
     return {
       agentName: undefined,
       containerType: undefined,
@@ -88,9 +101,18 @@ export async function getServiceMetadataIcons({
     };
   }
 
-  const { kubernetes, cloud, container, agent } = response.hits.hits[0]
-    ._source as ServiceMetadataIconsRaw;
+  const response = structuredClone(data);
+  response.hits.hits[0].fields[AGENT_NAME] = getAgentName(
+    data.hits.hits[0]?.fields?.[AGENT_NAME] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_LANGUAGE] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_NAME] as unknown as string | null
+  ) as unknown as unknown[];
 
+  const event = unflattenKnownApmEventFields(
+    maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+  );
+
+  const { kubernetes, cloud, container, agent } = event ?? {};
   let containerType: ContainerType;
   if (!!kubernetes) {
     containerType = 'Kubernetes';

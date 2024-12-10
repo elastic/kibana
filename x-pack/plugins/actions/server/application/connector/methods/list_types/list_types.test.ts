@@ -60,7 +60,6 @@ describe('listTypes()', () => {
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       inMemoryConnectors: [],
       actionExecutor: actionExecutorMock.create(),
-      ephemeralExecutionEnqueuer: jest.fn(),
       bulkExecutionEnqueuer: jest.fn(),
       request: httpServerMock.createKibanaRequest(),
       authorization: actionsAuthorizationMock.create() as unknown as ActionsAuthorization,

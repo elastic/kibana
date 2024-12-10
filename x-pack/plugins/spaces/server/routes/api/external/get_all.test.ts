@@ -15,10 +15,13 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import type { RouteValidatorConfig } from '@kbn/core-http-server';
 import { getRequestValidation } from '@kbn/core-http-server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initGetAllSpacesApi } from './get_all';
+import { API_VERSIONS } from '../../../../common';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -37,6 +40,7 @@ describe('GET /spaces/space', () => {
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
+    const versionedRouterMock = router.versioned as MockedVersionedRouter;
 
     const coreStart = coreMock.createStart();
 
@@ -72,9 +76,13 @@ describe('GET /spaces/space', () => {
       isServerless: false,
     });
 
+    const { handler, config } = versionedRouterMock.getRoute('get', '/api/spaces/space').versions[
+      API_VERSIONS.public.v1
+    ];
+
     return {
-      routeConfig: router.get.mock.calls[0][0],
-      routeHandler: router.get.mock.calls[0][1],
+      routeValidation: (config.validate as any).request as RouteValidatorConfig<{}, {}, {}> | false,
+      routeHandler: handler,
     };
   };
 
@@ -92,17 +100,17 @@ describe('GET /spaces/space', () => {
         });
 
         it(`returns expected result when specifying include_authorized_purposes=true`, async () => {
-          const { routeConfig, routeHandler } = await setup();
+          const { routeValidation, routeHandler } = await setup();
 
           const request = httpServerMock.createKibanaRequest({
             method: 'get',
             query: { purpose, include_authorized_purposes: true },
           });
 
-          if (routeConfig.validate === false) {
+          if (routeValidation === false) {
             throw new Error('Test setup failure. Expected route validation');
           }
-          const queryParamsValidation = getRequestValidation(routeConfig.validate)
+          const queryParamsValidation = getRequestValidation(routeValidation)
             .query! as ObjectType<any>;
 
           const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);

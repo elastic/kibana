@@ -8,8 +8,9 @@
 import type { Observable } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
-import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
+import type { DocLinksServiceSetup, HttpResources, IBasePath, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/feature_privilege_iterator';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineAnalyticsRoutes } from './analytics';
@@ -51,12 +52,14 @@ export interface RouteDefinitionParams {
   getSession: () => PublicMethodsOf<Session>;
   license: SecurityLicense;
   getFeatures: () => Promise<KibanaFeature[]>;
+  subFeaturePrivilegeIterator: SubFeaturePrivilegeIterator;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getAuthenticationService: () => InternalAuthenticationServiceStart;
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
   analyticsService: AnalyticsServiceSetup;
   buildFlavor: BuildFlavor;
+  docLinks: DocLinksServiceSetup;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {

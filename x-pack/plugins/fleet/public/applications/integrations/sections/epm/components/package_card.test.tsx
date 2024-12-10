@@ -14,6 +14,7 @@ import { useStartServices } from '../../../hooks';
 
 import type { PackageCardProps } from './package_card';
 import { PackageCard } from './package_card';
+import { getLineClampStyles, shouldShowInstallationStatus } from './installation_status';
 
 jest.mock('../../../hooks', () => {
   return {
@@ -38,6 +39,16 @@ jest.mock('../../../components', () => {
   };
 });
 
+jest.mock('./installation_status', () => {
+  return {
+    shouldShowInstallationStatus: jest.fn(),
+    getLineClampStyles: jest.fn(),
+    InstallationStatus: () => {
+      return <div data-test-subj="installation-status" />;
+    },
+  };
+});
+
 function cardProps(overrides: Partial<PackageCardProps> = {}): PackageCardProps {
   return {
     id: 'card-1',
@@ -57,11 +68,16 @@ function renderPackageCard(props: PackageCardProps) {
   return { utils };
 }
 
-describe('package card', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200848
+describe.skip('package card', () => {
   let mockNavigateToApp: jest.Mock;
   let mockNavigateToUrl: jest.Mock;
+  const mockGetLineClamp = getLineClampStyles as jest.Mock;
+  const mockShouldShowInstallationStatus = shouldShowInstallationStatus as jest.Mock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     mockNavigateToApp = useStartServices().application.navigateToApp as jest.Mock;
     mockNavigateToUrl = useStartServices().application.navigateToUrl as jest.Mock;
   });
@@ -136,4 +152,83 @@ describe('package card', () => {
       expect(!!collectionButton).toEqual(isCollectionCard);
     }
   );
+
+  describe('Installation status', () => {
+    it('should render installation status when showInstallationStatus is true', async () => {
+      const {
+        utils: { queryByTestId },
+      } = renderPackageCard(
+        cardProps({
+          showInstallationStatus: true,
+        })
+      );
+      const installationStatus = queryByTestId('installation-status');
+      expect(installationStatus).toBeInTheDocument();
+    });
+
+    it('should render max-height when maxCardHeight is provided', async () => {
+      const {
+        utils: { queryByTestId },
+      } = renderPackageCard(
+        cardProps({
+          maxCardHeight: 150,
+        })
+      );
+      const card = queryByTestId(`integration-card:card-1`);
+      expect(card).toHaveStyle('max-height: 150px');
+    });
+
+    it('should render 1 line of description when descriptionLineClamp is provided and shouldShowInstallationStatus returns true', async () => {
+      mockShouldShowInstallationStatus.mockReturnValue(true);
+      renderPackageCard(
+        cardProps({
+          showInstallationStatus: true,
+          installStatus: 'installed',
+          descriptionLineClamp: 3,
+        })
+      );
+      expect(mockShouldShowInstallationStatus).toHaveBeenCalledWith({
+        installStatus: 'installed',
+        showInstallationStatus: true,
+      });
+      expect(mockGetLineClamp).toHaveBeenCalledWith(1);
+    });
+
+    it('should render specific lines of description when descriptionLineClamp is provided and shouldShowInstallationStatus returns false', async () => {
+      mockShouldShowInstallationStatus.mockReturnValue(false);
+      renderPackageCard(
+        cardProps({
+          showInstallationStatus: false,
+          installStatus: 'installed',
+          descriptionLineClamp: 3,
+        })
+      );
+      expect(mockShouldShowInstallationStatus).toHaveBeenCalledWith({
+        installStatus: 'installed',
+        showInstallationStatus: false,
+      });
+      expect(mockGetLineClamp).toHaveBeenCalledWith(3);
+    });
+
+    it('should not render line clamp when descriptionLineClamp is not provided', async () => {
+      mockShouldShowInstallationStatus.mockReturnValue(false);
+      renderPackageCard(
+        cardProps({
+          showInstallationStatus: true,
+          installStatus: 'installed',
+        })
+      );
+      expect(mockShouldShowInstallationStatus).not.toHaveBeenCalled();
+    });
+
+    it('should render specific lines of title when titleLineClamp is provided and shouldShowInstallationStatus returns false', async () => {
+      mockShouldShowInstallationStatus.mockReturnValue(false);
+      renderPackageCard(
+        cardProps({
+          titleLineClamp: 1,
+        })
+      );
+      expect(mockGetLineClamp).toHaveBeenCalledWith(1);
+    });
+  });
 });

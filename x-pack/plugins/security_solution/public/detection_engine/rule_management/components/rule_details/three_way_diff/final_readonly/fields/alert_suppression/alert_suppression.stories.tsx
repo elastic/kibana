@@ -25,8 +25,8 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders>
-      <FieldReadOnly fieldName="alert_suppression" finalDiffableRule={args.finalDiffableRule} />
+    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+      <FieldReadOnly fieldName="alert_suppression" />
     </ThreeWayDiffStorybookProviders>
   );
 };

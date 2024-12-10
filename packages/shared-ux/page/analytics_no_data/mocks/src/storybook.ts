@@ -18,9 +18,14 @@ import type {
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { of } from 'rxjs';
 
+interface PropArguments {
+  useCustomOnTryESQL: boolean;
+}
+
 type ServiceArguments = Pick<AnalyticsNoDataPageServices, 'kibanaGuideDocLink' | 'customBranding'>;
 
-export type Params = ArgumentParams<{}, ServiceArguments> & KibanaNoDataPageStorybookParams;
+export type Params = ArgumentParams<PropArguments, ServiceArguments> &
+  KibanaNoDataPageStorybookParams;
 
 const kibanaNoDataMock = new KibanaNoDataPageStorybookMock();
 
@@ -30,7 +35,13 @@ export class StorybookMock extends AbstractStorybookMock<
   {},
   ServiceArguments
 > {
-  propArguments = {};
+  propArguments = {
+    // requires hasESData to be toggled to true
+    useCustomOnTryESQL: {
+      control: 'boolean',
+      defaultValue: false,
+    },
+  };
   serviceArguments = {
     kibanaGuideDocLink: {
       control: 'text',
@@ -59,9 +70,10 @@ export class StorybookMock extends AbstractStorybookMock<
     };
   }
 
-  getProps() {
+  getProps(params: Params) {
     return {
       onDataViewCreated: action('onDataViewCreated'),
+      onTryESQL: params.useCustomOnTryESQL ? action('onTryESQL-from-props') : undefined,
     };
   }
 }

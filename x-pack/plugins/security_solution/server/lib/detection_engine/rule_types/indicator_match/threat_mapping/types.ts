@@ -38,6 +38,7 @@ import type {
   WrapSuppressedHits,
   OverrideBodyQuery,
   RunOpts,
+  CreateRuleOptions,
 } from '../../types';
 import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
@@ -77,10 +78,10 @@ export interface CreateThreatSignalsOptions {
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
-  inputIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
   experimentalFeatures: ExperimentalFeatures;
+  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
 }
 
 export interface CreateThreatSignalOptions {
@@ -173,6 +174,7 @@ export interface CreateEventSignalOptions {
 }
 
 type EntryKey = 'field' | 'value';
+
 export interface BuildThreatMappingFilterOptions {
   chunkSize?: number;
   threatList: ThreatListItem[];
@@ -274,6 +276,7 @@ interface BaseThreatNamedQuery {
   value: string;
   queryType: string;
 }
+
 export interface ThreatMatchNamedQuery extends BaseThreatNamedQuery {
   id: string;
   index: string;
@@ -326,6 +329,7 @@ export interface EventDoc {
 }
 
 export type EventItem = estypes.SearchHit<EventDoc>;
+
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
   index: string[];

@@ -54,5 +54,7 @@ export async function checkIncompatibleMappings({
     throw createFailError(
       `Only mappings changes that are compatible with current mappings are allowed. Consider reaching out to the Kibana core team if you are stuck.`
     );
+  } finally {
+    await esClient.indices.delete({ index: TEST_INDEX_NAME }).catch(() => {});
   }
 }

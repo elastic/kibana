@@ -9,6 +9,6 @@
 
 export interface Url {
   domain?: string;
-  full: string;
+  full?: string;
   original?: string;
 }

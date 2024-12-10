@@ -1525,7 +1525,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('enrolled in a hosted agent policy bulk upgrade should respond with 200 and object of results. Should not update the hosted agent SOs', async () => {
         // move agent2 to policy2 to keep it regular
-        await supertest.put(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
+        await supertest.post(`/api/fleet/agents/agent2/reassign`).set('kbn-xsrf', 'xxx').send({
           policy_id: 'policy2',
         });
         // update enrolled policy to hosted

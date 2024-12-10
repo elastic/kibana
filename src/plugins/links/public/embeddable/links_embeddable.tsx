@@ -248,6 +248,7 @@ export const getLinksEmbeddableFactory = () => {
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"
+            borderRadius="none"
           >
             <EuiListGroup
               maxWidth={false}

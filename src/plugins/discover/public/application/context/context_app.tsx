@@ -9,7 +9,6 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import './context_app.scss';
-import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -19,11 +18,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  DOC_TABLE_LEGACY,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -56,10 +51,9 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     navigation,
     filterManager,
     core,
+    ebtManager,
+    fieldsMetadata,
   } = services;
-
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   /**
    * Context app state
@@ -83,7 +77,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    useNewFieldsApi,
     setAppState,
     columns: appState.columns,
     sort: appState.sort,
@@ -114,7 +107,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       anchorId,
       dataView,
       appState,
-      useNewFieldsApi,
     });
 
   /**
@@ -199,15 +191,36 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 
   const addFilter = useCallback(
-    async (field: DataViewField | string, values: unknown, operation: string) => {
+    async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
       const newFilters = generateFilters(filterManager, field, values, operation, dataView);
       filterManager.addFilters(newFilters);
       if (dataViews) {
         const fieldName = typeof field === 'string' ? field : field.name;
         await popularizeField(dataView, fieldName, dataViews, capabilities);
+        void ebtManager.trackFilterAddition({
+          fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+          filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+          fieldsMetadata,
+        });
       }
     },
-    [filterManager, dataViews, dataView, capabilities]
+    [filterManager, dataViews, dataView, capabilities, ebtManager, fieldsMetadata]
+  );
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtManager, fieldsMetadata]
   );
 
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
@@ -243,7 +256,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
+          <EuiPage className="dscDocsPage">
             <EuiPageBody
               panelled
               paddingSize="none"
@@ -267,12 +280,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
                 dataView={dataView}
-                useNewFieldsApi={useNewFieldsApi}
-                isLegacy={isLegacy}
                 columns={columns}
                 grid={appState.grid}
-                onAddColumn={onAddColumn}
-                onRemoveColumn={onRemoveColumn}
+                onAddColumn={onAddColumnWithTracking}
+                onRemoveColumn={onRemoveColumnWithTracking}
                 onSetColumns={onSetColumns}
                 predecessorCount={appState.predecessorCount}
                 successorCount={appState.successorCount}

@@ -16,10 +16,12 @@ import { getFetchAgent } from '../../../cli/utils/ssl';
 export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;
   private target: string;
+  private headers: Record<string, string>;
 
-  constructor(options: { logger: Logger; target: string }) {
+  constructor(options: { logger: Logger; target: string; headers?: Record<string, string> }) {
     this.logger = options.logger;
     this.target = options.target;
+    this.headers = { ...kibanaHeaders(), ...(options.headers ?? {}) };
   }
 
   getFleetApmPackagePath(packageVersion?: string): string {
@@ -32,24 +34,40 @@ export class ApmSynthtraceKibanaClient {
 
   async fetchLatestApmPackageVersion() {
     this.logger.debug(`Fetching latest APM package version`);
-    const url = `${this.getFleetApmPackagePath()}?prerelease=true`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: kibanaHeaders(),
-      agent: getFetchAgent(url),
-    });
 
-    const responseJson = await response.json();
+    const fetchPackageVersion = async ({ prerelease }: { prerelease: boolean }) => {
+      const url = `${this.getFleetApmPackagePath()}?prerelease=${prerelease}`;
+      this.logger.debug(`Fetching from URL: ${url}`);
 
-    if (response.status !== 200) {
-      throw new Error(
-        `Failed to fetch latest APM package version, received HTTP ${response.status} and message: ${responseJson.message}`
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.headers,
+        agent: getFetchAgent(url),
+      });
+
+      const responseJson = await response.json();
+
+      if (response.status !== 200) {
+        throw new Error(
+          `Failed to fetch APM package version, received HTTP ${response.status} and message: ${responseJson.message}`
+        );
+      }
+
+      return responseJson.item.latestVersion as string;
+    };
+
+    try {
+      return await fetchPackageVersion({ prerelease: true });
+    } catch (error) {
+      this.logger.debug(
+        'Fetching latestes prerelease version failed, retrying with latest GA version'
       );
+      const retryResult = await fetchPackageVersion({ prerelease: false }).catch((retryError) => {
+        throw retryError;
+      });
+
+      return retryResult;
     }
-
-    const { latestVersion } = responseJson.item;
-
-    return latestVersion as string;
   }
 
   async installApmPackage(packageVersion?: string) {
@@ -63,7 +81,7 @@ export class ApmSynthtraceKibanaClient {
       async () => {
         const res = await fetch(url, {
           method: 'POST',
-          headers: kibanaHeaders(),
+          headers: this.headers,
           body: '{"force":true}',
           agent: getFetchAgent(url),
         });
@@ -111,7 +129,7 @@ export class ApmSynthtraceKibanaClient {
       async () => {
         const res = await fetch(url, {
           method: 'DELETE',
-          headers: kibanaHeaders(),
+          headers: this.headers,
           body: '{"force":true}',
           agent: getFetchAgent(url),
         });

@@ -48,7 +48,7 @@ export async function fetchRelatedSavedObjects(
 
   const [outputs, { host: downloadSourceUri, proxy_id: downloadSourceProxyId }, fleetServerHosts] =
     await Promise.all([
-      outputService.bulkGet(soClient, outputIds, { ignoreNotFound: true }),
+      outputService.bulkGet(outputIds, { ignoreNotFound: true }),
       getSourceUriForAgentPolicy(soClient, agentPolicy),
       getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
         appContextService

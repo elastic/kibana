@@ -1,0 +1,144 @@
+[[inference-action-type]]
+== AI connector and action
+++++
+<titleabbrev>AI</titleabbrev>
+++++
+:frontmatter-description: Add a connector that can send requests to {inference}.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
+
+coming::[]
+
+The {infer} connector uses the {es} client to send requests to an {infer} service.
+The connector uses the <<execute-connector-api,run connector API>> to send the request.
+
+[float]
+[[define-inference-ui]]
+=== Create connectors in {kib}
+
+// TBD After you set the `xpack.stack_connectors.enableExperimental` to include `inferenceConnectorOn`,
+You can create connectors in *{stack-manage-app} > {connectors-ui}*. For example:
+
+[role="screenshot"]
+image::management/connectors/images/inference-connector.png[{inference} connector]
+
+
+[float]
+[[inference-connector-configuration]]
+==== Connector configuration
+
+{infer-cap} connectors have the following configuration properties:
+
+Name::      The name of the connector.
+Service::   The supported {infer} service provider.
+Task type:: The {infer} task type, it depends on the selected service.
+Inference ID:: The unique identifier of the {infer} endpoint.
+Provider configuration:: Settings for service configuration.
+Provider secrets:: Configuration for authentication.
+Task type configuration:: Settings for task type configuration.
+
+[float]
+[[inference-action-configuration]]
+=== Test connectors
+
+You can test connectors using the <<execute-connector-api,run connector API>> or
+while creating or editing the connector in {kib}. For example:
+
+[role="screenshot"]
+image::management/connectors/images/inference-completion-params.png[{infer} params test]
+
+
+[float]
+[[inference-connector-actions]]
+=== {infer-cap} connector actions
+
+The {infer} actions have the following configuration properties. Properties depend on the selected task type.
+
+[float]
+[[inference-connector-perform-completion]]
+==== Completion
+
+The following example performs a completion task on the example question.
+
+Input::
+The text on which you want to perform the {infer} task. For example:
++
+--
+[source,text]
+------------------------------------------------------------
+{
+  input: 'What is Elastic?'
+}
+------------------------------------------------------------
+--
+
+[float]
+[[inference-connector-perform-text-embedding]]
+==== Text embedding
+
+The following example performs a text embedding task.
+
+Input::
+The text on which you want to perform the {infer} task. For example:
++
+--
+[source,text]
+------------------------------------------------------------
+{
+  input: 'The sky above the port was the color of television tuned to a dead channel.',
+  task_settings: {
+    input_type: 'ingest'
+  }
+}
+------------------------------------------------------------
+--
+
+Input type::
+An optional string that overwrites the connector's default model.
+
+[float]
+[[inference-connector-perform-rerank]]
+==== Reranking
+
+The following example performs a reranking task on the example input.
+
+Input::
+The text on which you want to perform the {infer} task. Should be a string array. For example:
++
+--
+[source,text]
+------------------------------------------------------------
+{
+  input: ['luke', 'like', 'leia', 'chewy', 'r2d2', 'star', 'wars'],
+  query: 'star wars main character'
+}
+------------------------------------------------------------
+--
+
+Query::
+The search query text.
+
+[float]
+[[inference-connector-perform-sparse-embedding]]
+==== Sparse embedding
+
+The following example performs a sparse embedding task on the example sentence.
+
+Input::
+The text on which you want to perform the {infer} task. For example:
++
+--
+[source,text]
+------------------------------------------------------------
+{
+  input: 'The sky above the port was the color of television tuned to a dead channel.'
+}
+------------------------------------------------------------
+--
+
+[float]
+[[inference-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can apply these settings to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

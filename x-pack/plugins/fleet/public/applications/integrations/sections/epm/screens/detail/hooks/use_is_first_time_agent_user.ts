@@ -34,7 +34,7 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
   const policyIds = [...new Set(packagePolicies?.items.flatMap((item) => item.policy_ids) ?? [])];
 
   // now get all agents that are NOT part of a fleet server policy
-  const serverPolicyIdsQuery = policyIds.map((policyId) => `policy_id:${policyId}`).join(' or ');
+  const serverPolicyIdsQuery = policyIds.map((policyId) => `policy_id:"${policyId}"`).join(' or ');
 
   // get agents that are not unenrolled and not fleet server
   const kuery =

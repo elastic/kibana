@@ -7,14 +7,12 @@
 
 import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
-
-type DataViewOption = Pick<DataView, 'id' | 'name' | 'title'>;
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 export interface ESDataViewSelectProps {
   loading: boolean;
   value: string;
-  dataViews: DataViewOption[];
+  dataViews: DataViewListItem[];
   onChange: (string: string) => void;
   onBlur: FocusEventHandler<HTMLDivElement> | undefined;
   onFocus: FocusEventHandler<HTMLDivElement> | undefined;
@@ -31,7 +29,7 @@ export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = 
   onFocus,
   onBlur,
 }) => {
-  const selectedDataView = dataViews.find((view) => value === view.title) as DataViewOption;
+  const selectedDataView = dataViews.find((view) => value === view.title);
 
   const selectedOption = selectedDataView
     ? { value: selectedDataView.title, label: selectedDataView.name || selectedDataView.title }

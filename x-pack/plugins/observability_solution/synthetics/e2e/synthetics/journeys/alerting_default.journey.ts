@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { journey, step, before, after } from '@elastic/synthetics';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { cleanSettings } from './services/settings';
@@ -29,13 +29,10 @@ journey('AlertingDefaults', async ({ page, params }) => {
   step('Go to Settings page', async () => {
     await page.click('[aria-label="Toggle primary navigation"]');
     await page.click('text=Synthetics');
-    await page.click('text=Settings');
+    await page.getByTestId('settings-page-link').click();
   });
 
   step('Click text=Synthetics', async () => {
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/alerting');
-    await page.click('.euiComboBox__inputWrap');
-    await page.click("text=There aren't any options available");
     await page.click('button:has-text("Add connector")');
     await page.click('p:has-text("Slack")');
     await page.click('input[type="text"]');
@@ -43,13 +40,13 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.press('input[type="text"]', 'Tab');
   });
   step(
-    'Fill text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
+    'Fill text=Webhook URLCreate a Slack Webhook URL(external, opens in a new tab or window) >> input[type="text"]',
     async () => {
       if (await page.isVisible(byTestId('webhookButton'))) {
         await page.click(byTestId('webhookButton'));
       }
       await page.fill(
-        'text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
+        'text=Webhook URLCreate a Slack Webhook URL(external, opens in a new tab or window) >> input[type="text"]',
         'https://www.slack.com'
       );
       await page.click('button:has-text("Save")');
@@ -74,10 +71,10 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.fill('input[type="password"]', 'changeme');
     await page.click('button:has-text("Save")');
     await page.click(
-      'text=Sender is required.Configure email accounts(opens in a new tab or window) >> input[type="text"]'
+      'text=Sender is required.Configure email accounts(external, opens in a new tab or window) >> input[type="text"]'
     );
     await page.fill(
-      'text=Sender is required.Configure email accounts(opens in a new tab or window) >> input[type="text"]',
+      'text=Sender is required.Configure email accounts(external, opens in a new tab or window) >> input[type="text"]',
       'test@gmail.com'
     );
     await page.click('button:has-text("Save")');

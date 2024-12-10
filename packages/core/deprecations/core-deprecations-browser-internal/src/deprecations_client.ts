@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { HttpFetchOptionsWithPath, HttpStart } from '@kbn/core-http-browser';
 import type {
   DomainDeprecationDetails,
   DeprecationsGetResponse,
@@ -47,23 +47,15 @@ export class DeprecationsClient {
     return typeof details.correctiveActions.api === 'object';
   };
 
-  public resolveDeprecation = async (
+  private getResolveFetchDetails = (
     details: DomainDeprecationDetails
-  ): Promise<ResolveDeprecationResponse> => {
+  ): HttpFetchOptionsWithPath | undefined => {
     const { domainId, correctiveActions } = details;
-    // explicit check required for TS type guard
-    if (typeof correctiveActions.api !== 'object') {
-      return {
-        status: 'fail',
-        reason: i18n.translate('core.deprecations.noCorrectiveAction', {
-          defaultMessage: 'This deprecation cannot be resolved automatically.',
-        }),
-      };
-    }
 
-    const { body, method, path, omitContextFromBody = false } = correctiveActions.api;
-    try {
-      await this.http.fetch<void>({
+    if (correctiveActions.api) {
+      const { body, method, path, omitContextFromBody = false } = correctiveActions.api;
+
+      return {
         path,
         method,
         asSystemRequest: true,
@@ -71,7 +63,54 @@ export class DeprecationsClient {
           ...body,
           ...(omitContextFromBody ? {} : { deprecationDetails: { domainId } }),
         }),
-      });
+      };
+    }
+
+    if (correctiveActions.mark_as_resolved_api) {
+      const { routeMethod, routePath, routeVersion, apiTotalCalls, totalMarkedAsResolved } =
+        correctiveActions.mark_as_resolved_api;
+      const incrementBy = apiTotalCalls - totalMarkedAsResolved;
+
+      return {
+        path: '/api/deprecations/mark_as_resolved',
+        method: 'POST',
+        asSystemRequest: true,
+        body: JSON.stringify({
+          domainId,
+          routeMethod,
+          routePath,
+          routeVersion,
+          incrementBy,
+        }),
+      };
+    }
+  };
+
+  public resolveDeprecation = async (
+    details: DomainDeprecationDetails
+  ): Promise<ResolveDeprecationResponse> => {
+    const { correctiveActions } = details;
+    const noCorrectiveActionFail = {
+      status: 'fail' as const,
+      reason: i18n.translate('core.deprecations.noCorrectiveAction', {
+        defaultMessage: 'This deprecation cannot be resolved automatically or marked as resolved.',
+      }),
+    };
+
+    if (
+      typeof correctiveActions.api !== 'object' &&
+      typeof correctiveActions.mark_as_resolved_api !== 'object'
+    ) {
+      return noCorrectiveActionFail;
+    }
+
+    try {
+      const fetchParams = this.getResolveFetchDetails(details);
+      if (!fetchParams) {
+        return noCorrectiveActionFail;
+      }
+
+      await this.http.fetch<void>(fetchParams);
       return { status: 'ok' };
     } catch (err) {
       return {

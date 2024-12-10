@@ -309,13 +309,14 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     dynamicRowHeight,
     query,
     querySnapshot,
-    featureIds,
+    ruleTypeIds,
     cases: { data: cases, isLoading: isLoadingCases },
     maintenanceWindows: { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows },
     controls,
     toolbarVisibility: toolbarVisibilityProp,
     shouldHighlightRow,
     fieldFormats,
+    height,
   } = props;
 
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -344,7 +345,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       query,
       useBulkActionsConfig: alertsTableConfiguration.useBulkActions,
       refresh: refetchAlerts,
-      featureIds,
+      ruleTypeIds,
       hideBulkActions: Boolean(alertsTableConfiguration.hideBulkActions),
     };
   }, [
@@ -354,7 +355,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     alertsTableConfiguration.hideBulkActions,
     query,
     refetchAlerts,
-    featureIds,
+    ruleTypeIds,
   ]);
 
   const {
@@ -412,7 +413,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
       rowSelection: bulkActionsState.rowSelection,
       alerts,
       isLoading,
-      columnIds: visibleColumns,
+      columnIds: columns.map((column) => column.id),
       onToggleColumn,
       onResetColumns,
       browserFields,
@@ -430,7 +431,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
     alertsCount,
     bulkActionsState,
     isLoading,
-    visibleColumns,
+    columns,
     onToggleColumn,
     onResetColumns,
     browserFields,
@@ -682,17 +683,21 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
   }, [props.gridStyle, mergedGridStyle]);
 
   const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
-    ({ visibleColumns: _visibleColumns, Cell }) => (
-      <CustomGridBody
-        visibleColumns={_visibleColumns}
-        Cell={Cell}
-        actualGridStyle={actualGridStyle}
-        alertsData={oldAlertsData}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        isLoading={isLoading}
-        stripes={props.gridStyle?.stripes}
-      />
+    ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
+      <>
+        {headerRow}
+        <CustomGridBody
+          visibleColumns={_visibleColumns}
+          Cell={Cell}
+          actualGridStyle={actualGridStyle}
+          alertsData={oldAlertsData}
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          isLoading={isLoading}
+          stripes={props.gridStyle?.stripes}
+        />
+        {footerRow}
+      </>
     ),
     [actualGridStyle, oldAlertsData, pageIndex, pageSize, isLoading, props.gridStyle?.stripes]
   );
@@ -723,6 +728,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
         </Suspense>
         {alertsCount > 0 && (
           <EuiDataGrid
+            // As per EUI docs, it is not recommended to switch between undefined and defined height.
+            // If user changes height, it is better to unmount and mount the component.
+            // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
+            key={height ? 'fixedHeight' : 'autoHeight'}
             aria-label="Alerts table"
             data-test-subj="alertsTable"
             columns={columnsWithCellActions}
@@ -741,6 +750,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = memo((props: Aler
             ref={dataGridRef}
             renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
             renderCellPopover={handleRenderCellPopover}
+            height={height}
           />
         )}
       </section>

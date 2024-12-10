@@ -30,7 +30,6 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { rulesClientMock } from '../rules_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import {
   AlertingEventLogger,
@@ -132,6 +131,7 @@ const alertsService = new AlertsService({
   elasticsearchClientPromise: Promise.resolve(clusterClient),
   dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
   elasticsearchAndSOAvailability$,
+  isServerless: false,
 });
 const backfillClient = backfillClientMock.create();
 const dataPlugin = dataPluginMock.createStartContract();
@@ -143,7 +143,6 @@ const elasticsearchService = elasticsearchServiceMock.createInternalStart();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
-const rulesClient = rulesClientMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 const rulesSettingsService = rulesSettingsServiceMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -166,19 +165,17 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   eventLogger: eventLoggerMock.create(),
   executionContext: executionContextServiceMock.createInternalStartContract(),
   maintenanceWindowsService,
-  getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
   kibanaBaseUrl: 'https://localhost:5601',
   logger,
   maxAlerts: 1000,
-  maxEphemeralActionsPerRule: 10,
   ruleTypeRegistry,
   rulesSettingsService,
   savedObjects: savedObjectsService,
   share: {} as SharePluginStart,
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-  supportsEphemeralTasks: false,
   uiSettings: uiSettingsService,
   usageCounter: mockUsageCounter,
+  isServerless: false,
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {
@@ -462,7 +459,7 @@ describe('Ad Hoc Task Runner', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       index: '.alerts-test.alerts-default',
-      refresh: true,
+      refresh: 'wait_for',
       require_alias: !useDataStreamForAlerts,
       body: [
         {

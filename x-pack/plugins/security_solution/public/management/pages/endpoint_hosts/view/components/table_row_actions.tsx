@@ -10,16 +10,16 @@ import type { EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ContextMenuItemNavByRouter } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
-import type { HostMetadata } from '../../../../../../common/endpoint/types';
+import type { HostInfo } from '../../../../../../common/endpoint/types';
 import { useEndpointActionItems } from '../hooks';
 
 export interface TableRowActionProps {
-  endpointMetadata: HostMetadata;
+  endpointInfo: HostInfo;
 }
 
-export const TableRowActions = memo<TableRowActionProps>(({ endpointMetadata }) => {
+export const TableRowActions = memo<TableRowActionProps>(({ endpointInfo }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const endpointActions = useEndpointActionItems(endpointMetadata, { isEndpointList: true });
+  const endpointActions = useEndpointActionItems(endpointInfo, { isEndpointList: true });
 
   const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);

@@ -6,3 +6,4 @@
  */
 export * from './types';
 export { Telemetry } from './telemetry/service';
+export { ExperimentalFeaturesService } from './experimental_features_service';

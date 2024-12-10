@@ -15,7 +15,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import { ConnectorDefinition } from '@kbn/search-connectors';
 
 import {
   CONNECTOR_CLIENTS_TYPE,
@@ -152,7 +152,7 @@ const getConnectorModeBadge = (isNative?: boolean) => {
       <EuiBadge iconSide="right">
         <FormattedMessage
           id="xpack.enterpriseSearch.getConnectorTypeBadge.nativeBadgeLabel"
-          defaultMessage="Native connector"
+          defaultMessage="Elastic managed connector"
         />
       </EuiBadge>
     );
@@ -161,7 +161,7 @@ const getConnectorModeBadge = (isNative?: boolean) => {
     return (
       <EuiBadge iconSide="right">
         {i18n.translate('xpack.enterpriseSearch.getConnectorTypeBadge.connectorClientBadgeLabel', {
-          defaultMessage: 'Connector client',
+          defaultMessage: 'Self-managed',
         })}
       </EuiBadge>
     );

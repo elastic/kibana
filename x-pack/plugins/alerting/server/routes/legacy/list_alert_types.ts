@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -14,6 +15,7 @@ import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 export const listAlertTypesRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
+  docLinks: DocLinksServiceSetup,
   usageCounter?: UsageCounter,
   isServerless?: boolean
 ) => {
@@ -25,7 +27,15 @@ export const listAlertTypesRoute = (
         access: isServerless ? 'internal' : 'public',
         summary: 'Get the alert types',
         tags: ['oas-tag:alerting'],
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'GET',
+            newApiPath: '/api/alerting/rule_types',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -35,8 +45,10 @@ export const listAlertTypesRoute = (
       }
       trackLegacyRouteUsage('listAlertTypes', usageCounter);
       const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
+
       return res.ok({
-        body: Array.from(await alertingContext.getRulesClient().listRuleTypes()),
+        body: Array.from(await rulesClient.listRuleTypes()),
       });
     })
   );

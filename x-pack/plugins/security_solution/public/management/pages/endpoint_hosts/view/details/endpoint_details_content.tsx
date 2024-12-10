@@ -11,11 +11,11 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiLink,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkflowInsights } from './components/insights/workflow_insights';
 import { isPolicyOutOfDate } from '../../utils';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
@@ -116,7 +116,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               policyId={hostInfo.metadata.Endpoint.policy.applied.id}
               revision={hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version}
               isOutdated={isPolicyOutOfDate(hostInfo.metadata.Endpoint.policy.applied, policyInfo)}
-              policyExists={!missingPolicies[hostInfo.metadata.Endpoint.policy.applied.id]}
+              policyExists={!missingPolicies.has(hostInfo.metadata.Endpoint.policy.applied.id)}
               data-test-subj="policyDetailsValue"
             >
               {hostInfo.metadata.Endpoint.policy.applied.name}
@@ -184,7 +184,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
 
     return (
       <div>
-        <EuiSpacer size="s" />
+        <WorkflowInsights />
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed

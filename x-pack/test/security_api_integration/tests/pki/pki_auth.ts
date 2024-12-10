@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { expect as jestExpect } from 'expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 const CA_CERT = readFileSync(CA_CERT_PATH);

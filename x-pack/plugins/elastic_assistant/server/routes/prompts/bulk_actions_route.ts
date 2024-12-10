@@ -35,7 +35,7 @@ import {
   transformESSearchToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
 import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -44,8 +44,6 @@ export interface BulkOperationError {
     id: string;
   };
 }
-
-export type BulkActionError = BulkOperationError | unknown;
 
 const buildBulkResponse = (
   response: KibanaResponseFactory,
@@ -156,22 +154,17 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
 
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
           if (body.create && body.create.length > 0) {
@@ -211,7 +204,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             ),
             getUpdateScript: (document: UpdatePromptSchema) =>
               getUpdateScript({ prompt: document, isPatch: true }),
-            authenticatedUser,
+            authenticatedUser: authenticatedUser ?? undefined,
           });
           const created =
             docsCreated.length > 0

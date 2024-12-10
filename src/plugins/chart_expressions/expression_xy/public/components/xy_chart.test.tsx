@@ -798,7 +798,7 @@ describe('XYChart component', () => {
     expect(lineArea.prop('markSizeAccessor')).toEqual(markSizeAccessorArg.markSizeAccessor);
     const expectedSeriesStyle = expect.objectContaining({
       point: expect.objectContaining({
-        visible: true,
+        visible: 'always',
         fill: ColorVariant.Series,
       }),
     });
@@ -842,7 +842,7 @@ describe('XYChart component', () => {
       const lineArea = dataLayers.find(LineSeries).at(0);
       const expectedSeriesStyle = expect.objectContaining({
         point: expect.objectContaining({
-          visible: showPoints,
+          visible: showPoints ? 'always' : 'auto',
         }),
       });
       expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);

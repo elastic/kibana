@@ -165,9 +165,6 @@ describe('ES deprecation logs', () => {
               prepend: (url: string) => url,
             },
           },
-          plugins: {
-            infra: {},
-          },
         });
       });
 

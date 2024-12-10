@@ -15,7 +15,7 @@ import { links as timelinesLinks } from './timelines/links';
 import { links as casesLinks } from './cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from './management/links';
 import { exploreLinks } from './explore/links';
-import { gettingStartedLinks } from './overview/links';
+import { onboardingLinks } from './onboarding/links';
 import { findingsLinks } from './cloud_security_posture/links';
 import type { StartPlugins } from './types';
 import { dashboardsLinks } from './dashboards/links';
@@ -33,7 +33,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   indicatorsLinks,
   exploreLinks,
   rulesLinks,
-  gettingStartedLinks,
+  onboardingLinks,
   managementLinks,
 ]);
 
@@ -53,7 +53,7 @@ export const getFilteredLinks = async (
     indicatorsLinks,
     exploreLinks,
     rulesLinks,
-    gettingStartedLinks,
+    onboardingLinks,
     managementFilteredLinks,
   ]);
 };

@@ -13,6 +13,7 @@ import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  PublishingSubject,
   ViewMode,
   apiHasParentApi,
   apiPublishesDataLoading,
@@ -37,6 +38,7 @@ import {
   roundUpToNextStepSizeFactor,
 } from './time_utils';
 import { Timeslice, TimesliderControlApi, TimesliderControlState } from './types';
+import { isCompressed } from '../../control_group/utils/is_compressed';
 
 const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
@@ -56,6 +58,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
+      const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
       const timeRangePercentage = initTimeRangePercentage(
         initialState,
@@ -101,6 +104,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       function onChange(timeslice?: Timeslice) {
+        hasTimeSliceSelection$.next(Boolean(timeslice));
         setTimeslice(timeslice);
         const nextSelectedRange = timeslice
           ? timeslice[TO_INDEX] - timeslice[FROM_INDEX]
@@ -223,7 +227,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
           },
           clearSelections: () => {
             setTimeslice(undefined);
+            hasTimeSliceSelection$.next(false);
           },
+          hasSelections$: hasTimeSliceSelection$ as PublishingSubject<boolean | undefined>,
           CustomPrependComponent: () => {
             const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
               controlGroupApi.autoApplySelections$,
@@ -306,6 +312,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
                 ticks={timeRangeMeta.ticks}
                 timeRangeMin={timeRangeMeta.timeRangeMin}
                 timeRangeMax={timeRangeMeta.timeRangeMax}
+                compressed={isCompressed(api)}
               />
             </EuiInputPopover>
           );

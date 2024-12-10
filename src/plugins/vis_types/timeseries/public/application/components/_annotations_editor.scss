@@ -3,8 +3,6 @@
   background-color: $euiColorLightestShade;
 }
 
-@include euiPanel('.tvbAnnotationsEditor');
-
 .tvbAnnotationsEditor {
   margin-bottom: $euiSize;
   padding: $euiSizeS;

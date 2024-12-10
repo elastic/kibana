@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
@@ -64,10 +64,14 @@ describe('useSetupTechnology', () => {
     });
 
     it('calls handleSetupTechnologyChange when setupTechnology changes', () => {
+      const inputPackage = {
+        type: 'someType',
+        policy_template: 'somePolicyTemplate',
+      } as NewPackagePolicyInput;
       const handleSetupTechnologyChangeMock = jest.fn();
       const { result } = renderHook(() =>
         useSetupTechnology({
-          input: { type: 'someType' } as NewPackagePolicyInput,
+          input: inputPackage,
           handleSetupTechnologyChange: handleSetupTechnologyChangeMock,
         })
       );
@@ -79,7 +83,10 @@ describe('useSetupTechnology', () => {
       });
 
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENTLESS);
-      expect(handleSetupTechnologyChangeMock).toHaveBeenCalledWith(SetupTechnology.AGENTLESS);
+      expect(handleSetupTechnologyChangeMock).toHaveBeenCalledWith(
+        SetupTechnology.AGENTLESS,
+        inputPackage.policy_template
+      );
     });
   });
 

@@ -42,6 +42,11 @@ import { SideBarColumn } from '../../../components/side_bar_column';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
+import {
+  CloudPostureThirdPartySupportCallout,
+  BidirectionalIntegrationsBanner,
+} from '../components';
+
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 import { Details } from './details';
@@ -170,6 +175,8 @@ export const OverviewPage: React.FC<Props> = memo(
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     const isElasticDefend = packageInfo.name === 'endpoint';
+    const isSentinelOne = packageInfo.name === 'sentinel_one';
+    const isCrowdStrike = packageInfo.name === 'crowdstrike';
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
@@ -294,9 +301,25 @@ export const OverviewPage: React.FC<Props> = memo(
     const [showAVCBanner, setShowAVCBanner] = useState(
       storage.get('securitySolution.showAvcBanner') ?? true
     );
-    const onBannerDismiss = useCallback(() => {
+    const [showCSResponseSupportBanner, setShowCSResponseSupportBanner] = useState(
+      storage.get('fleet.showCSResponseSupportBanner') ?? true
+    );
+    const [showSOReponseSupportBanner, setShowSOResponseSupportBanner] = useState(
+      storage.get('fleet.showSOReponseSupportBanner') ?? true
+    );
+    const onAVCBannerDismiss = useCallback(() => {
       setShowAVCBanner(false);
       storage.set('securitySolution.showAvcBanner', false);
+    }, [storage]);
+
+    const onCSResponseSupportBannerDismiss = useCallback(() => {
+      setShowCSResponseSupportBanner(false);
+      storage.set('fleet.showCSResponseSupportBanner', false);
+    }, [storage]);
+
+    const onSOResponseSupportBannerDismiss = useCallback(() => {
+      setShowSOResponseSupportBanner(false);
+      storage.set('fleet.showSOReponseSupportBanner', false);
     }, [storage]);
 
     return (
@@ -315,10 +338,23 @@ export const OverviewPage: React.FC<Props> = memo(
           {isUnverified && <UnverifiedCallout />}
           {useIsStillYear2024() && isElasticDefend && showAVCBanner && (
             <>
-              <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+              <AVCResultsBanner2024 onDismiss={onAVCBannerDismiss} />
               <EuiSpacer size="s" />
             </>
           )}
+          {isCrowdStrike && showCSResponseSupportBanner && (
+            <>
+              <BidirectionalIntegrationsBanner onDismiss={onCSResponseSupportBannerDismiss} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {isSentinelOne && showSOReponseSupportBanner && (
+            <>
+              <BidirectionalIntegrationsBanner onDismiss={onSOResponseSupportBannerDismiss} />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
           {isPrerelease && (
             <PrereleaseCallout
               packageName={packageInfo.name}

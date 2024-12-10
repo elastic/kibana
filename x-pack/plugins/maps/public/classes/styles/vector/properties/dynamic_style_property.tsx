@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React from 'react';
 import { FeatureCollection } from 'geojson';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import { DataRequest } from '../../../util/data_request';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -97,6 +98,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
     mbMap: MbMap,
     mbSourceId: string
   ): boolean;
+  getStyleMetaDataRequest(): DataRequest | undefined;
 }
 
 export class DynamicStyleProperty<T extends object>
@@ -120,6 +122,11 @@ export class DynamicStyleProperty<T extends object>
     this._field = field;
     this._layer = vectorLayer;
     this._getFieldFormatter = getFieldFormatter;
+  }
+
+  getStyleMetaDataRequest() {
+    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
+    return dataRequestId ? this._layer.getDataRequest(dataRequestId) : undefined;
   }
 
   getValueSuggestions = async (query: string) => {
@@ -147,12 +154,7 @@ export class DynamicStyleProperty<T extends object>
   }
 
   _getRangeFieldMetaFromStyleMetaRequest(): RangeFieldMeta | null {
-    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
-    if (!dataRequestId) {
-      return null;
-    }
-
-    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    const styleMetaDataRequest = this.getStyleMetaDataRequest();
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return null;
     }
@@ -177,12 +179,7 @@ export class DynamicStyleProperty<T extends object>
       return null;
     }
 
-    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
-    if (!dataRequestId) {
-      return null;
-    }
-
-    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    const styleMetaDataRequest = this.getStyleMetaDataRequest();
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return null;
     }
@@ -202,12 +199,7 @@ export class DynamicStyleProperty<T extends object>
   }
 
   _getCategoryFieldMetaFromStyleMetaRequest() {
-    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
-    if (!dataRequestId) {
-      return [];
-    }
-
-    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    const styleMetaDataRequest = this.getStyleMetaDataRequest();
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
       return [];
     }
@@ -301,9 +293,7 @@ export class DynamicStyleProperty<T extends object>
       return this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.INTERPOLATE
         ? this._field.getExtendedStatsFieldMetaRequest()
         : this._field.getPercentilesFieldMetaRequest(
-            this.getFieldMetaOptions().percentiles !== undefined
-              ? this.getFieldMetaOptions().percentiles
-              : DEFAULT_PERCENTILES
+            this.getFieldMetaOptions().percentiles ?? DEFAULT_PERCENTILES
           );
     }
 
@@ -331,7 +321,7 @@ export class DynamicStyleProperty<T extends object>
     return this.usesFeatureState() ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
   }
 
-  getFieldMetaOptions() {
+  getFieldMetaOptions(): FieldMetaOptions {
     const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
 
     // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported

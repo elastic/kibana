@@ -48,15 +48,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('Top nav', async () => {
-      await testSubjects.existOrFail('customOptionsButton');
       await testSubjects.existOrFail('shareTopNavButton');
-      await testSubjects.existOrFail('documentExplorerButton');
       await testSubjects.missingOrFail('discoverNewButton');
       await testSubjects.missingOrFail('discoverOpenButton');
-      await testSubjects.click('customOptionsButton');
-      await testSubjects.existOrFail('customOptionsPopover');
-      await testSubjects.click('customOptionsButton');
-      await testSubjects.missingOrFail('customOptionsPopover');
     });
 
     it('Search bar', async () => {

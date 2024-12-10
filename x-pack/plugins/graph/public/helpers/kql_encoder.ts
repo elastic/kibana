@@ -10,7 +10,7 @@ import rison from '@kbn/rison';
 import { Workspace } from '../types';
 
 function escapeQuotes(str: string) {
-  return str.replace(/"/g, '\\"');
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 export function asKQL(workspace: Workspace, joinBy: 'and' | 'or') {

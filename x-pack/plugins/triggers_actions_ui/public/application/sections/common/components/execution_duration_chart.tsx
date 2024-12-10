@@ -116,7 +116,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
               <Settings
                 theme={{
                   lineSeriesStyle: {
-                    point: { visible: false },
+                    point: { visible: 'never' },
                     line: { stroke: lightEuiTheme.euiColorAccent },
                   },
                 }}

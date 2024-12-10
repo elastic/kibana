@@ -21,7 +21,6 @@ import {
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ErrorRendererConfig } from '../../common/types';
 import { LazyErrorRenderComponent } from '../components';
 
@@ -39,8 +38,7 @@ const errorStrings = {
 const ErrorComponent = withSuspense(LazyErrorRenderComponent);
 
 export const getErrorRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$) =>
-  (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
     name: 'error',
     displayName: errorStrings.getDisplayName(),
     help: errorStrings.getHelpDescription(),

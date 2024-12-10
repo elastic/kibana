@@ -8,7 +8,7 @@
 import React from 'react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
+import { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
@@ -28,7 +28,6 @@ import memoizeOne from 'memoize-one';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
-  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   OperationDescriptor,
@@ -40,6 +39,7 @@ import type {
   UserMessage,
   StateSetter,
   IndexPatternMap,
+  DatasourceDataPanelProps,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -101,6 +101,7 @@ import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
+import { getLongMessage } from '../../user_messages_utils';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -216,7 +217,7 @@ export function getFormBasedDatasource({
   const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
-  const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState> = {
+  const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState, Query> = {
     id: DATASOURCE_ID,
     alias: ALIAS_IDS,
 
@@ -463,7 +464,7 @@ export function getFormBasedDatasource({
     LayerSettingsComponent(props) {
       return <LayerSettingsPanel {...props} />;
     },
-    DataPanelComponent(props: DatasourceDataPanelProps<FormBasedPrivateState>) {
+    DataPanelComponent(props: DatasourceDataPanelProps<FormBasedPrivateState, Query>) {
       const { onChangeIndexPattern, ...otherProps } = props;
       const layerFields = formBasedDatasource?.getSelectedFields?.(props.state);
       return (
@@ -868,13 +869,11 @@ export function getFormBasedDatasource({
 
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const layers = references ? injectReferences(state, references).layers : state.layers;
-      const indexPatterns: DataView[] = [];
-      for (const { indexPatternId } of Object.values(layers)) {
-        const dataView = await dataViewsService?.get(indexPatternId);
-        if (dataView) {
-          indexPatterns.push(dataView);
-        }
-      }
+      const indexPatterns: DataView[] = await Promise.all(
+        Object.values(layers)
+          .map(({ indexPatternId }) => dataViewsService?.get(indexPatternId))
+          .filter(nonNullable)
+      );
       return Object.entries(layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const dataView = indexPatterns?.find(
           (indexPattern) => indexPattern.id === layer.indexPatternId
@@ -995,7 +994,7 @@ function getLayerErrorMessages(
                 defaultMessage="Layer {position} error: {wrappedMessage}"
                 values={{
                   position: index + 1,
-                  wrappedMessage: <>{error.longMessage}</>,
+                  wrappedMessage: getLongMessage(error),
                 }}
               />
             ),

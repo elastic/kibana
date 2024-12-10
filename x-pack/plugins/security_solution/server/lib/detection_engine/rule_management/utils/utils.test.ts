@@ -7,7 +7,6 @@
 
 import { partition } from 'lodash/fp';
 import { Readable } from 'stream';
-import { createPromiseFromStreams } from '@kbn/utils';
 import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -37,8 +36,7 @@ import { createBulkErrorObject } from '../../routes/utils';
 import type { RuleAlertType } from '../../rule_schema';
 import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../rule_schema/mocks';
 
-import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
-import type { RuleExceptionsPromiseFromStreams } from '../logic/import/import_rules_utils';
+import { createPromiseFromRuleImportStream } from '../logic/import/create_promise_from_rule_import_stream';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 type PromiseFromStreams = RuleToImport | Error;
@@ -50,10 +48,10 @@ const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchema
       this.push(null);
     },
   });
-  const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-    ndJsonStream,
-    ...createRulesAndExceptionsStreamFromNdJson(1000),
-  ]);
+  const [{ rules }] = await createPromiseFromRuleImportStream({
+    stream: ndJsonStream,
+    objectLimit: 1000,
+  });
   return rules;
 };
 
@@ -433,10 +431,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
@@ -454,10 +452,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
 
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
 
@@ -485,10 +483,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
 
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
@@ -507,10 +505,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
 
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, true);
 
@@ -528,10 +526,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
 
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
@@ -823,10 +821,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
 
       clients.actionsClient.getAll.mockResolvedValue([]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -854,10 +852,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       clients.actionsClient.getAll.mockResolvedValue([]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(output.length).toEqual(0);
@@ -890,10 +888,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       clients.actionsClient.getAll.mockResolvedValue([
         {
           id: '123',
@@ -935,10 +933,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       clients.actionsClient.getAll.mockResolvedValue([
         {
           id: '123',
@@ -995,10 +993,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       clients.actionsClient.getAll.mockResolvedValue([
         {
           id: '123',
@@ -1062,10 +1060,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       clients.actionsClient.getAll.mockResolvedValue([
         {
           id: '123',
@@ -1131,10 +1129,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       clients.actionsClient.getAll.mockResolvedValue([
         {
           id: '123',
@@ -1241,10 +1239,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
-        ndJsonStream,
-        ...createRulesAndExceptionsStreamFromNdJson(1000),
-      ]);
+      const [{ rules }] = await createPromiseFromRuleImportStream({
+        stream: ndJsonStream,
+        objectLimit: 1000,
+      });
       clients.actionsClient.getAll.mockResolvedValue([
         {
           id: '123',

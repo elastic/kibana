@@ -15,6 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./observability_logs_explorer'));
     loadTestFile(require.resolve('./dataset_quality'));
+    loadTestFile(require.resolve('./discover/context_awareness'));
     loadTestFile(require.resolve('./onboarding'));
     loadTestFile(require.resolve('./rules/rules_list'));
     loadTestFile(require.resolve('./cases'));

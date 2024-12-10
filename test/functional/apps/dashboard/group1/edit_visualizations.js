@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const { dashboard, header, visualize, common, visEditor } = getPageObjects([
+  const { dashboard, header, visualize, visEditor } = getPageObjects([
     'dashboard',
     'header',
     'visualize',
@@ -114,7 +114,6 @@ export default function ({ getService, getPageObjects }) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize Library');
-      await common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 
@@ -132,7 +131,6 @@ export default function ({ getService, getPageObjects }) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize Library');
-      await common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 
@@ -191,7 +189,7 @@ export default function ({ getService, getPageObjects }) {
       it('should lose its connection to the dashboard when creating new visualization', async () => {
         await visualize.gotoVisualizationLandingPage();
         await visualize.clickNewVisualization();
-        await visualize.clickMarkdownWidget();
+        await visualize.clickVisualBuilder();
         await visualize.notLinkedToOriginatingApp();
 
         // return to origin should not be present in save modal

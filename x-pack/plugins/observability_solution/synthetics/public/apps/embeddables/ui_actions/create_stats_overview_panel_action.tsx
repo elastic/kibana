@@ -39,6 +39,9 @@ export function createStatusOverviewPanelAction(
         const initialState = await openMonitorConfiguration({
           coreStart,
           pluginStart,
+          title: i18n.translate('xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.title', {
+            defaultMessage: 'Create monitor stats',
+          }),
         });
         embeddable.addNewPanel({
           panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,

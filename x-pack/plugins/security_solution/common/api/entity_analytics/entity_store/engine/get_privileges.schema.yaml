@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: Get Entity Store Privileges Schema
+  version: '1'
+paths:
+  /internal/entity_store/privileges:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: EntityStoreGetPrivileges
+      summary: Get Entity Store Privileges
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:              
+                $ref: '../../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'

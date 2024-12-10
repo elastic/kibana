@@ -15,7 +15,8 @@ export const getUpdateScript = ({
   isPatch?: boolean;
 }) => {
   return {
-    source: `
+    script: {
+      source: `
     if (params.assignEmpty == true || params.containsKey('api_config')) {
       if (ctx._source.api_config != null) {
         if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
@@ -70,11 +71,12 @@ export const getUpdateScript = ({
     }
     ctx._source.updated_at = params.updated_at;
   `,
-    lang: 'painless',
-    params: {
-      ...conversation, // when assigning undefined in painless, it will remove property and wil set it to null
-      // for patch we don't want to remove unspecified value in payload
-      assignEmpty: !(isPatch ?? true),
+      lang: 'painless',
+      params: {
+        ...conversation, // when assigning undefined in painless, it will remove property and wil set it to null
+        // for patch we don't want to remove unspecified value in payload
+        assignEmpty: !(isPatch ?? true),
+      },
     },
   };
 };

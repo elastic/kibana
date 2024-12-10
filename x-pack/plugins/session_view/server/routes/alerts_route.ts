@@ -11,6 +11,7 @@ import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import {
   ALERTS_ROUTE,
   ALERTS_PER_PAGE,
@@ -36,6 +37,11 @@ export const registerAlertsRoute = (
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            requiredPrivileges: ['securitySolution'],
+          },
+        },
         validate: {
           request: {
             query: schema.object({
@@ -83,9 +89,9 @@ export const searchAlerts = async (
   range?: string[],
   cursor?: string
 ) => {
-  const indices = (await client.getAuthorizedAlertsIndices(['siem']))?.filter(
-    (index) => index !== PREVIEW_ALERTS_INDEX
-  );
+  const indices = (
+    await client.getAuthorizedAlertsIndices(SECURITY_SOLUTION_RULE_TYPE_IDS)
+  )?.filter((index) => index !== PREVIEW_ALERTS_INDEX);
 
   if (!indices) {
     return { events: [] };

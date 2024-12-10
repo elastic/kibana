@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Entity Store', function () {
     loadTestFile(require.resolve('./entities_list'));
-    loadTestFile(require.resolve('./engine'));
+    loadTestFile(require.resolve('./entity_store'));
+    loadTestFile(require.resolve('./field_retention_operators'));
+    loadTestFile(require.resolve('./entity_store_nondefault_spaces'));
   });
 }

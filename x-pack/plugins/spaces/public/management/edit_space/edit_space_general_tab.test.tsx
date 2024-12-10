@@ -19,16 +19,18 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditSpaceSettingsTab } from './edit_space_general_tab';
-import { EditSpaceProvider } from './provider/edit_space_provider';
+import { EditSpaceProviderRoot } from './provider/edit_space_provider';
 import type { SolutionView } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { spacesManagerMock } from '../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
+import { getSecurityLicenseMock } from '../security_license.mock';
 
 const space = { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true };
 const history = scopedHistoryMock.create();
@@ -42,6 +44,7 @@ const reloadWindow = jest.fn();
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
+const userProfile = userProfileServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
@@ -61,10 +64,10 @@ describe('EditSpaceSettings', () => {
     deleteSpaceSpy.mockReset();
   });
 
-  const TestComponent: React.FC = ({ children }) => {
+  const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
       <IntlProvider locale="en">
-        <EditSpaceProvider
+        <EditSpaceProviderRoot
           capabilities={{
             navLinks: {},
             management: {},
@@ -79,13 +82,16 @@ describe('EditSpaceSettings', () => {
           http={http}
           notifications={notifications}
           overlays={overlays}
+          getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
           getPrivilegesAPIClient={getPrivilegeAPIClient}
+          getSecurityLicense={getSecurityLicenseMock}
+          userProfile={userProfile}
           theme={theme}
           i18n={i18n}
           logger={logger}
         >
           {children}
-        </EditSpaceProvider>
+        </EditSpaceProviderRoot>
       </IntlProvider>
     );
   };
@@ -401,6 +407,76 @@ describe('EditSpaceSettings', () => {
           imageUrl: '',
           disabledFeatures: ['feature-1'],
         });
+      });
+    });
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('submits the disabled features list when the solution view is undefined', async () => {
+    const features = [
+      new KibanaFeature({
+        id: 'feature-1',
+        name: 'feature 1',
+        app: [],
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        privileges: null,
+      }),
+    ];
+
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: undefined,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={features}
+          allowFeatureVisibility={true}
+          allowSolutionVisibility={true}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // update the space visible features
+    const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+    expect(feature1Checkbox).toBeChecked();
+    await act(async () => {
+      await userEvent.click(feature1Checkbox);
+    });
+    await waitFor(() => {
+      expect(feature1Checkbox).not.toBeChecked();
+    });
+
+    expect(screen.getByTestId('space-edit-page-user-impact-warning')).toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+
+    const updateButton = screen.getByTestId('save-space-button');
+    await act(async () => {
+      await userEvent.click(updateButton);
+    });
+
+    expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+
+    const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+    await act(async () => {
+      await userEvent.click(confirmButton);
+    });
+
+    await waitFor(() => {
+      expect(updateSpaceSpy).toHaveBeenCalledWith({
+        ...spaceToUpdate,
+        imageUrl: '',
+        disabledFeatures: ['feature-1'],
       });
     });
 

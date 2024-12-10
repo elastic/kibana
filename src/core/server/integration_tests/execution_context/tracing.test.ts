@@ -55,6 +55,7 @@ describe('trace', () => {
         requestId: {
           allowFromAnyIp: true,
         },
+        restrictInternalApis: false,
       },
       execution_context: {
         enabled: true,
@@ -191,6 +192,7 @@ describe('trace', () => {
             requestId: {
               allowFromAnyIp: true,
             },
+            restrictInternalApis: false,
           },
         });
         await rootExecutionContextDisabled.preboot();

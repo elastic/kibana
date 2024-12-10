@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { skip } from 'rxjs';
-import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { skip } from 'rxjs';
 import { SearchState } from '../../hooks/use_url_search_state';
 
 interface Props {
@@ -53,7 +53,17 @@ export function QuickFilters({
   }
 
   return (
-    <Container>
+    <div
+      css={css`
+        .controlsWrapper {
+          align-items: flex-start;
+          min-height: initial;
+        }
+        .controlGroup {
+          min-height: initial;
+        }
+      `}
+    >
       <ControlGroupRenderer
         onApiAvailable={setControlGroupAPI}
         getCreationOptions={async (initialState, builder) => {
@@ -92,8 +102,9 @@ export function QuickFilters({
           };
         }}
         timeRange={{ from: 'now-24h', to: 'now' }}
+        compressed={false}
       />
-    </Container>
+    </div>
   );
 }
 
@@ -112,16 +123,6 @@ export const getSelectedOptions = (filter?: Filter) => {
   }
   return [];
 };
-
-const Container = styled.div`
-  .controlsWrapper {
-    align-items: flex-start;
-    min-height: initial;
-  }
-  .controlGroup {
-    min-height: initial;
-  }
-`;
 
 const TAGS_LABEL = i18n.translate('xpack.slo.list.tags', {
   defaultMessage: 'Tags',

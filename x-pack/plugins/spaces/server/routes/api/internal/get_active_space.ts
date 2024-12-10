@@ -15,6 +15,13 @@ export function initGetActiveSpaceApi(deps: InternalRouteDeps) {
   router.get(
     {
       path: '/internal/spaces/_active_space',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service getActiveSpace API, which uses a scoped spaces client',
+        },
+      },
       validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {

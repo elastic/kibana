@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { TableTitle } from '../../common/components/table_title';
 import { ParamsText } from './params_text';
 import { SyntheticsParams } from '../../../../../../common/runtime_types';
@@ -83,7 +83,11 @@ export const ParamsList = () => {
       render: (val: string[]) => {
         const tags = val ?? [];
         if (tags.length === 0) {
-          return <EuiText>--</EuiText>;
+          return (
+            <EuiText>
+              {i18n.translate('xpack.synthetics.columns.TextLabel', { defaultMessage: '--' })}
+            </EuiText>
+          );
         }
         return (
           <EuiFlexGroup gutterSize="xs" wrap>
@@ -105,7 +109,11 @@ export const ParamsList = () => {
       render: (val: string[]) => {
         const namespaces = val ?? [];
         if (namespaces.length === 0) {
-          return <EuiText>--</EuiText>;
+          return (
+            <EuiText>
+              {i18n.translate('xpack.synthetics.columns.TextLabel', { defaultMessage: '--' })}
+            </EuiText>
+          );
         }
         return (
           <EuiFlexGroup gutterSize="xs" wrap>
@@ -184,6 +192,7 @@ export const ParamsList = () => {
         isEditingItem={isEditingItem}
         setIsEditingItem={setIsEditingItem}
         items={items}
+        key="add-param-flyout"
       />,
     ];
   };

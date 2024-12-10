@@ -19,8 +19,10 @@ export const registerMigrateRoute = (
     {
       path: '/_migrate',
       validate: false,
-      options: {
-        tags: ['access:migrateSavedObjects'],
+      security: {
+        authz: {
+          requiredPrivileges: ['migrateSavedObjects'],
+        },
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {

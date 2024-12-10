@@ -807,6 +807,15 @@ describe('AlertingEventLogger', () => {
 
       expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
     });
+
+    test('should log action event with uuid', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      alertingEventLogger.logAction({ ...action, uuid: 'abcdefg' });
+
+      const event = createActionExecuteRecord(ruleContext, ruleData, [alertSO], action);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
   });
 
   describe('done()', () => {
@@ -1132,6 +1141,68 @@ describe('AlertingEventLogger', () => {
             ...event.kibana?.saved_objects,
             { id: 'bbb', type: 'alert', type_id: 'test', rel: 'primary' },
           ],
+        },
+      };
+
+      expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
+    test('should set fields from backfill even when no rule data is provided', () => {
+      alertingEventLogger.initialize({
+        context: backfillContext,
+        runDate,
+        type: executionType.BACKFILL,
+      });
+
+      alertingEventLogger.done({
+        backfill: {
+          id: 'abc',
+          start: '2024-03-13T00:00:00.000Z',
+          interval: '1h',
+        },
+        status: {
+          lastExecutionDate: new Date('2022-05-05T15:59:54.480Z'),
+          status: 'error',
+          error: {
+            reason: RuleExecutionStatusErrorReasons.Execute,
+            message: 'something went wrong',
+          },
+        },
+      });
+
+      const event = initializeExecuteBackfillRecord(backfillContextWithScheduleDelay, [adHocRunSO]);
+      const loggedEvent = {
+        ...event,
+        event: {
+          ...event?.event,
+          outcome: 'failure',
+          reason: RuleExecutionStatusErrorReasons.Execute,
+        },
+        error: {
+          message: 'something went wrong',
+        },
+        message: 'def: execution failed',
+        kibana: {
+          ...event.kibana,
+          alert: {
+            ...event.kibana?.alert,
+            rule: {
+              ...event.kibana?.alert?.rule,
+              execution: {
+                ...event.kibana?.alert?.rule?.execution,
+                backfill: {
+                  id: 'abc',
+                  start: '2024-03-13T00:00:00.000Z',
+                  interval: '1h',
+                },
+              },
+            },
+          },
+          alerting: {
+            outcome: 'failure',
+            status: 'error',
+          },
         },
       };
 

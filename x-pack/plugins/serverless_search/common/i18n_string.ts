@@ -51,6 +51,14 @@ export const DISABLED_LABEL: string = i18n.translate('xpack.serverlessSearch.dis
   defaultMessage: 'Disabled',
 });
 
+export const BETA_LABEL: string = i18n.translate('xpack.serverlessSearch.beta', {
+  defaultMessage: 'Beta',
+});
+
+export const TECH_PREVIEW_LABEL: string = i18n.translate('xpack.serverlessSearch.techPreview', {
+  defaultMessage: 'Tech preview',
+});
+
 export const INVALID_JSON_ERROR: string = i18n.translate(
   'xpack.serverlessSearch.invalidJsonError',
   {
@@ -64,6 +72,13 @@ export const CONNECTORS_LABEL: string = i18n.translate('xpack.serverlessSearch.c
 export const CONNECTOR_LABEL: string = i18n.translate('xpack.serverlessSearch.connector', {
   defaultMessage: 'Connector',
 });
+
+export const WEB_CRAWLERS_LABEL: string = i18n.translate(
+  'xpack.serverlessSearch.webCrawlersLabel',
+  {
+    defaultMessage: 'Web Crawlers',
+  }
+);
 
 export const DELETE_CONNECTOR_LABEL = i18n.translate(
   'xpack.serverlessSearch.connectors.deleteConnectorLabel',

@@ -22,16 +22,25 @@ import {
   useResizeObserver,
   EuiListGroup,
   EuiListGroupItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
+import { AddMetricsCallout } from '../../add_metrics_callout';
+import { useEntitySummary } from '../../hooks/use_entity_summary';
+import { isMetricsSignal } from '../../utils/get_data_stream_types';
 
 export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
   ({ children }, ref) => {
     const { euiTheme } = useEuiTheme();
-    const { renderMode } = useAssetDetailsRenderPropsContext();
+    const { asset, renderMode } = useAssetDetailsRenderPropsContext();
     const { scrollTo, setScrollTo } = useTabSwitcherContext();
+    const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
+      entityType: asset.type,
+      entityId: asset.id,
+    });
 
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const initialScrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -111,94 +120,110 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
 
     const quickAccessItems = [...quickAccessItemsRef.current];
 
+    const showAddMetricsCallout =
+      dataStreamsStatus === 'success' &&
+      !isMetricsSignal(dataStreams) &&
+      renderMode.mode === 'page';
+    const addMetricsCalloutId: AddMetricsCalloutKey =
+      asset.type === 'host' ? 'hostMetrics' : 'containerMetrics';
+
     return (
-      <EuiFlexGroup
-        gutterSize="s"
-        direction="row"
-        css={css`
-          ${useEuiMaxBreakpoint('xl')} {
-            flex-direction: column;
-          }
-        `}
-        data-test-subj="infraAssetDetailsMetricChartsContent"
-        ref={ref}
-      >
-        <EuiFlexItem
-          grow={false}
+      <>
+        {showAddMetricsCallout && (
+          <>
+            <AddMetricsCallout id={addMetricsCalloutId} />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <EuiFlexGroup
+          gutterSize="s"
+          direction="row"
           css={css`
-            position: sticky;
-            top: ${kibanaHeaderOffset};
-            background: ${euiTheme.colors.emptyShade};
-            min-width: 100px;
-            z-index: ${euiTheme.levels.navigation};
-            ${useEuiMinBreakpoint('xl')} {
-              align-self: flex-start;
+            ${useEuiMaxBreakpoint('xl')} {
+              flex-direction: column;
             }
           `}
+          data-test-subj="infraAssetDetailsMetricChartsContent"
+          ref={ref}
         >
-          <div ref={quickAccessRef}>
-            <EuiListGroup
-              flush
-              css={css`
-                ${useEuiMaxBreakpoint('xl')} {
-                  flex-direction: row;
-                  flex-wrap: wrap;
-                  gap: 0px ${euiTheme.size.xl};
-                  min-width: 100%;
-                  border-bottom: ${euiTheme.border.thin};
-                }
-              `}
-            >
-              {quickAccessItems.map(([sectionId, label]) => (
-                <EuiListGroupItem
-                  data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
-                  onClick={() => onQuickAccessItemClick(sectionId)}
-                  color="text"
-                  size="s"
-                  className={cx({
-                    [css`
-                      text-decoration: underline;
-                    `]: sectionId === scrollTo,
-                  })}
-                  css={css`
-                    background-color: unset;
-                    & > button {
-                      padding-block: ${euiTheme.size.s};
-                      padding-inline: 0px;
-                    }
-                    &:hover,
-                    &:focus-within {
-                      background-color: unset;
-                    }
-                  `}
-                  label={label}
-                />
-              ))}
-            </EuiListGroup>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            gutterSize="m"
-            direction="column"
+          <EuiFlexItem
+            grow={false}
             css={css`
-              padding-top: ${euiTheme.size.s};
-              & > [data-section-id] {
-                scroll-margin-top: ${quickAccessOffset};
+              position: sticky;
+              top: ${kibanaHeaderOffset};
+              background: ${euiTheme.colors.emptyShade};
+              min-width: 100px;
+              z-index: ${euiTheme.levels.navigation};
+              ${useEuiMinBreakpoint('xl')} {
+                align-self: flex-start;
               }
             `}
           >
-            {React.Children.map(children, (child, index) => {
-              if (React.isValidElement(child)) {
-                return React.cloneElement(child as React.ReactElement, {
-                  ref: setContentRef,
-                  key: index,
-                });
-              }
-            })}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <div ref={quickAccessRef}>
+              <EuiListGroup
+                flush
+                css={css`
+                  ${useEuiMaxBreakpoint('xl')} {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    gap: 0px ${euiTheme.size.xl};
+                    min-width: 100%;
+                    border-bottom: ${euiTheme.border.thin};
+                  }
+                `}
+              >
+                {quickAccessItems.map(([sectionId, label]) => (
+                  <EuiListGroupItem
+                    data-test-subj={`infraMetricsQuickAccessItem${sectionId}`}
+                    key={sectionId}
+                    onClick={() => onQuickAccessItemClick(sectionId)}
+                    color="text"
+                    size="s"
+                    className={cx({
+                      [css`
+                        text-decoration: underline;
+                      `]: sectionId === scrollTo,
+                    })}
+                    css={css`
+                      background-color: unset;
+                      & > button {
+                        padding-block: ${euiTheme.size.s};
+                        padding-inline: 0px;
+                      }
+                      &:hover,
+                      &:focus-within {
+                        background-color: unset;
+                      }
+                    `}
+                    label={label}
+                  />
+                ))}
+              </EuiListGroup>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup
+              gutterSize="m"
+              direction="column"
+              css={css`
+                padding-top: ${euiTheme.size.s};
+                & > [data-section-id] {
+                  scroll-margin-top: ${quickAccessOffset};
+                }
+              `}
+            >
+              {React.Children.map(children, (child, index) => {
+                if (React.isValidElement(child)) {
+                  return React.cloneElement(child as React.ReactElement, {
+                    ref: setContentRef,
+                    key: index,
+                  });
+                }
+              })}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     );
   }
 );

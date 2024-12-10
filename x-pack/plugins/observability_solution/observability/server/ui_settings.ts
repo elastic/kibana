@@ -28,7 +28,6 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableCriticalPath,
-  enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -45,7 +44,6 @@ import {
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
-  enableInfrastructureContainerAssetView,
   searchExcludedDataTiers,
 } from '../common/ui_settings_keys';
 
@@ -231,31 +229,6 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     requiresPageReload: true,
     type: 'boolean',
-  },
-  [enableInfrastructureHostsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
-      defaultMessage: 'Infrastructure Hosts view',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: 'Enable the Hosts view in the Infrastructure app.',
-    }),
-    schema: schema.boolean(),
-  },
-  [enableInfrastructureContainerAssetView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
-      defaultMessage: 'Container view',
-    }),
-    value: true,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureContainerAssetViewDescription',
-      {
-        defaultMessage: 'Enable the Container asset view in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
   },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
@@ -531,7 +504,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: 1.7,
     description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
       defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the <a>Uptime Institute</a> survey
-      
+
       You can also use the PUE that corresponds with your cloud provider:
       '<ul style="list-style-type: none;margin-left: 4px;">
         <li><strong>AWS:</strong> 1.135</li>
@@ -649,8 +622,8 @@ export const uiSettings: Record<string, UiSettings> = {
     description: i18n.translate(
       'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
       {
-        defaultMessage: `{technicalPreviewLabel} Specify the data tiers to exclude from search, such as data_cold and/or data_frozen. 
-        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM`,
+        defaultMessage: `{technicalPreviewLabel} Specify the data tiers to exclude from search, such as data_cold and/or data_frozen.
+        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM, Infrastructure`,
         values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
       }
     ),

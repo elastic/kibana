@@ -37,10 +37,12 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
+import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
-  getDatasetDisplayName,
-} from '../../../common/utils/get_dataset_display_name';
+  getVendorName,
+} from '../../../common/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -200,13 +202,13 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
   }
 };
 
-const isNativeCspFinding = (finding: CspFinding) =>
-  finding.data_stream.dataset === CSP_MISCONFIGURATIONS_DATASET;
-
-const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
+export const MissingFieldsCallout = ({
+  finding,
+}: {
+  finding: CspFinding | CspVulnerabilityFinding;
+}) => {
   const { euiTheme } = useEuiTheme();
-  const datasetDisplayName =
-    getDatasetDisplayName(finding.data_stream.dataset) || finding.data_stream.dataset;
+  const vendor = getVendorName(finding);
 
   return (
     <EuiCallOut
@@ -220,9 +222,9 @@ const MissingFieldsCallout = ({ finding }: { finding: CspFinding }) => {
         <span style={{ color: euiTheme.colors.text }}>
           <FormattedMessage
             id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {datasource}"
+            defaultMessage="Some fields not provided by {vendor}"
             values={{
-              datasource: datasetDisplayName || 'the data source',
+              vendor: vendor || 'the vendor',
             }}
           />
         </span>
@@ -285,7 +287,7 @@ export const FindingsRuleFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
         {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: euiThemeVars.euiSize }}>
             <MissingFieldsCallout finding={finding} />
           </div>
         )}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocOverrides } from './sample_docs';
+import { DocOverrides } from '@kbn/observability-synthetics-test-data/src/make_summaries';
 
 export const getGeoData = (locationName?: string, locationId?: string) => ({
   observer: {
@@ -22,10 +22,10 @@ export const journeySummary = ({
   timestamp,
   monitorId,
   testRunId,
-  locationName,
+  location,
 }: DocOverrides = {}) => {
   return {
-    ...getGeoData(locationName),
+    ...getGeoData(location?.label),
     summary: {
       up: 1,
       down: 0,
@@ -105,9 +105,9 @@ export const journeyStart = ({
   timestamp,
   monitorId,
   testRunId,
-  locationName,
+  location,
 }: DocOverrides = {}) => ({
-  ...getGeoData(locationName),
+  ...getGeoData(location?.label),
   test_run_id: testRunId ?? '07e339f4-4d56-4cdb-b314-96faacaee645',
   agent: {
     name: 'job-88fe737c53c39aea-lp69x',
@@ -167,14 +167,8 @@ export const journeyStart = ({
   },
 });
 
-export const step1 = ({
-  name,
-  timestamp,
-  monitorId,
-  testRunId,
-  locationName,
-}: DocOverrides = {}) => ({
-  ...getGeoData(locationName),
+export const step1 = ({ name, timestamp, monitorId, testRunId, location }: DocOverrides = {}) => ({
+  ...getGeoData(location?.label),
   test_run_id: testRunId ?? 'c16b1614-7f48-4791-8f46-9ccf3a896e20',
   agent: {
     name: 'job-76905d93798e6fff-z6nsb',
@@ -249,14 +243,8 @@ export const step1 = ({
   },
 });
 
-export const step2 = ({
-  name,
-  timestamp,
-  monitorId,
-  testRunId,
-  locationName,
-}: DocOverrides = {}) => ({
-  ...getGeoData(locationName),
+export const step2 = ({ name, timestamp, monitorId, testRunId, location }: DocOverrides = {}) => ({
+  ...getGeoData(location?.label),
   test_run_id: testRunId ?? 'c16b1614-7f48-4791-8f46-9ccf3a896e20',
   agent: {
     name: 'job-76905d93798e6fff-z6nsb',

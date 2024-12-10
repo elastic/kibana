@@ -86,11 +86,13 @@ export class InvestigateAppPlugin
         ]);
 
         const services: InvestigateAppServices = {
+          ...coreStart,
           esql: createEsqlService({
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             lens: pluginsStart.lens,
           }),
+          charts: pluginsStart.charts,
         };
 
         ReactDOM.render(
@@ -130,6 +132,7 @@ export class InvestigateAppPlugin
             dataViews: pluginsStart.dataViews,
             lens: pluginsStart.lens,
           }),
+          charts: pluginsStart.charts,
         },
       });
     });
