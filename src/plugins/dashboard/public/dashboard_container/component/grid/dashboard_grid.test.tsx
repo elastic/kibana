@@ -13,10 +13,10 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
 import { DashboardGrid } from './dashboard_grid';
-import { buildMockDashboard } from '../../../mocks';
+import { buildMockDashboardApi } from '../../../mocks';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { DashboardApi } from '../../../dashboard_api/types';
+import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardPanelMap } from '../../../../common';
 
 jest.mock('./dashboard_grid_item', () => {
@@ -61,18 +61,19 @@ const PANELS = {
 };
 
 const createAndMountDashboardGrid = async (panels: DashboardPanelMap = PANELS) => {
-  const dashboardContainer = buildMockDashboard({
+  const { api, internalApi } = buildMockDashboardApi({
     overrides: {
       panels,
     },
   });
-  await dashboardContainer.untilContainerInitialized();
   const component = mountWithIntl(
-    <DashboardContext.Provider value={dashboardContainer as DashboardApi}>
-      <DashboardGrid viewportWidth={1000} />
+    <DashboardContext.Provider value={api}>
+      <DashboardInternalContext.Provider value={internalApi}>
+        <DashboardGrid viewportWidth={1000} />
+      </DashboardInternalContext.Provider>
     </DashboardContext.Provider>
   );
-  return { dashboardApi: dashboardContainer, component };
+  return { dashboardApi: api, component };
 };
 
 test('renders DashboardGrid', async () => {
@@ -101,7 +102,8 @@ test('DashboardGrid removes panel when removed from container', async () => {
 
 test('DashboardGrid renders expanded panel', async () => {
   const { dashboardApi, component } = await createAndMountDashboardGrid();
-  dashboardApi.setExpandedPanelId('1');
+  // maximize panel
+  dashboardApi.expandPanel('1');
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
@@ -110,7 +112,8 @@ test('DashboardGrid renders expanded panel', async () => {
   expect(component.find('#mockDashboardGridItem_1').hasClass('expandedPanel')).toBe(true);
   expect(component.find('#mockDashboardGridItem_2').hasClass('hiddenPanel')).toBe(true);
 
-  dashboardApi.setExpandedPanelId();
+  // minimize panel
+  dashboardApi.expandPanel('1');
   await new Promise((resolve) => setTimeout(resolve, 1));
   component.update();
   expect(component.find('GridItem').length).toBe(2);
