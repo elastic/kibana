@@ -35,6 +35,7 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -231,6 +232,9 @@ interface NotePreviewsProps {
 
 export const NotePreviews = React.memo<NotePreviewsProps>(
   ({ notes, timelineId, showTimelineDescription, showToggleEventDetailsAction = true }) => {
+    const {
+      notesPrivileges: { crud: canCrudNotes },
+    } = useUserPrivileges();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
     const timeline = useDeepEqualSelector((state) =>
@@ -296,7 +300,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>
               </div>
             ),
-            actions: (
+            actions: canCrudNotes ? (
               <NoteActions
                 eventId={eventId}
                 timelineId={timelineId}
@@ -306,7 +310,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 eventIdToNoteIds={eventIdToNoteIds}
                 showToggleEventDetailsAction={showToggleEventDetailsAction}
               />
-            ),
+            ) : null,
             timelineAvatar: (
               <EuiAvatar
                 data-test-subj="avatar"
