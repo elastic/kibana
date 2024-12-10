@@ -11,7 +11,7 @@ Please follow the following steps:
   resides along side your kibana repo, and checkout the ECS version you wish to
   support (for example, the `1.8` branch, for version 1.8).
 
-2. In the `x-pack/plugins/event_log/scripts/mappings.js` file you'll want to
+2. In the `x-pack/platform/plugins/shared/event_log/scripts/mappings.js` file you'll want to
   make the following changes:
     - Update `EcsCustomPropertyMappings` to include the mapping of the custom
       fields you wish to add.
@@ -22,5 +22,5 @@ Please follow the following steps:
 3. Cd to the `kibana` root folder and run:
 
     ```sh
-    node ./x-pack/plugins/event_log/scripts/create_schemas.js
+    node ./x-pack/platform/plugins/shared/event_log/scripts/create_schemas.js
     ```

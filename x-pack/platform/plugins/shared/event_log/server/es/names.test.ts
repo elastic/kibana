@@ -7,7 +7,7 @@
 
 import { getEsNames } from './names';
 
-jest.mock('../../../../package.json', () => ({
+jest.mock('../../../../../../package.json', () => ({
   version: '1.2.3',
 }));
 
