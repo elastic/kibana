@@ -11,7 +11,6 @@ import { useValues } from 'kea';
 import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CRAWLER } from '../../../../../common/constants';
 import { HttpLogic } from '../../../shared/http';
 import { GithubIcon } from '../../../shared/icons/github_icon';
 import { KibanaLogic } from '../../../shared/kibana';
