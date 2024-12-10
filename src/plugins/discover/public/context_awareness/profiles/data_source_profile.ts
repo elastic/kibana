@@ -10,7 +10,11 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverDataSource } from '../../../common/data_sources';
-import { AsyncProfileProvider, AsyncProfileService } from '../profile_service';
+import {
+  AsyncProfileProvider,
+  AsyncProfileService,
+  ContextWithProfileId,
+} from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
 
@@ -34,7 +38,7 @@ export interface DataSourceProfileProviderParams {
   /**
    * The current root context
    */
-  rootContext: RootContext;
+  rootContext: ContextWithProfileId<RootContext>;
   /**
    * The current data source
    */

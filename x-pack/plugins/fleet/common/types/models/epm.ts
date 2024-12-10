@@ -311,6 +311,7 @@ export type RegistrySearchResult = Pick<
   | 'icons'
   | 'internal'
   | 'data_streams'
+  | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
 >;

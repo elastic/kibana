@@ -6,8 +6,6 @@
   height: 100%;
   min-height: $euiSizeL + 2px; // + 2px to account for border
   position: relative;
-  border: none;
-  outline: $euiBorderThin;
 
   &-isLoading {
     // completely center the loading indicator
@@ -105,47 +103,9 @@
   }
 }
 
-// OPTIONS MENU
-
-/**
-  * 1. Use opacity to make this element accessible to screen readers and keyboard.
-  * 2. Show on focus to enable keyboard accessibility.
-  * 3. Always show in editing mode
-  */
-
-.embPanel__optionsMenuButton {
-  background-color: transparentize($euiColorLightShade, .5);
-  border-bottom-right-radius: 0;
-  border-top-left-radius: 0;
-
-  &:focus {
-    background-color: transparentize($euiColorLightestShade, .5);
-  }
-}
-
-.embPanel__optionsMenuPopover-loading {
-  width: $euiSizeS * 32;
-}
-
-.embPanel__optionsMenuPopover-notification::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  content: '•';
-  transform: translate(50%, -50%);
-  color: $euiColorAccent;
-  font-size: $euiSizeL;
-}
-
 // EDITING MODE
-
 .embPanel--editing {
-  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-  outline: 1px dashed $euiColorMediumShade;
-
   .embPanel--dragHandle {
-    transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
-
     .embPanel--dragHandle:hover {
       background-color: transparentize($euiColorWarning, lightOrDarkTheme(.9, .7));
       cursor: move;
@@ -170,56 +130,14 @@
   z-index: $euiZLevel1;
 }
 
-.embPanel__hoverActionsAnchor {
-  position: relative;
-  height: 100%;
+.embPanel--dragHandle {
+  cursor: move;
 
-  .embPanel__hoverActionsWrapper {
-    height: $euiSizeXL;
-    position: absolute;
-    top: 0;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 $euiSize;
-    flex-wrap: nowrap;
-    min-width: 100%;
-    z-index: -1;
-    pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
+  img {
+    pointer-events: all !important;
   }
+}
 
-  .embPanel__hoverActions {
-    opacity: 0;
-    padding: calc($euiSizeXS - 1px);
-    display: flex;
-    flex-wrap: nowrap;
-    border: $euiBorderThin;
-
-    background-color: $euiColorEmptyShade;
-    height: $euiSizeXL;
-
-    pointer-events: all; // Re-enable pointer-events for hover actions
-  }
-
-  .embPanel--dragHandle {
-    cursor: move;
-
-    img {
-      pointer-events: all !important;
-    }
-  }
-
-  .embPanel__descriptionTooltipAnchor {
-    padding: $euiSizeXS;
-  }
-
-  &:hover .embPanel__hoverActionsWrapper,
-  &:focus-within .embPanel__hoverActionsWrapper,
-  .embPanel__hoverActionsWrapper--lockHoverActions {
-    z-index: $euiZLevel9;
-    top: -$euiSizeXL;
-
-    .embPanel__hoverActions {
-      opacity: 1;
-    }
-  }
+.embPanel__descriptionTooltipAnchor {
+  padding: $euiSizeXS;
 }

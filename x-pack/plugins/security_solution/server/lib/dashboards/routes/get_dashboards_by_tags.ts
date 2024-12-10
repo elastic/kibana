@@ -21,8 +21,10 @@ export const getDashboardsByTagsRoute = (router: SecuritySolutionPluginRouter, l
     .post({
       path: INTERNAL_DASHBOARDS_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

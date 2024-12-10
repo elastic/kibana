@@ -6,9 +6,8 @@
  */
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { MetricTypes } from '../../../common/rest_types';
 import { ChartPanel } from './chart_panel';
-import { UsageMetricsResponseSchemaBody } from '../../../common/rest_types';
+import type { UsageMetricsResponseSchemaBody, MetricTypes } from '../../../common/rest_types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 interface ChartsProps {
   data: UsageMetricsResponseSchemaBody;
@@ -24,7 +23,7 @@ export const Charts: React.FC<ChartsProps> = ({ data, 'data-test-subj': dataTest
 
   return (
     <EuiFlexGroup direction="column" data-test-subj={getTestId('charts')}>
-      {Object.entries(data.metrics).map(([metricType, series], idx) => (
+      {Object.entries(data).map(([metricType, series], idx) => (
         <ChartPanel
           key={metricType}
           metricType={metricType as MetricTypes}

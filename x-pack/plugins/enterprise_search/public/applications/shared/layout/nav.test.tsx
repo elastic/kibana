@@ -73,7 +73,7 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Playground',
-        href: '/app/enterprise_search/applications/playground',
+        href: '/app/search_playground',
         id: 'playground',
         items: undefined,
         name: 'Playground',
@@ -101,7 +101,7 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        href: '/app/enterprise_search/relevance/inference_endpoints',
+        href: '/app/elasticsearch/relevance/inference_endpoints',
         id: 'inference_endpoints',
         items: undefined,
         name: 'Inference Endpoints',
@@ -188,9 +188,9 @@ const mockNavLinks = [
     url: '/app/enterprise_search/content/crawlers',
   },
   {
-    id: 'enterpriseSearchApplications:playground',
+    id: 'searchPlayground',
     title: 'Playground',
-    url: '/app/enterprise_search/applications/playground',
+    url: '/app/search_playground',
   },
   {
     id: 'enterpriseSearchApplications:searchApplications',
@@ -205,7 +205,7 @@ const mockNavLinks = [
   {
     id: 'searchInferenceEndpoints:inferenceEndpoints',
     title: 'Inference Endpoints',
-    url: '/app/enterprise_search/relevance/inference_endpoints',
+    url: '/app/elasticsearch/relevance/inference_endpoints',
   },
   {
     id: 'appSearch:engines',

@@ -55,20 +55,6 @@ export type CreateKnowledgeBaseRequestParamsInput = z.input<
 export type CreateKnowledgeBaseResponse = z.infer<typeof CreateKnowledgeBaseResponse>;
 export const CreateKnowledgeBaseResponse = KnowledgeBaseResponse;
 
-export type DeleteKnowledgeBaseRequestParams = z.infer<typeof DeleteKnowledgeBaseRequestParams>;
-export const DeleteKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string().optional(),
-});
-export type DeleteKnowledgeBaseRequestParamsInput = z.input<
-  typeof DeleteKnowledgeBaseRequestParams
->;
-
-export type DeleteKnowledgeBaseResponse = z.infer<typeof DeleteKnowledgeBaseResponse>;
-export const DeleteKnowledgeBaseResponse = KnowledgeBaseResponse;
-
 export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
 export const ReadKnowledgeBaseRequestParams = z.object({
   /**

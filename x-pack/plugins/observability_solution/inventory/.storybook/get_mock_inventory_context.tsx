@@ -24,7 +24,14 @@ export function getMockInventoryContext(): InventoryKibanaContext {
 
   return {
     ...coreStart,
-    entityManager: {} as unknown as EntityManagerPublicPluginStart,
+    entityManager: {
+      entityClient: {
+        asKqlFilter: jest.fn(),
+        getIdentityFieldsValue() {
+          return 'entity_id';
+        },
+      },
+    } as unknown as EntityManagerPublicPluginStart,
     observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
     inference: {} as unknown as InferencePublicStart,
     share: {

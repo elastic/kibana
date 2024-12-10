@@ -34,7 +34,7 @@ import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
-import { useSummaryChartData } from '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const hostName = 'host';
 const osFamily = 'Windows';
@@ -61,8 +61,17 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock(
-  '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -118,7 +127,7 @@ describe('<HostEntityContent />', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
-    (useSummaryChartData as jest.Mock).mockReturnValue({ isLoading: false, items: [] });
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   describe('license is valid', () => {
@@ -248,9 +257,9 @@ describe('<HostEntityContent />', () => {
     });
 
     it('should render alert count when data is available', () => {
-      (useSummaryChartData as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
         isLoading: false,
-        items: [{ key: 'high', value: 78, label: 'High' }],
+        items: mockAlertData,
       });
 
       const { getByTestId } = renderHostEntityContent();

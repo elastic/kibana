@@ -15,7 +15,7 @@ import {
   renderMutation,
 } from '../test_utils';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 
 describe('Update artifact hook', () => {
   let result: ReturnType<typeof useUpdateArtifact>;

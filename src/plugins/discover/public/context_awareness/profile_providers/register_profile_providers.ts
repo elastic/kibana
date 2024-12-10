@@ -19,14 +19,15 @@ import {
   createExampleSolutionViewRootProfileProvider,
   createExampleRootProfileProvider,
 } from './example/example_root_profile';
-import { createLogsDataSourceProfileProviders } from './common/logs_data_source_profile';
-import { createLogDocumentProfileProvider } from './common/log_document_profile';
+import { createObservabilityLogsDataSourceProfileProviders } from './observability/logs_data_source_profile';
+import { createObservabilityLogDocumentProfileProvider } from './observability/log_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
 import type { DiscoverServices } from '../../build_services';
+import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -122,6 +123,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
   createExampleRootProfileProvider(),
   createExampleSolutionViewRootProfileProvider(),
   createSecurityRootProfileProvider(providerServices),
+  createObservabilityRootProfileProvider(providerServices),
 ];
 
 /**
@@ -131,7 +133,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
-  ...createLogsDataSourceProfileProviders(providerServices),
+  ...createObservabilityLogsDataSourceProfileProviders(providerServices),
 ];
 
 /**
@@ -141,5 +143,5 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
-  createLogDocumentProfileProvider(providerServices),
+  createObservabilityLogDocumentProfileProvider(providerServices),
 ];

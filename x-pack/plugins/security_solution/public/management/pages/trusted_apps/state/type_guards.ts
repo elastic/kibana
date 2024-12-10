@@ -8,18 +8,14 @@
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
   TrustedAppConditionEntry,
-  MacosLinuxConditionEntry,
-  WindowsConditionEntry,
+  LinuxConditionEntry,
 } from '../../../../../common/endpoint/types';
 
-export const isWindowsTrustedAppCondition = (
+export const isSignerFieldExcluded = (
   condition: TrustedAppConditionEntry
-): condition is WindowsConditionEntry => {
-  return condition.field === ConditionEntryField.SIGNER || true;
-};
-
-export const isMacosLinuxTrustedAppCondition = (
-  condition: TrustedAppConditionEntry
-): condition is MacosLinuxConditionEntry => {
-  return condition.field !== ConditionEntryField.SIGNER;
+): condition is LinuxConditionEntry => {
+  return (
+    condition.field !== ConditionEntryField.SIGNER &&
+    condition.field !== ConditionEntryField.SIGNER_MAC
+  );
 };

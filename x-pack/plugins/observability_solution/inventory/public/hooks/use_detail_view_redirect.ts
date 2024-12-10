@@ -6,32 +6,33 @@
  */
 import {
   ASSET_DETAILS_LOCATOR_ID,
-  AssetDetailsLocatorParams,
-  ENTITY_IDENTITY_FIELDS,
-  ENTITY_TYPE,
-  ENTITY_TYPES,
-  SERVICE_ENVIRONMENT,
+  BUILT_IN_ENTITY_TYPES,
   SERVICE_OVERVIEW_LOCATOR_ID,
-  ServiceOverviewParams,
+  type AssetDetailsLocatorParams,
+  type ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
-import type { Entity } from '../../common/entities';
-import { unflattenEntity } from '../../common/utils/unflatten_entity';
+import { isBuiltinEntityOfType } from '../../common/utils/entity_type_guards';
+import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
-  [ENTITY_TYPES.KUBERNETES.CLUSTER.ecs]: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-  [ENTITY_TYPES.KUBERNETES.CLUSTER.semconv]: 'kubernetes_otel-cluster-overview',
-  [ENTITY_TYPES.KUBERNETES.CRONJOB.ecs]: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-  [ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs]: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
-  [ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs]: 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-  [ENTITY_TYPES.KUBERNETES.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
-  [ENTITY_TYPES.KUBERNETES.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
-  [ENTITY_TYPES.KUBERNETES.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-  [ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs]: 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.ecs]: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.semconv]: 'kubernetes_otel-cluster-overview',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.CRONJOB.ecs]: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs]:
+    'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs]:
+    'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.JOB.ecs]: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.NODE.ecs]: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.POD.ecs]: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.SERVICE.ecs]: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
+  [BUILT_IN_ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs]:
+    'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
 };
 
 export const useDetailViewRedirect = () => {
@@ -44,52 +45,37 @@ export const useDetailViewRedirect = () => {
   const dashboardLocator = locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const serviceOverviewLocator = locators.get<ServiceOverviewParams>(SERVICE_OVERVIEW_LOCATOR_ID);
 
-  const getSingleIdentityFieldValue = useCallback(
-    (entity: Entity) => {
-      const identityFields = castArray(entity[ENTITY_IDENTITY_FIELDS]);
-      if (identityFields.length > 1) {
-        throw new Error(`Multiple identity fields are not supported for ${entity[ENTITY_TYPE]}`);
-      }
-
-      const identityField = identityFields[0];
-      return entityManager.entityClient.getIdentityFieldsValue(unflattenEntity(entity))[
-        identityField
-      ];
-    },
-    [entityManager.entityClient]
-  );
-
   const getDetailViewRedirectUrl = useCallback(
-    (entity: Entity) => {
-      const type = entity[ENTITY_TYPE];
-      const identityValue = getSingleIdentityFieldValue(entity);
+    (entity: InventoryEntity) => {
+      const identityFieldsValue = entityManager.entityClient.getIdentityFieldsValue({
+        entity: {
+          identity_fields: entity.entityIdentityFields,
+        },
+        ...entity,
+      });
+      const identityFields = castArray(entity.entityIdentityFields);
 
-      switch (type) {
-        case ENTITY_TYPES.HOST:
-        case ENTITY_TYPES.CONTAINER:
-          return assetDetailsLocator?.getRedirectUrl({
-            assetId: identityValue,
-            assetType: type,
-          });
-
-        case 'service':
-          return serviceOverviewLocator?.getRedirectUrl({
-            serviceName: identityValue,
-            // service.environemnt is not part of entity.identityFields
-            // we need to manually get its value
-            environment: [entity[SERVICE_ENVIRONMENT] || undefined].flat()[0],
-          });
-
-        default:
-          return undefined;
+      if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
+        return assetDetailsLocator?.getRedirectUrl({
+          assetId: identityFieldsValue[identityFields[0]],
+          assetType: entity.entityType,
+        });
       }
+
+      if (isBuiltinEntityOfType('service', entity)) {
+        return serviceOverviewLocator?.getRedirectUrl({
+          serviceName: identityFieldsValue[identityFields[0]],
+        });
+      }
+
+      return undefined;
     },
-    [assetDetailsLocator, getSingleIdentityFieldValue, serviceOverviewLocator]
+    [assetDetailsLocator, entityManager.entityClient, serviceOverviewLocator]
   );
 
   const getDashboardRedirectUrl = useCallback(
-    (entity: Entity) => {
-      const type = entity[ENTITY_TYPE];
+    (entity: InventoryEntity) => {
+      const type = entity.entityType;
       const dashboardId = KUBERNETES_DASHBOARDS_IDS[type];
 
       return dashboardId
@@ -97,7 +83,12 @@ export const useDetailViewRedirect = () => {
             dashboardId,
             query: {
               language: 'kuery',
-              query: entityManager.entityClient.asKqlFilter(unflattenEntity(entity)),
+              query: entityManager.entityClient.asKqlFilter({
+                entity: {
+                  identity_fields: entity.entityIdentityFields,
+                },
+                ...entity,
+              }),
             },
           })
         : undefined;
@@ -106,7 +97,8 @@ export const useDetailViewRedirect = () => {
   );
 
   const getEntityRedirectUrl = useCallback(
-    (entity: Entity) => getDetailViewRedirectUrl(entity) ?? getDashboardRedirectUrl(entity),
+    (entity: InventoryEntity) =>
+      getDetailViewRedirectUrl(entity) ?? getDashboardRedirectUrl(entity),
     [getDashboardRedirectUrl, getDetailViewRedirectUrl]
   );
 

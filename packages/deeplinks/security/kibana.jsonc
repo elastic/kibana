@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/deeplinks-security",
-  "owner": "@elastic/security-solution"
+  "owner": [
+    "@elastic/security-solution"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

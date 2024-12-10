@@ -64,7 +64,7 @@ export const HostPanelContent = ({
         entity={{ name: hostName, type: 'host' }}
         onChange={onAssetCriticalityChange}
       />
-      <EntityInsight name={hostName} fieldName={'host.name'} isPreviewMode={isPreviewMode} />
+      <EntityInsight value={hostName} field={'host.name'} isPreviewMode={isPreviewMode} />
       <ObservedEntity
         observedData={observedHost}
         contextID={contextID}

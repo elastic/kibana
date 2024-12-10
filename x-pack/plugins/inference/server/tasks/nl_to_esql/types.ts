@@ -14,7 +14,7 @@ import type {
   ToolOptions,
   OutputCompleteEvent,
 } from '@kbn/inference-common';
-import type { InferenceClient } from '../../types';
+import type { InferenceClient } from '../../inference_client';
 
 export type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =
   | OutputCompleteEvent<

@@ -29,6 +29,7 @@ import { EntityAnalytics } from './entity_analytics';
 import { Assets } from './assets';
 import { Investigations } from './investigations';
 import { MachineLearning } from './machine_learning';
+import { SiemMigrations } from './siem_migrations';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -53,5 +54,6 @@ const subPluginClasses = {
   Assets,
   Investigations,
   MachineLearning,
+  SiemMigrations,
 };
 export { subPluginClasses };

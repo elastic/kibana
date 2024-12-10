@@ -5,67 +5,123 @@
  * 2.0.
  */
 
-import type {
-  MlDeploymentAllocationState,
-  MlDeploymentState,
-} from '@elastic/elasticsearch/lib/api/types';
 import pLimit from 'p-limit';
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import {
+  InferenceInferenceEndpointInfo,
+  MlDeploymentAllocationState,
+  MlDeploymentState,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
-  handler: async (
-    resources
-  ): Promise<{
-    enabled: boolean;
+  handler: async ({
+    service,
+    request,
+  }): Promise<{
+    errorMessage?: string;
     ready: boolean;
-    error?: any;
-    deployment_state?: MlDeploymentState;
-    allocation_state?: MlDeploymentAllocationState;
-    model_name?: string;
+    enabled: boolean;
+    endpoint?: Partial<InferenceInferenceEndpointInfo>;
+    model_stats?: {
+      deployment_state: MlDeploymentState | undefined;
+      allocation_state: MlDeploymentAllocationState | undefined;
+    };
   }> => {
-    const client = await resources.service.getClient({ request: resources.request });
+    const client = await service.getClient({ request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    return await client.getKnowledgeBaseStatus();
+    return client.getKnowledgeBaseStatus();
   },
 });
 
 const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+  params: t.partial({
+    query: t.partial({
+      model_id: t.string,
+    }),
+  }),
   options: {
-    tags: ['access:ai_assistant'],
     timeout: {
-      idleSocket: 20 * 60 * 1000, // 20 minutes
+      idleSocket: moment.duration(20, 'minutes').asMilliseconds(),
     },
   },
-  handler: async (resources): Promise<{}> => {
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<InferenceInferenceEndpointInfo> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    await client.setupKnowledgeBase();
+    const { model_id: modelId } = resources.params?.query ?? {};
 
-    return {};
+    return await client.setupKnowledgeBase(modelId);
+  },
+});
+
+const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/reset',
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<{ result: string }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    await client.resetKnowledgeBase();
+
+    return { result: 'success' };
+  },
+});
+
+const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/semantic_text_migration',
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.migrateKnowledgeBaseToSemanticText();
   },
 });
 
 const getKnowledgeBaseUserInstructions = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (
     resources
@@ -89,12 +145,14 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
   params: t.type({
     body: t.type({
       id: t.string,
-      text: nonEmptyStringRt,
+      text: t.string,
       public: toBooleanRt,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
@@ -112,8 +170,10 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
 
 const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   params: t.type({
     query: t.type({
@@ -163,8 +223,10 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: knowledgeBaseEntryRt,
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
@@ -194,8 +256,10 @@ const deleteKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       entryId: t.string,
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
@@ -215,8 +279,10 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       entries: t.array(knowledgeBaseEntryRt),
     }),
   }),
-  options: {
-    tags: ['access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
@@ -225,8 +291,8 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const status = await client.getKnowledgeBaseStatus();
-    if (!status.ready) {
+    const { ready } = await client.getKnowledgeBaseStatus();
+    if (!ready) {
       throw new Error('Knowledge base is not ready');
     }
 
@@ -252,7 +318,9 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 });
 
 export const knowledgeBaseRoutes = {
+  ...semanticTextMigrationKnowledgeBase,
   ...setupKnowledgeBase,
+  ...resetKnowledgeBase,
   ...getKnowledgeBaseStatus,
   ...getKnowledgeBaseEntries,
   ...saveKnowledgeBaseUserInstruction,

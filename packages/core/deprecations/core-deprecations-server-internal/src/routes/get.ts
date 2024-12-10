@@ -14,6 +14,9 @@ export const registerGetRoute = (router: InternalDeprecationRouter) => {
   router.get(
     {
       path: '/',
+      options: {
+        access: 'public',
+      },
       validate: false,
     },
     async (context, req, res) => {

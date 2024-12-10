@@ -102,6 +102,7 @@ const mockOptions = {
     const date = STARTED_AT_MOCK_DATE.toISOString();
     return { dateStart: date, dateEnd: date };
   },
+  isServerless: false,
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {

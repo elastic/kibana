@@ -14,12 +14,17 @@ export interface FavoritesSavedObjectAttributes {
   userId: string;
   type: string;
   favoriteIds: string[];
+  favoriteMetadata?: Record<string, object>;
 }
 
 const schemaV1 = schema.object({
   userId: schema.string(),
   type: schema.string(), // object type, e.g. dashboard
   favoriteIds: schema.arrayOf(schema.string()),
+});
+
+const schemaV3 = schemaV1.extends({
+  favoriteMetadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 export const favoritesSavedObjectName = 'favorites';
@@ -34,6 +39,7 @@ export const favoritesSavedObjectType: SavedObjectsType = {
       userId: { type: 'keyword' },
       type: { type: 'keyword' },
       favoriteIds: { type: 'keyword' },
+      favoriteMetadata: { type: 'object', dynamic: false },
     },
   },
   modelVersions: {
@@ -63,6 +69,20 @@ export const favoritesSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: schemaV1.extends({}, { unknowns: 'ignore' }),
         create: schemaV1,
+      },
+    },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            favoriteMetadata: { type: 'object', dynamic: false },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: schemaV3.extends({}, { unknowns: 'ignore' }),
+        create: schemaV3,
       },
     },
   },

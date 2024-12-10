@@ -31,6 +31,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
+      summary: `Get an enrollment API key`,
+      description: `Get an enrollment API key by ID.`,
+      options: {
+        tags: ['oas-tag:Fleet enrollment API keys'],
+      },
     })
     .addVersion(
       {
@@ -45,6 +50,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
         fleet: { allAgents: true },
+      },
+      summary: `Revoke an enrollment API key`,
+      description: `Revoke an enrollment API key by ID by marking it as inactive.`,
+      options: {
+        tags: ['oas-tag:Fleet enrollment API keys'],
       },
     })
     .addVersion(
@@ -61,6 +71,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readEnrollmentTokens: true },
       },
+      summary: `Get enrollment API keys`,
+      options: {
+        tags: ['oas-tag:Fleet enrollment API keys'],
+      },
     })
     .addVersion(
       {
@@ -75,6 +89,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
       fleetAuthz: {
         fleet: { allAgents: true },
+      },
+      summary: `Create an enrollment API key`,
+      options: {
+        tags: ['oas-tag:Fleet enrollment API keys'],
       },
     })
     .addVersion(

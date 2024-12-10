@@ -20,5 +20,8 @@ export const DEPRECATED_ROUTES = {
   DEPRECATED_ROUTE: '/api/routing_example/d/deprecated_route',
   REMOVED_ROUTE: '/api/routing_example/d/removed_route',
   MIGRATED_ROUTE: '/api/routing_example/d/migrated_route',
-  VERSIONED_ROUTE: '/api/routing_example/d/versioned',
+  VERSIONED_ROUTE: '/api/routing_example/d/versioned_route',
+  INTERNAL_DEPRECATED_ROUTE: '/api/routing_example/d/internal_deprecated_route',
+  INTERNAL_ONLY_ROUTE: '/internal/routing_example/d/internal_only_route',
+  VERSIONED_INTERNAL_ROUTE: '/internal/routing_example/d/internal_versioned_route',
 };

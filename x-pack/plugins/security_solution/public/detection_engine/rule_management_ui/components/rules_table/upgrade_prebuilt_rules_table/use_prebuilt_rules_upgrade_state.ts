@@ -19,11 +19,12 @@ import {
   type DiffableRule,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
+  type RuleSignatureId,
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
-type RulesResolvedConflicts = Record<string, RuleResolvedConflicts>;
+type RulesResolvedConflicts = Record<RuleSignatureId, RuleResolvedConflicts>;
 
 interface UseRulesUpgradeStateResult {
   rulesUpgradeState: RulesUpgradeState;

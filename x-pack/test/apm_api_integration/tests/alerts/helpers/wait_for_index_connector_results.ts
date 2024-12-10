@@ -7,7 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
-import { APM_ACTION_VARIABLE_INDEX } from './alerting_api_helper';
+import { APM_ACTION_VARIABLE_INDEX } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
 async function getIndexConnectorResults(es: Client) {
   const res = await es.search({ index: APM_ACTION_VARIABLE_INDEX });

@@ -23,7 +23,7 @@ const FooterComponent: React.FC<Props> = ({ closeModal, onReset, onSave }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty data-test-sub="reset" flush="both" onClick={onReset} size="s">
+        <EuiButtonEmpty data-test-subj="reset" flush="both" onClick={onReset} size="s">
           {i18n.RESET}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -36,13 +36,13 @@ const FooterComponent: React.FC<Props> = ({ closeModal, onReset, onSave }) => {
             `}
             grow={false}
           >
-            <EuiButtonEmpty data-test-sub="cancel" onClick={closeModal} size="s">
+            <EuiButtonEmpty data-test-subj="cancel" onClick={closeModal} size="s">
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-sub="save" fill onClick={onSave} size="s">
+            <EuiButton data-test-subj="save" fill onClick={onSave} size="s">
               {i18n.SAVE}
             </EuiButton>
           </EuiFlexItem>

@@ -36,6 +36,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (authz) => {
         return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
       },
+      summary: 'Get outputs',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
@@ -50,6 +54,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (authz) => {
         return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
       },
+      summary: 'Get output',
+      description: 'Get output by ID.',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
@@ -63,6 +72,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: (authz) => {
         return authz.fleet.allSettings || authz.fleet.allAgentPolicies;
+      },
+      summary: 'Update output',
+      description: 'Update output by ID.',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -79,6 +93,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      summary: 'Create output',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
@@ -93,6 +111,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
         fleet: { allSettings: true },
+      },
+      summary: 'Delete output',
+      description: 'Delete output by ID.',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(
@@ -109,6 +132,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      summary: 'Generate a Logstash API key',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
+      },
     })
     .addVersion(
       {
@@ -123,6 +150,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN,
       fleetAuthz: {
         fleet: { readSettings: true },
+      },
+      summary: 'Get the latest output health',
+      options: {
+        tags: ['oas-tag:Fleet outputs'],
       },
     })
     .addVersion(

@@ -105,6 +105,7 @@ elastic_agent_config_path="/opt/Elastic/Agent/elastic-agent.yml"
 elastic_agent_tmp_config_path="/tmp/elastic-agent-config.tar"
 integration_names=()
 integration_titles=()
+config_files_with_password=()
 
 OS="$(uname)"
 ARCH="$(uname -m)"
@@ -155,7 +156,7 @@ download_elastic_agent() {
   curl -L -O "$download_url" --silent --fail
 
   if [ "$?" -eq 0 ]; then
-    printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent downloaded to $(pwd)/$elastic_agent_artifact_name.tar.gz"
+    printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent downloaded to $(pwd)/$elastic_agent_artifact_name.tar.gz"
     update_step_progress "ea-download" "complete"
   else
     update_step_progress "ea-download" "danger" "Failed to download Elastic Agent, see script output for error."
@@ -167,7 +168,7 @@ extract_elastic_agent() {
   tar -xzf "${elastic_agent_artifact_name}.tar.gz"
 
   if [ "$?" -eq 0 ]; then
-    printf "\e[1;32m✓\e[0m %s\n" "Archive extracted"
+    printf "\e[32;1m✓\e[0m %s\n" "Archive extracted"
     update_step_progress "ea-extract" "complete"
   else
     update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent, see script output for error."
@@ -179,7 +180,7 @@ install_elastic_agent() {
   "./${elastic_agent_artifact_name}/elastic-agent" install -f -n >/dev/null
 
   if [ "$?" -eq 0 ]; then
-    printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent installed to $(dirname "$elastic_agent_config_path")"
+    printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent installed to $(dirname "$elastic_agent_config_path")"
     update_step_progress "ea-install" "complete"
   else
     update_step_progress "ea-install" "danger" "Failed to install Elastic Agent, see script output for error."
@@ -224,7 +225,7 @@ ensure_elastic_agent_healthy() {
 
 backup_elastic_agent_config() {
   if [ -f "$elastic_agent_config_path" ]; then
-    echo -e "\nExisting config found at $elastic_agent_config_path"
+    printf "\n%s \e[36m%s\e[0m\n" "Existing config found at" "$elastic_agent_config_path"
 
     printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Create backup and continue installation?" "[Y/n] (default: Yes): "
     read confirmation_reply
@@ -241,7 +242,7 @@ backup_elastic_agent_config() {
       fi
 
       if [ "$?" -eq 0 ]; then
-        printf "\n\e[1;32m✓\e[0m %s\n" "Backup saved to $backup_path"
+        printf "\n\e[32;1m✓\e[0m %s \e[36m%s\e[0m\n" "Backup saved to" "$backup_path"
       else
         update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
         fail "Failed to backup existing config - Try manually creating a backup or delete your existing config before re-running this script"
@@ -256,7 +257,15 @@ install_integrations() {
   local install_integrations_api_body_string=""
 
   for item in "${selected_known_integrations_array[@]}"; do
-    install_integrations_api_body_string+="$item\tregistry\n"
+    local metadata=""
+
+    case "$item" in
+    "system")
+      metadata="\t$(hostname | tr '[:upper:]' '[:lower:]')"
+      ;;
+    esac
+
+    install_integrations_api_body_string+="$item\tregistry$metadata\n"
   done
 
   for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
@@ -278,7 +287,7 @@ install_integrations() {
     --output "$elastic_agent_tmp_config_path"
 
   if [ "$?" -eq 0 ]; then
-    printf "\n\e[1;32m✓\e[0m %s\n" "Integrations installed"
+    printf "\n\e[32;1m✓\e[0m %s\n" "Integrations installed"
   else
     update_step_progress "ea-config" "warning" "Failed to install integrations"
     fail "Failed to install integrations"
@@ -297,10 +306,15 @@ apply_elastic_agent_config() {
     # Replace placeholder with the Ingest API key
     sed -i='' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
   if [ "$?" -eq 0 ]; then
-    printf "\e[1;32m✓\e[0m %s\n" "Config written to:"
-    tar --list --file "$elastic_agent_tmp_config_path" | grep '\.yml$' | while read -r file; do
-      echo "  - $(dirname "$elastic_agent_config_path")/$file"
-    done
+    printf "\e[32;1m✓\e[0m %s\n" "Config files written to:"
+    while IFS= read -r file; do
+      local path="$(dirname "$elastic_agent_config_path")/$file"
+      printf "  \e[36m%s\e[0m\n" "$path"
+      grep '<PASSWORD>' "$path" >/dev/null
+      if [ "$?" -eq 0 ]; then
+        config_files_with_password+=("$path")
+      fi
+    done < <(tar --list --file "$elastic_agent_tmp_config_path" | grep '\.yml$')
 
     update_step_progress "ea-config" "complete"
   else
@@ -602,4 +616,11 @@ printf "\n\e[1m%s\e[0m\n" "Waiting for healthy status..."
 wait_for_elastic_agent_status
 ensure_elastic_agent_healthy
 
-printf "\n\e[32m%s\e[0m\n" "🎉 Elastic Agent is configured and running. You can now go back to Kibana and check for incoming logs."
+printf "\n\e[32m%s\e[0m\n" "🎉 Elastic Agent is configured and running!"
+
+printf "\n\e[1m%s\e[0m\n" "Next steps:"
+printf "\n• %s\n" "Go back to Kibana and check for incoming data"
+for path in "${config_files_with_password[@]}"; do
+  printf "\n• %s:\n  \e[36m%s\e[0m\n" "Collect $(known_integration_title "$(basename "${path%.yml}")") metrics by adding your username and password to" "$path"
+done
+printf "\n• %s:\n  \e[36;4m%s\e[0m\n" "For information on other standalone integration setups, visit" "https://www.elastic.co/guide/en/fleet/current/elastic-agent-configuration.html"

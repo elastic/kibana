@@ -130,7 +130,6 @@ export function getTimelineItemsfromConversation({
 
       switch (role) {
         case MessageRole.User:
-          actions.canCopy = true;
           actions.canGiveFeedback = false;
           actions.canRegenerate = false;
 
@@ -210,11 +209,16 @@ export function getTimelineItemsfromConversation({
             display.collapsed = false;
           }
 
+          if (!content) {
+            actions.canCopy = false;
+          } else {
+            actions.canCopy = true;
+          }
+
           break;
 
         case MessageRole.Assistant:
           actions.canRegenerate = hasConnector;
-          actions.canCopy = true;
           actions.canGiveFeedback = true;
           display.hide = false;
 
@@ -250,6 +254,13 @@ export function getTimelineItemsfromConversation({
             display.collapsed = false;
             actions.canEdit = false;
           }
+
+          if (!content) {
+            actions.canCopy = false;
+          } else {
+            actions.canCopy = true;
+          }
+
           break;
       }
 

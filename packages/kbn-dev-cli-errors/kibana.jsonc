@@ -1,6 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/dev-cli-errors",
-  "devOnly": true,
-  "owner": "@elastic/kibana-operations"
+  "owner": [
+    "@elastic/kibana-operations"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
 }

@@ -808,7 +808,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
-            style={{
+            css={{
               position: 'relative',
               width: '100%',
               zIndex: euiThemeVars.euiZLevel1,

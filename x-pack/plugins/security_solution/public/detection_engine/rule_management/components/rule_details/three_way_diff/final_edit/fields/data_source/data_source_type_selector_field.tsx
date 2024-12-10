@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { i18n as i18nCore } from '@kbn/i18n';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { DataSourceType } from '../../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { FieldHook } from '../../../../../../../../shared_imports';
 import type { ResetFormFn } from '../rule_field_edit_component_props';
+import * as i18n from './translations';
 
 interface DataSourceTypeSelectorFieldProps {
   field: FieldHook<string>;
@@ -26,20 +26,13 @@ export function DataSourceTypeSelectorField({
     () => [
       {
         id: DataSourceType.index_patterns,
-        label: i18nCore.translate(
-          'xpack.securitySolution.ruleDefine.indexTypeSelect.indexPattern',
-          {
-            defaultMessage: 'Index Patterns',
-          }
-        ),
+        label: i18n.INDEX_PATTERNS,
         iconType: field.value === DataSourceType.index_patterns ? 'checkInCircleFilled' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.index_patterns}`,
       },
       {
         id: DataSourceType.data_view,
-        label: i18nCore.translate('xpack.securitySolution.ruleDefine.indexTypeSelect.dataView', {
-          defaultMessage: 'Data View',
-        }),
+        label: i18n.DATA_VIEW,
         iconType: field.value === DataSourceType.data_view ? 'checkInCircleFilled' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.data_view}`,
       },

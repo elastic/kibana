@@ -72,6 +72,12 @@ export function registerTelemetryOptInStatsRoutes(
     .addVersion(
       {
         version: '2023-10-31',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           request: {
             body: schema.object({

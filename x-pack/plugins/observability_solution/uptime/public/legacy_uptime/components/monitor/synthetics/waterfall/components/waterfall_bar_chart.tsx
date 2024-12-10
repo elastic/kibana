@@ -21,6 +21,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { BAR_HEIGHT } from './constants';
 import { useBaseChartTheme } from '../../../../../hooks/use_base_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
@@ -81,6 +82,8 @@ export const WaterfallBarChart = ({
   const handleProjectionClick = useMemo(() => onProjectionClick, [onProjectionClick]);
   const memoizedTickFormat = useCallback(tickFormat, [tickFormat]);
 
+  const appFixedViewport = useAppFixedViewport();
+
   return (
     <WaterfallChartChartContainer
       height={getChartHeight(chartData)}
@@ -91,7 +94,7 @@ export const WaterfallBarChart = ({
         <Tooltip
           // this is done to prevent the waterfall tooltip from rendering behind Kibana's
           // stacked header when the user highlights an item at the top of the chart
-          boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+          boundary={appFixedViewport}
           customTooltip={CustomTooltip}
         />
         <Settings

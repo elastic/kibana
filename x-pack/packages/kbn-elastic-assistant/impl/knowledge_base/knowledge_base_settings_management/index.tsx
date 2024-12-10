@@ -48,7 +48,6 @@ import { Flyout } from '../../assistant/common/components/assistant_settings_man
 import { useFlyoutModalVisibility } from '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { IndexEntryEditor } from './index_entry_editor';
 import { DocumentEntryEditor } from './document_entry_editor';
-import { KnowledgeBaseSettings } from '../knowledge_base_settings';
 import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 import { useDeleteKnowledgeBaseEntries } from '../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries';
 import {
@@ -73,7 +72,6 @@ interface Params {
 
 export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ dataViews }) => {
   const {
-    assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
     assistantAvailability: { hasManageGlobalKnowledgeBase, isAssistantEnabled },
     http,
     toasts,
@@ -162,7 +160,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
   } = useKnowledgeBaseEntries({
     http,
     toasts,
-    enabled: enableKnowledgeBaseByDefault && isAssistantEnabled,
+    enabled: isAssistantEnabled,
     isRefetching: kbStatus?.is_setup_in_progress,
   });
 
@@ -332,21 +330,6 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     }
   }, [createEntry, duplicateKBItem, resetStateAndCloseFlyout]);
 
-  if (!enableKnowledgeBaseByDefault) {
-    return (
-      <>
-        <KnowledgeBaseSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={handleUpdateKnowledgeBaseSettings}
-        />
-        <AssistantSettingsBottomBar
-          hasPendingChanges={hasPendingChanges}
-          onCancelClick={onCancelClick}
-          onSaveButtonClicked={onSaveButtonClicked}
-        />
-      </>
-    );
-  }
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">

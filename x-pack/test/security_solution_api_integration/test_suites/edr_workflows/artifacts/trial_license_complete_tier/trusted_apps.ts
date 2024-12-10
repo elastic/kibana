@@ -206,26 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
             const body = trustedAppApiCall.getBody();
 
             body.os_types = ['linux'];
-            body.entries = [
-              {
-                field: 'process.Ext.code_signature',
-                entries: [
-                  {
-                    field: 'trusted',
-                    value: 'true',
-                    type: 'match',
-                    operator: 'included',
-                  },
-                  {
-                    field: 'subject_name',
-                    value: 'foo',
-                    type: 'match',
-                    operator: 'included',
-                  },
-                ],
-                type: 'nested',
-              },
-            ];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
 
             await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
               .set('kbn-xsrf', 'true')
@@ -233,6 +214,58 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(400)
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/^.*(?!process\.Ext\.code_signature)/));
+          });
+
+          it(`should error on [${trustedAppApiCall.method} if Mac signer field is used for Windows entry`, async () => {
+            const body = trustedAppApiCall.getBody();
+
+            body.os_types = ['windows'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
+
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400);
+          });
+
+          it(`should error on [${trustedAppApiCall.method} if Windows signer field is used for Mac entry`, async () => {
+            const body = trustedAppApiCall.getBody();
+
+            body.os_types = ['macos'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
+
+            await endpointPolicyManagerSupertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(400);
+          });
+
+          it('should not error if signer is set for a windows os entry item', async () => {
+            const body = trustedAppApiCalls[0].getBody();
+
+            body.os_types = ['windows'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry();
+
+            await endpointPolicyManagerSupertest[trustedAppApiCalls[0].method](
+              trustedAppApiCalls[0].path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
+          });
+
+          it('should not error if signer is set for a mac os entry item', async () => {
+            const body = trustedAppApiCalls[0].getBody();
+
+            body.os_types = ['macos'];
+            body.entries = exceptionsGenerator.generateTrustedAppSignerEntry('mac');
+
+            await endpointPolicyManagerSupertest[trustedAppApiCalls[0].method](
+              trustedAppApiCalls[0].path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(body)
+              .expect(200);
           });
 
           it(`should error on [${trustedAppApiCall.method}] if more than one OS is set`, async () => {

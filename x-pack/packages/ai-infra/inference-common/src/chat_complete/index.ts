@@ -13,6 +13,11 @@ export type {
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
 } from './api';
+export type {
+  BoundChatCompleteAPI,
+  BoundChatCompleteOptions,
+  UnboundChatCompleteOptions,
+} from './bound_api';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,

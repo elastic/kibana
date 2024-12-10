@@ -179,6 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.setInterval('Second');
         await visEditor.clickGo();
         await inspector.open();
+        await inspector.setTablePageSize(20);
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
       });
@@ -211,6 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleScaleMetrics();
         await visEditor.clickGo();
         await inspector.open();
+        await inspector.setTablePageSize(20);
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
       });
@@ -245,6 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregateWith('average');
         await visEditor.clickGo();
         await inspector.open();
+        await inspector.setTablePageSize(20);
         await inspector.expectTableData(expectedTableData);
         await inspector.close();
       });

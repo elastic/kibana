@@ -14,25 +14,3 @@ export type StreamParser = (
   abortSignal?: AbortSignal,
   tokenHandler?: (token: string) => void
 ) => Promise<string>;
-
-export interface GeminiResponseSchema {
-  candidates: Candidate[];
-  usageMetadata: {
-    promptTokenCount: number;
-    candidatesTokenCount: number;
-    totalTokenCount: number;
-  };
-}
-interface Part {
-  text: string;
-}
-
-interface Candidate {
-  content: Content;
-  finishReason: string;
-}
-
-interface Content {
-  role: string;
-  parts: Part[];
-}

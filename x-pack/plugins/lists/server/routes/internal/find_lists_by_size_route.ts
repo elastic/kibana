@@ -23,10 +23,12 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'internal',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: INTERNAL_FIND_LISTS_BY_SIZE,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {

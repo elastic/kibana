@@ -6,17 +6,19 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import { DataUsageRequestHandlerContext } from '../../types';
+import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
-import { DataUsageService } from '../../services';
 import { getMeteringStats } from '../../utils/get_metering_stats';
+import { DataStreamsRequestQuery } from '../../../common/rest_types/data_streams';
+import { NoIndicesMeteringError, NoPrivilegeMeteringError } from '../../errors';
 
 export const getDataStreamsHandler = (
-  dataUsageService: DataUsageService
-): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
-  const logger = dataUsageService.getLogger('dataStreamsRoute');
+  dataUsageContext: DataUsageContext
+): RequestHandler<never, DataStreamsRequestQuery, unknown, DataUsageRequestHandlerContext> => {
+  const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
+  return async (context, request, response) => {
+    const { includeZeroStorage } = request.query;
 
-  return async (context, _, response) => {
     logger.debug('Retrieving user data streams');
 
     try {
@@ -29,16 +31,27 @@ export const getDataStreamsHandler = (
         meteringStats && !!meteringStats.length
           ? meteringStats
               .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
-              .map((stat) => ({
-                name: stat.name,
-                storageSizeBytes: stat.size_in_bytes ?? 0,
-              }))
+              .reduce<Array<{ name: string; storageSizeBytes: number }>>((acc, stat) => {
+                if (includeZeroStorage || stat.size_in_bytes > 0) {
+                  acc.push({
+                    name: stat.name,
+                    storageSizeBytes: stat.size_in_bytes ?? 0,
+                  });
+                }
+                return acc;
+              }, [])
           : [];
 
       return response.ok({
         body,
       });
     } catch (error) {
+      if (error.message.includes('security_exception')) {
+        return errorHandler(logger, response, new NoPrivilegeMeteringError());
+      } else if (error.message.includes('index_not_found_exception')) {
+        return errorHandler(logger, response, new NoIndicesMeteringError());
+      }
+
       return errorHandler(logger, response, error);
     }
   };

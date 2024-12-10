@@ -22,7 +22,7 @@ export interface BulkOperationError {
   };
 }
 
-interface WriterBulkResponse {
+export interface WriterBulkResponse {
   errors: BulkOperationError[];
   docs_created: string[];
   docs_deleted: string[];

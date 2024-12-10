@@ -6,7 +6,7 @@
  */
 
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 

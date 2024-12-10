@@ -6,7 +6,7 @@
  */
 import { set } from '@kbn/safer-lodash-set';
 import { get, isEmpty } from 'lodash/fp';
-import { toObjectArrayOfStrings } from '../../../common/utils/to_array';
+import { toObjectArrayOfStrings } from '@kbn/timelines-plugin/common';
 
 export function getFlattenedFields<T>(
   fields: string[],

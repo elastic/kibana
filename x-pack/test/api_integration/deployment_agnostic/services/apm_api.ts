@@ -16,16 +16,7 @@ import { formatRequest } from '@kbn/server-route-repository';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-const INTERNAL_API_REGEX = /^\S+\s(\/)?internal\/[^\s]*$/;
-
-type InternalApi = `${string} /internal/${string}`;
-interface ExternalEndpointParams {
-  roleAuthc: RoleCredentials;
-}
-
-type Options<TEndpoint extends APIEndpoint> = (TEndpoint extends InternalApi
-  ? {}
-  : ExternalEndpointParams) & {
+type Options<TEndpoint extends APIEndpoint> = {
   type?: 'form-data';
   endpoint: TEndpoint;
   spaceId?: string;
@@ -33,32 +24,27 @@ type Options<TEndpoint extends APIEndpoint> = (TEndpoint extends InternalApi
     params?: { query?: { _inspect?: boolean } };
   };
 
-function isPublicApi<TEndpoint extends APIEndpoint>(
-  options: Options<TEndpoint>
-): options is Options<TEndpoint> & ExternalEndpointParams {
-  return !INTERNAL_API_REGEX.test(options.endpoint);
-}
+type InternalEndpoint<T extends APIEndpoint> = T extends `${string} /internal/${string}`
+  ? T
+  : never;
 
-function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext, role: string) {
+type PublicEndpoint<T extends APIEndpoint> = T extends `${string} /api/${string}` ? T : never;
+
+function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const samlAuth = getService('samlAuth');
   const logger = getService('log');
 
-  return async <TEndpoint extends APIEndpoint>(
-    options: Options<TEndpoint>
-  ): Promise<SupertestReturnType<TEndpoint>> => {
+  async function makeApiRequest<TEndpoint extends APIEndpoint>({
+    options,
+    headers,
+  }: {
+    options: Options<TEndpoint>;
+    headers: Record<string, string>;
+  }): Promise<SupertestReturnType<TEndpoint>> {
     const { endpoint, type } = options;
 
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
-
-    const credentials = isPublicApi(options)
-      ? options.roleAuthc.apiKeyHeader
-      : await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role);
-
-    const headers: Record<string, string> = {
-      ...samlAuth.getInternalRequestHeader(),
-      ...credentials,
-    };
 
     const { method, pathname, version } = formatRequest(endpoint, params.path);
     const pathnameWithSpaceId = options.spaceId ? `/s/${options.spaceId}${pathname}` : pathname;
@@ -71,6 +57,7 @@ function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext
     }
 
     let res: request.Response;
+
     if (type === 'form-data') {
       const fields: Array<[string, any]> = Object.entries(params.body);
       const formDataRequest = supertestWithoutAuth[method](url)
@@ -94,6 +81,45 @@ function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext
     }
 
     return res;
+  }
+
+  function makeInternalApiRequest(role: string) {
+    return async <TEndpoint extends InternalEndpoint<APIEndpoint>>(
+      options: Options<TEndpoint>
+    ): Promise<SupertestReturnType<TEndpoint>> => {
+      const headers: Record<string, string> = {
+        ...samlAuth.getInternalRequestHeader(),
+        ...(await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role)),
+      };
+
+      return makeApiRequest({
+        options,
+        headers,
+      });
+    };
+  }
+
+  function makePublicApiRequest() {
+    return async <TEndpoint extends PublicEndpoint<APIEndpoint>>(
+      options: Options<TEndpoint> & {
+        roleAuthc: RoleCredentials;
+      }
+    ): Promise<SupertestReturnType<TEndpoint>> => {
+      const headers: Record<string, string> = {
+        ...samlAuth.getInternalRequestHeader(),
+        ...options.roleAuthc.apiKeyHeader,
+      };
+
+      return makeApiRequest({
+        options,
+        headers,
+      });
+    };
+  }
+
+  return {
+    makeInternalApiRequest,
+    makePublicApiRequest,
   };
 }
 
@@ -129,9 +155,13 @@ export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
 }
 
 export function ApmApiProvider(context: DeploymentAgnosticFtrProviderContext) {
+  const apmClient = createApmApiClient(context);
   return {
-    readUser: createApmApiClient(context, 'viewer'),
-    adminUser: createApmApiClient(context, 'admin'),
-    writeUser: createApmApiClient(context, 'editor'),
+    readUser: apmClient.makeInternalApiRequest('viewer'),
+    adminUser: apmClient.makeInternalApiRequest('admin'),
+    writeUser: apmClient.makeInternalApiRequest('editor'),
+    publicApi: apmClient.makePublicApiRequest(),
   };
 }
+
+export type ApmApiClient = ReturnType<typeof ApmApiProvider>;

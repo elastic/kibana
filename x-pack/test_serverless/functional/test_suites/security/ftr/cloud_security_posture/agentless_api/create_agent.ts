@@ -54,6 +54,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.selectSetupTechnology('agentless');
       await cisIntegration.selectAwsCredentials('direct');
 
+      if (
+        process.env.TEST_CLOUD &&
+        process.env.CSPM_AWS_ACCOUNT_ID &&
+        process.env.CSPM_AWS_SECRET_KEY
+      ) {
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
+          process.env.CSPM_AWS_ACCOUNT_ID
+        );
+
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID,
+          process.env.CSPM_AWS_SECRET_KEY
+        );
+      }
+
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
@@ -62,12 +78,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegration.getFirstCspmIntegrationPageIntegration()).to.be(
+      expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessIntegration()).to.be(
         integrationPolicyName
       );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgent()).to.be(
-        `Agentless policy for ${integrationPolicyName}`
-      );
+      expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Pending');
     });
 
     it(`should create default agent-based agent`, async () => {

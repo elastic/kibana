@@ -46,6 +46,9 @@
     "@kbn/management-settings-ids",
     "@kbn/ai-assistant-common",
     "@kbn/inference-common",
+    "@kbn/core-lifecycle-server",
+    "@kbn/server-route-repository-utils",
+    "@kbn/inference-plugin"
   ],
   "exclude": ["target/**/*"]
 }

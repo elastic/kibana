@@ -178,8 +178,7 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
-    useAgentless();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
@@ -280,7 +279,7 @@ export function useOnSubmit({
 
   useEffect(() => {
     if (
-      agentPolicies.length > 0 &&
+      (canUseMultipleAgentPolicies || agentPolicies.length > 0) &&
       !isEqual(
         agentPolicies.map((policy) => policy.id),
         packagePolicy.policy_ids
@@ -290,7 +289,7 @@ export function useOnSubmit({
         policy_ids: agentPolicies.map((policy) => policy.id),
       });
     }
-  }, [packagePolicy, agentPolicies, updatePackagePolicy]);
+  }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -316,9 +315,7 @@ export function useOnSubmit({
         (agentCount !== 0 ||
           (agentPolicies.length === 0 && selectedPolicyTab !== SelectedPolicyTab.NEW)) &&
         !(
-          isAgentlessIntegration(packageInfo) ||
-          isAgentlessPackagePolicy(packagePolicy) ||
-          isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
+          isAgentlessIntegration(packageInfo) || isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
         ) &&
         formState !== 'CONFIRM'
       ) {
@@ -365,9 +362,7 @@ export function useOnSubmit({
         : packagePolicy.policy_ids;
 
       const shouldForceInstallOnAgentless =
-        isAgentlessAgentPolicy(createdPolicy) ||
-        isAgentlessIntegration(packageInfo) ||
-        isAgentlessPackagePolicy(packagePolicy);
+        isAgentlessAgentPolicy(createdPolicy) || isAgentlessIntegration(packageInfo);
 
       const forceInstall = force || shouldForceInstallOnAgentless;
 
@@ -390,8 +385,7 @@ export function useOnSubmit({
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
       // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
-      const isAgentlessConfigured =
-        isAgentlessAgentPolicy(createdPolicy) || (data && isAgentlessPackagePolicy(data.item));
+      const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
       if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
@@ -479,7 +473,6 @@ export function useOnSubmit({
       selectedPolicyTab,
       packagePolicy,
       isAgentlessAgentPolicy,
-      isAgentlessPackagePolicy,
       hasFleetAddAgentsPrivileges,
       withSysMonitoring,
       newAgentPolicy,

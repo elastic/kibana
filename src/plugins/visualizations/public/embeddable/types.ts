@@ -17,6 +17,7 @@ import {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesRendered,
   PublishesTimeRange,
   SerializedTimeRange,
   SerializedTitles,
@@ -92,6 +93,7 @@ export const isVisualizeRuntimeState = (state: unknown): state is VisualizeRunti
 export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
+  PublishesRendered &
   HasVisualizeConfig &
   HasInspectorAdapters &
   HasSupportedTriggers &

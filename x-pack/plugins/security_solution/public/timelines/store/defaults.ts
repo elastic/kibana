@@ -32,7 +32,6 @@ export const timelineDefaults: SubsetTimelineModel &
   description: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
-    tiebreakerField: '',
     timestampField: '@timestamp',
     query: '',
     size: 100,
@@ -64,7 +63,6 @@ export const timelineDefaults: SubsetTimelineModel &
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isLoading: false,
   isSaving: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],

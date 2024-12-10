@@ -8,8 +8,8 @@
 import { getMachineLearningRule } from '../../../../objects/rule';
 import { TOOLTIP } from '../../../../screens/common';
 import {
-  ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_WARNING,
 } from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
@@ -102,7 +102,7 @@ describe(
 
           it('displays a warning message on the suppression fields', () => {
             cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
-            cy.get(ALERT_SUPPRESSION_FIELDS).should(
+            cy.get(ALERT_SUPPRESSION_WARNING).should(
               'contain.text',
               'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.'
             );

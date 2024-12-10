@@ -55,12 +55,9 @@ export interface UpdateAlertStatusActionProps {
 export interface SendAlertToTimelineActionProps {
   createTimeline: CreateTimeline;
   ecsData: Ecs | Ecs[];
-  updateTimelineIsLoading: UpdateTimelineLoading;
   searchStrategyClient: ISearchStart;
   getExceptionFilter: GetExceptionFilter;
 }
-
-export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 
 export interface CreateTimelineProps {
   from: string;

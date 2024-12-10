@@ -33,10 +33,7 @@ export type ActionsClientChatModelClass =
 export type ChatModelParams = Partial<ActionsClientSimpleChatModelParams> &
   Partial<ActionsClientChatOpenAIParams> &
   Partial<ActionsClientBedrockChatModelParams> &
-  Partial<ActionsClientChatVertexAIParams> & {
-    /** Enables the streaming mode of the response, disabled by default */
-    streaming?: boolean;
-  };
+  Partial<ActionsClientChatVertexAIParams>;
 
 const llmTypeDictionary: Record<string, string> = {
   [`.gen-ai`]: `openai`,
@@ -67,7 +64,7 @@ export class ActionsClientChat {
       llmType,
       model: connector.config?.defaultModel,
       ...params,
-      streaming: params?.streaming ?? false, // disabling streaming by default, for some reason is enabled when omitted
+      streaming: false, // disabling streaming by default
     });
     return model;
   }

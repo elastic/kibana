@@ -33,8 +33,12 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
     .put({
       access: 'public',
       path: PREBUILT_RULES_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -49,7 +53,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const rulesClient = await (await context.alerting).getRulesClient();
 
           const validated = await createPrepackagedRules(
             await context.securitySolution,

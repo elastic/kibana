@@ -28,14 +28,14 @@ import type {
   VersionedRouter,
   RouteRegistrar,
   RouteSecurity,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
-import { RouteDeprecationInfo } from '@kbn/core-http-server/src/router/route';
 import { RouteValidator } from './validator';
-import { ALLOWED_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
+import { BASE_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
@@ -113,6 +113,11 @@ function validOptions(
         routeConfig.path
       } is not valid. Only '${validBodyOutput.join("' or '")}' are valid.`
     );
+  }
+
+  // @ts-expect-error to eliminate problems with `security` in the options for route factories abstractions
+  if (options.security) {
+    throw new Error('`options.security` is not allowed in route config. Use `security` instead.');
   }
 
   const body = shouldNotHavePayload
@@ -287,10 +292,13 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   /** Should be private, just exposed for convenience for the versioned router */
   public emitPostValidate = (
     request: KibanaRequest,
-    routeOptions: { deprecated?: RouteDeprecationInfo } = {}
+    postValidateConext: PostValidationMetadata = {
+      isInternalApiRequest: true,
+      isPublicAccess: false,
+    }
   ) => {
     const postValidate: RouterEvents = 'onPostValidate';
-    Router.ee.emit(postValidate, request, routeOptions);
+    Router.ee.emit(postValidate, request, postValidateConext);
   };
 
   private async handle<P, Q, B>({
@@ -304,7 +312,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     request: Request;
     responseToolkit: ResponseToolkit;
     emit?: {
-      onPostValidation: (req: KibanaRequest, reqOptions: any) => void;
+      onPostValidation: (req: KibanaRequest, metadata: PostValidationMetadata) => void;
     };
     isPublicUnversionedRoute: boolean;
     handler: RequestHandlerEnhanced<
@@ -336,22 +344,30 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       if (isPublicUnversionedRoute) {
         response.output.headers = {
           ...response.output.headers,
-          ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
+          ...getVersionHeader(BASE_PUBLIC_VERSION),
         };
       }
 
       // Emit onPostValidation even if validation fails.
       const req = CoreKibanaRequest.from(request);
-      emit?.onPostValidation(req, req.route.options);
+      emit?.onPostValidation(req, {
+        deprecated: req.route.options.deprecated,
+        isInternalApiRequest: req.isInternalApiRequest,
+        isPublicAccess: req.route.options.access === 'public',
+      });
       return response;
     }
 
-    emit?.onPostValidation(kibanaRequest, kibanaRequest.route.options);
+    emit?.onPostValidation(kibanaRequest, {
+      deprecated: kibanaRequest.route.options.deprecated,
+      isInternalApiRequest: kibanaRequest.isInternalApiRequest,
+      isPublicAccess: kibanaRequest.route.options.access === 'public',
+    });
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
       if (isPublicUnversionedRoute) {
-        injectVersionHeader(ALLOWED_PUBLIC_VERSION, kibanaResponse);
+        injectVersionHeader(BASE_PUBLIC_VERSION, kibanaResponse);
       }
       if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({

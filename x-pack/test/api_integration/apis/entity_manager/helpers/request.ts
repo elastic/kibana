@@ -16,12 +16,12 @@ export interface Auth {
 
 export const getInstalledDefinitions = async (
   supertest: Agent,
-  params: { auth?: Auth; id?: string; includeState?: boolean } = {}
+  params: { auth?: Auth; id?: string; includeState?: boolean; perPage?: number } = {}
 ): Promise<{ definitions: EntityDefinitionWithState[] }> => {
-  const { auth, id, includeState = true } = params;
+  const { auth, id, includeState = true, perPage = 1000 } = params;
   let req = supertest
     .get(`/internal/entities/definition${id ? `/${id}` : ''}`)
-    .query({ includeState })
+    .query({ includeState, perPage })
     .set('kbn-xsrf', 'xxx');
   if (auth) {
     req = req.auth(auth.username, auth.password);

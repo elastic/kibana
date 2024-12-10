@@ -67,7 +67,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(`/api/observability/slos`)
           .set(adminRoleAuthc.apiKeyHeader)
           .set(internalHeaders)
-          .set('elastic-api-version', '1')
           .send();
 
         expect(response.body.results).length(2);
@@ -76,7 +75,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(`/api/observability/slos?kqlQuery=slo.name%3Airrelevant`)
           .set(adminRoleAuthc.apiKeyHeader)
           .set(internalHeaders)
-          .set('elastic-api-version', '1')
           .send()
           .expect(200);
 
@@ -87,7 +85,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(`/api/observability/slos?kqlQuery=slo.name%3Aintegration`)
           .set(adminRoleAuthc.apiKeyHeader)
           .set(internalHeaders)
-          .set('elastic-api-version', '1')
           .send()
           .expect(200);
 

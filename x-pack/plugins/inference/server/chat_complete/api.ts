@@ -16,14 +16,14 @@ import {
   type ToolOptions,
   ChatCompleteOptions,
 } from '@kbn/inference-common';
-import type { InferenceStartDependencies } from '../types';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
 import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
-  actions: InferenceStartDependencies['actions'];
+  actions: ActionsPluginStart;
   logger: Logger;
 }
 

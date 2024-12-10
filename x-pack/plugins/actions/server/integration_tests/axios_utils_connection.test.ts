@@ -28,6 +28,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../../common';
+import { getFips } from 'crypto';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -251,19 +252,6 @@ describe('axios connections', () => {
       expect(res.status).toBe(200);
     });
 
-    test('it works with pfx and passphrase in SSL overrides', async () => {
-      const { url, server } = await createServer({ useHttps: true, requestCert: true });
-      testServer = server;
-
-      const configurationUtilities = getACUfromConfig();
-      const sslOverrides = {
-        pfx: KIBANA_P12,
-        passphrase: 'storepass',
-      };
-      const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
-      expect(res.status).toBe(200);
-    });
-
     test('it fails with cert and key but no ca in SSL overrides', async () => {
       const { url, server } = await createServer({ useHttps: true, requestCert: true });
       testServer = server;
@@ -278,18 +266,33 @@ describe('axios connections', () => {
       await expect(fn()).rejects.toThrow('certificate');
     });
 
-    test('it fails with pfx but no passphrase in SSL overrides', async () => {
-      const { url, server } = await createServer({ useHttps: true, requestCert: true });
-      testServer = server;
+    if (getFips() !== 1) {
+      test('it works with pfx and passphrase in SSL overrides', async () => {
+        const { url, server } = await createServer({ useHttps: true, requestCert: true });
+        testServer = server;
 
-      const configurationUtilities = getACUfromConfig();
-      const sslOverrides = {
-        pfx: KIBANA_P12,
-      };
-      const fn = async () =>
-        await request({ axios, url, logger, configurationUtilities, sslOverrides });
-      await expect(fn()).rejects.toThrow('mac verify');
-    });
+        const configurationUtilities = getACUfromConfig();
+        const sslOverrides = {
+          pfx: KIBANA_P12,
+          passphrase: 'storepass',
+        };
+        const res = await request({ axios, url, logger, configurationUtilities, sslOverrides });
+        expect(res.status).toBe(200);
+      });
+
+      test('it fails with pfx but no passphrase in SSL overrides', async () => {
+        const { url, server } = await createServer({ useHttps: true, requestCert: true });
+        testServer = server;
+
+        const configurationUtilities = getACUfromConfig();
+        const sslOverrides = {
+          pfx: KIBANA_P12,
+        };
+        const fn = async () =>
+          await request({ axios, url, logger, configurationUtilities, sslOverrides });
+        await expect(fn()).rejects.toThrow('mac verify');
+      });
+    }
 
     test('it fails with a client-side certificate issued by an invalid ca', async () => {
       const { url, server } = await createServer({ useHttps: true, requestCert: true });

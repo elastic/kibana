@@ -19,7 +19,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/serverless",
-    "@kbn/enterprise-search-plugin",
     "@kbn/management-settings-components-field-row",
     "@kbn/observability-shared-plugin",
     "@kbn/config-schema",
@@ -27,7 +26,8 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/core-plugins-browser",
     "@kbn/ai-assistant",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/product-doc-base-plugin"
   ],
   "exclude": [
     "target/**/*"

@@ -32,7 +32,6 @@ const mockContext = {
   http: {
     get: jest.fn(),
   },
-  assistantFeatures: { assistantKnowledgeBaseByDefault: true },
   selectedSettingsTab: null,
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -174,17 +173,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       mutateAsync: mockDeleteEntry,
       isLoading: false,
     });
-  });
-  it('renders old kb settings when enableKnowledgeBaseByDefault is not enabled', () => {
-    (useAssistantContext as jest.Mock).mockImplementation(() => ({
-      ...mockContext,
-      assistantFeatures: {
-        assistantKnowledgeBaseByDefault: false,
-      },
-    }));
-    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, { wrapper });
-
-    expect(screen.getByTestId('knowledge-base-settings')).toBeInTheDocument();
   });
   it('renders loading spinner when data is not fetched', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockReturnValue({ data: {}, isFetched: false });

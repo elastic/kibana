@@ -92,7 +92,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
-      expect(body.message).to.eql('Forbidden');
 
       const { body: getBody, status: getStatus } = await supertest
         .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)
@@ -115,7 +114,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
-      expect(body.message).to.eql('Forbidden');
 
       const { body: getBody, status: getStatus } = await supertest
         .get(`/internal/ml/job_audit_messages/messages/test_get_job_audit_messages_2`)

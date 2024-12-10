@@ -256,6 +256,42 @@ paths:
       summary: List Asset Criticality Records
       tags:
         - Security Entity Analytics API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -381,41 +417,6 @@ paths:
                     type: boolean
           description: Successful response
       summary: Start an Entity Engine
-      tags:
-        - Security Entity Analytics API
-  '/api/entity_store/engines/{entityType}/stats':
-    post:
-      operationId: GetEntityEngineStats
-      parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/EntityType'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  indexPattern:
-                    $ref: '#/components/schemas/IndexPattern'
-                  indices:
-                    items:
-                      type: object
-                    type: array
-                  status:
-                    $ref: '#/components/schemas/EngineStatus'
-                  transforms:
-                    items:
-                      type: object
-                    type: array
-                  type:
-                    $ref: '#/components/schemas/EntityType'
-          description: Successful response
-      summary: Get Entity Engine stats
       tags:
         - Security Entity Analytics API
   '/api/entity_store/engines/{entityType}/stop':
@@ -563,6 +564,44 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      parameters:
+        - description: >-
+            If true returns a detailed status of the engine including all it's
+            components
+          in: query
+          name: include_components
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/EngineDescriptor'
+                        - type: object
+                          properties:
+                            components:
+                              items:
+                                $ref: '#/components/schemas/EngineComponentStatus'
+                              type: array
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/StoreStatus'
+                required:
+                  - status
+                  - engines
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
   /api/risk_score/engine/dangerously_delete_data:
@@ -753,6 +792,47 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
+    EngineComponentResource:
+      enum:
+        - entity_engine
+        - entity_definition
+        - index
+        - component_template
+        - index_template
+        - ingest_pipeline
+        - enrich_policy
+        - task
+        - transform
+      type: string
+    EngineComponentStatus:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              title:
+                type: string
+          type: array
+        health:
+          enum:
+            - green
+            - yellow
+            - red
+            - unknown
+          type: string
+        id:
+          type: string
+        installed:
+          type: boolean
+        resource:
+          $ref: '#/components/schemas/EngineComponentResource'
+      required:
+        - id
+        - installed
+        - resource
     EngineDataviewUpdateResult:
       type: object
       properties:
@@ -1031,6 +1111,14 @@ components:
         - index
         - description
         - category
+    StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object

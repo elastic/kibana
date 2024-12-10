@@ -7,7 +7,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/i18n",
     "@kbn/data-views-plugin",
     "@kbn/i18n-react",

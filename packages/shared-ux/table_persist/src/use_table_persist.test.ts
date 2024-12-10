@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Criteria } from '@elastic/eui';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { CriteriaWithPagination } from '@elastic/eui';
+import { renderHook, act } from '@testing-library/react';
 import { useEuiTablePersist } from './use_table_persist';
 import { createStorage } from './storage'; // Mock this if it's external
 
@@ -58,7 +58,7 @@ describe('useEuiTablePersist', () => {
     };
 
     act(() => {
-      result.current.onTableChange(nextCriteria as Criteria<any>);
+      result.current.onTableChange(nextCriteria as CriteriaWithPagination<any>);
     });
 
     expect(result.current.pageSize).toBe(100);
@@ -85,7 +85,7 @@ describe('useEuiTablePersist', () => {
     };
 
     act(() => {
-      result.current.onTableChange(nextCriteria as Criteria<any>);
+      result.current.onTableChange(nextCriteria as CriteriaWithPagination<any>);
     });
 
     expect(customOnTableChange).toHaveBeenCalledWith(nextCriteria);
@@ -98,7 +98,7 @@ describe('useEuiTablePersist', () => {
     const { result } = renderHook(() => useEuiTablePersist({ tableId: 'testTable' }));
 
     act(() => {
-      result.current.onTableChange({}); // Empty change
+      result.current.onTableChange({} as CriteriaWithPagination<any>); // Empty change
     });
 
     expect(result.current.pageSize).toBe(25);
@@ -118,7 +118,7 @@ describe('useEuiTablePersist', () => {
     };
 
     act(() => {
-      result.current.onTableChange(nextCriteria as Criteria<any>);
+      result.current.onTableChange(nextCriteria as CriteriaWithPagination<any>);
     });
 
     expect(result.current.pageSize).toBe(100);

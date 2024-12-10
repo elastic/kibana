@@ -10,8 +10,6 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
-import { SerializableRecord } from '@kbn/utility-types';
-
 export interface GridCoordinate {
   column: number;
   row: number;
@@ -60,6 +58,8 @@ export interface ActivePanel {
 
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  expandedPanelId$: BehaviorSubject<string | undefined>;
+  isMobileView$: BehaviorSubject<boolean>;
 
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
@@ -106,18 +106,6 @@ export interface PanelInteractionEvent {
   };
 }
 
-/**
- * The external API provided through the GridLayout component
- */
-export interface GridLayoutApi {
-  addPanel: (panelId: string, placementSettings: PanelPlacementSettings) => void;
-  removePanel: (panelId: string) => void;
-  replacePanel: (oldPanelId: string, newPanelId: string) => void;
-
-  getPanelCount: () => number;
-  serializeState: () => GridLayoutData & SerializableRecord;
-}
-
 // TODO: Remove from Dashboard plugin as part of https://github.com/elastic/kibana/issues/190446
 export enum PanelPlacementStrategy {
   /** Place on the very top of the grid layout, add the height of this panel to all other panels. */
@@ -131,3 +119,5 @@ export interface PanelPlacementSettings {
   height: number;
   width: number;
 }
+
+export type GridAccessMode = 'VIEW' | 'EDIT';
