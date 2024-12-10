@@ -9,4 +9,6 @@
 
 import { EmbeddableExamplesPlugin } from './plugin';
 
+export { AddButton as AddEmbeddableButton } from './app/presentation_container_example/components/add_button';
+
 export const plugin = () => new EmbeddableExamplesPlugin();
