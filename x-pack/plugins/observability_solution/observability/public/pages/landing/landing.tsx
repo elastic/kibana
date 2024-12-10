@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
 
@@ -24,13 +24,8 @@ export function LandingPage() {
       const hasLogsData = logs?.hasData;
 
       if (hasLogsData) {
-        const discoverLocator = url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR');
-        discoverLocator?.navigate({
-          dataViewSpec: {
-            title: 'logs-*', // Contrary to its name, this param sets the index pattern
-            timeFieldName: '@timestamp',
-          },
-        });
+        const logsLocator = url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+        logsLocator?.navigate({});
       } else if (hasApmData) {
         navigateToUrl(basePath.prepend('/app/apm/services'));
       } else {

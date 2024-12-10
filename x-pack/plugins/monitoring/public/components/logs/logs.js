@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Reason } from './reason';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 
 const getFormattedDateTimeLocal = (timestamp) => {
   const timezone = Legacy.shims.uiSettings?.get('dateFormat:tz');
@@ -124,7 +124,7 @@ function getLogsUiLink(clusterUuid, nodeId, indexUuid, sharePlugin) {
   }
 
   const filter = params.join(' and ');
-  const { logsLocator } = getLogsLocatorsFromUrlService(sharePlugin.url);
+  const logsLocator = getLogsLocatorFromUrlService(sharePlugin.url);
 
   const base = logsLocator.getRedirectUrl({
     filter,

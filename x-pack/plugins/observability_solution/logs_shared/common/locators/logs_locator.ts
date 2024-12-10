@@ -8,38 +8,52 @@
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import { LogsLocatorParams } from './types';
-import { getLogsQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
-
+/**
+ * Locator used to link to all log sources in Discover.
+ */
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
+
+/**
+ * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewSpec` param to all log sources.
+ */
+export type LogsLocatorParams = DiscoverAppLocatorParams;
 
 export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
   public readonly id = LOGS_LOCATOR_ID;
 
-  constructor(private readonly locators: LocatorClient) {}
+  constructor(
+    private readonly deps: {
+      locators: LocatorClient;
+      getLogSourcesService(): Promise<LogsDataAccessPluginStart['services']['logSourcesService']>;
+      getDataViewsService(): Promise<DataViewsContract>;
+    }
+  ) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
-    const discoverAppLocator = this.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR');
-    if (!discoverAppLocator) {
-      throw new Error('Locator "DISCOVER_APP_LOCATOR" not found');
-    }
+    const discoverAppLocator =
+      this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
 
-    const { time } = params;
     return discoverAppLocator.getLocation({
-      dataViewSpec: {
-        title: 'logs-*', // Contrary to its name, this param sets the index pattern
-        timeFieldName: '@timestamp',
-      },
-      query: getLogsQuery(params),
-      ...(time
-        ? {
-            timeRange: {
-              from: getTimeRangeStartFromTime(time),
-              to: getTimeRangeEndFromTime(time),
-            },
-          }
-        : {}),
+      dataViewSpec: params.dataViewSpec ?? (await this.getLogSourcesDataViewSpec()),
+      ...params,
     });
   };
+
+  private async getLogSourcesDataViewSpec() {
+    const [logSourcesService, dataViewsService] = await Promise.all([
+      this.deps.getLogSourcesService(),
+      this.deps.getDataViewsService(),
+    ]);
+
+    const logSources = await logSourcesService.getLogSources();
+    const dataView = await dataViewsService.create({
+      title: logSources.map((logSource) => logSource.indexPattern).join(','),
+      timeFieldName: '@timestamp',
+    });
+
+    return dataView.toSpec();
+  }
 }

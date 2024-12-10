@@ -18,10 +18,10 @@ import {
   useGeneratedHtmlId,
   EuiIcon,
 } from '@elastic/eui';
-import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { type LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -63,7 +63,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const customIntegrations = installedIntegrations.filter(
     (integration) => integration.installSource === 'custom'
   );
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  const logsLocator = share.url.locators.get<LogsLocatorParams>('LOGS_LOCATOR_ID');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const assetDetailsLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
 
@@ -291,10 +291,10 @@ export const AutoDetectPanel: FunctionComponent = () => {
                               <li key={`${integration.pkgName}/${datastream.dataset}`}>
                                 <EuiButtonEmpty
                                   data-test-subj="observabilityOnboardingAutoDetectPanelButton"
-                                  href={discoverLocator?.getRedirectUrl({
+                                  href={logsLocator?.getRedirectUrl({
                                     dataViewSpec: {
                                       name: integration.pkgName,
-                                      title: `${datastream.type}-${datastream.dataset}-*`, // Contrary to its name, this param sets the index pattern
+                                      title: `${datastream.type}-${datastream.dataset}-*`,
                                       timeFieldName: '@timestamp',
                                     },
                                   })}

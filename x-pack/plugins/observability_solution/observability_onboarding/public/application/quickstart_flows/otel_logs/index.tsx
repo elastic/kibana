@@ -21,11 +21,11 @@ import {
   EuiImage,
   EuiCallOut,
 } from '@elastic/eui';
-import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { type LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
@@ -70,20 +70,15 @@ export const OtelLogsPanel: React.FC = () => {
     isServerless && setup ? setup.elasticAgentVersionInfo.agentVersion : stackVersion;
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
 
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  const logsLocator = share.url.locators.get<LogsLocatorParams>('LOGS_LOCATOR_ID');
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
 
   const [{ value: deeplinks }, getDeeplinks] = useAsyncFn(async () => {
     return {
-      logs: discoverLocator?.getRedirectUrl({
-        dataViewSpec: {
-          title: 'logs-*', // Contrary to its name, this param sets the index pattern
-          timeFieldName: '@timestamp',
-        },
-      }),
+      logs: logsLocator?.getRedirectUrl({}),
       metrics: hostsLocator?.getRedirectUrl({}),
     };
-  }, [discoverLocator]);
+  }, [logsLocator]);
 
   useEffect(() => {
     getDeeplinks();

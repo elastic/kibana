@@ -15,7 +15,7 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { buildLogsExplorerLocatorConfig } from './logs_explorer_locator_config';
 
@@ -30,14 +30,14 @@ export function ExploreLogsButton({
 }) {
   const { share } = useApmPluginContext();
 
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
-  if (!discoverLocator) {
+  if (!logsLocator) {
     return null;
   }
 
   const { logsExplorerLinkProps } = buildLogsExplorerLocatorConfig({
-    locator: discoverLocator,
+    locator: logsLocator,
     from: start,
     to: end,
     kuery,

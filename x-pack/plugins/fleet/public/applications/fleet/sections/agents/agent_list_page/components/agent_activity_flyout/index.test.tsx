@@ -29,7 +29,7 @@ const mockedUseAuthz = useAuthz as jest.Mock;
 
 jest.mock('@kbn/logs-shared-plugin/common', () => {
   return {
-    getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
+    getLogsLocatorFromUrlService: jest.fn().mockReturnValue({
       logsLocator: { getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') },
     }),
   };

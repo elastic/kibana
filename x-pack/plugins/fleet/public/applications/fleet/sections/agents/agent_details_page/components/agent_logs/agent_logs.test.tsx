@@ -28,7 +28,7 @@ jest.mock('@kbn/logs-shared-plugin/public', () => {
 });
 jest.mock('@kbn/logs-shared-plugin/common', () => {
   return {
-    getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
+    getLogsLocatorFromUrlService: jest.fn().mockReturnValue({
       logsLocator: { getRedirectUrl: jest.fn(() => 'https://logs-explorer-redirect-url') },
     }),
   };

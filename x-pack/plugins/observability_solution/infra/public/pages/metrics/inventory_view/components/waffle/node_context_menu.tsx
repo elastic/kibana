@@ -27,7 +27,11 @@ import {
   type InventoryItemType,
 } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import {
+  getLogsLocatorFromUrlService,
+  getNodeQuery,
+  getTimeRange,
+} from '@kbn/logs-shared-plugin/common';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
@@ -49,7 +53,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
     const { application, share } = services;
-    const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
+    const logsLocator = getLogsLocatorFromUrlService(share.url)!;
     const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
     const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
@@ -116,10 +120,12 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} logs',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      href: nodeLogsLocator.getRedirectUrl({
-        nodeField: findInventoryFields(nodeType).id,
-        nodeId: node.id,
-        time: currentTime,
+      href: logsLocator.getRedirectUrl({
+        query: getNodeQuery({
+          nodeField: findInventoryFields(nodeType).id,
+          nodeId: node.id,
+        }),
+        timeRange: getTimeRange(currentTime),
       }),
       'data-test-subj': 'viewLogsContextMenuItem',
       isDisabled: !showLogsLink,

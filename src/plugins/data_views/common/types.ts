@@ -502,7 +502,9 @@ export type DataViewSpec = {
    */
   version?: string;
   /**
-   * Data view title
+   * Contrary to its name, this property sets the index pattern of the data view. (e.g. `logs-*,metrics-*`)
+   *
+   * Use the `name` property instead to set a human readable name for the data view.
    */
   title?: string;
   /**
@@ -546,7 +548,7 @@ export type DataViewSpec = {
    */
   namespaces?: string[];
   /**
-   * Name of the data view. Human readable name used to differentiate data view.
+   * Human readable name used to differentiate the data view.
    */
   name?: string;
   /**

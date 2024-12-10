@@ -14,7 +14,7 @@ const sharePlugin = sharePluginMock.createStartContract();
 
 jest.mock('@kbn/logs-shared-plugin/common', () => {
   return {
-    getLogsLocatorsFromUrlService: jest.fn().mockReturnValue({
+    getLogsLocatorFromUrlService: jest.fn().mockReturnValue({
       logsLocator: { getRedirectUrl: jest.fn(() => '') },
     }),
   };
