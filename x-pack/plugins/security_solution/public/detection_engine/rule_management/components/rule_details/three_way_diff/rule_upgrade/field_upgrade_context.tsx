@@ -89,9 +89,7 @@ export function FieldUpgradeContextProvider({
     initialRightSideMode === FieldFinalSideMode.Edit
   );
 
-  if (!fieldDiff) {
-    throw new Error(`Field diff is not found for ${fieldName}.`);
-  }
+  invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 
   const contextValue: FieldUpgradeContextType = useMemo(
     () => ({
