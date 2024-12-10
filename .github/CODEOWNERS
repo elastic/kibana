@@ -99,7 +99,6 @@ packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-base-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-browser-internal @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-browser-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-common @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-import-export-server-internal @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/saved-objects/api-server @elastic/kibana-core
 src/core/packages/saved-objects/api-server-internal @elastic/kibana-core
 src/core/packages/saved-objects/base-server-internal @elastic/kibana-core
 src/core/packages/saved-objects/browser @elastic/kibana-core
+src/core/packages/saved-objects/browser-internal @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
