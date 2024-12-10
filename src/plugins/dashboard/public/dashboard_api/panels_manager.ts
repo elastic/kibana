@@ -51,6 +51,7 @@ import { DashboardState } from './types';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { placeClonePanel } from '../dashboard_container/panel_placement';
+import { i18n } from '@kbn/i18n';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -395,7 +396,16 @@ export function initializePanelsManager(
         for (const panelId of Object.keys(currentChildren)) {
           if (panels$.value[panelId]) {
             const child = currentChildren[panelId];
-            if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+            if (apiPublishesUnsavedChanges(child)) {
+              const success = child.resetUnsavedChanges();
+              if (!success) {
+                coreServices.notifications.toasts.addWarning(
+                  i18n.translate('dashboard.reset.panelError', {
+                    defaultMessage: 'Unable to reset panel changes',
+                  })
+                );
+              }
+            }
           } else {
             // if reset resulted in panel removal, we need to update the list of children
             delete currentChildren[panelId];
