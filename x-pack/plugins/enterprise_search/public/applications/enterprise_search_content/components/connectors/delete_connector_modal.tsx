@@ -27,6 +27,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { flashSuccessToast } from '../../../shared/flash_messages';
+
 import { ConnectorsLogic } from './connectors_logic';
 
 export interface DeleteConnectorModalProps {
@@ -84,6 +86,19 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
           });
           setConnectorUiOptions(omit(connectorUiOptions, connectorId));
         }
+        setTimeout(() => {
+          flashSuccessToast(
+            !isCrawler
+              ? i18n.translate('xpack.enterpriseSearch.content.connectors.deleteToast.title', {
+                  defaultMessage: 'Connector deleted',
+                  values: { connectorCount: 1 },
+                })
+              : i18n.translate('xpack.enterpriseSearch.content.crawlers.deleteToast.title', {
+                  defaultMessage: 'Web Crawlers deleted',
+                  values: { connectorCount: 1 },
+                })
+          );
+        }, 2000);
       }}
       cancelButtonText={
         isDeleteLoading
