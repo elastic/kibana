@@ -14,7 +14,7 @@ This tool is developed for the teams working on anything related to inference. I
 
 Run the tool using:
 
-`$ node x-pack/plugins/inference/scripts/evaluation/index.js`
+`$ node x-pack/platform/plugins/shared/inference/scripts/evaluation/index.js`
 
 This will evaluate all existing scenarios, and write the evaluation results to the terminal.
 
