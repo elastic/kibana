@@ -54,17 +54,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     composedOf,
     order,
     indexPatterns = [],
-    indexMode,
     ilmPolicy,
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
     allowAutoCreate,
+    template,
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
 
   const { history, core } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
+
+  const indexMode = template?.settings?.index?.mode;
 
   return (
     <>
@@ -226,15 +228,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             )}
 
             {/* Index mode */}
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
-                defaultMessage="Index mode"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {indexModeLabels[indexMode]}
-            </EuiDescriptionListDescription>
+            {indexMode && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
+                    defaultMessage="Index mode"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {indexModeLabels[indexMode]}
+                </EuiDescriptionListDescription>
+              </>
+            )}
 
             {/* Allow auto create */}
             {isLegacy !== true &&

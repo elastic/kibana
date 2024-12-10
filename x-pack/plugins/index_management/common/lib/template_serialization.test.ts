@@ -18,7 +18,6 @@ const defaultSerializedTemplate: TemplateSerialized = {
 const defaultDeserializedTemplate: TemplateDeserialized = {
   name: 'my_template',
   indexPatterns: ['test'],
-  indexMode: STANDARD_INDEX_MODE,
   _kbnMeta: {
     type: 'default',
     hasDatastream: true,
