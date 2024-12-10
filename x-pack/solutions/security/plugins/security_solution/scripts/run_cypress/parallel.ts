@@ -67,7 +67,7 @@ ${JSON.stringify(argv, null, 2)}
 `);
 
       const isOpen = argv._.includes('open');
-      const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
+      const cypressConfigFilePath = require.resolve(`../../../../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
       if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
