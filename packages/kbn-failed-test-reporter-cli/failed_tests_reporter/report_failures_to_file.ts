@@ -181,7 +181,11 @@ export async function reportFailuresToFile(
             }
             <div>
                 <strong>Owners</strong>:
-                <pre>${escape(failure.owners) || 'Unable to determine code owners'}</pre>
+                <pre>${escape(
+                  failure?.owners?.teams
+                    ? failure?.owners?.teams
+                    : 'Unable to determine code owners'
+                )}</pre>
             </div>
             <div>
                 <strong>Failures in tracked branches</strong>:

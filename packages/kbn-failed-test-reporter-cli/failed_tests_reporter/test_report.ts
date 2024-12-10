@@ -59,7 +59,7 @@ export interface TestCase {
     /* the command that ran this suite */
     'command-line'?: string;
     /* the codeowners of the file */
-    owners?: string;
+    owners?: CodeOwnership
   };
   /* contents of system-out elements */
   'system-out'?: Array<string | { _: string }>;

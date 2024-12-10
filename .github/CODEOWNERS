@@ -1040,8 +1040,6 @@ x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana
 ##  https://help.github.com/articles/about-codeowners/
 ####
 
-test.js @elastic/tre
-
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
