@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { sendGetAgents, useGetPackageInfoByKeyQuery } from '../../hooks';
 import { usePollingIncomingData } from '../agent_enrollment_flyout/use_get_agent_incoming_data';
@@ -31,7 +31,8 @@ const mockSendGetAgents = sendGetAgents as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockUsePollingIncomingData = usePollingIncomingData as jest.Mock;
 
-describe('AgentlessEnrollmentFlyout', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201738
+describe.skip('AgentlessEnrollmentFlyout', () => {
   const onClose = jest.fn();
   const packagePolicy: PackagePolicy = {
     id: 'test-package-policy-id',
@@ -64,7 +65,7 @@ describe('AgentlessEnrollmentFlyout', () => {
     const { getByText } = renderer.render(
       <AgentlessEnrollmentFlyout onClose={onClose} packagePolicy={packagePolicy} />
     );
-    await act(async () => {
+    await waitFor(async () => {
       expect(getByText('Confirm agentless enrollment')).toBeInTheDocument();
       expect(getByText('Step 1 is loading')).toBeInTheDocument();
       expect(

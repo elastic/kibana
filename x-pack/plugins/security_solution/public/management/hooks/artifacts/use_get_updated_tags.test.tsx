@@ -6,7 +6,7 @@
  */
 
 import { useGetUpdatedTags } from '.';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { TagFilter } from '../../../../common/endpoint/service/artifacts/utils';
 

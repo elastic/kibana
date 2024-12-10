@@ -19,8 +19,8 @@ describe('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];
   let fileClient: FileClient;
   let testHarness: TestEnvironmentUtils;
-  const blobStorageIndex = '.kibana-test-blob';
-  const metadataIndex = '.kibana-test-metadata';
+  const blobStorageIndex = 'kibana-files-test-blob';
+  const metadataIndex = 'kibana-files-test-metadata';
 
   const deleteFile = async ({
     id,

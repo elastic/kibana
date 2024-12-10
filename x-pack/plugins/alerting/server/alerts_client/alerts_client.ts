@@ -77,6 +77,7 @@ export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
   dataStreamAdapter: DataStreamAdapter;
+  isServerless: boolean;
 }
 
 interface AlertsAffectedByMaintenanceWindows {
@@ -114,6 +115,7 @@ export class AlertsClient<
   private runTimestampString: string | undefined;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
+  private readonly isServerless: boolean;
 
   private indexTemplateAndPattern: IIndexPatternString;
 
@@ -148,6 +150,7 @@ export class AlertsClient<
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
     this.ruleInfoMessage = `for ${this.ruleType.id}:${this.options.rule.id} '${this.options.rule.name}'`;
     this.logTags = { tags: [this.ruleType.id, this.options.rule.id, 'alerts-client'] };
+    this.isServerless = options.isServerless;
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -560,7 +563,9 @@ export class AlertsClient<
 
       try {
         const response = await esClient.bulk({
-          refresh: true,
+          // On serverless we can force a refresh to we don't wait for the longer refresh interval
+          // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
+          refresh: this.isServerless ? true : 'wait_for',
           index: this.indexTemplateAndPattern.alias,
           require_alias: !this.isUsingDataStreams(),
           body: bulkBody,

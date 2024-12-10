@@ -29,18 +29,18 @@ export function LensEmbeddableComponent({
     expressionParams,
     // used for functional tests
     renderCount,
-    // has the render completed?
-    hasRendered,
     // these are blocking errors that can be shown in a badge
     // without replacing the entire panel
     blockingErrors,
+    // has the render completed?
+    hasRendered,
     // has view mode changed?
     latestViewMode,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
-    internalApi.hasRenderCompleted$,
     internalApi.validationMessages$,
+    api.rendered$,
     api.viewMode
   );
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
@@ -57,7 +57,7 @@ export function LensEmbeddableComponent({
   const rootRef = useDispatcher(hasRendered, api);
 
   // Publish the data attributes only if avaialble/visible
-  const title = api.hidePanelTitle?.getValue()
+  const title = internalApi.getDisplayOptions()?.noPanelTitle
     ? undefined
     : { 'data-title': api.panelTitle?.getValue() ?? api.defaultPanelTitle?.getValue() };
   const description = api.panelDescription?.getValue()

@@ -13,7 +13,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
+import {
+  EngineComponentResourceEnum,
+  type EntityType,
+} from '../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -275,3 +278,37 @@ const createTaskRunnerFactory =
       },
     };
   };
+
+export const getEntityStoreFieldRetentionEnrichTaskState = async ({
+  namespace,
+  taskManager,
+}: {
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId(namespace);
+  try {
+    const taskState = await taskManager.get(taskId);
+
+    return {
+      id: taskState.id,
+      resource: EngineComponentResourceEnum.task,
+      installed: true,
+      enabled: taskState.enabled,
+      status: taskState.status,
+      retryAttempts: taskState.attempts,
+      nextRun: taskState.runAt,
+      lastRun: taskState.state.lastExecutionTimestamp,
+      runs: taskState.state.runs,
+    };
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      return {
+        id: taskId,
+        installed: false,
+        resource: EngineComponentResourceEnum.task,
+      };
+    }
+    throw e;
+  }
+};

@@ -6,11 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEmpty, pick } from 'lodash';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
+import { pick } from 'lodash';
+import { KueryNode } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  buildConsumersFilter,
+  buildRuleTypeIdsFilter,
+  combineFilterWithAuthorizationFilter,
+  combineFilters,
+} from '../../../../rules_client/common/filters';
+import { AlertingAuthorizationEntity } from '../../../../authorization/types';
 import { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
-import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
@@ -46,7 +52,7 @@ export async function findRules<Params extends RuleParams = never>(
 ): Promise<FindResult<Params>> {
   const { options, excludeFromPublicApi = false, includeSnoozeData = false } = params || {};
 
-  const { fields, filterConsumers, ...restOptions } = options || {};
+  const { fields, ruleTypeIds, consumers, ...restOptions } = options || {};
 
   try {
     if (params) {
@@ -58,11 +64,10 @@ export async function findRules<Params extends RuleParams = never>(
 
   let authorizationTuple;
   try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts,
-      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
-    );
+    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      filterOpts: alertingAuthorizationFilterOpts,
+    });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -76,6 +81,7 @@ export async function findRules<Params extends RuleParams = never>(
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
   const filterKueryNode = buildKueryNodeFilter(restOptions.filter as string | KueryNode);
   let sortField = mapSortField(restOptions.sortField);
+
   if (excludeFromPublicApi) {
     try {
       validateOperationOnAttributes(
@@ -111,6 +117,18 @@ export async function findRules<Params extends RuleParams = never>(
     modifyFilterKueryNode({ astFilter: filterKueryNode });
   }
 
+  const ruleTypeIdsFilter = buildRuleTypeIdsFilter(ruleTypeIds);
+  const consumersFilter = buildConsumersFilter(consumers);
+  const combinedFilters = combineFilters(
+    [filterKueryNode, ruleTypeIdsFilter, consumersFilter],
+    'and'
+  );
+
+  const finalFilter = combineFilterWithAuthorizationFilter(
+    combinedFilters,
+    authorizationFilter as KueryNode
+  );
+
   const {
     page,
     per_page: perPage,
@@ -121,10 +139,7 @@ export async function findRules<Params extends RuleParams = never>(
     savedObjectsFindOptions: {
       ...modifiedOptions,
       sortField,
-      filter:
-        (authorizationFilter && filterKueryNode
-          ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
-          : authorizationFilter) ?? filterKueryNode,
+      filter: finalFilter,
       fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
     },
   });

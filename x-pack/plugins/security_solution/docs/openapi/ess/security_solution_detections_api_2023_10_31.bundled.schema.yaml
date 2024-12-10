@@ -1010,6 +1010,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/finalize_migration:
     post:
+      deprecated: true
       description: >
         Finalize successful migrations of detection alerts. This replaces the
         original index's alias with the successfully migrated index's alias.
@@ -1069,6 +1070,7 @@ paths:
         - Alerts migration API
   /api/detection_engine/signals/migration:
     delete:
+      deprecated: true
       description: >
         Migrations favor data integrity over shard size. Consequently, unused or
         orphaned indices are artifacts of
@@ -1136,6 +1138,7 @@ paths:
         - Security Detections API
         - Alerts migration API
     post:
+      deprecated: true
       description: >
         Initiate a migration of detection alerts.
 
@@ -1204,6 +1207,7 @@ paths:
         - Alerts migration API
   /api/detection_engine/signals/migration_status:
     post:
+      deprecated: true
       description: >-
         Retrieve indices that contain detection alerts of a particular age,
         along with migration information for each of those indices.

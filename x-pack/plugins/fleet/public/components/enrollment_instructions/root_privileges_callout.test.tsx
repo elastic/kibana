@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { cleanup, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../mock';
 
@@ -15,7 +15,6 @@ import { RootPrivilegesCallout } from './root_privileges_callout';
 
 describe('RootPrivilegesCallout', () => {
   function render(rootIntegrations?: Array<{ name: string; title: string }>) {
-    cleanup();
     const renderer = createFleetTestRendererMock();
     const results = renderer.render(<RootPrivilegesCallout rootIntegrations={rootIntegrations} />);
 

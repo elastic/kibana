@@ -503,7 +503,7 @@
               "section": "def-common.CasesFindResponseUI",
               "text": "CasesFindResponseUI"
             },
-            ">; getCasesStatus: (query: { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }>; getCasesMetrics: (query: { features: ",
+            ">; getCasesMetrics: (query: { features: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -511,7 +511,7 @@
               "section": "def-common.CaseMetricsFeature",
               "text": "CaseMetricsFeature"
             },
-            "[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; }>; bulkGet: (params: { ids: string[]; }, signal?: AbortSignal | undefined) => Promise<{ cases: ({ description: string; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
+            "[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; status?: { open: number; inProgress: number; closed: number; } | undefined; }>; bulkGet: (params: { ids: string[]; }, signal?: AbortSignal | undefined) => Promise<{ cases: ({ description: string; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -2987,24 +2987,9 @@
         "label": "CasesMetricsResponse",
         "description": [],
         "signature": [
-          "{ mttr?: number | null | undefined; }"
+          "{ mttr?: number | null | undefined; status?: { open: number; inProgress: number; closed: number; } | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.CasesStatus",
-        "type": "Type",
-        "tags": [],
-        "label": "CasesStatus",
-        "description": [],
-        "signature": [
-          "{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }"
-        ],
-        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

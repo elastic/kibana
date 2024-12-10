@@ -319,6 +319,7 @@ export class TaskRunner<
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
       spaceId,
+      isServerless: this.context.isServerless,
     };
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<

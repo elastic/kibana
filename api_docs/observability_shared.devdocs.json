@@ -9417,13 +9417,13 @@
     "objects": [
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.ENTITY_TYPES",
+        "id": "def-common.BUILT_IN_ENTITY_TYPES",
         "type": "Object",
         "tags": [],
-        "label": "ENTITY_TYPES",
+        "label": "BUILT_IN_ENTITY_TYPES",
         "description": [],
         "signature": [
-          "{ readonly HOST: \"host\"; readonly CONTAINER: \"container\"; readonly SERVICE: \"service\"; readonly KUBERNETES: { readonly CLUSTER: { ecs: \"kubernetes_cluster_ecs\"; semconv: \"kubernetes_cluster_semconv\"; }; readonly CONTAINER: { ecs: \"kubernetes_container_ecs\"; semconv: \"kubernetes_container_semconv\"; }; readonly CRONJOB: { ecs: \"kubernetes_cron_job_ecs\"; semconv: \"kubernetes_cron_job_semconv\"; }; readonly DAEMONSET: { ecs: \"kubernetes_daemon_set_ecs\"; semconv: \"kubernetes_daemon_set_semconv\"; }; readonly DEPLOYMENT: { ecs: \"kubernetes_deployment_ecs\"; semconv: \"kubernetes_deployment_semconv\"; }; readonly JOB: { ecs: \"kubernetes_job_ecs\"; semconv: \"kubernetes_job_semconv\"; }; readonly NAMESPACE: { ecs: \"kubernetes_namespace_ecs\"; semconv: \"kubernetes_namespace_semconv\"; }; readonly NODE: { ecs: \"kubernetes_node_ecs\"; semconv: \"kubernetes_node_semconv\"; }; readonly POD: { ecs: \"kubernetes_pod_ecs\"; semconv: \"kubernetes_pod_semconv\"; }; readonly STATEFULSET: { ecs: \"kubernetes_stateful_set_ecs\"; semconv: \"kubernetes_stateful_set_semconv\"; }; }; }"
+          "{ readonly HOST: \"host\"; readonly CONTAINER: \"container\"; readonly SERVICE: \"service\"; readonly KUBERNETES: { readonly CLUSTER: { ecs: \"k8s.cluster.ecs\"; semconv: \"k8s.cluster.semconv\"; }; readonly CONTAINER: { ecs: \"k8s.container.ecs\"; semconv: \"k8s.container.semconv\"; }; readonly CRONJOB: { ecs: \"k8s.cron_job.ecs\"; semconv: \"k8s.cron_job.semconv\"; }; readonly DAEMONSET: { ecs: \"k8s.daemonset.ecs\"; semconv: \"k8s.daemonset.semconv\"; }; readonly DEPLOYMENT: { ecs: \"k8s.deployment.ecs\"; semconv: \"k8s.deployment.semconv\"; }; readonly JOB: { ecs: \"k8s.job.ecs\"; semconv: \"k8s.job.semconv\"; }; readonly NAMESPACE: { ecs: \"k8s.namespace.ecs\"; semconv: \"k8s.namespace.semconv\"; }; readonly NODE: { ecs: \"k8s.node.ecs\"; semconv: \"k8s.node.semconv\"; }; readonly POD: { ecs: \"k8s.pod.ecs\"; semconv: \"k8s.pod.semconv\"; }; readonly SERVICE: { ecs: \"k8s.service.ecs\"; semconv: \"k8s.service.semconv\"; }; readonly STATEFULSET: { ecs: \"k8s.statefulset.ecs\"; semconv: \"k8s.statefulset.semconv\"; }; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/entity/entity_types.ts",
         "deprecated": false,

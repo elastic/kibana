@@ -14,6 +14,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { ErrorToast } from './error_toast';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 
 interface ErrorToastProps {
@@ -25,6 +26,7 @@ interface ErrorToastProps {
 let openModal: jest.Mock;
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
 const mockTheme = themeServiceMock.createStartContract();
+const mockUserProfile = userProfileServiceMock.createStart();
 const mockI18n = i18nServiceMock.createStartContract();
 
 beforeEach(() => (openModal = jest.fn()));
@@ -39,6 +41,7 @@ function render(props: ErrorToastProps = {}) {
       analytics={mockAnalytics}
       i18n={mockI18n}
       theme={mockTheme}
+      userProfile={mockUserProfile}
     />
   );
 }

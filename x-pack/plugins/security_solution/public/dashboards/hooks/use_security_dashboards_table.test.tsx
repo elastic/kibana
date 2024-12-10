@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { render } from '@testing-library/react';
+import { render, waitFor, renderHook } from '@testing-library/react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EuiBasicTable } from '@elastic/eui';
 import { useKibana } from '../../common/lib/kibana';
@@ -28,21 +27,20 @@ import type { HttpStart } from '@kbn/core/public';
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/tags/api');
 jest.mock('../../common/containers/dashboards/api');
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
 const spyUseGetSecuritySolutionUrl = jest.spyOn(linkTo, 'useGetSecuritySolutionUrl');
 const spyTrack = jest.spyOn(telemetry, 'track');
 const {
   id: mockReturnDashboardId,
   attributes: { title: mockReturnDashboardTitle, description: mockReturnDashboardDescription },
 } = DEFAULT_DASHBOARDS_RESPONSE[0];
-const renderUseSecurityDashboardsTableItems = async () => {
-  const renderedHook = renderHook(() => useSecurityDashboardsTableItems(), {
+
+const renderUseSecurityDashboardsTableItems = () => {
+  return renderHook(useSecurityDashboardsTableItems, {
     wrapper: DashboardContextProvider,
   });
-  await act(async () => {
-    // needed to let dashboard items to be updated from saved objects response
-    await renderedHook.waitForNextUpdate();
-  });
-  return renderedHook;
 };
 
 const renderUseDashboardsTableColumns = () =>
@@ -50,100 +48,136 @@ const renderUseDashboardsTableColumns = () =>
     wrapper: TestProviders,
   });
 
+const tagsColumn = {
+  field: 'id', // set existing field to prevent test error
+  name: 'Tags',
+  'data-test-subj': 'dashboardTableTagsCell',
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('Security Dashboards Table hooks', () => {
-  const mockGetRedirectUrl = jest.fn(() => '/path');
-  useKibana().services.dashboard = {
-    locator: { getRedirectUrl: mockGetRedirectUrl },
-  } as unknown as DashboardStart;
-  useKibana().services.http = {} as unknown as HttpStart;
+  let mockTaggingGetTableColumnDefinition: jest.Mock;
 
-  const mockTaggingGetTableColumnDefinition = useKibana().services.savedObjectsTagging?.ui
-    .getTableColumnDefinition as jest.Mock;
-  const tagsColumn = {
-    field: 'id', // set existing field to prevent test error
-    name: 'Tags',
-    'data-test-subj': 'dashboardTableTagsCell',
-  };
-  mockTaggingGetTableColumnDefinition.mockReturnValue(tagsColumn);
+  beforeEach(() => {
+    useKibanaMock().services.dashboard = {
+      locator: { getRedirectUrl: jest.fn(() => '/path') },
+    } as unknown as DashboardStart;
+    useKibanaMock().services.http = {} as unknown as HttpStart;
 
-  afterEach(() => {
-    jest.clearAllMocks();
+    mockTaggingGetTableColumnDefinition = useKibanaMock().services.savedObjectsTagging?.ui
+      .getTableColumnDefinition as jest.Mock;
+
+    mockTaggingGetTableColumnDefinition.mockReturnValue(tagsColumn);
   });
 
   describe('useSecurityDashboardsTableItems', () => {
     it('should request when renders', async () => {
-      await renderUseSecurityDashboardsTableItems();
-      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      renderUseSecurityDashboardsTableItems();
+
+      await waitFor(() => {
+        expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('should not request again when rerendered', async () => {
-      const { rerender } = await renderUseSecurityDashboardsTableItems();
+      const { rerender } = renderUseSecurityDashboardsTableItems();
 
-      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
-      act(() => rerender());
-      expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      });
+
+      rerender();
+
+      await waitFor(() => {
+        return expect(getDashboardsByTagIds).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('should return a memoized value when rerendered', async () => {
-      const { result, rerender } = await renderUseSecurityDashboardsTableItems();
+      const { result, rerender } = renderUseSecurityDashboardsTableItems();
+
+      waitFor(() => expect(result.current.isLoading).toBe(false));
 
       const result1 = result.current.items;
-      act(() => rerender());
-      const result2 = result.current.items;
 
-      expect(result1).toBe(result2);
+      rerender();
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+        expect(result1).toBe(result.current.items);
+      });
     });
 
     it('should return dashboard items', async () => {
-      const { result } = await renderUseSecurityDashboardsTableItems();
+      const { result } = renderUseSecurityDashboardsTableItems();
 
       const [dashboard1] = DEFAULT_DASHBOARDS_RESPONSE;
-      expect(result.current.items).toStrictEqual([
-        {
-          ...dashboard1,
-          title: dashboard1.attributes.title,
-          description: dashboard1.attributes.description,
-        },
-      ]);
+
+      await waitFor(() => {
+        expect(result.current.items).toStrictEqual([
+          {
+            ...dashboard1,
+            title: dashboard1.attributes.title,
+            description: dashboard1.attributes.description,
+          },
+        ]);
+      });
     });
   });
 
   describe('useDashboardsTableColumns', () => {
-    it('should call getTableColumnDefinition to get tags column', () => {
+    it('should call getTableColumnDefinition to get tags column', async () => {
       renderUseDashboardsTableColumns();
-      expect(mockTaggingGetTableColumnDefinition).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockTaggingGetTableColumnDefinition).toHaveBeenCalled();
+      });
     });
 
-    it('should return dashboard columns', () => {
+    it('should return dashboard columns', async () => {
       const { result } = renderUseDashboardsTableColumns();
 
-      expect(result.current).toEqual([
-        expect.objectContaining({
-          field: 'title',
-          name: 'Title',
-        }),
-        expect.objectContaining({
-          field: 'description',
-          name: 'Description',
-        }),
-        expect.objectContaining(tagsColumn),
-      ]);
+      await waitFor(() => {
+        expect(result.current).toEqual([
+          expect.objectContaining({
+            field: 'title',
+            name: 'Title',
+          }),
+          expect.objectContaining({
+            field: 'description',
+            name: 'Description',
+          }),
+          expect.objectContaining(tagsColumn),
+        ]);
+      });
     });
 
     it('returns a memoized value', async () => {
       const { result, rerender } = renderUseDashboardsTableColumns();
 
       const result1 = result.current;
-      act(() => rerender());
+
+      rerender();
+
       const result2 = result.current;
 
-      expect(result1).toBe(result2);
+      await waitFor(() => {
+        expect(result1).toBe(result2);
+      });
     });
   });
 
   it('should render a table with consistent items and columns', async () => {
-    const { result: itemsResult } = await renderUseSecurityDashboardsTableItems();
+    const { result: itemsResult } = renderUseSecurityDashboardsTableItems();
     const { result: columnsResult } = renderUseDashboardsTableColumns();
+
+    await waitFor(() => {
+      expect(itemsResult.current.isLoading).toBe(false);
+      expect(itemsResult.current.items).toHaveLength(1);
+      expect(columnsResult.current).toHaveLength(3);
+    });
 
     const result = render(
       <EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />,
@@ -152,21 +186,27 @@ describe('Security Dashboards Table hooks', () => {
       }
     );
 
-    expect(result.getAllByText('Title').length).toBeGreaterThan(0);
-    expect(result.getAllByText('Description').length).toBeGreaterThan(0);
-    expect(result.getAllByText('Tags').length).toBeGreaterThan(0);
+    expect(await result.findAllByText('Title')).toHaveLength(1);
+    expect(await result.findAllByText('Description')).toHaveLength(1);
+    expect(await result.findAllByText('Tags')).toHaveLength(1);
 
-    expect(result.getByText(mockReturnDashboardTitle)).toBeInTheDocument();
-    expect(result.getByText(mockReturnDashboardDescription)).toBeInTheDocument();
+    expect(await result.findByText(mockReturnDashboardTitle)).toBeInTheDocument();
+    expect(await result.findByText(mockReturnDashboardDescription)).toBeInTheDocument();
 
-    expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(1);
-    expect(result.queryAllByTestId('dashboardTableDescriptionCell')).toHaveLength(1);
-    expect(result.queryAllByTestId('dashboardTableTagsCell')).toHaveLength(1);
+    expect(await result.findAllByTestId('dashboardTableTitleCell')).toHaveLength(1);
+    expect(await result.findAllByTestId('dashboardTableDescriptionCell')).toHaveLength(1);
+    expect(await result.findAllByTestId('dashboardTableTagsCell')).toHaveLength(1);
   });
 
   it('should send telemetry when dashboard title clicked', async () => {
-    const { result: itemsResult } = await renderUseSecurityDashboardsTableItems();
+    const { result: itemsResult } = renderUseSecurityDashboardsTableItems();
     const { result: columnsResult } = renderUseDashboardsTableColumns();
+
+    await waitFor(() => {
+      expect(itemsResult.current.isLoading).toBe(false);
+      expect(itemsResult.current.items).toHaveLength(1);
+      expect(columnsResult.current).toHaveLength(3);
+    });
 
     const result = render(
       <EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />,
@@ -176,22 +216,33 @@ describe('Security Dashboards Table hooks', () => {
     );
 
     result.getByText(mockReturnDashboardTitle).click();
-    expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
+
+    await waitFor(() => {
+      expect(spyTrack).toHaveBeenCalledWith(METRIC_TYPE.CLICK, TELEMETRY_EVENT.DASHBOARD);
+    });
   });
 
   it('should land on SecuritySolution dashboard view page when dashboard title clicked', async () => {
     const mockGetSecuritySolutionUrl = jest.fn();
     spyUseGetSecuritySolutionUrl.mockImplementation(() => mockGetSecuritySolutionUrl);
-    const { result: itemsResult } = await renderUseSecurityDashboardsTableItems();
+    const { result: itemsResult } = renderUseSecurityDashboardsTableItems();
     const { result: columnsResult } = renderUseDashboardsTableColumns();
+
+    await waitFor(() => {
+      expect(itemsResult.current.isLoading).toBe(false);
+      expect(itemsResult.current.items).toHaveLength(1);
+      expect(columnsResult.current).toHaveLength(3);
+    });
 
     render(<EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />, {
       wrapper: TestProviders,
     });
 
-    expect(mockGetSecuritySolutionUrl).toHaveBeenCalledWith({
-      deepLinkId: SecurityPageName.dashboards,
-      path: mockReturnDashboardId,
+    await waitFor(() => {
+      expect(mockGetSecuritySolutionUrl).toHaveBeenCalledWith({
+        deepLinkId: SecurityPageName.dashboards,
+        path: mockReturnDashboardId,
+      });
     });
   });
 });

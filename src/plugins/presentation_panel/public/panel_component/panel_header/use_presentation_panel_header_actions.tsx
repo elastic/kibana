@@ -167,7 +167,7 @@ export const usePresentationPanelHeaderActions = <
         <EuiNotificationBadge
           data-test-subj={`embeddablePanelNotification-${notification.id}`}
           key={notification.id}
-          style={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
+          css={{ marginTop: euiThemeVars.euiSizeXS, marginRight: euiThemeVars.euiSizeXS }}
           onClick={() =>
             notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
           }
