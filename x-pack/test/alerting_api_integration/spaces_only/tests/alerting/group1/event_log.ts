@@ -369,7 +369,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               secrets: {},
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
 
           const response = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -1837,7 +1837,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               secrets: {},
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
 
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)

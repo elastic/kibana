@@ -18,10 +18,12 @@ export const exportExceptionsRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: `${EXCEPTION_LIST_URL}/_export`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {

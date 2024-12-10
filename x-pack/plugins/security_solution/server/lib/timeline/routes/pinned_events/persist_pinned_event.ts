@@ -26,8 +26,10 @@ export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) =>
   router.versioned
     .patch({
       path: PINNED_EVENT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -59,9 +61,7 @@ export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) =>
           );
 
           return response.ok({
-            body: {
-              data: { persistPinnedEventOnTimeline: res },
-            },
+            body: res,
           });
         } catch (err) {
           const error = transformError(err);

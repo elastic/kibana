@@ -55,7 +55,6 @@ export const mockConfig: ClientConfigType = {
       duration: '10m',
       size: 500,
     },
-    enablePanelActionDownload: false,
   },
   poll: {
     jobsRefresh: {
@@ -73,9 +72,6 @@ export const mockConfig: ClientConfigType = {
     csv: {
       enabled: true,
     },
-  },
-  roles: {
-    enabled: false,
   },
   statefulSettings: { enabled: true },
 };

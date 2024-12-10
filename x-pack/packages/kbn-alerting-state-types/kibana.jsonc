@@ -1,5 +1,9 @@
 {
   "type": "shared-server",
   "id": "@kbn/alerting-state-types",
-  "owner": "@elastic/response-ops"
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

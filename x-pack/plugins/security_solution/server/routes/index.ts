@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { StartServicesAccessor, Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
+import type { EndpointAppContext } from '../endpoint/types';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 import { registerFleetIntegrationsRoutes } from '../lib/detection_engine/fleet_integrations';
@@ -41,6 +42,7 @@ import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
+import { registerWorkflowInsightsRoutes } from '../endpoint/routes/workflow_insights';
 import {
   createEsIndexRoute,
   createPrebuiltSavedObjectsRoute,
@@ -77,11 +79,14 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  previewTelemetryReceiver: ITelemetryReceiver
+  previewTelemetryReceiver: ITelemetryReceiver,
+  isServerless: boolean,
+  docLinks: DocLinksServiceSetup,
+  endpointContext: EndpointAppContext
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
-  registerPrebuiltRulesRoutes(router);
+  registerPrebuiltRulesRoutes(router, config);
   registerRuleExceptionsRoutes(router);
   registerManageExceptionsRoutes(router);
   registerRuleManagementRoutes(router, config, ml, logger);
@@ -95,12 +100,13 @@ export const initRoutes = (
     securityRuleTypeOptions,
     previewRuleDataClient,
     getStartServices,
-    logger
+    logger,
+    isServerless
   );
 
   registerResolverRoutes(router, getStartServices, config);
 
-  registerTimelineRoutes(router, config);
+  registerTimelineRoutes(router, config, getStartServices);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
@@ -109,10 +115,10 @@ export const initRoutes = (
   setAlertTagsRoute(router);
   setAlertAssigneesRoute(router);
   querySignalsRoute(router, ruleDataClient);
-  getSignalsMigrationStatusRoute(router);
-  createSignalsMigrationRoute(router);
-  finalizeSignalsMigrationRoute(router, ruleDataService);
-  deleteSignalsMigrationRoute(router);
+  getSignalsMigrationStatusRoute(router, docLinks);
+  createSignalsMigrationRoute(router, docLinks);
+  finalizeSignalsMigrationRoute(router, ruleDataService, docLinks);
+  deleteSignalsMigrationRoute(router, docLinks);
   suggestUserProfilesRoute(router, getStartServices);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
@@ -152,4 +158,6 @@ export const initRoutes = (
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
+
+  registerWorkflowInsightsRoutes(router, config, endpointContext);
 };

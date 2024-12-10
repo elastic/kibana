@@ -200,7 +200,7 @@ describe('getAlertsGroupAggregations', () => {
           context
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"featureIds\\"'"`
+        `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
       );
     });
 
@@ -211,7 +211,13 @@ describe('getAlertsGroupAggregations', () => {
             method: 'post',
             path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
             body: {
-              featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+              ruleTypeIds: [
+                'apm.anomaly',
+                'logs.alert.document.count',
+                'metrics.alert.threshold',
+                'slo.rules.burnRate',
+                'xpack.uptime.alerts.durationAnomaly',
+              ],
               groupByField: 'kibana.alert.rule.name',
               aggregations: {
                 scriptedAggregation: {
@@ -231,7 +237,13 @@ describe('getAlertsGroupAggregations', () => {
             method: 'post',
             path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
             body: {
-              featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+              ruleTypeIds: [
+                'apm.anomaly',
+                'logs.alert.document.count',
+                'metrics.alert.threshold',
+                'slo.rules.burnRate',
+                'xpack.uptime.alerts.durationAnomaly',
+              ],
               groupByField: 'kibana.alert.rule.name',
               filters: [
                 {
@@ -256,7 +268,13 @@ describe('getAlertsGroupAggregations', () => {
             method: 'post',
             path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
             body: {
-              featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+              ruleTypeIds: [
+                'apm.anomaly',
+                'logs.alert.document.count',
+                'metrics.alert.threshold',
+                'slo.rules.burnRate',
+                'xpack.uptime.alerts.durationAnomaly',
+              ],
               groupByField: 'kibana.alert.rule.name',
               aggregations: {},
               runtimeMappings: {},
@@ -278,6 +296,86 @@ describe('getAlertsGroupAggregations', () => {
     expect(response.body).toEqual({
       attributes: { success: false },
       message: 'Unable to get alerts',
+    });
+  });
+
+  test('rejects without ruleTypeIds', async () => {
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+          body: {
+            groupByField: 'kibana.alert.rule.name',
+          },
+        }),
+        context
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Request was rejected with message: 'Invalid value \\"undefined\\" supplied to \\"ruleTypeIds\\"'"`
+    );
+  });
+
+  test('accepts consumers', async () => {
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+          body: {
+            ruleTypeIds: [
+              'apm.anomaly',
+              'logs.alert.document.count',
+              'metrics.alert.threshold',
+              'slo.rules.burnRate',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
+            groupByField: 'kibana.alert.rule.name',
+            consumers: ['foo'],
+          },
+        }),
+        context
+      )
+    ).resolves.not.toThrow();
+  });
+
+  test('calls the alerts client correctly', async () => {
+    await expect(
+      server.inject(
+        requestMock.create({
+          method: 'post',
+          path: `${BASE_RAC_ALERTS_API_PATH}/_group_aggregations`,
+          body: {
+            ruleTypeIds: [
+              'apm.anomaly',
+              'logs.alert.document.count',
+              'metrics.alert.threshold',
+              'slo.rules.burnRate',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
+            groupByField: 'kibana.alert.rule.name',
+            consumers: ['foo'],
+          },
+        }),
+        context
+      )
+    ).resolves.not.toThrow();
+
+    expect(clients.rac.getGroupAggregations).toHaveBeenCalledWith({
+      aggregations: undefined,
+      consumers: ['foo'],
+      filters: undefined,
+      groupByField: 'kibana.alert.rule.name',
+      pageIndex: 0,
+      pageSize: 10,
+      ruleTypeIds: [
+        'apm.anomaly',
+        'logs.alert.document.count',
+        'metrics.alert.threshold',
+        'slo.rules.burnRate',
+        'xpack.uptime.alerts.durationAnomaly',
+      ],
+      sort: undefined,
     });
   });
 });

@@ -33,7 +33,7 @@ import { omit } from 'lodash/fp';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
-import { DEFAULT_PLUGIN_NAME, isV2KnowledgeBaseEnabled, performChecks } from '../helpers';
+import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
@@ -64,8 +64,12 @@ export const postEvaluateRoute = (
     .post({
       access: INTERNAL_API_ACCESS,
       path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
@@ -91,19 +95,16 @@ export const postEvaluateRoute = (
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-        const v2KnowledgeBaseEnabled = isV2KnowledgeBaseEnabled({ context: ctx, request });
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
-          authenticatedUser: true,
           capability: 'assistantModelEvaluation',
           context: ctx,
-          license: true,
           request,
           response,
         });
-        if (checkResponse) {
-          return checkResponse;
+        if (!checkResponse.isSuccess) {
+          return checkResponse.response;
         }
 
         try {
@@ -153,6 +154,8 @@ export const postEvaluateRoute = (
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
           const inference = ctx.elasticAssistant.inference;
+          const productDocsAvailable =
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Data clients
           const anonymizationFieldsDataClient =
@@ -160,9 +163,7 @@ export const postEvaluateRoute = (
           const conversationsDataClient =
             (await assistantContext.getAIAssistantConversationsDataClient()) ?? undefined;
           const kbDataClient =
-            (await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              v2KnowledgeBaseEnabled,
-            })) ?? undefined;
+            (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
           const dataClients: AssistantDataClients = {
             anonymizationFieldsDataClient,
             conversationsDataClient,
@@ -248,7 +249,7 @@ export const postEvaluateRoute = (
 
               // Check if KB is available
               const isEnabledKnowledgeBase =
-                (await dataClients.kbDataClient?.isModelDeployed()) ?? false;
+                (await dataClients.kbDataClient?.isInferenceEndpointExists()) ?? false;
 
               // Skeleton request from route to pass to the agents
               // params will be passed to the actions executor
@@ -284,6 +285,8 @@ export const postEvaluateRoute = (
                 inference,
                 connectorId: connector.id,
                 size,
+                telemetry: ctx.elasticAssistant.telemetry,
+                ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
               };
 
               const tools: StructuredTool[] = assistantTools.flatMap(

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/integration-assistant-plugin",
   "owner": "@elastic/security-scalability",
+  "group": "platform",
+  "visibility": "shared",
   "description": "Plugin implementing the Integration Assistant API and UI",
   "plugin": {
     "id": "integrationAssistant",

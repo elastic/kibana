@@ -22,7 +22,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type {
   GetOneAgentResponse,
-  PutAgentReassignResponse,
+  PostAgentReassignResponse,
   UpdateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
@@ -56,10 +56,10 @@ export const getAgentByHostName = (hostname: string): Cypress.Chainable<Agent> =
 export const reassignAgentPolicy = (
   agentId: string,
   agentPolicyId: string
-): Cypress.Chainable<Cypress.Response<PutAgentReassignResponse>> =>
-  request<PutAgentReassignResponse>({
+): Cypress.Chainable<Cypress.Response<PostAgentReassignResponse>> =>
+  request<PostAgentReassignResponse>({
     url: agentRouteService.getReassignPath(agentId),
-    method: 'PUT',
+    method: 'POST',
     body: {
       policy_id: agentPolicyId,
     },

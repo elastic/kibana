@@ -9,7 +9,6 @@
 
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -59,7 +58,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    const themeVersion: ThemeVersion = 'v8';
+    let themeName: string = 'amsterdam';
 
     try {
       const authenticated = isAuthenticated(request);
@@ -72,6 +71,8 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         } else {
           darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
         }
+
+        themeName = await uiSettingsClient.get('theme:name');
       }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
@@ -83,7 +84,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     }
 
     const themeTag = getThemeTag({
-      themeVersion,
+      name: !themeName || themeName === 'amsterdam' ? 'v8' : themeName,
       darkMode,
     });
     const bundlesHref = getBundlesHref(baseHref);

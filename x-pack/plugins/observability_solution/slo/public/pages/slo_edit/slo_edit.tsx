@@ -12,16 +12,17 @@ import { useParams } from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    serverless,
   } = useKibana().services;
   const { sloId } = useParams<{ sloId: string | undefined }>();
 
@@ -32,32 +33,35 @@ export function SloEditPage() {
   const hasRightLicense = hasAtLeast('platinum');
   const { data: slo } = useFetchSloDetails({ sloId });
 
-  useBreadcrumbs([
-    {
-      href: basePath.prepend(paths.slos),
-      text: i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
-        defaultMessage: 'SLOs',
-      }),
-      deepLinkId: 'slo',
-    },
-    ...(!!slo
-      ? [
-          {
-            href: basePath.prepend(paths.sloDetails(slo!.id)),
-            text: slo!.name,
-          },
-        ]
-      : []),
-    {
-      text: slo
-        ? i18n.translate('xpack.slo.breadcrumbs.sloEditLabel', {
-            defaultMessage: 'Edit',
-          })
-        : i18n.translate('xpack.slo.breadcrumbs.sloCreateLabel', {
-            defaultMessage: 'Create',
-          }),
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        href: basePath.prepend(paths.slos),
+        text: i18n.translate('xpack.slo.breadcrumbs.sloLabel', {
+          defaultMessage: 'SLOs',
+        }),
+        deepLinkId: 'slo',
+      },
+      ...(!!slo
+        ? [
+            {
+              href: basePath.prepend(paths.sloDetails(slo!.id)),
+              text: slo!.name,
+            },
+          ]
+        : []),
+      {
+        text: slo
+          ? i18n.translate('xpack.slo.breadcrumbs.sloEditLabel', {
+              defaultMessage: 'Edit',
+            })
+          : i18n.translate('xpack.slo.breadcrumbs.sloCreateLabel', {
+              defaultMessage: 'Create',
+            }),
+      },
+    ],
+    { serverless }
+  );
 
   useEffect(() => {
     if (hasRightLicense === false || permissions?.hasAllReadRequested === false) {

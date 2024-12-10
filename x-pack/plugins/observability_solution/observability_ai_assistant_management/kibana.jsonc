@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-management-plugin",
   "owner": "@elastic/obs-ai-assistant",
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "observabilityAiAssistantManagement",
     "server": true,
@@ -19,11 +21,11 @@
     "optionalPlugins": [
       "home",
       "serverless",
-      "enterpriseSearch"
+      "productDocBase"
     ],
     "requiredBundles": [
       "kibanaReact",
-      "logsDataAccess",
+      "logsDataAccess"
     ]
   }
 }

@@ -26,8 +26,10 @@ export const riskEngineInitRoute = (
     .post({
       access: 'internal',
       path: RISK_ENGINE_INIT_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

@@ -26,8 +26,10 @@ export const readIndexRoute = (
     .get({
       path: DETECTION_ENGINE_INDEX_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

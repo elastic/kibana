@@ -69,6 +69,9 @@
     "@kbn/cloud-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/ai-assistant-common",
+    "@kbn/inference-common",
+    "@kbn/llm-tasks-plugin",
+    "@kbn/product-doc-common",
   ],
   "exclude": [
     "target/**/*"

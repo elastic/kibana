@@ -47,6 +47,26 @@ describe('isBiggerThanGlobalMaxRetention', () => {
     });
   });
 
+  it('should correctly compare retention in all of the units that are accepted by es', () => {
+    // 1000 milliseconds = 1 seconds
+    expect(isBiggerThanGlobalMaxRetention(1, 's', '1000ms')).toBeUndefined();
+    expect(isBiggerThanGlobalMaxRetention(2, 's', '1000ms')).toEqual({
+      message: 'Maximum data retention period on this project is 1000 milliseconds.',
+    });
+
+    // 1000000 microseconds = 1 seconds
+    expect(isBiggerThanGlobalMaxRetention(1, 's', '1000000micros')).toBeUndefined();
+    expect(isBiggerThanGlobalMaxRetention(2, 'm', '1000000micros')).toEqual({
+      message: 'Maximum data retention period on this project is 1000000 microseconds.',
+    });
+
+    // 1000000000 microseconds = 1 seconds
+    expect(isBiggerThanGlobalMaxRetention(2, 's', '1000000000nanos'));
+    expect(isBiggerThanGlobalMaxRetention(2, 'h', '1000000000nanos')).toEqual({
+      message: 'Maximum data retention period on this project is 1000000000 nanoseconds.',
+    });
+  });
+
   it('should throw an error for unknown time units', () => {
     expect(() => isBiggerThanGlobalMaxRetention(10, 'x', '30d')).toThrow('Unknown unit: x');
   });

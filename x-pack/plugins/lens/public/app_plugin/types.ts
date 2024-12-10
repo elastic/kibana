@@ -55,15 +55,15 @@ import type {
   UserMessagesGetter,
   StartServices,
 } from '../types';
-import type { LensAttributeService } from '../lens_attribute_service';
-import type { LensEmbeddableInput } from '../embeddable/embeddable';
+import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensInspector } from '../lens_inspector_service';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
-import type { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
+import type { LensDocument, SavedObjectIndexStore } from '../persistence/saved_object_store';
 import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
+import { LensSerializedState } from '../react_embeddable/types';
 
 export interface RedirectToOriginProps {
-  input?: LensEmbeddableInput;
+  state?: LensSerializedState;
   isCopied?: boolean;
 }
 
@@ -76,7 +76,7 @@ export interface LensAppProps {
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
 
   // The initial input passed in by the container when editing. Can be either by reference or by value.
-  initialInput?: LensEmbeddableInput;
+  initialInput?: LensSerializedState;
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
@@ -110,7 +110,7 @@ export interface LensTopNavMenuProps {
 
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   // The initial input passed in by the container when editing. Can be either by reference or by value.
-  initialInput?: LensEmbeddableInput;
+  initialInput?: LensSerializedState;
   getIsByValueMode: () => boolean;
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -124,7 +124,7 @@ export interface LensTopNavMenuProps {
   initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
-  currentDoc: Document | undefined;
+  currentDoc: LensDocument | undefined;
   indexPatternService: IndexPatternServiceAPI;
   getUserMessages: UserMessagesGetter;
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
@@ -156,7 +156,7 @@ export interface LensAppServices extends StartServices {
   usageCollection?: UsageCollectionStart;
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
-  attributeService: LensAttributeService;
+  attributeService: LensAttributesService;
   contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;

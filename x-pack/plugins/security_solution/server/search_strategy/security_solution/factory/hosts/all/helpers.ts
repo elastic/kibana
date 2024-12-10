@@ -8,12 +8,12 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { get, has } from 'lodash/fp';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
+import { toObjectArrayOfStrings } from '@kbn/timelines-plugin/common';
 import type {
   HostAggEsItem,
   HostsEdges,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const HOSTS_FIELDS: readonly string[] = [
   '_id',

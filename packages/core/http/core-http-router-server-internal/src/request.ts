@@ -177,9 +177,14 @@ export class CoreKibanaRequest<
     this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = !isRealReq;
+    // set to false if elasticInternalOrigin is explicitly set to false
+    // otherwise check for the header or the query param
     this.isInternalApiRequest =
-      X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
-      Boolean(this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM));
+      this.url?.searchParams?.get(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM) === 'false'
+        ? false
+        : X_ELASTIC_INTERNAL_ORIGIN_REQUEST in this.headers ||
+          this.url?.searchParams?.has(ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM);
+
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
       value: request,

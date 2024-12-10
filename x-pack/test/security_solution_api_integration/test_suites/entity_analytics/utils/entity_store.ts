@@ -51,7 +51,7 @@ export const EntityStoreUtils = (
     }
   };
 
-  const _initEntityEngineForEntityType = async (entityType: EntityType) => {
+  const initEntityEngineForEntityType = async (entityType: EntityType) => {
     log.info(
       `Initializing engine for entity type ${entityType} in namespace ${namespace || 'default'}`
     );
@@ -72,7 +72,7 @@ export const EntityStoreUtils = (
   };
 
   const initEntityEngineForEntityTypesAndWait = async (entityTypes: EntityType[]) => {
-    await Promise.all(entityTypes.map((entityType) => _initEntityEngineForEntityType(entityType)));
+    await Promise.all(entityTypes.map((entityType) => initEntityEngineForEntityType(entityType)));
 
     await retry.waitForWithTimeout(
       `Engines to start for entity types: ${entityTypes.join(', ')}`,
@@ -82,9 +82,36 @@ export const EntityStoreUtils = (
         if (body.engines.every((engine: any) => engine.status === 'started')) {
           return true;
         }
+        if (body.engines.some((engine: any) => engine.status === 'error')) {
+          throw new Error(`Engines not started: ${JSON.stringify(body)}`);
+        }
         return false;
       }
     );
+  };
+
+  const waitForEngineStatus = async (entityType: EntityType, status: string) => {
+    await retry.waitForWithTimeout(
+      `Engine for entity type ${entityType} to be in status ${status}`,
+      60_000,
+      async () => {
+        const { body } = await api
+          .getEntityEngine({ params: { entityType } }, namespace)
+          .expect(200);
+        log.debug(`Engine status for ${entityType}: ${body.status}`);
+        return body.status === status;
+      }
+    );
+  };
+
+  const enableEntityStore = async () => {
+    const res = await api.initEntityStore({ body: {} }, namespace);
+    if (res.status !== 200) {
+      log.error(`Failed to enable entity store`);
+      log.error(JSON.stringify(res.body));
+    }
+    expect(res.status).to.eql(200);
+    return res;
   };
 
   const expectTransformStatus = async (
@@ -141,5 +168,8 @@ export const EntityStoreUtils = (
     expectTransformStatus,
     expectEngineAssetsExist,
     expectEngineAssetsDoNotExist,
+    enableEntityStore,
+    waitForEngineStatus,
+    initEntityEngineForEntityType,
   };
 };

@@ -1,0 +1,30 @@
+{
+  "type": "index",
+  "value": {
+    "index": "semantic_text_fields",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "content": {
+          "type": "semantic_text",
+          "inference_id": "elastic-security-ai-assistant-elser2",
+          "model_settings": {
+            "task_type": "sparse_embedding"
+          }
+        },
+        "text": {
+          "type": "text"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

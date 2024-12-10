@@ -18,17 +18,6 @@ import type {
 
 export * from './constants';
 
-/**
- * @deprecated
- * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
- */
-export interface JobParamsDownloadCSV {
-  browserTimezone: string;
-  title: string;
-  searchSource: SerializedSearchSourceFields;
-  columns?: string[];
-}
-
 interface BaseParamsCSV {
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
@@ -61,12 +50,6 @@ export interface TaskPayloadCsvFromSavedObject extends CsvFromSavedObjectBase, B
 }
 
 export const CSV_REPORTING_ACTION = 'generateCsvReport';
-
-/**
- * @deprecated
- * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
- */
-export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 
 /**
  * @deprecated

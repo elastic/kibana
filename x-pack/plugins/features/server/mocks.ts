@@ -25,8 +25,8 @@ const createSetup = (): jest.Mocked<FeaturesPluginSetup> => {
 
 const createStart = (): jest.Mocked<FeaturesPluginStart> => {
   return {
-    getKibanaFeatures: jest.fn(),
-    getElasticsearchFeatures: jest.fn(),
+    getKibanaFeatures: jest.fn().mockReturnValue([]),
+    getElasticsearchFeatures: jest.fn().mockReturnValue([]),
   };
 };
 

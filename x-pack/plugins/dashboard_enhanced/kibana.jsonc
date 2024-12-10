@@ -5,7 +5,7 @@
     "@elastic/kibana-presentation"
   ],
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "plugin": {
     "id": "dashboardEnhanced",
     "browser": true,

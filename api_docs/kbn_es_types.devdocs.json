@@ -137,12 +137,13 @@
           {
             "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchParams.params",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "Record<string, string | undefined>[] | undefined"
+              "ScalarValue",
+              "[] | Record<string, string | undefined>[] | undefined"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -234,6 +235,21 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchResponse._clusters",
+            "type": "Object",
+            "tags": [],
+            "label": "_clusters",
+            "description": [],
+            "signature": [
+              "ClusterStatistics",
+              " | undefined"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -478,6 +494,8 @@
           "AggregationsRateAggregation",
           "; reverse_nested: ",
           "AggregationsReverseNestedAggregation",
+          "; random_sampler: ",
+          "AggregationsRandomSamplerAggregation",
           "; sampler: ",
           "AggregationsSamplerAggregation",
           "; scripted_metric: ",
@@ -500,6 +518,8 @@
           "AggregationsSumBucketAggregation",
           "; terms: ",
           "AggregationsTermsAggregation",
+          "; time_series: ",
+          "AggregationsTimeSeriesAggregation",
           "; top_hits: ",
           "AggregationsTopHitsAggregation",
           "; t_test: ",

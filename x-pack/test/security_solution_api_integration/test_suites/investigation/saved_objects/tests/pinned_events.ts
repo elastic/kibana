@@ -28,8 +28,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             timelineId: 'testId',
             eventId: 'bv4QSGsB9v5HJNSH-7fi',
           });
-        const { eventId, pinnedEventId, timelineId, version } =
-          response.body.data && response.body.data.persistPinnedEventOnTimeline;
+        const { eventId, pinnedEventId, timelineId, version } = response.body;
 
         expect(eventId).to.be('bv4QSGsB9v5HJNSH-7fi');
         expect(pinnedEventId).to.not.be.empty();
@@ -39,7 +38,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     });
 
     describe('unpin an event', () => {
-      it('returns null', async () => {
+      it('returns { unpinned: true }', async () => {
         const response = await supertest
           .patch(PINNED_EVENT_URL)
           .set('elastic-api-version', '2023-10-31')
@@ -49,8 +48,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             eventId: 'bv4QSGsB9v5HJNSH-7fi',
             timelineId: 'testId',
           });
-        const { eventId, pinnedEventId, timelineId } =
-          response.body.data && response.body.data.persistPinnedEventOnTimeline;
+        const { eventId, pinnedEventId, timelineId } = response.body;
 
         const responseToTest = await supertest
           .patch(PINNED_EVENT_URL)
@@ -61,7 +59,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
             eventId,
             timelineId,
           });
-        expect(responseToTest.body.data!.persistPinnedEventOnTimeline).to.be(null);
+        expect(responseToTest.body).to.eql({ unpinned: true });
       });
     });
   });

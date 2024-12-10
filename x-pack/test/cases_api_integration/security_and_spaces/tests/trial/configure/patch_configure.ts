@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('default', connector.id, 'connector', 'actions');
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(supertest);
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('default', connector.id, 'connector', 'actions');
 
       // Configuration is created with connector so the mappings are created
       const configuration = await createConfiguration(

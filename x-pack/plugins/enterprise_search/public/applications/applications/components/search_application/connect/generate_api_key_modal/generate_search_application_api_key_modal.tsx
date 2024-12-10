@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -24,12 +24,13 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiText,
-  EuiSpacer,
-  EuiFormLabel,
+  EuiCallOut,
   EuiCodeBlock,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';
 
@@ -45,16 +46,24 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
 > = ({ onClose, searchApplicationName }) => {
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
+  const modalTitleId = useGeneratedHtmlId();
   const { makeRequest } = useActions(GenerateSearchApplicationApiKeyLogic);
+  const copyApiKeyRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     setKeyName(`${searchApplicationName} read-only API key`);
   }, [searchApplicationName]);
 
+  useEffect(() => {
+    if (isSuccess) {
+      copyApiKeyRef.current?.focus();
+    }
+  }, [isSuccess]);
+
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate(
             'xpack.enterpriseSearch.searchApplication.searchApplication.api.generateApiKeyModal.title',
             {
@@ -65,15 +74,24 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
       </EuiModalHeader>
       <EuiModalBody>
         <>
-          <EuiPanel hasShadow={false} color="primary">
+          <EuiPanel hasShadow={false} color={!isSuccess ? 'primary' : 'success'}>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" alignItems="flexEnd">
                   {!isSuccess ? (
                     <>
                       <EuiFlexItem>
-                        <EuiFormRow label="Name your API key" fullWidth>
+                        <EuiFormRow
+                          label={
+                            <FormattedMessage
+                              id="xpack.enterpriseSearch.generateSearchApplicationApiKeyModal.euiFormRow.nameYourAPIKeyLabel"
+                              defaultMessage="Name your API key"
+                            />
+                          }
+                          fullWidth
+                        >
                           <EuiFieldText
+                            data-test-subj="enterpriseSearchGenerateSearchApplicationApiKeyModalFieldText"
                             data-telemetry-id="entSearchApplications-api-generateSearchApplicationApiKeyModal-editName"
                             fullWidth
                             placeholder="Type a name for your API key"
@@ -110,8 +128,20 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <EuiFormLabel>{keyName}</EuiFormLabel>
-                      <EuiSpacer size="xs" />
+                      <EuiCallOut
+                        title={
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.searchApplication.searchApplication.api.generateApiKeyModal.callOutMessage"
+                            defaultMessage="Done! The {name} API key was generated."
+                            values={{
+                              name: <strong>{keyName}</strong>,
+                            }}
+                          />
+                        }
+                        color="success"
+                        iconType="check"
+                        role="alert"
+                      />
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem>
                           <EuiCodeBlock
@@ -126,6 +156,8 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
+                            buttonRef={copyApiKeyRef}
+                            data-test-subj="enterpriseSearchGenerateSearchApplicationApiKeyModalButton"
                             data-telemetry-id="entSearchApplications-api-generateSearchApplicationApiKeyModal-csvDownloadButton"
                             aria-label={i18n.translate(
                               'xpack.enterpriseSearch.searchApplication.searchApplication.api.generateApiKeyModal.csvDownloadButton',
@@ -165,6 +197,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
       <EuiModalFooter>
         {apiKey ? (
           <EuiButton
+            data-test-subj="enterpriseSearchGenerateSearchApplicationApiKeyModalDoneButton"
             data-telemetry-id="entSearchApplications-api-generateSearchApplicationApiKeyModal-done"
             fill
             onClick={onClose}
@@ -178,6 +211,7 @@ export const GenerateSearchApplicationApiKeyModal: React.FC<
           </EuiButton>
         ) : (
           <EuiButtonEmpty
+            data-test-subj="enterpriseSearchGenerateSearchApplicationApiKeyModalCancelButton"
             data-telemetry-id="entSearchApplications-api-generateSearchApplicationApiKeyModal-cancel"
             onClick={onClose}
           >

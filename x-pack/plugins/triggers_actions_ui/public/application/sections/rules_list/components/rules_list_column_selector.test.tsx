@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import {
   RulesListColumns,

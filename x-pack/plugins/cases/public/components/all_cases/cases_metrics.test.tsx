@@ -10,27 +10,22 @@ import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
-import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { CasesMetrics } from './cases_metrics';
 
 jest.mock('pretty-ms', () => jest.fn().mockReturnValue('2ms'));
 jest.mock('../../containers/use_get_cases_metrics');
-jest.mock('../../containers/use_get_cases_status');
 
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
-const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 
 describe('Cases metrics', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
-    useGetCasesMetricsMock.mockReturnValue({ isLoading: false, data: { mttr: 2000 } });
-    useGetCasesStatusMock.mockReturnValue({
+    useGetCasesMetricsMock.mockReturnValue({
       isLoading: false,
       data: {
-        countOpenCases: 20,
-        countInProgressCases: 40,
-        countClosedCases: 130,
+        mttr: 2000,
+        status: { open: 20, inProgress: 40, closed: 130 },
       },
     });
 

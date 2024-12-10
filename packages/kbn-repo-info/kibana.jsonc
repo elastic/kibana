@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/repo-info",
-  "owner": "@elastic/kibana-operations"
+  "owner": [
+    "@elastic/kibana-operations"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

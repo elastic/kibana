@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { Query, Filter } from '@kbn/es-query';
-import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
+import { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
@@ -68,6 +68,7 @@ export interface RuleConditionChartExpressions {
   timeSize?: number;
   timeUnit?: TimeUnitChar;
   equation?: string;
+  label?: string;
 }
 export interface RuleConditionChartProps {
   metricExpression: RuleConditionChartExpressions;
@@ -80,6 +81,10 @@ export interface RuleConditionChartProps {
   chartOptions?: ChartOptions;
   additionalFilters?: Filter[];
 }
+
+export type TopValuesOrderParams =
+  | Pick<TermsIndexPatternColumn['params'], 'orderDirection' | 'orderBy' | 'orderAgg'>
+  | undefined;
 
 const defaultQuery: Query = {
   language: 'kuery',
@@ -108,6 +113,7 @@ export function RuleConditionChart({
     threshold,
     comparator,
     equation,
+    label,
     warningComparator,
     warningThreshold,
   } = metricExpression;
@@ -297,10 +303,10 @@ export function RuleConditionChart({
       return;
     }
     const aggMapFromMetrics = metrics.reduce((acc, metric) => {
-      const operationField = getLensOperationFromRuleMetric(metric);
+      const { operation, operationWithField, sourceField } = getLensOperationFromRuleMetric(metric);
       return {
         ...acc,
-        [metric.name]: operationField,
+        [metric.name]: { operation, operationWithField, sourceField },
       };
     }, {} as AggMap);
 
@@ -332,7 +338,7 @@ export function RuleConditionChart({
     const baseLayer = {
       type: 'formula',
       value: formula,
-      label: formula,
+      label: label ?? formula,
       groupBy,
       format: {
         id: formatId,
@@ -352,6 +358,26 @@ export function RuleConditionChart({
       seriesType: seriesType ? seriesType : 'bar',
     };
 
+    const firstMetricAggMap = aggMap && metrics.length > 0 ? aggMap[metrics[0].name] : undefined;
+    const convertToMaxOperation = ['counter_rate', 'last_value', 'percentile'];
+
+    const orderParams: TopValuesOrderParams = firstMetricAggMap
+      ? {
+          orderDirection: 'desc',
+          orderBy: { type: 'custom' },
+          orderAgg: {
+            label: firstMetricAggMap.operationWithField,
+            dataType: 'number',
+            operationType: convertToMaxOperation.includes(firstMetricAggMap.operation)
+              ? 'max'
+              : firstMetricAggMap.operation,
+            sourceField: firstMetricAggMap.sourceField,
+            isBucketed: false,
+            scale: 'ratio',
+          },
+        }
+      : undefined;
+
     if (groupBy && groupBy?.length) {
       xYDataLayerOptions.breakdown = {
         type: 'top_values',
@@ -360,6 +386,7 @@ export function RuleConditionChart({
           size: 3,
           secondaryFields: (groupBy as string[]).slice(1),
           accuracyMode: false,
+          ...orderParams,
         },
       };
     }
@@ -409,6 +436,7 @@ export function RuleConditionChart({
     comparator,
     dataView,
     equation,
+    label,
     searchConfiguration,
     formula,
     formulaAsync.value,
@@ -422,6 +450,7 @@ export function RuleConditionChart({
     timeUnit,
     seriesType,
     warningThresholdReferenceLine,
+    aggMap,
   ]);
 
   if (

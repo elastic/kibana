@@ -12,24 +12,24 @@ import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from
 import { BulkActionSkipResult } from '../../../common/bulk_edit';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
-import { RuleAttributes } from '../../data/rule/types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RawRule } from '../../types';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
 
 type BulkEditOperation = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
-  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
-  resultSavedObjects: Array<SavedObjectsUpdateResponse<RuleAttributes>>;
+  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
   skipped: BulkActionSkipResult[];
 }>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
-  results: Array<SavedObjectsUpdateResponse<RuleAttributes>>;
+  results: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
   skipped: BulkActionSkipResult[];
 }
@@ -55,7 +55,7 @@ export const retryIfBulkEditConflicts = async (
   filter: KueryNode | null,
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
-  accResults: Array<SavedObjectsUpdateResponse<RuleAttributes>> = [],
+  accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
   accErrors: BulkOperationError[] = [],
   accSkipped: BulkActionSkipResult[] = []
 ): Promise<ReturnRetry> => {

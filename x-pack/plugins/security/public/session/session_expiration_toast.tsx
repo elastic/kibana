@@ -44,7 +44,7 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
       id="xpack.security.sessionExpirationToast.body"
       defaultMessage="You will be logged out {timeout}."
       values={{
-        timeout: <FormattedRelativeTime value={timeoutSeconds} />,
+        timeout: <FormattedRelativeTime value={timeoutSeconds} updateIntervalInSeconds={1} />,
       }}
     />
   );

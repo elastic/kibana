@@ -25,5 +25,6 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/std",
+    "@kbn/doc-links",
   ]
 }

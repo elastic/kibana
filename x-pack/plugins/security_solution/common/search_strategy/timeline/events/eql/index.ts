@@ -7,7 +7,7 @@
 
 export type {
   TimelineEqlResponse,
-  EqlOptionsData,
-  EqlOptionsSelected,
+  EqlFieldsComboBoxOptions,
+  EqlOptions,
   FieldsEqlOptions,
 } from '@kbn/timelines-plugin/common';

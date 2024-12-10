@@ -26,8 +26,10 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
     .get({
       access: INTERNAL_API_ACCESS,
       path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(
@@ -48,15 +50,14 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
-          authenticatedUser: true,
           capability: 'assistantModelEvaluation',
           context: ctx,
-          license: true,
           request,
           response,
         });
-        if (checkResponse) {
-          return checkResponse;
+
+        if (!checkResponse.isSuccess) {
+          return checkResponse.response;
         }
 
         // Fetch datasets from LangSmith // TODO: plumb apiKey so this will work in cloud w/o env vars

@@ -9,11 +9,12 @@ import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { FlyoutHeader, FlyoutTitle } from '@kbn/security-solution-common';
 import type { HostItem } from '../../../../common/search_strategy';
 import { getHostDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutTitle } from '../../shared/components/flyout_title';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 interface HostPanelHeaderProps {

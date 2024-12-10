@@ -233,6 +233,7 @@
     "payload.connector.type",
     "type"
   ],
+  "cloud": [],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -443,6 +444,7 @@
   ],
   "favorites": [
     "favoriteIds",
+    "favoriteMetadata",
     "type",
     "userId"
   ],
@@ -509,6 +511,7 @@
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -530,6 +533,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
@@ -690,6 +694,7 @@
     "version"
   ],
   "ingest-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -711,6 +716,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
@@ -853,6 +859,13 @@
   ],
   "policy-settings-protection-updates-note": [
     "note"
+  ],
+  "product-doc-install-status": [
+    "index_name",
+    "installation_status",
+    "last_installation_date",
+    "product_name",
+    "product_version"
   ],
   "query": [
     "description",
@@ -1073,6 +1086,7 @@
     "urls"
   ],
   "synthetics-param": [],
+  "synthetics-private-location": [],
   "synthetics-privates-locations": [],
   "tag": [
     "color",

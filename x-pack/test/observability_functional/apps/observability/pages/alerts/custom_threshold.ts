@@ -18,7 +18,8 @@ export default ({ getService }: FtrProviderContext) => {
   const logger = getService('log');
   const retry = getService('retry');
 
-  describe('Custom threshold rule', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/196766
+  describe.skip('Custom threshold rule', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');

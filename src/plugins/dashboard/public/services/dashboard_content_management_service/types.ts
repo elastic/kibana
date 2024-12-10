@@ -8,17 +8,19 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardContainerInput } from '../../../common';
-import { DashboardAttributes, DashboardCrudTypes } from '../../../common/content_management';
+import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
+import { DashboardState } from '../../dashboard_api/types';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
@@ -38,7 +40,7 @@ export interface LoadDashboardFromSavedObjectProps {
   id?: string;
 }
 
-type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
+type DashboardResolveMeta = DashboardGetOut['meta'];
 
 export type SavedDashboardInput = DashboardContainerInput & {
   /**
@@ -52,6 +54,10 @@ export type SavedDashboardInput = DashboardContainerInput & {
    * Use runtime state when building input for portable dashboards
    */
   controlGroupState?: Partial<ControlGroupRuntimeState>;
+};
+
+export type DashboardSearchSource = Omit<SerializedSearchSourceFields, 'query'> & {
+  query?: Query;
 };
 
 export interface LoadDashboardReturn {
@@ -77,7 +83,7 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
-  currentState: SavedDashboardInput;
+  currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
   lastSavedId?: string;

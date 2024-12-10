@@ -9,9 +9,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERTING_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
-import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -27,7 +26,11 @@ import { RuleDetailsTabs } from './components/rule_details_tabs';
 import { getHealthColor } from './helpers/get_health_color';
 import { isRuleEditable } from './helpers/is_rule_editable';
 import { ruleDetailsLocatorID } from '../../../common';
-import { ALERT_STATUS_ALL } from '../../../common/constants';
+import {
+  ALERT_STATUS_ALL,
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  observabilityAlertFeatureIds,
+} from '../../../common/constants';
 import {
   RULE_DETAILS_EXECUTION_TAB,
   RULE_DETAILS_ALERTS_TAB,
@@ -61,6 +64,7 @@ export function RuleDetailsPage() {
       getRuleDefinition: RuleDefinition,
       getRuleStatusPanel: RuleStatusPanel,
     },
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -72,24 +76,27 @@ export function RuleDetailsPage() {
     filterByRuleTypeIds: filteredRuleTypes,
   });
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: basePath.prepend(paths.observability.alerts),
-      deepLinkId: 'observability-overview:alerts',
-    },
-    {
-      href: basePath.prepend(paths.observability.rules),
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-    {
-      text: rule && rule.name,
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+          defaultMessage: 'Alerts',
+        }),
+        href: basePath.prepend(paths.observability.alerts),
+        deepLinkId: 'observability-overview:alerts',
+      },
+      {
+        href: basePath.prepend(paths.observability.rules),
+        text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+          defaultMessage: 'Rules',
+        }),
+      },
+      {
+        text: rule && rule.name,
+      },
+    ],
+    { serverless }
+  );
 
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -176,15 +183,7 @@ export function RuleDetailsPage() {
   };
 
   const ruleType = ruleTypes?.find((type) => type.id === rule?.ruleTypeId);
-
   const isEditable = isRuleEditable({ capabilities, rule, ruleType, ruleTypeRegistry });
-
-  const featureIds =
-    rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
-      ? [ruleType.producer as AlertConsumers]
-      : rule
-      ? [rule.consumer as AlertConsumers]
-      : [];
 
   const ruleStatusMessage =
     rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
@@ -230,7 +229,8 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            featureIds={featureIds}
+            ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+            consumers={observabilityAlertFeatureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
             filter={{
@@ -257,7 +257,7 @@ export function RuleDetailsPage() {
 
       <RuleDetailsTabs
         esQuery={esQuery}
-        featureIds={featureIds}
+        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         rule={rule}
         ruleId={ruleId}
         ruleType={ruleType}

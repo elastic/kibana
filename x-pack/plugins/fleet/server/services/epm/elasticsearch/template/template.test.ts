@@ -14,7 +14,11 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+import {
+  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
+  FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+} from '../../../../constants/fleet_es_assets';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
@@ -22,7 +26,6 @@ import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
-  FLEET_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
@@ -35,10 +38,6 @@ import {
   generateTemplateIndexPattern,
   updateCurrentWriteIndices,
 } from './template';
-
-const FLEET_COMPONENT_TEMPLATES_NAMES = FLEET_COMPONENT_TEMPLATES.map(
-  (componentTemplate) => componentTemplate.name
-);
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -88,7 +87,8 @@ describe('EPM template', () => {
       STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
@@ -108,7 +108,8 @@ describe('EPM template', () => {
       'metrics@tsdb-settings',
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
@@ -138,6 +139,34 @@ describe('EPM template', () => {
     ]);
   });
 
+  it('creates fleet event ingested component template if event ingested flag is enabled', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        agentIdVerificationEnabled: false,
+        eventIngestedEnabled: true,
+      })
+    );
+    const composedOfTemplates = ['component1', 'component2'];
+
+    const template = getTemplate({
+      templateIndexPattern: 'logs-*',
+      type: 'logs',
+      packageName: 'nginx',
+      composedOfTemplates,
+      templatePriority: 200,
+      mappings: { properties: [] },
+      isIndexModeTimeSeries: false,
+    });
+    expect(template.composed_of).toStrictEqual([
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+      ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+    ]);
+  });
+
   it('adds empty composed_of correctly', () => {
     const composedOfTemplates: string[] = [];
 
@@ -154,7 +183,8 @@ describe('EPM template', () => {
       STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
       STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-      ...FLEET_COMPONENT_TEMPLATES_NAMES,
+      FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+      FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
     ]);
   });
 
@@ -1870,9 +1900,19 @@ describe('EPM template', () => {
 
     it('should fill constant keywords from previous mappings', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
       esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test-constant.keyword-default' }],
+        data_streams: [
+          {
+            name: 'test-constant.keyword-default',
+            indices: [
+              { index_name: '.ds-test-constant.keyword-default-0001' },
+              { index_name: '.ds-test-constant.keyword-default-0002' },
+            ],
+          },
+        ],
       } as any);
+
       esClient.indices.get.mockResponse({
         'test-constant.keyword-default': {
           mappings: {
@@ -1912,6 +1952,9 @@ describe('EPM template', () => {
           } as any,
         },
       ]);
+      expect(esClient.indices.get).toBeCalledWith({
+        index: '.ds-test-constant.keyword-default-0002',
+      });
       const putMappingsCalls = esClient.indices.putMapping.mock.calls;
       expect(putMappingsCalls).toHaveLength(1);
       expect(putMappingsCalls[0][0]).toEqual({
@@ -2034,6 +2077,57 @@ describe('EPM template', () => {
                 'mapper_exception\n' +
                 '\tRoot causes:\n' +
                 "\t\tmapper_exception: the [subobjects] parameter can't be updated for the object mapping [_doc]",
+            },
+          },
+        } as any);
+      });
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+    it('should rollover on mapper exception with subobjects in reason', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.putMapping.mockImplementation(() => {
+        throw new errors.ResponseError({
+          body: {
+            error: {
+              type: 'mapper_exception',
+              reason:
+                "the [subobjects] parameter can't be updated for the object mapping [okta.debug_context.debug_data]",
             },
           },
         } as any);

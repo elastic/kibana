@@ -22,10 +22,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist/src';
 import { DataViewRow, DataViewColumn } from '../types';
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 interface DataTableFormatState {
   columns: DataViewColumn[];
@@ -49,7 +55,10 @@ interface RenderCellArguments {
   isFilterable: boolean;
 }
 
-export class DataTableFormat extends Component<DataTableFormatProps, DataTableFormatState> {
+class DataTableFormatClass extends Component<
+  DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
+  DataTableFormatState
+> {
   static propTypes = {
     data: PropTypes.object.isRequired,
     uiSettings: PropTypes.object.isRequired,
@@ -169,7 +178,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
           const formattedValue = fieldFormatter.convert(value);
           const rowIndex = data.rows.findIndex((row) => row[dataColumn.id] === value) || 0;
 
-          return DataTableFormat.renderCell({
+          return DataTableFormatClass.renderCell({
             table: data,
             columnIndex: index,
             rowIndex,
@@ -186,9 +195,10 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
 
   render() {
     const { columns, rows } = this.state;
+    const { pageSize, sorting, onTableChange } = this.props.euiTablePersist;
     const pagination = {
-      pageSizeOptions: [10, 20, 50],
-      initialPageSize: 20,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+      pageSize,
     };
 
     return (
@@ -198,8 +208,9 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
         data-test-subj="inspectorTable"
         columns={columns}
         items={rows}
-        sorting={true}
+        sorting={sorting}
         pagination={pagination}
+        onChange={onTableChange}
         css={css`
           // Set a min width on each column - you can use [data-test-subj] to target specific columns
           .euiTableHeaderCell {
@@ -216,3 +227,9 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     );
   }
 }
+
+export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
+  tableId: 'inspectorDataTable',
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
+  initialPageSize: 20,
+});

@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 
 import { i18n } from '@kbn/i18n';
 
-import { WEB_CRAWLER_DOCS_URL, WEB_CRAWLER_LOG_DOCS_URL } from '../../routes';
+import { docLinks } from '../../../shared/doc_links';
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
@@ -82,7 +82,7 @@ export const CrawlerOverview: React.FC = () => {
                 defaultMessage:
                   "Easily index your website's content. To get started, enter your domain name, provide optional entry points and crawl rules, and we will handle the rest.",
               })}{' '}
-              <EuiLink external target="_blank" href={WEB_CRAWLER_DOCS_URL}>
+              <EuiLink external target="_blank" href={docLinks.appSearchWebCrawler}>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.empty.crawlerDocumentationLinkDescription',
                   {
@@ -125,7 +125,7 @@ export const CrawlerOverview: React.FC = () => {
                 defaultMessage:
                   "Recent crawl requests are logged here. Using the request ID of each crawl, you can track progress and examine crawl events in Kibana's Discover or Logs user interfaces.",
               })}{' '}
-              <EuiLink href={WEB_CRAWLER_LOG_DOCS_URL} target="_blank" external>
+              <EuiLink href={docLinks.appSearchWebCrawlerEventLogs} target="_blank" external>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.configurationDocumentationLinkDescription',
                   {

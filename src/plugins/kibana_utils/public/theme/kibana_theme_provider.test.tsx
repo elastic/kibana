@@ -14,6 +14,7 @@ import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of } from 'rxjs';
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { CoreTheme } from '@kbn/core/public';
 
@@ -21,6 +22,7 @@ import { KibanaThemeProvider } from './kibana_theme_provider';
 
 describe('KibanaThemeProvider', () => {
   let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
+  const userProfile = userProfileServiceMock.createStart();
 
   beforeEach(() => {
     euiTheme = undefined;
@@ -52,10 +54,10 @@ describe('KibanaThemeProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: CoreTheme = { darkMode: true };
+    const coreTheme: CoreTheme = { darkMode: true, name: 'amsterdam' };
 
     const wrapper = mountWithIntl(
-      <KibanaThemeProvider theme$={of(coreTheme)}>
+      <KibanaThemeProvider theme$={of(coreTheme)} userProfile={userProfile}>
         <InnerComponent />
       </KibanaThemeProvider>
     );
@@ -66,10 +68,10 @@ describe('KibanaThemeProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'amsterdam' });
 
     const wrapper = mountWithIntl(
-      <KibanaThemeProvider theme$={coreTheme$}>
+      <KibanaThemeProvider theme$={coreTheme$} userProfile={userProfile}>
         <InnerComponent />
       </KibanaThemeProvider>
     );
@@ -79,7 +81,7 @@ describe('KibanaThemeProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false });
+      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
     });
 
     await refresh(wrapper);

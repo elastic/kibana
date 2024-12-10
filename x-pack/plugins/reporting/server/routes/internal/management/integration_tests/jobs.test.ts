@@ -76,7 +76,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
   };
 
   const coreSetupMock = coreMock.createSetup();
-  const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
+  const mockConfigSchema = createMockConfigSchema();
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
@@ -346,45 +346,6 @@ describe(`Reporting Job Management Routes: Internal`, () => {
         .expect(
           'content-disposition',
           'attachment; filename=%E6%97%A5%E6%9C%AC%E8%AA%9E%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89.pdf'
-        );
-    });
-  });
-
-  describe('Deprecated: role-based access control', () => {
-    it('fails on users without the appropriate role', async () => {
-      mockStartDeps = await createMockPluginStart(
-        {
-          licensing: {
-            ...licensingMock.createStart(),
-            license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
-          },
-          securityService: {
-            authc: {
-              getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
-            },
-          },
-        },
-        mockConfigSchema
-      );
-
-      reportingCore = await createMockReportingCore(
-        createMockConfigSchema({ roles: { enabled: true } }),
-        mockSetupDeps,
-        mockStartDeps
-      );
-
-      registerJobInfoRoutes(reportingCore);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
-        .expect(403)
-        .then(({ body }) =>
-          expect(body.message).toMatchInlineSnapshot(`
-            "Ask your administrator for access to reporting features. <a href=https://www.elastic.co/guide/en/kibana/test-branch/secure-reporting.html#grant-user-access style=\\"font-weight: 600;\\"
-                                target=\\"_blank\\" rel=\\"noopener\\">Learn more</a>."
-          `)
         );
     });
   });

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -96,12 +95,11 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should throw if called outside of a cases context', () => {
-    const { result } = renderHook(() => {
-      useCasesAddToExistingCaseModal(defaultParams());
-    });
-    expect(result.error?.message).toContain(
-      'useCasesContext must be used within a CasesProvider and have a defined value'
-    );
+    expect(() =>
+      renderHook(() => {
+        useCasesAddToExistingCaseModal(defaultParams());
+      })
+    ).toThrow(/useCasesContext must be used within a CasesProvider and have a defined value/);
   });
 
   it('should dispatch the open action when invoked', () => {

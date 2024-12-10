@@ -37,7 +37,7 @@ export const runKbnManifestCli = () => {
           --list all List all the manifests
           --package [packageId] Select a package to update.
           --plugin [pluginId] Select a plugin to update.
-          --set [property] [value] Set the desired "[property]": "[value]"
+          --set [property]=[value] Set the desired "[property]": "[value]"
           --unset [property] Removes the desired "[property]: value" from the manifest
         `,
       },

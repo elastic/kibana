@@ -37,7 +37,7 @@ import {
   VisualizeESQLUserIntention,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
@@ -47,19 +47,6 @@ import type {
   VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
-
-enum ChartType {
-  XY = 'XY',
-  Bar = 'Bar',
-  Line = 'Line',
-  Area = 'Area',
-  Donut = 'Donut',
-  Heatmap = 'Heat map',
-  Treemap = 'Treemap',
-  Tagcloud = 'Tag cloud',
-  Waffle = 'Waffle',
-  Table = 'Table',
-}
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -140,13 +127,13 @@ export function VisualizeESQL({
     (
       isLoading: boolean,
       adapters: InlineEditLensEmbeddableContext['lensEvent']['adapters'] | undefined,
-      lensEmbeddableOutput$?: InlineEditLensEmbeddableContext['lensEvent']['embeddableOutput$']
+      dataLoading$?: InlineEditLensEmbeddableContext['lensEvent']['dataLoading$']
     ) => {
       const adapterTables = adapters?.tables?.tables;
       if (adapterTables && !isLoading) {
         setLensLoadEvent({
           adapters,
-          embeddableOutput$: lensEmbeddableOutput$,
+          dataLoading$,
         });
       }
     },

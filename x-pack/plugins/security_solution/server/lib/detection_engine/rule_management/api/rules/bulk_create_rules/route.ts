@@ -31,14 +31,20 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../.
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ *
+ * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
 export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_CREATE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
@@ -60,7 +66,7 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const ruleDefinitions = request.body;

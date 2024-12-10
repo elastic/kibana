@@ -10,7 +10,8 @@ import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { InferenceUsageInfo } from '../../../../types';
 import * as i18n from '../delete/confirm_delete_endpoint/translations';
-import { UsageItem } from './usage_item';
+import { IndexItem } from './index_item';
+import { PipelineItem } from './pipeline_item';
 
 interface ListUsageResultsProps {
   list: InferenceUsageInfo[];
@@ -35,9 +36,13 @@ export const ListUsageResults: React.FC<ListUsageResultsProps> = ({ list }) => {
       <EuiFlexItem>
         {list
           .filter((item) => item.id.toLowerCase().includes(term.toLowerCase()))
-          .map((item, id) => (
-            <UsageItem usageItem={item} key={id} />
-          ))}
+          .map((item, id) => {
+            if (item.type === 'Pipeline') {
+              return <PipelineItem usageItem={item} key={id} />;
+            } else {
+              return <IndexItem usageItem={item} key={id} />;
+            }
+          })}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

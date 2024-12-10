@@ -6,144 +6,82 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from './use_kibana';
-import { PlaygroundProvider } from '../providers/playground_provider';
-import React from 'react';
-import * as ReactHookForm from 'react-hook-form';
-
-jest.mock('./use_kibana', () => ({
-  useKibana: jest.fn(),
-}));
-jest.mock('react-router-dom-v5-compat', () => ({
-  useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
-}));
-
-let formHookSpy: jest.SpyInstance;
-
+import { useUsageTracker } from './use_usage_tracker';
+import { useController } from 'react-hook-form';
+import { useIndicesFields } from './use_indices_fields';
+import { AnalyticsEvents } from '../analytics/constants';
 import { useSourceIndicesFields } from './use_source_indices_field';
-import { IndicesQuerySourceFields } from '../types';
 
-// Failing: See https://github.com/elastic/kibana/issues/188840
-describe.skip('useSourceIndicesFields Hook', () => {
-  let postMock: jest.Mock;
+jest.mock('./use_usage_tracker');
+jest.mock('react-hook-form');
+jest.mock('./use_indices_fields');
 
-  beforeEach(() => {
-    // Playground Provider has the formProvider which
-    // persists the form state into local storage
-    // We need to clear the local storage before each test
-    localStorage.clear();
-  });
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <PlaygroundProvider>{children}</PlaygroundProvider>
-  );
+describe('useSourceIndicesFields', () => {
+  const mockUsageTracker = {
+    count: jest.fn(),
+  };
+  const mockOnChange = jest.fn();
+  const mockFields = ['field1', 'field2'];
+  const mockSelectedIndices = ['index1', 'index2'];
 
   beforeEach(() => {
-    formHookSpy = jest.spyOn(ReactHookForm, 'useForm');
-    const querySourceFields: IndicesQuerySourceFields = {
-      newIndex: {
-        elser_query_fields: [
-          {
-            field: 'field1',
-            model_id: 'model1',
-            indices: ['newIndex'],
-            sparse_vector: true,
-          },
-        ],
-        dense_vector_query_fields: [],
-        bm25_query_fields: [],
-        source_fields: ['field1'],
-        skipped_fields: 0,
-        semantic_fields: [],
-      },
-    };
-
-    postMock = jest.fn().mockResolvedValue(querySourceFields);
-    (useKibana as jest.Mock).mockImplementation(() => ({
-      services: {
-        http: {
-          post: postMock,
-          get: jest.fn(() => {
-            return [];
-          }),
-        },
-      },
-    }));
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    (useUsageTracker as jest.Mock).mockReturnValue(mockUsageTracker);
+    (useController as jest.Mock).mockReturnValue({
+      field: { value: mockSelectedIndices, onChange: mockOnChange },
+    });
+    (useIndicesFields as jest.Mock).mockReturnValue({
+      fields: mockFields,
+      isLoading: false,
+    });
   });
 
-  it('should handle addIndex correctly changing indices', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useSourceIndicesFields(), { wrapper });
-    const { getValues } = formHookSpy.mock.results[0].value;
+  it('should initialize correctly', () => {
+    const { result } = renderHook(() => useSourceIndicesFields());
 
+    expect(result.current.indices).toEqual(mockSelectedIndices);
+    expect(result.current.fields).toEqual(mockFields);
+    expect(result.current.isFieldsLoading).toBe(false);
+  });
+
+  it('should add an index', () => {
+    const { result } = renderHook(() => useSourceIndicesFields());
     act(() => {
-      expect(result.current.indices).toEqual([]);
-      expect(getValues()).toMatchInlineSnapshot(`
-        Object {
-          "doc_size": 3,
-          "elasticsearch_query": Object {
-            "retriever": Object {
-              "standard": Object {
-                "query": Object {
-                  "match_all": Object {},
-                },
-              },
-            },
-          },
-          "indices": Array [],
-          "prompt": "You are an assistant for question-answering tasks.",
-          "query_fields": Object {},
-          "source_fields": Object {},
-          "summarization_model": undefined,
-        }
-      `);
       result.current.addIndex('newIndex');
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
-      expect(result.current.indices).toEqual(['newIndex']);
+    expect(mockOnChange).toHaveBeenCalledWith([...mockSelectedIndices, 'newIndex']);
+    expect(mockUsageTracker.count).toHaveBeenCalledWith(
+      AnalyticsEvents.sourceIndexUpdated,
+      mockSelectedIndices.length + 1
+    );
+  });
+
+  it('should remove an index', () => {
+    const { result } = renderHook(() => useSourceIndicesFields());
+    act(() => {
+      result.current.removeIndex('index1');
     });
 
-    expect(postMock).toHaveBeenCalled();
+    expect(mockOnChange).toHaveBeenCalledWith(['index2']);
+    expect(mockUsageTracker.count).toHaveBeenCalledWith(
+      AnalyticsEvents.sourceIndexUpdated,
+      mockSelectedIndices.length - 1
+    );
+  });
 
-    await act(async () => {
-      expect(getValues()).toMatchInlineSnapshot(`
-        Object {
-          "doc_size": 3,
-          "elasticsearch_query": Object {
-            "retriever": Object {
-              "standard": Object {
-                "query": Object {
-                  "sparse_vector": Object {
-                    "field": "field1",
-                    "inference_id": "model1",
-                    "query": "{query}",
-                  },
-                },
-              },
-            },
-          },
-          "indices": Array [
-            "newIndex",
-          ],
-          "prompt": "You are an assistant for question-answering tasks.",
-          "query_fields": Object {
-            "newIndex": Array [
-              "field1",
-            ],
-          },
-          "source_fields": Object {
-            "newIndex": Array [
-              "field1",
-            ],
-          },
-          "summarization_model": undefined,
-        }
-      `);
+  it('should set indices', () => {
+    const { result } = renderHook(() => useSourceIndicesFields());
+    const newIndices = ['index3', 'index4'];
+
+    act(() => {
+      result.current.setIndices(newIndices);
     });
+
+    expect(mockOnChange).toHaveBeenCalledWith(newIndices);
+    expect(mockUsageTracker.count).toHaveBeenCalledWith(
+      AnalyticsEvents.sourceIndexUpdated,
+      newIndices.length
+    );
   });
 });

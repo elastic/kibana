@@ -16,7 +16,7 @@ import React, { useState, useCallback } from 'react';
 import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ChartData } from '../../../typings/slo';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';

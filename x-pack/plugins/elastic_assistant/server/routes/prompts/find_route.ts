@@ -18,15 +18,17 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsPromptsSchema } from '../../ai_assistant_data_clients/prompts/types';
 import { transformESSearchToPrompts } from '../../ai_assistant_data_clients/prompts/helpers';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .get({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(
@@ -44,13 +46,14 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 

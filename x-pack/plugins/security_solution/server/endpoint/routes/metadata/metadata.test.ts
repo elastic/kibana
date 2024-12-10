@@ -240,8 +240,8 @@ describe('test endpoint routes', () => {
       });
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
+      expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
       expect(mockResponse.ok).toBeCalled();
       const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as MetadataListResponse;
       expect(endpointResultList.data.length).toEqual(1);
@@ -614,8 +614,8 @@ describe('test endpoint routes', () => {
       expect(esClientMock.transform.getTransformStats).toHaveBeenCalledTimes(1);
       expect(routeConfig.options).toEqual({
         authRequired: true,
-        tags: ['access:securitySolution'],
       });
+      expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
       expect(mockResponse.ok).toBeCalled();
       const response = mockResponse.ok.mock.calls[0][0]?.body as TransformGetTransformStatsResponse;
       expect(response.count).toEqual(expectedResponse.count);

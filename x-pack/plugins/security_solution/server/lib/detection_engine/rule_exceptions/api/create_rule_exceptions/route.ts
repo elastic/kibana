@@ -36,8 +36,10 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
     .post({
       path: CREATE_RULE_EXCEPTIONS_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -61,7 +63,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             'licensing',
             'lists',
           ]);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 

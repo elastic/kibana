@@ -16,7 +16,17 @@ export const getUserUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLen
     fields: [
       collect({ field: 'user.domain' }),
       collect({ field: 'user.email' }),
-      collect({ field: 'user.full_name' }),
+      collect({
+        field: 'user.full_name',
+        mapping: {
+          type: 'keyword',
+          fields: {
+            text: {
+              type: 'match_only_text',
+            },
+          },
+        },
+      }),
       collect({ field: 'user.hash' }),
       collect({ field: 'user.id' }),
       collect({ field: 'user.roles' }),

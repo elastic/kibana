@@ -14,15 +14,12 @@ import {
   SparseEmbeddingParams,
   TextEmbeddingParams,
 } from '../../../common/inference/types';
-import { ConfigProperties } from '../lib/dynamic_config/types';
 
 export type InferenceActionParams =
   | { subAction: SUB_ACTION.COMPLETION; subActionParams: ChatCompleteParams }
   | { subAction: SUB_ACTION.RERANK; subActionParams: RerankParams }
   | { subAction: SUB_ACTION.SPARSE_EMBEDDING; subActionParams: SparseEmbeddingParams }
   | { subAction: SUB_ACTION.TEXT_EMBEDDING; subActionParams: TextEmbeddingParams };
-
-export type FieldsConfiguration = Record<string, ConfigProperties>;
 
 export interface Config {
   taskType: string;

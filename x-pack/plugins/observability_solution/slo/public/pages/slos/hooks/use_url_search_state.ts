@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
-import { useHistory } from 'react-router-dom';
-import { Filter } from '@kbn/es-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
 import type { GroupByField } from '../components/slo_list_group_by';
 import type { SLOView } from '../components/toggle_slo_view';

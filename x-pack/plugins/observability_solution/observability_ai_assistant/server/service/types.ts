@@ -8,7 +8,7 @@
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
+import { ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
@@ -17,7 +17,7 @@ import type {
 import type {
   Message,
   ObservabilityAIAssistantScreenContextRequest,
-  InstructionOrPlainText,
+  AdHocInstruction,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
@@ -47,7 +47,7 @@ export type FunctionCallChatFunction = (
     Parameters<ObservabilityAIAssistantClient['chat']>[1],
     'connectorId' | 'simulateFunctionCalling' | 'tracer'
   >
-) => Observable<ChatCompletionChunkEvent>;
+) => Observable<ChatEvent>;
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
   options: {
@@ -66,15 +66,17 @@ export interface FunctionHandler {
   respond: RespondFunction<any, FunctionResponse>;
 }
 
-export type InstructionOrCallback = InstructionOrPlainText | RegisterInstructionCallback;
+export type InstructionOrCallback = string | RegisterInstructionCallback;
 
 export type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
-}) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
+}) => string | string[] | undefined;
 
 export type RegisterInstruction = (...instruction: InstructionOrCallback[]) => void;
+
+export type RegisterAdHocInstruction = (...instruction: AdHocInstruction[]) => void;
 
 export type RegisterFunction = <
   TParameters extends CompatibleJSONSchema = any,

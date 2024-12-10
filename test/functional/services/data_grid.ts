@@ -102,9 +102,38 @@ export class DataGridService extends FtrService {
   public async resizeColumn(field: string, delta: number) {
     const header = await this.getHeaderElement(field);
     const originalWidth = (await header.getSize()).width;
-    const resizer = await header.findByCssSelector(
-      this.testSubjects.getCssSelector('dataGridColumnResizer')
-    );
+
+    let resizer: WebElementWrapper | undefined;
+
+    if (await this.testSubjects.exists('euiDataGridHeaderDroppable')) {
+      // if drag & drop is enabled for data grid columns
+      const headerDraggableColumns = await this.find.allByCssSelector(
+        '[data-test-subj="euiDataGridHeaderDroppable"] > div'
+      );
+      // searching for a common parent of the field column header and its resizer
+      const fieldHeader: WebElementWrapper | null | undefined = (
+        await Promise.all(
+          headerDraggableColumns.map(async (column) => {
+            const hasFieldColumn =
+              (await column.findAllByCssSelector(`[data-gridcell-column-id="${field}"]`)).length >
+              0;
+            return hasFieldColumn ? column : null;
+          })
+        )
+      ).find(Boolean);
+
+      resizer = await fieldHeader?.findByTestSubject('dataGridColumnResizer');
+    } else {
+      // if drag & drop is not enabled for data grid columns
+      resizer = await header.findByCssSelector(
+        this.testSubjects.getCssSelector('dataGridColumnResizer')
+      );
+    }
+
+    if (!resizer) {
+      throw new Error(`Unable to find column resizer for field ${field}`);
+    }
+
     await this.browser.dragAndDrop({ location: resizer }, { location: { x: delta, y: 0 } });
     return { originalWidth, newWidth: (await header.getSize()).width };
   }
@@ -137,14 +166,22 @@ export class DataGridService extends FtrService {
     );
   }
 
+  public async getCellElementByColumnName(rowIndex: number, columnName: string) {
+    return await this.find.byCssSelector(
+      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`
+    );
+  }
+
   private async getCellActionButton(
     rowIndex: number = 0,
-    columnIndex: number = 0,
+    { columnIndex = 0, columnName }: { columnIndex?: number; columnName?: string },
     selector: string
   ): Promise<WebElementWrapper> {
     let actionButton: WebElementWrapper | undefined;
     await this.retry.try(async () => {
-      const cell = await this.getCellElement(rowIndex, columnIndex);
+      const cell = columnName
+        ? await this.getCellElementByColumnName(rowIndex, columnName)
+        : await this.getCellElement(rowIndex, columnIndex);
       await cell.moveMouseTo();
       await cell.click();
       actionButton = await cell.findByTestSubject(selector);
@@ -159,11 +196,15 @@ export class DataGridService extends FtrService {
    * Clicks grid cell 'expand' action button
    * @param rowIndex data row index starting from 0 (0 means 1st row)
    * @param columnIndex column index starting from 0 (0 means 1st column)
+   * @param columnName column/field name
    */
-  public async clickCellExpandButton(rowIndex: number = 0, columnIndex: number = 0) {
+  public async clickCellExpandButton(
+    rowIndex: number = 0,
+    { columnIndex = 0, columnName }: { columnIndex?: number; columnName?: string }
+  ) {
     const actionButton = await this.getCellActionButton(
       rowIndex,
-      columnIndex,
+      { columnIndex, columnName },
       'euiDataGridCellExpandButton'
     );
     await actionButton.moveMouseTo();
@@ -183,7 +224,7 @@ export class DataGridService extends FtrService {
     columnIndex: number = 0
   ) {
     const controlsCount = await this.getControlColumnsCount();
-    await this.clickCellExpandButton(rowIndex, controlsCount + columnIndex);
+    await this.clickCellExpandButton(rowIndex, { columnIndex: controlsCount + columnIndex });
   }
 
   /**
@@ -209,7 +250,11 @@ export class DataGridService extends FtrService {
    * @param columnIndex column index starting from 0 (0 means 1st column)
    */
   public async clickCellFilterForButton(rowIndex: number = 0, columnIndex: number = 0) {
-    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterForButton');
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      { columnIndex },
+      'filterForButton'
+    );
     await actionButton.moveMouseTo();
     await actionButton.click();
   }
@@ -226,7 +271,7 @@ export class DataGridService extends FtrService {
     const controlsCount = await this.getControlColumnsCount();
     const actionButton = await this.getCellActionButton(
       rowIndex,
-      controlsCount + columnIndex,
+      { columnIndex: controlsCount + columnIndex },
       'filterForButton'
     );
     await actionButton.moveMouseTo();
@@ -234,7 +279,11 @@ export class DataGridService extends FtrService {
   }
 
   public async clickCellFilterOutButton(rowIndex: number = 0, columnIndex: number = 0) {
-    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterOutButton');
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      { columnIndex },
+      'filterOutButton'
+    );
     await actionButton.moveMouseTo();
     await actionButton.click();
   }
@@ -246,7 +295,7 @@ export class DataGridService extends FtrService {
     const controlsCount = await this.getControlColumnsCount();
     const actionButton = await this.getCellActionButton(
       rowIndex,
-      controlsCount + columnIndex,
+      { columnIndex: controlsCount + columnIndex },
       'filterOutButton'
     );
     await actionButton.moveMouseTo();
@@ -450,14 +499,6 @@ export class DataGridService extends FtrService {
     return await detailsRow.findAllByTestSubject('~docTableRowAction');
   }
 
-  public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
-    const table = await this.getTable();
-
-    return await table.findByCssSelector(
-      '[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]'
-    );
-  }
-
   public async openColMenuByField(field: string) {
     await this.retry.waitFor('header cell action being displayed', async () => {
       // to prevent flakiness
@@ -620,24 +661,6 @@ export class DataGridService extends FtrService {
       'a',
     ]);
     await sampleSizeInput.type(String(newValue));
-  }
-
-  public async getDetailsRow(): Promise<WebElementWrapper> {
-    const detailRows = await this.getDetailsRows();
-    return detailRows[0];
-  }
-
-  public async getTableDocViewRow(
-    detailsRow: WebElementWrapper,
-    fieldName: string
-  ): Promise<WebElementWrapper> {
-    return await detailsRow.findByTestSubject(`~tableDocViewRow-${fieldName}`);
-  }
-
-  public async getRemoveInclusiveFilterButton(
-    tableDocViewRow: WebElementWrapper
-  ): Promise<WebElementWrapper> {
-    return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
   }
 
   public async showFieldCellActionInFlyout(fieldName: string, actionName: string): Promise<void> {

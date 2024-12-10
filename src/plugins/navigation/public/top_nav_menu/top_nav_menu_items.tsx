@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBreakpointSize, EuiHeaderLinks } from '@elastic/eui';
+import { EuiBreakpointSize, EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
 import React from 'react';
 import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
+
+const POPOVER_BREAKPOINTS: EuiBreakpointSize[] = ['xs', 's'];
 
 interface TopNavMenuItemsProps {
   config: TopNavMenuData[] | undefined;
@@ -21,8 +23,10 @@ interface TopNavMenuItemsProps {
 export const TopNavMenuItems = ({
   config,
   className,
-  popoverBreakpoints,
+  popoverBreakpoints = POPOVER_BREAKPOINTS,
 }: TopNavMenuItemsProps) => {
+  const isMobileMenu = useIsWithinBreakpoints(popoverBreakpoints);
+
   if (!config || config.length === 0) return null;
   return (
     <EuiHeaderLinks
@@ -32,7 +36,7 @@ export const TopNavMenuItems = ({
       popoverBreakpoints={popoverBreakpoints}
     >
       {config.map((menuItem: TopNavMenuData, i: number) => {
-        return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
+        return <TopNavMenuItem key={`nav-menu-${i}`} isMobileMenu={isMobileMenu} {...menuItem} />;
       })}
     </EuiHeaderLinks>
   );

@@ -17,7 +17,11 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -28,7 +32,11 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        'ABC-abc': 'average(system.cpu.system.pct)',
+        'ABC-abc': {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
       },
     });
     expect(parser.parse()).toEqual('100*average(system.cpu.system.pct)');
@@ -38,8 +46,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -52,9 +68,21 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
-        C: 'average(system.cpu.cores)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
+        C: {
+          operationWithField: 'average(system.cpu.cores)',
+          operation: 'average',
+          sourceField: 'system.cpu.cores',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -67,7 +95,11 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -79,8 +111,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -93,8 +133,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -107,8 +155,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -121,8 +177,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -135,8 +199,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -149,8 +221,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -163,8 +243,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -178,8 +266,16 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        aa: 'average(system.cpu.system.pct)',
-        baa: 'average(system.cpu.user.pct)',
+        aa: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        baa: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
       },
     });
     expect(parser.parse()).toEqual(
@@ -193,12 +289,36 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
-        C: 'average(system.cpu.total.pct)',
-        D: 'average(system.cpu.cores)',
-        E: 'count()',
-        F: 'sum(system.cpu.total.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
+        C: {
+          operationWithField: 'average(system.cpu.total.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.total.pct',
+        },
+        D: {
+          operationWithField: 'average(system.cpu.cores)',
+          operation: 'average',
+          sourceField: 'system.cpu.cores',
+        },
+        E: {
+          operationWithField: 'count()',
+          operation: 'count',
+          sourceField: '',
+        },
+        F: {
+          operationWithField: 'sum(system.cpu.total.pct)',
+          operation: 'sum',
+          sourceField: 'system.cpu.total.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor
@@ -213,12 +333,36 @@ describe('PainlessTinyMathParser', () => {
     const parser = new PainlessTinyMathParser({
       equation,
       aggMap: {
-        A: 'average(system.cpu.system.pct)',
-        B: 'average(system.cpu.user.pct)',
-        C: 'average(system.cpu.total.pct)',
-        D: 'average(system.cpu.cores)',
-        E: 'count()',
-        F: 'sum(system.cpu.total.pct)',
+        A: {
+          operationWithField: 'average(system.cpu.system.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.system.pct',
+        },
+        B: {
+          operationWithField: 'average(system.cpu.user.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.user.pct',
+        },
+        C: {
+          operationWithField: 'average(system.cpu.total.pct)',
+          operation: 'average',
+          sourceField: 'system.cpu.total.pct',
+        },
+        D: {
+          operationWithField: 'average(system.cpu.cores)',
+          operation: 'average',
+          sourceField: 'system.cpu.cores',
+        },
+        E: {
+          operationWithField: 'count()',
+          operation: 'count',
+          sourceField: '',
+        },
+        F: {
+          operationWithField: 'sum(system.cpu.total.pct)',
+          operation: 'sum',
+          sourceField: 'system.cpu.total.pct',
+        },
       },
     });
     // ✅ checked with Lens Formula editor

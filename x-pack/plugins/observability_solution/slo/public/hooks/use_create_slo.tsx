@@ -15,9 +15,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import { paths } from '../../common/locators/paths';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -29,6 +30,7 @@ export function useCreateSlo() {
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const services = useKibana().services;
   const queryClient = useQueryClient();
 
@@ -40,8 +42,7 @@ export function useCreateSlo() {
   >(
     ['createSlo'],
     ({ slo }) => {
-      const body = JSON.stringify(slo);
-      return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
+      return sloClient.fetch(`POST /api/observability/slos 2023-10-31`, { params: { body: slo } });
     },
     {
       onSuccess: (data, { slo }) => {

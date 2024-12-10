@@ -50,11 +50,16 @@ export const DashboardListingPage = ({
   }, []);
 
   useEffect(() => {
-    coreServices.chrome.setBreadcrumbs([
+    coreServices.chrome.setBreadcrumbs(
+      [
+        {
+          text: getDashboardBreadcrumb(),
+        },
+      ],
       {
-        text: getDashboardBreadcrumb(),
-      },
-    ]);
+        project: { value: [] },
+      }
+    );
 
     if (serverlessService) {
       // if serverless breadcrumbs available,

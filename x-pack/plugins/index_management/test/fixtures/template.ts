@@ -23,6 +23,7 @@ export const getComposableTemplate = ({
   isLegacy = false,
   type = 'default',
   allowAutoCreate = 'NO_OVERWRITE',
+  indexMode = 'standard',
   composedOf = [],
 }: Partial<
   TemplateDeserialized & {
@@ -42,6 +43,7 @@ export const getComposableTemplate = ({
     version,
     priority,
     indexPatterns,
+    indexMode,
     allowAutoCreate,
     template: {
       aliases,
@@ -66,6 +68,7 @@ export const getTemplate = ({
   order = getRandomNumber(),
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
+  indexMode = 'standard',
   dataStream,
   composedOf,
   ignoreMissingComponentTemplates,
@@ -85,6 +88,7 @@ export const getTemplate = ({
     version,
     order,
     indexPatterns,
+    indexMode,
     allowAutoCreate,
     template: {
       aliases,

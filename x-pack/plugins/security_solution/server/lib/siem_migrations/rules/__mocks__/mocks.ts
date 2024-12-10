@@ -5,17 +5,30 @@
  * 2.0.
  */
 
-import type { SiemRuleMigrationsClient } from '../types';
+import { mockRuleMigrationsDataClient } from '../data/__mocks__/mocks';
+import { mockRuleMigrationsTaskClient } from '../task/__mocks__/mocks';
 
-export const createRuleMigrationClient = (): SiemRuleMigrationsClient => ({
-  create: jest.fn().mockResolvedValue({ success: true }),
-  search: jest.fn().mockResolvedValue([]),
+export const createRuleMigrationDataClient = jest
+  .fn()
+  .mockImplementation(() => mockRuleMigrationsDataClient);
+
+export const createRuleMigrationTaskClient = jest
+  .fn()
+  .mockImplementation(() => mockRuleMigrationsTaskClient);
+
+export const createRuleMigrationClient = () => ({
+  data: createRuleMigrationDataClient(),
+  task: createRuleMigrationTaskClient(),
 });
 
+export const MockSiemRuleMigrationsClient = jest.fn().mockImplementation(createRuleMigrationClient);
+
 export const mockSetup = jest.fn();
-export const mockGetClient = jest.fn().mockReturnValue(createRuleMigrationClient());
+export const mockCreateClient = jest.fn().mockReturnValue(createRuleMigrationClient());
+export const mockStop = jest.fn();
 
 export const MockSiemRuleMigrationsService = jest.fn().mockImplementation(() => ({
   setup: mockSetup,
-  getClient: mockGetClient,
+  createClient: mockCreateClient,
+  stop: mockStop,
 }));

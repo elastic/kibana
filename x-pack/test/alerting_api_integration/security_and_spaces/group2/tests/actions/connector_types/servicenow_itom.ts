@@ -440,7 +440,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
@@ -459,7 +459,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
@@ -482,7 +482,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                   connector_id: simulatedActionId,
                   status: 'error',
                   retry: false,
-                  errorSource: TaskErrorSource.FRAMEWORK,
+                  errorSource: TaskErrorSource.USER,
                   message:
                     'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subActionParams.fields]: expected value of type [array] but got [undefined]',
                 });

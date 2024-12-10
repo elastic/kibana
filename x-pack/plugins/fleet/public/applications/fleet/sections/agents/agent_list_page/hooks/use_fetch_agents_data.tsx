@@ -52,6 +52,7 @@ function useFullAgentPolicyFetcher() {
       if (policiesToFetchIds.length) {
         const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPolicies(policiesToFetchIds, {
           full: authz.fleet.readAgentPolicies,
+          ignoreMissing: true,
         });
 
         if (bulkGetAgentPoliciesResponse.error) {
@@ -84,6 +85,16 @@ function useFullAgentPolicyFetcher() {
   );
 }
 
+const VERSION_FIELD = 'local_metadata.elastic.agent.version';
+const HOSTNAME_FIELD = 'local_metadata.host.hostname';
+
+export const getSortFieldForAPI = (field: string): string => {
+  if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field)) {
+    return `${field}.keyword`;
+  }
+  return field;
+};
+
 export function useFetchAgentsData() {
   const fullAgentPolicyFecher = useFullAgentPolicyFetcher();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
@@ -104,9 +115,6 @@ export function useFetchAgentsData() {
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  const VERSION_FIELD = 'local_metadata.elastic.agent.version';
-  const HOSTNAME_FIELD = 'local_metadata.host.hostname';
 
   // Policies state for filtering
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
@@ -175,13 +183,6 @@ export function useFetchAgentsData() {
   }>({});
 
   const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
-
-  const getSortFieldForAPI = (field: keyof Agent): string => {
-    if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
-      return `${field}.keyword`;
-    }
-    return field;
-  };
 
   const isLoadingVar = useRef<boolean>(false);
 
@@ -306,14 +307,18 @@ export function useFetchAgentsData() {
             setTotalManagedAgentIds([]);
             setManagedAgentsOnCurrentPage(0);
           } else {
-            // Find all the agents that have managed policies and are not unenrolled
-            const policiesKuery = managedAgentPolicies
-              .map((policy) => `policy_id:"${policy.id}"`)
-              .join(' or ');
+            // Find all the agents that have managed policies
+            // to the correct ids we need to build the kuery applying the same filters as the global ones
+            const managedPoliciesKuery = getKuery({
+              search,
+              selectedAgentPolicies: managedAgentPolicies.map((policy) => policy.id),
+              selectedTags,
+              selectedStatus,
+            });
             const response = await sendGetAgents({
-              kuery: `NOT (status:unenrolled) and ${policiesKuery}`,
+              kuery: `${managedPoliciesKuery}`,
               perPage: SO_SEARCH_LIMIT,
-              showInactive: true,
+              showInactive,
             });
             if (response.error) {
               throw new Error(response.error.message);
@@ -350,7 +355,6 @@ export function useFetchAgentsData() {
       fetchDataAsync();
     },
     [
-      fullAgentPolicyFecher,
       pagination.currentPage,
       pagination.pageSize,
       kuery,
@@ -359,8 +363,12 @@ export function useFetchAgentsData() {
       showInactive,
       showUpgradeable,
       displayAgentMetrics,
+      fullAgentPolicyFecher,
       allTags,
       latestAgentActionErrors,
+      search,
+      selectedTags,
+      selectedStatus,
       notifications.toasts,
     ]
   );

@@ -16,6 +16,10 @@ interface RelatedIntegrationsReadOnly {
 }
 
 export function RelatedIntegrationsReadOnly({ relatedIntegrations }: RelatedIntegrationsReadOnly) {
+  if (!relatedIntegrations.length) {
+    return null;
+  }
+
   return (
     <EuiDescriptionList
       listItems={[

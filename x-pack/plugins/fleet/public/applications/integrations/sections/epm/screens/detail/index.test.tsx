@@ -7,7 +7,7 @@
 
 import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
-import { act, cleanup } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
@@ -65,10 +65,6 @@ describe('When on integration detail', () => {
     act(() => testRenderer.mountHistory.push(detailPageUrlPath));
   });
 
-  afterEach(() => {
-    cleanup();
-  });
-
   describe('and the package is installed', () => {
     beforeEach(async () => {
       await render();
@@ -106,7 +102,7 @@ describe('When on integration detail', () => {
   describe('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
       mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: true, id: '', fleet_server_hosts: [] },
+        item: { prerelease_integrations_enabled: true, id: '' },
       });
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
@@ -145,7 +141,7 @@ describe('When on integration detail', () => {
     beforeEach(async () => {
       mockGAAndPrereleaseVersions('1.0.0');
       mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+        item: { prerelease_integrations_enabled: false, id: '' },
       });
       await render();
       await act(() => mockedApi.waitForApi());
@@ -172,7 +168,7 @@ describe('When on integration detail', () => {
   describe('and a custom UI extension is NOT registered', () => {
     beforeEach(async () => {
       mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+        item: { prerelease_integrations_enabled: false, id: '' },
       });
       await render();
       await act(() => mockedApi.waitForApi());
@@ -211,7 +207,7 @@ describe('When on integration detail', () => {
     beforeEach(async () => {
       let setWasRendered: () => void;
       mockedApi.responseProvider.getSettings.mockReturnValue({
-        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+        item: { prerelease_integrations_enabled: false, id: '' },
       });
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;

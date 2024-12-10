@@ -12,17 +12,24 @@ import { IndexEntryEditor } from './index_entry_editor';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
+import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
+import { HttpSetup } from '@kbn/core-http-browser';
+
+jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
 
 describe('IndexEntryEditor', () => {
   const mockSetEntry = jest.fn();
   const mockDataViews = {
-    getIndices: jest.fn().mockResolvedValue([{ name: 'index-1' }, { name: 'index-2' }]),
     getFieldsForWildcard: jest.fn().mockResolvedValue([
       { name: 'field-1', esTypes: ['semantic_text'] },
       { name: 'field-2', esTypes: ['text'] },
       { name: 'field-3', esTypes: ['semantic_text'] },
     ]),
+    getExistingIndices: jest.fn().mockResolvedValue(['index-1']),
   } as unknown as DataViewsContract;
+  const http = {
+    get: jest.fn(),
+  } as unknown as HttpSetup;
 
   const defaultProps = {
     dataViews: mockDataViews,
@@ -36,10 +43,14 @@ describe('IndexEntryEditor', () => {
       queryDescription: 'Test Query Description',
       users: [],
     } as unknown as IndexEntry,
+    http,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
+      data: { indices: ['index-1', 'index-2'] },
+    });
   });
 
   it('renders the form fields with initial values', async () => {
@@ -101,7 +112,6 @@ describe('IndexEntryEditor', () => {
     const { getAllByTestId, getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
 
     await waitFor(() => {
-      expect(mockDataViews.getIndices).toHaveBeenCalled();
       fireEvent.click(getByTestId('index-combobox'));
       fireEvent.click(getAllByTestId('comboBoxToggleListButton')[0]);
       fireEvent.click(getByTestId('index-2'));
@@ -146,5 +156,21 @@ describe('IndexEntryEditor', () => {
     waitFor(() => {
       expect(getByRole('combobox', { name: i18n.ENTRY_FIELD_PLACEHOLDER })).toBeDisabled();
     });
+  });
+
+  it('fetches index options and updates on selection 2', async () => {
+    (mockDataViews.getExistingIndices as jest.Mock).mockResolvedValue([]);
+    const { getByText } = render(
+      <IndexEntryEditor
+        {...defaultProps}
+        entry={{ ...defaultProps.entry, index: 'missing-index' }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockDataViews.getExistingIndices).toHaveBeenCalled();
+    });
+
+    expect(getByText("Index doesn't exist")).toBeInTheDocument();
   });
 });

@@ -34,8 +34,12 @@ export const installPrepackedTimelinesRoute = (
   router.versioned
     .post({
       path: `${TIMELINE_PREPACKAGED_URL}`,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         body: {
           maxBytes: config.maxTimelineImportPayloadBytes,
           output: 'stream',

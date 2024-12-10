@@ -497,7 +497,7 @@ export const DocViewerTable = ({
       </EuiFlexItem>
 
       {rows.length === 0 ? (
-        <EuiSelectableMessage style={{ minHeight: 300 }}>
+        <EuiSelectableMessage css={{ minHeight: 300 }}>
           <p>
             <EuiI18n
               token="unifiedDocViewer.docViews.table.noFieldFound"

@@ -11,15 +11,15 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 export default function indexTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('index action', () => {
-    it('should return 200 when creating an index action', async () => {
-      // create action with no config
+  describe('index connector', () => {
+    it('should return 200 when creating an index connector', async () => {
+      // create connector with no config
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'An index action',
-          actionTypeId: '.index',
+          name: 'An index connector',
+          connector_type_id: '.index',
           config: {
             index: 'foo',
           },

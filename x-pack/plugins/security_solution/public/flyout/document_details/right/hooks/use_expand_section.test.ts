@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseExpandSectionParams } from './use_expand_section';
 import { useExpandSection } from './use_expand_section';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -14,7 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
 describe('useExpandSection', () => {
-  let hookResult: RenderHookResult<UseExpandSectionParams, boolean>;
+  let hookResult: RenderHookResult<boolean, UseExpandSectionParams>;
 
   it('should return default value if nothing in localStorage', () => {
     (useKibana as jest.Mock).mockReturnValue({

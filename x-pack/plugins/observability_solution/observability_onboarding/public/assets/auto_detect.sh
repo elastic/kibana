@@ -257,7 +257,15 @@ install_integrations() {
   local install_integrations_api_body_string=""
 
   for item in "${selected_known_integrations_array[@]}"; do
-    install_integrations_api_body_string+="$item\tregistry\n"
+    local metadata=""
+
+    case "$item" in
+    "system")
+      metadata="\t$(hostname | tr '[:upper:]' '[:lower:]')"
+      ;;
+    esac
+
+    install_integrations_api_body_string+="$item\tregistry$metadata\n"
   done
 
   for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
@@ -317,15 +325,32 @@ apply_elastic_agent_config() {
 
 read_open_log_file_list() {
   local exclude_patterns=(
-    "^\/Users\/.+?\/Library\/Application Support"
-    "^\/Users\/.+?\/Library\/Group Containers"
-    "^\/Users\/.+?\/Library\/Containers"
-    "^\/Users\/.+?\/Library\/Caches"
-    "^\/private"
+    "^\/Users\/.+?\/Library\/Application Support\/"
+    "^\/Users\/.+?\/Library\/Group Containers\/"
+    "^\/Users\/.+?\/Library\/Containers\/"
+    "^\/Users\/.+?\/Library\/Caches\/"
+    "^\/private\/"
+
+    # Integrations only ingest a subset of application logs so there are scenarios where additional
+    # log files could be detected and displayed as a "custom log" alongside the detected integration
+    # they belong to. To avoid this UX issue we exclude all log files inside application directories
+    # from the custom log file detection
+    "^\/var\/log\/nginx\/"
+    "^\/var\/log\/apache2\/"
+    "^\/var\/log\/httpd\/"
+    "^\/var\/log\/mysql\/"
+    "^\/var\/log\/postgresql\/"
+    "^\/var\/log\/redis\/"
+    "^\/var\/log\/rabbitmq\/"
+    "^\/var\/log\/kafka\/"
+    "^\/var\/lib\/docker\/"
+    "^\/var\/log\/mongodb\/"
+    "^\/opt\/tomcat\/logs\/"
+    "^\/var\/log\/prometheus\/"
 
     # Exclude previous installation logs
-    "\/opt\/Elastic\/Agent\/"
-    "\/Library\/Elastic\/Agent\/"
+    "^\/opt\/Elastic\/Agent\/"
+    "^\/Library\/Elastic\/Agent\/"
   )
 
   # Excluding all patterns that correspond to known integrations

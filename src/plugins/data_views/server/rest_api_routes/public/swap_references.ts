@@ -70,6 +70,14 @@ export const swapReferencesRoute =
     router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            // We don't use the indexPatterns:manage privilege for this route because it can be used for saved object
+            // types other than index-pattern
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           request: {
             body: schema.object({

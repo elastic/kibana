@@ -9,10 +9,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type {
-  PluginSetupContract as AlertingPluginSetup,
-  PluginStartContract as AlertingPluginStart,
-} from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
@@ -37,6 +34,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppServerStart {}
@@ -46,7 +44,7 @@ export interface ObservabilityAIAssistantAppServerSetup {}
 export interface ObservabilityAIAssistantAppPluginStartDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantServerStart;
   ruleRegistry: RuleRegistryPluginStartContract;
-  alerting: AlertingPluginStart;
+  alerting: AlertingServerStart;
   licensing: LicensingPluginStart;
   actions: ActionsPluginStart;
   security: SecurityPluginStart;
@@ -57,12 +55,13 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   inference: InferenceServerStart;
   logsDataAccess: LogsDataAccessPluginStart;
+  llmTasks: LlmTasksPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   observabilityAIAssistant: ObservabilityAIAssistantServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  alerting: AlertingPluginSetup;
+  alerting: AlertingServerSetup;
   licensing: LicensingPluginSetup;
   actions: ActionsPluginSetup;
   security: SecurityPluginSetup;

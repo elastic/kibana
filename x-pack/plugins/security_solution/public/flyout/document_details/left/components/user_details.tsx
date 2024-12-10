@@ -25,8 +25,8 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
@@ -69,6 +69,7 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -133,7 +134,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         banner: USER_PREVIEW_BANNER,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });
@@ -359,6 +360,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
             name={userName}
             direction="column"
             data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'user-details'}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />

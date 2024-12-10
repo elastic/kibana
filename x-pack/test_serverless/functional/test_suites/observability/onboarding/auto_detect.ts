@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         .set('Content-Type', 'text/tab-separated-values')
         .set('x-elastic-internal-origin', 'Kibana')
         .set('kbn-xsrf', 'true')
-        .send('system\tregistry\n')
+        .send('system\tregistry\ttest-host\n')
         .expect(200);
 
       // Simulate bash script installing Elastic Agent

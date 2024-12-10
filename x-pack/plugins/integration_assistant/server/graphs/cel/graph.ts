@@ -104,6 +104,6 @@ export async function getCelGraph({ model }: CelInputGraphParams) {
     .addEdge('handleGetStateVariables', 'handleGetStateDetails')
     .addEdge('handleGetStateDetails', 'modelOutput');
 
-  const compiledCelGraph = workflow.compile().withConfig({ runName: 'CEL' });
+  const compiledCelGraph = workflow.compile();
   return compiledCelGraph;
 }

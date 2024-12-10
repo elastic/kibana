@@ -9,7 +9,7 @@
 
 import React, { FunctionComponent } from 'react';
 import * as ReactQuery from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { queryKeyPrefix, useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -38,10 +38,11 @@ describe('useVirtualDataViewQuery', () => {
 
   it('does not create a data view if indexNames is empty or nullish', () => {
     const { rerender } = renderHook(
-      ({ indexNames }: React.PropsWithChildren<{ indexNames: string[] }>) =>
+      ({ indexNames }: { indexNames?: string[] }) =>
         useVirtualDataViewQuery({ dataViewsService: mockDataViewsService, indexNames }),
       {
         wrapper,
+        initialProps: {},
       }
     );
 
@@ -89,7 +90,7 @@ describe('useVirtualDataViewQuery', () => {
   });
 
   it('removes the data view from the instance cache on unmount', async () => {
-    const { result, waitForValueToChange, unmount } = renderHook(
+    const { result, unmount } = renderHook(
       () =>
         useVirtualDataViewQuery({
           dataViewsService: mockDataViewsService,
@@ -100,10 +101,10 @@ describe('useVirtualDataViewQuery', () => {
       }
     );
 
-    await waitForValueToChange(() => result.current.data);
+    await waitFor(() => expect(result.current.data).toBeDefined());
 
     unmount();
 
-    expect(mockDataViewsService.clearInstanceCache).toHaveBeenCalled();
+    await waitFor(() => expect(mockDataViewsService.clearInstanceCache).toHaveBeenCalled());
   });
 });

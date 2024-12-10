@@ -81,6 +81,17 @@ function ChatContent({
     next(initialMessagesRef.current);
   }, [next]);
 
+  useEffect(() => {
+    if (state !== ChatState.Loading && lastAssistantResponse) {
+      chatService.sendAnalyticsEvent({
+        type: ObservabilityAIAssistantTelemetryEventType.InsightResponse,
+        payload: {
+          '@timestamp': lastAssistantResponse['@timestamp'],
+        },
+      });
+    }
+  }, [state, lastAssistantResponse, chatService]);
+
   return (
     <>
       <MessagePanel
@@ -128,6 +139,7 @@ function ChatContent({
                     service.conversations.openNewConversation({
                       messages,
                       title: defaultTitle,
+                      hideConversationList: true,
                     });
                   }}
                 />

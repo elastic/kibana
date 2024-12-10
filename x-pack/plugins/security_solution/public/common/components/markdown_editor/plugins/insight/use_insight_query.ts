@@ -41,7 +41,7 @@ export const useInsightQuery = ({
 }: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
-  const { browserFields, selectedPatterns, indexPattern, dataViewId } = useSourcererDataView(
+  const { browserFields, selectedPatterns, sourcererDataView, dataViewId } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const [hasError, setHasError] = useState(false);
@@ -51,7 +51,7 @@ export const useInsightQuery = ({
         const parsedCombinedQueries = combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern,
+          indexPattern: sourcererDataView,
           browserFields,
           filters,
           kqlQuery: {
@@ -66,7 +66,7 @@ export const useInsightQuery = ({
       setHasError(true);
       return null;
     }
-  }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern, filters]);
+  }, [browserFields, dataProviders, esQueryConfig, hasError, sourcererDataView, filters]);
 
   const [dataLoadingState, { events, totalCount }] = useTimelineEvents({
     dataViewId,

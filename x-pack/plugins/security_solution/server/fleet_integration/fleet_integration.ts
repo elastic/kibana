@@ -7,7 +7,7 @@
 
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostDeleteCallback,
@@ -27,8 +27,13 @@ import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type {
   PostAgentPolicyCreateCallback,
+  PostAgentPolicyPostUpdateCallback,
   PostAgentPolicyUpdateCallback,
+  PutPackagePolicyPostUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import type { EndpointInternalFleetServicesInterface } from '../endpoint/services/fleet';
+import type { EndpointAppContextService } from '../endpoint/endpoint_app_context_services';
+import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datastreams';
 import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
@@ -62,6 +67,32 @@ const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   return packagePolicy.package?.name === 'endpoint';
 };
 
+const getEndpointPolicyForAgentPolicy = async (
+  fleetServices: EndpointInternalFleetServicesInterface,
+  agentPolicy: AgentPolicy
+): Promise<PackagePolicy | undefined> => {
+  let agentPolicyIntegrations: PackagePolicy[] | undefined = agentPolicy.package_policies;
+
+  if (!agentPolicyIntegrations) {
+    const fullAgentPolicy = await fleetServices.agentPolicy.get(
+      fleetServices.savedObjects.createInternalScopedSoClient(),
+      agentPolicy.id,
+      true
+    );
+    agentPolicyIntegrations = fullAgentPolicy?.package_policies ?? [];
+  }
+
+  if (Array.isArray(agentPolicyIntegrations)) {
+    for (const integrationPolicy of agentPolicyIntegrations) {
+      if (isEndpointPackagePolicy(integrationPolicy)) {
+        return integrationPolicy;
+      }
+    }
+  }
+
+  return undefined;
+};
+
 const shouldUpdateMetaValues = (
   endpointPackagePolicy: PolicyConfig,
   currentLicenseType: string,
@@ -88,7 +119,7 @@ export const getPackagePolicyCreateCallback = (
   logger: Logger,
   manifestManager: ManifestManager,
   securitySolutionRequestContextFactory: IRequestContextFactory,
-  alerts: AlertsStartContract,
+  alerts: AlertingServerStart,
   licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
@@ -279,15 +310,46 @@ export const getPackagePolicyUpdateCallback = (
   };
 };
 
+export const getPackagePolicyPostUpdateCallback = (
+  endpointServices: EndpointAppContextService
+): PutPackagePolicyPostUpdateCallback => {
+  const logger = endpointServices.createLogger('endpointPackagePolicyPostUpdate');
+
+  return async (packagePolicy) => {
+    if (!isEndpointPackagePolicy(packagePolicy)) {
+      return packagePolicy;
+    }
+
+    logger.debug(`Processing endpoint integration policy (post update): ${packagePolicy.id}`);
+
+    // The check below will run in the background - we don't need to wait for it
+    createPolicyDataStreamsIfNeeded({
+      endpointServices,
+      endpointPolicyIds: [packagePolicy.id],
+    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+
+    return packagePolicy;
+  };
+};
+
 export const getPackagePolicyPostCreateCallback = (
-  logger: Logger,
-  exceptionsClient: ExceptionListClient | undefined
+  endpointServices: EndpointAppContextService
 ): PostPackagePolicyPostCreateCallback => {
+  const logger = endpointServices.createLogger('endpointPolicyPostCreate');
+  const exceptionsClient = endpointServices.getExceptionListsClient();
+
   return async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
     // We only care about Endpoint package policies
     if (!exceptionsClient || !isEndpointPackagePolicy(packagePolicy)) {
       return packagePolicy;
     }
+
+    // Check and create internal datastreams for this policy if needed.
+    // NOTE: we don't need for it to complete here, thus no `await`.
+    createPolicyDataStreamsIfNeeded({
+      endpointServices,
+      endpointPolicyIds: [packagePolicy.id],
+    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
 
     const integrationConfig = packagePolicy?.inputs[0]?.config?.integration_config;
 
@@ -349,6 +411,31 @@ export const getAgentPolicyUpdateCallback = (
     ) {
       throwAgentTamperProtectionUnavailableError(logger, agentPolicy.name, agentPolicy.id);
     }
+    return agentPolicy;
+  };
+};
+
+export const getAgentPolicyPostUpdateCallback = (
+  endpointServices: EndpointAppContextService
+): PostAgentPolicyPostUpdateCallback => {
+  const logger = endpointServices.createLogger('endpointPolicyPostUpdate');
+
+  return async (agentPolicy) => {
+    const fleetServices = endpointServices.getInternalFleetServices();
+    const endpointPolicy = await getEndpointPolicyForAgentPolicy(fleetServices, agentPolicy);
+
+    if (!endpointPolicy) {
+      return agentPolicy;
+    }
+
+    logger.debug(`Processing post-update to Fleet agent policy: [${agentPolicy.id}]`);
+
+    // We don't need to `await` for this function to execute. It can be done in the background
+    createPolicyDataStreamsIfNeeded({
+      endpointServices,
+      endpointPolicyIds: [endpointPolicy.id],
+    }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
+
     return agentPolicy;
   };
 };

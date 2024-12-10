@@ -98,6 +98,7 @@ describe('SavedObjectsService', () => {
       elasticsearch: elasticsearchMock,
       deprecations: deprecationsSetup,
       coreUsageData: createCoreUsageDataSetupMock(),
+      docLinks: docLinksServiceMock.createSetupContract(),
     };
   };
 
@@ -178,6 +179,18 @@ describe('SavedObjectsService', () => {
       await soService.setup(createSetupDeps());
 
       expect(registerRoutesMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
+    });
+
+    it('calls registerRoutes with docLinks', async () => {
+      const coreContext = createCoreContext();
+      const mockedLinks = docLinksServiceMock.createSetupContract();
+
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+
+      expect(registerRoutesMock).toHaveBeenCalledWith(
+        expect.objectContaining({ docLinks: mockedLinks })
+      );
     });
 
     describe('#setClientFactoryProvider', () => {

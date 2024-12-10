@@ -153,20 +153,17 @@ export class VisualizeChartPageObject extends FtrService {
     return values.sort((a, b) => a.x - b.x).map(({ y }) => y);
   }
 
-  private async toggleLegend(force = false) {
-    const isVisTypePieChart = await this.isNewLibraryChart(partitionVisChartSelector);
-    const legendSelector = force || isVisTypePieChart ? '.echLegend' : '.visLegend';
-
+  private async toggleLegend() {
     await this.retry.try(async () => {
-      const isVisible = await this.find.existsByCssSelector(legendSelector);
+      const isVisible = await this.find.existsByCssSelector('.echLegend');
       if (!isVisible) {
         await this.testSubjects.click('vislibToggleLegend');
       }
     });
   }
 
-  public async filterLegend(name: string, force = false) {
-    await this.toggleLegend(force);
+  public async filterLegend(name: string) {
+    await this.toggleLegend();
     await this.testSubjects.click(`legend-${name}`);
     // wait for a short amount of time for popover to stabilize as there is no good way to check for that
     await this.common.sleep(250);
@@ -189,23 +186,13 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async doesSelectedLegendColorExistForPie(matchingColor: string) {
-    if (await this.isNewLibraryChart(partitionVisChartSelector)) {
-      const hexMatchingColor = chroma(matchingColor).hex().toUpperCase();
-      const slices =
-        (await this.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]?.partitions ??
-        [];
-      return slices.some(({ color }) => {
-        return hexMatchingColor === chroma(color).hex().toUpperCase();
-      });
-    }
-
-    return await this.testSubjects.exists(`legendSelectedColor-${matchingColor}`);
-  }
-
-  public async expectError() {
-    if (!this.isNewLibraryChart(partitionVisChartSelector)) {
-      await this.testSubjects.existOrFail('vislibVisualizeError');
-    }
+    const hexMatchingColor = chroma(matchingColor).hex().toUpperCase();
+    const slices =
+      (await this.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]?.partitions ??
+      [];
+    return slices.some(({ color }) => {
+      return hexMatchingColor === chroma(color).hex().toUpperCase();
+    });
   }
 
   public async getVisualizationRenderingCount() {
@@ -305,17 +292,11 @@ export class VisualizeChartPageObject extends FtrService {
   public async openLegendOptionColorsForPie(name: string, chartSelector: string) {
     await this.waitForVisualizationRenderingStabilized();
     await this.retry.try(async () => {
-      if (await this.isNewLibraryChart(partitionVisChartSelector)) {
-        const chart = await this.find.byCssSelector(chartSelector);
-        const legendItemColor = await chart.findByCssSelector(
-          `[data-ech-series-name="${name}"] .echLegendItem__color`
-        );
-        await legendItemColor.click();
-      } else {
-        // This click has been flaky in opening the legend, hence the this.retry.  See
-        // https://github.com/elastic/kibana/issues/17468
-        await this.testSubjects.click(`legend-${name}`);
-      }
+      const chart = await this.find.byCssSelector(chartSelector);
+      const legendItemColor = await chart.findByCssSelector(
+        `[data-ech-series-name="${name}"] .echLegendItem__color`
+      );
+      await legendItemColor.click();
 
       await this.waitForVisualizationRenderingStabilized();
       // arbitrary color chosen, any available would do

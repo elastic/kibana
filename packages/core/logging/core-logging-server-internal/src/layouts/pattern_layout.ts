@@ -24,6 +24,7 @@ import {
 const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
 
 export const patternSchema = schema.string({
+  maxLength: 1000,
   validate: (string) => {
     DateConversion.validate!(string);
   },
