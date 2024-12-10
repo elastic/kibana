@@ -15,11 +15,10 @@ import {
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../locator';
 import type { NavigateToPath } from '../../contexts/kibana';
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import type { MlRoute } from '../router';
-import { createPath, PageLoader } from '../router';
+import { PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
@@ -35,7 +34,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   title: i18n.translate('xpack.ml.anomalyDetection.jobs.docTitle', {
     defaultMessage: 'Anomaly Detection Jobs',
   }),
-  path: createPath(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE),
+  path: '',
   render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),

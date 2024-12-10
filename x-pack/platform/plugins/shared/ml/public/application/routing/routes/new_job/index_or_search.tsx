@@ -106,109 +106,109 @@ export const indexOrSearchRouteFactory = (
   breadcrumbs: getBreadcrumbs(navigateToPath, basePath),
 });
 
-export const dataVizIndexOrSearchRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'data_view_datavisualizer',
-  path: createPath(ML_PAGES.DATA_VISUALIZER_INDEX_SELECT),
-  title: i18n.translate('xpack.ml.selectDataViewLabel', {
-    defaultMessage: 'Select Data View',
-  }),
-  render: (props, deps) => {
-    const button = (
-      <NavigateToPageButton
-        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
-        title={
-          <FormattedMessage
-            id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
-            defaultMessage="Use ES|QL"
-          />
-        }
-      />
-    );
-    return (
-      <PageWrapper
-        {...props}
-        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
-        deps={deps}
-        mode={MODE.DATAVISUALIZER}
-        extraButtons={button}
-      />
-    );
-  },
-  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
-});
+// export const dataVizIndexOrSearchRouteFactory = (
+//   navigateToPath: NavigateToPath,
+//   basePath: string
+// ): MlRoute => ({
+//   id: 'data_view_datavisualizer',
+//   path: createPath(ML_PAGES.DATA_VISUALIZER_INDEX_SELECT),
+//   title: i18n.translate('xpack.ml.selectDataViewLabel', {
+//     defaultMessage: 'Select Data View',
+//   }),
+//   render: (props, deps) => {
+//     const button = (
+//       <NavigateToPageButton
+//         nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
+//         title={
+//           <FormattedMessage
+//             id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
+//             defaultMessage="Use ES|QL"
+//           />
+//         }
+//       />
+//     );
+//     return (
+//       <PageWrapper
+//         {...props}
+//         nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
+//         deps={deps}
+//         mode={MODE.DATAVISUALIZER}
+//         extraButtons={button}
+//       />
+//     );
+//   },
+//   breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
+// });
 
-export const logRateAnalysisIndexOrSearchRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'data_view_log_rate_analysis',
-  path: createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT),
-  title: i18n.translate('xpack.ml.selectDataViewLabel', {
-    defaultMessage: 'Select Data View',
-  }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS)}
-      deps={deps}
-      mode={MODE.DATAVISUALIZER}
-    />
-  ),
-  breadcrumbs: getLogRateAnalysisBreadcrumbs(navigateToPath, basePath),
-});
+// export const logRateAnalysisIndexOrSearchRouteFactory = (
+//   navigateToPath: NavigateToPath,
+//   basePath: string
+// ): MlRoute => ({
+//   id: 'data_view_log_rate_analysis',
+//   path: createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT),
+//   title: i18n.translate('xpack.ml.selectDataViewLabel', {
+//     defaultMessage: 'Select Data View',
+//   }),
+//   render: (props, deps) => (
+//     <PageWrapper
+//       {...props}
+//       nextStepPath={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS)}
+//       deps={deps}
+//       mode={MODE.DATAVISUALIZER}
+//     />
+//   ),
+//   breadcrumbs: getLogRateAnalysisBreadcrumbs(navigateToPath, basePath),
+// });
 
 /**
  * @deprecated since 8.10, kept here to redirect old bookmarks.
  */
-export const explainLogRateSpikesIndexOrSearchRouteFactory = (): MlRoute => ({
-  path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
-  render: () => <Redirect to={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT)} />,
-  // no breadcrumbs since it's just a redirect
-  breadcrumbs: [],
-});
+// export const explainLogRateSpikesIndexOrSearchRouteFactory = (): MlRoute => ({
+//   path: createPath(ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT),
+//   render: () => <Redirect to={createPath(ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT)} />,
+//   // no breadcrumbs since it's just a redirect
+//   breadcrumbs: [],
+// });
 
-export const logCategorizationIndexOrSearchRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'data_view_log_categorization',
-  path: createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT),
-  title: i18n.translate('xpack.ml.selectDataViewLabel', {
-    defaultMessage: 'Select Data View',
-  }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION)}
-      deps={deps}
-      mode={MODE.DATAVISUALIZER}
-    />
-  ),
-  breadcrumbs: getLogCategorizationBreadcrumbs(navigateToPath, basePath),
-});
+// export const logCategorizationIndexOrSearchRouteFactory = (
+//   navigateToPath: NavigateToPath,
+//   basePath: string
+// ): MlRoute => ({
+//   id: 'data_view_log_categorization',
+//   path: createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT),
+//   title: i18n.translate('xpack.ml.selectDataViewLabel', {
+//     defaultMessage: 'Select Data View',
+//   }),
+//   render: (props, deps) => (
+//     <PageWrapper
+//       {...props}
+//       nextStepPath={createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION)}
+//       deps={deps}
+//       mode={MODE.DATAVISUALIZER}
+//     />
+//   ),
+//   breadcrumbs: getLogCategorizationBreadcrumbs(navigateToPath, basePath),
+// });
 
-export const changePointDetectionIndexOrSearchRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'data_view_change_point_detection',
-  path: createPath(ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT),
-  title: i18n.translate('xpack.ml.selectDataViewLabel', {
-    defaultMessage: 'Select Data View',
-  }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.AIOPS_CHANGE_POINT_DETECTION)}
-      deps={deps}
-      mode={MODE.DATAVISUALIZER}
-    />
-  ),
-  breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
-});
+// export const changePointDetectionIndexOrSearchRouteFactory = (
+//   navigateToPath: NavigateToPath,
+//   basePath: string
+// ): MlRoute => ({
+//   id: 'data_view_change_point_detection',
+//   path: createPath(ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT),
+//   title: i18n.translate('xpack.ml.selectDataViewLabel', {
+//     defaultMessage: 'Select Data View',
+//   }),
+//   render: (props, deps) => (
+//     <PageWrapper
+//       {...props}
+//       nextStepPath={createPath(ML_PAGES.AIOPS_CHANGE_POINT_DETECTION)}
+//       deps={deps}
+//       mode={MODE.DATAVISUALIZER}
+//     />
+//   ),
+//   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
+// });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode, extraButtons }) => {
   const {

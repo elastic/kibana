@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Settings } from './settings';
+export { TrainedModelsPage } from './trained_models';
