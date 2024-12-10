@@ -11,11 +11,7 @@ import React, { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import {
   FetchContext,
   useBatchedOptionalPublishingSubjects,
@@ -108,7 +104,6 @@ export function SearchEmbeddableGridComponent({
   }, [savedSearch.sort, dataView, isEsql, discoverServices.uiSettings]);
 
   const originalColumns = useMemo(() => savedSearch.columns ?? [], [savedSearch.columns]);
-  const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
@@ -126,7 +121,6 @@ export function SearchEmbeddableGridComponent({
         stateManager.grid.next(params.settings as DiscoverGridSettings);
       }
     },
-    useNewFieldsApi,
     columns: originalColumns,
     sort,
     settings: grid,
@@ -219,7 +213,6 @@ export function SearchEmbeddableGridComponent({
     searchDescription: panelDescription || savedSearchDescription,
     sort,
     totalHitCount,
-    useNewFieldsApi,
   };
 
   return (
