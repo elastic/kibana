@@ -6,11 +6,11 @@
  */
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
 import { toHighPrecision } from '../utils/number';
@@ -47,6 +47,54 @@ export interface Sort {
   direction: 'asc' | 'desc';
 }
 
+export type Pagination = CursorPagination | PagePagination;
+
+interface CursorPagination {
+  searchAfter?: Array<string | number>;
+  size: number;
+}
+
+interface PagePagination {
+  page: number;
+  perPage: number;
+}
+
+export function isCursorPagination(pagination: Pagination): pagination is CursorPagination {
+  return (pagination as CursorPagination).size !== undefined;
+}
+
+function toPaginationQuery(
+  pagination: Pagination
+): { size: number; search_after?: Array<string | number> } | { size: number; from: number } {
+  if (isCursorPagination(pagination)) {
+    return {
+      size: pagination.size * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
+      search_after: pagination.searchAfter,
+    };
+  }
+
+  return {
+    size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
+    from: (pagination.page - 1) * pagination.perPage,
+  };
+}
+
+export type Paginated<T> = CursorPaginated<T> | PagePaginated<T>;
+
+export interface CursorPaginated<T> {
+  total: number;
+  searchAfter?: Array<string | number>;
+  size: number;
+  results: T[];
+}
+
+export interface PagePaginated<T> {
+  total: number;
+  page: number;
+  perPage: number;
+  results: T[];
+}
+
 export interface SummarySearchClient {
   search(
     kqlQuery: string,
@@ -75,6 +123,9 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     const parsedFilters = parseStringFilters(filters, this.logger);
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+
+    const paginationQuery = toPaginationQuery(pagination);
+
     const esParams = createEsParams({
       index: indices,
       track_total_hits: true,
@@ -97,9 +148,14 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         [toDocumentSortField(sort.field)]: {
           order: sort.direction,
         },
+        'slo.id': {
+          order: 'asc',
+        },
+        'slo.instanceId': {
+          order: 'asc',
+        },
       },
-      from: (pagination.page - 1) * pagination.perPage,
-      size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
+      ...paginationQuery,
     });
 
     try {
@@ -110,7 +166,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
       const total = (summarySearch.hits.total as SearchTotalHits).value ?? 0;
       if (total === 0) {
-        return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
+        return { total: 0, ...pagination, results: [] };
       }
 
       const [tempSummaryDocuments, summaryDocuments] = partition(
@@ -128,12 +184,16 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
       const finalResults = summaryDocuments
         .concat(tempSummaryDocumentsDeduped)
-        .slice(0, pagination.perPage);
+        .slice(0, isCursorPagination(pagination) ? pagination.size : pagination.perPage);
 
       const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
 
+      const paginationResponse = isCursorPagination(pagination)
+        ? { searchAfter: finalResults[finalResults.length - 1].sort, size: pagination.size }
+        : pagination;
+
       return {
-        ...pagination,
+        ...paginationResponse,
         total: finalTotal,
         results: finalResults.map((doc) => {
           const summaryDoc = doc._source;
@@ -178,7 +238,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       };
     } catch (err) {
       this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
-      return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
+      return { total: 0, ...pagination, results: [] };
     }
   }
 
