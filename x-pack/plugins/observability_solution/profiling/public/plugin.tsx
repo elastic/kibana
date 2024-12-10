@@ -7,6 +7,7 @@
 
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -15,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { NavigationSection } from '@kbn/observability-shared-plugin/public';
 import type { Location } from 'history';
-import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, map, take } from 'rxjs';
 import { OBLT_PROFILING_APP_ID } from '@kbn/deeplinks-observability';
 import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
@@ -64,29 +65,45 @@ export class ProfilingPlugin
     ];
 
     const kuerySubject = new BehaviorSubject<string>('');
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
     const section$ = combineLatest([from(coreSetup.getStartServices()), kuerySubject]).pipe(
       map(([[coreStart], kuery]) => {
         if (coreStart.application.capabilities.profiling.show) {
-          const sections: NavigationSection[] = [
-            {
-              label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
-                defaultMessage: 'Universal Profiling',
-              }),
-              entries: links.map((link) => {
-                return {
-                  app: OBLT_PROFILING_APP_ID,
-                  label: link.title,
-                  path: `${link.path}?kuery=${kuery ?? ''}`,
-                  matchPath: (path) => {
-                    return path.startsWith(link.path);
-                  },
-                };
-              }),
-              sortKey: 700,
-            },
-          ];
-          return sections;
+          let isSidebarEnabled = true;
+          coreStart.chrome
+            .getChromeStyle$()
+            .pipe(take(1))
+            .subscribe((style) => (isSidebarEnabled = style === 'classic'));
+
+          if (isSidebarEnabled) {
+            const sections: NavigationSection[] = [
+              {
+                label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
+                  defaultMessage: 'Universal Profiling',
+                }),
+                entries: links.map((link) => {
+                  return {
+                    app: OBLT_PROFILING_APP_ID,
+                    label: link.title,
+                    path: `${link.path}?kuery=${kuery ?? ''}`,
+                    matchPath: (path) => {
+                      return path.startsWith(link.path);
+                    },
+                  };
+                }),
+                sortKey: 700,
+              },
+            ];
+            return sections;
+          } else {
+            appUpdater$.next(() => ({
+              deepLinks: links.map((link) => ({
+                ...link,
+                path: coreStart.application.getUrlForApp(`${link.path}?kuery=${kuery ?? ''}`),
+              })),
+            }));
+          }
         }
         return [];
       })
@@ -103,6 +120,7 @@ export class ProfilingPlugin
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
+      updater$: appUpdater$,
       async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
