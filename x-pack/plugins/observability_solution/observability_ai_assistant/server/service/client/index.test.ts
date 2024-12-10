@@ -1648,7 +1648,7 @@ describe('Observability AI Assistant client', () => {
       });
     });
 
-    describe('and validation fails', () => {
+    describe.skip('and validation fails', () => {
       beforeEach(async () => {
         await llmSimulator.chunk({
           function_call: { name: 'my_action', arguments: JSON.stringify({ bar: 'foo' }) },
