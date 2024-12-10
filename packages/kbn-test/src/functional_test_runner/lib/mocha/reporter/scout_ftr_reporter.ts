@@ -22,7 +22,6 @@ import {
   getCodeOwnersForFile,
   getPathsWithOwnersReversed,
   type PathWithOwners,
-  type CodeOwnership,
 } from '@kbn/code-owners';
 import { Runner, Test } from '../../../fake_mocha_types';
 
