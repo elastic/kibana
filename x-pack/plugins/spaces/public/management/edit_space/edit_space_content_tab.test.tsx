@@ -16,6 +16,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { EditSpaceContentTab } from './edit_space_content_tab';
@@ -37,6 +38,7 @@ const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
+const userProfile = userProfileServiceMock.createStart();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
 
@@ -62,6 +64,7 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
         getPrivilegesAPIClient={getPrivilegeAPIClient}
         getSecurityLicense={getSecurityLicenseMock}
         theme={theme}
+        userProfile={userProfile}
         i18n={i18n}
         logger={logger}
       >
