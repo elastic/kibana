@@ -10,7 +10,7 @@
     "avcBanner": "packages/kbn-avc-banner/src",
     "bfetch": "src/plugins/bfetch",
     "bfetchError": "packages/kbn-bfetch-error",
-    "cases": ["packages/kbn-cases-components"],
+    "cases": ["src/platform/packages/shared/kbn-cases-components"],
     "cellActions": "packages/kbn-cell-actions",
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
