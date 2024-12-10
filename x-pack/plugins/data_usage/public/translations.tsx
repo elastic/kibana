@@ -40,6 +40,9 @@ export const DATA_USAGE_PAGE = Object.freeze({
 
 export const UX_LABELS = Object.freeze({
   filters: {
+    invalidDateRange: i18n.translate('xpack.dataUsage.metrics.filter.invalidDateRange', {
+      defaultMessage: 'The date range should be within 10 days from now.',
+    }),
     dataStreams: {
       label: i18n.translate('xpack.dataUsage.metrics.filter.dataStreams.label', {
         defaultMessage: 'Name',

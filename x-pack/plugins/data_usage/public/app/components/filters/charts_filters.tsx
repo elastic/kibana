@@ -15,6 +15,7 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 
+import { UX_LABELS } from '../../../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetDataUsageMetrics } from '../../../hooks/use_get_usage_metrics';
 import { type UsageMetricsDateRangePickerProps, UsageMetricsDateRangePicker } from './date_picker';
@@ -77,7 +78,7 @@ export const ChartsFilters = memo<ChartsFiltersProps>(
           {!isValidDateRange && (
             <EuiText color="danger" size="s" data-test-subj={getTestId('invalid-date-range')}>
               <EuiTextAlign textAlign="center">
-                <p>The date range should be within 10 days from now.</p>
+                <p>{UX_LABELS.filters.invalidDateRange}</p>
               </EuiTextAlign>
             </EuiText>
           )}
