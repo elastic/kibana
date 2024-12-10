@@ -376,6 +376,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     getTagList,
     isFavoritesEnabled,
+    isKibanaVersioningEnabled,
   } = useServices();
 
   const openContentEditor = useOpenContentEditor();
@@ -578,7 +579,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         appendRows: contentInsightsServices && (
           // have to "REWRAP" in the provider here because it will be rendered in a different context
           <ContentInsightsProvider {...contentInsightsServices}>
-            <ContentEditorActivityRow item={item} />
+            <ContentEditorActivityRow item={item} entityNamePlural={entityNamePlural} />
           </ContentInsightsProvider>
         ),
       });
@@ -591,6 +592,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       tableItemsRowActions,
       fetchItems,
       contentInsightsServices,
+      entityNamePlural,
     ]
   );
 
@@ -646,7 +648,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ) : record.managed ? (
             <ManagedAvatarTip entityName={entityName} />
           ) : (
-            <NoCreatorTip iconType={'minus'} />
+            <NoCreatorTip iconType={'minus'} includeVersionTip={isKibanaVersioningEnabled} />
           ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
@@ -753,6 +755,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     inspectItem,
     entityName,
     isFavoritesEnabled,
+    isKibanaVersioningEnabled,
   ]);
 
   const itemsById = useMemo(() => {

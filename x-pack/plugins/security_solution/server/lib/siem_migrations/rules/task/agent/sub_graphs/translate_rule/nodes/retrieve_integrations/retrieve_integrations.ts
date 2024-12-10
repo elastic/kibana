@@ -5,38 +5,20 @@
  * 2.0.
  */
 
-import { JsonOutputParser } from '@langchain/core/output_parsers';
-import type { ChatModel } from '../../../../../util/actions_client_chat';
-import type { IntegrationRetriever } from '../../../../../util/integration_retriever';
+import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { GraphNode } from '../../types';
-import { CREATE_SEMANTIC_QUERY_PROMPT } from './prompts';
 
 interface GetRetrieveIntegrationsNodeParams {
-  model: ChatModel;
-  integrationRetriever: IntegrationRetriever;
-}
-
-interface GetSemanticQueryResponse {
-  query: string;
+  ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
 export const getRetrieveIntegrationsNode = ({
-  model,
-  integrationRetriever,
+  ruleMigrationsRetriever,
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
-  const jsonParser = new JsonOutputParser();
-  const semanticQueryChain = CREATE_SEMANTIC_QUERY_PROMPT.pipe(model).pipe(jsonParser);
-
   return async (state) => {
-    const query = state.inline_query;
+    const query = state.semantic_query;
 
-    const integrationQuery = (await semanticQueryChain.invoke({
-      title: state.original_rule.title,
-      description: state.original_rule.description,
-      query,
-    })) as GetSemanticQueryResponse;
-
-    const integrations = await integrationRetriever.getIntegrations(integrationQuery.query);
+    const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
     return {
       integrations,
     };
