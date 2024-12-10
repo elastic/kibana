@@ -63,14 +63,13 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
   isEdit,
   taskTypeOptions,
   optionalProviderFormFields,
-  taskTypeFormFields,
   selectedTaskType,
   onSetProviderConfigEntry,
   onTaskTypeOptionsSelect,
 }) => {
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
-  const { setFieldValue, validateFields } = useFormContext();
+  const { setFieldValue } = useFormContext();
 
   const taskTypeSettings = useMemo(
     () =>

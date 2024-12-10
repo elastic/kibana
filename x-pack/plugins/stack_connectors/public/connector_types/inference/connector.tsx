@@ -78,7 +78,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
-  const [taskTypeFormFields, setTaskTypeFormFields] = useState<ConfigEntryView[]>([]);
+  const [taskTypeFormFields] = useState<ConfigEntryView[]>([]);
 
   const handleProviderClosePopover = useCallback(() => {
     setProviderPopoverOpen(false);
@@ -108,12 +108,8 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   }, [isSubmitting, config, validateFields]);
 
   const onTaskTypeOptionsSelect = useCallback(
-    (taskType: string, provider?: string) => {
+    (taskType: string) => {
       // Get task type settings
-      const currentProvider = providers?.find((p) => p.service === (provider ?? config?.provider));
-      const currentTaskTypes = currentProvider?.task_types;
-      const newTaskType = currentTaskTypes?.find((p) => p === taskType);
-
       setSelectedTaskType(taskType);
 
       updateFieldValues({
@@ -123,7 +119,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       });
       generateInferenceEndpointId({ ...config, taskType }, setFieldValue);
     },
-    [config, providers, setFieldValue, updateFieldValues]
+    [config, setFieldValue, updateFieldValues]
   );
 
   const onProviderChange = useCallback(
@@ -133,7 +129,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       // Update task types list available for the selected provider
       setTaskTypeOptions(getTaskTypeOptions(newProvider?.task_types ?? []));
       if (newProvider?.task_types && newProvider?.task_types.length > 0) {
-        onTaskTypeOptionsSelect(newProvider?.task_types[0], provider);
+        onTaskTypeOptionsSelect(newProvider?.task_types[0]);
       }
 
       // Update connector providerSchema
@@ -202,7 +198,6 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         })
       : [];
 
-    existingConfiguration.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
     setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets]);

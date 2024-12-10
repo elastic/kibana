@@ -50,4 +50,5 @@ interface ConfigEntry extends ConfigProperties {
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
   validationErrors: string[];
+  value: string | number | boolean | null;
 }
