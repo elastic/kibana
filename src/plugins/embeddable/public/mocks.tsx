@@ -35,9 +35,7 @@ import {
 import { setKibanaServices } from './kibana_services';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 import { EmbeddablePublicPlugin } from './plugin';
-import {
-  registerReactEmbeddableFactory,
-} from './react_embeddable_system';
+import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';

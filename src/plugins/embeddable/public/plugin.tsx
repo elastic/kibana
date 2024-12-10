@@ -54,9 +54,7 @@ import {
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
-import {
-  registerReactEmbeddableFactory,
-} from './react_embeddable_system';
+import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 
 export interface EmbeddableSetupDependencies {
