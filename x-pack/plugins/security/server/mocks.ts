@@ -29,8 +29,6 @@ function createSetupMock() {
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
-      getCurrentUser: mockAuthz.getCurrentUser,
-      getClusterClient: mockAuthz.getClusterClient,
     },
     registerSpacesService: jest.fn(),
     license: licenseMock.create(),
@@ -56,8 +54,6 @@ function createStartMock() {
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
-      getClusterClient: mockAuthz.getClusterClient,
-      getCurrentUser: mockAuthz.getCurrentUser,
     },
     userProfiles: {
       getCurrent: mockUserProfiles.getCurrent,
