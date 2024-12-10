@@ -66,7 +66,7 @@ export const securityWorkflowInsightsFieldMap: FieldMap = {
     required: true,
   },
   // endpoint, policy, etc
-  'target.id': {
+  'target.ids': {
     type: 'keyword',
     array: true,
     required: true,

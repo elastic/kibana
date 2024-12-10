@@ -102,9 +102,9 @@ describe('helpers', () => {
         { terms: { _id: ['id1', 'id2'] } },
         { terms: { categories: ['endpoint'] } },
         { terms: { types: ['incompatible_antivirus'] } },
-        { terms: { 'source.type': ['llm-connector'] } },
-        { terms: { 'source.id': ['source1'] } },
-        { nested: { path: 'target', query: { terms: { 'target.id': ['target1'] } } } },
+        { nested: { path: 'source', query: { terms: { 'source.type': ['llm-connector'] } } } },
+        { nested: { path: 'source', query: { terms: { 'source.id': ['source1'] } } } },
+        { nested: { path: 'target', query: { terms: { 'target.ids': ['target1'] } } } },
         { nested: { path: 'action', query: { terms: { 'action.type': ['refreshed'] } } } },
       ]);
     });
@@ -140,7 +140,7 @@ describe('helpers', () => {
       };
       const result = buildEsQueryParams(searchParams);
       expect(result).toEqual([
-        { nested: { path: 'target', query: { terms: { 'target.id': ['target1'] } } } },
+        { nested: { path: 'target', query: { terms: { 'target.ids': ['target1'] } } } },
       ]);
     });
   });

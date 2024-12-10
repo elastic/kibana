@@ -48,7 +48,7 @@ export interface SecurityWorkflowInsight {
   };
   target: {
     type: TargetType;
-    id: string[];
+    ids: string[];
   };
   action: {
     type: ActionType;

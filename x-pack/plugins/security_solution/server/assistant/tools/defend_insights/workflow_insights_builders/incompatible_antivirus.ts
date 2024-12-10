@@ -44,7 +44,7 @@ export function buildIncompatibleAntivirusWorkflowInsights(
       },
       target: {
         type: TargetType.Endpoint,
-        id: endpointIds,
+        ids: endpointIds,
       },
       action: {
         type: ActionType.Refreshed,
