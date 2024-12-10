@@ -470,7 +470,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/asset_inventory/README.md[assetInventory]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/asset_inventory/README.md[assetInventory]
 |Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments.
 
 
@@ -499,7 +499,7 @@ It was removed, but the plugin was left behind to register no longer used config
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_defend/README.md[cloudDefend]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_defend/README.md[cloudDefend]
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
@@ -516,7 +516,7 @@ This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeat
 |Adds all the links to the Elastic Cloud console.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/cloud_security_posture/README.md[cloudSecurityPosture]
 |Cloud Posture automates the identification and remediation of risks across cloud infrastructures
 
 
@@ -673,7 +673,7 @@ the infrastructure monitoring use-case within Kibana.
 |undefined
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
@@ -890,7 +890,7 @@ This plugin is only enabled when the application is built for serverless project
 |This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/session_view/README.md[sessionView]
 |Session View is meant to provide a visualization into what is going on in a particular Linux environment where the agent is running. It looks likes a terminal emulator; however, it is a tool for introspecting process activity and understanding user and service behaviour in your Linux servers and infrastructure. It is a time-ordered series of process executions displayed in a tree over time.
 
 
