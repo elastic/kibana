@@ -102,7 +102,7 @@ export async function scoreSuggestions({
           type: 'string',
         },
       },
-      required: ['score'],
+      required: ['scores'],
     } as const,
   };
 
