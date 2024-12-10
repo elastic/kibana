@@ -523,7 +523,7 @@ Notes:
 
 ### Error handling
 
-#### **Scenario: Error is handled when any operation on prebuilt rules fails**
+#### **Scenario: Error is handled when any installation operation on prebuilt rules fails**
 
 **Automation**: e2e test with mock rules
 
@@ -537,9 +537,6 @@ Examples:
   | installing all        |
   | installing selected   |
   | installing individual |
-  | upgrading all         |
-  | upgrading selected    |
-  | upgrading individual  |
 ```
 
 ### Authorization / RBAC
