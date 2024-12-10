@@ -382,6 +382,7 @@ packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 packages/kbn-index-adapter @elastic/security-threat-hunting
 packages/kbn-interpreter @elastic/kibana-visualizations
+nick-test/kbn-interpreter @elastic/kibana-visualizations
 packages/kbn-investigation-shared @elastic/obs-ux-management-team
 packages/kbn-io-ts-utils @elastic/obs-knowledge-team
 packages/kbn-ipynb @elastic/search-kibana
