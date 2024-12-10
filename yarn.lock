@@ -5408,7 +5408,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/security-solution/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
 
