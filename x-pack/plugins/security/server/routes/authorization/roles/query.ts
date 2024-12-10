@@ -73,7 +73,7 @@ export function defineQueryRolesRoutes({
         }
 
         if (showReservedRoles) {
-          queryPayload.bool.should.push({ term: { 'metadata._reserved': showReservedRoles } });
+          queryPayload.bool.should.push({ term: { 'metadata._reserved': true } });
         }
 
         if (filters?.spaceId) {
@@ -94,8 +94,13 @@ export function defineQueryRolesRoutes({
         });
 
         const transformedRoles = queryRoles.roles?.map((role) =>
-          // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
-          transformElasticsearchRoleToRole(features, role, role.name, authz.applicationName, logger)
+          transformElasticsearchRoleToRole({
+            features,
+            elasticsearchRole: role, // TODO: address why the `remote_cluster` field is throwing type errors
+            name: role.name,
+            application: authz.applicationName,
+            logger,
+          })
         );
 
         return response.ok<QueryRolesResult>({
