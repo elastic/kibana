@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ColorFormatEditor should render boolean type normally (regex field) 1`] = `
+exports[`ColorFormatEditor should render boolean type normally 1`] = `
 <Fragment>
   <EuiBasicTable
     columns={
