@@ -61,7 +61,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
+      (await doAnyChangesMatch([/^x-pack\/platform\/plugins\/shared\/cases/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
@@ -325,7 +325,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/packages\/kbn-elastic-assistant-common/,
         /^x-pack\/packages\/security-solution/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
-        /^x-pack\/plugins\/cases/,
+        /^x-pack\/platform\/plugins\/shared\/cases/,
         /^x-pack\/plugins\/data_views\/common/,
         /^x-pack\/plugins\/elastic_assistant/,
         /^x-pack\/plugins\/lists/,
