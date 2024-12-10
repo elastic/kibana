@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import _ from 'lodash';
 import * as fs from 'fs';
 import * as parser from '@babel/parser';
@@ -12,6 +14,7 @@ import generate from '@babel/generator';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import chalk from 'chalk';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 
 /**
  * Retrieve test files using a glob pattern.
@@ -155,4 +158,23 @@ export const getOnBeforeHook = (module: unknown, beforeSpecFilePath: string): Fu
   }
 
   return module.onBeforeHook;
+};
+
+/**
+ * Sets the default log level for `ToolingLog` instances created by `createToolingLogger()`:
+ * `x-pack/plugins/security_solution/common/endpoint/data_loaders/utils.ts:148`.
+ * It will first check the NodeJs `process.env` to see if an Environment Variable was set
+ * and then, if provided, it will use the value defined in the Cypress Config. file.
+ */
+export const setDefaultToolingLoggingLevel = (cypressConfigFile?: any) => {
+  const logLevel =
+    process.env.TOOLING_LOG_LEVEL ||
+    process.env.CYPRESS_TOOLING_LOG_LEVEL ||
+    cypressConfigFile?.env?.TOOLING_LOG_LEVEL ||
+    '';
+
+  if (logLevel) {
+    createToolingLogger('info').info(`Setting tooling log level to [${logLevel}]`);
+    createToolingLogger.defaultLogLevel = logLevel;
+  }
 };

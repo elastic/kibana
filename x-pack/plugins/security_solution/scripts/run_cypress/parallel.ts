@@ -32,7 +32,7 @@ import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
-import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import { parseTestFileConfig, retrieveIntegrations, setDefaultToolingLoggingLevel } from './utils';
 import { getFTRConfig } from './get_ftr_config';
 
 export const cli = () => {
@@ -54,6 +54,8 @@ export const cli = () => {
         )
         .boolean('inspect');
 
+      const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
+
       _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
@@ -70,18 +72,7 @@ ${JSON.stringify(argv, null, 2)}
 
       // Adjust tooling log level based on the `TOOLING_LOG_LEVEL` property, which can be
       // defined in the cypress config file or set in the `env`
-      {
-        const logLevel =
-          process.env.TOOLING_LOG_LEVEL ||
-          process.env.CYPRESS_TOOLING_LOG_LEVEL ||
-          cypressConfigFile.env?.TOOLING_LOG_LEVEL ||
-          '';
-
-        if (logLevel) {
-          _cliLogger.info(`Setting tooling log level to [${logLevel}]`);
-          createToolingLogger.defaultLogLevel = logLevel;
-        }
-      }
+      setDefaultToolingLoggingLevel(cypressConfigFile);
 
       const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
 
@@ -458,7 +449,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   });
                 } else {
                   result = await cypress.run({
-                    browser: 'chrome',
+                    browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
