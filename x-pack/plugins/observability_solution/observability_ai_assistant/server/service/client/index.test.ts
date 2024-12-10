@@ -12,8 +12,6 @@ import { last, merge, repeat } from 'lodash';
 import { Subject, Observable } from 'rxjs';
 import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
 import { ObservabilityAIAssistantClient } from '.';
 import { MessageRole, type Message } from '../../../common';
 import {
@@ -21,6 +19,8 @@ import {
   MessageAddEvent,
   StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
+import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
+import { InferenceClient } from '@kbn/inference-plugin/server';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
@@ -1530,6 +1530,7 @@ describe('Observability AI Assistant client', () => {
       const parsed = last(body.messages);
 
       expect(parsed).toEqual({
+        name: 'get_top_alerts',
         role: 'tool',
         response: {
           message: 'Function response exceeded the maximum length allowed and was truncated',
@@ -1647,7 +1648,7 @@ describe('Observability AI Assistant client', () => {
       });
     });
 
-    describe.skip('and validation fails', () => {
+    describe('and validation fails', () => {
       beforeEach(async () => {
         await llmSimulator.chunk({
           function_call: { name: 'my_action', arguments: JSON.stringify({ bar: 'foo' }) },
