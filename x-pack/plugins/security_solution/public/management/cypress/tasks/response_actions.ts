@@ -274,10 +274,6 @@ export const ensureResponseActionAuthzAccess = (
       url = SCAN_ROUTE;
       Object.assign(apiPayload, { parameters: { path: 'scan/two' } });
       break;
-    case 'runscript':
-      url = RUN_SCRIPT_ROUTE;
-      Object.assign(apiPayload, { parameters: { Raw: 'ls' } });
-      break;
 
     case 'runscript':
       url = RUN_SCRIPT_ROUTE;

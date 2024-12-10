@@ -27,7 +27,6 @@ export const FEATURE_KEYS = {
   RUN_SCRIPT: 'Run script',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
-  RUN_SCRIPT: 'Run script',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURE_KEYS;
