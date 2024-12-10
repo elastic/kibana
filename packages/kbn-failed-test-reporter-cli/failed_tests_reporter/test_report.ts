@@ -11,7 +11,7 @@ import Fs from 'fs';
 import { promisify } from 'util';
 
 import xml2js from 'xml2js';
-
+import type { CodeOwnership } from '@kbn/code-owners'
 const readAsync = promisify(Fs.readFile);
 
 export type TestReport =
@@ -41,7 +41,7 @@ export interface TestSuite {
     /* the command that ran this suite */
     'command-line'?: string;
     /* the codeowners of the file */
-    owners?: string;
+    owners?: CodeOwnership;
   };
   testcase?: TestCase[];
 }

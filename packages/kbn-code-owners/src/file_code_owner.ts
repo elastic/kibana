@@ -21,6 +21,8 @@ export interface PathWithOwners {
   teams: string;
   ignorePattern: Ignore;
 }
+export type CodeOwnership = Partial<Pick<PathWithOwners, 'path' | 'teams'>> | undefined;
+
 const existOrThrow = (targetFile: string) => {
   if (existsSync(targetFile) === false)
     throw createFailError(`Unable to determine code owners: file ${targetFile} Not Found`);

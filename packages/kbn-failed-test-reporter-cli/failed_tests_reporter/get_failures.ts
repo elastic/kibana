@@ -10,6 +10,7 @@
 import stripAnsi from 'strip-ansi';
 
 import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
+import type { CodeOwnership } from '@kbn/code-owners'
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
@@ -18,7 +19,7 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
-  owners?: { path: string; teams: string } | undefined;
+  owners?: CodeOwnership;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -109,7 +110,7 @@ function getCommandLineFromReport(report: TestReport) {
   }
 }
 
-function getOwner(report: TestReport) {
+function getOwner(report: TestReport): CodeOwnership {
   // TODO-TRE: Remove comments and update logic
   // if ('testsuites' in report) {
   //   return report.testsuites?.testsuite?.[0]?.$['command-line'] || '';
@@ -117,4 +118,5 @@ function getOwner(report: TestReport) {
   //   return report.testsuite?.$['command-line'] || '';
   // }
   if ('testsuites' in report) return report.testsuites?.testsuite?.[0]?.testcase?.[0].$.owners;
+  return;
 }
