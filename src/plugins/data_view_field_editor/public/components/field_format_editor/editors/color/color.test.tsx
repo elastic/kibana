@@ -57,7 +57,7 @@ describe('ColorFormatEditor', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render boolean type normally (regex field)', async () => {
+  it('should render boolean type normally', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
         fieldType={'boolean'}
