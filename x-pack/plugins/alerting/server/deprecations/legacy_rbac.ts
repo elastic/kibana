@@ -64,7 +64,7 @@ export const getLegacyRbacDeprecationsInfo = async ({
             }),
             i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.manualStepTwo', {
               defaultMessage:
-                'Update the alerting rule API key by editing the rule, so the authorization uses the normal RBAC process',
+                'To use normal RBAC authorization, update the API key by editing the rule.',
             }),
           ],
         },
