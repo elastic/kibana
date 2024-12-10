@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-alerts-ui-shared'],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-alerts-ui-shared/setup_tests.ts'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-alerts-ui-shared'],
+  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/kbn-alerts-ui-shared/setup_tests.ts'],
 };
