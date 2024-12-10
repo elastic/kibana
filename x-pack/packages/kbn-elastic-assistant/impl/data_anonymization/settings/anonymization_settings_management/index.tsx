@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
@@ -138,7 +137,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
               isDataAnonymizable={true}
               anonymizationFields={updatedAnonymizationData.data}
               titleSize="m"
-              gap={euiThemeVars.euiSizeS}
+              gap={euiTheme.size.s}
             />
           </EuiFlexGroup>
 
@@ -173,7 +172,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
             isDataAnonymizable={true}
             anonymizationFields={updatedAnonymizationData.data}
             titleSize="m"
-            gap={euiThemeVars.euiSizeS}
+            gap={euiTheme.size.s}
           />
         </EuiFlexGroup>
 
