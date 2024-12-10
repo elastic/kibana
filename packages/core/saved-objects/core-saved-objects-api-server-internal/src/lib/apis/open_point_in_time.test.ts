@@ -36,6 +36,7 @@ import {
   createGenericNotFoundErrorPayload,
 } from '../../test_helpers/repository.test.common';
 import { PointInTimeFinder } from '../point_in_time_finder';
+import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -81,7 +82,7 @@ describe('SavedObjectsRepository', () => {
   describe('#openPointInTimeForType', () => {
     const type = 'index-pattern';
 
-    const generateResults = (id?: string) => ({ id: id || 'id' });
+    const generateResults = (id?: string) => ({ id: id || 'id' } as OpenPointInTimeResponse);
     const successResponse = async (type: string, options?: SavedObjectsOpenPointInTimeOptions) => {
       client.openPointInTime.mockResponseOnce(generateResults());
       const result = await repository.openPointInTimeForType(type, options);
@@ -136,7 +137,7 @@ describe('SavedObjectsRepository', () => {
       it(`throws when ES is unable to find the index`, async () => {
         client.openPointInTime.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { id: 'error' },
+            { id: 'error' } as OpenPointInTimeResponse,
             { statusCode: 404 }
           )
         );

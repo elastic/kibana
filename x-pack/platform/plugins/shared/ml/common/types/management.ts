@@ -29,7 +29,7 @@ export interface AnalyticsManagementItems {
 export interface TrainedModelsManagementItems {
   id: string;
   description: string;
-  state: estypes.MlDeploymentState | '';
+  state: estypes.MlDeploymentAssignmentState | '';
   type: Array<string | undefined>;
   spaces: string[];
 }
