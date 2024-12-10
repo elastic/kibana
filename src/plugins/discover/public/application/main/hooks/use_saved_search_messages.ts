@@ -52,10 +52,15 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
 export function sendFetchStartMsg(
   main$: DataMain$,
   timeRange: TimeRange,
-  timeRangeRelative?: TimeRange,
-  query?: AggregateQuery | Query | undefined
+  timeRangeRelative: TimeRange,
+  query: AggregateQuery | Query | undefined
 ) {
-  main$.next({ ...main$.getValue(), timeRange, timeRangeRelative, query });
+  main$.next({
+    ...main$.getValue(),
+    timeRange,
+    timeRangeRelative,
+    query,
+  });
 }
 
 /**

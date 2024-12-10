@@ -17,6 +17,7 @@ import {
   sendLoadingMoreFinishedMsg,
   sendNoResultsFoundMsg,
   sendPartialMsg,
+  sendFetchStartMsg,
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
@@ -187,5 +188,24 @@ describe('test useSavedSearch message generators', () => {
       done();
     });
     checkHitCount(main$, 0);
+  });
+
+  test('sendFetchStartMsg', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({
+      fetchStatus: FetchStatus.COMPLETE,
+    });
+    const timeRange = { from: 'fromAbs', to: 'toAbs' };
+    const timeRangeRelative = { from: 'fromRel', to: 'toRel' };
+    const query = { query: 'query', language: 'test' };
+    main$.subscribe((value) => {
+      if (value.fetchStatus === FetchStatus.LOADING) {
+        expect(value.fetchStatus).toBe(FetchStatus.LOADING);
+        expect(value.timeRange).toBe(timeRange);
+        expect(value.timeRangeRelative).toBe(timeRangeRelative);
+        expect(value.query).toBe(query);
+        done();
+      }
+    });
+    sendFetchStartMsg(main$, timeRange, timeRangeRelative, query);
   });
 });

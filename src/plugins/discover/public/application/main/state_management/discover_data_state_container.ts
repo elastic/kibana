@@ -12,7 +12,7 @@ import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -55,7 +55,6 @@ export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
   timeRange?: TimeRange;
   timeRangeRelative?: TimeRange;
-  filter?: Filter[];
 }
 
 export interface DataDocumentsMsg extends DataMsg {
