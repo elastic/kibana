@@ -54,10 +54,9 @@ export const ServicesContent = ({
   const params = useMemo(
     () => ({
       filters: { [HOST_NAME_FIELD]: hostName },
-      from: parsedDateRange.from,
-      to: parsedDateRange.to,
+      ...parsedDateRange,
     }),
-    [hostName, parsedDateRange.from, parsedDateRange.to]
+    [hostName, parsedDateRange]
   );
 
   const query = useMemo(() => ({ ...params, filters: JSON.stringify(params.filters) }), [params]);
