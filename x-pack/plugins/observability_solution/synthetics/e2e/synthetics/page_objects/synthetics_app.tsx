@@ -128,6 +128,9 @@ export function syntheticsAppPageProvider({
     },
 
     async deleteMonitors() {
+      if (!page.url().includes('monitors/management')) {
+        return true;
+      }
       await page.getByTestId('euiCollapsedItemActionsButton').first().click();
       await page.click(`.euiContextMenuPanel ${this.byTestId('syntheticsMonitorDeleteAction')}`, {
         delay: 800,
