@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema, Pagination } from '@kbn/slo-schema';
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
 import { SLODefinition } from '../domain/models';
-import { IllegalArgumentError } from '../errors';
 import { SLORepository } from './slo_repository';
-import { Sort, SummaryResult, SummarySearchClient } from './summary_search_client';
+import { Pagination, Sort, SummaryResult, SummarySearchClient } from './summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
+const DEFAULT_SIZE = 1000;
 const MAX_PER_PAGE = 5000;
 
+const DELIMITER_SEARCH_AFTER = '|$';
 export class FindSLO {
   constructor(
     private repository: SLORepository,
@@ -38,8 +39,13 @@ export class FindSLO {
     );
 
     return findSLOResponseSchema.encode({
-      page: summaryResults.page,
-      perPage: summaryResults.perPage,
+      page: 'page' in summaryResults ? summaryResults.page : DEFAULT_PAGE,
+      perPage: 'perPage' in summaryResults ? summaryResults.perPage : DEFAULT_PER_PAGE,
+      size: 'size' in summaryResults ? summaryResults.size : undefined,
+      searchAfter:
+        'searchAfter' in summaryResults
+          ? summaryResults.searchAfter?.join(DELIMITER_SEARCH_AFTER)
+          : undefined,
       total: summaryResults.total,
       results: mergeSloWithSummary(localSloDefinitions, summaryResults.results),
     });
@@ -78,16 +84,24 @@ function mergeSloWithSummary(
 }
 
 function toPagination(params: FindSLOParams): Pagination {
+  const isCursorBased = !!params.searchAfter || !!params.size;
+
+  if (isCursorBased) {
+    const size = Number(params.size);
+    return {
+      searchAfter: params.searchAfter
+        ?.split(DELIMITER_SEARCH_AFTER)
+        .map((value) => (!isNaN(Number(value)) ? Number(value) : value)),
+      size: !isNaN(size) && size > 0 && size <= MAX_PER_PAGE ? size : DEFAULT_SIZE,
+    };
+  }
+
   const page = Number(params.page);
   const perPage = Number(params.perPage);
 
-  if (!isNaN(perPage) && perPage > MAX_PER_PAGE) {
-    throw new IllegalArgumentError(`perPage limit set to ${MAX_PER_PAGE}`);
-  }
-
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage >= 0 ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage > 0 && perPage <= MAX_PER_PAGE ? perPage : DEFAULT_PER_PAGE,
   };
 }
 
