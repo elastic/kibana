@@ -41,7 +41,7 @@ export interface LogEntryFlyoutProps {
 export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   const flyoutRef = useRef<OverlayRef>();
   const {
-    services: { http, data, share, uiSettings, application, LogAIAssistant },
+    services: { http, data, share, uiSettings, application, logsShared },
     overlays: { openFlyout },
   } = useKibanaContextForPlugin();
 
@@ -57,7 +57,7 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
         share,
         uiSettings,
         application,
-        LogAIAssistant,
+        logsShared,
       });
 
       flyoutRef.current = openFlyout(
@@ -71,7 +71,7 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
       );
     },
     [
-      LogAIAssistant,
+      logsShared,
       application,
       closeLogEntryFlyout,
       data,
@@ -114,7 +114,11 @@ export const LogEntryFlyout = ({
     logEntryId,
   });
 
-  const { LogAIAssistant } = useKibanaContextForPlugin().services;
+  const {
+    services: {
+      logsShared: { LogAIAssistant },
+    },
+  } = useKibanaContextForPlugin();
 
   useEffect(() => {
     if (logViewReference && logEntryId) {
