@@ -4,7 +4,7 @@
     "aiAssistantManagementSelection": "src/plugins/ai_assistant_management/selection",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
-    "alertingTypes": "packages/kbn-alerting-types",
+    "alertingTypes": "src/platform/packages/shared/kbn-alerting-types",
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "packages/kbn-avc-banner/src",
