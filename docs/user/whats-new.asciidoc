@@ -20,7 +20,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6fa3a9ee8
 [discrete]
 ==== Starred ES|QL queries for quick access and reusability
 
-With this release, you can favorite your ES|QL queries directly from your query history by starring them. These starred queries are saved under a dedicated Starred tab, allowing you quick access to your most-used queries across Kibana – not just within Discover. With the ability to manage up to 100 starred queries per user, you can sort them by timestamp and receive warnings as you approach the limit. This enhancement utilizes the favorites service at the user level, enabling users to reuse ES|QL queries in other areas of Kibana, such as the dashboard in-line editor and alerts.
+With this release, you can bookmark your ES|QL queries directly from your query history by starring them. These starred queries are saved under a dedicated Starred tab, allowing you quick access to your most-used queries across {kib} – not just within Discover. You can reuse these queries in other areas of {kib}, such as the dashboard in-line editor and alerts. With the ability to manage up to 100 starred queries per user, you can sort them by timestamp and receive warnings as you approach the limit.
 
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltdaffacc1de686bcc/67533eadb02aaf3aa84c8a3f/starred-esql-queries.gif[Running a starred query from the Starred tab in Discover]
 
@@ -51,7 +51,7 @@ image::images/legacy-visualizations.png[New Legacy tab in the Create Visualizati
 
 [discrete]
 ==== Improving CSV download for tables
-When exporting tables in CSV in the past, you may have encountered issues with incorrect formatting of the data, rows, and columns. These issues have now been addressed and your exported CSV file shows exactly what you see in Kibana.
+When exporting tables in CSV in the past, you may have encountered issues with incorrect formatting of the data, rows, and columns. These issues have now been addressed and your exported CSV file shows exactly what you see in {kib}.
 
 image::images/csv-download-1.png[Exported CSV in the past]
 _Exported CSV in the past_
@@ -68,28 +68,28 @@ _Exported CSV now_
 === Managing {kib} and data
 
 [discrete]
-==== Kibana Alerting scalability improvements
-The Kibana Alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all Elastic Cloud-hosted deployments. These improvements will provide our customers with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new Kibana Alerting framework:  
+==== {kib} Alerting scalability improvements
+The {kib} Alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all Elastic Cloud-hosted deployments. These improvements will provide our customers with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new {kib} Alerting framework:  
 
 ** 10x reduction in alerting task delays
 ** 2x increase in task execution throughput on average
 ** 50% fewer requests to Elasticsearch, resulting in lower overhead
 
-These customers are now enjoying higher alerting capacity and faster response times without the need for any additional configuration or hardware. Furthermore, these improvements also bring in a new unparalleled scalability for our largest alerting customers, enabling deployments of up to 192 Kibana nodes running alerting rules.
+These customers are now enjoying higher alerting capacity and faster response times without the need for any additional configuration or hardware. Furthermore, these improvements also bring in a new unparalleled scalability for our largest alerting customers, enabling deployments of up to 192 {kib} nodes running alerting rules.
 
 We are very excited to see how these enhancements empower your alerting strategies with faster, more efficient, and scalable performance.
 
 [discrete]
-==== Kibana Cases support for file attachments through API actions 
-The latest enhancements to Kibana Cases introduce highly requested functionality for managing security incidents and workflows. Users can now attach files to Kibana Cases via the public API, allowing them to enrich cases with supporting documentation, evidence, and other critical information. This improvement marks a significant enhancement in case management, providing incident response teams with greater flexibility to include all relevant details directly within their cases.
+==== {kib} Cases support for file attachments through API actions 
+The latest enhancements to {kib} Cases introduce highly requested functionality for managing security incidents and workflows. Users can now attach files to {kib} Cases via the public API, allowing them to enrich cases with supporting documentation, evidence, and other critical information. This improvement marks a significant enhancement in case management, providing incident response teams with greater flexibility to include all relevant details directly within their cases.
 
 Additionally, this release expands integration capabilities with third-party systems such as ServiceNow and Tines. Users can now programmatically update cases through API calls from external platforms, streamlining workflows and fostering seamless collaboration across tools. These features make it easier to automate case updates and efficiently track complex security incidents in real time. For more details, see the https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createcasedefaultspace[API documentation].
 
 [discrete]
-==== Kibana Connector now supports Jira Data Center
-This release introduces Kibana Connector support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with Kibana, enabling more efficient workflows and streamlined incident management.
+==== Jira Connector now supports Jira Data Center
+This release introduces {kib} Connector support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with {kib}, enabling more efficient workflows and streamlined incident management.
 
-With this update, users can create and manage Jira issues directly from Kibana, regardless of their Jira deployment model. This expanded compatibility highlights our commitment to supporting diverse customer deployment setups and delivering enhanced functionality tailored to enterprise environments.
+With this update, users can create and manage Jira issues directly from {kib}, regardless of their Jira deployment model. This expanded compatibility highlights our commitment to supporting diverse customer deployment setups and delivering enhanced functionality tailored to enterprise environments.
 
 [discrete]
 === Machine Learning
@@ -110,5 +110,5 @@ For more information on the Elastic Rerank model architecture and how it compare
 [discrete]
 ==== Pre-configured default ELSER endpoint
 
-With this release, we are introducing a pre-configured default ELSER endpoint. This removes the need for any inference configuration in order to use ELSER. There is no more need for an inference endpoint setup or for downloading the model and configuring threads and allocations through the trained models UI. Simply create a https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-text.html[semantic text] mapping with your indices and start using. The default inference endpoint will download, deploy and start using ELSER for inference with https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-auto-scale.html#nlp-model-adaptive-allocations[adaptive allocations] out of the box.
+With this release, we are introducing a pre-configured default ELSER endpoint. This removes the need for any inference configuration in order to use ELSER. There is no more need for an inference endpoint setup or for downloading the model and configuring threads and allocations through the trained models UI. Simply create a https://www.elastic.co/guide/en/elasticsearch/reference/current/semantic-text.html[semantic text] mapping with your indices and start using it. The default inference endpoint will download, deploy and start using ELSER for inference with https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-auto-scale.html#nlp-model-adaptive-allocations[adaptive allocations] out of the box.
 
