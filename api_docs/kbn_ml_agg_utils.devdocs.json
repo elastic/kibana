@@ -33,7 +33,7 @@
           "AggregationsAggregationContainer",
           ">"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +49,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -66,7 +66,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -105,7 +105,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,7 +127,7 @@
                 "text": "FetchAggIntervalsParams"
               }
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -158,7 +158,7 @@
           },
           " | OrdinalChartData | UnsupportedChartData)[]>"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -174,7 +174,7 @@
             "signature": [
               "FetchHistogramsForFieldsParams"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -197,7 +197,7 @@
         "signature": [
           "(samplerShardSize: number) => string[]"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,7 +213,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -244,7 +244,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -267,7 +267,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -298,7 +298,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -321,7 +321,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -348,7 +348,7 @@
           "AggregationsMultiBucketAggregateBase",
           "<TBucket>"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -364,7 +364,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -385,7 +385,7 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -401,7 +401,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -424,7 +424,7 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -440,7 +440,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/type_guards.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -473,7 +473,7 @@
           },
           " | null) & _.MemoizedFunction"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -489,7 +489,7 @@
             "signature": [
               "NumberValidatorConditions | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -513,7 +513,7 @@
         "description": [
           "\nInterface for cardinality aggregation."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -529,7 +529,7 @@
             "signature": [
               "FieldAggCardinality | ScriptAggCardinality"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -545,7 +545,7 @@
         "description": [
           "\nInterface for the parameters required to fetch aggregation intervals."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1815,7 +1815,7 @@
               "default",
               "; }"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1831,7 +1831,7 @@
             "signature": [
               "AbortSignal | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1859,7 +1859,7 @@
               "MappingRuntimeFields",
               " | undefined; randomSamplerProbability?: number | undefined; randomSamplerSeed?: number | undefined; }"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1875,7 +1875,7 @@
         "description": [
           "\nField/value pair definition."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1888,7 +1888,7 @@
             "description": [
               "The field name."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1904,7 +1904,7 @@
             "signature": [
               "string | number"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1922,7 +1922,7 @@
         "description": [
           "\nRepresents parameters used to identify which histogram data needs to be generated for a field."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1935,7 +1935,7 @@
             "description": [
               "\nThe name of the field for which histogram data is generated."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1957,7 +1957,7 @@
                 "text": "KBN_FIELD_TYPES"
               }
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1973,7 +1973,7 @@
         "description": [
           "\nRepresents an item set returned from `frequent_item_sets` augmented\nwith some metadata related to log rate analysis."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1996,7 +1996,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2009,7 +2009,7 @@
             "description": [
               "The size of the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2022,7 +2022,7 @@
             "description": [
               "The maximum p-value associated with the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2035,7 +2035,7 @@
             "description": [
               "The document count of the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2048,7 +2048,7 @@
             "description": [
               "The support value of the item set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2061,7 +2061,7 @@
             "description": [
               "The total document count."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2079,7 +2079,7 @@
         "description": [
           "\nInterface describing the data structure returned for numeric-based charts."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2102,7 +2102,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2115,7 +2115,7 @@
             "description": [
               "\nThe identifier for the data set."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2128,7 +2128,7 @@
             "description": [
               "\nThe interval value for the data."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2144,7 +2144,7 @@
             "signature": [
               "[number, number]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2160,7 +2160,7 @@
             "signature": [
               "\"numeric\""
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2178,7 +2178,7 @@
         "description": [
           "\nInterface describing attributes used for numeric histograms."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2191,7 +2191,7 @@
             "description": [
               "The interval value for the histogram."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2204,7 +2204,7 @@
             "description": [
               "The minimum value in the histogram."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2217,7 +2217,7 @@
             "description": [
               "The maximum value in the histogram."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2235,7 +2235,7 @@
         "description": [
           "\nRepresents an item in numeric data."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2248,7 +2248,7 @@
             "description": [
               "\nThe numeric key."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2264,7 +2264,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2277,7 +2277,7 @@
             "description": [
               "\nThe document count associated with the key."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2310,7 +2310,7 @@
             "text": "HistogramField"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2341,7 +2341,7 @@
               },
               ".NUMBER"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2377,7 +2377,7 @@
             "text": "FieldValuePair"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2390,7 +2390,7 @@
             "description": [
               "The key associated with the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2406,7 +2406,7 @@
             "signature": [
               "\"keyword\" | \"log_pattern\""
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2419,7 +2419,7 @@
             "description": [
               "The document count for the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2432,7 +2432,7 @@
             "description": [
               "The background count for the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2445,7 +2445,7 @@
             "description": [
               "The total document count for all items."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2458,7 +2458,7 @@
             "description": [
               "The total background count for all items."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2471,7 +2471,7 @@
             "description": [
               "The score associated with the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2487,7 +2487,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2500,7 +2500,7 @@
             "description": [
               "The normalized score for the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2523,7 +2523,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2539,7 +2539,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2555,7 +2555,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2573,7 +2573,7 @@
         "description": [
           "\nRepresents a significant item group."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2586,7 +2586,7 @@
             "description": [
               "The identifier for the item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2609,7 +2609,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2622,7 +2622,7 @@
             "description": [
               "The document count associated with this item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2638,7 +2638,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2661,7 +2661,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2679,7 +2679,7 @@
         "description": [
           "\nRepresents histogram data for a group of field/value pairs."
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2692,7 +2692,7 @@
             "description": [
               "The identifier for the group."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2715,7 +2715,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2750,7 +2750,7 @@
             "text": "FieldValuePair"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2763,7 +2763,7 @@
             "description": [
               "The key associated with the significant item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2779,7 +2779,7 @@
             "signature": [
               "\"keyword\" | \"log_pattern\""
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2792,7 +2792,7 @@
             "description": [
               "The document count associated with this item."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2808,7 +2808,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2824,7 +2824,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2859,7 +2859,7 @@
             "text": "FieldValuePair"
           }
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2882,7 +2882,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2908,7 +2908,7 @@
           },
           " extends SignificantItemHistogramItemBase"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2921,7 +2921,7 @@
             "description": [
               "The document count for this histogram item in the significant item context."
             ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2939,7 +2939,7 @@
         "description": [
           "\nAll available types for time series metric fields"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/time_series_metric_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2958,7 +2958,7 @@
         "signature": [
           "5000"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/field_histograms.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2983,7 +2983,7 @@
           },
           " | NumericHistogramFieldWithColumnStats | OrdinalHistogramField | UnsupportedHistogramField)[]"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3002,7 +3002,7 @@
         "signature": [
           "{ [key: string]: boolean; } & { min?: boolean | undefined; max?: boolean | undefined; integerOnly?: boolean | undefined; }"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3027,7 +3027,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3044,7 +3044,7 @@
         "signature": [
           "\"keyword\" | \"log_pattern\""
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3063,7 +3063,7 @@
         "signature": [
           "{ readonly KEYWORD: \"keyword\"; readonly LOG_PATTERN: \"log_pattern\"; }"
         ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
