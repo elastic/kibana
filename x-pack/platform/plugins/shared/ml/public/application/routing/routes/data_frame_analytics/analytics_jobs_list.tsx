@@ -9,10 +9,9 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers, initSavedObjects } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
@@ -26,7 +25,7 @@ export const analyticsJobsListRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'data_frame_analytics',
-  path: createPath(ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE),
+  path: '',
   title: i18n.translate('xpack.ml.dataFrameAnalytics.jobs.docTitle', {
     defaultMessage: 'Data Frame Analytics Jobs',
   }),

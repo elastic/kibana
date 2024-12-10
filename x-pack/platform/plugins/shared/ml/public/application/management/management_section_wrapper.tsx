@@ -8,11 +8,9 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import { pick } from 'lodash';
-
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -26,17 +24,15 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UpgradeWarning } from '../../../components/upgrade/upgrade_warning';
-import { getMlGlobalServices } from '../../../util/get_services';
-import { EnabledFeaturesContextProvider } from '../../../contexts/ml';
-import { type MlFeatures, PLUGIN_ID } from '../../../../../common/constants/app';
+import { UpgradeWarning } from '../components/upgrade/upgrade_warning';
+import { getMlGlobalServices } from '../util/get_services';
+import { EnabledFeaturesContextProvider } from '../contexts/ml';
+import { type MlFeatures, PLUGIN_ID } from '../../../common/constants/app';
 
-import { checkGetManagementMlJobsResolver } from '../../../capabilities/check_capabilities';
+import { checkGetManagementMlJobsResolver } from '../capabilities/check_capabilities';
 
-import { AccessDeniedPage } from '../../jobs_list/components/access_denied_page';
-import { InsufficientLicensePage } from '../../jobs_list/components/insufficient_license_page';
-// import { DocsLink } from '../../jobs_list/components/jobs_list_page/docs_link';
-import { JobsPage } from '../../../jobs/jobs_list';
+import { AccessDeniedPage } from './jobs_list/components/access_denied_page';
+import { InsufficientLicensePage } from './jobs_list/components/insufficient_license_page';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -51,9 +47,10 @@ interface Props {
   fieldFormats: FieldFormatsStart;
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  children: React.ReactNode;
 }
 
-export const AnomalyDetectionJobsPage: FC<Props> = ({
+export const ManagementSectionWrapper: FC<Props> = ({
   coreStart,
   share,
   history,
@@ -64,6 +61,7 @@ export const AnomalyDetectionJobsPage: FC<Props> = ({
   fieldFormats,
   isServerless,
   mlFeatures,
+  children,
 }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -177,35 +175,7 @@ export const AnomalyDetectionJobsPage: FC<Props> = ({
             <DatePickerContextProvider {...datePickerDeps}>
               <ContextWrapper feature={PLUGIN_ID}>
                 <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
-                  <Router history={history}>
-                    <EuiPageTemplate.Header
-                      pageTitle={
-                        <FormattedMessage
-                          id="xpack.ml.management.overview.anomalyDetectionJobsPageTitle"
-                          defaultMessage="Anomaly Detection Jobs"
-                        />
-                      }
-                      description={
-                        <FormattedMessage
-                          id="xpack.ml.management.jobsList.jobsListTagline"
-                          defaultMessage="Identify, analyze, and process your data using advanced analysis techniques."
-                        />
-                      }
-                      // rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
-                      bottomBorder
-                      paddingSize={'none'}
-                    />
-
-                    <EuiSpacer size="l" />
-
-                    <EuiPageTemplate.Section
-                      paddingSize={'none'}
-                      id="kibanaManagementMLSection"
-                      data-test-subj="mlPageStackManagementJobsList"
-                    >
-                      <JobsPage />
-                    </EuiPageTemplate.Section>
-                  </Router>
+                  <Router history={history}>{children}</Router>
                 </EnabledFeaturesContextProvider>
               </ContextWrapper>
             </DatePickerContextProvider>

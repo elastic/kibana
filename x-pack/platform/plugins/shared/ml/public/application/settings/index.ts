@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 export { Settings } from './settings';

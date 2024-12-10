@@ -8,9 +8,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
 import { useUrlState } from '@kbn/ml-url-state';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { useMlKibana } from './kibana_context';
 import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
+
+export const useMlManagementLocator = () => {
+  const {
+    services: { share },
+  } = useMlKibana();
+
+  return share.url.locators.get(MANAGEMENT_APP_LOCATOR);
+};
 
 export const useMlLocator = () => {
   const {

@@ -11,10 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers, initSavedObjects } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
@@ -29,7 +28,7 @@ export const modelsListRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'trained_models',
-  path: createPath(ML_PAGES.TRAINED_MODELS_MANAGE),
+  path: '',
   title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
     defaultMessage: 'Trained Models',
   }),

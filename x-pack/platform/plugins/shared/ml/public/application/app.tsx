@@ -43,6 +43,7 @@ interface AppProps {
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
   nlpSettings: NLPSettings;
+  entryPoint?: string; // This will need to be defined as finite set of possible ids - maybe the id used to register the app in the management section
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -53,7 +54,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({
+export const App: FC<AppProps> = ({
   coreStart,
   deps,
   appMountParams,
@@ -61,6 +62,7 @@ const App: FC<AppProps> = ({
   mlFeatures,
   experimentalFeatures,
   nlpSettings,
+  entryPoint, // TODO: might need to update this naming
 }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
@@ -153,7 +155,7 @@ const App: FC<AppProps> = ({
                 experimentalFeatures={experimentalFeatures}
               >
                 <MlServerInfoContextProvider nlpSettings={nlpSettings}>
-                  <MlRouter pageDeps={pageDeps} />
+                  <MlRouter pageDeps={pageDeps} entryPoint={entryPoint} />
                 </MlServerInfoContextProvider>
               </EnabledFeaturesContextProvider>
             </DatePickerContextProvider>

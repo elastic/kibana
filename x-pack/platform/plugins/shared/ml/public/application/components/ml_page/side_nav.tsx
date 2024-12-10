@@ -125,15 +125,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         disabled: disableLinks,
         items: [
           {
-            id: 'anomaly_detection',
-            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.jobsManagementText', {
-              defaultMessage: 'Jobs',
-            }),
-            disabled: disableLinks,
-            pathId: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-            testSubj: 'mlMainTab anomalyDetection',
-          },
-          {
             id: 'anomaly_explorer',
             name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
               defaultMessage: 'Anomaly Explorer',
@@ -151,28 +142,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab singleMetricViewer',
           },
-          {
-            id: 'settings',
-            pathId: ML_PAGES.SETTINGS,
-            name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-              defaultMessage: 'Settings',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab settings',
-            highlightNestedRoutes: true,
-          },
-          {
-            id: 'supplied_cofigurations',
-            name: i18n.translate(
-              'xpack.ml.navMenu.anomalyDetection.suppliedConfigurationsLinkText',
-              {
-                defaultMessage: 'Supplied Configurations',
-              }
-            ),
-            disabled: disableLinks,
-            pathId: ML_PAGES.SUPPLIED_CONFIGURATIONS,
-            testSubj: 'mlMainTab suppliedConfigurations',
-          },
         ],
       },
       {
@@ -182,15 +151,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         }),
         disabled: disableLinks,
         items: [
-          {
-            id: 'data_frame_analytics_jobs',
-            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.jobsManagementText', {
-              defaultMessage: 'Jobs',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab dataFrameAnalytics',
-          },
           {
             id: 'data_frame_analytics_results_explorer',
             pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
@@ -208,24 +168,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalyticsMap',
-          },
-        ],
-      },
-      {
-        id: 'model_management',
-        name: i18n.translate('xpack.ml.navMenu.modelManagementText', {
-          defaultMessage: 'Model Management',
-        }),
-        disabled: disableLinks,
-        items: [
-          {
-            id: 'trained_models',
-            pathId: ML_PAGES.TRAINED_MODELS_MANAGE,
-            name: i18n.translate('xpack.ml.navMenu.trainedModelsText', {
-              defaultMessage: 'Trained Models',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab trainedModels',
           },
         ],
       },
