@@ -26,6 +26,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
+      "data"
     ]
   }
 }
