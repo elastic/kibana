@@ -265,6 +265,28 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
       defaultMessage: 'Run a script on the host',
     }),
+    helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
+      defaultMessage: `
+Command Examples for Running Scripts:
+
+1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
+
+   runscript --CloudFile="CloudScript1.ps1" --CommandLine="-Verbose true"
+
+2. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments and a 180-second timeout.
+
+   runscript --CloudFile="CloudScript1.ps1" --CommandLine="-Verbose true" -Timeout=180
+
+3. Executes a raw script provided entirely within the "--Raw" flag.
+
+   runscript --Raw="Get-ChildItem."
+
+4. Executes a script located on the remote host at the specified path with the provided command-line arguments.
+
+   runscript --HostPath="C:\\temp\\LocalScript.ps1" --CommandLine="-Verbose true"
+
+`,
+    }),
     privileges: i18n.translate(
       'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
       {

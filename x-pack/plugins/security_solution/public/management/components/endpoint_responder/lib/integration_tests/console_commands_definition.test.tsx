@@ -180,7 +180,7 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      expect(commandsInPanel).toEqual(['isolate', 'release', 'runscript --']);
+      expect(commandsInPanel).toEqual(['isolate', 'release', 'runscript --Raw']);
     });
   });
 });
