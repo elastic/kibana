@@ -46,6 +46,13 @@ describe('Security Plugin', () => {
     mockCoreSetup = coreMock.createSetup({
       pluginStartContract: { userProfiles: userProfileServiceMock.createStart() },
     });
+
+    const core = coreMock.createRequestHandlerContext();
+
+    core.elasticsearch.client.asInternalUser.transport.request.mockImplementation((async () => ({
+      security: { operator_privileges: { enabled: false, available: false } },
+    })) as any);
+
     mockCoreSetup.http.getServerInfo.mockReturnValue({
       hostname: 'localhost',
       name: 'kibana',
@@ -63,6 +70,12 @@ describe('Security Plugin', () => {
     } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
+
+    mockCoreSetup.getStartServices.mockResolvedValue([
+      // @ts-expect-error only mocking the client we use
+      { elasticsearch: core.elasticsearch },
+      mockSetupDependencies.features,
+    ]);
 
     mockStartDependencies = {
       features: featuresPluginMock.createStart(),
@@ -113,8 +126,6 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
-            "getClusterClient": [Function],
-            "getCurrentUser": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -212,8 +223,6 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
-            "getClusterClient": [Function],
-            "getCurrentUser": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
