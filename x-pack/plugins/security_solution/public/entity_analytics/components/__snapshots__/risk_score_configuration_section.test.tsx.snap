@@ -5,8 +5,19 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
   <EuiFlexGroup
     alignItems="center"
   >
-    <EuiFlexItem
-      grow={false}
+    <div
+      css={
+        Object {
+          "map": undefined,
+          "name": "15ux7s5",
+          "next": undefined,
+          "styles": "
+    height: 24px;
+    width: 32px;
+  ",
+          "toString": [Function],
+        }
+      }
     >
       <EuiSwitch
         checked={false}
@@ -14,14 +25,31 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
         label="Include closed alerts for risk scoring"
         onChange={[Function]}
       />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <VerticalSeparator />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+    </div>
+    <Styled(div) />
+    <div
+      css={
+        Object {
+          "map": undefined,
+          "name": "16nl2q1",
+          "next": undefined,
+          "styles": "
+    flex-grow: 1;
+    max-width: 32px;
+    font-size: 24px;
+    input {
+      height: 24px;
+      padding: 8px;
+      border: 1px solid #D3DAE6;
+      border-radius: 4px;
+    }
+    @media (max-width: 100vw) {
+      max-width: 100%;
+    }
+  ",
+          "toString": [Function],
+        }
+      }
     >
       <EuiSuperDatePicker
         compressed={false}
@@ -31,7 +59,7 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
         start="now-30m"
         width="auto"
       />
-    </EuiFlexItem>
+    </div>
   </EuiFlexGroup>
   <EuiSpacer
     size="m"
