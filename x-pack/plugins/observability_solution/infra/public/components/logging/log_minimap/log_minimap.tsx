@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import styled from '@emotion/styled';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
@@ -14,6 +13,9 @@ import {
 import { scaleLinear } from 'd3-scale';
 import moment from 'moment';
 import * as React from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { useState } from 'react';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
@@ -37,11 +39,6 @@ interface LogMinimapProps {
   width: number;
 }
 
-interface LogMinimapState {
-  target: number | null;
-  timeCursorY: number;
-}
-
 // Wide enough to fit "September"
 const TIMERULER_WIDTH = 50;
 
@@ -51,133 +48,130 @@ function calculateYScale(start: number | null, end: number | null, height: numbe
     .range([0, height]);
 }
 
-export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState> {
-  constructor(props: LogMinimapProps) {
-    super(props);
-    this.state = {
-      timeCursorY: 0,
-      target: props.target,
-    };
-  }
+export const LogMinimap = ({
+  start,
+  end,
+  className,
+  height,
+  highlightedInterval,
+  jumpToTarget,
+  summaryBuckets,
+  summaryHighlightBuckets,
+  width,
+  target,
+}: LogMinimapProps) => {
+  const [timeCursorY, setTimeCursorY] = useState<number>(0);
+  const theme = useEuiTheme();
 
-  public handleClick: React.MouseEventHandler<SVGSVGElement> = (event) => {
+  const handleClick: React.MouseEventHandler<SVGSVGElement> = (event) => {
     const minimapTop = event.currentTarget.getBoundingClientRect().top;
     const clickedYPosition = event.clientY - minimapTop;
 
-    const clickedTime = Math.floor(this.getYScale().invert(clickedYPosition));
+    const clickedTime = Math.floor(getYScale().invert(clickedYPosition));
 
-    this.props.jumpToTarget({
+    jumpToTarget({
       tiebreaker: 0,
       time: moment(clickedTime).toISOString(),
     });
   };
 
-  public getYScale = () => {
-    const { start, end, height } = this.props;
+  const getYScale = () => {
     return calculateYScale(start, end, height);
   };
 
-  public getPositionOfTime = (time: number) => {
-    return this.getYScale()(time) ?? 0;
+  const getPositionOfTime = (time: number) => {
+    return getYScale()(time) ?? 0;
   };
 
-  private updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = (event) => {
+  const updateTimeCursor: React.MouseEventHandler<SVGSVGElement> = (event) => {
     const svgPosition = event.currentTarget.getBoundingClientRect();
-    const timeCursorY = event.clientY - svgPosition.top;
 
-    this.setState({ timeCursorY });
+    setTimeCursorY(event.clientY - svgPosition.top);
   };
 
-  public render() {
-    const {
-      start,
-      end,
-      className,
-      height,
-      highlightedInterval,
-      jumpToTarget,
-      summaryBuckets,
-      summaryHighlightBuckets,
-      width,
-    } = this.props;
-    const { timeCursorY, target } = this.state;
-    const [minTime, maxTime] = calculateYScale(start, end, height).domain();
-    const tickCount = height ? Math.floor(height / 50) : 12;
+  const [minTime, maxTime] = calculateYScale(start, end, height).domain();
+  const tickCount = height ? Math.floor(height / 50) : 12;
 
-    return (
-      <MinimapWrapper
-        className={className}
+  return (
+    <svg
+      className={className}
+      height={height}
+      preserveAspectRatio="none"
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+      onClick={handleClick}
+      onMouseMove={updateTimeCursor}
+      css={css`
+        cursor: pointer;
+        fill: ${theme.euiTheme.colors.emptyShade};
+        & line.logs-time-cursor {
+          visibility: hidden;
+        }
+        &:hover line.logs-time-cursor {
+          visibility: visible;
+        }
+      `}
+    >
+      <line
+        x1={TIMERULER_WIDTH}
+        x2={TIMERULER_WIDTH}
+        y1={0}
+        y2={height}
+        css={css`
+          stroke: ${theme.euiTheme.colors.mediumShade};
+          stroke-width: 1px;
+        `}
+      />
+      <TimeRuler
+        start={minTime}
+        end={maxTime}
+        width={TIMERULER_WIDTH}
         height={height}
-        preserveAspectRatio="none"
-        viewBox={`0 0 ${width} ${height}`}
-        width={width}
-        onClick={this.handleClick}
-        onMouseMove={this.updateTimeCursor}
-      >
-        <MinimapBorder x1={TIMERULER_WIDTH} x2={TIMERULER_WIDTH} y1={0} y2={height} />
-        <TimeRuler
+        tickCount={tickCount}
+      />
+      <g transform={`translate(${TIMERULER_WIDTH}, 0)`}>
+        <DensityChart
+          buckets={summaryBuckets}
           start={minTime}
           end={maxTime}
-          width={TIMERULER_WIDTH}
+          width={width - TIMERULER_WIDTH}
           height={height}
-          tickCount={tickCount}
         />
-        <g transform={`translate(${TIMERULER_WIDTH}, 0)`}>
-          <DensityChart
-            buckets={summaryBuckets}
-            start={minTime}
-            end={maxTime}
-            width={width - TIMERULER_WIDTH}
-            height={height}
-          />
 
-          <SearchMarkers
-            buckets={summaryHighlightBuckets || []}
-            start={minTime}
-            end={maxTime}
-            width={width - TIMERULER_WIDTH}
-            height={height}
-            jumpToTarget={jumpToTarget}
-          />
-        </g>
+        <SearchMarkers
+          buckets={summaryHighlightBuckets || []}
+          start={minTime}
+          end={maxTime}
+          width={width - TIMERULER_WIDTH}
+          height={height}
+          jumpToTarget={jumpToTarget}
+        />
+      </g>
 
-        {highlightedInterval ? (
-          <HighlightedInterval
-            end={moment(highlightedInterval.end).valueOf()}
-            getPositionOfTime={this.getPositionOfTime}
-            start={moment(highlightedInterval.start).valueOf()}
-            targetWidth={TIMERULER_WIDTH}
-            width={width}
-            target={target}
-          />
-        ) : null}
-        <TimeCursor x1={TIMERULER_WIDTH} x2={width} y1={timeCursorY} y2={timeCursorY} />
-      </MinimapWrapper>
-    );
-  }
-}
-
-const MinimapBorder = styled.line`
-  stroke: ${(props) => props.theme.euiTheme.colors.mediumShade};
-  stroke-width: 1px;
-`;
-
-const TimeCursor = styled.line`
-  pointer-events: none;
-  stroke-width: 1px;
-  stroke: ${(props) =>
-    props.theme.colorMode === 'DARK'
-      ? props.theme.euiTheme.colors.darkestShade
-      : props.theme.euiTheme.colors.darkShade};
-`;
-
-const MinimapWrapper = styled.svg`
-  cursor: pointer;
-  fill: ${(props) => props.theme.euiTheme.colors.emptyShade};
-  & ${TimeCursor} {
-    visibility: hidden;
-  }
-  &:hover ${TimeCursor} {
-    visibility: visible;
-  }
-`;
+      {highlightedInterval ? (
+        <HighlightedInterval
+          end={moment(highlightedInterval.end).valueOf()}
+          getPositionOfTime={getPositionOfTime}
+          start={moment(highlightedInterval.start).valueOf()}
+          targetWidth={TIMERULER_WIDTH}
+          width={width}
+          target={target}
+        />
+      ) : null}
+      <line
+        className="logs-time-cursor"
+        x1={TIMERULER_WIDTH}
+        x2={width}
+        y1={timeCursorY}
+        y2={timeCursorY}
+        css={css`
+          pointer-events: none;
+          stroke-width: 1px;
+          stroke: ${theme.colorMode === 'DARK'
+            ? theme.euiTheme.colors.darkestShade
+            : theme.euiTheme.colors.darkShade};
+        `}
+      />
+    </svg>
+  );
+};
