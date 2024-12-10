@@ -10,36 +10,20 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { BaseKibanaFeatureConfig } from '../../types';
-import { APP_ID, CASES_FEATURE_ID, CASES_FEATURE_ID_V3 } from '../../constants';
+import { APP_ID, CASES_FEATURE_ID_V3, CASES_FEATURE_ID } from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
-/**
- * @deprecated Use getCasesBaseKibanaFeatureV2 instead
- */
-export const getCasesBaseKibanaFeature = ({
+export const getCasesBaseKibanaFeatureV3 = ({
   uiCapabilities,
   apiTags,
   savedObjects,
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
-    deprecated: {
-      notice: i18n.translate(
-        'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCase.deprecationMessage',
-        {
-          defaultMessage:
-            'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
-          values: {
-            currentId: CASES_FEATURE_ID,
-            casesFeatureIdV2: CASES_FEATURE_ID_V3,
-          },
-        }
-      ),
-    },
-    id: CASES_FEATURE_ID,
+    id: CASES_FEATURE_ID_V3,
     name: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitleDeprecated',
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle',
       {
-        defaultMessage: 'Cases (Deprecated)',
+        defaultMessage: 'Cases',
       }
     ),
     order: 1100,
@@ -50,7 +34,7 @@ export const getCasesBaseKibanaFeature = ({
     cases: [APP_ID],
     privileges: {
       all: {
-        api: [...apiTags.all, ...apiTags.createComment],
+        api: apiTags.all,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -58,23 +42,12 @@ export const getCasesBaseKibanaFeature = ({
           read: [APP_ID],
           update: [APP_ID],
           push: [APP_ID],
-          createComment: [APP_ID],
-          reopenCase: [APP_ID],
         },
         savedObject: {
           all: [...savedObjects.files],
           read: [...savedObjects.files],
         },
         ui: uiCapabilities.all,
-        replacedBy: {
-          default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['all'] }],
-          minimal: [
-            {
-              feature: CASES_FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen'],
-            },
-          ],
-        },
       },
       read: {
         api: apiTags.read,
@@ -88,10 +61,6 @@ export const getCasesBaseKibanaFeature = ({
           read: [...savedObjects.files],
         },
         ui: uiCapabilities.read,
-        replacedBy: {
-          default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['read'] }],
-          minimal: [{ feature: CASES_FEATURE_ID_V3, privileges: ['minimal_read'] }],
-        },
       },
     },
   };

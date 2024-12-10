@@ -14,6 +14,7 @@ export const isReadOnlyPermissions = (permissions: CasesPermissions) => {
     !permissions.update &&
     !permissions.delete &&
     !permissions.push &&
+    !permissions.assignCase &&
     permissions.read
   );
 };

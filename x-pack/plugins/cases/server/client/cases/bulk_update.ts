@@ -323,7 +323,7 @@ function partitionPatchRequest(
   };
 }
 
-function getOperationsToAuthorize(
+export function getOperationsToAuthorize(
   reopenedCases: CasePatchRequest[],
   changedAssignees: CasePatchRequest[]
 ): OperationDetails[] {

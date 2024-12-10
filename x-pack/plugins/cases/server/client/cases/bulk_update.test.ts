@@ -20,7 +20,7 @@ import {
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
-import { bulkUpdate } from './bulk_update';
+import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
 
 describe('update', () => {
   const cases = {
@@ -314,6 +314,50 @@ describe('update', () => {
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
       );
+    });
+
+    it('returns updateCase operation when no reopened cases or changed assignees', () => {
+      const operations = getOperationsToAuthorize([], []);
+      expect(operations).toEqual([Operations.updateCase]);
+    });
+
+    it('returns reopenCase operation when there are reopened cases', () => {
+      const reopenedCases = [
+        {
+          id: 'case-1',
+          version: '1',
+        },
+      ];
+      const operations = getOperationsToAuthorize(reopenedCases, []);
+      expect(operations).toEqual([Operations.reopenCase]);
+    });
+
+    it('returns assignCase operation when there are changed assignees', () => {
+      const changedAssignees = [
+        {
+          id: 'case-1',
+          version: '1',
+        },
+      ];
+      const operations = getOperationsToAuthorize([], changedAssignees);
+      expect(operations).toEqual([Operations.assignCase]);
+    });
+
+    it('returns both reopenCase and assignCase operations when both arrays have cases', () => {
+      const reopenedCases = [
+        {
+          id: 'case-1',
+          version: '1',
+        },
+      ];
+      const changedAssignees = [
+        {
+          id: 'case-2',
+          version: '1',
+        },
+      ];
+      const operations = getOperationsToAuthorize(reopenedCases, changedAssignees);
+      expect(operations).toEqual([Operations.reopenCase, Operations.assignCase]);
     });
   });
 
@@ -1725,7 +1769,7 @@ describe('update', () => {
         });
       });
 
-      it('checks authorization for both reopenCase and updateCase operations when reopening a case', async () => {
+      it('checks authorization for only reopenCase', async () => {
         // Mock a closed case
         const closedCase = {
           ...mockCases[0],
@@ -1757,7 +1801,7 @@ describe('update', () => {
 
         expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
           entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
-          operation: [Operations.reopenCase, Operations.updateCase],
+          operation: [Operations.reopenCase],
         });
       });
 

@@ -136,6 +136,31 @@ export const secCasesV2All: Role = {
   },
 };
 
+export const secCasesV3All: Role = {
+  name: 'sec_cases_v3_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCasesV3: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const secCasesV2NoReopenWithCreateComment: Role = {
   name: 'sec_cases_v2_no_reopen_role_api_int',
   privileges: {
@@ -484,6 +509,31 @@ export const casesV2All: Role = {
   },
 };
 
+export const casesV3All: Role = {
+  name: 'cases_v3_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV3: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const casesV2NoReopenWithCreateComment: Role = {
   name: 'cases_v2_no_reopen_role_api_int',
   privileges: {
@@ -683,6 +733,31 @@ export const obsCasesV2All: Role = {
   },
 };
 
+export const obsCasesV3All: Role = {
+  name: 'obs_cases_v3_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV3: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const obsCasesV2NoReopenWithCreateComment: Role = {
   name: 'obs_cases_v2_no_reopen_role_api_int',
   privileges: {
@@ -763,6 +838,7 @@ export const roles = [
   secAllCasesNoDelete,
   secAll,
   secCasesV2All,
+  secCasesV3All,
   secCasesV2NoReopenWithCreateComment,
   secCasesV2NoCreateCommentWithReopen,
   secAllSpace1,
@@ -777,6 +853,7 @@ export const roles = [
   casesNoDelete,
   casesAll,
   casesV2All,
+  casesV3All,
   casesV2NoReopenWithCreateComment,
   casesV2NoCreateCommentWithReopen,
   casesRead,
@@ -785,6 +862,7 @@ export const roles = [
   obsCasesNoDelete,
   obsCasesAll,
   obsCasesV2All,
+  obsCasesV3All,
   obsCasesV2NoReopenWithCreateComment,
   obsCasesV2NoCreateCommentWithReopen,
   obsCasesRead,

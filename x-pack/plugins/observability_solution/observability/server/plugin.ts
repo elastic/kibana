@@ -59,6 +59,7 @@ import { AlertDetailsContextualInsightsService } from './services';
 import { uiSettings } from './ui_settings';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
+import { getCasesFeatureV3 } from './features/cases_v3';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -113,6 +114,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
+    plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 

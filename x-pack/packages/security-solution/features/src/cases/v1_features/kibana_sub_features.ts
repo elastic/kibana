@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { CasesSubFeatureId } from '../../product_features_keys';
-import { APP_ID, CASES_FEATURE_ID_V2 } from '../../constants';
+import { APP_ID, CASES_FEATURE_ID_V3 } from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
 /**
@@ -56,7 +56,7 @@ export const getCasesSubFeaturesMap = ({
               delete: [APP_ID],
             },
             ui: uiCapabilities.delete,
-            replacedBy: [{ feature: CASES_FEATURE_ID_V2, privileges: ['cases_delete'] }],
+            replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_delete'] }],
           },
         ],
       },
@@ -91,7 +91,7 @@ export const getCasesSubFeaturesMap = ({
               settings: [APP_ID],
             },
             ui: uiCapabilities.settings,
-            replacedBy: [{ feature: CASES_FEATURE_ID_V2, privileges: ['cases_settings'] }],
+            replacedBy: [{ feature: CASES_FEATURE_ID_V3, privileges: ['cases_settings'] }],
           },
         ],
       },
