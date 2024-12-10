@@ -10,8 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
 import useSet from 'react-use/lib/useSet';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import {
   categoriesSortRT,
@@ -29,7 +28,7 @@ import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
 import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
 
-export const TopCategoriesTable = euiStyled(
+export const TopCategoriesTable = styled(
   ({
     categorizationJobId,
     className,
