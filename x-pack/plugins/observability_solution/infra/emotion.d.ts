@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { NotFound } from './not_found';
+import '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+declare module '@emotion/react' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface Theme extends UseEuiTheme {}
+}

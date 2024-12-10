@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { EnterpriseSearchRelevancePageTemplate } from './page_template';
+import { i18n } from '@kbn/i18n';
+
+export const RULE_STATUS_INSTALLED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.status.installedLabel',
+  {
+    defaultMessage: 'Installed',
+  }
+);
