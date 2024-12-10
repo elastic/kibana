@@ -6484,7 +6484,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-logs-overview@link:x-pack/packages/observability/logs_overview":
+"@kbn/observability-logs-overview@link:x-pack/solutions/observability/packages/logs_overview":
   version "0.0.0"
   uid ""
 
