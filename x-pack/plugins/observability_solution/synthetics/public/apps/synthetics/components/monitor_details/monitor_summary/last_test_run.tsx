@@ -162,7 +162,7 @@ const PanelHeader = ({
 
   const TitleNode = (
     <EuiTitle size="xs">
-      <h3>{LAST_TEST_RUN_LABEL}</h3>
+      <h2>{LAST_TEST_RUN_LABEL}</h2>
     </EuiTitle>
   );
 
