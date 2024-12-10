@@ -23,7 +23,7 @@ import type {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
-import type { DataInputStep } from './types';
+import { DataInputStep } from './types';
 import { MacrosDataInput } from './steps/macros/macros_data_input';
 
 interface MissingResourcesIndexed {
@@ -51,7 +51,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       }
     }, [migrationStats, startMigration]);
 
-    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(1);
+    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Rules);
 
     const onMigrationCreated = useCallback((createdMigrationStats: RuleMigrationTaskStats) => {
       setMigrationStats(createdMigrationStats);
@@ -71,13 +71,21 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
           { macros: [], lookups: [] }
         );
         setMissingResourcesIndexed(newMissingResourcesIndexed);
-        setDataInputStep(2);
+        if (newMissingResourcesIndexed.macros.length) {
+          setDataInputStep(DataInputStep.Macros);
+          return;
+        }
+        if (newMissingResourcesIndexed.lookups.length) {
+          setDataInputStep(DataInputStep.Lookups);
+          return;
+        }
+        setDataInputStep(DataInputStep.End);
       },
       []
     );
 
     const onMacrosCreated = useCallback(() => {
-      setDataInputStep(3);
+      setDataInputStep(DataInputStep.Lookups);
     }, []);
 
     return (

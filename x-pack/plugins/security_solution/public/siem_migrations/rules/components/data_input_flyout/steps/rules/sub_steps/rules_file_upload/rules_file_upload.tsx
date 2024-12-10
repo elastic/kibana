@@ -62,7 +62,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
               </EuiText>
             </>
           }
-          accept="application/json"
+          accept="application/json, application/x-ndjson"
           onChange={parseFile}
           display="large"
           aria-label="Upload rules file"

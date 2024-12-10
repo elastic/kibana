@@ -14,4 +14,9 @@ export type OnMigrationCreated = (migrationStats: RuleMigrationTaskStats) => voi
 export type OnResourcesCreated = () => void;
 export type OnMissingResourcesFetched = (missingResources: RuleMigrationResourceData[]) => void;
 
-export type DataInputStep = 1 | 2 | 3;
+export enum DataInputStep {
+  Rules = 1,
+  Macros = 2,
+  Lookups = 3,
+  End = 10,
+}

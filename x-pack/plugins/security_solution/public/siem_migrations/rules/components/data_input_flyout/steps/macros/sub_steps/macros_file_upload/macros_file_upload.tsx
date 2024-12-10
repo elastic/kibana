@@ -60,7 +60,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
               </EuiText>
             </>
           }
-          accept="application/json"
+          accept="application/json, application/x-ndjson"
           onChange={parseFile}
           display="large"
           aria-label="Upload logs sample file"
