@@ -423,8 +423,9 @@ export const mockState: State = {
     logSamples: rawSamples,
   },
   isGenerating: false,
-  hasCelInput: false,
   result,
+  showCelCreateFlyout: false,
+  isFlyoutGenerating: false,
 };
 
 export const mockActions: Actions = {
@@ -432,7 +433,8 @@ export const mockActions: Actions = {
   setConnector: jest.fn(),
   setIntegrationSettings: jest.fn(),
   setIsGenerating: jest.fn(),
-  setHasCelInput: jest.fn(),
   setResult: jest.fn(),
   setCelInputResult: jest.fn(),
+  setShowCelCreateFlyout: jest.fn(),
+  setIsFlyoutGenerating: jest.fn(),
 };
