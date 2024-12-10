@@ -7128,7 +7128,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/packages/security-solution/data_table":
+"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data_table":
   version "0.0.0"
   uid ""
 
