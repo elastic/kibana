@@ -7664,7 +7664,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/timerange@link:packages/kbn-timerange":
+"@kbn/timerange@link:x-pack/solutions/observability/packages/kbn-timerange":
   version "0.0.0"
   uid ""
 
