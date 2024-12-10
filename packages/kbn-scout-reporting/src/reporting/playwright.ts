@@ -25,7 +25,6 @@ import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   type PathWithOwners,
-  type CodeOwnership,
   getPathsWithOwnersReversed,
   getCodeOwnersForFile,
 } from '@kbn/code-owners';
