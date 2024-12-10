@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/chrome/core-chrome-browser'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/chrome/browser'],
 };
