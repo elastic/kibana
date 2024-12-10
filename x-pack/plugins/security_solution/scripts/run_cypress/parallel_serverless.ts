@@ -368,7 +368,7 @@ ${JSON.stringify(argv, null, 2)}
         cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless --@skipInServerlessMKI';
       }
 
-      setDefaultToolingLoggingLevel(cypressConfigFile);
+      setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
 
       // eslint-disable-next-line require-atomic-updates
       log = prefixedOutputLogger('cy.parallel(svl)', createToolingLogger());

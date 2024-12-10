@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import _ from 'lodash';
 import * as fs from 'fs';
 import * as parser from '@babel/parser';
@@ -14,6 +12,7 @@ import generate from '@babel/generator';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import chalk from 'chalk';
+import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 
 /**
@@ -166,15 +165,15 @@ export const getOnBeforeHook = (module: unknown, beforeSpecFilePath: string): Fu
  * It will first check the NodeJs `process.env` to see if an Environment Variable was set
  * and then, if provided, it will use the value defined in the Cypress Config. file.
  */
-export const setDefaultToolingLoggingLevel = (cypressConfigFile?: any) => {
+export const setDefaultToolingLoggingLevel = (defaultFallbackLoggingLevel?: string) => {
   const logLevel =
     process.env.TOOLING_LOG_LEVEL ||
     process.env.CYPRESS_TOOLING_LOG_LEVEL ||
-    cypressConfigFile?.env?.TOOLING_LOG_LEVEL ||
+    defaultFallbackLoggingLevel ||
     '';
 
   if (logLevel) {
     createToolingLogger('info').info(`Setting tooling log level to [${logLevel}]`);
-    createToolingLogger.defaultLogLevel = logLevel;
+    createToolingLogger.defaultLogLevel = logLevel as ToolingLogTextWriterConfig['level'];
   }
 };

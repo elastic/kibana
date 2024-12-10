@@ -72,7 +72,7 @@ ${JSON.stringify(argv, null, 2)}
 
       // Adjust tooling log level based on the `TOOLING_LOG_LEVEL` property, which can be
       // defined in the cypress config file or set in the `env`
-      setDefaultToolingLoggingLevel(cypressConfigFile);
+      setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
 
       const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
 
