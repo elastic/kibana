@@ -9,7 +9,7 @@ import { compact, last } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { EntitySourceDefinition } from '../types';
 
-const sourceCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {
+const fromCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {
   let command = `FROM ${sources.flatMap((source) => source.index_patterns).join(', ')}`;
   if (sources.length > 1) {
     command += ' METADATA _index';
@@ -55,12 +55,14 @@ const dslFilter = ({
   );
 };
 
-const groupBy = ({ sources }: { sources: EntitySourceDefinition[] }) => {
-  if (sources.length === 1) {
-    return `STATS BY ${sources[0].identity_fields.join(', ')}`;
-  }
-
-  return `STATS BY entity.id`;
+const statsCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {
+  const commands = [
+    sources.length === 1
+      ? `STATS BY ${sources[0].identity_fields.join(', ')}`
+      : `STATS BY entity.id`,
+    'STATS count = COUNT()',
+  ];
+  return commands.join(' | ');
 };
 
 const sourcesEvalCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {
@@ -117,12 +119,11 @@ export function getEntityCountQuery({
   end: string;
 }) {
   const commands = compact([
-    sourceCommand({ sources }),
+    fromCommand({ sources }),
     sourcesEvalCommand({ sources }),
     idEvalCommand({ sources }),
     whereCommand({ sources }),
-    groupBy({ sources }),
-    'STATS count = COUNT()',
+    statsCommand({ sources }),
   ]);
 
   const filter = dslFilter({ sources, filters, start, end });
