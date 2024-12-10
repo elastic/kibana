@@ -5923,11 +5923,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inference-common@link:x-pack/packages/ai-infra/inference-common":
+"@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
   version "0.0.0"
   uid ""
 
-"@kbn/inference-plugin@link:x-pack/plugins/inference":
+"@kbn/inference-plugin@link:x-pack/platform/plugins/shared/inference":
   version "0.0.0"
   uid ""
 
@@ -6119,7 +6119,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/llm-tasks-plugin@link:x-pack/plugins/ai_infra/llm_tasks":
+"@kbn/llm-tasks-plugin@link:x-pack/platform/plugins/shared/ai_infra/llm_tasks":
   version "0.0.0"
   uid ""
 
@@ -6607,11 +6607,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-base-plugin@link:x-pack/plugins/ai_infra/product_doc_base":
+"@kbn/product-doc-base-plugin@link:x-pack/platform/plugins/shared/ai_infra/product_doc_base":
   version "0.0.0"
   uid ""
 
-"@kbn/product-doc-common@link:x-pack/packages/ai-infra/product-doc-common":
+"@kbn/product-doc-common@link:x-pack/platform/packages/shared/ai-infra/product-doc-common":
   version "0.0.0"
   uid ""
 
