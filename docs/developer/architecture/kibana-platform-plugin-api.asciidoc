@@ -225,11 +225,11 @@ These are the contracts exposed by the core services for each lifecycle:
 |{kib-repo}blob/{branch}/packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts[PluginInitializerContext]
 
 |_setup_
-|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-server/src/core_setup.ts[CoreSetup]
+|{kib-repo}blob/{branch}/src/core/packages/lifecycle/server/src/core_setup.ts[CoreSetup]
 |{kib-repo}blob/{branch}/src/core/packages/lifecycle/browser-internal/src/internal_core_setup.ts[CoreSetup]
 
 |_start_
-|{kib-repo}blob/{branch}/packages/core/lifecycle/core-lifecycle-server/src/core_start.ts[CoreStart]
+|{kib-repo}blob/{branch}/src/core/packages/lifecycle/server/src/core_start.ts[CoreStart]
 |{kib-repo}blob/{branch}/src/core/packages/lifecycle/browser/src/core_start.ts[CoreStart]
 
 |_stop_ |
