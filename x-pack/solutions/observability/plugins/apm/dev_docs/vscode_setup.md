@@ -1,6 +1,6 @@
 # Visual Studio Code
 
-When using [Visual Studio Code](https://code.visualstudio.com/) with APM it's best to set up a [multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) and add the `x-pack/plugins/observability_solution/apm` directory, the `x-pack` directory, and the root of the Kibana repository to the workspace. This makes it so you can navigate and search within APM and use the wider workspace roots when you need to widen your search.
+When using [Visual Studio Code](https://code.visualstudio.com/) with APM it's best to set up a [multi-root workspace](https://code.visualstudio.com/docs/editor/multi-root-workspaces) and add the `x-pack/solutions/observability/plugins/apm` directory, the `x-pack` directory, and the root of the Kibana repository to the workspace. This makes it so you can navigate and search within APM and use the wider workspace roots when you need to widen your search.
 
 ## Using the Jest extension
 
@@ -39,7 +39,7 @@ To make the [VSCode debugger](https://vscode.readthedocs.io/en/latest/editor/deb
   "console": "integratedTerminal",
   "internalConsoleOptions": "neverOpen",
   "disableOptimisticBPs": true,
-  "program": "${workspaceFolder}/../../../node_modules/jest/bin/jest"
+  "program": "${workspaceFolder}/../../../../node_modules/jest/bin/jest"
 }
 ```
 

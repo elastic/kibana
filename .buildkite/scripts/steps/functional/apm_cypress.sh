@@ -31,6 +31,6 @@ echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/observability_solution/apm/scripts/test/e2e.js \
+node solutions/observability/plugins/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   $CYPRESS_ARGS

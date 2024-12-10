@@ -39,7 +39,7 @@ const project = new Project({
 
 const glob =
   (argv.glob as string | undefined) ||
-  'x-pack/plugins/observability_solution/apm/server/**/route.ts';
+  'x-pack/solutions/observability/plugins/apm/server/**/route.ts';
 
 const files = project.getSourceFiles(glob);
 
@@ -122,7 +122,7 @@ files.forEach((file) => {
 
 changedFiles.forEach((file) => file.saveSync());
 
-const root = Path.join(__dirname, '../../../../..');
+const root = Path.join(__dirname, '../../../../../..');
 
 // run ESLint on the changed files
 execSync(`node scripts/eslint ${glob} --fix`, {

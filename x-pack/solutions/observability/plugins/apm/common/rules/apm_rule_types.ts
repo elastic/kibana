@@ -290,9 +290,9 @@ export const ANOMALY_DETECTOR_SELECTOR_OPTIONS = [
 ].map((type) => ({ type, label: getApmMlDetectorLabel(type) }));
 
 // Server side registrations
-// x-pack/plugins/observability_solution/apm/server/lib/alerts/<alert>.ts
-// x-pack/plugins/observability_solution/apm/server/lib/alerts/register_apm_alerts.ts
+// x-pack/solutions/observability/plugins/apm/server/lib/alerts/<alert>.ts
+// x-pack/solutions/observability/plugins/apm/server/lib/alerts/register_apm_alerts.ts
 
 // Client side registrations:
-// x-pack/plugins/observability_solution/apm/public/components/alerting/<alert>/index.tsx
-// x-pack/plugins/observability_solution/apm/public/components/alerting/register_apm_alerts
+// x-pack/solutions/observability/plugins/apm/public/components/alerting/<alert>/index.tsx
+// x-pack/solutions/observability/plugins/apm/public/components/alerting/register_apm_alerts

@@ -23,7 +23,7 @@ import { getRequestBase } from './get_request_base';
 import type { FetchTopOptions } from './fetch_top_types';
 
 // TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
-// `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
+// `x-pack/solutions/observability/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
 const TOP_TERM_AGG_PREFIX = 'top_terms_';
 
