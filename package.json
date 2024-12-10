@@ -834,7 +834,7 @@
     "@kbn/security-solution-navigation": "link:x-pack/solutions/security/packages/navigation",
     "@kbn/security-solution-plugin": "link:x-pack/plugins/security_solution",
     "@kbn/security-solution-serverless": "link:x-pack/plugins/security_solution_serverless",
-    "@kbn/security-solution-side-nav": "link:x-pack/packages/security-solution/side_nav",
+    "@kbn/security-solution-side-nav": "link:x-pack/solutions/security/packages/side_nav",
     "@kbn/security-solution-storybook-config": "link:x-pack/packages/security-solution/storybook/config",
     "@kbn/security-solution-upselling": "link:x-pack/packages/security-solution/upselling",
     "@kbn/security-test-endpoints-plugin": "link:x-pack/test/security_functional/plugins/test_endpoints",

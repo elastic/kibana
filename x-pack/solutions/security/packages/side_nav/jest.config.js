@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/security-solution/side_nav'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/side_nav'],
 };
