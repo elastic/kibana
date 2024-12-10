@@ -65,21 +65,19 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
   }, [state]);
 
   return (
-    <>
-      <EuiText color={color} size="xs">
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <strong>{title}</strong>
-          </EuiFlexItem>
+    <EuiText color={color} size="xs">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <strong>{title}</strong>
+        </EuiFlexItem>
 
-          {description && (
-            <EuiFlexItem grow={false}>
-              {i18n.SEPARATOR} {description}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiText>
-    </>
+        {description && (
+          <EuiFlexItem grow={false}>
+            {i18n.SEPARATOR} {description}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiText>
   );
 }
