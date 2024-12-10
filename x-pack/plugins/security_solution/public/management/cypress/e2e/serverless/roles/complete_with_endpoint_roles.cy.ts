@@ -42,11 +42,11 @@ describe(
         ],
         // This is not needed for this test, but it's a good example of
         // how to enable experimental features in the Cypress tests.
-        // kbnServerArgs: [
-        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        //     'featureFlagName',
-        //   ])}`,
-        // ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'crowdstrikeRunScriptEnabled',
+          ])}`,
+        ],
       },
     },
   },
@@ -129,7 +129,11 @@ describe(
         'scan'
       );
 
-      const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');
+      const deniedResponseActions = pick(
+        consoleHelpPanelResponseActionsTestSubj,
+        'execute',
+        'runscript'
+      );
 
       beforeEach(() => {
         login(ROLE.t3_analyst);
