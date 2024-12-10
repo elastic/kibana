@@ -84,6 +84,12 @@ export async function createRule<Params extends RuleParams = never>(
     throw Boom.badRequest(`Error validating create data - ${error.message}`);
   }
 
+  /**
+   * ruleTypeRegistry.get will throw a 400 (Bad request)
+   * error if the rule type is not registered.
+   */
+  context.ruleTypeRegistry.get(data.alertTypeId);
+
   let validationPayload: ValidateScheduleLimitResult = null;
   if (data.enabled) {
     validationPayload = await validateScheduleLimit({

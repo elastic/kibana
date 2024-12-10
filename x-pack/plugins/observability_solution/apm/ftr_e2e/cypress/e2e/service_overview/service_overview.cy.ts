@@ -191,19 +191,10 @@ describe('Service Overview', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames);
 
-      cy.intercept('GET', 'internal/apm/suggestions?*').as('suggestionsRequest');
-
-      cy.getByTestSubj('environmentFilter')
-        .find('input')
-        .type('{selectall}production', { force: true });
-
-      cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: ['@suggestionsRequest'],
-        value: 'fieldValue=production',
-      });
-
+      cy.getByTestSubj('environmentFilter').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
-        .contains('production')
+        .should('be.visible')
+        .contains('button', 'production')
         .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({

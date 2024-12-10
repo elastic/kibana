@@ -423,11 +423,11 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
 
         history.push(
-          '/slos/123/edit?_a=(name:%27updated-name%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration),objective:(target:0.92))'
+          '/slos/edit/123?_a=(name:%27updated-name%27,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration),objective:(target:0.92))'
         );
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/edit/123', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
@@ -463,8 +463,7 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
-
+          .mockReturnValue({ pathname: '/slos/edit/123', search: '', state: '', hash: '' });
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
         const { getByTestId } = render(<SloEditPage />);

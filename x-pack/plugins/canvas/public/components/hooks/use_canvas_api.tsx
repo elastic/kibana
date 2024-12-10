@@ -49,6 +49,8 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         createNewEmbeddable(panelType, initialState);
       },
       disableTriggers: true,
+      // this is required to disable inline editing now enabled by default
+      canEditInline: false,
       type: 'canvas',
       /**
        * getSerializedStateForChild is left out here because we cannot access the state here. That method

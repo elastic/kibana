@@ -75,18 +75,26 @@ export const useGetAgentIncomingData = (
 };
 
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
-const POLLING_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
+export const POLLING_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 
 /**
- * Hook for polling incoming data for the selected agent policy.
+ * Hook for polling incoming data for the selected agent(s).
  * @param agentIds
  * @returns incomingData, isLoading
  */
-export const usePollingIncomingData = (
-  agentIds: string[],
-  previewData?: boolean,
-  stopPollingAfterPreviewLength: number = 0
-) => {
+export const usePollingIncomingData = ({
+  agentIds,
+  pkgName,
+  pkgVersion,
+  previewData,
+  stopPollingAfterPreviewLength = 0,
+}: {
+  agentIds: string[];
+  pkgName?: string;
+  pkgVersion?: string;
+  previewData?: boolean;
+  stopPollingAfterPreviewLength?: number;
+}) => {
   const timeout = useRef<number | undefined>(undefined);
   const [result, setResult] = useState<{
     incomingData: IncomingDataList[];
@@ -117,7 +125,12 @@ export const usePollingIncomingData = (
           setHasReachedTimeout(true);
         }
 
-        const { data } = await sendGetAgentIncomingData({ agentsIds: agentIds, previewData });
+        const { data } = await sendGetAgentIncomingData({
+          agentsIds: agentIds,
+          previewData,
+          pkgName,
+          pkgVersion,
+        });
         if (data?.items) {
           // filter out  agents that have `data = false` and keep polling
           const filtered = data?.items.filter((item) => {
@@ -153,7 +166,15 @@ export const usePollingIncomingData = (
     return () => {
       isAborted = true;
     };
-  }, [agentIds, result, previewData, stopPollingAfterPreviewLength, startedPollingAt]);
+  }, [
+    agentIds,
+    result,
+    previewData,
+    stopPollingAfterPreviewLength,
+    startedPollingAt,
+    pkgName,
+    pkgVersion,
+  ]);
 
   return {
     ...result,

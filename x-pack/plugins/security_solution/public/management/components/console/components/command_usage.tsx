@@ -33,6 +33,13 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
     });
   }, [commandDef]);
 
+  const helpExample = useMemo(() => {
+    if (commandDef.helpUsage) {
+      return commandDef.helpUsage;
+    }
+    return commandDef.exampleUsage;
+  }, [commandDef]);
+
   return (
     <>
       <EuiDescriptionList
@@ -55,7 +62,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
         titleProps={additionalProps}
       />
       <EuiSpacer size="s" />
-      {commandDef.exampleUsage && (
+      {helpExample && (
         <EuiDescriptionList
           compressed
           type="column"
@@ -69,7 +76,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
                   })}
                 </ConsoleCodeBlock>
               ),
-              description: <ConsoleCodeBlock>{commandDef.exampleUsage}</ConsoleCodeBlock>,
+              description: <ConsoleCodeBlock>{helpExample}</ConsoleCodeBlock>,
             },
           ]}
           descriptionProps={additionalProps}

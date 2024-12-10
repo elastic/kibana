@@ -216,15 +216,14 @@ describe('Task Runner', () => {
       logger,
       maintenanceWindowsService,
       maxAlerts: 1000,
-      maxEphemeralActionsPerRule: 10,
       ruleTypeRegistry,
       rulesSettingsService,
       savedObjects: savedObjectsService,
       share: {} as SharePluginStart,
       spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-      supportsEphemeralTasks: false,
       uiSettings: uiSettingsService,
       usageCounter: mockUsageCounter,
+      isServerless: false,
     };
 
     describe(`using ${label} for alert indices`, () => {
@@ -412,6 +411,7 @@ describe('Task Runner', () => {
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
           elasticsearchAndSOAvailability$,
+          isServerless: false,
         });
         elasticsearchAndSOAvailability$.next(true);
 
@@ -544,6 +544,7 @@ describe('Task Runner', () => {
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
           elasticsearchAndSOAvailability$,
+          isServerless: false,
         });
         elasticsearchAndSOAvailability$.next(true);
 
@@ -590,7 +591,7 @@ describe('Task Runner', () => {
 
         expect(clusterClient.bulk).toHaveBeenCalledWith({
           index: '.alerts-test.alerts-default',
-          refresh: true,
+          refresh: 'wait_for',
           require_alias: !useDataStreamForAlerts,
           body: [
             {

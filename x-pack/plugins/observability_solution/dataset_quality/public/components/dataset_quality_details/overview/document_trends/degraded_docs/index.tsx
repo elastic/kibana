@@ -77,6 +77,7 @@ export default function DegradedDocs({ lastReloadTime }: { lastReloadTime: numbe
     dataStreamStat: datasetDetails,
     timeRangeConfig: timeRange,
     query: { language: 'kuery', query: `${_IGNORED}: *` },
+    breakdownField: breakdownDataViewField?.name,
     sendTelemetry,
   });
 

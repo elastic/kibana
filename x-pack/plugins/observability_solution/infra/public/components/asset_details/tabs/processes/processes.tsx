@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
+import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { parseSearchString } from './parse_search_string';
@@ -58,7 +58,7 @@ export const Processes = () => {
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
   const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
-    entityType: ENTITY_TYPES.HOST,
+    entityType: BUILT_IN_ENTITY_TYPES.HOST,
     entityId: asset.name,
   });
   const addMetricsCalloutId: AddMetricsCalloutKey = 'hostProcesses';
