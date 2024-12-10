@@ -44,6 +44,7 @@ import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { esqlVariablesService } from '../../../common';
 import { EsqlControlFlyoutType, type ESQLControlState } from './types';
+import { updateQueryStringWithVariable } from './helpers';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
@@ -271,13 +272,7 @@ export function ESQLControlsFlyout({
         },
       });
 
-      // add the variable to the service
-      const cursorColumn = cursorPosition?.column ?? 0;
-      const query = [
-        queryString.slice(0, cursorColumn - 1),
-        variableName,
-        queryString.slice(cursorColumn - 1),
-      ].join('');
+      const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
 
       addToESQLVariablesService(varName, availableOptions[0], controlType, query);
       const embeddable = dashboardPanels[panelId!];
