@@ -59,7 +59,7 @@ export const createApiLogic = <Result, Args>(
       },
       apiSuccess: (result) => {
         if (options.showSuccessFlashFn) {
-          flashSuccessToast(options.showSuccessFlashFn(result));
+          flashSuccessToast(options.showSuccessFlashFn(result), 2);
         }
       },
       makeRequest: async (args, breakpoint) => {
