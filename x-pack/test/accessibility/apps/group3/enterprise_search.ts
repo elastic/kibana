@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Playground', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/applications');
+        await common.navigateToApp('elasticsearch/applications');
       });
 
       it('loads playground', async function () {
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Search Applications', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/applications/search_applications');
+        await common.navigateToApp('elasticsearch/applications/search_applications');
       });
 
       it('loads search applications list', async function () {
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     describe('Behavioral Analytics', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/analytics');
+        await common.navigateToApp('elasticsearch/analytics');
       });
 
       it('loads Behavioral Analytics page', async function () {
