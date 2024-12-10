@@ -54,7 +54,52 @@ export function initAPIAuthorization(
       }
 
       const authz = security.authz as AuthzEnabled;
-      const requiredPrivileges = authz.requiredPrivileges;
+      const normalizeRequiredPrivileges = async (
+        privileges: AuthzEnabled['requiredPrivileges']
+      ) => {
+        const hasOperatorPrivileges = privileges.some(
+          (privilege) =>
+            privilege === ReservedPrivilegesSet.operator ||
+            (typeof privilege === 'object' &&
+              privilege.allRequired?.includes(ReservedPrivilegesSet.operator))
+        );
+
+        // nothing to normalize
+        if (!hasOperatorPrivileges) {
+          return privileges;
+        }
+
+        const securityConfig = await getSecurityConfig();
+
+        // nothing to normalize
+        if (securityConfig.operator_privileges.enabled) {
+          return privileges;
+        }
+
+        return privileges.reduce<AuthzEnabled['requiredPrivileges']>((acc, privilege) => {
+          if (typeof privilege === 'object') {
+            const operatorPrivilegeIndex =
+              privilege.allRequired?.findIndex((p) => p === ReservedPrivilegesSet.operator) ?? -1;
+
+            acc.push(
+              operatorPrivilegeIndex !== -1
+                ? {
+                    anyRequired: privilege.anyRequired,
+                    allRequired: privilege.allRequired?.toSpliced(operatorPrivilegeIndex, 1),
+                  }
+                : privilege
+            );
+          }
+
+          if (privilege !== ReservedPrivilegesSet.operator) {
+            acc.push(privilege);
+          }
+
+          return acc;
+        }, []);
+      };
+
+      const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
 
       const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
         (acc, privilegeEntry) => {
@@ -64,10 +109,7 @@ export function initAPIAuthorization(
               : [privilegeEntry];
 
           for (const privilege of privileges) {
-            if (
-              isReservedPrivilegeSet(privilege) &&
-              !acc.requestedReservedPrivileges.includes(privilege)
-            ) {
+            if (isReservedPrivilegeSet(privilege)) {
               acc.requestedReservedPrivileges.push(privilege);
             } else {
               acc.requestedPrivileges.push(privilege);

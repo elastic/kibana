@@ -382,6 +382,50 @@ describe('initAPIAuthorization', () => {
     );
 
     testSecurityConfig(
+      `protected route returns "authzResult" if user has requested operator privileges and operator privileges are disabled`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [ReservedPrivilegesSet.operator, 'privilege1'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [{ privilege: 'api:privilege1', authorized: true }],
+          },
+        },
+        kibanaCurrentUserResponse: { operator: false },
+        esXpackSecurityUsageResponse: { operator_privileges: { enabled: false, available: false } },
+        asserts: {
+          authzResult: {
+            privilege1: true,
+          },
+        },
+      }
+    );
+
+    testSecurityConfig(
+      `protected route returns forbidden if user operator privileges are disabled and user doesn't have additional privileges granted`,
+      {
+        security: {
+          authz: {
+            requiredPrivileges: [ReservedPrivilegesSet.operator, 'privilege1'],
+          },
+        },
+        kibanaPrivilegesResponse: {
+          privileges: {
+            kibana: [{ privilege: 'api:privilege1', authorized: false }],
+          },
+        },
+        kibanaCurrentUserResponse: { operator: false },
+        esXpackSecurityUsageResponse: { operator_privileges: { enabled: false, available: false } },
+        asserts: {
+          forbidden: true,
+        },
+      }
+    );
+
+    testSecurityConfig(
       `protected route returns forbidden if user has operator privileges requested and user is not operator`,
       {
         security: {
