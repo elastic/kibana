@@ -21,6 +21,7 @@ import {
   EuiResizeObserver,
   EuiProgress,
 } from '@elastic/eui';
+import type { Moment } from 'moment';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 // @ts-ignore
 import { JobSelectorTable } from './job_selector_table';
@@ -56,6 +57,21 @@ export interface JobSelectorFlyoutProps {
   onTimeRangeConfigChange?: (v: boolean) => void;
 }
 
+export interface GroupWithTimerange {
+  id: string;
+  jobIds: string[];
+  timeRange: {
+    from: number;
+    to: number;
+    fromPx: number;
+    toPx: number;
+    fromMoment: Moment | null;
+    toMoment: Moment | null;
+    widthPx?: number | null;
+    label?: string;
+  };
+}
+
 export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   dateFormatTz,
   selectedIds = [],
@@ -80,7 +96,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
-  const [groups, setGroups] = useState<Array<{ id: string; jobIds: string[] }>>([]);
+  const [groups, setGroups] = useState<GroupWithTimerange[]>([]);
 
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
 

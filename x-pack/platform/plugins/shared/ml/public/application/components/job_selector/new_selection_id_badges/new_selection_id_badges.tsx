@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { JobSelectorBadge } from '../job_selector_badge';
+import type { GroupWithTimerange } from '../job_selector_flyout';
 
 interface NewSelectionIdBadgesProps {
   limit: number;
@@ -17,7 +18,7 @@ interface NewSelectionIdBadgesProps {
   onDeleteClick?: Function;
   onLinkClick?: MouseEventHandler<HTMLAnchorElement>;
   showAllBadges?: boolean;
-  groups: Array<{ id: string; jobIds: string[] }>;
+  groups: GroupWithTimerange[];
 }
 
 export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
