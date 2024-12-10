@@ -74,7 +74,6 @@ export default class JestJUnitReporter extends BaseReporter {
       failures: results.numFailedTests,
       skipped: results.numPendingTests,
       'command-line': prettifyCommandLine(process.argv),
-      // owners: ''
     });
 
     // top level test results are the files/suites

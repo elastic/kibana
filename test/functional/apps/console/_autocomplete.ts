@@ -57,6 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.promptAutocomplete();
+      // expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       expect(false).to.be.eql(true);
     });
 
