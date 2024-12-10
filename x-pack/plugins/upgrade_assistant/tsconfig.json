@@ -43,7 +43,8 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-server-utils",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/discover-plugin"
   ],
   "exclude": [
     "target/**/*",
