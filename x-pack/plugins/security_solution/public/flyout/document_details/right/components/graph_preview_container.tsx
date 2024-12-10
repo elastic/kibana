@@ -11,6 +11,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
@@ -18,6 +19,7 @@ import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
 
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
@@ -35,6 +37,9 @@ export const GraphPreviewContainer: React.FC = () => {
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+  );
+  const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(
+    GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
   );
 
   const allowFlyoutExpansion = !isPreviewMode && !isPreview;
@@ -55,6 +60,9 @@ export const GraphPreviewContainer: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
+  const shouldShowGraphPreview =
+    visualizationInFlyoutEnabled && isGraphFeatureEnabled && isAuditLog;
+
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
@@ -71,8 +79,7 @@ export const GraphPreviewContainer: React.FC = () => {
   });
 
   return (
-    isAuditLog &&
-    visualizationInFlyoutEnabled && (
+    shouldShowGraphPreview && (
       <ExpandablePanel
         header={{
           title: (

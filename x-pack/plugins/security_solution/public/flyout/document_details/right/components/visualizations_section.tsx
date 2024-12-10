@@ -17,7 +17,9 @@ import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
+import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
 
 const KEY = 'visualizations';
 
@@ -32,11 +34,18 @@ export const VisualizationsSection = memo(() => {
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
 
+  const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(
+    GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
+  );
+
   // Decide whether to show the graph preview or not
-  const { isAuditLog: isGraphPreviewEnabled } = useGraphPreview({
+  const { isAuditLog } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
+
+  const shouldShowGraphPreview =
+    visualizationInFlyoutEnabled && isGraphFeatureEnabled && isAuditLog;
 
   return (
     <ExpandableSection
@@ -53,7 +62,7 @@ export const VisualizationsSection = memo(() => {
       <SessionPreviewContainer />
       <EuiSpacer />
       <AnalyzerPreviewContainer />
-      {visualizationInFlyoutEnabled && isGraphPreviewEnabled && (
+      {shouldShowGraphPreview && (
         <>
           <EuiSpacer />
           <GraphPreviewContainer />

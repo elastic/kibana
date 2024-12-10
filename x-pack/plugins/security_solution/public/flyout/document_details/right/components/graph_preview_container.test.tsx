@@ -21,6 +21,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const mockUseUiSetting = jest.fn().mockReturnValue([true]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -30,6 +31,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useUiSetting$: () => mockUseUiSetting(),
   };
 });
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../shared/hooks/use_graph_preview');
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
@@ -58,6 +65,7 @@ describe('<GraphPreviewContainer />', () => {
   });
 
   it('should render component and link in header', async () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -108,6 +116,7 @@ describe('<GraphPreviewContainer />', () => {
   });
 
   it('should render component and without link in header in preview panel', async () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -161,6 +170,7 @@ describe('<GraphPreviewContainer />', () => {
   });
 
   it('should render component and without link in header in rule preview', async () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -213,7 +223,8 @@ describe('<GraphPreviewContainer />', () => {
     });
   });
 
-  it('should not render when feature is not enabled', () => {
+  it('should not render when flyout feature is not enabled', () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseUiSetting.mockReturnValue([false]);
 
     mockUseFetchGraphData.mockReturnValue({
@@ -233,7 +244,29 @@ describe('<GraphPreviewContainer />', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('should not render when experimental feature is not enabled', () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+    mockUseUiSetting.mockReturnValue([true]);
+
+    mockUseFetchGraphData.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: undefined,
+    });
+
+    (useGraphPreview as jest.Mock).mockReturnValue({
+      isAuditLog: true,
+    });
+
+    const { queryByTestId } = renderGraphPreview();
+
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
+  });
+
   it('should not render when graph data is not available', () => {
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,

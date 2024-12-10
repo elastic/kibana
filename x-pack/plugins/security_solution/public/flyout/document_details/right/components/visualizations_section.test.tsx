@@ -27,6 +27,7 @@ import { useExpandSection } from '../hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
@@ -52,6 +53,12 @@ jest.mock(
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -132,6 +139,7 @@ describe('<VisualizationsSection />', () => {
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useExpandSection as jest.Mock).mockReturnValue(true);
     mockUseUiSetting.mockReturnValue([false]);
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
     const { getByTestId, queryByTestId } = renderVisualizationsSection();
     expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeVisible();
@@ -144,9 +152,30 @@ describe('<VisualizationsSection />', () => {
   it('should render the graph preview component if the feature is enabled', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
     mockUseUiSetting.mockReturnValue([true]);
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
     const { getByTestId } = renderVisualizationsSection();
 
     expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
+  });
+
+  it('should not render the graph preview component if the experimental feature is disabled', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseUiSetting.mockReturnValue([true]);
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+
+    const { queryByTestId } = renderVisualizationsSection();
+
+    expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+  });
+
+  it('should not render the graph preview component if the flyout feature is disabled', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseUiSetting.mockReturnValue([false]);
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+
+    const { queryByTestId } = renderVisualizationsSection();
+
+    expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
   });
 });

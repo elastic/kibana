@@ -44,15 +44,6 @@ export const defineGraphRoute = (router: CspRouter) =>
       },
       async (context: CspRequestHandlerContext, request, response) => {
         const cspContext = await context.csp;
-        const isGraphEnabled = await (
-          await context.core
-        ).uiSettings.client.get(ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING);
-
-        cspContext.logger.debug(`isGraphEnabled: ${isGraphEnabled}`);
-
-        if (!isGraphEnabled) {
-          return response.notFound();
-        }
 
         const { nodesLimit, showUnknownTarget = false } = request.body;
         const { eventIds, start, end, esQuery } = request.body.query as GraphRequest['query'];

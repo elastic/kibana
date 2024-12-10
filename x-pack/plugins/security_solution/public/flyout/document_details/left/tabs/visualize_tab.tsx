@@ -11,6 +11,7 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/butt
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import {
@@ -33,6 +34,7 @@ import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -121,14 +123,18 @@ export const VisualizeTab = memo(() => {
   }, [panels.left?.path?.subTab]);
 
   // Decide whether to show the graph preview or not
-  const { isAuditLog: isGraphPreviewEnabled } = useGraphPreview({
+  const { isAuditLog } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
 
+  const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(
+    GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
+  );
+
   const options = [...visualizeButtons];
 
-  if (isGraphPreviewEnabled) {
+  if (isAuditLog && isGraphFeatureEnabled) {
     options.push(graphVisualizationButton);
   }
 

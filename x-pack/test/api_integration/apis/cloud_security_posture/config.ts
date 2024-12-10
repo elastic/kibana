@@ -17,7 +17,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
         ...baseConfig.get('kbnTestServer.serverArgs'),
-        `--uiSettings.overrides.securitySolution:enableVisualizationsInFlyout=false`, // Disables /graph API
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(baseConfig.get('kbnTestServer.serverArgs')),
           {
