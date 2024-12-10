@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { isEqual } from 'lodash';
 import { SplitAccordion } from '../../../../../../common/components/split_accordion';
 import { FieldComparisonSide } from '../comparison_side/field_comparison_side';
 import { FieldFinalSide } from '../field_final_side';
@@ -17,25 +16,12 @@ import { useFieldUpgradeContext } from './field_upgrade_context';
 
 export function FieldUpgrade(): JSX.Element {
   const { euiTheme } = useEuiTheme();
-  const { fieldName, fieldUpgradeState, hasConflict, fieldDiff } = useFieldUpgradeContext();
-  const isFieldCustomized = useMemo(
-    () =>
-      fieldDiff.has_base_version
-        ? !isEqual(fieldDiff.base_version, fieldDiff.current_version)
-        : false,
-    [fieldDiff]
-  );
+  const { fieldName, fieldUpgradeState, hasConflict } = useFieldUpgradeContext();
 
   return (
     <>
       <SplitAccordion
-        header={
-          <FieldUpgradeHeader
-            fieldName={fieldName}
-            fieldUpgradeState={fieldUpgradeState}
-            isCustomized={isFieldCustomized}
-          />
-        }
+        header={<FieldUpgradeHeader fieldName={fieldName} fieldUpgradeState={fieldUpgradeState} />}
         initialIsOpen={hasConflict}
         data-test-subj="ruleUpgradePerFieldDiff"
       >
