@@ -106,7 +106,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
   );
 };
 
-export const getDefaultColor = () => euiPaletteColorBlind()[1];
+export const getDefaultColor = () => euiPaletteColorBlind()[2];
 
 export const getFormattedPercentageValue = (
   currentValue: number,

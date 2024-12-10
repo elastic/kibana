@@ -16,6 +16,8 @@ import {
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
+  makeHighContrastColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -53,6 +55,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   overrideFieldTopValueBar,
   ...fieldTopValuesBucketOverridableProps
 }) => {
+  const { euiTheme } = useEuiTheme();
   const overrides = overrideFieldTopValueBar
     ? overrideFieldTopValueBar(fieldTopValuesBucketOverridableProps)
     : ({} as FieldTopValuesBucketParams);
@@ -141,7 +144,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               })}
               delay="long"
             >
-              <EuiText size="xs" textAlign="left" color={color}>
+              <EuiText size="xs" textAlign="left" color={makeHighContrastColor(color)(euiTheme)}>
                 {formattedPercentage}
               </EuiText>
             </EuiToolTip>
