@@ -66,7 +66,7 @@ describe('Charts Filters', () => {
       metricTypes: {
         filterName: 'metricTypes' as FilterName,
         isFilterLoading: false,
-        options: METRIC_TYPE_VALUES,
+        options: METRIC_TYPE_VALUES.slice(),
         onChangeFilterOptions: jest.fn(),
       },
     },
