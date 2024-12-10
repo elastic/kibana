@@ -428,6 +428,7 @@ export class ExecuteReportTask implements ReportingTask {
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
+          console.time('timeToPageLoad');
           let report: SavedReport | undefined;
           const isLastAttempt = taskAttempts >= this.getMaxAttempts();
 
@@ -547,6 +548,8 @@ export class ExecuteReportTask implements ReportingTask {
             this.reporting.untrackReport(jobId);
             logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           }
+
+          console.timeEnd('timeToCapturePDF');
         },
 
         /*

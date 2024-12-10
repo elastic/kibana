@@ -230,6 +230,9 @@ export class ScreenshotObservableHandler {
       }
 
       await waitForRenderComplete(driver, eventLogger, layout);
+
+      console.timeEnd('pageLoad');
+      console.time('timeToCapturePDF');
     }).pipe(
       mergeMap(() =>
         forkJoin({
@@ -247,6 +250,8 @@ export class ScreenshotObservableHandler {
   }
 
   public setupPage(index: number, url: UrlOrUrlWithContext) {
+    console.timeEnd('timeToPageLoad');
+    console.time('pageLoad');
     return this.openUrl(index, url).pipe(
       switchMapTo(this.waitForElements()),
       switchMapTo(this.completeRender())
