@@ -211,44 +211,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           profileId: 'default-document-profile',
         });
       });
-
-      it('should send EBT events also for embeddables', async () => {
-        await dashboard.navigateToApp();
-        await dashboard.gotoDashboardLandingPage();
-        await dashboard.clickNewDashboard();
-        await timePicker.setDefaultAbsoluteRange();
-        await ebtUIHelper.setOptIn(true);
-        await dashboardAddPanel.addSavedSearch('A Saved Search');
-        await header.waitUntilLoadingHasFinished();
-        await dashboard.waitForRenderComplete();
-        const rows = await dataGrid.getDocTableRows();
-        expect(rows.length).to.be.above(0);
-
-        await dataGrid.clickRowToggle();
-        await discover.isShowingDocViewer();
-
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['discover_profile_resolved'],
-          withTimeoutMs: 500,
-        });
-
-        expect(events[0].properties).to.eql({
-          profileLevel: 'rootLevel',
-          profileId: 'example-root-profile',
-        });
-
-        expect(events[1].properties).to.eql({
-          profileLevel: 'dataSourceLevel',
-          profileId: 'default-data-source-profile',
-        });
-
-        expect(events[2].properties).to.eql({
-          profileLevel: 'documentLevel',
-          profileId: 'default-document-profile',
-        });
-
-        expect(events.length).to.be(3);
-      });
     });
 
     describe('field usage events', () => {

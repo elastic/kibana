@@ -262,7 +262,7 @@ export class DiscoverPlugin
       registerFeature(plugins.home);
     }
 
-    this.registerEmbeddable(core, plugins, ebtManager);
+    this.registerEmbeddable(core, plugins);
 
     return {
       locator: this.locator,
@@ -390,11 +390,9 @@ export class DiscoverPlugin
     });
   };
 
-  private registerEmbeddable(
-    core: CoreSetup<DiscoverStartPlugins>,
-    plugins: DiscoverSetupPlugins,
-    ebtManager: DiscoverEBTManager
-  ) {
+  private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
+    const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
+
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return {
