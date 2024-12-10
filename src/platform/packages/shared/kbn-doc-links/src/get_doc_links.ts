@@ -677,6 +677,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
       legacyRuleApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201550`,
+      legacyRbacExemption: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-legacy-rbac`,
     },
     taskManager: {
       healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,

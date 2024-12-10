@@ -8,10 +8,12 @@
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { i18n } from '@kbn/i18n';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 
-export const getLegacyRbacDeprecationsInfo = async ({
-  esClient,
-}: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
+export const getLegacyRbacDeprecationsInfo = async (
+  { esClient }: GetDeprecationsContext,
+  docLinks: DocLinksServiceSetup
+): Promise<DeprecationsDetails[]> => {
   const { hits: legacyRBACExemptions } = await esClient.asCurrentUser.search({
     index: '.kibana*',
     body: {
@@ -41,6 +43,7 @@ export const getLegacyRbacDeprecationsInfo = async ({
           ],
         },
       },
+      _source: ['alert.name', 'namespaces'],
     },
   });
 
@@ -60,7 +63,7 @@ export const getLegacyRbacDeprecationsInfo = async ({
           manualSteps: [
             i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.manualStepOne', {
               defaultMessage:
-                'The affected rules will have action failures in Stack Management > Rules.',
+                'To identify the affected rules run the query in Dev Tools that is linked above under Learn more.',
             }),
             i18n.translate('xpack.alerting.deprecations.legacyRbacExemption.manualStepTwo', {
               defaultMessage:
@@ -68,6 +71,7 @@ export const getLegacyRbacDeprecationsInfo = async ({
             }),
           ],
         },
+        documentationUrl: docLinks.links.alerting.legacyRbacExemption,
       },
     ];
   }

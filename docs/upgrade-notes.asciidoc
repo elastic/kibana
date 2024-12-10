@@ -334,6 +334,54 @@ The `xpack.actions.enabled` setting has been removed. For more information, refe
 Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
 ====
 
+[discrete]
+[[breaking-legacy-rbac]]
+[Alerting] Legacy RBAC exemption (9.0.0)
+[%collapsible]
+====
+*Details* +
+The legacy role-based action control exemption for alerting rules has been removed in version 9.0.0.
+
+*Impact* +
+Any alerting rules that rely on the legacy exemption will fail to trigger actions for alerts starting
+from version 9.0.0.
+
+*Action* +
+To identify the affected rules run the query below in Dev Tools. To use normal RBAC authorization, update the API key by editing the rule.
+
+[source,js]
+----------------------------------
+GET .kibana*/_search
+{
+  "runtime_mappings": {
+    "apiKeyVersion": {
+      "type": "keyword",
+      "script": {
+        "source": "def alert = params._source['alert']; if (alert != null) { def meta = alert.meta; if (meta != null) { emit(meta.versionApiKeyLastmodified); } else { emit('');}}"
+      }
+    }
+  },
+  "size": 10000,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "type": "alert"
+          }
+        },
+        {
+          "term": {
+            "apiKeyVersion": "pre-7.10.0"
+          }
+        }
+      ]
+    }
+  },
+  "_source": ["alert.name", "namespaces"]
+}
+----------------------------------
+====
 
 // Data views
 

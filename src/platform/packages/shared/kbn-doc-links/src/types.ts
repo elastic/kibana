@@ -478,6 +478,7 @@ export interface DocLinks {
     teamsAction: string;
     connectors: string;
     legacyRuleApiDeprecations: string;
+    legacyRbacExemption: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;

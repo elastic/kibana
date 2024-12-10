@@ -10,7 +10,7 @@ import { getLegacyRbacDeprecationsInfo } from './legacy_rbac';
 export const registerDeprecations = ({ core }: { core: CoreSetup }) => {
   core.deprecations.registerDeprecations({
     getDeprecations: async (context) => {
-      return [...(await getLegacyRbacDeprecationsInfo(context))];
+      return [...(await getLegacyRbacDeprecationsInfo(context, core.docLinks))];
     },
   });
 };

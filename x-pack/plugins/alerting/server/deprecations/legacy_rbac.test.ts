@@ -7,11 +7,13 @@
 
 import { GetDeprecationsContext } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { getLegacyRbacDeprecationsInfo } from './legacy_rbac';
 import { SearchHit } from '@kbn/es-types';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { getLegacyRbacDeprecationsInfo } from './legacy_rbac';
 
 let context: GetDeprecationsContext;
 const esClient = elasticsearchClientMock.createScopedClusterClient();
+const docsLinks = docLinksServiceMock.createSetupContract();
 
 describe('getLegacyRbacDeprecationsInfo', () => {
   beforeEach(async () => {
@@ -36,7 +38,9 @@ describe('getLegacyRbacDeprecationsInfo', () => {
         hits: [],
       },
     });
-    expect(await getLegacyRbacDeprecationsInfo(context)).toMatchInlineSnapshot(`Array []`);
+    expect(await getLegacyRbacDeprecationsInfo(context, docsLinks)).toMatchInlineSnapshot(
+      `Array []`
+    );
   });
 
   test('does return deprecations when there is legacyRBACExemption usage', async () => {
@@ -54,18 +58,19 @@ describe('getLegacyRbacDeprecationsInfo', () => {
       },
     });
 
-    expect(await getLegacyRbacDeprecationsInfo(context)).toMatchInlineSnapshot(`
+    expect(await getLegacyRbacDeprecationsInfo(context, docsLinks)).toMatchInlineSnapshot(`
       Array [
         Object {
           "correctiveActions": Object {
             "manualSteps": Array [
-              "Look up the affected alerting rules by filtering for those that encountered action failures (via Stack Management > Rules)",
-              "Update the alerting rule API key by editing the rule, so the authorization uses the normal RBAC process",
+              "To identify the affected rules run the query in Dev Tools that is linked above under Learn more.",
+              "To use normal RBAC authorization, update the API key by editing the rule.",
             ],
           },
           "deprecationType": "feature",
+          "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/breaking-changes-summary.html#breaking-legacy-rbac",
           "level": "warning",
-          "message": "The legacy RBAC exemption for Alerting rules has been removed in future versions, and this cluster has alerting rules triggering actions that rely on the legacy exemption. The affected alerting rules will fail to trigger connector actions whenever alerts are found",
+          "message": "The legacy role-based action control exemption for alerting rules has been removed in future versions. This cluster has alerting rules triggering actions that rely on the legacy exemption. The rules will fail to trigger actions for alerts.",
           "title": "Legacy RBAC exemption",
         },
       ]
