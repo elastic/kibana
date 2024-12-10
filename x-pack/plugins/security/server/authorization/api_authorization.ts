@@ -36,7 +36,7 @@ export function initAPIAuthorization(
     checkPrivilegesWithRequest,
     mode,
     getCurrentUser,
-    getClusterClient,
+    getSecurityConfig,
   }: AuthorizationServiceSetup,
   logger: Logger
 ) {
@@ -54,60 +54,7 @@ export function initAPIAuthorization(
       }
 
       const authz = security.authz as AuthzEnabled;
-
-      const normalizeRequiredPrivileges = async (
-        privileges: AuthzEnabled['requiredPrivileges']
-      ) => {
-        const hasOperatorPrivileges = privileges.some(
-          (privilege) =>
-            privilege === ReservedPrivilegesSet.operator ||
-            (typeof privilege === 'object' &&
-              privilege.allRequired?.includes(ReservedPrivilegesSet.operator))
-        );
-
-        // nothing to normalize
-        if (!hasOperatorPrivileges) {
-          return privileges;
-        }
-
-        const esClient = await getClusterClient();
-        const operatorPrivilegesConfig = await esClient.asInternalUser.transport.request<{
-          security: { operator_privileges: { enabled: boolean; available: boolean } };
-        }>({
-          method: 'GET',
-          path: '/_xpack/usage?filter_path=security.operator_privileges',
-        });
-
-        // nothing to normalize
-        if (operatorPrivilegesConfig.security.operator_privileges.enabled) {
-          return privileges;
-        }
-
-        return privileges.map((privilege) => {
-          if (typeof privilege === 'object') {
-            const operatorPrivilegeIndex =
-              privilege.allRequired?.findIndex((p) => p === ReservedPrivilegesSet.operator) ?? -1;
-
-            return operatorPrivilegeIndex !== -1
-              ? {
-                  anyRequired: privilege.anyRequired,
-                  // @ts-expect-error wrong types for `toSpliced`
-                  allRequired: privilege.allRequired?.toSpliced(
-                    operatorPrivilegeIndex,
-                    1,
-                    ReservedPrivilegesSet.superuser
-                  ),
-                }
-              : privilege;
-          }
-
-          return privilege === ReservedPrivilegesSet.operator
-            ? ReservedPrivilegesSet.superuser
-            : privilege;
-        });
-      };
-
-      const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
+      const requiredPrivileges = authz.requiredPrivileges;
 
       const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
         (acc, privilegeEntry) => {
@@ -162,7 +109,13 @@ export function initAPIAuthorization(
 
         if (reservedPrivilege === ReservedPrivilegesSet.operator) {
           const currentUser = getCurrentUser(request);
-          kibanaPrivileges[ReservedPrivilegesSet.operator] = currentUser?.operator ?? false;
+          const securityConfig = await getSecurityConfig();
+          const isOperator = currentUser?.operator ?? false;
+
+          kibanaPrivileges[ReservedPrivilegesSet.operator] = securityConfig.operator_privileges
+            .enabled
+            ? isOperator
+            : false;
         }
       }
 

@@ -62,7 +62,7 @@ export interface AuthenticatedUser extends User {
   profile_uid?: string;
 
   /**
-   * Indicated whether user is an operator.
+   * Indicates whether user is an operator.
    */
   operator?: boolean;
 }

@@ -80,7 +80,7 @@ export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecate
   /**
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */
-  authz: AuthorizationServiceSetup;
+  authz: Omit<AuthorizationServiceSetup, 'getCurrentUser' | 'getSecurityConfig'>;
 }
 
 export interface PluginSetupDependencies {
@@ -344,7 +344,7 @@ export class SecurityPlugin
     return Object.freeze<SecurityPluginSetup>({
       audit: this.auditSetup,
       authc: {
-        getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+        getCurrentUser,
       },
       authz: {
         actions: this.authorizationSetup.actions,
@@ -354,9 +354,6 @@ export class SecurityPlugin
         checkSavedObjectsPrivilegesWithRequest:
           this.authorizationSetup.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup.mode,
-        getCurrentUser,
-        getClusterClient: () =>
-          startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       },
       license,
       privilegeDeprecationsService: getPrivilegeDeprecationsService({
@@ -440,8 +437,6 @@ export class SecurityPlugin
         checkSavedObjectsPrivilegesWithRequest:
           this.authorizationSetup!.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
-        getCurrentUser: this.authorizationSetup!.getCurrentUser,
-        getClusterClient: this.authorizationSetup!.getClusterClient,
       },
       userProfiles: {
         getCurrent: this.userProfileStart.getCurrent,

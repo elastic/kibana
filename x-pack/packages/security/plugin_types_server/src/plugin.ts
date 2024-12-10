@@ -45,7 +45,7 @@ export interface SecurityPluginStart {
   /**
    * Authorization services to manage and access the permissions a particular user has.
    */
-  authz: AuthorizationServiceSetup;
+  authz: Omit<AuthorizationServiceSetup, 'getCurrentUser' | 'getSecurityConfig'>;
   /**
    * User profiles services to retrieve user profiles.
    *

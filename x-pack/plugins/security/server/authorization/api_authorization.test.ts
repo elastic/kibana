@@ -149,7 +149,7 @@ describe('initAPIAuthorization', () => {
         kibanaCurrentUserResponse,
         kibanaPrivilegesRequestActions,
         asserts,
-        esXpackUsageResponse,
+        esXpackSecurityUsageResponse,
       }: {
         security?: RouteSecurity;
         kibanaPrivilegesResponse?: {
@@ -158,8 +158,8 @@ describe('initAPIAuthorization', () => {
         };
         kibanaPrivilegesRequestActions?: string[];
         kibanaCurrentUserResponse?: { operator: boolean };
-        esXpackUsageResponse?: {
-          security: { operator_privileges: { enabled: boolean; available: boolean } };
+        esXpackSecurityUsageResponse?: {
+          operator_privileges: { enabled: boolean; available: boolean };
         };
         asserts: {
           forbidden?: boolean;
@@ -192,13 +192,7 @@ describe('initAPIAuthorization', () => {
 
         const mockCheckPrivileges = jest.fn().mockReturnValue(kibanaPrivilegesResponse);
         mockAuthz.getCurrentUser.mockReturnValue(kibanaCurrentUserResponse);
-        mockAuthz.getClusterClient.mockResolvedValue({
-          asInternalUser: {
-            transport: {
-              request: jest.fn().mockResolvedValue(esXpackUsageResponse),
-            },
-          },
-        });
+        mockAuthz.getSecurityConfig.mockResolvedValue(esXpackSecurityUsageResponse);
         mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
         mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
           // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
@@ -378,32 +372,10 @@ describe('initAPIAuthorization', () => {
           },
         },
         kibanaCurrentUserResponse: { operator: true },
-        esXpackUsageResponse: {
-          security: { operator_privileges: { enabled: true, available: true } },
-        },
+        esXpackSecurityUsageResponse: { operator_privileges: { enabled: true, available: true } },
         asserts: {
           authzResult: {
             operator: true,
-          },
-        },
-      }
-    );
-
-    testSecurityConfig(
-      `falls back to 'superuser' privileges check if 'operator' privileges are not enabled`,
-      {
-        security: {
-          authz: {
-            requiredPrivileges: [ReservedPrivilegesSet.operator],
-          },
-        },
-        esXpackUsageResponse: {
-          security: { operator_privileges: { enabled: false, available: false } },
-        },
-        kibanaPrivilegesResponse: { privileges: { kibana: [] }, hasAllRequested: true },
-        asserts: {
-          authzResult: {
-            superuser: true,
           },
         },
       }
@@ -417,9 +389,7 @@ describe('initAPIAuthorization', () => {
             requiredPrivileges: [ReservedPrivilegesSet.operator],
           },
         },
-        esXpackUsageResponse: {
-          security: { operator_privileges: { enabled: true, available: true } },
-        },
+        esXpackSecurityUsageResponse: { operator_privileges: { enabled: true, available: true } },
         kibanaCurrentUserResponse: { operator: false },
         asserts: {
           forbidden: true,

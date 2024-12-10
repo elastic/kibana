@@ -24,8 +24,3 @@ export enum LogoutReason {
 export interface SecurityCheckupState {
   displayAlert: boolean;
 }
-
-export enum ReservedPrivilegesSet {
-  Operator = 'operator',
-  Superuser = 'superuser',
-}
