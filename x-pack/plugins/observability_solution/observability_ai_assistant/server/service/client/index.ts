@@ -7,10 +7,10 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SpanKind, context } from '@opentelemetry/api';
+import { context } from '@opentelemetry/api';
 import { last, merge, omit } from 'lodash';
 import {
   catchError,
@@ -28,23 +28,24 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { Readable } from 'stream';
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import { ToolChoiceType } from '@kbn/inference-common';
+
 import { resourceNames } from '..';
-import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
+  ChatCompletionMessageEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   createConversationNotFoundError,
-  createInternalServerError,
-  createTokenLimitReachedError,
   StreamingChatResponseEventType,
   TokenCountEvent,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
+import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
   type AdHocInstruction,
@@ -55,6 +56,7 @@ import {
   type Message,
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
+  MessageRole,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -63,30 +65,29 @@ import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
-import { withAssistantSpan } from '../util/with_assistant_span';
-import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
-import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
-import { createGeminiAdapter } from './adapters/gemini/gemini_adapter';
-import { createOpenAiAdapter } from './adapters/openai_adapter';
-import { LlmApiAdapter } from './adapters/types';
+import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
 import { LangTracer } from './instrumentation/lang_tracer';
 import { continueConversation } from './operators/continue_conversation';
+import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { extractTokenCount } from './operators/extract_token_count';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
 import {
-  LangtraceServiceProvider,
-  withLangtraceChatCompleteSpan,
-} from './operators/with_langtrace_chat_complete_span';
-import { runSemanticTextKnowledgeBaseMigration } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
+  runSemanticTextKnowledgeBaseMigration,
+  scheduleSemanticTextMigration,
+} from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { ObservabilityAIAssistantConfig } from '../../config';
 
 const MAX_FUNCTION_CALLS = 8;
 
 export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
+      config: ObservabilityAIAssistantConfig;
+      core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
       actionsClient: PublicMethodsOf<ActionsClient>;
       uiSettingsClient: IUiSettingsClient;
       namespace: string;
@@ -94,6 +95,7 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
+      inferenceClient: InferenceClient;
       logger: Logger;
       user?: {
         id?: string;
@@ -478,114 +480,32 @@ export class ObservabilityAIAssistantClient {
       simulateFunctionCalling?: boolean;
       tracer: LangTracer;
     }
-  ): Observable<ChatCompletionChunkEvent | TokenCountEvent> => {
-    return defer(() =>
-      from(
-        withAssistantSpan('get_connector', () =>
-          this.dependencies.actionsClient.get({ id: connectorId, throwIfSystemAction: true })
-        )
-      )
+  ): Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent> => {
+    const tools = functions?.reduce((acc, fn) => {
+      acc[fn.name] = {
+        description: fn.description,
+        schema: fn.parameters,
+      };
+      return acc;
+    }, {} as Record<string, { description: string; schema: any }>);
+
+    const chatComplete$ = defer(() =>
+      this.dependencies.inferenceClient.chatComplete({
+        connectorId,
+        stream: true,
+        messages: convertMessagesForInference(
+          messages.filter((message) => message.message.role !== MessageRole.System)
+        ),
+        functionCalling: simulateFunctionCalling ? 'simulated' : 'native',
+        toolChoice: functionCall
+          ? {
+              function: functionCall,
+            }
+          : ToolChoiceType.auto,
+        tools,
+      })
     ).pipe(
-      switchMap((connector) => {
-        this.dependencies.logger.debug(`Creating "${connector.actionTypeId}" adapter`);
-
-        let adapter: LlmApiAdapter;
-
-        switch (connector.actionTypeId) {
-          case ObservabilityAIAssistantConnectorType.OpenAI:
-            adapter = createOpenAiAdapter({
-              messages,
-              functions,
-              functionCall,
-              logger: this.dependencies.logger,
-              simulateFunctionCalling,
-            });
-            break;
-
-          case ObservabilityAIAssistantConnectorType.Bedrock:
-            adapter = createBedrockClaudeAdapter({
-              messages,
-              functions,
-              functionCall,
-              logger: this.dependencies.logger,
-            });
-            break;
-
-          case ObservabilityAIAssistantConnectorType.Gemini:
-            adapter = createGeminiAdapter({
-              messages,
-              functions,
-              functionCall,
-              logger: this.dependencies.logger,
-            });
-            break;
-
-          default:
-            throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
-        }
-
-        const subAction = adapter.getSubAction();
-
-        if (this.dependencies.logger.isLevelEnabled('trace')) {
-          this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
-        }
-
-        return from(
-          withAssistantSpan('get_execute_result', () =>
-            this.dependencies.actionsClient.execute({
-              actionId: connectorId,
-              params: subAction,
-            })
-          )
-        ).pipe(
-          switchMap((executeResult) => {
-            if (executeResult.status === 'error' && executeResult?.serviceMessage) {
-              const tokenLimitRegex =
-                /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
-              const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
-
-              if (tokenLimitRegexResult) {
-                const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
-                throw createTokenLimitReachedError(
-                  parseInt(tokenLimit, 10),
-                  parseInt(tokenCount, 10)
-                );
-              }
-            }
-
-            if (executeResult.status === 'error') {
-              throw createInternalServerError(
-                `${executeResult?.message} - ${executeResult?.serviceMessage}`
-              );
-            }
-
-            const response = executeResult.data as Readable;
-
-            signal.addEventListener('abort', () => response.destroy());
-
-            return tracer.startActiveSpan(
-              '/chat/completions',
-              {
-                kind: SpanKind.CLIENT,
-              },
-              ({ span }) => {
-                return adapter.streamIntoObservable(response).pipe(
-                  withLangtraceChatCompleteSpan({
-                    span,
-                    messages,
-                    functions,
-                    model: connector.name,
-                    serviceProvider:
-                      connector.actionTypeId === ObservabilityAIAssistantConnectorType.OpenAI
-                        ? LangtraceServiceProvider.OpenAI
-                        : LangtraceServiceProvider.Anthropic,
-                  })
-                );
-              }
-            );
-          })
-        );
-      }),
+      convertInferenceEventsToStreamingEvents(),
       instrumentAndCountTokens(name),
       failOnNonExistingFunctionCall({ functions }),
       tap((event) => {
@@ -598,6 +518,8 @@ export class ObservabilityAIAssistantClient {
       }),
       shareReplay()
     );
+
+    return chatComplete$;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
@@ -725,9 +647,23 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getStatus();
   };
 
-  setupKnowledgeBase = (modelId: string | undefined) => {
-    const { esClient } = this.dependencies;
-    return this.dependencies.knowledgeBaseService.setup(esClient, modelId);
+  setupKnowledgeBase = async (modelId: string | undefined) => {
+    const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
+
+    // setup the knowledge base
+    const res = await knowledgeBaseService.setup(esClient, modelId);
+
+    core
+      .getStartServices()
+      .then(([_, pluginsStart]) => {
+        logger.debug('Schedule semantic text migration task');
+        return scheduleSemanticTextMigration(pluginsStart);
+      })
+      .catch((error) => {
+        logger.error(`Failed to run semantic text migration task: ${error}`);
+      });
+
+    return res;
   };
 
   resetKnowledgeBase = () => {
@@ -739,6 +675,7 @@ export class ObservabilityAIAssistantClient {
     return runSemanticTextKnowledgeBaseMigration({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
+      config: this.dependencies.config,
     });
   };
 
