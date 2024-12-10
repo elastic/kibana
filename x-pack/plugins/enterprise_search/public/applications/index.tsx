@@ -56,12 +56,7 @@ export const renderApp = (
     plugins: PluginsStart;
     updateSideNavDefinition: UpdateSideNavDefinitionFn;
   },
-  {
-    config,
-    data,
-    esConfig,
-    uiActions,
-  }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
+  { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
   const {
     access,
