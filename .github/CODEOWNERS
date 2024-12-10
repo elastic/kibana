@@ -811,7 +811,6 @@ x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-te
 x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
-x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/navigation @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
@@ -1001,6 +1000,7 @@ x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
 x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
