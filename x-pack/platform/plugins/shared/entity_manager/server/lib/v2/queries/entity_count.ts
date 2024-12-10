@@ -29,29 +29,33 @@ const dslFilter = ({
   start: string;
   end: string;
 }) => {
-  const globalFilters = filters.map((filter) => '(' + filter + ')').join(' AND ');
-  const sourceFilters = sources
+  const sourcesFilters = sources
     .map((source) => {
-      const filters = [...source.filters, ...source.identity_fields.map((field) => `${field}: *`)];
+      const sourceFilters = [
+        ...source.filters,
+        ...source.identity_fields.map((field) => `${field}: *`),
+      ];
 
       if (source.timestamp_field) {
-        filters.push(
+        sourceFilters.push(
           `${source.timestamp_field} >= "${start}" AND ${source.timestamp_field} <= "${end}"`
         );
       }
 
-      filters.push(
+      sourceFilters.push(
         source.index_patterns
           .map((pattern) => `_index: "${pattern}*" OR _index: ".ds-${last(pattern.split(':'))}*"`)
           .join(' OR ')
       );
 
-      return '(' + filters.map((filter) => '(' + filter + ')').join(' AND ') + ')';
+      return '(' + sourceFilters.map((filter) => '(' + filter + ')').join(' AND ') + ')';
     })
     .join(' OR ');
 
+  const additionalFilters = filters.map((filter) => '(' + filter + ')').join(' AND ');
+
   return toElasticsearchQuery(
-    fromKueryExpression(compact([globalFilters, `(${sourceFilters})`]).join(' AND '))
+    fromKueryExpression(compact([`(${sourcesFilters})`, additionalFilters]).join(' AND '))
   );
 };
 
