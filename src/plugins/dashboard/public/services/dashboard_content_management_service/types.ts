@@ -25,6 +25,7 @@ import { DashboardState } from '../../dashboard_api/types';
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
   deleteDashboards: (ids: string[]) => Promise<void>;
+  getDashboardState: (props: GetDashboardStateProps) => Promise<GetDashboardStateReturn>;
   loadDashboardState: (props: { id?: string }) => Promise<LoadDashboardReturn>;
   saveDashboardState: (props: SaveDashboardProps) => Promise<SaveDashboardReturn>;
   checkForDuplicateDashboardTitle: (meta: DashboardDuplicateTitleCheckProps) => Promise<boolean>;
@@ -81,12 +82,23 @@ export interface LoadDashboardReturn {
  */
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
+export interface GetDashboardStateProps {
+  controlGroupReferences?: Reference[];
+  generateNewIds?: boolean;
+  currentState: DashboardState;
+  panelReferences?: Reference[];
+}
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
   currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
   lastSavedId?: string;
+}
+
+export interface GetDashboardStateReturn {
+  attributes: DashboardAttributes;
+  references: Reference[];
 }
 
 export interface SaveDashboardReturn {

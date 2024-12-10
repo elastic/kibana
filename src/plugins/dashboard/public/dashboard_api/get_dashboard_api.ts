@@ -172,6 +172,14 @@ export function getDashboardApi({
       unifiedSearchManager.internalApi.controlGroupReload$,
       unifiedSearchManager.internalApi.panelsReload$
     ).pipe(debounceTime(0)),
+    getDashboardState: async () => {
+      const { controlGroupReferences, dashboardState, panelReferences } = await getState();
+      return getDashboardContentManagementService().getDashboardState({
+        controlGroupReferences,
+        currentState: dashboardState,
+        panelReferences,
+      });
+    },
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
       const saveResult = await openSaveModal({

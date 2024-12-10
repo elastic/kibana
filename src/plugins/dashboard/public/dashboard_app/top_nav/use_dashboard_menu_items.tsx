@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
@@ -25,6 +26,7 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+import { DashboardExportFlyout } from './export/show_export_flyout';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -69,6 +71,34 @@ export const useDashboardMenuItems = ({
     },
     [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboardApi]
   );
+
+  /**
+   * Show Export flyout
+   */
+  const showExport = useCallback(() => {
+    dashboardApi.openOverlay(
+      coreServices.overlays.openFlyout(
+        toMountPoint(
+          <DashboardExportFlyout
+            getDashboardState={dashboardApi.getDashboardState}
+            close={() => dashboardApi.clearOverlays()}
+          />,
+          {
+            i18n: coreServices.i18n,
+            theme: coreServices.theme,
+          }
+        ),
+        {
+          size: 'm',
+          'data-test-subj': 'dashboardExportFlyout',
+          onClose: (flyout) => {
+            dashboardApi.clearOverlays();
+            flyout.close();
+          },
+        }
+      )
+    );
+  }, [dashboardApi]);
 
   /**
    * Save the dashboard without any UI or popups.
@@ -200,6 +230,14 @@ export const useDashboardMenuItems = ({
         run: showShare,
       } as TopNavMenuData,
 
+      export: {
+        ...topNavStrings.export,
+        id: 'export',
+        testId: 'dashboardExportMenuItem',
+        disableButton: disableTopNav,
+        run: showExport,
+      },
+
       settings: {
         ...topNavStrings.settings,
         id: 'settings',
@@ -217,6 +255,7 @@ export const useDashboardMenuItems = ({
     dashboardInteractiveSave,
     viewMode,
     showShare,
+    showExport,
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
@@ -266,6 +305,7 @@ export const useDashboardMenuItems = ({
       ...labsMenuItem,
       menuItems.fullScreen,
       ...shareMenuItem,
+      menuItems.export,
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
       ...editMenuItem,
@@ -288,7 +328,13 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
+    return [
+      ...labsMenuItem,
+      menuItems.settings,
+      ...shareMenuItem,
+      menuItems.export,
+      ...editModeItems,
+    ];
   }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

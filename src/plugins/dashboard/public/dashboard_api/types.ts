@@ -53,8 +53,9 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import type { DashboardOptions } from '../../server/content_management';
+import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
@@ -153,6 +154,10 @@ export type DashboardApi = CanExpandPanels &
     focusedPanelId$: PublishingSubject<string | undefined>;
     forceRefresh: () => void;
     getSettings: () => DashboardStateFromSettingsFlyout;
+    getDashboardState: () => Promise<{
+      attributes: DashboardAttributes;
+      references: SavedObjectReference[];
+    }>;
     getDashboardPanelFromId: (id: string) => Promise<DashboardPanelState>;
     hasOverlays$: PublishingSubject<boolean>;
     hasRunMigrations$: PublishingSubject<boolean>;

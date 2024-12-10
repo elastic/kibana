@@ -175,6 +175,14 @@ export const topNavStrings = {
       defaultMessage: 'Switch to edit mode',
     }),
   },
+  export: {
+    label: i18n.translate('dashboard.topNav.exportButtonAriaLabel', {
+      defaultMessage: 'export',
+    }),
+    description: i18n.translate('dashboard.topNav.exportConfigDescription', {
+      defaultMessage: 'Export Dashboard',
+    }),
+  },
   quickSave: {
     label: i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
       defaultMessage: 'save',
