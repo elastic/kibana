@@ -21,7 +21,7 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import useToggle from 'react-use/lib/useToggle';
 import { type Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -199,15 +199,13 @@ const explainProcessMessageTitle = i18n.translate(
   }
 );
 
-const ExpandedRowDescriptionList = euiStyled(EuiDescriptionList).attrs({
-  compressed: true,
-})`
+const ExpandedRowDescriptionList = styled(EuiDescriptionList)`
   width: 100%;
 `;
 
-const CodeListItem = euiStyled(EuiCode).attrs({
-  transparentBackground: true,
-})`
+ExpandedRowDescriptionList.defaultProps = { compressed: true };
+
+const CodeListItem = styled(EuiCode)`
   padding: 0 !important;
   & code.euiCodeBlock__code {
     white-space: nowrap !important;
@@ -215,18 +213,19 @@ const CodeListItem = euiStyled(EuiCode).attrs({
   }
 `;
 
-const ExpandedCommandLine = euiStyled(EuiCode).attrs({
-  transparentBackground: true,
-})`
+CodeListItem.defaultProps = { transparentBackground: true };
+
+const ExpandedCommandLine = styled(EuiCode)`
   padding: 0 !important;
-  margin-bottom: ${(props) => props.theme.eui.euiSizeS};
+  margin-bottom: ${(props) => props.theme.euiTheme.size.s};
 `;
 
-const ExpandedRowCell = euiStyled(EuiTableRowCell).attrs({
-  textOnly: false,
-  colSpan: 6,
-})`
-  padding-top: ${(props) => props.theme.eui.euiSizeM} !important;
-  padding-bottom: ${(props) => props.theme.eui.euiSizeM} !important;
-  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+ExpandedCommandLine.defaultProps = { transparentBackground: true };
+
+const ExpandedRowCell = styled(EuiTableRowCell)`
+  padding-top: ${(props) => props.theme.euiTheme.size.m} !important;
+  padding-bottom: ${(props) => props.theme.euiTheme.size.m} !important;
+  background-color: ${(props) => props.theme.euiTheme.colors.lightestShade};
 `;
+
+ExpandedRowCell.defaultProps = { textOnly: false, colSpan: 6 };
