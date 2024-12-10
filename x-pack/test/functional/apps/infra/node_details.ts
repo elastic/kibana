@@ -477,7 +477,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Processes Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/192891
+      describe.skip('Processes Tab', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -655,16 +656,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it(`${metric} tile should not be shown`, async () => {
             await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
           });
-        });
-
-        it('should show add metrics callout', async () => {
-          await pageObjects.assetDetails.addMetricsCalloutExists();
-        });
-      });
-
-      describe('Metrics Tab', () => {
-        before(async () => {
-          await pageObjects.assetDetails.clickMetricsTab();
         });
 
         it('should show add metrics callout', async () => {

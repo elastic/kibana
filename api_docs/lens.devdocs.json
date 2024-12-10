@@ -131,7 +131,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<object | undefined> | undefined; resetUnsavedChanges?: (() => void) | undefined; serializeState: () => ",
+          "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -665,7 +665,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17755,7 +17755,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<object | undefined> | undefined; resetUnsavedChanges?: (() => void) | undefined; serializeState: () => ",
+          "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -18289,7 +18289,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20309,7 +20309,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<object | undefined> | undefined; resetUnsavedChanges?: (() => void) | undefined; serializeState: () => ",
+          "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -20843,7 +20843,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
+          "[] | undefined>; isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; canEditUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

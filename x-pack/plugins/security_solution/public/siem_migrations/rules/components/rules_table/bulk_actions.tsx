@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import * as i18n from './translations';
 
 export interface BulkActionsProps {
@@ -28,14 +34,15 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
     installTranslatedRule,
     installSelectedRule,
   }) => {
-    const showInstallTranslatedRulesButton = numberOfTranslatedRules > 0;
-    const showInstallSelectedRulesButton =
-      showInstallTranslatedRulesButton && numberOfSelectedRules > 0;
+    const disableInstallTranslatedRulesButton = isTableLoading || !numberOfTranslatedRules;
+    const showInstallSelectedRulesButton = isTableLoading || numberOfSelectedRules > 0;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {showInstallSelectedRulesButton ? (
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              color={'primary'}
               onClick={installSelectedRule}
               disabled={isTableLoading}
               data-test-subj="installSelectedRulesButton"
@@ -43,24 +50,24 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
             >
               {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
               {isTableLoading && <EuiLoadingSpinner size="s" />}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
-        {showInstallTranslatedRulesButton ? (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="plusInCircle"
-              data-test-subj="installTranslatedRulesButton"
-              onClick={installTranslatedRule}
-              disabled={isTableLoading}
-              aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
-            >
-              {i18n.INSTALL_ALL_RULES(numberOfTranslatedRules)}
-              {isTableLoading && <EuiLoadingSpinner size="s" />}
-            </EuiButton>
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            data-test-subj="installTranslatedRulesButton"
+            onClick={installTranslatedRule}
+            disabled={disableInstallTranslatedRulesButton}
+            aria-label={i18n.INSTALL_TRANSLATED_ARIA_LABEL}
+          >
+            {numberOfTranslatedRules > 0
+              ? i18n.INSTALL_TRANSLATED_RULES(numberOfTranslatedRules)
+              : i18n.INSTALL_TRANSLATED_RULES_EMPTY_STATE}
+            {isTableLoading && <EuiLoadingSpinner size="s" />}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
