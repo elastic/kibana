@@ -31,7 +31,7 @@ interface LogsProps {
     }>;
     enabled: boolean;
     limit: number;
-    reason: IReason;
+    reason?: IReason;
   };
   nodeId?: string;
   indexUuid?: string;
