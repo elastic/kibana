@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { asKeyword } from './merge_entities_list';
+import { asKeyword } from './utils';
 import { EntitySourceDefinition, SortBy } from '../types';
 
 const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {

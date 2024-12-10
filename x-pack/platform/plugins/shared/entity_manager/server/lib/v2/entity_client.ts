@@ -5,32 +5,38 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { EntityV2 } from '@kbn/entities-schema';
+import { without } from 'lodash';
 import {
   ReadSourceDefinitionOptions,
   readSourceDefinitions,
   storeSourceDefinition,
 } from './definitions/source_definition';
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
+import { getEntityInstancesQuery } from './queries';
+import { mergeEntitiesList } from './queries/utils';
 import {
   EntitySourceDefinition,
   EntityTypeDefinition,
   SearchByType,
   SearchBySources,
 } from './types';
-import { searchEntitiesBySources } from './search/search_entities';
 import { UnknownEntityType } from './errors/unknown_entity_type';
+import { runESQLQuery } from './run_esql_query';
 
 export class EntityClient {
   constructor(
     private options: {
       clusterClient: IScopedClusterClient;
+      soClient: SavedObjectsClientContract;
       logger: Logger;
     }
   ) {}
 
   async searchEntities({ type, ...options }: SearchByType) {
-    const sources = await readSourceDefinitions(this.options.clusterClient, this.options.logger, {
+    const sources = await this.readSourceDefinitions({
       type,
     });
 
@@ -38,20 +44,87 @@ export class EntityClient {
       throw new UnknownEntityType(`No sources found for entity type [${type}]`);
     }
 
-    return searchEntitiesBySources({
-      ...options,
+    return this.searchEntitiesBySources({
       sources,
-      clusterClient: this.options.clusterClient,
-      logger: this.options.logger,
+      ...options,
     });
   }
 
-  async searchEntitiesBySources(options: SearchBySources) {
-    return searchEntitiesBySources({
-      ...options,
-      clusterClient: this.options.clusterClient,
-      logger: this.options.logger,
-    });
+  async searchEntitiesBySources({
+    sources,
+    metadata_fields: metadataFields,
+    filters,
+    start,
+    end,
+    sort,
+    limit,
+  }: SearchBySources) {
+    const entities = await Promise.all(
+      sources.map(async (source) => {
+        const mandatoryFields = [
+          ...source.identity_fields,
+          ...(source.timestamp_field ? [source.timestamp_field] : []),
+          ...(source.display_name ? [source.display_name] : []),
+        ];
+        const metaFields = [...metadataFields, ...source.metadata_fields];
+
+        // operations on an unmapped field result in a failing query so we verify
+        // field capabilities beforehand
+        const { fields } = await this.options.clusterClient.asCurrentUser.fieldCaps({
+          index: source.index_patterns,
+          fields: [...mandatoryFields, ...metaFields],
+        });
+
+        const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
+        if (!sourceHasMandatoryFields) {
+          // we can't build entities without id fields so we ignore the source.
+          // TODO filters should likely behave similarly. we should also throw
+          const missingFields = mandatoryFields.filter((field) => !fields[field]);
+          this.options.logger.info(
+            `Ignoring source for type [${source.type_id}] with index_patterns [${
+              source.index_patterns
+            }] because some mandatory fields [${missingFields.join(', ')}] are not mapped`
+          );
+          return [];
+        }
+
+        // but metadata field not being available is fine
+        const availableMetadataFields = metaFields.filter((field) => fields[field]);
+        if (availableMetadataFields.length < metaFields.length) {
+          this.options.logger.info(
+            `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(
+              ', '
+            )}]`
+          );
+        }
+
+        const { query, filter } = getEntityInstancesQuery({
+          source: {
+            ...source,
+            metadata_fields: availableMetadataFields,
+            filters: [...source.filters, ...filters],
+          },
+          start,
+          end,
+          sort,
+          limit,
+        });
+        this.options.logger.debug(
+          () => `Entity query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+        );
+
+        const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
+          query,
+          filter,
+          esClient: this.options.clusterClient.asCurrentUser,
+          logger: this.options.logger,
+        });
+
+        return rawEntities;
+      })
+    ).then((results) => results.flat());
+
+    return mergeEntitiesList(sources, entities).slice(0, limit);
   }
 
   async storeTypeDefinition(type: EntityTypeDefinition) {
