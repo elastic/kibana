@@ -6,7 +6,7 @@
  */
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
-import { keyBy } from 'lodash';
+import { isArray, keyBy } from 'lodash';
 import { SLODefinition } from '../domain/models';
 import { SLORepository } from './slo_repository';
 import { Pagination, Sort, SummaryResult, SummarySearchClient } from './summary_search_client';
@@ -16,7 +16,6 @@ const DEFAULT_PER_PAGE = 25;
 const DEFAULT_SIZE = 1000;
 const MAX_PER_PAGE = 5000;
 
-const DELIMITER_SEARCH_AFTER = '|$';
 export class FindSLO {
   constructor(
     private repository: SLORepository,
@@ -42,10 +41,7 @@ export class FindSLO {
       page: 'page' in summaryResults ? summaryResults.page : DEFAULT_PAGE,
       perPage: 'perPage' in summaryResults ? summaryResults.perPage : DEFAULT_PER_PAGE,
       size: 'size' in summaryResults ? summaryResults.size : undefined,
-      searchAfter:
-        'searchAfter' in summaryResults
-          ? summaryResults.searchAfter?.join(DELIMITER_SEARCH_AFTER)
-          : undefined,
+      searchAfter: 'searchAfter' in summaryResults ? summaryResults.searchAfter : undefined,
       total: summaryResults.total,
       results: mergeSloWithSummary(localSloDefinitions, summaryResults.results),
     });
@@ -88,10 +84,16 @@ function toPagination(params: FindSLOParams): Pagination {
 
   if (isCursorBased) {
     const size = Number(params.size);
+
+    let parsedSearchAfter;
+    try {
+      parsedSearchAfter = params.searchAfter ? JSON.parse(params.searchAfter) : undefined;
+    } catch (e) {
+      // noop
+    }
+
     return {
-      searchAfter: params.searchAfter
-        ?.split(DELIMITER_SEARCH_AFTER)
-        .map((value) => (!isNaN(Number(value)) ? Number(value) : value)),
+      searchAfter: parsedSearchAfter && isArray(parsedSearchAfter) ? parsedSearchAfter : undefined,
       size: !isNaN(size) && size > 0 && size <= MAX_PER_PAGE ? size : DEFAULT_SIZE,
     };
   }
