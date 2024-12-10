@@ -46,7 +46,6 @@ interface Props {
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
   setResetForm?: (value: ResetForm) => void;
-  resetErrorMessage?: () => void;
 }
 /**
  * The serializer and deserializer are needed to transform the headers of
@@ -114,7 +113,6 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onChange,
   onFormModifiedChange,
   setResetForm,
-  resetErrorMessage,
 }) => {
   const { form } = useForm({
     defaultValue: connector,
@@ -138,19 +136,8 @@ const ConnectorFormComponent: React.FC<Props> = ({
   useEffect(() => {
     if (onChange) {
       onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator });
-      if (isFormValid) {
-        resetErrorMessage?.();
-      }
     }
-  }, [
-    onChange,
-    isFormValid,
-    isSubmitted,
-    isSubmitting,
-    submit,
-    preSubmitValidator,
-    resetErrorMessage,
-  ]);
+  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit, preSubmitValidator]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
