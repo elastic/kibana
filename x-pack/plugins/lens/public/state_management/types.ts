@@ -34,9 +34,17 @@ export interface DataViewsState {
   indexPatterns: Record<string, IndexPattern>;
 }
 
+export interface BaseDatasourceLayer {
+  name?: string;
+}
+
+export interface DatasourceStateState {
+  layers: Record<string, BaseDatasourceLayer & unknown>;
+}
+
 export interface DatasourceState {
   isLoading: boolean;
-  state: unknown;
+  state: DatasourceStateState & unknown;
 }
 
 export type DatasourceStates = Record<string, DatasourceState>;

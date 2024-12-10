@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
-import { DimensionButton } from '@kbn/visualization-ui-components';
+import { DimensionButton, NameInput } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
@@ -231,41 +231,42 @@ export function LayerPanel(props: LayerPanelProps) {
         forceRender = false,
       }: { isDimensionComplete?: boolean; forceRender?: boolean } = {}
     ) => {
-      if (!openColumnGroup || !openColumnId) {
-        return;
-      }
-      if (allAccessors.includes(openColumnId)) {
-        if (isDimensionComplete) {
-          if (forceRender) {
-            updateDatasource(datasourceId, newState);
+      if (openColumnGroup && openColumnId) {
+        if (allAccessors.includes(openColumnId)) {
+          if (isDimensionComplete) {
+            if (forceRender) {
+              updateDatasource(datasourceId, newState);
+            } else {
+              updateDatasourceAsync(datasourceId, newState);
+            }
           } else {
-            updateDatasourceAsync(datasourceId, newState);
+            // The datasource can indicate that the previously-valid column is no longer
+            // complete, which clears the visualization. This keeps the flyout open and reuses
+            // the previous columnId
+            props.updateDatasource(datasourceId, newState);
+            props.onRemoveDimension({ layerId, columnId: openColumnId });
           }
-        } else {
-          // The datasource can indicate that the previously-valid column is no longer
-          // complete, which clears the visualization. This keeps the flyout open and reuses
-          // the previous columnId
-          props.updateDatasource(datasourceId, newState);
-          props.onRemoveDimension({ layerId, columnId: openColumnId });
+          return;
+        } else if (isDimensionComplete) {
+          updateAll(
+            datasourceId,
+            newState,
+            activeVisualization.setDimension({
+              layerId,
+              groupId: openColumnGroup.groupId,
+              columnId: openColumnId,
+              prevState: visualizationState,
+              frame: framePublicAPI,
+            })
+          );
+          return;
         }
-      } else if (isDimensionComplete) {
-        updateAll(
-          datasourceId,
-          newState,
-          activeVisualization.setDimension({
-            layerId,
-            groupId: openColumnGroup.groupId,
-            columnId: openColumnId,
-            prevState: visualizationState,
-            frame: framePublicAPI,
-          })
-        );
+      }
+
+      if (forceRender) {
+        updateDatasource(datasourceId, newState);
       } else {
-        if (forceRender) {
-          updateDatasource(datasourceId, newState);
-        } else {
-          updateDatasourceAsync(datasourceId, newState);
-        }
+        updateDatasourceAsync(datasourceId, newState);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -365,7 +366,9 @@ export function LayerPanel(props: LayerPanelProps) {
       >
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
           <EuiFlexItem grow={1}>
-            <span style={{ padding: '4px' }}>Layer {layerIndex}</span>
+            <span style={{ padding: '4px' }}>
+              {layerDatasourceState?.layers[layerId].name || `Layer ${layerIndex}`}
+            </span>
           </EuiFlexItem>
           {props.displayLayerSettings && (
             <EuiFlexItem grow={false}>
@@ -732,20 +735,37 @@ export function LayerPanel(props: LayerPanelProps) {
                   }}
                 />
               ) : null}
-              {visualizationLayerSettings.appearance ? (
-                <EuiText
-                  size="s"
-                  css={css`
-                    margin-bottom: ${euiThemeVars.euiSize};
-                  `}
-                >
-                  <h4>
-                    {i18n.translate('xpack.lens.editorFrame.layerSettings.headingAppearance', {
-                      defaultMessage: 'Appearance',
-                    })}
-                  </h4>
-                </EuiText>
-              ) : null}
+
+              <EuiText
+                size="s"
+                css={css`
+                  margin-bottom: ${euiThemeVars.euiSize};
+                `}
+              >
+                <h4>
+                  {i18n.translate('xpack.lens.editorFrame.layerSettings.headingAppearance', {
+                    defaultMessage: 'Appearance',
+                  })}
+                </h4>
+              </EuiText>
+
+              <NameInput
+                value={layerDatasourceState?.layers[layerId].name || ''}
+                defaultValue={`Layer ${layerIndex}`}
+                onChange={(value) => {
+                  if (!layerDatasourceState) return;
+                  updateDataLayerState({
+                    ...layerDatasourceState,
+                    layers: {
+                      ...layerDatasourceState.layers,
+                      [props.layerId]: {
+                        ...layerDatasourceState.layers[props.layerId],
+                        name: value,
+                      },
+                    },
+                  });
+                }}
+              />
               {activeVisualization?.LayerSettingsComponent && (
                 <activeVisualization.LayerSettingsComponent
                   {...{
