@@ -7,6 +7,7 @@
 
 import type { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { Logger } from '@kbn/logging';
+import { isArray } from 'lodash';
 
 interface EntitySourceResponse {
   sourceDataStreamType?: string | string[];
@@ -28,12 +29,11 @@ export async function getLatestEntity({
   logger: Logger;
 }): Promise<EntitySourceResponse | undefined> {
   try {
-    const { definitions } = await entityManagerClient.getEntityDefinitions({
-      builtIn: true,
+    const entityDefinitionsSource = await entityManagerClient.v2.readSourceDefinitions({
       type: entityType,
     });
 
-    const hostOrContainerIdentityField = definitions[0]?.identityFields?.[0]?.field;
+    const hostOrContainerIdentityField = entityDefinitionsSource[0]?.identity_fields?.[0];
     if (hostOrContainerIdentityField === undefined) {
       return undefined;
     }
@@ -47,7 +47,13 @@ export async function getLatestEntity({
       end: to,
     });
 
-    return { sourceDataStreamType: entities[0]['data_stream.type'].filter(Boolean) };
+    const entityDataStreamType = entities[0]['data_stream.type'];
+
+    return {
+      sourceDataStreamType: isArray(entityDataStreamType)
+        ? entityDataStreamType.filter(Boolean)
+        : entityDataStreamType,
+    };
   } catch (e) {
     logger.error(e);
   }
