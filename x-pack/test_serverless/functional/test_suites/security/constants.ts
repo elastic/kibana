@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ai-infra/inference-common'],
-};
+export const SECURITY_ES_ARCHIVES_DIR = 'x-pack/test/security_solution_cypress/es_archives';
