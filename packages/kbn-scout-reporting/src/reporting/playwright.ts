@@ -64,9 +64,7 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    const owners: CodeOwnership = getCodeOwnersForFile(filePath, this.pathsWithOwners);
-
-    const concatenatedOwners = owners?.teams;
+    const concatenatedOwners = getCodeOwnersForFile(filePath, this.pathsWithOwners)?.teams;
 
     if (concatenatedOwners === undefined) {
       return [];
