@@ -18,14 +18,12 @@ import {
   BooleanLiteralContext,
   InputParameterContext,
   BooleanValueContext,
-  type CommandOptionsContext,
   ComparisonContext,
   type ComparisonOperatorContext,
   type ConstantContext,
   ConstantDefaultContext,
   DecimalLiteralContext,
   DereferenceContext,
-  type DissectCommandContext,
   type DropCommandContext,
   type EnrichCommandContext,
   type FieldContext,
@@ -33,7 +31,6 @@ import {
   type AggFieldsContext,
   type FromCommandContext,
   FunctionContext,
-  type GrokCommandContext,
   IntegerLiteralContext,
   IsNullContext,
   type KeepCommandContext,
@@ -74,7 +71,6 @@ import {
   createFakeMultiplyLiteral,
   createList,
   createNumericLiteral,
-  sanitizeIdentifierString,
   computeLocationExtends,
   createColumnStar,
   wrapIdentifierAsArray,
@@ -86,6 +82,7 @@ import {
   createOrderExpression,
   createFunctionCall,
   createParam,
+  createLiteralString,
 } from './factories';
 
 import {
@@ -331,7 +328,7 @@ function getBooleanValue(ctx: BooleanLiteralContext | BooleanValueContext) {
   return createLiteral('boolean', booleanTerminalNode!);
 }
 
-function getConstant(ctx: ConstantContext): ESQLAstItem {
+export function getConstant(ctx: ConstantContext): ESQLAstItem {
   if (ctx instanceof NullLiteralContext) {
     return createLiteral('null', ctx.NULL());
   }
@@ -354,8 +351,7 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     return getBooleanValue(ctx);
   }
   if (ctx instanceof StringLiteralContext) {
-    // String literal covers multiple ES|QL types: text and keyword types
-    return createLiteral('keyword', ctx.string_().QUOTED_STRING());
+    return createLiteralString(ctx.string_());
   }
   if (
     ctx instanceof NumericArrayLiteralContext ||
@@ -374,11 +370,9 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
       values.push(getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(StringContext)) {
-      // String literal covers multiple ES|QL types: text and keyword types
-      const literal = createLiteral('keyword', string.QUOTED_STRING());
-      if (literal) {
-        values.push(literal);
-      }
+      const literal = createLiteralString(string);
+
+      values.push(literal);
     }
     return createList(ctx, values);
   }
@@ -484,10 +478,10 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {
         fn.args.push(arg);
-        const literal = createLiteral('keyword', regex._pattern.QUOTED_STRING());
-        if (literal) {
-          fn.args.push(literal);
-        }
+
+        const literal = createLiteralString(regex._pattern);
+
+        fn.args.push(literal);
       }
       return fn;
     })
@@ -630,48 +624,4 @@ export function visitOrderExpressions(
   }
 
   return ast;
-}
-
-export function visitDissect(ctx: DissectCommandContext) {
-  const pattern = ctx.string_().getToken(esql_parser.QUOTED_STRING, 0);
-  return [
-    visitPrimaryExpression(ctx.primaryExpression()),
-    ...(pattern && textExistsAndIsValid(pattern.getText())
-      ? [createLiteral('keyword', pattern), ...visitDissectOptions(ctx.commandOptions())]
-      : []),
-  ].filter(nonNullable);
-}
-
-export function visitGrok(ctx: GrokCommandContext) {
-  const pattern = ctx.string_().getToken(esql_parser.QUOTED_STRING, 0);
-  return [
-    visitPrimaryExpression(ctx.primaryExpression()),
-    ...(pattern && textExistsAndIsValid(pattern.getText())
-      ? [createLiteral('keyword', pattern)]
-      : []),
-  ].filter(nonNullable);
-}
-
-function visitDissectOptions(ctx: CommandOptionsContext | undefined) {
-  if (!ctx) {
-    return [];
-  }
-  const options: ESQLCommandOption[] = [];
-  for (const optionCtx of ctx.commandOption_list()) {
-    const option = createOption(
-      sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
-      optionCtx
-    );
-    options.push(option);
-    // it can throw while accessing constant for incomplete commands, so try catch it
-    try {
-      const optionValue = getConstant(optionCtx.constant());
-      if (optionValue != null) {
-        option.args.push(optionValue);
-      }
-    } catch (e) {
-      // do nothing here
-    }
-  }
-  return options;
 }

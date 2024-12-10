@@ -32,6 +32,7 @@ import {
   ESQLParamLiteral,
   ESQLFunction,
   ESQLAstItem,
+  ESQLStringLiteral,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -252,6 +253,38 @@ export namespace Builder {
           },
           fromParser
         );
+      };
+
+      export const string = (
+        valueUnquoted: string,
+        template?: Omit<
+          AstNodeTemplate<ESQLStringLiteral>,
+          'name' | 'literalType' | 'value' | 'valueUnquoted'
+        > &
+          Partial<Pick<ESQLStringLiteral, 'name'>>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLStringLiteral => {
+        const value =
+          '"' +
+          valueUnquoted
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t') +
+          '"';
+        const name = template?.name ?? value;
+        const node: ESQLStringLiteral = {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'literal',
+          literalType: 'keyword',
+          name,
+          value,
+          valueUnquoted,
+        };
+
+        return node;
       };
 
       export const list = (
