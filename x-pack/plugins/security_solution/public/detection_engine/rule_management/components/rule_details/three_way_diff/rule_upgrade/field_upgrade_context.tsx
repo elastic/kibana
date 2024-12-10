@@ -17,7 +17,7 @@ import { convertRuleToDiffable } from '../../../../../../../common/detection_eng
 import type { SetRuleFieldResolvedValueFn } from '../../../../model/prebuilt_rule_upgrade/set_rule_field_resolved_value';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
-import { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import { FieldUpgradeStateEnum } from '../../../../model/prebuilt_rule_upgrade';
 
 export enum FieldFinalSideMode {
   Readonly = 'readonly',
@@ -32,7 +32,7 @@ interface FieldUpgradeContextType {
   /**
    * Field's upgrade state
    */
-  fieldUpgradeState: FieldUpgradeState;
+  fieldUpgradeState: FieldUpgradeStateEnum;
   /**
    * Whether rule has an unresolved conflict. This state is derived from `fieldUpgradeState`.
    */
@@ -81,7 +81,7 @@ export function FieldUpgradeContextProvider({
   const { state: fieldUpgradeState } = ruleUpgradeState.fieldsUpgradeState[fieldName];
   const fieldDiff = ruleUpgradeState.diff.fields[fieldName];
   const initialRightSideMode =
-    fieldUpgradeState === FieldUpgradeState.NonSolvableConflict
+    fieldUpgradeState === FieldUpgradeStateEnum.NonSolvableConflict
       ? FieldFinalSideMode.Edit
       : FieldFinalSideMode.Readonly;
 
@@ -96,8 +96,8 @@ export function FieldUpgradeContextProvider({
       fieldName,
       fieldUpgradeState,
       hasConflict:
-        fieldUpgradeState === FieldUpgradeState.SolvableConflict ||
-        fieldUpgradeState === FieldUpgradeState.NonSolvableConflict,
+        fieldUpgradeState === FieldUpgradeStateEnum.SolvableConflict ||
+        fieldUpgradeState === FieldUpgradeStateEnum.NonSolvableConflict,
       fieldDiff,
       finalDiffableRule: calcFinalDiffableRule(ruleUpgradeState),
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
@@ -137,7 +137,7 @@ function calcFinalDiffableRule(ruleUpgradeState: RuleUpgradeState): DiffableRule
   const fieldsResolvedValues = Object.entries(ruleUpgradeState.fieldsUpgradeState).reduce<
     Record<string, unknown>
   >((result, [fieldName, fieldState]) => {
-    if (fieldState.state === FieldUpgradeState.Accepted) {
+    if (fieldState.state === FieldUpgradeStateEnum.Accepted) {
       result[fieldName] = fieldState.resolvedValue;
     }
 

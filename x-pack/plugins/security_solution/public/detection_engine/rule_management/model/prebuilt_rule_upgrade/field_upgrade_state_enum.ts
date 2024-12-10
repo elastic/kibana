@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum FieldUpgradeState {
+export enum FieldUpgradeStateEnum {
   NoUpdate = 'NO_UPDATE',
   NoConflict = 'NO_CONFLICT',
   Accepted = 'ACCEPTED',

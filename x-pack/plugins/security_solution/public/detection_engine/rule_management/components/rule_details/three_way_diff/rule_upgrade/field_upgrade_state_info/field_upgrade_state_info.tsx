@@ -8,27 +8,27 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
-import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
+import { FieldUpgradeStateEnum } from '../../../../../model/prebuilt_rule_upgrade';
 import { ReadyForUpgradeBadge } from '../../badges/ready_for_upgrade_badge';
 import { ReviewRequiredBadge } from '../../badges/review_required_badge';
 import { ActionRequiredBadge } from '../../badges/action_required';
 import * as i18n from './translations';
 
 interface FieldUpgradeStateInfoProps {
-  state: FieldUpgradeState;
+  state: FieldUpgradeStateEnum;
 }
 
 export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JSX.Element {
   const { color, badge, title, description } = useMemo(() => {
     switch (state) {
-      case FieldUpgradeState.NoUpdate:
+      case FieldUpgradeStateEnum.NoUpdate:
         return {
           color: 'success',
           title: i18n.NO_UPDATE,
           description: i18n.NO_UPDATE_DESCRIPTION,
         };
 
-      case FieldUpgradeState.NoConflict:
+      case FieldUpgradeStateEnum.NoConflict:
         return {
           color: 'success',
           badge: <ReadyForUpgradeBadge />,
@@ -36,14 +36,14 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
           description: i18n.NO_CONFLICT_DESCRIPTION,
         };
 
-      case FieldUpgradeState.Accepted:
+      case FieldUpgradeStateEnum.Accepted:
         return {
           color: 'success',
           badge: <ReadyForUpgradeBadge />,
           title: i18n.REVIEWED_AND_ACCEPTED,
         };
 
-      case FieldUpgradeState.SolvableConflict:
+      case FieldUpgradeStateEnum.SolvableConflict:
         return {
           color: 'warning',
           badge: <ReviewRequiredBadge />,
@@ -51,7 +51,7 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
           description: i18n.SOLVABLE_CONFLICT_DESCRIPTION,
         };
 
-      case FieldUpgradeState.NonSolvableConflict:
+      case FieldUpgradeStateEnum.NonSolvableConflict:
         return {
           color: 'danger',
           badge: <ActionRequiredBadge />,

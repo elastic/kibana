@@ -27,7 +27,7 @@ import { TabContentPadding } from '../../../../rule_management/components/rule_d
 import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state';
+import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state_enum';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
@@ -458,7 +458,7 @@ function constructRuleFieldsToUpgrade(ruleUpgradeState: RuleUpgradeState): RuleF
   for (const [fieldName, fieldUpgradeState] of Object.entries(
     ruleUpgradeState.fieldsUpgradeState
   )) {
-    if (fieldUpgradeState.state === FieldUpgradeState.Accepted) {
+    if (fieldUpgradeState.state === FieldUpgradeStateEnum.Accepted) {
       ruleFieldsToUpgrade[fieldName] = {
         pick_version: 'RESOLVED',
         resolved_value: fieldUpgradeState.resolvedValue,

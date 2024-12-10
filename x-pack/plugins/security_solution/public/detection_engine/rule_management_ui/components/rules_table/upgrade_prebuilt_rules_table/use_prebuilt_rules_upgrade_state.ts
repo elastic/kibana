@@ -12,7 +12,7 @@ import type {
   FieldsUpgradeState,
   SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import {
   type FieldsDiff,
   type DiffableAllFields,
@@ -62,8 +62,8 @@ export function usePrebuiltRulesUpgradeState(
       const hasRuleTypeChange = Boolean(ruleUpgradeInfo.diff.fields.type);
       const hasFieldConflicts = Object.values(fieldsUpgradeState).some(
         ({ state: fieldState }) =>
-          fieldState === FieldUpgradeState.SolvableConflict ||
-          fieldState === FieldUpgradeState.NonSolvableConflict
+          fieldState === FieldUpgradeStateEnum.SolvableConflict ||
+          fieldState === FieldUpgradeStateEnum.NonSolvableConflict
       );
 
       state[ruleUpgradeInfo.rule_id] = {
@@ -105,16 +105,18 @@ function calcFieldsState(
     switch (fieldDiff.conflict) {
       case ThreeWayDiffConflict.NONE:
         fieldsState[fieldName] = {
-          state: fieldDiff.has_update ? FieldUpgradeState.NoConflict : FieldUpgradeState.NoUpdate,
+          state: fieldDiff.has_update
+            ? FieldUpgradeStateEnum.NoConflict
+            : FieldUpgradeStateEnum.NoUpdate,
         };
         break;
 
       case ThreeWayDiffConflict.SOLVABLE:
-        fieldsState[fieldName] = { state: FieldUpgradeState.SolvableConflict };
+        fieldsState[fieldName] = { state: FieldUpgradeStateEnum.SolvableConflict };
         break;
 
       case ThreeWayDiffConflict.NON_SOLVABLE:
-        fieldsState[fieldName] = { state: FieldUpgradeState.NonSolvableConflict };
+        fieldsState[fieldName] = { state: FieldUpgradeStateEnum.NonSolvableConflict };
         break;
 
       default:
@@ -123,7 +125,7 @@ function calcFieldsState(
   }
 
   for (const [fieldName, resolvedValue] of Object.entries(ruleResolvedConflicts)) {
-    fieldsState[fieldName] = { state: FieldUpgradeState.Accepted, resolvedValue };
+    fieldsState[fieldName] = { state: FieldUpgradeStateEnum.Accepted, resolvedValue };
   }
 
   return fieldsState;

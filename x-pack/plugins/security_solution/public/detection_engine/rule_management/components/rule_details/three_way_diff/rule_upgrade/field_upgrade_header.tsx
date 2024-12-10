@@ -9,14 +9,14 @@ import React from 'react';
 import { camelCase, startCase } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { fieldToDisplayNameMap } from '../../diff_components/translations';
-import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import type { FieldUpgradeStateEnum } from '../../../../model/prebuilt_rule_upgrade';
 import { ModifiedBadge } from '../badges/modified_badge';
 import { FieldUpgradeStateInfo } from './field_upgrade_state_info';
 import * as i18n from './translations';
 
 interface FieldUpgradeHeaderProps {
   fieldName: string;
-  fieldUpgradeState: FieldUpgradeState;
+  fieldUpgradeState: FieldUpgradeStateEnum;
   /**
    * Whether the field was customized by users (current and base versions differ)
    */

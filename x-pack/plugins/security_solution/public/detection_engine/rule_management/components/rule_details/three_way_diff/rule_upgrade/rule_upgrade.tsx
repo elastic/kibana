@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import {
-  FieldUpgradeState,
+  FieldUpgradeStateEnum,
   type RuleUpgradeState,
   type SetRuleFieldResolvedValueFn,
 } from '../../../../model/prebuilt_rule_upgrade';
@@ -69,18 +69,18 @@ function calcTotalNumOfFields(ruleUpgradeState: RuleUpgradeState): number {
 
 function calcNumOfFieldsWithUpdates(ruleUpgradeState: RuleUpgradeState): number {
   return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
-    ({ state }) => state !== FieldUpgradeState.NoUpdate
+    ({ state }) => state !== FieldUpgradeStateEnum.NoUpdate
   ).length;
 }
 
 function calcNumOfSolvableConflicts(ruleUpgradeState: RuleUpgradeState): number {
   return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
-    ({ state }) => state === FieldUpgradeState.SolvableConflict
+    ({ state }) => state === FieldUpgradeStateEnum.SolvableConflict
   ).length;
 }
 
 function calcNumOfNonSolvableConflicts(ruleUpgradeState: RuleUpgradeState): number {
   return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
-    ({ state }) => state === FieldUpgradeState.NonSolvableConflict
+    ({ state }) => state === FieldUpgradeStateEnum.NonSolvableConflict
   ).length;
 }
