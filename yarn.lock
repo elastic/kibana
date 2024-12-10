@@ -7848,7 +7848,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ux-plugin@link:x-pack/plugins/observability_solution/ux":
+"@kbn/ux-plugin@link:x-pack/solutions/observability/plugins/ux":
   version "0.0.0"
   uid ""
 
