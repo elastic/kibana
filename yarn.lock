@@ -7112,7 +7112,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-upselling@link:x-pack/packages/security-solution/upselling":
+"@kbn/security-solution-upselling@link:x-pack/solutions/security/packages/upselling":
   version "0.0.0"
   uid ""
 
