@@ -71,7 +71,6 @@ packages/core/doc-links/core-doc-links-server-mocks @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-client-server-mocks @elastic/kibana-core
 packages/core/elasticsearch/core-elasticsearch-server-mocks @elastic/kibana-core
 packages/core/environment/core-environment-server-mocks @elastic/kibana-core
-packages/core/execution-context/core-execution-context-browser @elastic/kibana-core
 packages/core/execution-context/core-execution-context-browser-internal @elastic/kibana-core
 packages/core/execution-context/core-execution-context-browser-mocks @elastic/kibana-core
 packages/core/execution-context/core-execution-context-common @elastic/kibana-core
@@ -617,6 +616,7 @@ src/core/packages/elasticsearch/client-server-internal @elastic/kibana-core
 src/core/packages/elasticsearch/server @elastic/kibana-core
 src/core/packages/elasticsearch/server-internal @elastic/kibana-core
 src/core/packages/environment/server-internal @elastic/kibana-core
+src/core/packages/execution-context/browser @elastic/kibana-core
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
