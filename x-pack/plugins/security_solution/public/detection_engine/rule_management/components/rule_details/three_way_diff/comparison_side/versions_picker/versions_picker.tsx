@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/css';
 import { EuiSelect } from '@elastic/eui';
-import type { EuiSelectOption } from '@elastic/eui';
-import { BASE_OPTIONS, CURRENT_OPTIONS, TARGET_OPTIONS, SelectedVersions } from './constants';
+import { SelectedVersions } from './constants';
 import * as i18n from './translations';
 
 interface VersionsPickerProps {
-  hasBaseVersion: boolean;
+  options: Array<{ value: SelectedVersions; text: string; title: string }>;
   selectedVersions: SelectedVersions;
   onChange: (pickedVersions: SelectedVersions) => void;
 }
 
 export function VersionsPicker({
-  hasBaseVersion,
+  options,
   selectedVersions = SelectedVersions.CurrentFinal,
   onChange,
 }: VersionsPickerProps) {
-  const options: EuiSelectOption[] = useMemo(
-    () => [...CURRENT_OPTIONS, ...TARGET_OPTIONS, ...(hasBaseVersion ? BASE_OPTIONS : [])],
-    [hasBaseVersion]
-  );
-
   const handleChange = useCallback(
     (changeEvent: React.ChangeEvent<HTMLSelectElement>) => {
       onChange(changeEvent.target.value as SelectedVersions);
@@ -49,5 +43,5 @@ export function VersionsPicker({
 const VERSIONS_PICKER_STYLES = css`
   // Set min-width a bit wider than default
   // to make English text in narrow screens readable
-  min-width: 220px;
+  min-width: 300px;
 `;

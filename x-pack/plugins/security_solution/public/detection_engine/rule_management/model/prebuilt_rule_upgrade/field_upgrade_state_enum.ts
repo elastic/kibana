@@ -7,6 +7,7 @@
 
 export enum FieldUpgradeStateEnum {
   NoUpdate = 'NO_UPDATE',
+  SameUpdate = 'SAME_UPDATE',
   NoConflict = 'NO_CONFLICT',
   Accepted = 'ACCEPTED',
   SolvableConflict = 'SOLVABLE_CONFLICT',

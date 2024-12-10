@@ -28,6 +28,13 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
           description: i18n.NO_UPDATE_DESCRIPTION,
         };
 
+      case FieldUpgradeStateEnum.SameUpdate:
+        return {
+          color: 'success',
+          title: i18n.SAME_UPDATE,
+          description: i18n.SAME_UPDATE_DESCRIPTION,
+        };
+
       case FieldUpgradeStateEnum.NoConflict:
         return {
           color: 'success',
@@ -65,19 +72,21 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
   }, [state]);
 
   return (
-    <EuiText color={color} size="xs">
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <strong>{title}</strong>
-        </EuiFlexItem>
-
-        {description && (
+    <>
+      <EuiText color={color} size="xs">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {i18n.SEPARATOR} {description}
+            <strong>{title}</strong>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiText>
+
+          {description && (
+            <EuiFlexItem grow={false}>
+              {i18n.SEPARATOR} {description}
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiText>
+    </>
   );
 }
