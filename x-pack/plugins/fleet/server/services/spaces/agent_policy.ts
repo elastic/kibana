@@ -212,6 +212,6 @@ export async function updateAgentPolicySpaces({
       });
     }
   } finally {
-    closePointInTime(esClient, pitId);
+    await closePointInTime(esClient, pitId);
   }
 }
