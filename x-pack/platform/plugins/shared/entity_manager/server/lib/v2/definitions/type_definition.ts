@@ -10,6 +10,7 @@ import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
 import { EntityTypeDefinition, InternalClusterClient, StoredEntityTypeDefinition } from '../types';
 import { SourceAs, runESQLQuery } from '../run_esql_query';
 import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
+import { UnknownEntityType } from '../errors/unknown_entity_type';
 
 interface StoreTypeDefinitionOptions {
   type: EntityTypeDefinition;
@@ -70,4 +71,27 @@ export async function readTypeDefinitions(
   );
 
   return types.map((storedTypeDefinition) => storedTypeDefinition._source.type);
+}
+
+export async function readTypeDefinitionById(
+  id: string,
+  clusterClient: InternalClusterClient,
+  logger: Logger
+): Promise<EntityTypeDefinition> {
+  const esClient = clusterClient.asInternalUser;
+
+  const types = await runESQLQuery<SourceAs<StoredEntityTypeDefinition>>(
+    'fetch type definition by ID',
+    {
+      esClient,
+      query: `FROM ${DEFINITIONS_ALIAS} METADATA _id,_source | WHERE definition_type == "type" AND _id == "${id}" | KEEP _source`,
+      logger,
+    }
+  );
+
+  if (types.length === 0) {
+    throw new UnknownEntityType(`Type with ID ${id} not found`);
+  }
+
+  return types[0]._source.type;
 }

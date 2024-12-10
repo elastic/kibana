@@ -14,7 +14,7 @@ import {
 } from '../types';
 import { SourceAs, runESQLQuery } from '../run_esql_query';
 import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
-import { readTypeDefinitions } from './type_definition';
+import { readTypeDefinitionById } from './type_definition';
 import { UnknownEntityType } from '../errors/unknown_entity_type';
 
 interface StoreSourceDefinitionOptions {
@@ -32,11 +32,16 @@ export async function storeSourceDefinition({
 }: StoreSourceDefinitionOptions): Promise<EntitySourceDefinition> {
   const esClient = clusterClient.asInternalUser;
 
-  const types = await readTypeDefinitions(clusterClient, logger);
-  if (!types.some((type) => type.id === source.type_id)) {
-    throw new UnknownEntityType(
-      `Type with ID ${source.type_id} not found, cannot attach source with ID ${source.id}`
-    );
+  try {
+    await readTypeDefinitionById(source.type_id, clusterClient, logger);
+  } catch (error) {
+    if (error instanceof UnknownEntityType) {
+      throw new UnknownEntityType(
+        `Type with ID ${source.type_id} not found, cannot attach source with ID ${source.id}`
+      );
+    }
+
+    throw error;
   }
 
   const sources = await runESQLQuery('fetch source definition for conflict check', {

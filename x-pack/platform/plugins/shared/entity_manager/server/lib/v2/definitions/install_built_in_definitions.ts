@@ -36,6 +36,8 @@ export async function installBuiltInDefinitions(clusterClient: IClusterClient, l
           replace: true,
         });
       } catch (error) {
+        // This may fail because the type installation failed and storeSourceDefinition verifies that the type exists first
+        // It may also fail for other reasons but we continue in case there are more sources for the same type that might succeed
         logger.error(error.message);
       }
     }
