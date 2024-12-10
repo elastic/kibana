@@ -61,7 +61,7 @@
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "solutions/observability/plugins/infra",
     "xpack.logsDataAccess": "plugins/observability_solution/logs_data_access",
-    "xpack.logsExplorer": "plugins/observability_solution/logs_explorer",
+    "xpack.logsExplorer": "solutions/observability/plugins/logs_explorer",
     "xpack.logsShared": "plugins/observability_solution/logs_shared",
     "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
