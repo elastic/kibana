@@ -315,10 +315,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // check available formats for ES_FIELD_TYPES.BOOLEAN
             expectFormatterTypes: [
               FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
               FIELD_FORMAT_IDS.STATIC_LOOKUP,
               FIELD_FORMAT_IDS.STRING,
               FIELD_FORMAT_IDS.URL,
-              FIELD_FORMAT_IDS.COLOR,
             ],
             expectFormattedValue: 'yes',
             beforeSave: async () => {
