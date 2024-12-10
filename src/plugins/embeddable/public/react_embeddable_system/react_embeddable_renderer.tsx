@@ -18,7 +18,7 @@ import {
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import {
@@ -142,15 +142,7 @@ export const ReactEmbeddableRenderer = <
                   .pipe(
                     skip(1),
                     debounceTime(ON_STATE_CHANGE_DEBOUNCE),
-                    switchMap(() => {
-                      const isAsync =
-                        apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
-                      return isAsync
-                        ? (apiRegistration.serializeState() as Promise<
-                            SerializedPanelState<SerializedState>
-                          >)
-                        : Promise.resolve(apiRegistration.serializeState());
-                    })
+                    map(() => apiRegistration.serializeState())
                   )
                   .subscribe((nextSerializedState) => {
                     onAnyStateChange(nextSerializedState);

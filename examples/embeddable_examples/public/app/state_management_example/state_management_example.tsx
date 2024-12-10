@@ -123,13 +123,13 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
         <EuiFlexItem grow={false}>
           <EuiButton
             disabled={isSaving || !hasUnsavedChanges}
-            onClick={async () => {
+            onClick={() => {
               if (!bookApi) {
                 return;
               }
 
               setIsSaving(true);
-              const bookSerializedState = await bookApi.serializeState();
+              const bookSerializedState = bookApi.serializeState();
               if (!isMounted()) {
                 return;
               }
