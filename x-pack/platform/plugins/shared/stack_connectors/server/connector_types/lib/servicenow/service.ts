@@ -68,7 +68,7 @@ export const createExternalService: ServiceFactory = ({
   const choicesUrl = `${urlWithoutTrailingSlash}/api/now/table/sys_choice`;
   /**
    * Need to be set the same at:
-   * x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/api.ts
+   * x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/builtin_action_types/servicenow/api.ts
    */
   const getVersionUrl = () => `${urlWithoutTrailingSlash}/api/${appScope}/elastic_api/health`;
 
