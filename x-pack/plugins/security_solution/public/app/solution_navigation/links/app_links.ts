@@ -20,6 +20,12 @@ import { createSettingsLinksFromManage } from './sections/settings_links';
 export const solutionAppLinksSwitcher = (appLinks: AppLinkItems): AppLinkItems => {
   const solutionAppLinks = cloneDeep(appLinks) as LinkItem[];
 
+  const dashboardApp = find(solutionAppLinks ?? [], { id: SecurityPageName.dashboards });
+
+  if (dashboardApp && dashboardApp.links) {
+    remove(dashboardApp.links, { id: SecurityPageName.kubernetes });
+  }
+
   // Remove manage link
   const [manageLinkItem] = remove(solutionAppLinks, { id: SecurityPageName.administration });
 
