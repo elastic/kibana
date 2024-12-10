@@ -11,11 +11,9 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { monaco } from '../..';
 
 export function createTheme(
-  { colorMode, euiTheme }: UseEuiTheme,
+  { euiTheme }: UseEuiTheme,
   backgroundColor?: string
 ): monaco.editor.IStandaloneThemeData {
-  const selectionBackgroundColor = colorMode === 'DARK' ? '#343551' : '#E3E4ED';
-
   return {
     base: 'vs',
     inherit: true,
@@ -87,11 +85,11 @@ export function createTheme(
     ],
     colors: {
       'editor.foreground': euiTheme.colors.darkestShade,
-      'editor.background': backgroundColor ?? euiTheme.colors.backgroundBaseSubdued,
+      'editor.background': backgroundColor ?? euiTheme.colors.backgroundBasePlain,
       'editorLineNumber.foreground': euiTheme.colors.darkShade,
       'editorLineNumber.activeForeground': euiTheme.colors.darkShade,
       'editorIndentGuide.background1': euiTheme.colors.lightShade,
-      'editor.selectionBackground': selectionBackgroundColor,
+      'editor.selectionBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
       'editorWidget.border': euiTheme.colors.lightShade,
       'editorWidget.background': euiTheme.colors.lightestShade,
       'editorCursor.foreground': euiTheme.colors.darkestShade,
