@@ -98,7 +98,7 @@ export function useOnboardingFlow() {
         ),
       };
     });
-  }, [installedIntegrations.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [installedIntegrations.length]);
 
   useInterval(
     refetchProgress,
