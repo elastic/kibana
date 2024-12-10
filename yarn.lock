@@ -5608,7 +5608,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/exploratory-view-example-plugin@link:x-pack/examples/exploratory_view_example":
+"@kbn/exploratory-view-example-plugin@link:x-pack/solutions/observability/plugins/Users/gsoldevila/Work/kibana-quaternary/x-pack/examples/exploratory_view_example":
   version "0.0.0"
   uid ""
 

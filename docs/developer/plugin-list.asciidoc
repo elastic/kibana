@@ -596,6 +596,10 @@ activities.
 |A shared component for visualizing observability data types via lens embeddable. For further details.
 
 
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/Users/gsoldevila/Work/kibana-quaternary/x-pack/examples/exploratory_view_example/README.md[exploratoryViewExample]
+|To run this example plugin, use the command yarn start --run-examples.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
 
