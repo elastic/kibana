@@ -15,7 +15,8 @@ const TEST_SUBJ = Object.freeze({
 });
 
 export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
-  ConsoleResponseActionCommands,
+  // TODO: currently runscript is not supported in Endpoint
+  Exclude<ConsoleResponseActionCommands, 'runscript'>,
   string
 > => {
   return {
