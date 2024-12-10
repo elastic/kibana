@@ -62,7 +62,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
-  const [isRequiredFieldError, setIsRequiredFieldError] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -109,7 +108,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const setResetForm = (reset: ResetForm) => {
     resetConnectorForm.current = reset;
-    setIsRequiredFieldError(false);
   };
 
   const onChangeGroupAction = (id: string) => {
@@ -128,11 +126,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       }
     }
   };
-
-  // Hide All fields required error message
-  const resetRequiredFieldsErrorMessage = useCallback(() => {
-    setIsRequiredFieldError(false);
-  }, []);
 
   const validateAndCreateConnector = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
@@ -168,11 +161,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
-    } else {
-      if (Object.keys(data).length === 0) {
-        setIsRequiredFieldError(true);
-      }
-      return;
     }
   }, [submit, preSubmitValidator, createConnector]);
 
@@ -242,17 +230,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiSpacer size="xs" />
               </>
             )}
-            {isRequiredFieldError && (
+            {!!hasErrors && (
               <>
                 <EuiCallOut
                   size="s"
                   color="danger"
                   iconType="warning"
-                  data-test-subj="required-field-error-label"
+                  data-test-subj="connector-form-header-error-label"
                   title={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionConnectorAdd.requiredFieldError',
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
                     {
-                      defaultMessage: 'All fields are required',
+                      defaultMessage: 'There are errors in the form',
                     }
                   )}
                 />
@@ -265,7 +253,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               isEdit={false}
               onChange={setFormState}
               setResetForm={setResetForm}
-              resetErrorMessage={resetRequiredFieldsErrorMessage}
             />
             {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
             <EuiFlexItem grow={false}>
