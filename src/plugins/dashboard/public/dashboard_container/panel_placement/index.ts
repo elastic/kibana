@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { placePanel } from './place_panel';
-
 export { placeClonePanel } from './place_clone_panel_strategy';
 
 export { registerDashboardPanelPlacementSetting } from './panel_placement_registry';
