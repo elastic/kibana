@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/203462
+    // FLAKY: https://github.com/elastic/kibana/issues/203462 testing
     describe.skip('create and configure connector', () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
