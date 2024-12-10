@@ -70,7 +70,6 @@ export async function fetchEsqlQuery({
 
   return {
     link,
-    query,
     numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
       isCountAgg: true,

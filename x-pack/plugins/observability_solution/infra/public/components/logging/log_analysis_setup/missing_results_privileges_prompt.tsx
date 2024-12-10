@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   missingMlPrivilegesTitle,
   missingMlResultsPrivilegesDescription,
@@ -23,6 +23,6 @@ export const MissingResultsPrivilegesPrompt: React.FunctionComponent = () => (
   />
 );
 
-const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
+const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
 `;
