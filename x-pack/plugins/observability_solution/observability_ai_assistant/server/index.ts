@@ -31,8 +31,6 @@ export { streamIntoObservable } from './service/util/stream_into_observable';
 export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
 export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
 
-export { parseTimeRangeFromSchema, timeRangeSchema } from '../common/functions/schemas';
-
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [
     unusedFromRoot('xpack.observability.aiAssistant.enabled', {
