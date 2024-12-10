@@ -345,6 +345,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
       fieldFormattersString: `${KIBANA_DOCS}managing-data-views.html#string-field-formatters`,
       runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
+      migrateOffScriptedFields: `${KIBANA_DOCS}managing-data-views.html#migrate-off-scripted-fields`,
     },
     addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
     kibana: {
@@ -503,6 +504,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
+      signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -792,6 +794,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
       restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
       searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
+      slmStart: `${ELASTICSEARCH_DOCS}slm-api-start.html`,
     },
     ingest: {
       append: `${ELASTICSEARCH_DOCS}append-processor.html`,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { transformError, getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ReadAlertsMigrationStatusRequestQuery } from '../../../../../common/api/detection_engine/signals_migration';
@@ -18,7 +19,10 @@ import { isOutdated, signalsAreOutdated } from '../../migrations/helpers';
 import { getTemplateVersion } from '../index/check_template_version';
 import { buildSiemResponse } from '../utils';
 
-export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRouter) => {
+export const getSignalsMigrationStatusRoute = (
+  router: SecuritySolutionPluginRouter,
+  docLinks: DocLinksServiceSetup
+) => {
   router.versioned
     .get({
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
@@ -34,6 +38,13 @@ export const getSignalsMigrationStatusRoute = (router: SecuritySolutionPluginRou
         version: '2023-10-31',
         validate: {
           request: { query: buildRouteValidationWithZod(ReadAlertsMigrationStatusRequestQuery) },
+        },
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.signalsMigrationApi,
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
         },
       },
       async (context, request, response) => {

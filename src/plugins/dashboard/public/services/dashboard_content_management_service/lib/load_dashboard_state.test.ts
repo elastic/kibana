@@ -8,7 +8,6 @@
  */
 
 import { getDashboardContentManagementCache } from '..';
-import { getSampleDashboardInput } from '../../../mocks';
 import { contentManagementService } from '../../kibana_services';
 import { loadDashboardState } from './load_dashboard_state';
 
@@ -33,8 +32,7 @@ describe('Load dashboard state', () => {
     });
     contentManagementService.client.get = jest.fn();
     dashboardContentManagementCache.addDashboard = jest.fn();
-
-    const { id } = getSampleDashboardInput();
+    const id = '123';
     const result = await loadDashboardState({
       id,
     });
@@ -61,9 +59,8 @@ describe('Load dashboard state', () => {
         },
       });
     });
-    const { id } = getSampleDashboardInput();
     await loadDashboardState({
-      id,
+      id: '123',
     });
     expect(dashboardContentManagementCache.fetchDashboard).toBeCalled();
     expect(dashboardContentManagementCache.addDashboard).not.toBeCalled();
