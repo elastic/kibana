@@ -37,7 +37,7 @@ export const buildValidators = <
         /**
          * With this validation we enforce the subActionParams to be an object.
          * Each sub action has different parameters and they are validated inside the executor
-         * (x-pack/plugins/actions/server/sub_action_framework/executor.ts). For that reason,
+         * (x-pack/platform/plugins/shared/actions/server/sub_action_framework/executor.ts). For that reason,
          * we allow all unknowns at this level of validation as they are not known at this
          * time of execution.
          */
