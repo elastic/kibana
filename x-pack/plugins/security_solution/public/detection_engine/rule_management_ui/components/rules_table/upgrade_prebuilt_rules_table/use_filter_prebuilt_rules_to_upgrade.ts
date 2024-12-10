@@ -14,15 +14,15 @@ export type UpgradePrebuiltRulesTableFilterOptions = Pick<
   'filter' | 'tags' | 'ruleSource'
 >;
 
-interface UseFilterPrebuiltRulesToUpgradeParams<T extends RuleUpgradeInfoForReview> {
-  data: T[];
+interface UseFilterPrebuiltRulesToUpgradeParams {
+  data: RuleUpgradeInfoForReview[];
   filterOptions: UpgradePrebuiltRulesTableFilterOptions;
 }
 
-export const useFilterPrebuiltRulesToUpgrade = <T extends RuleUpgradeInfoForReview>({
+export const useFilterPrebuiltRulesToUpgrade = ({
   data,
   filterOptions,
-}: UseFilterPrebuiltRulesToUpgradeParams<T>): T[] => {
+}: UseFilterPrebuiltRulesToUpgradeParams): RuleUpgradeInfoForReview[] => {
   return useMemo(() => {
     const { filter, tags, ruleSource } = filterOptions;
 
