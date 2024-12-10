@@ -23,7 +23,12 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { PathWithOwners, getPathsWithOwnersReversed, getCodeOwnersForFile } from '@kbn/code-owners';
+import {
+  type PathWithOwners,
+  type CodeOwnership,
+  getPathsWithOwnersReversed,
+  getCodeOwnersForFile,
+} from '@kbn/code-owners';
 import { generateTestRunId, getTestIDForTitle, ScoutReport, ScoutReportEventAction } from '.';
 import { environmentMetadata } from '../datasources';
 
@@ -60,7 +65,7 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    const owners = getCodeOwnersForFile(filePath, this.pathsWithOwners);
+    const owners: CodeOwnership = getCodeOwnersForFile(filePath, this.pathsWithOwners);
 
     const concatenatedOwners = owners?.teams;
 

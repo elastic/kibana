@@ -18,7 +18,12 @@ import {
   ScoutReportEventAction,
   datasources,
 } from '@kbn/scout-reporting';
-import { getCodeOwnersForFile, getPathsWithOwnersReversed, PathWithOwners } from '@kbn/code-owners';
+import {
+  getCodeOwnersForFile,
+  getPathsWithOwnersReversed,
+  type PathWithOwners,
+  type CodeOwnership,
+} from '@kbn/code-owners';
 import { Runner, Test } from '../../../fake_mocha_types';
 
 /**
@@ -64,7 +69,7 @@ export class ScoutFTRReporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    const owners = getCodeOwnersForFile(filePath, this.pathsWithOwners);
+    const owners: CodeOwnership = getCodeOwnersForFile(filePath, this.pathsWithOwners);
 
     const concatenatedOwners = owners?.teams;
 
