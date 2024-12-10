@@ -85,6 +85,8 @@ export interface LayerPanelProps {
   displayLayerSettings: boolean;
   setIsInlineFlyoutVisible?: (status: boolean) => void;
   onlyAllowSwitchToSubtypes?: boolean;
+  setExpandedLayerId: (layerId: number) => void;
+  expandedLayerId: number;
 }
 
 export interface LayerDatasourceDropProps {

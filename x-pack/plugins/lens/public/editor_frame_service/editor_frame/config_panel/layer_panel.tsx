@@ -74,6 +74,8 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
+    setExpandedLayerId,
+    expandedLayerId,
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -405,7 +407,10 @@ export function LayerPanel(props: LayerPanelProps) {
             buttonElement={'div'}
             buttonContentClassName={'lnsLayerPanel__layerSettingsAccordionButton'}
             paddingSize="xs"
-            initialIsOpen={true}
+            forceState={layerIndex === expandedLayerId ? 'open' : 'closed'}
+            onClick={() => {
+              setExpandedLayerId(layerIndex);
+            }}
             borders="none"
           >
             <header style={{ paddingBottom: '16px', borderBottom: '1px' }}>
