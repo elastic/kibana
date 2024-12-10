@@ -15,6 +15,7 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -196,6 +197,8 @@ function getProps({
   const analyticsMock = analyticsServiceMock.createAnalyticsServiceStart();
   const i18nMock = i18nServiceMock.createStartContract();
   const themeMock = themeServiceMock.createStartContract();
+  const userProfileMock = userProfileServiceMock.createStart();
+
   return {
     action,
     roleName: role?.name,
@@ -214,6 +217,7 @@ function getProps({
     history: scopedHistoryMock.create(),
     spacesApiUi,
     buildFlavor,
+    userProfile: userProfileMock,
     theme: themeMock,
     i18n: i18nMock,
     analytics: analyticsMock,
