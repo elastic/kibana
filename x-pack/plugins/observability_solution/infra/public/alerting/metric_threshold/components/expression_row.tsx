@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
 import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   AggregationType,
   IErrorObject,
@@ -47,13 +47,15 @@ interface ExpressionRowProps {
   fields: DataViewFieldBase[];
 }
 
-const NegativeHorizontalMarginDiv = euiStyled.div`margin: 0 -4px;`;
+const NegativeHorizontalMarginDiv = styled.div`
+  margin: 0 -4px;
+`;
 
-const StyledExpression = euiStyled.div`
+const StyledExpression = styled.div`
   padding: 0 4px;
 `;
 
-const StyledHealth = euiStyled(EuiHealth)`
+const StyledHealth = styled(EuiHealth)`
   margin-left: 4px;
 `;
 
