@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName, SECURITY_FEATURE_ID, TIMELINES_PATH } from '../../common/constants';
+import { SecurityPageName, TIMELINE_FEATURE_ID, TIMELINES_PATH } from '../../common/constants';
 import { TIMELINES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
@@ -15,7 +15,7 @@ export const links: LinkItem = {
   title: TIMELINES,
   path: TIMELINES_PATH,
   globalNavPosition: 7,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [`${TIMELINE_FEATURE_ID}.read`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.timelines', {
       defaultMessage: 'Timelines',
