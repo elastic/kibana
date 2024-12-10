@@ -15,6 +15,7 @@ import {
   OBSERVABLE_TYPE_IPV6,
   OBSERVABLE_TYPE_URL,
 } from '../../../common/constants';
+import * as i18n from './translations';
 
 export const normalizeValueType = (value: string): keyof typeof fieldsConfig.value | 'generic' => {
   if (value in fieldsConfig.value) {
@@ -43,7 +44,7 @@ const { emptyField } = fieldValidators;
 const validatorFactory =
   (
     regex: RegExp,
-    message: string = 'Value is invalid',
+    message: string = i18n.INVALID_VALUE,
     code: string = 'ERR_NOT_VALID'
   ): ValidationFunc =>
   (...args: Parameters<ValidationFunc>) => {
@@ -79,7 +80,7 @@ export const urlValidator = (...args: Parameters<ValidationFunc>) => {
   } catch (error) {
     return {
       code: 'ERR_NOT_VALID',
-      message: 'Value is invalid',
+      message: i18n.INVALID_VALUE,
       path,
     };
   }
@@ -90,7 +91,7 @@ export const emailValidator = (...args: Parameters<ValidationFunc>) => {
   const emailAddresses = parseAddressList(value as string);
 
   if (emailAddresses == null) {
-    return { message: 'Value should be an email', code: 'ERR_NOT_EMAIL', path };
+    return { message: i18n.INVALID_EMAIL, code: 'ERR_NOT_EMAIL', path };
   }
 };
 
@@ -99,7 +100,7 @@ export const fieldsConfig = {
     generic: {
       validations: [
         {
-          validator: emptyField('Value is required'),
+          validator: emptyField(i18n.REQUIRED_VALUE),
         },
         {
           validator: genericValidator,
@@ -110,7 +111,7 @@ export const fieldsConfig = {
     [OBSERVABLE_TYPE_EMAIL.key]: {
       validations: [
         {
-          validator: emptyField('Value is required'),
+          validator: emptyField(i18n.REQUIRED_VALUE),
         },
         {
           validator: emailValidator,
@@ -121,7 +122,7 @@ export const fieldsConfig = {
     [OBSERVABLE_TYPE_DOMAIN.key]: {
       validations: [
         {
-          validator: emptyField('Value is required'),
+          validator: emptyField(i18n.REQUIRED_VALUE),
         },
         {
           validator: domainValidator,
@@ -132,7 +133,7 @@ export const fieldsConfig = {
     [OBSERVABLE_TYPE_IPV4.key]: {
       validations: [
         {
-          validator: emptyField('Value is required'),
+          validator: emptyField(i18n.REQUIRED_VALUE),
         },
         {
           validator: ipv4Validator,
@@ -143,7 +144,7 @@ export const fieldsConfig = {
     [OBSERVABLE_TYPE_IPV6.key]: {
       validations: [
         {
-          validator: emptyField('Value is required'),
+          validator: emptyField(i18n.REQUIRED_VALUE),
         },
         {
           validator: ipv6Validator,
@@ -154,7 +155,7 @@ export const fieldsConfig = {
     [OBSERVABLE_TYPE_URL.key]: {
       validations: [
         {
-          validator: emptyField('Value is required'),
+          validator: emptyField(i18n.REQUIRED_VALUE),
         },
         {
           validator: urlValidator,
@@ -166,7 +167,7 @@ export const fieldsConfig = {
   typeKey: {
     validations: [
       {
-        validator: emptyField('Type is required'),
+        validator: emptyField(i18n.REQUIRED_VALUE),
       },
     ],
     label: 'Type',

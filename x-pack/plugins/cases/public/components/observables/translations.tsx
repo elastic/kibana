@@ -103,3 +103,15 @@ export const PLATINUM_NOTICE = i18n.translate('xpack.cases.caseView.observables.
   defaultMessage:
     'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license',
 });
+
+export const REQUIRED_VALUE = i18n.translate('xpack.cases.caseView.observables.requiredValue', {
+  defaultMessage: 'Value is required',
+});
+
+export const INVALID_VALUE = i18n.translate('xpack.cases.caseView.observables.invalidValue', {
+  defaultMessage: 'Value is invalid',
+});
+
+export const INVALID_EMAIL = i18n.translate('xpack.cases.caseView.observables.invalidEmail', {
+  defaultMessage: 'Value should be a valid email',
+});
