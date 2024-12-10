@@ -10,6 +10,14 @@ import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
 
 const { parameters, ...restBaseSchema } = BaseActionRequestSchema;
+const NonEmptyString = schema.string({
+  minLength: 1,
+  validate: (value) => {
+    if (!value.trim().length) {
+      return 'Raw cannot be an empty string';
+    }
+  },
+});
 export const RunScriptActionRequestSchema = {
   body: schema.object({
     ...restBaseSchema,
@@ -18,55 +26,19 @@ export const RunScriptActionRequestSchema = {
         /**
          * The script to run
          */
-        Raw: schema.maybe(
-          schema.string({
-            minLength: 1,
-            validate: (value) => {
-              if (!value.trim().length) {
-                return 'Raw cannot be an empty string';
-              }
-            },
-          })
-        ),
+        Raw: schema.maybe(NonEmptyString),
         /**
          * The path to the script on the host to run
          */
-        HostPath: schema.maybe(
-          schema.string({
-            minLength: 1,
-            validate: (value) => {
-              if (!value.trim().length) {
-                return 'HostPath cannot be an empty string';
-              }
-            },
-          })
-        ),
+        HostPath: schema.maybe(NonEmptyString),
         /**
          * The path to the script in the cloud to run
          */
-        CloudFile: schema.maybe(
-          schema.string({
-            minLength: 1,
-            validate: (value) => {
-              if (!value.trim().length) {
-                return 'CloudFile cannot be an empty string';
-              }
-            },
-          })
-        ),
+        CloudFile: schema.maybe(NonEmptyString),
         /**
          * The command line to run
          */
-        CommandLine: schema.maybe(
-          schema.string({
-            minLength: 1,
-            validate: (value) => {
-              if (!value.trim().length) {
-                return 'CommandLine cannot be an empty string';
-              }
-            },
-          })
-        ),
+        CommandLine: schema.maybe(NonEmptyString),
         /**
          * The max timeout value before the command is killed. Number represents milliseconds
          */
