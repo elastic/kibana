@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { IClusterClient } from '@kbn/core/server';
+import { IClusterClient, IScopedClusterClient } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import moment from 'moment';
 
 export type InternalClusterClient = Pick<IClusterClient, 'asInternalUser'>;
+export type UserClusterClient = Pick<IScopedClusterClient, 'asCurrentUser'>;
 
 // Definitions
 
