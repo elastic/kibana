@@ -15,11 +15,9 @@ import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
 
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesToast } from '../../common/use_cases_toast';
 import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
 import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
 import { type CaseUI } from '../../containers/types';
-import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { EditObservableModal } from './edit_observable_modal';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
 
@@ -29,7 +27,6 @@ export const ObservableActionsPopoverButton: React.FC<{
 }> = ({ caseData, observable }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { permissions } = useCasesContext();
-  const refreshCaseViewPage = useRefreshCaseViewPage();
   const [showEditModal, setShowEditModal] = useState(false);
 
   const { isLoading: isDeleteLoading, mutateAsync: deleteObservable } = useDeleteObservable(
@@ -39,7 +36,6 @@ export const ObservableActionsPopoverButton: React.FC<{
 
   const isLoading = isDeleteLoading;
 
-  const { showSuccessToast } = useCasesToast();
   const {
     showDeletionModal,
     onModalOpen: onDeletionModalOpen,
@@ -47,14 +43,7 @@ export const ObservableActionsPopoverButton: React.FC<{
     onCancel,
   } = useDeletePropertyAction({
     onDelete: () => {
-      if (!observable.id) {
-        throw new Error('invalid observable');
-      }
-
-      deleteObservable().then(() => {
-        showSuccessToast(i18n.OBSERVABLE_REMOVED);
-        refreshCaseViewPage();
-      });
+      deleteObservable();
     },
   });
 
@@ -72,7 +61,7 @@ export const ObservableActionsPopoverButton: React.FC<{
       },
     ];
 
-    if (permissions.delete) {
+    if (permissions.update) {
       mainPanelItems.push({
         name: <EuiTextColor color={'danger'}>{i18n.DELETE_OBSERVABLE}</EuiTextColor>,
         icon: <EuiIcon type="trash" size="m" color={'danger'} />,
@@ -83,9 +72,7 @@ export const ObservableActionsPopoverButton: React.FC<{
         disabled: isLoading,
         'data-test-subj': 'cases-observables-delete-button',
       });
-    }
 
-    if (permissions.update) {
       mainPanelItems.push({
         name: <EuiTextColor>{i18n.EDIT_OBSERVABLE}</EuiTextColor>,
         icon: <EuiIcon type="pencil" size="m" />,

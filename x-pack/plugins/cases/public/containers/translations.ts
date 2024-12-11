@@ -72,3 +72,7 @@ export const CATEGORIES_ERROR_TITLE = i18n.translate(
 export const OBSERVABLE_CREATED = i18n.translate('xpack.cases.caseView.observables.created', {
   defaultMessage: 'Observable created',
 });
+
+export const OBSERVABLE_REMOVED = i18n.translate('xpack.cases.caseView.observables.removed', {
+  defaultMessage: 'Observable removed',
+});

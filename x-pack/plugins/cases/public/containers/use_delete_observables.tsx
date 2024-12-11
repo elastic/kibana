@@ -16,6 +16,7 @@ import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_c
 export const useDeleteObservable = (caseId: string, observableId: string) => {
   const { showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const { showSuccessToast } = useCasesToast();
 
   return useMutation(
     () => {
@@ -27,6 +28,7 @@ export const useDeleteObservable = (caseId: string, observableId: string) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
       onSuccess: () => {
+        showSuccessToast(i18n.OBSERVABLE_REMOVED);
         refreshCaseViewPage();
       },
     }
