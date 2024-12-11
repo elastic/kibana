@@ -48,6 +48,7 @@
     "@kbn/inference-common",
     "@kbn/core-lifecycle-server",
     "@kbn/server-route-repository-utils",
+    "@kbn/inference-plugin"
   ],
   "exclude": ["target/**/*"]
 }
