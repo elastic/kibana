@@ -125,7 +125,7 @@ describe('ThemeService', () => {
         setUpMockTheme.theme$ = createTheme$Mock(true);
         themeService.init(setUpMockTheme);
       });
-      expect(renderCounter).toHaveBeenCalledTimes(4);
+      expect(renderCounter).toHaveBeenCalledTimes(2);
     });
   });
 });
