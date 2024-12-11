@@ -91,7 +91,7 @@ function toPagination(params: FindSLOParams): Pagination {
   if (isCursorBased) {
     const size = Number(params.size);
     if (!isNaN(size) && size > MAX_PER_PAGE_OR_SIZE) {
-      throw new IllegalArgumentError('perPage limit set to 5000');
+      throw new IllegalArgumentError('size limit set to 5000');
     }
 
     let parsedSearchAfter;
@@ -110,7 +110,7 @@ function toPagination(params: FindSLOParams): Pagination {
   const page = Number(params.page);
   const perPage = Number(params.perPage);
   if (!isNaN(perPage) && perPage > MAX_PER_PAGE_OR_SIZE) {
-    throw new IllegalArgumentError('size limit set to 5000');
+    throw new IllegalArgumentError('perPage limit set to 5000');
   }
 
   return {
