@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { type FC, useState } from 'react';
+import React, { type FC } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -20,11 +20,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { DarkModeValue as ColorMode } from '@kbn/user-profile-components';
 import { type Value, ValuesGroup } from './values_group';
-// import { useAppearance } from './use_appearance_hook';
-
-type ColorMode = 'system' | 'light' | 'dark' | 'space_default';
-type Contrast = 'system' | 'normal' | 'high';
+import { useAppearance } from './use_appearance_hook';
 
 const systemLabel = i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalSystemLabel', {
   defaultMessage: 'System',
@@ -69,28 +67,6 @@ const colorModeOptions: Array<Value<ColorMode>> = [
   },
 ];
 
-const contrastOptions: Array<Value<Contrast>> = [
-  {
-    id: 'system',
-    label: systemLabel,
-    icon: 'desktop',
-  },
-  {
-    id: 'normal',
-    label: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalNormalLabel', {
-      defaultMessage: 'Normal',
-    }),
-    icon: 'crosshairs',
-  },
-  {
-    id: 'high',
-    label: i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalHighLabel', {
-      defaultMessage: 'High',
-    }),
-    icon: 'crosshairs',
-  },
-];
-
 interface Props {
   closeModal: () => void;
   uiSettingsClient: IUiSettingsClient;
@@ -98,12 +74,10 @@ interface Props {
 
 export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => {
   const modalTitleId = useGeneratedHtmlId();
-  const [colorMode, setColorMode] = useState<ColorMode>('system');
-  const [contrast, setContrast] = useState<Contrast>('system');
 
-  // const { isVisible, toggle, isDarkModeOn, colorScheme } = useAppearance({
-  //   uiSettingsClient,
-  // });
+  const { onChange, colorMode, isLoading } = useAppearance({
+    uiSettingsClient,
+  });
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal} style={{ width: 600 }}>
@@ -122,7 +96,9 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
           })}
           values={colorModeOptions}
           selectedValue={colorMode}
-          onChange={setColorMode}
+          onChange={(id) => {
+            onChange({ colorMode: id }, false);
+          }}
           ariaLabel={i18n.translate(
             'xpack.cloudLinks.userMenuLinks.appearanceModalColorModeAriaLabel',
             {
@@ -130,10 +106,10 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
             }
           )}
         />
-        <EuiSpacer />
 
         {colorMode === 'space_default' && (
           <>
+            <EuiSpacer />
             <EuiCallOut
               title={i18n.translate(
                 'xpack.cloudLinks.userMenuLinks.appearanceModalDeprecatedSpaceDefaultTitle',
@@ -157,25 +133,6 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
             <EuiSpacer />
           </>
         )}
-
-        <ValuesGroup<Contrast>
-          title={i18n.translate(
-            'xpack.cloudLinks.userMenuLinks.appearanceModalInterfaceContrastTitle',
-            {
-              defaultMessage: 'Interface contrast',
-            }
-          )}
-          values={contrastOptions}
-          selectedValue={contrast}
-          onChange={setContrast}
-          ariaLabel={i18n.translate(
-            'xpack.cloudLinks.userMenuLinks.appearanceModalContrastAriaLabel',
-            {
-              defaultMessage: 'Appearance contrast',
-            }
-          )}
-        />
-        <EuiSpacer />
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -186,10 +143,12 @@ export const AppearanceModal: FC<Props> = ({ closeModal, uiSettingsClient }) => 
         </EuiButtonEmpty>
 
         <EuiButton
-          onClick={() => {
-            // console.log('close');
+          onClick={async () => {
+            await onChange({ colorMode }, true);
+            closeModal();
           }}
           fill
+          isLoading={isLoading}
         >
           {i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceModalSaveBtnLabel', {
             defaultMessage: 'Save changes',

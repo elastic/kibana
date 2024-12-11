@@ -8,28 +8,40 @@
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { useUpdateUserProfile } from '@kbn/user-profile-components';
-import useMountedState from 'react-use/lib/useMountedState';
+import {
+  useUpdateUserProfile,
+  type DarkModeValue as ColorMode,
+} from '@kbn/user-profile-components';
+
+const parseDarkModeValue = (rawValue: unknown): ColorMode => {
+  if (rawValue === true || rawValue === 'true' || rawValue === 'enabled') {
+    return 'dark';
+  }
+  if (rawValue === false || rawValue === 'false' || rawValue === 'disabled') {
+    return 'light';
+  }
+  if (rawValue === 'system') {
+    return 'system';
+  }
+  return 'space_default';
+};
 
 interface Deps {
   uiSettingsClient: IUiSettingsClient;
 }
 
 export const useAppearance = ({ uiSettingsClient }: Deps) => {
-  const [isDarkModeOn, setIsDarkModeOn] = useState(false);
-  const isMounted = useMountedState();
-
   // If a value is set in kibana.yml (uiSettings.overrides.theme:darkMode)
   // we don't allow the user to change the theme color.
   const valueSetInKibanaConfig = uiSettingsClient.isOverridden('theme:darkMode');
 
   const { userProfileData, isLoading, update } = useUpdateUserProfile({
     notificationSuccess: {
-      title: i18n.translate('xpack.cloudLinks.userMenuLinks.darkMode.successNotificationTitle', {
-        defaultMessage: 'Color theme updated',
+      title: i18n.translate('xpack.cloudLinks.userMenuLinks.appearance.successNotificationTitle', {
+        defaultMessage: 'Appearance settings updated',
       }),
       pageReloadText: i18n.translate(
-        'xpack.cloudLinks.userMenuLinks.darkMode.successNotificationText',
+        'xpack.cloudLinks.userMenuLinks.appearance.successNotificationText',
         {
           defaultMessage: 'Reload the page to see the changes',
         }
@@ -42,24 +54,34 @@ export const useAppearance = ({ uiSettingsClient }: Deps) => {
 
   const {
     userSettings: {
-      darkMode: colorScheme = uiSettingsClient.get('theme:darkMode') === true ? 'dark' : 'light',
+      darkMode: colorModeUserProfile = parseDarkModeValue(uiSettingsClient.get('theme:darkMode')),
     } = {},
   } = userProfileData ?? {
     userSettings: {},
   };
 
-  const toggle = useCallback(
-    (on: boolean) => {
+  const [colorMode, setColorMode] = useState<ColorMode>(colorModeUserProfile);
+
+  const onChange = useCallback(
+    ({ colorMode: updatedColorMode }: { colorMode?: ColorMode }, persist: boolean) => {
       if (isLoading) {
         return;
       }
 
       // optimistic update
-      setIsDarkModeOn(on);
+      if (updatedColorMode) {
+        setColorMode(updatedColorMode);
+      }
 
-      update({
+      // TODO: here we will update the contrast when available
+
+      if (!persist) {
+        return;
+      }
+
+      return update({
         userSettings: {
-          darkMode: on ? 'dark' : 'light',
+          darkMode: updatedColorMode,
         },
       });
     },
@@ -67,14 +89,14 @@ export const useAppearance = ({ uiSettingsClient }: Deps) => {
   );
 
   useEffect(() => {
-    if (!isMounted()) return;
-    setIsDarkModeOn(colorScheme === 'dark');
-  }, [isMounted, colorScheme]);
+    setColorMode(colorModeUserProfile);
+  }, [colorModeUserProfile]);
 
   return {
     isVisible: valueSetInKibanaConfig ? false : Boolean(userProfileData),
-    toggle,
-    isDarkModeOn,
-    colorScheme,
+    setColorMode,
+    colorMode,
+    onChange,
+    isLoading,
   };
 };
