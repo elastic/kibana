@@ -137,7 +137,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     isRefetching,
   } = usePrebuiltRulesUpgradeReview({
-    // Refetch review prebuilt rules upgrade data in case of
+    // Refetch review prebuilt rules upgrade data to detect possible cases of:
     // - editing prebuilt rules (revision change)
     // - releasing a new prebuilt rules package (version change)
     refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
