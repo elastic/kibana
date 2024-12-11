@@ -13,7 +13,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 
 import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 
+import { EndpointMetadataService } from '../metadata';
 import {
   COMPONENT_TEMPLATE_NAME,
   DATA_STREAM_PREFIX,
@@ -110,4 +112,21 @@ export function buildEsQueryParams(searchParams: SearchParams): QueryDslQueryCon
     const next = { terms: { [paramKey]: v } };
     return [...acc, next];
   }, []);
+}
+
+export async function groupEndpointIdsByOS(
+  endpointIds: string[],
+  endpointMetadataService: EndpointMetadataService
+): Promise<Record<SupportedHostOsType, string[]>> {
+  const metadata = await endpointMetadataService.getMetadataForEndpoints(endpointIds);
+  return metadata.reduce<Record<string, string[]>>((acc, m) => {
+    const os = m.host.os.name.toLowerCase() as SupportedHostOsType;
+    if (!acc[os]) {
+      acc[os] = [];
+    }
+
+    acc[os].push(m.agent.id);
+
+    return acc;
+  }, {});
 }

@@ -12,17 +12,20 @@ import type {
   UpdateResponse,
   WriteResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
 
 import type {
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
 import { buildEsQueryParams, createDatastream, createPipeline } from './helpers';
 import { DATA_STREAM_NAME } from './constants';
+import { buildWorkflowInsights } from './builders';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -30,6 +33,7 @@ interface SetupInterface {
   kibanaVersion: string;
   logger: Logger;
   isFeatureEnabled: boolean;
+  endpointContext: EndpointAppContextService;
 }
 
 interface StartInterface {
@@ -42,6 +46,7 @@ class SecurityWorkflowInsightsService {
   private stop$ = new ReplaySubject<void>(1);
   private ds: DataStreamSpacesAdapter | undefined;
   private _esClient: ElasticsearchClient | undefined;
+  private _endpointContext: EndpointAppContextService | undefined;
   private _logger: Logger | undefined;
   private _isInitialized: Promise<[void, void]> = firstValueFrom(
     combineLatest<[void, void]>([this.setup$, this.start$])
@@ -52,13 +57,14 @@ class SecurityWorkflowInsightsService {
     return this._isInitialized;
   }
 
-  public setup({ kibanaVersion, logger, isFeatureEnabled }: SetupInterface) {
+  public setup({ kibanaVersion, logger, isFeatureEnabled, endpointContext }: SetupInterface) {
     this.isFeatureEnabled = isFeatureEnabled;
     if (!isFeatureEnabled) {
       return;
     }
 
     this._logger = logger;
+    this._endpointContext = endpointContext;
 
     try {
       this.ds = createDatastream(kibanaVersion);
@@ -110,6 +116,18 @@ class SecurityWorkflowInsightsService {
     this.start$.complete();
     this.stop$.next();
     this.stop$.complete();
+  }
+
+  public async createFromDefendInsights(
+    defendInsights: DefendInsight[],
+    request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
+  ): Promise<WriteResponseBase[]> {
+    const workflowInsights = await buildWorkflowInsights({
+      defendInsights,
+      request,
+      endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
+    });
+    return Promise.all(workflowInsights.map((insight) => this.create(insight)));
   }
 
   public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase> {
@@ -188,6 +206,14 @@ class SecurityWorkflowInsightsService {
     }
 
     return this._logger;
+  }
+
+  private get endpointContext(): EndpointAppContextService {
+    if (!this._endpointContext) {
+      throw new SecurityWorkflowInsightsFailedInitialized('no endpoint context found');
+    }
+
+    return this._endpointContext;
   }
 }
 
