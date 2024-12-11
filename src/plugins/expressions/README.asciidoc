@@ -52,4 +52,4 @@ https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressio
 
 
 ==== Other documentation
-https://www.elastic.co/guide/en/kibana/current/canvas-function-arguments.html[See Canvas documentation about expressions]
+<<canvas-function-arguments,See Canvas documentation about expressions>>
