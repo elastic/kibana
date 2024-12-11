@@ -97,10 +97,11 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const formatName = (name: string) => {
       if (name === 'result') return 'result.evaluation';
-      else return 'rule.name';
+      if (name === 'rule') return 'rule.name';
+      else return '';
     };
 
-    const [sortField, setSortField] = useState<string>(formatName('result'));
+    const [sortField, setSortField] = useState<'result' | 'rule' | 'resource'>('result');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const obj: { [key: string]: string } = {};

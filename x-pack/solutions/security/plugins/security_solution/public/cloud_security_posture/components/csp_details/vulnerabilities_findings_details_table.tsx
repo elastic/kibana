@@ -35,10 +35,10 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
-type VulnerabilitiesFindingDetailFields = Pick<
-  CspVulnerabilityFinding,
-  'vulnerability' | 'resource'
->;
+// type VulnerabilitiesFindingDetailFields = Pick<
+//   CspVulnerabilityFinding,
+//   'vulnerability' | 'resource'
+// >;
 
 interface VulnerabilitiesPackage extends Vulnerability {
   package: {
@@ -46,6 +46,10 @@ interface VulnerabilitiesPackage extends Vulnerability {
     version: string;
   };
 }
+
+type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'id' | 'severity' | 'score'> &
+  Pick<VulnerabilitiesPackage, 'package'> &
+  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>;
 
 export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: string }) => {
   useEffect(() => {
@@ -58,12 +62,20 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   const [currentFilter, setCurrentFilter] = useState<string>('');
 
   const formatName = (name: string) => {
-    if (name === 'result') return 'result.evaluation';
-    else return 'rule.name';
+    if (name === 'id') return 'vulnerability.id';
+    if (name === 'severity') return 'vulnerability.severity';
+    if (name === 'score') return 'vulnerability.score.base';
+    if (name === 'package') return 'vulnerability.package.name';
+    else return '';
   };
 
-  const [sortField, setSortField] = useState<string>('Alpha');
+  const [sortField, setSortField] = useState<
+    'id' | 'score' | 'severity' | 'package' | 'vulnerability' | 'resource'
+  >('id');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const obj: { [key: string]: string } = {};
+  obj[formatName(sortField)] = sortDirection;
 
   const sorting: EuiTableSortingType<VulnerabilitiesFindingDetailFields> = {
     sort: {
@@ -74,12 +86,11 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
 
   const { data } = useVulnerabilitiesFindings({
     query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
-    sort: [],
+    sort: [obj],
     enabled: true,
     pageSize: 1,
   });
-console.log(sortField)
-console.log(sortDirection)
+
   const { counts } = useHasVulnerabilities('host.name', value);
 
   const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
@@ -185,8 +196,8 @@ console.log(sortDirection)
       ),
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: Vulnerability) => <EuiText size="s">{vulnerability?.id}</EuiText>,
+      field: 'id',
+      render: (id: string) => <EuiText size="s">{id}</EuiText>,
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.resultColumnName',
         { defaultMessage: 'Vulnerability' }
@@ -195,13 +206,10 @@ console.log(sortDirection)
       sortable: true,
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: Vulnerability) => (
+      field: 'score',
+      render: (score: { version?: string; base?: number }) => (
         <EuiText size="s">
-          <CVSScoreBadge
-            version={vulnerability?.score?.version}
-            score={vulnerability?.score?.base}
-          />
+          <CVSScoreBadge version={score?.version} score={score?.base} />
         </EuiText>
       ),
       name: i18n.translate(
@@ -212,13 +220,11 @@ console.log(sortDirection)
       sortable: true,
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: Vulnerability) => (
+      field: 'severity',
+      render: (severity: string) => (
         <>
           <EuiText size="s">
-            <SeverityStatusBadge
-              severity={vulnerability?.severity?.toUpperCase() as VulnSeverity}
-            />
+            <SeverityStatusBadge severity={severity?.toUpperCase() as VulnSeverity} />
           </EuiText>
         </>
       ),
@@ -230,9 +236,9 @@ console.log(sortDirection)
       sortable: true,
     },
     {
-      field: 'vulnerability',
-      render: (vulnerability: VulnerabilitiesPackage) => (
-        <EuiText size="s">{vulnerability?.package?.name}</EuiText>
+      field: 'package',
+      render: (packages: { version?: string; name?: string; fixed_version?: string }) => (
+        <EuiText size="s">{packages?.name}</EuiText>
       ),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
@@ -242,7 +248,7 @@ console.log(sortDirection)
       sortable: true,
     },
   ];
-console.log(pageOfItems)
+
   return (
     <>
       <EuiPanel hasShadow={false}>

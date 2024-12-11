@@ -75,14 +75,9 @@ export const getMisconfigurationAggregationCount = (
 export const buildMisconfigurationsFindingsQuery = (
   { query, sort }: UseCspOptions,
   rulesStates: CspBenchmarkRulesStates,
-  isPreview = false,
+  isPreview = false
 ) => {
   const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
-  // const obj: { [key: string]: string } = {};
-  // obj[sortField] = sortDirection;
-console.log(buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery))
-console.log('hhell')
-console.log(sort)
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: isPreview ? 0 : 500,
@@ -90,7 +85,6 @@ console.log(sort)
     ignore_unavailable: true,
     query: buildMisconfigurationsFindingsQueryWithFilters(query, mutedRulesFilterQuery),
     _source: MISCONFIGURATIONS_SOURCE_FIELDS,
-    // sort: [{ 'rule.name': 'asc' }],
     sort,
   };
 };
@@ -169,12 +163,13 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
   },
 });
 
-export const getVulnerabilitiesQuery = ({ query }: UseCspOptions, isPreview = false) => ({
+export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPreview = false) => ({
   index: CDR_VULNERABILITIES_INDEX_PATTERN,
   size: isPreview ? 0 : 500,
   aggs: getFindingsCountAggQueryVulnerabilities(),
   ignore_unavailable: true,
   query: buildVulnerabilityFindingsQueryWithFilters(query),
+  sort,
 });
 
 const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {

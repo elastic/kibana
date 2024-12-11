@@ -76,7 +76,7 @@ export const AlertsDetailsTable = memo(
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
 
-    const [sortField, setSortField] = useState<ContextualFlyoutAlertsField>('ruleName');
+    const [sortField, setSortField] = useState<'ruleName' | 'severity' | 'status'>('ruleName');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const formatName = (name: string) => {
