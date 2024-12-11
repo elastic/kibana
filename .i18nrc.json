@@ -90,9 +90,10 @@
     "lists": "packages/kbn-securitysolution-list-utils/src",
     "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
     "management": [
-      "src/legacy/core_platform/plugins/shared/management",
       "src/platform/plugins/shared/management",
-      "packages/kbn-management"
+      "packages/kbn-management",
+      "src/platform/packages/shared/kbn-management",
+      "src/platform/packages/private/kbn-management"
     ],
     "monaco": "packages/kbn-monaco/src",
     "navigation": ["src/plugins/navigation", "packages/solution-nav"],
