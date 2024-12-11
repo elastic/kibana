@@ -22,7 +22,7 @@ export const useDeleteObservable = (caseId: string, observableId: string) => {
       return deleteObservable(caseId, observableId);
     },
     {
-      mutationKey: casesMutationsKeys.deleteObservables,
+      mutationKey: casesMutationsKeys.deleteObservable,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },

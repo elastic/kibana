@@ -23,7 +23,7 @@ export const usePatchObservable = (caseId: string, observableId: string) => {
       return patchObservable(request, caseId, observableId);
     },
     {
-      mutationKey: casesMutationsKeys.patchObservables,
+      mutationKey: casesMutationsKeys.patchObservable,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },

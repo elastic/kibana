@@ -24,7 +24,7 @@ export const usePostObservable = (caseId: string) => {
       return postObservable(request, caseId);
     },
     {
-      mutationKey: casesMutationsKeys.postObservables,
+      mutationKey: casesMutationsKeys.postObservable,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
