@@ -4,7 +4,7 @@
   "owner": [
     "@elastic/logstash"
   ],
-  "group": "observability",
+  "group": "platform",
   "visibility": "private",
   "plugin": {
     "id": "logstash",
