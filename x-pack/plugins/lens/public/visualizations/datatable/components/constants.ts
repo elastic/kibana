@@ -13,5 +13,5 @@ export const LENS_TOGGLE_ACTION = 'toggle';
 export const LENS_EDIT_PAGESIZE_ACTION = 'pagesize';
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
 export const DEFAULT_HEADER_ROW_HEIGHT = RowHeightMode.custom;
-export const DEFAULT_ROW_HEIGHT = RowHeightMode.single;
+export const DEFAULT_ROW_HEIGHT = RowHeightMode.custom;
 export const DEFAULT_ROW_HEIGHT_LINES = 2;
