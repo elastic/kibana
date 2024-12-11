@@ -20,7 +20,7 @@ import * as i18n from '../translations';
  * Cache expiration in ms -- 1 minute, useful if connector is deleted/access removed
  */
 // const STALE_TIME = 1000 * 60;
-const QUERY_KEY = ['elastic-assistant, load-connectors'];
+export const QUERY_KEY = ['elastic-assistant, load-connectors'];
 
 export interface Props {
   http: HttpSetup;
@@ -41,6 +41,7 @@ export const useLoadConnectors = ({
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
+      console.error('ERROR', queryResult);
       return queryResult.reduce(
         (acc: AIConnector[], connector) => [
           ...acc,

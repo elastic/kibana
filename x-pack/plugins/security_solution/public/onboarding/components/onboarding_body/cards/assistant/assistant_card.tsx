@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { OnboardingCardId } from '../../../../constants';
@@ -42,7 +42,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const connectors = checkCompleteMetadata?.connectors;
   const canExecuteConnectors = checkCompleteMetadata?.canExecuteConnectors;
   const canCreateConnectors = checkCompleteMetadata?.canCreateConnectors;
+  const [selectedConnectorId, setSelectedConnectorId] = useState(
+    connectors && connectors?.length > 0 ? connectors[0].id : undefined
+  );
 
+  console.log({ connectors });
   return (
     <OnboardingCardContentPanel>
       {canExecuteConnectors ? (
@@ -78,6 +82,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
                 canCreateConnectors={canCreateConnectors}
                 connectors={connectors}
                 onConnectorSaved={checkComplete}
+                selectedConnectorId={selectedConnectorId}
+                setSelectedConnectorId={setSelectedConnectorId}
               />
             )}
           </EuiFlexItem>

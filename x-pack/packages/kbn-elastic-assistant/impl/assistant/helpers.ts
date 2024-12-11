@@ -6,6 +6,7 @@
  */
 
 import { isEmpty, some } from 'lodash';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
@@ -67,6 +68,17 @@ export const getDefaultConnector = (
 
   return undefined;
 };
+
+/**
+ * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.
+ */
+export const useDefinedLocalStorage = <T = undefined>(key: string, defaultValue: T) => {
+  const [value, setValue] = useLocalStorage<T>(key, defaultValue);
+  return [value ?? defaultValue, setValue] as const;
+};
+
+export const useSelectedConnector = (selectedConnector: string) =>
+  useDefinedLocalStorage<string | null>('connectorAssistant', null);
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;

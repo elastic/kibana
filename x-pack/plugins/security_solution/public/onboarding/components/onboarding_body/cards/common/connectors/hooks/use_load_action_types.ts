@@ -12,6 +12,9 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { AIActionTypeIds } from '../constants';
 
 export const useFilteredActionTypes = (http: HttpSetup, toasts: IToasts) => {
-  const { data } = loadActionTypes({ http, toasts });
-  return useMemo(() => data?.filter(({ id }) => AIActionTypeIds.includes(id)), [data]);
+  const { data, refetch: refetchActionTypes } = loadActionTypes({ http, toasts });
+  return {
+    actionTypes: useMemo(() => data?.filter(({ id }) => AIActionTypeIds.includes(id)), [data]),
+    refetchActionTypes,
+  };
 };

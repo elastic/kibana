@@ -26,6 +26,7 @@ import {
   getActionTypeTitle,
 } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import * as i18n from './translations';
+import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -49,6 +50,7 @@ export interface ConnectorSelectorProps {
   refetchConnectors?: () => void;
   actionTypes: ActionType[];
   postSaveConnectorEventHandler?: (savedAction: ActionConnector) => void;
+  http: any;
 }
 
 export type AIConnector = ActionConnector & {
@@ -65,16 +67,20 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     onConnectorSelectionChange,
     setIsOpen,
     stats = null,
-    aiConnectors,
-    refetchConnectors,
+    // aiConnectors,
+    // refetchConnectors,
     actionTypeRegistry,
     actionTypes,
     postSaveConnectorEventHandler,
+    http,
   }) => {
     // Connector Modal State
+    // const { http } = useKibana().services;
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
 
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
+
+    const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({ http });
 
     const hasConnectorsAllPrivilege = true;
 

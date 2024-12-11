@@ -153,6 +153,7 @@ export const ConnectorSelectorAIAssistant = React.memo<Props>(
 
         <EuiFlexItem grow={false}>
           <ConnectorSelector
+            http={http}
             displayFancy={(displayText) => (
               <EuiText className={inputDisplayClassName} size="s" color={euiTheme.colors.primary}>
                 {displayText}
