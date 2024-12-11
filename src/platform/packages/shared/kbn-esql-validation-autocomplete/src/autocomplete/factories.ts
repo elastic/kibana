@@ -624,7 +624,10 @@ export function getControlSuggestion(
       detail: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
         {
-          defaultMessage: 'Click to create',
+          defaultMessage: 'Click to create a {type} control',
+          values: {
+            type,
+          },
         }
       ),
       sortText: '1A',
