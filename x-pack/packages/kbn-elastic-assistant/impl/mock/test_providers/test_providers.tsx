@@ -13,14 +13,14 @@ import React from 'react';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ChromeNavControls, UserProfileService } from '@kbn/core/public';
+import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { of } from 'rxjs';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
-  navControls?: ChromeNavControls;
   children: React.ReactNode;
   providerContext?: Partial<AssistantProviderProps>;
 }
@@ -40,7 +40,6 @@ export const mockAssistantAvailability: AssistantAvailability = {
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
-  navControls = chromeServiceMock.createStartContract().navControls,
   children,
   providerContext,
 }) => {
@@ -66,6 +65,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
       error: () => {},
     },
   });
+  const chrome = chromeServiceMock.createStartContract()
+  chrome.getChromeStyle$.mockReturnValue(of("classic"))
 
   return (
     <I18nProvider>
@@ -87,7 +88,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             {...providerContext}
             currentAppId={'test'}
             userProfileService={jest.fn() as unknown as UserProfileService}
-            navControls={navControls}
+            chrome={chrome}
           >
             {children}
           </AssistantProvider>

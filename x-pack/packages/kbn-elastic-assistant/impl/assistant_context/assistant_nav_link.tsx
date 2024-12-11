@@ -9,20 +9,12 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
-import { ChromeNavControls } from '@kbn/core/public';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { EMPTY } from 'rxjs';
-import { UseAssistantContext } from '.';
+import { useAssistantContext } from '.';
 import { AssistantAvatar } from '../..';
 
-interface Props {
-  hasAssistantPrivilege: UseAssistantContext['assistantAvailability']['hasAssistantPrivilege'];
-  navControls: ChromeNavControls;
-  showAssistantOverlay: UseAssistantContext['showAssistantOverlay'];
-}
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -37,14 +29,11 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
   defaultMessage: 'AI Assistant',
 });
 
-export const AssistantNavLink: FC<Props> = ({
-  showAssistantOverlay,
-  hasAssistantPrivilege,
-  navControls,
+export const AssistantNavLink: FC = ({
 }) => {
+  const { chrome: { getChromeStyle$, navControls }, showAssistantOverlay, assistantAvailability: { hasAssistantPrivilege } } = useAssistantContext()
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
-  const { chrome } = useKibana().services;
-  const chromeStyle$ = useMemo(() => chrome?.getChromeStyle$() ?? EMPTY, [chrome]);
+  const chromeStyle$ = useMemo(() => getChromeStyle$(), [getChromeStyle$]);
   const chromeStyle = useObservable(chromeStyle$, undefined);
 
   useEffect(() => {

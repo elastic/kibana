@@ -20,6 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BASE_SECURITY_CONVERSATIONS } from '../../../../assistant/content/conversations';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { chromeServiceMock } from '@kbn/core/public/mocks';
+import { of } from 'rxjs';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -48,33 +49,37 @@ const queryClient = new QueryClient({
   logger: {
     log: jest.fn(),
     warn: jest.fn(),
-    error: () => {},
+    error: () => { },
   },
 });
 
-const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
-  <QueryClientProvider client={queryClient}>
-    <AssistantProvider
-      actionTypeRegistry={actionTypeRegistry}
-      assistantAvailability={mockAssistantAvailability}
-      augmentMessageCodeBlocks={jest.fn()}
-      basePath={'https://localhost:5601/kbn'}
-      docLinks={{
-        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-        DOC_LINK_VERSION: 'current',
-      }}
-      getComments={mockGetComments}
-      http={mockHttp}
-      navigateToApp={mockNavigationToApp}
-      baseConversations={BASE_SECURITY_CONVERSATIONS}
-      currentAppId={'security'}
-      userProfileService={jest.fn() as unknown as UserProfileService}
-      navControls={chromeServiceMock.createStartContract().navControls}
-    >
-      {children}
-    </AssistantProvider>
-  </QueryClientProvider>
-);
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const chrome = chromeServiceMock.createStartContract()
+  chrome.getChromeStyle$.mockReturnValue(of("classic"))
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AssistantProvider
+        actionTypeRegistry={actionTypeRegistry}
+        assistantAvailability={mockAssistantAvailability}
+        augmentMessageCodeBlocks={jest.fn()}
+        basePath={'https://localhost:5601/kbn'}
+        docLinks={{
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'current',
+        }}
+        getComments={mockGetComments}
+        http={mockHttp}
+        navigateToApp={mockNavigationToApp}
+        baseConversations={BASE_SECURITY_CONVERSATIONS}
+        currentAppId={'security'}
+        userProfileService={jest.fn() as unknown as UserProfileService}
+        chrome={chrome}
+      >
+        {children}
+      </AssistantProvider>
+    </QueryClientProvider>
+  )
+};
 
 describe('RuleStatusFailedCallOut', () => {
   const renderWith = (status: RuleExecutionStatus | null | undefined) =>
