@@ -87,7 +87,7 @@ export class ProfilingPlugin
                   return {
                     app: OBLT_PROFILING_APP_ID,
                     label: link.title,
-                    path: `${link.path}?kuery=${kuery ?? ''}`,
+                    path: kuery ? `${link.path}?kuery=${kuery}` : link.path,
                     matchPath: (path) => {
                       return path.startsWith(link.path);
                     },
@@ -102,7 +102,7 @@ export class ProfilingPlugin
             appUpdater$.next(() => ({
               deepLinks: links.map((link) => ({
                 ...link,
-                path: `${link.path}?kuery=${encodeURIComponent(kuery) ?? ''}`,
+                path: kuery ? `${link.path}?kuery=${encodeURIComponent(kuery)}` : link.path,
               })),
             }));
           }
