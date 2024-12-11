@@ -16,6 +16,9 @@ import { Expressions } from './expression';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { ResolvedDataView } from '../../../utils/data_view';
+import { dataViewPluginMocks as mockDataViewPlugin } from '@kbn/data-views-plugin/public/mocks';
+import { indexPatternEditorPluginMock as mockDataViewEditorPlugin } from '@kbn/data-view-editor-plugin/public/mocks';
+import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 
 const mockDataView = {
   id: 'mock-id',
@@ -45,7 +48,16 @@ jest.mock('../../../containers/metrics_source', () => ({
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
-    services: mockCoreMock.createStart(),
+    services: {
+      ...mockCoreMock.createStart(),
+      data: mockDataPlugin.createStartContract(),
+      dataViews: {
+        ...mockDataViewPlugin.createStartContract(),
+        getIds: jest.fn().mockImplementation(() => ['test-data-view-id']),
+        get: jest.fn().mockReturnValue(Promise.resolve({ isPersisted: jest.fn() })),
+      },
+      dataViewEditor: mockDataViewEditorPlugin.createStartContract(),
+    },
   }),
 }));
 
