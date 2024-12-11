@@ -82,8 +82,8 @@ describe('transformCreateRuleBody', () => {
       name: 'test',
       enabled: true,
       throttle: null,
-      rule_type_id: '.index-threshold',
       notifyWhen: 'onActionGroupChange',
+      rule_type_id: '.index-threshold',
       actions: [
         {
           group: 'threshold met',

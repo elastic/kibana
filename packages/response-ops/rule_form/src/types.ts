@@ -46,7 +46,6 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   actions: RuleUiAction[];
   alertDelay?: Rule<Params>['alertDelay'];
   notifyWhen?: Rule<Params>['notifyWhen'];
-  throttle?: Rule<Params>['throttle'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
   flapping?: Rule<Params>['flapping'];
 }
