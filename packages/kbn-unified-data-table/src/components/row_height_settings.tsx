@@ -44,7 +44,9 @@ export function RowHeightSettings({
   ['data-test-subj']: dataTestSubj,
 }: RowHeightSettingsProps) {
   const prevRowHeightRef = useRef<RowHeightMode | undefined>();
-  const [lineCountInput, setLineCountInput] = useState(rowHeightLines || 2);
+  // if rowHeightLines is -1 (auto mode) we can't populate input with -1
+  const initialRowHeightLines = rowHeightLines && rowHeightLines > 0 ? rowHeightLines : 3;
+  const [lineCountInput, setLineCountInput] = useState(initialRowHeightLines);
 
   const rowHeightModeOptions = [
     {
@@ -68,8 +70,9 @@ export function RowHeightSettings({
     if (prevRowHeightRef.current === RowHeightMode.auto && rowHeight === RowHeightMode.custom) {
       onChangeRowHeightLines(lineCountInput);
     }
+
     prevRowHeightRef.current = rowHeight;
-  }, [rowHeight, onChangeRowHeightLines, lineCountInput]);
+  }, [rowHeight, onChangeRowHeightLines, lineCountInput, initialRowHeightLines]);
 
   return (
     <>
