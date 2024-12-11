@@ -871,6 +871,7 @@ x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
+x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
@@ -925,7 +926,6 @@ x-pack/plugins/license_api_guard @elastic/kibana-management
 x-pack/plugins/license_management @elastic/kibana-management
 x-pack/plugins/licensing @elastic/kibana-core
 x-pack/plugins/lists @elastic/security-detection-engine
-x-pack/plugins/logstash @elastic/logstash
 x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/plugins/monitoring @elastic/stack-monitoring
 x-pack/plugins/monitoring_collection @elastic/stack-monitoring
