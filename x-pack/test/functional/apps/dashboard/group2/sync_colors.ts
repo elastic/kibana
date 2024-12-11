@@ -52,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // create non-filtered xy chart
       await dashboardAddPanel.clickCreateNewLink();
+      await dashboard.selectIndexPattern('log*');
       await lens.goToTimeRange();
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
