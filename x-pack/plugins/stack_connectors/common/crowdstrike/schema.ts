@@ -346,5 +346,7 @@ export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+export type CrowdStrikeExecuteRTRResponse = typeof CrowdstrikeExecuteRTRResponseSchema;
+
 // TODO: will be part of a next PR
 export const CrowdstrikeGetScriptsParamsSchema = schema.any({});

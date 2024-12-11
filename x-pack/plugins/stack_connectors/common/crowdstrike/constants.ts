@@ -16,5 +16,5 @@ export enum SUB_ACTION {
   EXECUTE_RTR_COMMAND = 'executeRTRCommand',
   EXECUTE_ACTIVE_RESPONDER_RTR = 'batchActiveResponderExecuteRTR',
   EXECUTE_ADMIN_RTR = 'batchAdminExecuteRTR',
-  GET_SCRIPTS = 'getScripts',
+  GET_RTR_CLOUD_SCRIPTS = 'getRTRCloudScripts',
 }
