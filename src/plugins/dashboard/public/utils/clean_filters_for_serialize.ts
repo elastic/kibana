@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line import/no-default-export
-export { defaultConfig as default } from '@kbn/storybook';
+import { Filter } from '@kbn/es-query';
+
+export function cleanFiltersForSerialize(filters?: Filter[]): Filter[] {
+  if (!filters) return [];
+  return filters.map((filter) => {
+    if (filter.meta?.value) delete filter.meta.value;
+    return filter;
+  });
+}

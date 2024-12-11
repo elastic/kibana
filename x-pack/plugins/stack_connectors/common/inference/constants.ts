@@ -38,6 +38,7 @@ export enum SUB_ACTION {
   TEXT_EMBEDDING = 'text_embedding',
   SPARSE_EMBEDDING = 'sparse_embedding',
   COMPLETION_STREAM = 'completion_stream',
+  COMPLETION_ASYNC_ITERATOR = 'completion_async_iterator',
 }
 
 export const DEFAULT_PROVIDER = 'openai';

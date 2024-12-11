@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { addons } from '@storybook/addons';
-import { create } from '@storybook/theming';
-import { PANEL_ID } from '@storybook/addon-actions';
+import * as z from '@kbn/zod';
 
-addons.setConfig({
-  theme: create({
-    base: 'light',
-    brandTitle: 'Kibana Embeddable Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/embeddable',
-  }),
-  showPanel: true.valueOf,
-  selectedPanel: PANEL_ID,
-});
+export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
+  if (input.trim() === '') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'No empty strings allowed',
+    });
+  }
+}

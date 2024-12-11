@@ -6,17 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { startCase } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { DocumentSeverity } from './severity';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { getField } from '../../shared/utils';
-import { EVENT_CATEGORY_TO_FIELD } from '../utils/event_utils';
+import { getField, getEventTitle } from '../../shared/utils';
 
 /**
  * Event details flyout right section header
@@ -28,31 +25,10 @@ export const EventHeaderTitle = memo(() => {
   const eventKind = getField(getFieldsData('event.kind'));
   const eventCategory = getField(getFieldsData('event.category'));
 
-  const title = useMemo(() => {
-    const defaultTitle = i18n.translate('xpack.securitySolution.flyout.right.title.eventTitle', {
-      defaultMessage: `Event details`,
-    });
-
-    if (eventKind === 'event' && eventCategory) {
-      const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
-      return getField(getFieldsData(fieldName)) ?? defaultTitle;
-    }
-
-    if (eventKind === 'alert') {
-      return i18n.translate('xpack.securitySolution.flyout.right.title.alertEventTitle', {
-        defaultMessage: 'External alert details',
-      });
-    }
-
-    return eventKind
-      ? i18n.translate('xpack.securitySolution.flyout.right.title.otherEventTitle', {
-          defaultMessage: '{eventKind} details',
-          values: {
-            eventKind: startCase(eventKind),
-          },
-        })
-      : defaultTitle;
-  }, [eventKind, getFieldsData, eventCategory]);
+  const title = useMemo(
+    () => getEventTitle({ eventKind, eventCategory, getFieldsData }),
+    [eventKind, eventCategory, getFieldsData]
+  );
 
   return (
     <>
