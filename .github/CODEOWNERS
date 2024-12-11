@@ -800,6 +800,8 @@ x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-tea
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
+x-pack/packages/observability/observability_ai/observability_ai_common @elastic/obs-ai-assistant
+x-pack/packages/observability/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
@@ -986,8 +988,6 @@ x-pack/plugins/snapshot_restore @elastic/kibana-management
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
-x-pack/plugins/streams @elastic/streams-program-team
-x-pack/plugins/streams_app @elastic/streams-program-team
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -997,6 +997,8 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
+x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
+x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops

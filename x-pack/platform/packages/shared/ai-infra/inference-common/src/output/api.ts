@@ -100,6 +100,16 @@ export interface OutputOptions<
    * Optional signal that can be used to forcefully cancel the request.
    */
   abortSignal?: AbortSignal;
+  /**
+   * Optional configuration for retrying the call if an error occurs.
+   */
+  retry?: {
+    /**
+     * Whether to retry on validation errors. Can be a number or retries,
+     * or a boolean, which means one retry.
+     */
+    onValidationError?: boolean | number;
+  };
 }
 
 /**
