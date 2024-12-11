@@ -154,7 +154,7 @@
       "solutions/observability/plugins/streams_app"
     ],
     "xpack.slo": "plugins/observability_solution/slo",
-    "xpack.snapshotRestore": "plugins/snapshot_restore",
+    "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": [
       "plugins/saved_objects_tagging"
