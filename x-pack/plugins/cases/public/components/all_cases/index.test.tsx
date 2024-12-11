@@ -92,7 +92,7 @@ describe('AllCases', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/162852
-  describe.skip('empty table', () => {
+  describe('empty table', () => {
     beforeEach(() => {
       useGetCasesMock.mockReturnValue({
         ...defaultGetCases,
