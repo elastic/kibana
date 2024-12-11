@@ -15,6 +15,7 @@ export const initGetLogViewRoute = ({
   config,
   framework,
   getStartServices,
+  isServerless,
 }: LogsSharedBackendLibs) => {
   framework
     .registerVersionedRoute({
@@ -53,7 +54,7 @@ export const initGetLogViewRoute = ({
            * - if the log view saved object is correctly registered, perform a lookup for retrieving it
            * - else, skip the saved object lookup and immediately get the internal log view if exists.
            */
-          const logView = config.savedObjects.logView.enabled
+          const logView = !isServerless
             ? await logViewsClient.getLogView(logViewId)
             : await logViewsClient.getInternalLogView(logViewId);
 

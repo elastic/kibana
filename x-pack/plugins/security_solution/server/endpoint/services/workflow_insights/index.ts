@@ -114,6 +114,7 @@ class SecurityWorkflowInsightsService {
     const response = await this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
       body: insight,
+      refresh: 'wait_for',
     });
 
     return response;
@@ -121,14 +122,26 @@ class SecurityWorkflowInsightsService {
 
   public async update(
     id: string,
-    insight: Partial<SecurityWorkflowInsight>
+    insight: Partial<SecurityWorkflowInsight>,
+    backingIndex?: string
   ): Promise<UpdateResponse> {
     await this.isInitialized;
 
+    let index = backingIndex;
+    if (!index) {
+      const retrievedInsight = (await this.fetch({ ids: [id] }))[0];
+      index = retrievedInsight?._index;
+    }
+
+    if (!index) {
+      throw new Error('invalid backing index for updating workflow insight');
+    }
+
     const response = await this.esClient.update<SecurityWorkflowInsight>({
-      index: DATA_STREAM_NAME,
+      index,
       id,
       body: { doc: insight },
+      refresh: 'wait_for',
     });
 
     return response;

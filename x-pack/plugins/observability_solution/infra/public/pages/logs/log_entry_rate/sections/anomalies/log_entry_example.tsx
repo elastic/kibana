@@ -10,7 +10,7 @@ import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
 import {
   LogEntryColumn,
@@ -333,7 +333,7 @@ export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
   );
 };
 
-const LogEntryExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
+const LogEntryExampleMessageHeadersWrapper = styled(LogColumnHeadersWrapper)`
   border-bottom: none;
   box-shadow: none;
   padding-right: 0;
