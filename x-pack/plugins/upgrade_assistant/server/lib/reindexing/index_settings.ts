@@ -43,8 +43,8 @@ export const transformFlatSettings = (flatSettings: FlatSettings) => {
  * introduced by the upgrade assistant
  *
  * Examples:
- *   .reindex-v7-foo => .foo
- *   reindex-v7-foo => foo
+ *   .reindex-v8-foo => .foo
+ *   reindex-v8-foo => foo
  *
  * @param indexName
  */
@@ -63,8 +63,8 @@ export const sourceNameForIndex = (indexName: string): string => {
 /**
  * Provides the index name to re-index into
  *
- * .foo -> .reindexed-v7-foo
- * foo => reindexed-v7-foo
+ * .foo -> .reindexed-v8-foo
+ * foo => reindexed-v8-foo
  */
 export const generateNewIndexName = (indexName: string): string => {
   const sourceName = sourceNameForIndex(indexName);
@@ -136,7 +136,7 @@ export const getReindexWarnings = (
 ): ReindexWarning[] => {
   const warnings = [] as ReindexWarning[];
 
-  if (versionService.getMajorVersion() === 7) {
+  if (versionService.getMajorVersion() === 8) {
     const customTypeWarning = getCustomTypeWarning(flatSettings);
     const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);
 
