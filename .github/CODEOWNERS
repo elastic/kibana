@@ -627,7 +627,7 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-man
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
+src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
@@ -3050,7 +3050,7 @@ src/platform/packages/shared/shared-ux/prompt/not_found @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/core @elastic/kibana-core
-src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common @elastic/kibana-visualizations
+src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations

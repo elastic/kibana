@@ -9,8 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../../../../../../../../../../../../../..',
-  roots: [
-    '<rootDir>/src/platform/packages/shared/Users/gsoldevila/Work/kibana-secondary/Users/gsoldevila/Work/kibana-secondary/src/plugins/chart_expressions/common',
-  ],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/chart-expressions-common'],
 };
