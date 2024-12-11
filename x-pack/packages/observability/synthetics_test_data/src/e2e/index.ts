@@ -8,3 +8,4 @@
 export { recordVideo } from './helpers/record_video';
 export { SyntheticsRunner } from './helpers/synthetics_runner';
 export { argv } from './helpers/parse_args_params';
+export { readKibanaConfig } from './tasks/read_kibana_config';
