@@ -60,6 +60,7 @@ export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
+  accessMode$: BehaviorSubject<GridAccessMode>;
 
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;

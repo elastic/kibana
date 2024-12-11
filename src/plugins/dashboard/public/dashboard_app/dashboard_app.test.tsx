@@ -12,11 +12,10 @@ import React, { useEffect } from 'react';
 
 import { render, waitFor } from '@testing-library/react';
 
-import { DashboardApi } from '..';
 import type { DashboardRendererProps } from '../dashboard_container/external_api/dashboard_renderer';
 import { LazyDashboardRenderer } from '../dashboard_container/external_api/lazy_dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
-import { buildMockDashboard } from '../mocks';
+import { buildMockDashboardApi } from '../mocks';
 import { dataService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
 
@@ -26,12 +25,12 @@ jest.mock('../dashboard_top_nav');
 describe('Dashboard App', () => {
   dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
 
-  const mockDashboard = buildMockDashboard();
+  const { api: dashboardApi, cleanup } = buildMockDashboardApi();
   let mockHistory: MemoryHistory;
   // this is in url_utils dashboardApi expandedPanel subscription
   let historySpy: jest.SpyInstance;
   // this is in the dashboard app for the renderer when provided an expanded panel id
-  const expandPanelSpy = jest.spyOn(mockDashboard, 'expandPanel');
+  const expandPanelSpy = jest.spyOn(dashboardApi, 'expandPanel');
 
   beforeAll(() => {
     mockHistory = createMemoryHistory();
@@ -46,7 +45,7 @@ describe('Dashboard App', () => {
       ({ onApiAvailable }: DashboardRendererProps) => {
         // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
         useEffect(() => {
-          onApiAvailable?.(mockDashboard as DashboardApi);
+          onApiAvailable?.(dashboardApi);
         }, [onApiAvailable]);
 
         return <div>Test renderer</div>;
@@ -60,23 +59,27 @@ describe('Dashboard App', () => {
     historySpy.mockClear();
   });
 
+  afterAll(() => {
+    cleanup();
+  });
+
   it('test the default behavior without an expandedPanel id passed as a prop to the DashboardApp', async () => {
     render(<DashboardApp redirectTo={jest.fn()} history={mockHistory} />);
 
     await waitFor(() => {
       expect(expandPanelSpy).not.toHaveBeenCalled();
       // this value should be undefined by default
-      expect(mockDashboard.expandedPanelId.getValue()).toBe(undefined);
+      expect(dashboardApi.expandedPanelId.getValue()).toBe(undefined);
       // history should not be called
       expect(historySpy).toHaveBeenCalledTimes(0);
       expect(mockHistory.location.pathname).toBe('/');
     });
 
     // simulate expanding a panel
-    mockDashboard.expandPanel('123');
+    dashboardApi.expandPanel('123');
 
     await waitFor(() => {
-      expect(mockDashboard.expandedPanelId.getValue()).toBe('123');
+      expect(dashboardApi.expandedPanelId.getValue()).toBe('123');
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create/123');
     });
@@ -91,10 +94,10 @@ describe('Dashboard App', () => {
     });
 
     // simulate minimizing a panel
-    mockDashboard.expandedPanelId.next(undefined);
+    dashboardApi.expandPanel('456');
 
     await waitFor(() => {
-      expect(mockDashboard.expandedPanelId.getValue()).toBe(undefined);
+      expect(dashboardApi.expandedPanelId.getValue()).toBe(undefined);
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create');
     });

@@ -59,7 +59,7 @@ describe('createReadme', () => {
       },
     ];
 
-    createReadme(integrationPath, testIntegration.name, fields);
+    createReadme(integrationPath, testIntegration.name, testIntegration.dataStreams, fields);
 
     expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/_dev/build/docs/README.md`,
@@ -103,7 +103,7 @@ describe('createReadme', () => {
       },
     ];
 
-    createReadme(integrationPath, testIntegration.name, fields);
+    createReadme(integrationPath, testIntegration.name, testIntegration.dataStreams, fields);
 
     const firstDatastreamFieldsDisplayed = `
 | Field | Description | Type |
@@ -139,7 +139,7 @@ describe('createReadme', () => {
       },
     ];
 
-    createReadme(integrationPath, testIntegration.name, fields);
+    createReadme(integrationPath, testIntegration.name, testIntegration.dataStreams, fields);
 
     expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/_dev/build/docs/README.md`,
@@ -165,7 +165,7 @@ describe('createReadme', () => {
       },
     ];
 
-    createReadme(integrationPath, testIntegration.name, fields);
+    createReadme(integrationPath, testIntegration.name, testIntegration.dataStreams, fields);
 
     const firstDatastreamFieldsDisplayed = `
 | Field | Description | Type |

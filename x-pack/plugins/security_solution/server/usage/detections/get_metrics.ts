@@ -13,6 +13,10 @@ import { getMlJobMetrics } from './ml_jobs/get_metrics';
 import { getRuleMetrics } from './rules/get_metrics';
 import { getInitialEventLogUsage, getInitialRulesUsage } from './rules/get_initial_usage';
 import { getInitialMlJobUsage } from './ml_jobs/get_initial_usage';
+// eslint-disable-next-line no-restricted-imports
+import { getInitialLegacySiemSignalsUsage } from './legacy_siem_signals/get_initial_usage';
+// eslint-disable-next-line no-restricted-imports
+import { getLegacySiemSignalsUsage } from './legacy_siem_signals/get_legacy_siem_signals_metrics';
 
 export interface GetDetectionsMetricsOptions {
   signalsIndex: string;
@@ -21,6 +25,7 @@ export interface GetDetectionsMetricsOptions {
   logger: Logger;
   mlClient: MlPluginSetup | undefined;
   eventLogIndex: string;
+  legacySignalsIndex: string;
 }
 
 export const getDetectionsMetrics = async ({
@@ -30,10 +35,12 @@ export const getDetectionsMetrics = async ({
   savedObjectsClient,
   logger,
   mlClient,
+  legacySignalsIndex,
 }: GetDetectionsMetricsOptions): Promise<DetectionMetrics> => {
-  const [mlJobMetrics, detectionRuleMetrics] = await Promise.allSettled([
+  const [mlJobMetrics, detectionRuleMetrics, legacySiemSignalsUsage] = await Promise.allSettled([
     getMlJobMetrics({ mlClient, savedObjectsClient, logger }),
     getRuleMetrics({ signalsIndex, eventLogIndex, esClient, savedObjectsClient, logger }),
+    getLegacySiemSignalsUsage({ signalsIndex: legacySignalsIndex, esClient, logger }),
   ]);
 
   return {
@@ -49,5 +56,9 @@ export const getDetectionsMetrics = async ({
             detection_rule_usage: getInitialRulesUsage(),
             detection_rule_status: getInitialEventLogUsage(),
           },
+    legacy_siem_signals:
+      legacySiemSignalsUsage.status === 'fulfilled'
+        ? legacySiemSignalsUsage.value
+        : getInitialLegacySiemSignalsUsage(),
   };
 };

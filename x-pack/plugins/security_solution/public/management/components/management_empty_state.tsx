@@ -74,7 +74,11 @@ const PolicyEmptyState = React.memo<{
   policyEntryPoint?: boolean;
 }>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
   const docLinks = useKibana().services.docLinks;
-  const { canAccessFleet, loading: authzLoading } = useUserPrivileges().endpointPrivileges;
+  const {
+    canAccessFleet,
+    canWriteIntegrationPolicies,
+    loading: authzLoading,
+  } = useUserPrivileges().endpointPrivileges;
 
   return (
     <div data-test-subj="emptyPolicyTable">
@@ -134,7 +138,7 @@ const PolicyEmptyState = React.memo<{
 
             {authzLoading && <EuiSkeletonText lines={1} />}
 
-            {!authzLoading && canAccessFleet && (
+            {!authzLoading && canAccessFleet && canWriteIntegrationPolicies && (
               <>
                 <EuiSpacer size="s" />
                 <EuiFlexGroup>
@@ -156,7 +160,9 @@ const PolicyEmptyState = React.memo<{
               </>
             )}
 
-            {!authzLoading && !canAccessFleet && <MissingFleetAccessInfo />}
+            {!authzLoading && !(canAccessFleet && canWriteIntegrationPolicies) && (
+              <MissingFleetAccessInfo />
+            )}
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>

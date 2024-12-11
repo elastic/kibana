@@ -120,6 +120,10 @@ export interface GetRuleMigrationParams {
   page?: number;
   /** Optional number of documents per page to retrieve */
   perPage?: number;
+  /** Optional field of the rule migration object to sort results by */
+  sortField?: string;
+  /** Optional direction to sort results by */
+  sortDirection?: 'asc' | 'desc';
   /** Optional search term to filter documents */
   searchTerm?: string;
   /** Optional AbortSignal for cancelling request */
@@ -130,12 +134,24 @@ export const getRuleMigrations = async ({
   migrationId,
   page,
   perPage,
+  sortField,
+  sortDirection,
   searchTerm,
   signal,
 }: GetRuleMigrationParams): Promise<GetRuleMigrationResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
-    { version: '1', query: { page, per_page: perPage, search_term: searchTerm }, signal }
+    {
+      version: '1',
+      query: {
+        page,
+        per_page: perPage,
+        sort_field: sortField,
+        sort_direction: sortDirection,
+        search_term: searchTerm,
+      },
+      signal,
+    }
   );
 };
 
@@ -163,6 +179,8 @@ export interface InstallRulesParams {
   migrationId: string;
   /** The rule ids to install */
   ids: string[];
+  /** Optional indicator to enable the installed rule */
+  enabled?: boolean;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
@@ -170,11 +188,12 @@ export interface InstallRulesParams {
 export const installMigrationRules = async ({
   migrationId,
   ids,
+  enabled,
   signal,
 }: InstallRulesParams): Promise<InstallMigrationRulesResponse> => {
   return KibanaServices.get().http.post<InstallMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
-    { version: '1', body: JSON.stringify(ids), signal }
+    { version: '1', body: JSON.stringify({ ids, enabled }), signal }
   );
 };
 

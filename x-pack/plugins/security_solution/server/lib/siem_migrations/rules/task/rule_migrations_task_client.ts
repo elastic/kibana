@@ -9,14 +9,15 @@ import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import {
-  SiemMigrationTaskStatus,
   SiemMigrationStatus,
+  SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
+import { RuleMigrationsRetriever } from './retrievers';
 import type {
   MigrationAgent,
   RuleMigrationTaskPrepareParams,
@@ -26,9 +27,6 @@ import type {
   RuleMigrationTaskStopResult,
 } from './types';
 import { ActionsClientChat } from './util/actions_client_chat';
-import { IntegrationRetriever } from './util/integration_retriever';
-import { retrievePrebuiltRulesMap } from './util/prebuilt_rules';
-import { RuleResourceRetriever } from './util/rule_resource_retriever';
 
 const ITERATION_BATCH_SIZE = 50 as const;
 const ITERATION_SLEEP_SECONDS = 10 as const;
@@ -67,14 +65,12 @@ export class RuleMigrationsTaskClient {
 
     const abortController = new AbortController();
 
-    // Await the preparation to make sure the agent is created properly so the task can run
-    const agent = await this.prepare({ ...params, abortController });
-
-    // not awaiting the `run` promise to execute the task in the background
-    this.run({ ...params, agent, abortController }).catch((err) => {
-      // All errors in the `run` method are already catch, this should never happen, but just in case
-      this.logger.error(`Unexpected error running the migration ID:${migrationId}`, err);
-    });
+    // Retrieve agent from prepare and pass it to run right after without awaiting but using .then
+    this.prepare({ ...params, abortController })
+      .then((agent) => this.run({ ...params, agent, abortController }))
+      .catch((error) => {
+        this.logger.error(`Error starting migration ID:${migrationId} with error:${error}`, error);
+      });
 
     return { exists: true, started: true };
   }
@@ -88,9 +84,17 @@ export class RuleMigrationsTaskClient {
     soClient,
     abortController,
   }: RuleMigrationTaskPrepareParams): Promise<MigrationAgent> {
-    const prebuiltRulesMap = await retrievePrebuiltRulesMap({ soClient, rulesClient });
-    const resourceRetriever = new RuleResourceRetriever(migrationId, this.data);
-    const integrationRetriever = new IntegrationRetriever(this.data);
+    await Promise.all([
+      // Populates the indices used for RAG searches on prebuilt rules and integrations.
+      await this.data.prebuiltRules.create({ rulesClient, soClient }),
+      // Will use Fleet API client for integration retrieval as an argument once feature is available
+      await this.data.integrations.create(),
+    ]).catch((error) => {
+      this.logger.error(`Error preparing RAG indices for migration ID:${migrationId}`, error);
+      throw error;
+    });
+
+    const ruleMigrationsRetriever = new RuleMigrationsRetriever(this.data, migrationId);
 
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
@@ -102,9 +106,7 @@ export class RuleMigrationsTaskClient {
       connectorId,
       model,
       inferenceClient,
-      prebuiltRulesMap,
-      resourceRetriever,
-      integrationRetriever,
+      ruleMigrationsRetriever,
       logger: this.logger,
     });
     return agent;

@@ -50,6 +50,7 @@ export const registerSiemRuleMigrationsInstallTranslatedRoute = (
 
             await installTranslated({
               migrationId,
+              enabled: false,
               securitySolutionContext,
               savedObjectsClient,
               rulesClient,

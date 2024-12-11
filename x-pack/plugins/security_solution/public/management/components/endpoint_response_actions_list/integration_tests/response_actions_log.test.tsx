@@ -1518,6 +1518,7 @@ describe('Response actions history', () => {
     beforeEach(() => {
       featureFlags = {
         responseActionUploadEnabled: true,
+        crowdstrikeRunScriptEnabled: true,
       };
 
       mockedContext.setExperimentalFlag(featureFlags);
@@ -1537,8 +1538,9 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should show a list of actions (with `scan`) when opened', async () => {
-      render();
+    it('should show a list of actions (with `runscript`) when opened', async () => {
+      // Note: when we enable new commands, it might be needed to increase the height
+      render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
 
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
@@ -1557,6 +1559,7 @@ describe('Response actions history', () => {
         'execute. To check this option, press Enter.',
         'upload. To check this option, press Enter.',
         'scan. To check this option, press Enter.',
+        'runscript. To check this option, press Enter.',
       ]);
     });
 

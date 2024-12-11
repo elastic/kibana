@@ -39,13 +39,20 @@ export const registerSiemRuleMigrationsGetRoute = (
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
         const { migration_id: migrationId } = req.params;
-        const { page, per_page: perPage, search_term: searchTerm } = req.query;
+        const {
+          page,
+          per_page: perPage,
+          sort_field: sortField,
+          sort_direction: sortDirection,
+          search_term: searchTerm,
+        } = req.query;
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
           const options: RuleMigrationGetOptions = {
             filters: { searchTerm },
+            sort: { sortField, sortDirection },
             size: perPage,
             from: page && perPage ? page * perPage : 0,
           };
