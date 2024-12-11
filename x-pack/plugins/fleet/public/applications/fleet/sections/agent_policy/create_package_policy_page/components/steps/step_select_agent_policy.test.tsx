@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from '@testing-library/react';
+import { act, waitForElementToBeRemoved } from '@testing-library/react';
 
 import type { PackageInfo } from '../../../../../../../../common';
 
@@ -64,211 +64,212 @@ const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunc
   typeof useMultipleAgentPolicies
 >;
 
-describe('stepStepSelectAgentPolicy', () => {
-  let testRenderer: TestRenderer;
-  let renderResult: ReturnType<typeof testRenderer.render>;
-  const mockSetHasAgentPolicyError = jest.fn();
-  const updateAgentPoliciesMock = jest.fn();
-  const render = (packageInfo?: PackageInfo, selectedAgentPolicyIds: string[] = []) =>
-    (renderResult = testRenderer.render(
-      <StepSelectAgentPolicy
-        packageInfo={packageInfo || ({ name: 'apache' } as any)}
-        agentPolicies={[]}
-        updateAgentPolicies={updateAgentPoliciesMock}
-        setHasAgentPolicyError={mockSetHasAgentPolicyError}
-        initialSelectedAgentPolicyIds={selectedAgentPolicyIds}
-      />
-    ));
+for (let i = 0; i < 100; i++) {
+  describe(`stepStepSelectAgentPolicy - ${i + 1}`, () => {
+    let testRenderer: TestRenderer;
+    let renderResult: ReturnType<typeof testRenderer.render>;
+    const mockSetHasAgentPolicyError = jest.fn();
+    const updateAgentPoliciesMock = jest.fn();
+    const render = (packageInfo?: PackageInfo, selectedAgentPolicyIds: string[] = []) =>
+      (renderResult = testRenderer.render(
+        <StepSelectAgentPolicy
+          packageInfo={packageInfo || ({ name: 'apache' } as any)}
+          agentPolicies={[]}
+          updateAgentPolicies={updateAgentPoliciesMock}
+          setHasAgentPolicyError={mockSetHasAgentPolicyError}
+          initialSelectedAgentPolicyIds={selectedAgentPolicyIds}
+        />
+      ));
 
-  // FLAKY: https://github.com/elastic/kibana/issues/192792
-  // FLAKY: https://github.com/elastic/kibana/issues/192793
-  describe.skip('with single agent policy', () => {
-    beforeEach(() => {
-      testRenderer = createFleetTestRendererMock();
-      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
-    });
-    afterEach(() => {
-      updateAgentPoliciesMock.mockReset();
-      useGetAgentPoliciesMock.mockReset();
-    });
-
-    test('should not select agent policy by default if multiple exists', async () => {
-      useGetAgentPoliciesMock.mockReturnValue({
-        data: {
-          items: [
-            { id: 'policy-1', name: 'Policy 1' },
-            { id: 'policy-2', name: 'Policy 2' },
-          ],
-        },
-        error: undefined,
-        isLoading: false,
-        resendRequest: jest.fn(),
-      } as any);
-
-      render();
-      await act(async () => {
-        const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
-        expect((select as any)?.value).toEqual('');
+    describe('with single agent policy', () => {
+      beforeEach(() => {
+        testRenderer = createFleetTestRendererMock();
+        useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
       });
-    });
+      afterEach(() => {
+        updateAgentPoliciesMock.mockReset();
+        useGetAgentPoliciesMock.mockReset();
+      });
 
-    test('should select agent policy by default if one exists', async () => {
-      useGetAgentPoliciesMock.mockReturnValue({
-        data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
-        error: undefined,
-        isLoading: false,
-        resendRequest: jest.fn(),
-      } as any);
+      test('should not select agent policy by default if multiple exists', async () => {
+        useGetAgentPoliciesMock.mockReturnValue({
+          data: {
+            items: [
+              { id: 'policy-1', name: 'Policy 1' },
+              { id: 'policy-2', name: 'Policy 2' },
+            ],
+          },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        } as any);
 
-      render();
-      await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
-      await act(async () => {
+        render();
+        await act(async () => {
+          const select = renderResult.container.querySelector(
+            '[data-test-subj="agentPolicySelect"]'
+          );
+          expect((select as any)?.value).toEqual('');
+        });
+      });
+
+      test('should select agent policy by default if one exists', async () => {
+        useGetAgentPoliciesMock.mockReturnValue({
+          data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        } as any);
+
+        render();
+
+        await waitForElementToBeRemoved(renderResult.getAllByRole('progressbar'));
+
         expect(updateAgentPoliciesMock).toBeCalledTimes(1);
         expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
     });
-  });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/197985
-  describe.skip('with multiple agent policies', () => {
-    beforeEach(() => {
-      testRenderer = createFleetTestRendererMock();
-      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+    describe('with multiple agent policies', () => {
+      beforeEach(() => {
+        testRenderer = createFleetTestRendererMock();
+        useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
 
-      useGetAgentPoliciesMock.mockReturnValue({
-        data: {
-          items: [
-            { id: 'policy-1', name: 'Policy 1' },
-            { id: 'policy-2', name: 'Policy 2' },
-          ],
-        },
-        error: undefined,
-        isLoading: false,
-        resendRequest: jest.fn(),
-      } as any);
-    });
-    afterEach(() => {
-      updateAgentPoliciesMock.mockReset();
-      useGetAgentPoliciesMock.mockReset();
-    });
+        useGetAgentPoliciesMock.mockReturnValue({
+          data: {
+            items: [
+              { id: 'policy-1', name: 'Policy 1' },
+              { id: 'policy-2', name: 'Policy 2' },
+            ],
+          },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        } as any);
+      });
+      afterEach(() => {
+        updateAgentPoliciesMock.mockReset();
+        useGetAgentPoliciesMock.mockReset();
+      });
 
-    test('should select agent policy by default if one exists', async () => {
-      useGetAgentPoliciesMock.mockReturnValueOnce({
-        data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
-        error: undefined,
-        isLoading: false,
-        resendRequest: jest.fn(),
-      } as any);
+      test('should select agent policy by default if one exists', async () => {
+        useGetAgentPoliciesMock.mockReturnValueOnce({
+          data: { items: [{ id: 'policy-1', name: 'Policy 1' }] },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        } as any);
 
-      render();
-      await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
-      await act(async () => {
+        render();
+
+        await waitForElementToBeRemoved(renderResult.getAllByRole('progressbar'));
+
         expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
-    });
 
-    test('should not select agent policy by default if multiple exists', async () => {
-      useGetAgentPoliciesMock.mockReturnValue({
-        data: {
-          items: [
-            { id: 'policy-1', name: 'Policy 1' },
-            { id: 'policy-2', name: 'Policy 2' },
-          ],
-        },
-        error: undefined,
-        isLoading: false,
-        resendRequest: jest.fn(),
-      } as any);
+      test('should not select agent policy by default if multiple exists', async () => {
+        useGetAgentPoliciesMock.mockReturnValue({
+          data: {
+            items: [
+              { id: 'policy-1', name: 'Policy 1' },
+              { id: 'policy-2', name: 'Policy 2' },
+            ],
+          },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        } as any);
 
-      render();
+        render();
 
-      await act(async () => {
-        const select = renderResult.container.querySelector(
-          '[data-test-subj="agentPolicyMultiSelect"]'
-        );
-        expect((select as any)?.value).toEqual(undefined);
+        await act(async () => {
+          const select = renderResult.container.querySelector(
+            '[data-test-subj="agentPolicyMultiSelect"]'
+          );
+          expect((select as any)?.value).toEqual(undefined);
+        });
       });
-    });
 
-    test('should select agent policy if pre selected', async () => {
-      render(undefined, ['policy-1']);
-      await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
-      await act(async () => {
+      test('should select agent policy if pre selected', async () => {
+        render(undefined, ['policy-1']);
+
+        await waitForElementToBeRemoved(renderResult.getAllByRole('progressbar'));
+
         expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
-    });
 
-    test('should select multiple agent policies', async () => {
-      const result = render();
-      expect(result.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
-      await act(async () => {
-        result.getByTestId('comboBoxToggleListButton').click();
+      test('should select multiple agent policies', async () => {
+        const result = render();
+        expect(result.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
+        await act(async () => {
+          result.getByTestId('comboBoxToggleListButton').click();
+        });
+        expect(result.getAllByTestId('agentPolicyMultiItem').length).toBe(2);
+        await act(async () => {
+          result.getByText('Policy 1').click();
+        });
+        await act(async () => {
+          result.getByText('Policy 2').click();
+        });
+        expect(updateAgentPoliciesMock).toBeCalledWith([
+          { id: 'policy-1', package_policies: [] },
+          { id: 'policy-2', package_policies: [] },
+        ]);
       });
-      expect(result.getAllByTestId('agentPolicyMultiItem').length).toBe(2);
-      await act(async () => {
-        result.getByText('Policy 1').click();
-      });
-      await act(async () => {
-        result.getByText('Policy 2').click();
-      });
-      expect(updateAgentPoliciesMock).toBeCalledWith([
-        { id: 'policy-1', package_policies: [] },
-        { id: 'policy-2', package_policies: [] },
-      ]);
-    });
 
-    test('should disable option if agent policy has limited package', async () => {
-      useGetAgentPoliciesMock.mockReturnValue({
-        data: {
-          items: [
-            { id: 'policy-1', name: 'Policy 1' },
-            { id: 'policy-2', name: 'Policy 2' },
-            { id: 'policy-3', name: 'Policy 3' },
-          ],
-        },
-        error: undefined,
-        isLoading: false,
-        resendRequest: jest.fn(),
-      } as any);
-      const result = render({
-        name: 'osquery_manager',
-        policy_templates: [{ multiple: false }],
-      } as any);
-      expect(result.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
-      await act(async () => {
-        result.getByTestId('comboBoxToggleListButton').click();
+      test('should disable option if agent policy has limited package', async () => {
+        useGetAgentPoliciesMock.mockReturnValue({
+          data: {
+            items: [
+              { id: 'policy-1', name: 'Policy 1' },
+              { id: 'policy-2', name: 'Policy 2' },
+              { id: 'policy-3', name: 'Policy 3' },
+            ],
+          },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        } as any);
+        const result = render({
+          name: 'osquery_manager',
+          policy_templates: [{ multiple: false }],
+        } as any);
+        expect(result.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
+        await act(async () => {
+          result.getByTestId('comboBoxToggleListButton').click();
+        });
+        expect(
+          result.getByText('Policy 1').closest('[data-test-subj="agentPolicyMultiItem"]')
+        ).toBeDisabled();
       });
-      expect(
-        result.getByText('Policy 1').closest('[data-test-subj="agentPolicyMultiItem"]')
-      ).toBeDisabled();
-    });
 
-    test('should disable option if agent policy has apm package and logstash output', async () => {
-      useGetAgentPoliciesMock.mockReturnValue({
-        data: {
-          items: [
-            { id: 'policy-1', name: 'Policy 1' },
-            { id: 'policy-2', name: 'Policy 2', data_output_id: 'logstash-1' },
-            { id: 'policy-3', name: 'Policy 3' },
-          ],
-        },
-        error: undefined,
-        isLoading: false,
-        resendRequest: jest.fn(),
-      } as any);
-      const result = render({
-        name: 'apm',
-      } as any);
-      expect(result.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
-      await act(async () => {
-        result.getByTestId('comboBoxToggleListButton').click();
+      test('should disable option if agent policy has apm package and logstash output', async () => {
+        useGetAgentPoliciesMock.mockReturnValue({
+          data: {
+            items: [
+              { id: 'policy-1', name: 'Policy 1' },
+              { id: 'policy-2', name: 'Policy 2', data_output_id: 'logstash-1' },
+              { id: 'policy-3', name: 'Policy 3' },
+            ],
+          },
+          error: undefined,
+          isLoading: false,
+          resendRequest: jest.fn(),
+        } as any);
+        const result = render({
+          name: 'apm',
+        } as any);
+        expect(result.getByTestId('agentPolicyMultiSelect')).toBeInTheDocument();
+        await act(async () => {
+          result.getByTestId('comboBoxToggleListButton').click();
+        });
+        expect(
+          result.getByText('Policy 2').closest('[data-test-subj="agentPolicyMultiItem"]')
+        ).toBeDisabled();
+        expect(
+          result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFilled"]')
+        ).toBeInTheDocument();
       });
-      expect(
-        result.getByText('Policy 2').closest('[data-test-subj="agentPolicyMultiItem"]')
-      ).toBeDisabled();
-      expect(
-        result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFilled"]')
-      ).toBeInTheDocument();
     });
   });
-});
+}
