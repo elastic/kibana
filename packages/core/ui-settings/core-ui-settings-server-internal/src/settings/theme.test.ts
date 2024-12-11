@@ -8,10 +8,14 @@
  */
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { getThemeSettings } from './theme';
+import { getThemeSettings, type GetThemeSettingsOptions } from './theme';
+
+const defaultOptions: GetThemeSettingsOptions = {
+  isServerless: false,
+};
 
 describe('theme settings', () => {
-  const themeSettings = getThemeSettings();
+  const themeSettings = getThemeSettings(defaultOptions);
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
@@ -31,28 +35,80 @@ describe('theme settings', () => {
       expect(() => validate(12)).toThrowError();
     });
   });
+
+  describe('theme:name', () => {
+    const validate = getValidationFn(themeSettings['theme:name']);
+
+    it('should only accept expected values', () => {
+      expect(() => validate('amsterdam')).not.toThrow();
+      expect(() => validate('borealis')).not.toThrow();
+
+      expect(() => validate(true)).toThrow();
+      expect(() => validate(12)).toThrow();
+    });
+
+    describe('readonly', () => {
+      it('should be readonly when `isServerless = true`', () => {
+        expect(getThemeSettings({ isServerless: true })['theme:name'].readonly).toBe(true);
+        expect(getThemeSettings({ isServerless: false })['theme:name'].readonly).toBe(false);
+      });
+
+      it('should be editable when `isThemeSwitcherEnabled = true`', () => {
+        expect(
+          getThemeSettings({ isServerless: true, isThemeSwitcherEnabled: true })['theme:name']
+            .readonly
+        ).toBe(false);
+        expect(
+          getThemeSettings({ isServerless: false, isThemeSwitcherEnabled: true })['theme:name']
+            .readonly
+        ).toBe(false);
+      });
+    });
+
+    describe('value', () => {
+      it('should default to `amsterdam`', () => {
+        expect(getThemeSettings({ isServerless: false })['theme:name'].value).toBe('amsterdam');
+        expect(getThemeSettings({ isServerless: true })['theme:name'].value).toBe('amsterdam');
+      });
+
+      it('should default to `borealis` when `isDist = false` and `isServerless = false`', () => {
+        expect(getThemeSettings({ isDist: false, isServerless: false })['theme:name'].value).toBe(
+          'borealis'
+        );
+      });
+
+      it('should default to `amsterdam` wen `isDist = true`', () => {
+        expect(getThemeSettings({ isDist: true, isServerless: false })['theme:name'].value).toBe(
+          'amsterdam'
+        );
+        expect(getThemeSettings({ isDist: true, isServerless: true })['theme:name'].value).toBe(
+          'amsterdam'
+        );
+      });
+    });
+  });
 });
 
 describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
   it('defaults to properties of first tag', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v8light';
-    let settings = getThemeSettings({ isDist: false });
+    let settings = getThemeSettings({ ...defaultOptions, isDist: false });
     expect(settings['theme:darkMode'].value).toBe('enabled');
 
     process.env.KBN_OPTIMIZER_THEMES = 'v8light,v8dark';
-    settings = getThemeSettings({ isDist: false });
+    settings = getThemeSettings({ ...defaultOptions, isDist: false });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 
   it('ignores the value when isDist is undefined', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
-    const settings = getThemeSettings({ isDist: undefined });
+    const settings = getThemeSettings({ ...defaultOptions, isDist: undefined });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 
   it('ignores the value when isDist is true', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
-    const settings = getThemeSettings({ isDist: true });
+    const settings = getThemeSettings({ ...defaultOptions, isDist: true });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 });
