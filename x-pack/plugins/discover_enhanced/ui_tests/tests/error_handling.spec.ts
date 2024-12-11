@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 
-test.describe('Discover app - errors', { tag: ['@ess'] }, () => {
+test.describe('Discover app - errors', { tag: tags.ESS_ONLY }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
     await kbnClient.savedObjects.clean({ types: ['search', 'index-pattern'] });
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);

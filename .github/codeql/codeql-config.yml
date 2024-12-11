@@ -80,7 +80,6 @@ paths-ignore:
   - x-pack/plugins/fleet/scripts
   - x-pack/plugins/lists/scripts
   - x-pack/plugins/lists/server/scripts
-  - x-pack/plugins/ml/scripts
   - x-pack/plugins/observability_solution/*/scripts
   - x-pack/plugins/osquery/scripts
   - x-pack/plugins/rule_registry/scripts

@@ -1701,11 +1701,11 @@
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
+            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
           },
           {
             "plugin": "ml",
-            "path": "x-pack/plugins/ml/common/types/modules.ts"
+            "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts"
           }
         ],
         "initialIsOpen": false

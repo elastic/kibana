@@ -61,6 +61,8 @@ To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi]
 
 > The expandable flyout propagates the `onClose` callback from the EuiFlyout component. As we recommend having a single instance of the flyout in your application, it's up to the application's code to dispatch the event (through Redux, window events, observable, prop drilling...). 
 
+When calling `openFlyout`, the right panel state is automatically appended in the `history` slice in the redux context. To access the flyout's history, you can use the [useExpandableFlyoutHistory](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_history.ts) hook.
+
 ## Usage
 
 To use the expandable flyout in your plugin, first you need wrap your code with the [context provider](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx) at a high enough level as follows:

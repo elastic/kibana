@@ -27,5 +27,7 @@
     "@kbn/mock-idp-utils",
     "@kbn/test-suites-xpack",
     "@kbn/test-subj-selector",
+    "@kbn/scout-info",
+    "@kbn/scout-reporting"
   ]
 }

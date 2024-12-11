@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
 import { EuiRangeProps, EuiSelectProps } from '@elastic/eui';
@@ -378,7 +378,7 @@ export const LegendControls = ({
   );
 };
 
-const StyledEuiForm = euiStyled(EuiForm)`
+const StyledEuiForm = styled(EuiForm)`
   min-width: 400px;
   @media (max-width: 480px) {
     min-width: 100%;

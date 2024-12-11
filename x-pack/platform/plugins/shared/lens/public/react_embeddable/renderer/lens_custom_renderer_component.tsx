@@ -59,6 +59,8 @@ export function LensRenderer({
   filters,
   timeRange,
   disabledActions,
+  searchSessionId,
+  hidePanelTitles,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -71,6 +73,8 @@ export function LensRenderer({
   }, []);
   const disabledActionIds$ = useObservableVariable(disabledActions);
   const viewMode$ = useObservableVariable(viewMode);
+  const searchSessionId$ = useObservableVariable(searchSessionId);
+  const hidePanelTitles$ = useObservableVariable(hidePanelTitles);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -112,7 +116,6 @@ export function LensRenderer({
   const panelProps: PanelProps = useMemo(() => {
     return {
       hideInspector: !showInspector,
-      hideHeader: showPanelChrome,
       showNotifications: false,
       showShadow: false,
       showBadges: false,
@@ -124,7 +127,7 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, showPanelChrome, withDefaultActions, extraActions, lensApi]);
+  }, [showInspector, withDefaultActions, extraActions, lensApi]);
 
   return (
     <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
@@ -135,6 +138,7 @@ export function LensRenderer({
         ...props,
         // forward the unified search context
         ...searchApi,
+        searchSessionId$,
         disabledActionIds: disabledActionIds$,
         setDisabledActionIds: (ids: string[] | undefined) => disabledActionIds$.next(ids),
         viewMode: viewMode$,
@@ -147,6 +151,7 @@ export function LensRenderer({
           ...initialStateRef.current,
           attributes: props.attributes,
         }),
+        hidePanelTitle: hidePanelTitles$,
       })}
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}

@@ -25,19 +25,8 @@ export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
   ...pageTemplateProps
 }) => {
   const navItems = useWorkplaceSearchNav();
-  const { getChromeStyle$, updateSideNavDefinition } = useValues(KibanaLogic);
+  const { getChromeStyle$ } = useValues(KibanaLogic);
   const chromeStyle = useObservable(getChromeStyle$(), 'classic');
-
-  React.useEffect(() => {
-    if (chromeStyle === 'classic') return;
-    // We update the new side nav definition with the selected app items
-    updateSideNavDefinition({ workplaceSearch: navItems?.[0]?.items });
-  }, [chromeStyle, navItems, updateSideNavDefinition]);
-  React.useEffect(() => {
-    return () => {
-      updateSideNavDefinition({ workplaceSearch: undefined });
-    };
-  }, [updateSideNavDefinition]);
 
   return (
     <EnterpriseSearchPageTemplateWrapper

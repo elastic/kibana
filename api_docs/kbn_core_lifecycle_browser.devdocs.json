@@ -627,7 +627,7 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/mount_management_section.ts"
+                "path": "x-pack/platform/plugins/private/transform/public/app/mount_management_section.ts"
               },
               {
                 "plugin": "discover",
@@ -647,7 +647,7 @@
               },
               {
                 "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
+                "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
               }
             ]
           },

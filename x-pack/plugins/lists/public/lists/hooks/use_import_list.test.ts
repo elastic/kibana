@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useImportList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -32,7 +32,7 @@ describe('useImportList', () => {
   it('invokes Api.importList', async () => {
     const fileMock = 'my file' as unknown as File;
 
-    const { result, waitForNextUpdate } = renderHook(() => useImportList());
+    const { result } = renderHook(() => useImportList());
 
     act(() => {
       result.current.start({
@@ -42,21 +42,21 @@ describe('useImportList', () => {
         type: 'keyword',
       });
     });
-    await waitForNextUpdate();
-
-    expect(Api.importList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        file: fileMock,
-        listId: 'my_list_id',
-        type: 'keyword',
-      })
+    await waitFor(() =>
+      expect(Api.importList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          file: fileMock,
+          listId: 'my_list_id',
+          type: 'keyword',
+        })
+      )
     );
   });
 
   it('populates result with the response of Api.importList', async () => {
     const fileMock = 'my file' as unknown as File;
 
-    const { result, waitForNextUpdate } = renderHook(() => useImportList());
+    const { result } = renderHook(() => useImportList());
 
     act(() => {
       result.current.start({
@@ -66,15 +66,13 @@ describe('useImportList', () => {
         type: 'keyword',
       });
     });
-    await waitForNextUpdate();
-
-    expect(result.current.result).toEqual(getListResponseMock());
+    await waitFor(() => expect(result.current.result).toEqual(getListResponseMock()));
   });
 
   it('error is populated if importList rejects', async () => {
     const fileMock = 'my file' as unknown as File;
     (Api.importList as jest.Mock).mockRejectedValue(new Error('whoops'));
-    const { result, waitForNextUpdate } = renderHook(() => useImportList());
+    const { result } = renderHook(() => useImportList());
 
     act(() => {
       result.current.start({
@@ -85,9 +83,9 @@ describe('useImportList', () => {
       });
     });
 
-    await waitForNextUpdate();
-
-    expect(result.current.result).toBeUndefined();
-    expect(result.current.error).toEqual(new Error('whoops'));
+    await waitFor(() => {
+      expect(result.current.result).toBeUndefined();
+      expect(result.current.error).toEqual(new Error('whoops'));
+    });
   });
 });

@@ -7,7 +7,10 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UserProfileService } from '../../../services';
-import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '../../../../common/constants';
+import {
+  INTERNAL_SUGGEST_USER_PROFILES_URL,
+  SUGGEST_USER_PROFILES_API_TAG,
+} from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
@@ -17,8 +20,12 @@ export const suggestUserProfilesRoute = (userProfileService: UserProfileService)
   createCasesRoute({
     method: 'post',
     path: INTERNAL_SUGGEST_USER_PROFILES_URL,
+    security: {
+      authz: {
+        requiredPrivileges: [SUGGEST_USER_PROFILES_API_TAG],
+      },
+    },
     routerOptions: {
-      tags: ['access:casesSuggestUserProfiles'],
       access: 'internal',
     },
     params: {

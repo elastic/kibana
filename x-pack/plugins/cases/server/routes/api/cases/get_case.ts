@@ -14,6 +14,7 @@ import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 const params = {
   params: schema.object({
@@ -31,6 +32,7 @@ export const getCaseRoute = ({ isServerless }: { isServerless?: boolean }) =>
   createCasesRoute({
     method: 'get',
     path: CASE_DETAILS_URL,
+    security: DEFAULT_CASES_ROUTE_SECURITY,
     params,
     routerOptions: {
       access: 'public',

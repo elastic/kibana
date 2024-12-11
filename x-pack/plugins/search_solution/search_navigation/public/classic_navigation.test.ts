@@ -15,23 +15,23 @@ describe('classicNavigationFactory', function () {
   const mockedNavLinks: Array<Partial<ChromeNavLink>> = [
     {
       id: 'enterpriseSearch',
-      url: '/app/enterprise_search/overview',
+      url: '/app/elasticsearch/overview',
       title: 'Overview',
     },
     {
       id: 'enterpriseSearchContent:searchIndices',
       title: 'Indices',
-      url: '/app/enterprise_search/content/search_indices',
+      url: '/app/elasticsearch/content/search_indices',
     },
     {
       id: 'enterpriseSearchContent:connectors',
       title: 'Connectors',
-      url: '/app/enterprise_search/content/connectors',
+      url: '/app/elasticsearch/content/connectors',
     },
     {
       id: 'enterpriseSearchContent:webCrawlers',
       title: 'Web Crawlers',
-      url: '/app/enterprise_search/content/crawlers',
+      url: '/app/elasticsearch/content/crawlers',
     },
   ];
   const mockedCoreStart = {
@@ -69,7 +69,7 @@ describe('classicNavigationFactory', function () {
       icon: 'logoEnterpriseSearch',
       items: [
         {
-          href: '/app/enterprise_search/overview',
+          href: '/app/elasticsearch/overview',
           id: 'unit-test',
           isSelected: false,
           name: 'Overview',
@@ -82,7 +82,7 @@ describe('classicNavigationFactory', function () {
 
   it('will set isSelected', () => {
     mockHistory.location.pathname = '/overview';
-    mockHistory.createHref.mockReturnValue('/app/enterprise_search/overview');
+    mockHistory.createHref.mockReturnValue('/app/elasticsearch/overview');
 
     const items: ClassicNavItem[] = [
       {
@@ -96,7 +96,7 @@ describe('classicNavigationFactory', function () {
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: true,
         name: 'Overview',
@@ -132,14 +132,14 @@ describe('classicNavigationFactory', function () {
         id: 'searchContent',
         items: [
           {
-            href: '/app/enterprise_search/content/search_indices',
+            href: '/app/elasticsearch/content/search_indices',
             id: 'searchIndices',
             isSelected: false,
             name: 'Indices',
             onClick: expect.any(Function),
           },
           {
-            href: '/app/enterprise_search/content/connectors',
+            href: '/app/elasticsearch/content/connectors',
             id: 'searchConnectors',
             isSelected: false,
             name: 'Connectors',
@@ -163,7 +163,7 @@ describe('classicNavigationFactory', function () {
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/enterprise_search/content/search_indices',
+        href: '/app/elasticsearch/content/search_indices',
         id: 'searchIndices',
         isSelected: false,
         name: 'Index Management',
@@ -190,7 +190,7 @@ describe('classicNavigationFactory', function () {
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
         name: 'Overview',

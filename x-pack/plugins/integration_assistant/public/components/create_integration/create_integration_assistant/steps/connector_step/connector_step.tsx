@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
 import {
+  EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -42,7 +43,8 @@ interface ConnectorStepProps {
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
-  const { setConnector } = useActions();
+  const { setConnector, completeStep } = useActions();
+
   const [connectors, setConnectors] = useState<AIConnector[]>();
   const {
     isLoading,
@@ -69,41 +71,56 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const hasConnectors = !isLoading && connectors?.length;
 
   return (
-    <StepContentWrapper
-      title={i18n.TITLE}
-      subtitle={i18n.DESCRIPTION}
-      right={hasConnectors ? <CreateConnectorPopover onConnectorSaved={onConnectorSaved} /> : null}
+    <EuiForm
+      component="form"
+      fullWidth
+      onSubmit={(e) => {
+        e.preventDefault();
+        completeStep();
+      }}
     >
-      <EuiFlexGroup direction="column" alignItems="stretch">
-        <EuiFlexItem>
-          {isLoading ? (
-            <EuiLoadingSpinner />
-          ) : (
-            <>
-              {hasConnectors ? (
-                <ConnectorSelector connectors={connectors} selectedConnectorId={connector?.id} />
-              ) : (
-                <AuthorizationWrapper canCreateConnectors>
-                  <ConnectorSetup
-                    actionTypeIds={AllowedActionTypeIds}
-                    onConnectorSaved={onConnectorSaved}
+      <StepContentWrapper
+        title={i18n.TITLE}
+        subtitle={i18n.DESCRIPTION}
+        right={
+          hasConnectors ? <CreateConnectorPopover onConnectorSaved={onConnectorSaved} /> : null
+        }
+      >
+        <EuiFlexGroup direction="column" alignItems="stretch">
+          <EuiFlexItem>
+            {isLoading ? (
+              <EuiLoadingSpinner />
+            ) : (
+              <>
+                {hasConnectors ? (
+                  <ConnectorSelector
+                    connectors={connectors}
+                    setConnector={setConnector}
+                    selectedConnectorId={connector?.id}
                   />
-                </AuthorizationWrapper>
-              )}
-            </>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiText size="s" color="subdued">
-        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
-          <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
-            <EuiIcon type="iInCircle" />
+                ) : (
+                  <AuthorizationWrapper canCreateConnectors>
+                    <ConnectorSetup
+                      actionTypeIds={AllowedActionTypeIds}
+                      onConnectorSaved={onConnectorSaved}
+                    />
+                  </AuthorizationWrapper>
+                )}
+              </>
+            )}
           </EuiFlexItem>
-          <EuiFlexItem>{i18n.SUPPORTED_MODELS_INFO}</EuiFlexItem>
         </EuiFlexGroup>
-      </EuiText>
-    </StepContentWrapper>
+        <EuiSpacer size="m" />
+        <EuiText size="s" color="subdued">
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
+            <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
+              <EuiIcon type="iInCircle" />
+            </EuiFlexItem>
+            <EuiFlexItem>{i18n.SUPPORTED_MODELS_INFO}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiText>
+      </StepContentWrapper>
+    </EuiForm>
   );
 });
 ConnectorStep.displayName = 'ConnectorStep';

@@ -21,14 +21,14 @@ export const UpgradePrebuiltRulesTableButtons = ({
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
     state: {
-      ruleUpgradeInfos,
+      ruleUpgradeStates,
       hasRulesToUpgrade,
       loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,
       isPrebuiltRulesCustomizationEnabled,
     },
-    actions: { upgradeRules },
+    actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
   const canUserEditRules = canUserCRUD && !isUserDataLoading;
@@ -38,10 +38,13 @@ export const UpgradePrebuiltRulesTableButtons = ({
 
   const isRuleUpgrading = loadingRules.length > 0;
   const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
+
   const doAllSelectedRulesHaveConflicts =
-    isPrebuiltRulesCustomizationEnabled && isAllRuleHaveConflicts(selectedRules);
+    isPrebuiltRulesCustomizationEnabled &&
+    selectedRules.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
   const doAllRulesHaveConflicts =
-    isPrebuiltRulesCustomizationEnabled && isAllRuleHaveConflicts(ruleUpgradeInfos);
+    isPrebuiltRulesCustomizationEnabled &&
+    ruleUpgradeStates.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
 
   const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
     canUserEditRules,
@@ -53,12 +56,6 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const upgradeSelectedRules = useCallback(
     () => upgradeRules(selectedRules.map((rule) => rule.rule_id)),
     [selectedRules, upgradeRules]
-  );
-
-  const upgradeAllRules = useCallback(
-    // Upgrade all rules, ignoring filter and selection
-    () => upgradeRules(ruleUpgradeInfos.map((rule) => rule.rule_id)),
-    [ruleUpgradeInfos, upgradeRules]
   );
 
   return (
@@ -146,7 +143,3 @@ const useBulkUpdateButtonsTooltipContent = ({
     allRulesButtonTooltip: undefined,
   };
 };
-
-function isAllRuleHaveConflicts(rules: Array<{ diff: { num_fields_with_conflicts: number } }>) {
-  return rules.every((rule) => rule.diff.num_fields_with_conflicts > 0);
-}

@@ -235,4 +235,7 @@ const commons = {
       },
     },
   },
+  meta: {
+    space_id: 'default',
+  },
 };

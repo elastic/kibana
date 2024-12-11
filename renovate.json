@@ -1692,6 +1692,34 @@
       "enabled": true
     },
     {
+      "groupName": "reporting dependencies",
+      "matchDepNames": [
+        "@types/extract-zip",
+        "@types/opn",
+        "@types/pdfmake",
+        "extract-zip",
+        "opn",
+        "pdfjs-dist",
+        "pdfmake",
+        "puppeteer"
+      ],
+      "reviewers": [
+        "team:kibana-presentation",
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Reporting Services",
+        "Team:ResponseOps",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "turf",
       "matchDepNames": [
         "@turf/along",
@@ -2065,15 +2093,22 @@
       "groupName": "platform security modules",
       "matchDepNames": [
         "css.escape",
+        "dependency-check",
         "node-forge",
         "formik",
-        "@types/node-forge",
+        "handlebars",
+        "js-sha256",
         "require-in-the-middle",
+        "tape",
         "tough-cookie",
-        "@types/tough-cookie",
         "xml-crypto",
-        "@types/xml-crypto",
-        "@kayahr/text-encoding"
+        "@elastic/node-crypto",
+        "@kayahr/text-encoding",
+        "@types/lodash",
+        "@types/minimist",
+        "@types/node-forge",
+        "@types/tough-cookie",
+        "@types/xml-crypto"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -2414,8 +2449,7 @@
         "jsonwebtoken"
       ],
       "reviewers": [
-        "team:response-ops",
-        "team:kibana-core"
+        "team:response-ops"
       ],
       "matchBaseBranches": [
         "main"
@@ -2488,7 +2522,8 @@
     {
       "groupName": "AlertingEmails",
       "matchDepNames": [
-        "nodemailer"
+        "nodemailer",
+        "@types/nodemailer"
       ],
       "reviewers": [
         "team:response-ops"
@@ -2498,7 +2533,61 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Response Ops HTTPS dependencies",
+      "matchDepNames": [
+        "@types/http-proxy",
+        "get-port",
+        "google-auth-library",
+        "http-proxy",
+        "http-proxy-agent",
+        "https-proxy-agent",
+        "proxy"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Response Ops misc dependencies",
+      "matchDepNames": [
+        "@types/stats-lite",
+        "@types/textarea-caret",
+        "email-addresses",
+        "json-stringify-safe",
+        "murmurhash",
+        "mdast-util-to-hast",
+        "pretty-ms",
+        "p-settle",
+        "p-reflect",
+        "remark-stringify",
+        "stats-lite",
+        "textarea-caret",
+        "type-fest"
+      ],
+      "reviewers": [
+        "team:response-ops"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
