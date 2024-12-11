@@ -23,5 +23,6 @@ export function lightenColor(baseColor: string, step: number, totalSteps: number
   const currentLevelTargetLightness =
     outputColorLightness + lightnessSpace * ((step - 1) / (totalSteps - 1));
   const lightenedColor = hslColor.lightness(currentLevelTargetLightness);
+
   return lightenedColor.hex();
 }
