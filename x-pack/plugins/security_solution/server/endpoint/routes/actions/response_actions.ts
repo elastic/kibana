@@ -8,11 +8,6 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
-import { stringify } from '../../utils/stringify';
-import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
-import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
