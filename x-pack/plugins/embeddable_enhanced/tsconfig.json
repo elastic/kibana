@@ -9,9 +9,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
-    "@kbn/ui-actions-plugin",
     "@kbn/ui-actions-enhanced-plugin",
-    "@kbn/i18n",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-plugin",
     "@kbn/presentation-publishing",
