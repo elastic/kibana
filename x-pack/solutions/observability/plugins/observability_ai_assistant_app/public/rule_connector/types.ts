@@ -8,4 +8,5 @@
 export interface ObsAIAssistantActionParams {
   connector: string;
   message: string;
+  status: string;
 }
