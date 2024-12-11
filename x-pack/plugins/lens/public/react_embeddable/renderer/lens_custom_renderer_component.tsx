@@ -60,6 +60,7 @@ export function LensRenderer({
   timeRange,
   disabledActions,
   hidePanelTitles,
+  lastReloadRequestTime,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -83,6 +84,11 @@ export function LensRenderer({
   const searchApi = useSearchApi({ query, filters, timeRange });
 
   const showPanelChrome = Boolean(withDefaultActions) || (extraActions?.length || 0) > 0;
+
+  const reload$ = useMemo(() => new BehaviorSubject<void>(undefined), []);
+  useEffect(() => {
+    reload$.next();
+  }, [reload$, lastReloadRequestTime]);
 
   // Re-render on changes
   // internally the embeddable will evaluate whether it is worth to actual render or not
@@ -149,6 +155,7 @@ export function LensRenderer({
           attributes: props.attributes,
         }),
         hidePanelTitle: hidePanelTitles$,
+        reload$, // trigger a reload (replacement for deprepcated searchSessionId)
       })}
       onApiAvailable={setLensApi}
       hidePanelChrome={!showPanelChrome}
