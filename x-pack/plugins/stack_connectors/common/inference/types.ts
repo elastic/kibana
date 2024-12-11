@@ -20,6 +20,8 @@ import {
   TextEmbeddingResponseSchema,
   UnifiedChatCompleteParamsSchema,
   UnifiedChatCompleteResponseSchema,
+  DashboardActionParamsSchema,
+  DashboardActionResponseSchema,
 } from './schema';
 import { ConfigProperties } from '../dynamic_config/types';
 
@@ -42,6 +44,9 @@ export type TextEmbeddingParams = TypeOf<typeof TextEmbeddingParamsSchema>;
 export type TextEmbeddingResponse = TypeOf<typeof TextEmbeddingResponseSchema>;
 
 export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
+
+export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 
