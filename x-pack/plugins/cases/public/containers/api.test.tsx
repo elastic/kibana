@@ -1194,7 +1194,7 @@ describe('Cases API', () => {
     });
   });
 
-  describe('postObservables', () => {
+  describe('postObservable', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(basicCaseSnake);
