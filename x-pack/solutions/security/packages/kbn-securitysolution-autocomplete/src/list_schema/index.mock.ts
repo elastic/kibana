@@ -14,7 +14,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: Once this mock is available within packages, use it instead, https://github.com/elastic/kibana/issues/100715
-// import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
+// import { getFoundListSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_list_schema.mock';
 export const getFoundListSchemaMock = (): FoundListSchema => ({
   cursor: '123',
   data: [getListResponseMock()],
@@ -41,7 +41,7 @@ export const TYPE = 'ip';
 export const NAME = 'some name';
 
 // TODO: Once this mock is available within packages, use it instead, https://github.com/elastic/kibana/issues/100715
-// import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
+// import { getListResponseMock } from '../../../../../../../../lists/common/schemas/response/list_schema.mock';
 export const getListResponseMock = (): ListSchema => ({
   '@timestamp': DATE_NOW,
   _version: undefined,
