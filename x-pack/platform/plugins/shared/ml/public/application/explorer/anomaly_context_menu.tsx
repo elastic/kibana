@@ -50,8 +50,13 @@ import type { AnomalyChartsEmbeddableState } from '../../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
-import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
+import {
+  getMergedGroupsAndJobsIds,
+  getSelectionInfluencers,
+  getSelectionTimeRange,
+} from './explorer_utils';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/utils';
+import type { GroupObj } from '../components/job_selector/job_selector';
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
@@ -59,6 +64,7 @@ interface AnomalyContextMenuProps {
   bounds?: TimeRangeBounds;
   interval?: number;
   chartsCount: number;
+  selectedGroups: GroupObj[];
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -72,6 +78,7 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) 
 
 export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   selectedJobs,
+  selectedGroups,
   selectedCells,
   bounds,
   interval,
@@ -97,6 +104,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     [setIsMenuOpen]
   );
 
+  const mergedGroupsAndJobsIds = getMergedGroupsAndJobsIds(selectedGroups, selectedJobs);
   const openCasesModal = useCasesModal(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE);
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
@@ -137,8 +145,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     maxSeriesToPlot >= 1 &&
     maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
 
-  const jobIds = selectedJobs.map(({ id }) => id);
-
   const getEmbeddableInput = useCallback(
     (timeRange?: TimeRange) => {
       // Respect the query and the influencers selected
@@ -151,7 +157,8 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       );
 
       const influencers = selectionInfluencers ?? [];
-      const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
+      const config = getDefaultEmbeddablePanelConfig(mergedGroupsAndJobsIds, queryString);
+
       const queryFromSelectedCells = influencers
         .map((s) => escapeKueryForEmbeddableFieldValuePair(s.fieldName, s.fieldValue))
         .join(' or ');
@@ -161,7 +168,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       return {
         ...config,
         ...(timeRange ? { timeRange } : {}),
-        jobIds,
+        jobIds: mergedGroupsAndJobsIds,
         maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
         severityThreshold: severity.val,
         ...((isDefined(queryString) && queryString !== '') ||
@@ -175,7 +182,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           : {}),
       };
     },
-    [jobIds, maxSeriesToPlot, severity, queryString, selectedCells]
+    [selectedCells, mergedGroupsAndJobsIds, queryString, maxSeriesToPlot, severity.val]
   );
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
@@ -350,7 +357,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             defaultMessage: 'Anomaly charts',
           })}
           documentInfo={{
-            title: getDefaultExplorerChartsPanelTitle(selectedJobs.map(({ id }) => id)),
+            title: getDefaultExplorerChartsPanelTitle(mergedGroupsAndJobsIds),
           }}
           onClose={setIsAddDashboardActive.bind(null, false)}
           onSave={onSaveCallback}

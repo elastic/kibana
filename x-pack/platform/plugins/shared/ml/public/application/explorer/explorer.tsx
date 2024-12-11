@@ -582,6 +582,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
               <AnomalyContextMenu
                 selectedJobs={selectedJobs!}
+                selectedGroups={selectedGroups}
                 selectedCells={selectedCells}
                 bounds={bounds}
                 interval={swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined}
