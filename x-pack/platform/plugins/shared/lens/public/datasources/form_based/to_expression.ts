@@ -527,10 +527,11 @@ export function toExpression(
   searchSessionId?: string,
   forceDSL?: boolean
 ) {
-  if (state.layers[layerId]) {
+  const layer = state.layers[layerId] as FormBasedLayer;
+  if (layer) {
     return getExpressionForLayer(
-      state.layers[layerId],
-      indexPatterns[state.layers[layerId].indexPatternId],
+      layer,
+      indexPatterns[layer.indexPatternId],
       uiSettings,
       dateRange,
       nowInstant,

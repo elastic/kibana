@@ -180,6 +180,8 @@ export function getStateTimeShiftWarningMessages(
   if (!state) return [];
   const warningMessages: UserMessage[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
+    if (layer.type === 'esql') return;
+
     const layerIndexPattern = dataViews.indexPatterns[layer.indexPatternId];
     if (!layerIndexPattern) {
       return;

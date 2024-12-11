@@ -14,11 +14,8 @@ import { fetchFieldsFromESQL } from '@kbn/esql-editor';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
-import {
-  FormatSelector,
-  FormatSelectorProps,
-} from '../../form_based/dimension_panel/format_selector';
-import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
+import { FormatSelector, FormatSelectorProps } from '../../dimension_panel/format_selector';
+import type { DatasourceDimensionEditorProps, DataType } from '../../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';

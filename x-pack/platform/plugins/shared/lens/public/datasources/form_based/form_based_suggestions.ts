@@ -86,12 +86,16 @@ function buildSuggestion({
   // It's fairly easy to accidentally introduce a mismatch between
   // columnOrder and columns, so this is a safeguard to ensure the
   // two match up.
-  const layers = mapValues(updatedState.layers, (layer) => ({
-    ...layer,
-    columns: pick(layer.columns, layer.columnOrder) as Record<string, BaseIndexPatternColumn>,
-  }));
+  const layers = mapValues(updatedState.layers, (layer) =>
+    layer.type === 'esql'
+      ? layer
+      : {
+          ...layer,
+          columns: pick(layer.columns, layer.columnOrder) as Record<string, BaseIndexPatternColumn>,
+        }
+  );
 
-  const columnOrder = layers[layerId].columnOrder;
+  const columnOrder = (layers[layerId] as FormBasedLayer).columnOrder;
   const columnMap = layers[layerId].columns as Record<string, BaseIndexPatternColumn>;
   const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
 
@@ -104,7 +108,7 @@ function buildSuggestion({
     table: {
       columns: columnOrder
         // Hide any referenced columns from what visualizations know about
-        .filter((columnId) => !isReferenced(layers[layerId]!, columnId))
+        .filter((columnId) => !isReferenced(layers[layerId] as FormBasedLayer, columnId))
         .map((columnId) => ({
           columnId,
           operation: columnToOperation(columnMap[columnId]),
@@ -158,9 +162,9 @@ export function getDatasourceSuggestionsForField(
     // contain any layers yet, behave as if there is no layer.
     const mostEmptyLayerId = minBy(
       layerIds,
-      (layerId) => state.layers[layerId].columnOrder.length
+      (layerId) => (state.layers[layerId] as FormBasedLayer).columnOrder.length
     ) as string;
-    if (state.layers[mostEmptyLayerId].columnOrder.length === 0) {
+    if ((state.layers[mostEmptyLayerId] as FormBasedLayer).columnOrder.length === 0) {
       return getEmptyLayerSuggestionsForField(
         state,
         mostEmptyLayerId,
@@ -281,6 +285,7 @@ function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPat
         const orderColumn = column.params.orderAgg;
         const operationDefinition = operationDefinitionMap[orderColumn.operationType];
         const layer: FormBasedLayer = {
+          type: 'form',
           indexPatternId: indexPattern.id,
           columns: {},
           columnOrder: [],
@@ -312,6 +317,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
 ) {
   const columns = convertToColumnChange(layer.columns, indexPattern);
   let newLayer: FormBasedLayer = {
+    type: 'form',
     ignoreGlobalFilters: layer.ignoreGlobalFilters,
     indexPatternId: indexPattern.id,
     columns: {},
@@ -406,7 +412,7 @@ function getExistingLayerSuggestionsForField(
   field: IndexPatternField,
   indexPatterns: IndexPatternMap
 ) {
-  const layer = state.layers[layerId];
+  const layer = state.layers[layerId] as FormBasedLayer;
   const indexPattern = indexPatterns[layer.indexPatternId];
   const operations = getOperationTypesForField(field);
   const usableAsBucketOperation = getBucketOperation(field);
@@ -533,7 +539,7 @@ function getEmptyLayerSuggestionsForField(
   // copy the sampling rate to the new layer
   // or just default to 1
   if (newLayer) {
-    newLayer.sampling = state.layers[layerId]?.sampling ?? 1;
+    newLayer.sampling = (state.layers[layerId] as FormBasedLayer)?.sampling ?? 1;
   }
 
   const newLayerSuggestions = newLayer
@@ -561,7 +567,7 @@ function createNewLayerWithBucketAggregation(
     op: operation,
     layer: insertNewColumn({
       op: 'count',
-      layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+      layer: { type: 'form', indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
       columnId: generateId(),
       field: documentField,
       indexPattern,
@@ -588,7 +594,7 @@ function createNewLayerWithMetricAggregation(
     op: 'date_histogram',
     layer: insertNewColumn({
       op: metricOperation.type as OperationType,
-      layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+      layer: { type: 'form', indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
       columnId: generateId(),
       field,
       indexPattern,
@@ -627,7 +633,7 @@ export function getDatasourceSuggestionsFromCurrentState(
             })
           : i18n.translate('xpack.lens.indexPatternSuggestion.removeLayerLabel', {
               defaultMessage: 'Show only {indexPatternTitle}',
-              values: { indexPatternTitle: indexPatterns[layer.indexPatternId].title },
+              values: { indexPatternTitle: indexPatterns[layer.indexPatternId!].title },
             });
 
         return buildSuggestion({
@@ -653,7 +659,10 @@ export function getDatasourceSuggestionsFromCurrentState(
 
   return flatten(
     layers
-      .filter(([_id, layer]) => layer.columnOrder.length && layer.indexPatternId)
+      .filter(
+        ([_id, layer]) => layer.type !== 'esql' && layer.columnOrder.length && layer.indexPatternId
+      )
+      .map((layer) => layer as [string, FormBasedLayer])
       .map(([layerId, layer]) => {
         const indexPattern = indexPatterns[layer.indexPatternId];
         const [buckets, metrics, references] = getExistingColumnGroups(layer);
@@ -722,7 +731,7 @@ function createChangedNestingSuggestion(
   layerId: string,
   indexPatterns: IndexPatternMap
 ) {
-  const layer = state.layers[layerId];
+  const layer = state.layers[layerId] as FormBasedLayer;
   const [firstBucket, secondBucket, ...rest] = layer.columnOrder;
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
   const indexPattern = indexPatterns[state.currentIndexPatternId];
@@ -764,6 +773,7 @@ function createMetricSuggestion(
     changeType: 'initial',
     updatedLayer: insertNewColumn({
       layer: {
+        type: 'form',
         indexPatternId: indexPattern.id,
         columns: {},
         columnOrder: [],
@@ -793,7 +803,7 @@ function createAlternativeMetricSuggestions(
   layerId: string,
   state: FormBasedPrivateState
 ) {
-  const layer = state.layers[layerId];
+  const layer = state.layers[layerId] as FormBasedLayer;
   const suggestions: Array<DatasourceSuggestion<FormBasedPrivateState>> = [];
   const topLevelMetricColumns = layer.columnOrder.filter(
     (columnId) => !isReferenced(layer, columnId)
@@ -841,7 +851,7 @@ function createSuggestionWithDefaultDateHistogram(
   timeField: IndexPatternField,
   indexPatterns: IndexPatternMap
 ) {
-  const layer = state.layers[layerId];
+  const layer = state.layers[layerId] as FormBasedLayer;
   const indexPattern = indexPatterns[layer.indexPatternId];
 
   return buildSuggestion({
@@ -863,7 +873,7 @@ function createSuggestionWithDefaultDateHistogram(
 }
 
 function createSimplifiedTableSuggestions(state: FormBasedPrivateState, layerId: string) {
-  const layer = state.layers[layerId];
+  const layer = state.layers[layerId] as FormBasedLayer;
 
   const [availableBucketedColumns, availableMetricColumns] = partition(
     layer.columnOrder,

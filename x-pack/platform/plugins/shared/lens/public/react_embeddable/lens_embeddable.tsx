@@ -61,6 +61,12 @@ export const createLensEmbeddableFactory = (
        * Observables and functions declared here are used internally to store mutating state values
        * This is an internal API not exposed outside of the embeddable.
        */
+      if (initialState.attributes.state.datasourceStates.textBased) {
+        initialState.attributes.state.datasourceStates.formBased =
+          initialState.attributes.state.datasourceStates.textBased;
+        delete initialState.attributes.state.datasourceStates.textBased;
+      }
+
       const internalApi = initializeInternalApi(initialState, parentApi, titleManager, services);
 
       /**

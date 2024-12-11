@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { RandomSamplingIcon } from '@kbn/random-sampling';
 import type { DatasourceLayerPanelProps } from '../../types';
-import type { FormBasedPrivateState } from './types';
+import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getSamplingValue } from './utils';
 import { getIgnoreGlobalFilterIcon } from '../../shared_components/ignore_global_filter';
@@ -26,7 +26,7 @@ export function LayerPanel({
   onChangeIndexPattern,
   dataViews,
 }: FormBasedLayerPanelProps) {
-  const layer = state.layers[layerId];
+  const layer = state.layers[layerId] as FormBasedLayer;
   const { euiTheme } = useEuiTheme();
 
   const indexPattern = dataViews.indexPatterns[layer.indexPatternId];

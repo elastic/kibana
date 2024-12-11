@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Datasource } from '../../types';
-import { TextBasedPrivateState } from './types';
+import { Datasource } from '../../../types';
+import { FormBasedPrivateState } from '../types';
+import { TextBasedLayer } from '../types';
 
-export const removeColumn: Datasource<TextBasedPrivateState>['removeColumn'] = ({
+export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = ({
   prevState,
   layerId,
   columnId,
@@ -18,8 +19,10 @@ export const removeColumn: Datasource<TextBasedPrivateState>['removeColumn'] = (
     layers: {
       ...prevState.layers,
       [layerId]: {
-        ...prevState.layers[layerId],
-        columns: prevState.layers[layerId].columns.filter((col) => col.columnId !== columnId),
+        ...(prevState.layers[layerId] as TextBasedLayer),
+        columns: (prevState.layers[layerId] as TextBasedLayer).columns.filter(
+          (col) => col.columnId !== columnId
+        ),
       },
     },
   };

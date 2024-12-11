@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
-import { reorderElements } from '../../../utils';
-import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../types';
+import { FormBasedPrivateState, TextBasedLayer } from '../../types';
+import type { TextBasedLayerColumn } from '../types';
+import { reorderElements } from '../../../../utils';
+import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../../types';
 import { removeColumn } from '../remove_column';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
-export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPrivateState>) => {
+export const onDrop = (props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>) => {
   const { dropType, state, source, target } = props;
   if (
     ![
@@ -29,6 +30,9 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
   }
 
   const layer = state.layers[target.layerId];
+
+  if (layer.type !== 'esql') return;
+
   const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
   const sourceField = allColumns.find((f) => f.columnId === source.id || f.variable === source.id);
   const targetField = allColumns.find((f) => f.columnId === target.columnId);
@@ -81,7 +85,7 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
     layers: {
       ...props.state.layers,
       [target.layerId]: {
-        ...layer,
+        ...(layer as TextBasedLayer),
         columns,
         allColumns,
       },

@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
+import { TextBasedLayer, IndexPatternRef } from './types';
 import type { OriginalColumn } from '../../../common/types';
+import { FormBasedPrivateState } from '../types';
 
 function getExpressionForLayer(
   layer: TextBasedLayer,
@@ -130,9 +131,9 @@ function getExpressionForLayer(
   }
 }
 
-export function toExpression(state: TextBasedPrivateState, layerId: string) {
-  if (state.layers[layerId]) {
-    return getExpressionForLayer(state.layers[layerId], layerId, state.indexPatternRefs);
+export function toExpression(state: FormBasedPrivateState, layerId: string) {
+  if (state.layers[layerId] && state.layers[layerId].type === 'esql') {
+    return getExpressionForLayer(state.layers[layerId] as TextBasedLayer, layerId, []);
   }
 
   return null;

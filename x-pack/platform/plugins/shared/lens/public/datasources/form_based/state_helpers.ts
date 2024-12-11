@@ -20,7 +20,7 @@ export function mergeLayer({
     ...state,
     layers: {
       ...state.layers,
-      [layerId]: { ...state.layers[layerId], ...newLayer },
+      [layerId]: { ...state.layers[layerId], ...newLayer } as FormBasedLayer,
     },
   };
 }

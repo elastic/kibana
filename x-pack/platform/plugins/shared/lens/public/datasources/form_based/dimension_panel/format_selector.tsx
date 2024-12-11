@@ -28,7 +28,7 @@ import {
 } from '@kbn/field-formats-plugin/common';
 import { css } from '@emotion/react';
 import type { DocLinksStart } from '@kbn/core/public';
-import { TextBasedLayerColumn } from '../../text_based/types';
+import { TextBasedLayerColumn } from '../esql_layer/types';
 import { LensAppServices } from '../../../app_plugin/types';
 import { GenericIndexPatternColumn } from '../form_based';
 import { isColumnFormatted } from '../operations/definitions/helpers';
@@ -173,7 +173,7 @@ export function FormatSelector(props: FormatSelectorProps) {
   const { euiTheme } = useEuiTheme();
   const { selectedColumn, onChange, docLinks } = props;
   const currentFormat = isColumnFormatted(selectedColumn)
-    ? selectedColumn.params?.format
+    ? selectedColumn.params.format
     : undefined;
 
   const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);

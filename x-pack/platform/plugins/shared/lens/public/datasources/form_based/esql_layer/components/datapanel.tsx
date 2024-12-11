@@ -25,10 +25,10 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/types';
-import type { DatasourceDataPanelProps } from '../../../types';
+import type { DatasourceDataPanelProps } from '../../../../types';
 import type { TextBasedPrivateState } from '../types';
 import { getStateFromAggregateQuery } from '../utils';
-import { FieldItem } from '../../common/field_item';
+import { FieldItem } from '../../../common/field_item';
 import { getColumnsFromCache } from '../fieldlist_cache';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;

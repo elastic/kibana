@@ -73,7 +73,6 @@ import type {
   FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './datasources/form_based';
-import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
 
 import type {
   XyVisualization as XyVisualizationType,
@@ -303,7 +302,6 @@ export class LensPlugin {
   private editorFrameSetup: EditorFrameSetup | undefined;
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
   private FormBasedDatasource: FormBasedDatasourceType | undefined;
-  private TextBasedDatasource: TextBasedDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
@@ -582,12 +580,10 @@ export class LensPlugin {
       HeatmapVisualization,
       GaugeVisualization,
       TagcloudVisualization,
-      TextBasedDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.FormBasedDatasource = new FormBasedDatasource();
-    this.TextBasedDatasource = new TextBasedDatasource();
     this.xyVisualization = new XyVisualization();
     this.legacyMetricVisualization = new LegacyMetricVisualization();
     this.metricVisualization = new MetricVisualization();
@@ -611,7 +607,6 @@ export class LensPlugin {
       formatFactory,
     };
     this.FormBasedDatasource.setup(core, dependencies);
-    this.TextBasedDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.legacyMetricVisualization.setup(core, dependencies);
