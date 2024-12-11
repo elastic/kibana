@@ -101,6 +101,8 @@ export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
   comments: AttachmentUI[];
 };
+export type ObservableUI = CaseUI['observables'][0];
+
 export type CasesUI = CaseUI[];
 export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
   cases: CasesUI;

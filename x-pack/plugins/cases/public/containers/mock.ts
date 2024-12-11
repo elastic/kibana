@@ -48,9 +48,10 @@ import type {
   CasesConfigurationUICustomField,
   CasesConfigurationUITemplate,
   CasesSimilarResponseUI,
+  ObservableUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
 import type {
@@ -1549,5 +1550,24 @@ export const observableTypesMock: ObservableType[] = [
   {
     label: 'test_observable_type_2',
     key: '67ec9e77-f64c-47d9-900c-1142239e0d25',
+  },
+];
+
+export const mockObservables: ObservableUI[] = [
+  {
+    id: 'fa6dfb79-7fd5-44d0-a582-ca196e3a5e69',
+    value: '127.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    description: null,
+    createdAt: '2024-12-11',
+    updatedAt: '2024-12-11',
+  },
+  {
+    id: '096ca782-bd39-4dbf-8cf1-253d18277fdc',
+    value: '10.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    description: null,
+    createdAt: '2024-12-11',
+    updatedAt: '2024-12-11',
   },
 ];
