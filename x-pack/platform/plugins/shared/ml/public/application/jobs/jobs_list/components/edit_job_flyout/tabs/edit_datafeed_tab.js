@@ -33,7 +33,7 @@ function getDefaults(bucketSpan, jobDefaults) {
   };
 }
 
-export class Datafeed extends Component {
+export class EditDatafeedTab extends Component {
   constructor(props) {
     super(props);
 
@@ -164,7 +164,7 @@ export class Datafeed extends Component {
     );
   }
 }
-Datafeed.propTypes = {
+EditDatafeedTab.propTypes = {
   datafeedRunning: PropTypes.bool.isRequired,
   datafeedQuery: PropTypes.string.isRequired,
   datafeedQueryDelay: PropTypes.string.isRequired,

@@ -23,7 +23,7 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import { tabColor } from '../../../../../../../common/util/group_color_utils';
 
-export class JobDetailsUI extends Component {
+export class EditJobDetailsTabUI extends Component {
   constructor(props) {
     super(props);
 
@@ -42,12 +42,13 @@ export class JobDetailsUI extends Component {
   }
 
   componentDidMount() {
+    const euiTheme = this.props.euiTheme;
     const mlApi = this.props.kibana.services.mlServices.mlApi;
     // load groups to populate the select options
     mlApi.jobs
       .groups()
       .then((resp) => {
-        const groups = resp.map((g) => ({ label: g.id, color: tabColor(g.id) }));
+        const groups = resp.map((g) => ({ label: g.id, color: tabColor(g.id, euiTheme) }));
         this.setState({ groups });
       })
       .catch((error) => {
@@ -58,7 +59,7 @@ export class JobDetailsUI extends Component {
   static getDerivedStateFromProps(props) {
     const selectedGroups =
       props.jobGroups !== undefined
-        ? props.jobGroups.map((g) => ({ label: g, color: tabColor(g) }))
+        ? props.jobGroups.map((g) => ({ label: g, color: tabColor(g, props.euiTheme) }))
         : [];
 
     const { datafeedRunning, jobClosed } = props;
@@ -261,12 +262,13 @@ export class JobDetailsUI extends Component {
     );
   }
 }
-JobDetailsUI.propTypes = {
+EditJobDetailsTabUI.propTypes = {
   datafeedRunning: PropTypes.bool.isRequired,
+  euiTheme: PropTypes.object.isRequired,
   jobDescription: PropTypes.string.isRequired,
   jobGroups: PropTypes.array.isRequired,
   jobModelMemoryLimit: PropTypes.string.isRequired,
   setJobDetails: PropTypes.func.isRequired,
 };
 
-export const JobDetails = withKibana(JobDetailsUI);
+export const EditJobDetailsTab = withKibana(EditJobDetailsTabUI);
