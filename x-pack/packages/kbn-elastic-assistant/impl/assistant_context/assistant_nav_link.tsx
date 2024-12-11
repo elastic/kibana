@@ -15,7 +15,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { useAssistantContext } from '.';
 import { AssistantAvatar } from '../..';
 
-
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const TOOLTIP_CONTENT = i18n.translate(
@@ -29,9 +28,12 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
   defaultMessage: 'AI Assistant',
 });
 
-export const AssistantNavLink: FC = ({
-}) => {
-  const { chrome: { getChromeStyle$, navControls }, showAssistantOverlay, assistantAvailability: { hasAssistantPrivilege } } = useAssistantContext()
+export const AssistantNavLink: FC = ({}) => {
+  const {
+    chrome: { getChromeStyle$, navControls },
+    showAssistantOverlay,
+    assistantAvailability: { hasAssistantPrivilege },
+  } = useAssistantContext();
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
   const chromeStyle$ = useMemo(() => getChromeStyle$(), [getChromeStyle$]);
   const chromeStyle = useObservable(chromeStyle$, undefined);

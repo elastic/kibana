@@ -49,13 +49,13 @@ const queryClient = new QueryClient({
   logger: {
     log: jest.fn(),
     warn: jest.fn(),
-    error: () => { },
+    error: () => {},
   },
 });
 
 const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
-  const chrome = chromeServiceMock.createStartContract()
-  chrome.getChromeStyle$.mockReturnValue(of("classic"))
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.getChromeStyle$.mockReturnValue(of('classic'));
   return (
     <QueryClientProvider client={queryClient}>
       <AssistantProvider
@@ -78,7 +78,7 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
         {children}
       </AssistantProvider>
     </QueryClientProvider>
-  )
+  );
 };
 
 describe('RuleStatusFailedCallOut', () => {

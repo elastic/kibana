@@ -15,9 +15,9 @@ import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
-import { of } from 'rxjs';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -65,8 +65,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
       error: () => {},
     },
   });
-  const chrome = chromeServiceMock.createStartContract()
-  chrome.getChromeStyle$.mockReturnValue(of("classic"))
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
   return (
     <I18nProvider>
