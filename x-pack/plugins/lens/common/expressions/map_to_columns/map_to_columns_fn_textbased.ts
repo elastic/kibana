@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { OriginalColumn, MapToColumnsExpressionFunction } from './types';
 
 export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn'] = (
@@ -40,12 +39,7 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
         meta: {
           ...column.meta,
           field: originalColumn.sourceField,
-          ...(originalColumn.params && 'format' in (originalColumn.params as object)
-            ? {
-                params: (originalColumn.params as Record<string, unknown>)
-                  .format as SerializedFieldFormat,
-              }
-            : {}),
+          ...(originalColumn.format ? { params: originalColumn.format } : {}),
           ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
           sourceParams: {
             ...(column.meta?.sourceParams ?? {}),
