@@ -7120,7 +7120,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
+"@kbn/securitysolution-autocomplete@link:x-pack/solutions/security/packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
 

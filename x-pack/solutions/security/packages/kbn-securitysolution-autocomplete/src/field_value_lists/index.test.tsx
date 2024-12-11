@@ -25,7 +25,7 @@ import {
 
 // TODO: Once these mocks are available, use them instead of hand mocking, https://github.com/elastic/kibana/issues/100715
 // const mockKibanaHttpService = coreMock.createStart().http;
-// import { coreMock } from '../../../../../../../src/core/public/mocks';
+// import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
 const mockKibanaHttpService = jest.fn();
 const mockShowValueListModal = jest.fn();
 const MockedShowValueListModal = (props: unknown) => {
