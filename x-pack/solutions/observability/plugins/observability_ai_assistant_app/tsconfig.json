@@ -80,6 +80,8 @@
     "@kbn/observability-ai-common",
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-common",
+    "@kbn/rule-data-utils",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*"
