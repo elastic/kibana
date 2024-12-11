@@ -7,6 +7,7 @@ This package provides:
 - a function `getColorFactory` that given a color mapping configuration returns a function that maps a passed category to the corresponding color
 - a definition scheme for the color mapping, based on the type `ColorMapping.Config`, that provides an extensible way of describing the link between colors and rules. Collects the minimal information required apply colors based on categories. Together with the `ColorMappingInputData` can be used to get colors in a deterministic way.
 
+Testing
 
 An example of the configuration is the following:
 ```ts
