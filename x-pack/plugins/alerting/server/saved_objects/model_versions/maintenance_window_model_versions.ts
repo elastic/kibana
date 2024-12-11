@@ -32,6 +32,9 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
           expirationDate: {
             type: 'date',
           },
+          updatedAt: {
+            type: 'date',
+          },
         },
       },
     ],

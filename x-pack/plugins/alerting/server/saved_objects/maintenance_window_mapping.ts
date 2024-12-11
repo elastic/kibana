@@ -28,6 +28,9 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
     expirationDate: {
       type: 'date',
     },
+    updatedAt: {
+      type: 'date',
+    },
     // NO NEED TO BE INDEXED
     // duration: {
     //   type: 'long',
@@ -42,10 +45,6 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
     //   type: 'keyword',
     // },
     // createdAt: {
-    //   index: false,
-    //   type: 'date',
-    // },
-    // updatedAt: {
     //   index: false,
     //   type: 'date',
     // },
