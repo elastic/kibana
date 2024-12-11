@@ -52,8 +52,8 @@ Security Solution has multiple API domains scattered across Kibana. Currently th
 
 - Security Lists
 
-  - Bundling script: `packages/kbn-securitysolution-lists-common/scripts/openapi_bundle.js`
-  - Bundles location: `packages/kbn-securitysolution-lists-common/docs/openapi/{ess|serverless}`
+  - Bundling script: `x-pack/solutions/security/packages/kbn-securitysolution-lists-common/scripts/openapi_bundle.js`
+  - Bundles location: `x-pack/solutions/security/packages/kbn-securitysolution-lists-common/docs/openapi/{ess|serverless}`
 
 - Security Osquery
 
