@@ -36,10 +36,35 @@ test.skip('Kubernetes EA', async ({
   await kubernetesEAFlowPage.copyToClipboard();
 
   const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;
+  /**
+   * The page waits for the browser window to loose
+   * focus as a signal to start checking for incoming data
+   */
+  await page.evaluate('window.dispatchEvent(new Event("blur"))');
+
+  /**
+   * Ensemble story watches for the code snippet file
+   * to be created and then executes it
+   */
   fs.writeFileSync(outputPath, clipboardData);
 
   await kubernetesEAFlowPage.assertReceivedDataIndicatorKubernetes();
   await kubernetesEAFlowPage.clickKubernetesAgentCTA();
+
+  /**
+   * There might be a case that dashboard still does not show
+   * the data even though it was ingested already. This usually
+   * happens during in the test when navigation from the onboarding
+   * flow to the dashboard happens almost immediately.
+   * Waiting for a few seconds and reloading the page handles
+   * this case and makes the test a bit more robust.
+   */
+  try {
+    await kubernetesOverviewDashboardPage.assertNodesNoResultsNotVisible();
+  } catch {
+    await kubernetesOverviewDashboardPage.page.waitForTimeout(2000);
+    await kubernetesOverviewDashboardPage.page.reload();
+  }
 
   await kubernetesOverviewDashboardPage.openNodesInspector();
   await kubernetesOverviewDashboardPage.assetNodesInspectorStatusTableCells();

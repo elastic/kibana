@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
 });
 
-test('Auto-detect logs and metrics', async ({ onboardingHomePage, autoDetectFlowPage, page }) => {
+test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDetectFlowPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const fileName = 'code_snippet_logs_auto_detect.sh';
@@ -28,6 +28,11 @@ test('Auto-detect logs and metrics', async ({ onboardingHomePage, autoDetectFlow
   await autoDetectFlowPage.copyToClipboard();
 
   const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;
+
+  /**
+   * Ensemble story watches for the code snippet file
+   * to be created and then executes it
+   */
   fs.writeFileSync(outputPath, clipboardData);
 
   await autoDetectFlowPage.assertReceivedDataIndicator();
