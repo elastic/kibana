@@ -21,7 +21,7 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 By default, a saved Discover session stores the query text, filters, and
 current view of *Discover*, including the columns and sort order in the document table, and the {data-source}.
 
-. Once you've created a search worth saving, click *Save* in the toolbar.
+. Once you've created a view worth saving, click *Save* in the toolbar.
 . Enter a name for the session.
 . Optionally store <<managing-tags,tags>> and the time range with the session.
 . Click *Save*.
