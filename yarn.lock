@@ -7160,7 +7160,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-types@link:packages/kbn-securitysolution-io-ts-types":
+"@kbn/securitysolution-io-ts-types@link:src/platform/packages/shared/kbn-securitysolution-io-ts-types":
   version "0.0.0"
   uid ""
 
