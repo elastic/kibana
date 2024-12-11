@@ -2532,6 +2532,9 @@
           }
         },
         "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
