@@ -128,12 +128,7 @@ export class EntityClient {
     return mergeEntitiesList(sources, entities).slice(0, limit);
   }
 
-  async countEntities({
-    start,
-    end,
-    types = [],
-    filters = [],
-  }: CountByTypes) {
+  async countEntities({ start, end, types = [], filters = [] }: CountByTypes) {
     if (types.length === 0) {
       types = (await this.readTypeDefinitions()).map((definition) => definition.id);
     }
