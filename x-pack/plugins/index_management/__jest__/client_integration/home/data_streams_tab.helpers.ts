@@ -24,7 +24,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
-    clickIncludeStatsSwitch: () => void;
+    clickIncludeStatsSwitch: () => Promise<void>;
     toggleViewFilterAt: (index: number) => void;
     sortTableOnStorageSize: () => void;
     sortTableOnName: () => void;
@@ -90,9 +90,13 @@ export const setup = async (
     component.update();
   };
 
-  const clickIncludeStatsSwitch = () => {
-    const { find } = testBed;
-    find('includeStatsSwitch').simulate('click');
+  const clickIncludeStatsSwitch = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('includeStatsSwitch').simulate('click');
+    });
+    component.update();
   };
 
   const toggleViewFilterAt = (index: number) => {
@@ -294,6 +298,7 @@ export const createDataStreamPayload = (dataStream: Partial<DataStream>): DataSt
     enabled: true,
     data_retention: '7d',
   },
+  indexMode: 'standard',
   ...dataStream,
 });
 

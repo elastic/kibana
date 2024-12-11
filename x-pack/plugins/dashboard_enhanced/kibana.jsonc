@@ -1,12 +1,19 @@
 {
   "type": "plugin",
   "id": "@kbn/dashboard-enhanced-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "dashboardEnhanced",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "dashboardEnhanced"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "dashboardEnhanced"
+    ],
     "requiredPlugins": [
       "dashboard",
       "data",

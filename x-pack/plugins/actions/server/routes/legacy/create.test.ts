@@ -40,6 +40,16 @@ describe('createActionRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/action"`);
+    expect(config.options?.deprecated).toEqual({
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacycreateconnector',
+      severity: 'warning',
+      reason: {
+        type: 'migrate',
+        newApiPath: `/api/actions/connector/{id?}`,
+        newApiMethod: 'POST',
+      },
+    });
 
     const createResult = {
       id: '1',

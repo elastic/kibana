@@ -10,7 +10,6 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
-xpack.fleet.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.osquery.enabled: false
 
@@ -27,6 +26,13 @@ xpack.features.overrides:
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
   stackAlerts:
     name: "Alerts"
+    category: "enterpriseSearch"
+  ### Observability AI Assistant feature is moved to Search and renamed
+  observabilityAIAssistant:
+    name: "AI Assistant"
+    category: "enterpriseSearch"
+  ### AI Assistant enables the Inventory feature, moving to Search
+  inventory:
     category: "enterpriseSearch"
 
 ## Cloud settings
@@ -78,14 +84,18 @@ xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
 
-# Search Playground
-xpack.searchPlayground.ui.enabled: true
-
-# Search InferenceEndpoints
-xpack.searchInferenceEndpoints.ui.enabled: false
-
 # Search Notebooks
 xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
 # Semantic text UI
-xpack.index_management.dev.enableSemanticText: false
+xpack.index_management.dev.enableSemanticText: true
+
+# AI Assistant config
+xpack.observabilityAIAssistant.enabled: true
+xpack.searchAssistant.enabled: true
+xpack.searchAssistant.ui.enabled: true
+xpack.observabilityAIAssistant.scope: "search"
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
+xpack.observabilityAiAssistantManagement.spacesEnabled: false
+xpack.observabilityAiAssistantManagement.visibilityEnabled: false

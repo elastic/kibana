@@ -35,10 +35,3 @@ export const ASSISTANT_CARD_CALLOUT_INTEGRATIONS_BUTTON = i18n.translate(
     defaultMessage: 'Add integrations step',
   }
 );
-
-export const ASSISTANT_CARD_CREATE_NEW_CONNECTOR_POPOVER = i18n.translate(
-  'xpack.securitySolution.onboarding.assistantCard.createNewConnectorPopover',
-  {
-    defaultMessage: 'Create new connector',
-  }
-);

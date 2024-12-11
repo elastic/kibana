@@ -6,6 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ruleNotifyWhen,
   ruleLastRunOutcomeValues,
@@ -14,7 +15,6 @@ import {
   ruleExecutionStatusWarningReason,
 } from '../constants';
 import {
-  ruleParamsSchema,
   snoozeScheduleSchema,
   ruleExecutionStatusSchema,
   ruleLastRunSchema,

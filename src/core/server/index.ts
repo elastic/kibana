@@ -157,7 +157,7 @@ export type {
 } from '@kbn/core-user-profile-server';
 
 export { CspConfig } from '@kbn/core-http-server-internal';
-export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+export { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {
   AuthenticationHandler,
@@ -200,7 +200,6 @@ export type {
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
-  LifecycleResponseFactory,
   KnownHeaders,
   ErrorHttpResponseOptions,
   IKibanaSocket,
@@ -242,7 +241,11 @@ export type {
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { validBodyOutput, OnPostAuthResultType } from '@kbn/core-http-server';
+export {
+  validBodyOutput,
+  OnPostAuthResultType,
+  ReservedPrivilegesSet,
+} from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,

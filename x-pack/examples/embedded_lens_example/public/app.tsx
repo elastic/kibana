@@ -23,7 +23,6 @@ import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-  LensEmbeddableInput,
   FormulaPublicApi,
   DateHistogramIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
@@ -288,7 +287,7 @@ export const App = (props: {
           />
           {isSaveModalVisible && (
             <LensSaveModalComponent
-              initialInput={attributes as unknown as LensEmbeddableInput}
+              initialInput={{ attributes }}
               onSave={() => {}}
               onClose={() => setIsSaveModalVisible(false)}
             />

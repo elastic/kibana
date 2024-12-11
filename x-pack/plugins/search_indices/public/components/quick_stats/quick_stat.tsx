@@ -70,7 +70,7 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
           marginRight: euiTheme.size.s,
         },
         '.euiAccordion__triggerWrapper': {
-          background: euiTheme.colors.ghost,
+          background: euiTheme.colors.emptyShade,
         },
         '.euiAccordion__children': {
           borderTop: euiTheme.border.thin,

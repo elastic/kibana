@@ -16,7 +16,10 @@ import type {
   IContextContainer,
   HttpServiceSetup,
   HttpServiceStart,
+  RouterDeprecatedApiDetails,
 } from '@kbn/core-http-server';
+import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import type { PostValidationMetadata } from '@kbn/core-http-server';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
@@ -54,6 +57,9 @@ export interface InternalHttpServiceSetup
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
+  registerOnPostValidation(
+    cb: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void
+  ): void;
   registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   authRequestHeaders: IAuthHeadersStorage;
@@ -65,6 +71,7 @@ export interface InternalHttpServiceSetup
     contextName: ContextName,
     provider: IContextProvider<Context, ContextName>
   ) => IContextContainer;
+  getRegisteredDeprecatedApis: () => RouterDeprecatedApiDetails[];
 }
 
 /** @internal */

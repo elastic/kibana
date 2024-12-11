@@ -23,11 +23,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { clearFlashMessages, flashSuccessToast } from '../../../../shared/flash_messages';
 import { GenericEndpointInlineEditableTable } from '../../../../shared/tables/generic_endpoint_inline_editable_table';
 import { InlineEditableTableColumn } from '../../../../shared/tables/inline_editable_table/types';
 import { ItemWithAnID } from '../../../../shared/tables/types';
-import { CRAWL_RULES_DOCS_URL } from '../../../routes';
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
 import {
   CrawlerPolicies,
@@ -53,7 +53,12 @@ const DEFAULT_DESCRIPTION = (
       defaultMessage="Create a crawl rule to include or exclude pages whose URL matches the rule. Rules run in sequential order, and each URL is evaluated according to the first match. {link}"
       values={{
         link: (
-          <EuiLink href={CRAWL_RULES_DOCS_URL} target="_blank" external>
+          <EuiLink
+            data-test-subj="enterpriseSearchLearnMoreAboutCrawlRulesLink"
+            href={docLinks.appSearchCrawlRules}
+            target="_blank"
+            external
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.crawler.crawlRulesTable.descriptionLinkText',
               { defaultMessage: 'Learn more about crawl rules' }
@@ -78,9 +83,10 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-test-subj="enterpriseSearchColumnsSelect"
           fullWidth
-          hasNoInitialSelection
           value={(crawlRule as CrawlRule).policy}
+          hasNoInitialSelection={!(crawlRule as CrawlRule).policy}
           onChange={(e) => onChange(e.target.value)}
           disabled={isLoading}
           isInvalid={isInvalid}
@@ -106,9 +112,10 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-test-subj="enterpriseSearchColumnsSelect"
           fullWidth
-          hasNoInitialSelection
           value={(crawlRule as CrawlRule).rule}
+          hasNoInitialSelection={!(crawlRule as CrawlRule).rule}
           onChange={(e) => onChange(e.target.value)}
           disabled={isLoading}
           isInvalid={isInvalid}
@@ -139,6 +146,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiFieldText
+              data-test-subj="enterpriseSearchColumnsFieldText"
               fullWidth
               value={(crawlRule as CrawlRule).pattern}
               onChange={(e) => onChange(e.target.value)}

@@ -10,10 +10,9 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { getAriaLabelForTitle } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { PresentationPanelContextMenu } from './presentation_panel_context_menu';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
@@ -24,23 +23,20 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   hideTitle?: boolean;
   panelTitle?: string;
   panelDescription?: string;
-} & Pick<
-  PresentationPanelInternalProps,
-  'index' | 'showBadges' | 'getActions' | 'actionPredicate' | 'showNotifications'
->;
+  setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
+} & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
 
 export const PresentationPanelHeader = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
 >({
   api,
-  index,
   viewMode,
   headerId,
   getActions,
   hideTitle,
   panelTitle,
   panelDescription,
-  actionPredicate,
+  setDragHandle,
   showBadges = true,
   showNotifications = true,
 }: PresentationPanelHeaderProps<ApiType>) => {
@@ -51,12 +47,18 @@ export const PresentationPanelHeader = <
     getActions
   );
 
+  const memoizedSetDragHandle = useCallback(
+    // memoize the ref callback so that we don't call `setDragHandle` on every render
+    (ref: HTMLHeadingElement | null) => {
+      setDragHandle('panelHeader', ref);
+    },
+    [setDragHandle]
+  );
+
   const showPanelBar =
-    !hideTitle ||
-    panelDescription ||
-    viewMode !== 'view' ||
-    badgeElements.length > 0 ||
-    notificationElements.length > 0;
+    (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
+
+  if (!showPanelBar) return null;
 
   const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
   const ariaLabelElement = (
@@ -66,6 +68,7 @@ export const PresentationPanelHeader = <
   );
 
   const headerClasses = classNames('embPanel__header', {
+    'embPanel--dragHandle': viewMode === 'edit',
     'embPanel__header--floater': !showPanelBar,
   });
 
@@ -73,25 +76,12 @@ export const PresentationPanelHeader = <
     'embPanel--dragHandle': viewMode === 'edit',
   });
 
-  const contextMenuElement = (
-    <PresentationPanelContextMenu {...{ index, api, getActions, actionPredicate }} />
-  );
-
-  if (!showPanelBar) {
-    return (
-      <div data-test-subj={`embeddablePanelHeading`} className={headerClasses}>
-        {contextMenuElement}
-        {ariaLabelElement}
-      </div>
-    );
-  }
-
   return (
     <figcaption
       className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
     >
-      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
+      <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
         {ariaLabelElement}
         <PresentationPanelTitle
           api={api}
@@ -103,7 +93,6 @@ export const PresentationPanelHeader = <
         {showBadges && badgeElements}
       </h2>
       {showNotifications && notificationElements}
-      {contextMenuElement}
     </figcaption>
   );
 };

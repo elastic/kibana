@@ -581,6 +581,13 @@ components:
         - type
         - namespace_type
 
+    AlertSuppressionDurationUnit:
+      type: string
+      enum:
+        - s
+        - m
+        - h
+
     AlertSuppressionDuration:
       type: object
       properties:
@@ -588,11 +595,7 @@ components:
           type: integer
           minimum: 1
         unit:
-          type: string
-          enum:
-            - s
-            - m
-            - h
+          $ref: '#/components/schemas/AlertSuppressionDurationUnit'
       required:
         - value
         - unit

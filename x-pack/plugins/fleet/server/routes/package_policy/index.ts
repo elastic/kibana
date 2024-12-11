@@ -48,6 +48,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.LIST_PATTERN)
         ).granted,
+      summary: 'Get package policies',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
@@ -66,6 +70,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('post', PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN)
         ).granted,
+      summary: 'Bulk get package policies',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
@@ -84,6 +92,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.INFO_PATTERN)
         ).granted,
+      summary: 'Get a package policy',
+      description: 'Get a package policy by ID.',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
@@ -112,6 +125,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+      summary: 'Create a package policy',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
@@ -130,6 +147,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           fleetAuthz,
           getRouteRequiredAuthz('put', PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
         ).granted,
+      summary: 'Update a package policy',
+      description: 'Update a package policy by ID.',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
@@ -147,6 +169,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
+      summary: 'Bulk delete package policies',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
@@ -161,6 +187,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
+      },
+      summary: 'Delete a package policy',
+      description: 'Delete a package policy by ID.',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
       },
     })
     .addVersion(
@@ -178,6 +209,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
+      summary: 'Upgrade a package policy',
+      description: 'Upgrade a package policy to a newer package version.',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
@@ -193,6 +229,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN,
       fleetAuthz: {
         integrations: { readIntegrationPolicies: true },
+      },
+      summary: 'Dry run a package policy upgrade',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
       },
     })
     .addVersion(

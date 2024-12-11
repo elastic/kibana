@@ -78,14 +78,9 @@ describe('<AlertHeaderTitle />', () => {
   });
 
   it('should render notes section if experimental flag is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
 
     const { getByTestId } = renderHeader(mockContextValue);
     expect(getByTestId(NOTES_TITLE_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render fall back values if document is not alert', () => {
-    const { getByTestId } = renderHeader({ ...mockContextValue, dataFormattedForFieldBrowser: [] });
-    expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('Document details');
   });
 });

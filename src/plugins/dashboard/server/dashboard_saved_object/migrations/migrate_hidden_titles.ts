@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import type { SavedDashboardPanel } from '../schema';
 
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-} from '../../../common';
-import { SavedDashboardPanel } from '../../../common/content_management';
+} from './utils';
 
 /**
  * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced

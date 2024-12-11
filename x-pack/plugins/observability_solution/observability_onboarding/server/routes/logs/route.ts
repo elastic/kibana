@@ -6,10 +6,12 @@
  */
 
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
+import { ElasticAgentVersionInfo } from '../../../common/types';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
-import { getAgentVersion } from '../../lib/get_agent_version';
+import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -38,7 +40,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   async handler(resources): Promise<{
     apiEndpoint: string;
     scriptDownloadUrl: string;
-    elasticAgentVersion: string;
+    elasticAgentVersionInfo: ElasticAgentVersionInfo;
     elasticsearchUrl: string[];
   }> {
     const {
@@ -49,7 +51,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     } = resources;
 
     const fleetPluginStart = await plugins.fleet.start();
-    const elasticAgentVersion = await getAgentVersion(fleetPluginStart, kibanaVersion);
+    const elasticAgentVersionInfo = await getAgentVersionInfo(fleetPluginStart, kibanaVersion);
     const kibanaUrl = getKibanaUrl(core.setup, plugins.cloud?.setup);
     const scriptDownloadUrl = new URL(
       core.setup.http.staticAssets.getPluginAssetHref('standalone_agent_setup.sh'),
@@ -66,7 +68,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       apiEndpoint,
       elasticsearchUrl,
       scriptDownloadUrl,
-      elasticAgentVersion,
+      elasticAgentVersionInfo,
     };
   },
 });
@@ -80,6 +82,12 @@ const createAPIKeyRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
+
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
+    if (!hasPrivileges) {
+      throw Boom.forbidden('Insufficient permissions to create shipper API key');
+    }
+
     const { encoded: apiKeyEncoded } = await createShipperApiKey(client.asCurrentUser, 'otel logs');
 
     return { apiKeyEncoded };

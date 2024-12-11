@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-
-import { EuiToolTip } from '@elastic/eui';
+import React, { useEffect, useMemo, useRef } from 'react';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import type { EuiComboBox } from '@elastic/eui';
+import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { FieldHook } from '../../../../shared_imports';
-import { Field } from '../../../../shared_imports';
 import { FIELD_PLACEHOLDER } from './translations';
 
 interface MultiSelectAutocompleteProps {
@@ -18,7 +17,6 @@ interface MultiSelectAutocompleteProps {
   isDisabled: boolean;
   field: FieldHook;
   fullWidth?: boolean;
-  disabledText?: string;
   dataTestSubj?: string;
 }
 
@@ -28,12 +26,12 @@ const fieldDescribedByIds = 'detectionEngineMultiSelectAutocompleteField';
 
 export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteProps> = ({
   browserFields,
-  disabledText,
   isDisabled,
   field,
   fullWidth = false,
   dataTestSubj,
 }: MultiSelectAutocompleteProps) => {
+  const comboBoxRef = useRef<EuiComboBox<unknown>>();
   const fieldEuiFieldProps = useMemo(
     () => ({
       fullWidth: true,
@@ -43,23 +41,31 @@ export const MultiSelectAutocompleteComponent: React.FC<MultiSelectAutocompleteP
       onCreateOption: undefined,
       ...(fullWidth ? {} : { style: { width: `${FIELD_COMBO_BOX_WIDTH}px` } }),
       isDisabled,
+      ref: comboBoxRef,
     }),
-    [browserFields, isDisabled, fullWidth]
+    [browserFields, isDisabled, fullWidth, comboBoxRef]
   );
-  const fieldComponent = (
-    <Field
+
+  /**
+   * ComboBox's options list might stay open after disabling the control.
+   *
+   * It happens for example when disabled state condition depends on the number of selected items.
+   * When removing the last item the control switches to disabled state but doesn't close the
+   * options lits.
+   */
+  useEffect(() => {
+    if (isDisabled) {
+      comboBoxRef.current?.closeList();
+    }
+  }, [isDisabled]);
+
+  return (
+    <ComboBoxField
       field={field}
       idAria={fieldDescribedByIds}
       euiFieldProps={fieldEuiFieldProps}
       data-test-subj={dataTestSubj}
     />
-  );
-  return isDisabled ? (
-    <EuiToolTip position="right" content={disabledText}>
-      {fieldComponent}
-    </EuiToolTip>
-  ) : (
-    fieldComponent
   );
 };
 

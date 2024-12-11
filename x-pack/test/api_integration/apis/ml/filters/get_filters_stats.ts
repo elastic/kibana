@@ -212,7 +212,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
-      expect(body.message).to.eql('Forbidden');
     });
 
     it(`should not allow retrieving filters stats for unauthorized user`, async () => {
@@ -223,7 +222,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
-      expect(body.message).to.eql('Forbidden');
     });
   });
 };

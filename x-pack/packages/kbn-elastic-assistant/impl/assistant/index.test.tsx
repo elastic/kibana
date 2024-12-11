@@ -18,7 +18,7 @@ import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
-import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
+import { TestProviders } from '../mock/test_providers/test_providers';
 import { useFetchCurrentUserConversations } from './api';
 import { Conversation } from '../assistant_context/types';
 import * as all from './chat_send/use_chat_send';
@@ -54,7 +54,7 @@ const mockData = {
   },
 };
 
-const renderAssistant = async (extraProps = {}, providerProps = {}) => {
+const renderAssistant = async (extraProps = {}) => {
   const chatSendSpy = jest.spyOn(all, 'useChatSend');
   const assistant = render(
     <TestProviders>
@@ -138,6 +138,34 @@ describe('Assistant', () => {
       .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
         typeof useSessionStorage
       >);
+  });
+
+  describe('persistent storage', () => {
+    it('should delete conversation when delete button is clicked', async () => {
+      await renderAssistant();
+      const deleteButton = screen.getAllByTestId('delete-option')[0];
+      await act(async () => {
+        fireEvent.click(deleteButton);
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+
+      await waitFor(() => {
+        expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
+      });
+    });
+    it('should refetchCurrentUserConversations after clear chat history button click', async () => {
+      await renderAssistant();
+      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('clear-chat'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
+        expect(clearConversation).toHaveBeenCalled();
+        expect(refetchResults).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('when selected conversation changes and some connectors are loaded', () => {
@@ -282,12 +310,7 @@ describe('Assistant', () => {
 
   describe('when not authorized', () => {
     it('should be disabled', async () => {
-      const { queryByTestId } = await renderAssistant(
-        {},
-        {
-          assistantAvailability: { ...mockAssistantAvailability, isAssistantEnabled: false },
-        }
-      );
+      const { queryByTestId } = await renderAssistant({});
       expect(queryByTestId('prompt-textarea')).toHaveProperty('disabled');
     });
   });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { render } from '../utils/testing';
 import React from 'react';
@@ -18,6 +19,8 @@ import {
 } from '../utils/url_params/get_supported_url_params';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 import { SyntheticsSettingsContext } from '../contexts';
+import { BehaviorSubject } from 'rxjs';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 
 describe('useBreadcrumbs', () => {
   it('sets the given breadcrumbs', () => {
@@ -60,6 +63,7 @@ describe('useBreadcrumbs', () => {
               setBreadcrumbs: core.chrome.setBreadcrumbs,
               isInfraAvailable: false,
               isLogsAvailable: false,
+              canManagePrivateLocations: false,
             }}
           >
             <Component />
@@ -71,9 +75,10 @@ describe('useBreadcrumbs', () => {
     const urlParams: SyntheticsUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
       JSON.stringify(
-        makeBaseBreadcrumb('/app/synthetics', '/app/observability', urlParams, false).concat(
-          expectedCrumbs
-        )
+        [
+          { text: 'Observability', href: '/app/observability/overview' },
+          ...makeBaseBreadcrumb('/app/synthetics', urlParams),
+        ].concat(expectedCrumbs)
       )
     );
   });
@@ -84,6 +89,8 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
   const get = () => {
     return breadcrumbObj;
   };
+  const defaultCoreMock = coreMock.createStart();
+
   const core = {
     application: {
       getUrlForApp: (app: string) =>
@@ -91,6 +98,8 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
       navigateToUrl: jest.fn(),
     },
     chrome: {
+      ...defaultCoreMock.chrome,
+      getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbObj = newBreadcrumbs;
       },

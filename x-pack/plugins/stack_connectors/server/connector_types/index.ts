@@ -63,6 +63,7 @@ export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
 export type { ActionParamsType as WebhookActionParams } from './webhook/types';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
+export { OpsgenieConnectorTypeId } from './opsgenie';
 
 export type {
   OpsgenieActionConfig,
@@ -117,7 +118,7 @@ export function registerConnectorTypes({
     actions.registerSubActionConnectorType(getSentinelOneConnectorType());
   }
   if (experimentalFeatures.crowdstrikeConnectorOn) {
-    actions.registerSubActionConnectorType(getCrowdstrikeConnectorType());
+    actions.registerSubActionConnectorType(getCrowdstrikeConnectorType(experimentalFeatures));
   }
   if (experimentalFeatures.inferenceConnectorOn) {
     actions.registerSubActionConnectorType(getInferenceConnectorType());

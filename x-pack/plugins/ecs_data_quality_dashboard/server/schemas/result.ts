@@ -69,6 +69,11 @@ export const PostIndexResultBody = ResultDocument;
 export const GetIndexResultsLatestParams = t.type({ pattern: t.string });
 export type GetIndexResultsLatestParams = t.TypeOf<typeof GetIndexResultsLatestParams>;
 
+export const GetIndexResultsLatestQuery = t.partial({
+  startDate: t.string,
+  endDate: t.string,
+});
+
 export const GetIndexResultsParams = t.type({
   pattern: t.string,
 });

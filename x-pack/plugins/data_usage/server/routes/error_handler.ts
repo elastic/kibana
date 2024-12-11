@@ -7,9 +7,12 @@
 
 import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../utils/custom_http_request_error';
-import { BaseError } from '../common/errors';
-
-export class NotFoundError extends BaseError {}
+import {
+  AutoOpsError,
+  NoPrivilegeMeteringError,
+  NoIndicesMeteringError,
+  NotFoundError,
+} from '../errors';
 
 /**
  * Default Data Usage Routes error handler
@@ -31,7 +34,22 @@ export const errorHandler = <E extends Error>(
     });
   }
 
+  if (error instanceof AutoOpsError) {
+    return res.customError({
+      statusCode: 503,
+      body: error,
+    });
+  }
+
   if (error instanceof NotFoundError) {
+    return res.notFound({ body: error });
+  }
+
+  if (error instanceof NoPrivilegeMeteringError) {
+    return res.forbidden({ body: error });
+  }
+
+  if (error instanceof NoIndicesMeteringError) {
     return res.notFound({ body: error });
   }
 

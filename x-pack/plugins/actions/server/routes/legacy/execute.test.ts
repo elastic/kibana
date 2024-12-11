@@ -63,6 +63,16 @@ describe('executeActionRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}/_execute"`);
+    expect(config.options?.deprecated).toEqual({
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacyrunconnector',
+      severity: 'warning',
+      reason: {
+        type: 'migrate',
+        newApiPath: `/api/actions/connector/{id}/_execute`,
+        newApiMethod: 'POST',
+      },
+    });
 
     expect(await handler(context, req, res)).toEqual({ body: executeResult });
 

@@ -131,6 +131,7 @@ export const OptionsListEditorOptions = ({
         data-test-subj="optionsListControl__selectionOptionsRadioGroup"
       >
         <EuiRadioGroup
+          compressed
           options={selectionOptions}
           idSelected={singleSelect ? 'single' : 'multi'}
           onChange={(id) => {
@@ -146,6 +147,7 @@ export const OptionsListEditorOptions = ({
           data-test-subj="optionsListControl__searchOptionsRadioGroup"
         >
           <EuiRadioGroup
+            compressed
             options={searchOptions}
             idSelected={searchTechnique}
             onChange={(id) => {
@@ -158,6 +160,7 @@ export const OptionsListEditorOptions = ({
       )}
       <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
         <EuiSwitch
+          compressed
           label={
             <ControlSettingTooltipLabel
               label={OptionsListStrings.editor.getRunPastTimeoutTitle()}

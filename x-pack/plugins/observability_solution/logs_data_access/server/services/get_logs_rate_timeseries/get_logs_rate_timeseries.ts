@@ -104,12 +104,10 @@ export function createGetLogsRateTimeseries() {
 
     return buckets
       ? buckets.reduce<LogsRateTimeseriesReturnType>((acc, bucket) => {
-          const totalCount = bucket.doc_count;
-
           const timeseries = bucket.timeseries.buckets.map((timeseriesBucket) => {
             return {
               x: timeseriesBucket.key,
-              y: timeseriesBucket.doc_count / totalCount,
+              y: timeseriesBucket.doc_count / (intervalString / 60),
             };
           });
 

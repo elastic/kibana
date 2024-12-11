@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FieldSelector } from './field_selector';
@@ -23,18 +23,6 @@ export function MonitorFiltersForm() {
           )}
           name="monitorIds"
           dataTestSubj="syntheticsAvailabilityMonitorSelector"
-          tooltip={
-            <EuiIconTip
-              content={i18n.translate(
-                'xpack.synthetics.monitorEdit.syntheticsAvailability.monitor.tooltip',
-                {
-                  defaultMessage:
-                    'This is the monitor or monitors part of this monitor. Select "*" to group by project, tag, or location',
-                }
-              )}
-              position="top"
-            />
-          }
         />
         <FieldSelector
           label={i18n.translate('xpack.synthetics.monitorEdit.syntheticsAvailability.tags', {

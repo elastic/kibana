@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AbstractDataView } from '@kbn/data-views-plugin/common';
+import { type DataViewsContract, type DataView } from '@kbn/data-views-plugin/common';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
 export type LogsSourceConfiguration =
@@ -28,33 +28,68 @@ export interface IndexNameLogsSourceConfiguration {
 
 export interface DataViewLogsSourceConfiguration {
   type: 'data_view';
-  dataView: AbstractDataView;
+  dataView: DataView;
   messageField?: string;
 }
 
+export type ResolvedIndexNameLogsSourceConfiguration = IndexNameLogsSourceConfiguration & {
+  dataView: DataView;
+};
+
 export const normalizeLogsSource =
-  ({ logsDataAccess }: { logsDataAccess: LogsDataAccessPluginStart }) =>
-  async (logsSource: LogsSourceConfiguration): Promise<IndexNameLogsSourceConfiguration> => {
+  ({
+    logsDataAccess,
+    dataViewsService,
+  }: {
+    logsDataAccess: LogsDataAccessPluginStart;
+    dataViewsService: DataViewsContract;
+  }) =>
+  async (
+    logsSource: LogsSourceConfiguration
+  ): Promise<ResolvedIndexNameLogsSourceConfiguration> => {
     switch (logsSource.type) {
       case 'index_name':
-        return logsSource;
+        return {
+          ...logsSource,
+          dataView: await getDataViewForLogSource(logsSource, dataViewsService),
+        };
       case 'shared_setting':
         const logSourcesFromSharedSettings =
           await logsDataAccess.services.logSourcesService.getLogSources();
-        return {
-          type: 'index_name',
+        const sharedSettingLogsSource = {
+          type: 'index_name' as const,
           indexName: logSourcesFromSharedSettings
             .map((logSource) => logSource.indexPattern)
             .join(','),
           timestampField: logsSource.timestampField ?? '@timestamp',
           messageField: logsSource.messageField ?? 'message',
         };
-      case 'data_view':
         return {
-          type: 'index_name',
+          ...sharedSettingLogsSource,
+          dataView: await getDataViewForLogSource(sharedSettingLogsSource, dataViewsService),
+        };
+      case 'data_view':
+        const dataViewLogsSource = {
+          type: 'index_name' as const,
           indexName: logsSource.dataView.getIndexPattern(),
           timestampField: logsSource.dataView.timeFieldName ?? '@timestamp',
           messageField: logsSource.messageField ?? 'message',
         };
+        return {
+          ...dataViewLogsSource,
+          dataView: logsSource.dataView,
+        };
     }
   };
+
+// Ad-hoc Data View
+const getDataViewForLogSource = async (
+  logSourceConfiguration: IndexNameLogsSourceConfiguration,
+  dataViewsService: DataViewsContract
+) => {
+  const dataView = await dataViewsService.create({
+    title: logSourceConfiguration.indexName,
+    timeFieldName: logSourceConfiguration.timestampField,
+  });
+  return dataView;
+};

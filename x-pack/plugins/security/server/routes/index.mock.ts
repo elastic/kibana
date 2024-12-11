@@ -13,6 +13,7 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { getDocLinks } from '@kbn/doc-links';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -50,6 +51,8 @@ export const routeDefinitionParamsMock = {
       getAnonymousAccessService: jest.fn(),
       getUserProfileService: jest.fn().mockReturnValue(userProfileServiceMock.createStart()),
       analyticsService: analyticsServiceMock.createSetup(),
+      buildFlavor: 'traditional',
+      docLinks: { links: getDocLinks({ kibanaBranch: 'main', buildFlavor: 'traditional' }) },
     } as unknown as DeeplyMockedKeys<RouteDefinitionParams>;
   },
 };

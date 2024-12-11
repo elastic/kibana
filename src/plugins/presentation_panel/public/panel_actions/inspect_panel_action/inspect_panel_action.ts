@@ -30,7 +30,7 @@ const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
 export class InspectPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_INSPECT_PANEL;
   public readonly id = ACTION_INSPECT_PANEL;
-  public order = 20;
+  public order = 19; // right after Explore in Discover which is 20
 
   constructor() {}
 

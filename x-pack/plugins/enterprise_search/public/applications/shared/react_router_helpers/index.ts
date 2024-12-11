@@ -8,7 +8,6 @@
 export { letBrowserHandleEvent } from './link_events';
 export type { CreateHrefOptions } from './create_href';
 export { createHref } from './create_href';
-export type { ReactRouterProps } from './generate_react_router_props';
 export { generateReactRouterProps } from './generate_react_router_props';
 export {
   EuiLinkTo,

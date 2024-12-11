@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/input-control-vis-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "Adds Input Control visualization to Kibana",
   "plugin": {
     "id": "inputControlVis",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "data",
       "expressions",
@@ -16,7 +20,8 @@
       "uiActions"
     ],
     "requiredBundles": [
-      "kibanaReact", "embeddable"
+      "kibanaReact",
+      "embeddable"
     ]
   }
 }

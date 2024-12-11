@@ -44,20 +44,8 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "operationId": "%2Ffoo%2F%7Bid%7D#0",
+        "operationId": "get-foo-id",
         "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "2023-10-31",
-              "enum": Array [
-                "2023-10-31",
-              ],
-              "type": "string",
-            },
-          },
           Object {
             "description": "test",
             "in": "path",
@@ -71,7 +59,7 @@ Object {
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=2023-10-31": Object {
+            "application/json": Object {
               "schema": Object {
                 "$ref": "#/components/schemas/foo",
               },
@@ -81,7 +69,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "application/json": Object {
                 "schema": Object {
                   "maxLength": 10,
                   "minLength": 1,
@@ -138,25 +126,11 @@ Object {
     "/bar": Object {
       "get": Object {
         "deprecated": true,
-        "operationId": "%2Fbar#0",
-        "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "oas-test-version-2",
-              "enum": Array [
-                "oas-test-version-1",
-                "oas-test-version-2",
-              ],
-              "type": "string",
-            },
-          },
-        ],
+        "operationId": "get-bar",
+        "parameters": Array [],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+            "application/json": Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -176,26 +150,12 @@ Object {
                 "type": "object",
               },
             },
-            "application/json; Elastic-Api-Version=oas-test-version-2": Object {
-              "schema": Object {
-                "additionalProperties": false,
-                "properties": Object {
-                  "foo": Object {
-                    "type": "string",
-                  },
-                },
-                "required": Array [
-                  "foo",
-                ],
-                "type": "object",
-              },
-            },
           },
         },
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+              "application/json": Object {
                 "schema": Object {
                   "additionalProperties": false,
                   "description": "fooResponse",
@@ -210,15 +170,8 @@ Object {
                   "type": "object",
                 },
               },
-              "application/octet-stream; Elastic-Api-Version=oas-test-version-2": Object {
-                "schema": Object {
-                  "description": "stream response",
-                  "type": "object",
-                },
-              },
             },
-            "description": "OK response oas-test-version-1
-OK response oas-test-version-2",
+            "description": "OK response 2023-10-31",
           },
         },
         "summary": "versioned route",
@@ -228,23 +181,11 @@ OK response oas-test-version-2",
         "x-discontinued": "route discontinued version or date",
       },
     },
-    "/foo/{id}/{path*}": Object {
+    "/foo/{id}/{path}": Object {
       "delete": Object {
         "description": "route description",
-        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#2",
+        "operationId": "delete-foo-id-path",
         "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "2023-10-31",
-              "enum": Array [
-                "2023-10-31",
-              ],
-              "type": "string",
-            },
-          },
           Object {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -269,20 +210,8 @@ OK response oas-test-version-2",
       },
       "get": Object {
         "description": "route description",
-        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#0",
+        "operationId": "get-foo-id-path",
         "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "2023-10-31",
-              "enum": Array [
-                "2023-10-31",
-              ],
-              "type": "string",
-            },
-          },
           Object {
             "description": "id",
             "in": "path",
@@ -318,7 +247,7 @@ OK response oas-test-version-2",
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=2023-10-31": Object {
+            "application/json": Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -397,7 +326,7 @@ OK response oas-test-version-2",
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "application/json": Object {
                 "schema": Object {
                   "maxLength": 10,
                   "minLength": 1,
@@ -415,20 +344,8 @@ OK response oas-test-version-2",
       },
       "post": Object {
         "description": "route description",
-        "operationId": "%2Ffoo%2F%7Bid%7D%2F%7Bpath*%7D#1",
+        "operationId": "post-foo-id-path",
         "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "2023-10-31",
-              "enum": Array [
-                "2023-10-31",
-              ],
-              "type": "string",
-            },
-          },
           Object {
             "description": "A required header to protect against CSRF attacks",
             "in": "header",
@@ -474,7 +391,7 @@ OK response oas-test-version-2",
         ],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=2023-10-31": Object {
+            "application/json": Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -553,7 +470,7 @@ OK response oas-test-version-2",
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "application/json": Object {
                 "schema": Object {
                   "maxLength": 10,
                   "minLength": 1,
@@ -570,27 +487,14 @@ OK response oas-test-version-2",
         ],
       },
     },
-    "/no-xsrf/{id}/{path*}": Object {
+    "/no-xsrf/{id}/{path}": Object {
       "post": Object {
-        "operationId": "%2Fno-xsrf%2F%7Bid%7D%2F%7Bpath*%7D#1",
-        "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "oas-test-version-2",
-              "enum": Array [
-                "oas-test-version-1",
-                "oas-test-version-2",
-              ],
-              "type": "string",
-            },
-          },
-        ],
+        "deprecated": true,
+        "operationId": "post-no-xsrf-id-path",
+        "parameters": Array [],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+            "application/json": Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
@@ -610,26 +514,12 @@ OK response oas-test-version-2",
                 "type": "object",
               },
             },
-            "application/json; Elastic-Api-Version=oas-test-version-2": Object {
-              "schema": Object {
-                "additionalProperties": false,
-                "properties": Object {
-                  "foo": Object {
-                    "type": "string",
-                  },
-                },
-                "required": Array [
-                  "foo",
-                ],
-                "type": "object",
-              },
-            },
           },
         },
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=oas-test-version-1": Object {
+              "application/json": Object {
                 "schema": Object {
                   "additionalProperties": false,
                   "description": "fooResponse",
@@ -644,15 +534,8 @@ OK response oas-test-version-2",
                   "type": "object",
                 },
               },
-              "application/octet-stream; Elastic-Api-Version=oas-test-version-2": Object {
-                "schema": Object {
-                  "description": "stream response",
-                  "type": "object",
-                },
-              },
             },
-            "description": "OK response oas-test-version-1
-OK response oas-test-version-2",
+            "description": "OK response 2023-10-31",
           },
         },
         "summary": "",
@@ -724,24 +607,11 @@ Object {
   "paths": Object {
     "/recursive": Object {
       "get": Object {
-        "operationId": "%2Frecursive#0",
-        "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "2023-10-31",
-              "enum": Array [
-                "2023-10-31",
-              ],
-              "type": "string",
-            },
-          },
-        ],
+        "operationId": "get-recursive",
+        "parameters": Array [],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=2023-10-31": Object {
+            "application/json": Object {
               "schema": Object {
                 "$ref": "#/components/schemas/recursive",
               },
@@ -751,7 +621,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "application/json": Object {
                 "schema": Object {
                   "maxLength": 10,
                   "minLength": 1,
@@ -807,24 +677,11 @@ Object {
   "paths": Object {
     "/foo/{id}": Object {
       "get": Object {
-        "operationId": "%2Ffoo%2F%7Bid%7D#0",
-        "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "2023-10-31",
-              "enum": Array [
-                "2023-10-31",
-              ],
-              "type": "string",
-            },
-          },
-        ],
+        "operationId": "get-foo-id",
+        "parameters": Array [],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=2023-10-31": Object {
+            "application/json": Object {
               "schema": Object {},
             },
           },
@@ -832,7 +689,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "application/json": Object {
                 "schema": Object {},
               },
             },
@@ -845,24 +702,11 @@ Object {
     },
     "/test": Object {
       "get": Object {
-        "operationId": "%2Ftest#0",
-        "parameters": Array [
-          Object {
-            "description": "The version of the API to use",
-            "in": "header",
-            "name": "elastic-api-version",
-            "schema": Object {
-              "default": "123",
-              "enum": Array [
-                "123",
-              ],
-              "type": "string",
-            },
-          },
-        ],
+        "operationId": "get-test",
+        "parameters": Array [],
         "requestBody": Object {
           "content": Object {
-            "application/json; Elastic-Api-Version=123": Object {
+            "application/json": Object {
               "schema": Object {},
             },
           },
@@ -870,7 +714,7 @@ Object {
         "responses": Object {
           "200": Object {
             "content": Object {
-              "application/json; Elastic-Api-Version=123": Object {
+              "application/json": Object {
                 "schema": Object {},
               },
             },

@@ -8,6 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import type { EuiBadgeProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -34,67 +35,75 @@ import { useAgentRefresh } from '../agent_details_page/hooks';
 
 import { AgentUpgradeAgentModal } from './agent_upgrade_modal';
 
-interface Props {
+type Props = EuiBadgeProps & {
   agent: Agent;
   fromDetails?: boolean;
-}
-
-const Status = {
-  Healthy: (
-    <EuiBadge color="success">
-      <FormattedMessage id="xpack.fleet.agentHealth.healthyStatusText" defaultMessage="Healthy" />
-    </EuiBadge>
-  ),
-  Offline: (
-    <EuiBadge color="default">
-      <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Offline" />
-    </EuiBadge>
-  ),
-  Inactive: (
-    <EuiBadge color={euiVars.euiColorDarkShade}>
-      <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
-    </EuiBadge>
-  ),
-  Unenrolled: (
-    <EuiBadge color={euiVars.euiColorDisabled}>
-      <FormattedMessage
-        id="xpack.fleet.agentHealth.unenrolledStatusText"
-        defaultMessage="Unenrolled"
-      />
-    </EuiBadge>
-  ),
-  Unhealthy: (
-    <EuiBadge color="warning">
-      <FormattedMessage
-        id="xpack.fleet.agentHealth.unhealthyStatusText"
-        defaultMessage="Unhealthy"
-      />
-    </EuiBadge>
-  ),
-  Updating: (
-    <EuiBadge color="primary">
-      <FormattedMessage id="xpack.fleet.agentHealth.updatingStatusText" defaultMessage="Updating" />
-    </EuiBadge>
-  ),
 };
 
-function getStatusComponent(status: Agent['status']): React.ReactElement {
+function getStatusComponent({
+  status,
+  ...restOfProps
+}: {
+  status: Agent['status'];
+} & EuiBadgeProps): React.ReactElement {
   switch (status) {
     case 'error':
     case 'degraded':
-      return Status.Unhealthy;
+      return (
+        <EuiBadge color="warning" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.unhealthyStatusText"
+            defaultMessage="Unhealthy"
+          />
+        </EuiBadge>
+      );
     case 'inactive':
-      return Status.Inactive;
+      return (
+        <EuiBadge color={euiVars.euiColorDarkShade} {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.inactiveStatusText"
+            defaultMessage="Inactive"
+          />
+        </EuiBadge>
+      );
     case 'offline':
-      return Status.Offline;
+      return (
+        <EuiBadge color="default" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.offlineStatusText"
+            defaultMessage="Offline"
+          />
+        </EuiBadge>
+      );
     case 'unenrolling':
     case 'enrolling':
     case 'updating':
-      return Status.Updating;
+      return (
+        <EuiBadge color="primary" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.updatingStatusText"
+            defaultMessage="Updating"
+          />
+        </EuiBadge>
+      );
     case 'unenrolled':
-      return Status.Unenrolled;
+      return (
+        <EuiBadge color={euiVars.euiColorDisabled} {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.unenrolledStatusText"
+            defaultMessage="Unenrolled"
+          />
+        </EuiBadge>
+      );
     default:
-      return Status.Healthy;
+      return (
+        <EuiBadge color="success" {...restOfProps}>
+          <FormattedMessage
+            id="xpack.fleet.agentHealth.healthyStatusText"
+            defaultMessage="Healthy"
+          />
+        </EuiBadge>
+      );
   }
 }
 
@@ -102,7 +111,11 @@ const WrappedEuiCallOut = styled(EuiCallOut)`
   white-space: wrap !important;
 `;
 
-export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails }) => {
+export const AgentHealth: React.FunctionComponent<Props> = ({
+  agent,
+  fromDetails,
+  ...restOfProps
+}) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
   const lastCheckInMessageText = lastCheckInMessage ? (
@@ -172,14 +185,16 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
       >
         {isStuckInUpdating(agent) && !fromDetails ? (
           <div className="eui-textNoWrap">
-            {getStatusComponent(agent.status)}
+            {getStatusComponent({ status: agent.status, ...restOfProps })}
             &nbsp;
             <EuiIcon type="warning" color="warning" />
           </div>
         ) : (
           <>
-            {getStatusComponent(agent.status)}
-            {previousToOfflineStatus ? getStatusComponent(previousToOfflineStatus) : null}
+            {getStatusComponent({ status: agent.status, ...restOfProps })}
+            {previousToOfflineStatus
+              ? getStatusComponent({ status: previousToOfflineStatus, ...restOfProps })
+              : null}
           </>
         )}
       </EuiToolTip>

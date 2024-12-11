@@ -41,6 +41,8 @@ export interface DataQualityProviderProps {
   ilmPhases: string[];
   selectedIlmPhaseOptions: EuiComboBoxOptionOption[];
   setSelectedIlmPhaseOptions: (options: EuiComboBoxOptionOption[]) => void;
+  defaultStartTime: string;
+  defaultEndTime: string;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
@@ -67,6 +69,8 @@ export const DataQualityProvider: React.FC<PropsWithChildren<DataQualityProvider
   ilmPhases,
   selectedIlmPhaseOptions,
   setSelectedIlmPhaseOptions,
+  defaultStartTime,
+  defaultEndTime,
 }) => {
   const value = useMemo(
     () => ({
@@ -90,6 +94,8 @@ export const DataQualityProvider: React.FC<PropsWithChildren<DataQualityProvider
       ilmPhases,
       selectedIlmPhaseOptions,
       setSelectedIlmPhaseOptions,
+      defaultStartTime,
+      defaultEndTime,
     }),
     [
       httpFetch,
@@ -112,6 +118,8 @@ export const DataQualityProvider: React.FC<PropsWithChildren<DataQualityProvider
       ilmPhases,
       selectedIlmPhaseOptions,
       setSelectedIlmPhaseOptions,
+      defaultStartTime,
+      defaultEndTime,
     ]
   );
 

@@ -32,6 +32,7 @@ import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_critica
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
+import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 
 export interface IRequestContextFactory {
   create(
@@ -47,6 +48,7 @@ interface ConstructorOptions {
   plugins: SecuritySolutionPluginSetupDependencies;
   endpointAppContextService: EndpointAppContextService;
   ruleMonitoringService: IRuleMonitoringService;
+  siemMigrationsService: SiemMigrationsService;
   kibanaVersion: string;
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
@@ -64,7 +66,14 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, core, plugins, endpointAppContextService, ruleMonitoringService } = options;
+    const {
+      config,
+      core,
+      plugins,
+      endpointAppContextService,
+      ruleMonitoringService,
+      siemMigrationsService,
+    } = options;
 
     const { lists, ruleRegistry, security } = plugins;
 
@@ -98,6 +107,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
 
+    const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+
     return {
       core: coreContext,
 
@@ -126,6 +137,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getDataViewsService: () => dataViewsService,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
@@ -135,16 +148,17 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
 
         return createDetectionRulesClient({
+          rulesClient,
           actionsClient,
-          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
+          isRuleCustomizationEnabled: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
         });
       }),
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
-          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          rulesClient,
           eventLogClient: startPlugins.eventLog.getClient(request),
           currentSpaceId: getSpaceId(),
         })
@@ -156,6 +170,16 @@ export class RequestContextFactory implements IRequestContextFactory {
           eventLogClient: startPlugins.eventLog.getClient(request),
         })
       ),
+
+      getSiemRuleMigrationsClient: memoize(() =>
+        siemMigrationsService.createRulesClient({
+          request,
+          currentUser: coreContext.security.authc.getCurrentUser(),
+          spaceId: getSpaceId(),
+        })
+      ),
+
+      getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
 
       getExceptionListClient: () => {
         if (!lists) {
@@ -212,6 +236,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           taskManager: startPlugins.taskManager,
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
+          experimentalFeatures: config.experimentalFeatures,
+          telemetry: core.analytics,
+          config: config.entityAnalytics.entityStore,
         });
       }),
     };

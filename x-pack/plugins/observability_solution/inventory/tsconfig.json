@@ -20,7 +20,6 @@
     "@kbn/server-route-repository",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
-    "@kbn/observability-utils",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/deeplinks-observability",
@@ -51,6 +50,14 @@
     "@kbn/observability-plugin",
     "@kbn/rule-data-utils",
     "@kbn/spaces-plugin",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/storybook",
+    "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/react-hooks",
+    "@kbn/observability-utils-common",
+    "@kbn/observability-utils-browser",
+    "@kbn/observability-utils-server",
+    "@kbn/kibana-utils-plugin"
   ]
 }

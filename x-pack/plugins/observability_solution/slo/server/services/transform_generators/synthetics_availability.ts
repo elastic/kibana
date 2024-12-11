@@ -28,11 +28,11 @@ import { InvalidTransformError } from '../../errors';
 import { getFilterRange } from './common';
 
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
-  public async getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
+    super(spaceId, dataViewService, isServerless);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -40,11 +40,11 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      await this.buildSource(slo, slo.indicator, spaceId, dataViewService),
+      await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
-      this.buildSettings(slo, 'event.ingested'),
+      this.buildSettings(slo, this.isServerless ? '@timestamp' : 'event.ingested'),
       slo
     );
   }
@@ -56,7 +56,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   private buildGroupBy(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
     // These are the group by fields that will be used in `groupings` key
     // in the summary and rollup documents. For Synthetics, we want to use the
-    // user-readible `monitor.name` and `observer.geo.name` fields by default,
+    // user-readable `monitor.name` and `observer.geo.name` fields by default,
     // unless otherwise specified by the user.
     const flattenedGroupBy = [slo.groupBy].flat().filter((value) => !!value);
     const groupings =
@@ -107,15 +107,10 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     );
   }
 
-  private async buildSource(
-    slo: SLODefinition,
-    indicator: SyntheticsAvailabilityIndicator,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ) {
+  private async buildSource(slo: SLODefinition, indicator: SyntheticsAvailabilityIndicator) {
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
-      { term: { 'meta.space_id': spaceId } },
+      { term: { 'meta.space_id': this.spaceId } },
       getFilterRange(slo, '@timestamp'),
     ];
     const { monitorIds, tags, projects } = buildParamValues({
@@ -152,14 +147,11 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
     }
 
-    const dataView = await this.getIndicatorDataView({
-      dataViewService,
-      dataViewId: indicator.params.dataViewId,
-    });
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     return {
       index: SYNTHETICS_INDEX_PATTERN,
-      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: queryFilter,

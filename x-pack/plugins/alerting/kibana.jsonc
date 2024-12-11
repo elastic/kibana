@@ -1,15 +1,14 @@
 {
   "type": "plugin",
   "id": "@kbn/alerting-plugin",
-  "owner": "@elastic/response-ops",
+  "owner": ["@elastic/response-ops"],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "alerting",
-    "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "alerting"
-    ],
+    "server": true,
+    "configPath": ["xpack", "alerting"],
     "requiredPlugins": [
       "actions",
       "data",
@@ -32,11 +31,8 @@
       "security",
       "monitoringCollection",
       "spaces",
-      "serverless",
+      "serverless"
     ],
-    "extraPublicDirs": [
-      "common",
-      "common/parse_duration"
-    ]
+    "extraPublicDirs": ["common", "common/parse_duration"]
   }
 }

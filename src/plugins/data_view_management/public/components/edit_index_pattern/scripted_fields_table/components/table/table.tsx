@@ -13,7 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist';
 import { ScriptedFieldItem } from '../../types';
+
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 interface TableProps {
   indexPattern: DataView;
@@ -22,7 +28,9 @@ interface TableProps {
   deleteField: (field: ScriptedFieldItem) => void;
 }
 
-export class Table extends PureComponent<TableProps> {
+class TableClass extends PureComponent<
+  TableProps & EuiTablePersistInjectedProps<ScriptedFieldItem>
+> {
   renderFormatCell = (value: string) => {
     const { indexPattern } = this.props;
     const title = get(indexPattern, ['fieldFormatMap', value, 'type', 'title'], '');
@@ -31,7 +39,12 @@ export class Table extends PureComponent<TableProps> {
   };
 
   render() {
-    const { items, editField, deleteField } = this.props;
+    const {
+      items,
+      editField,
+      deleteField,
+      euiTablePersist: { pageSize, sorting, onTableChange },
+    } = this.props;
 
     const columns: Array<EuiBasicTableColumn<ScriptedFieldItem>> = [
       {
@@ -132,12 +145,26 @@ export class Table extends PureComponent<TableProps> {
     ];
 
     const pagination = {
-      initialPageSize: 10,
-      pageSizeOptions: [5, 10, 25, 50],
+      pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
     return (
-      <EuiInMemoryTable items={items} columns={columns} pagination={pagination} sorting={true} />
+      <EuiInMemoryTable
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={sorting}
+        onTableChange={onTableChange}
+      />
     );
   }
 }
+
+export const TableWithoutPersist = TableClass; // For testing purposes
+
+export const Table = withEuiTablePersist(TableClass, {
+  tableId: 'dataViewsScriptedFields',
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
+  initialPageSize: 10,
+});

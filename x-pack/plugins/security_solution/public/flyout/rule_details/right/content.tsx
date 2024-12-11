@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlyoutBody } from '@kbn/security-solution-common';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { RuleAboutSection } from '../../../detection_engine/rule_management/components/rule_details/rule_about_section';
 import { RuleScheduleSection } from '../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
@@ -23,6 +22,7 @@ import {
   ACTIONS_TEST_ID,
 } from './test_ids';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
 const panelViewStyle = css`
   dt {
@@ -50,12 +50,23 @@ export interface RuleDetailsProps {
  * Rule details content on the right section of expandable flyout
  */
 export const PanelContent = memo(({ rule }: RuleDetailsProps) => {
-  const { ruleActionsData } =
-    rule != null ? getStepsData({ rule, detailsView: true }) : { ruleActionsData: null };
+  const { ruleActionsData } = useMemo(
+    () => (rule != null ? getStepsData({ rule, detailsView: true }) : { ruleActionsData: null }),
+    [rule]
+  );
 
-  const hasNotificationActions = Boolean(ruleActionsData?.actions?.length);
-  const hasResponseActions = Boolean(ruleActionsData?.responseActions?.length);
-  const hasActions = ruleActionsData != null && (hasNotificationActions || hasResponseActions);
+  const hasNotificationActions = useMemo(
+    () => Boolean(ruleActionsData?.actions?.length),
+    [ruleActionsData]
+  );
+  const hasResponseActions = useMemo(
+    () => Boolean(ruleActionsData?.responseActions?.length),
+    [ruleActionsData]
+  );
+  const hasActions = useMemo(
+    () => ruleActionsData != null && (hasNotificationActions || hasResponseActions),
+    [ruleActionsData, hasNotificationActions, hasResponseActions]
+  );
 
   return (
     <FlyoutBody>

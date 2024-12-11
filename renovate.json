@@ -554,6 +554,14 @@
       "labels": ["Team:Cloud Security", "release_note:skip", "backport:skip"],
       "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+    {
+      "groupName": "@elastic/request-converter",
+      "matchDepNames": ["@elastic/request-converter"],
+      "reviewers": ["team:kibana-management"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],
+      "enabled": true
     }
   ],
   "customManagers": [

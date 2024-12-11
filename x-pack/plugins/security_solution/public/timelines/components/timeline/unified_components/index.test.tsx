@@ -32,7 +32,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
-import { defaultUdtHeaders } from './default_headers';
+import { defaultUdtHeaders } from '../body/column_headers/default_headers';
 import type { ColumnHeaderType } from '../../../../../common/types';
 
 jest.mock('../../../containers', () => ({
@@ -43,10 +43,6 @@ jest.mock('../../../containers/details');
 
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../body/events', () => ({
-  Events: () => <></>,
 }));
 
 jest.mock('../../../../sourcerer/containers');
@@ -67,9 +63,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof ExperimentalFeatures) => {
-  if (feature === 'unifiedComponentsInTimelineDisabled') {
-    return false;
-  }
   return allowedExperimentalValues[feature];
 });
 
@@ -114,10 +107,11 @@ const TestComponent = (
     events: localMockedTimelineData,
     refetch: jest.fn(),
     totalCount: localMockedTimelineData.length,
-    onChangePage: jest.fn(),
+    onFetchMoreRecords: jest.fn(),
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
+    onUpdatePageIndex: jest.fn(),
   };
 
   const dispatch = useDispatch();

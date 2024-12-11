@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  correctCommonEsqlMistakes,
-  isChatCompletionChunkEvent,
-  isOutputEvent,
-} from '@kbn/inference-plugin/common';
+import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
   FunctionVisibility,
@@ -18,12 +15,12 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
+import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
 import { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
-import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 
 export const QUERY_FUNCTION_NAME = 'query';
 export const EXECUTE_QUERY_NAME = 'execute_query';
@@ -53,7 +50,7 @@ export function registerQueryFunction({
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
   If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
       : undefined;
-  functions.registerInstruction({ instruction, scopes: ['all'] });
+  functions.registerInstruction(instruction);
 
   functions.registerFunction(
     {
@@ -103,8 +100,7 @@ export function registerQueryFunction({
           rows,
         },
       };
-    },
-    ['all']
+    }
   );
   functions.registerFunction(
     {
@@ -136,9 +132,10 @@ export function registerQueryFunction({
         ),
         logger: resources.logger,
         tools: Object.fromEntries(
-          actions
-            .concat(esqlFunctions)
-            .map((fn) => [fn.name, { description: fn.description, schema: fn.parameters }])
+          [...actions, ...esqlFunctions].map((fn) => [
+            fn.name,
+            { description: fn.description, schema: fn.parameters } as ToolDefinition,
+          ])
         ),
         functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
       });
@@ -188,7 +185,6 @@ export function registerQueryFunction({
           return messageAddEvent;
         })
       );
-    },
-    ['all']
+    }
   );
 }

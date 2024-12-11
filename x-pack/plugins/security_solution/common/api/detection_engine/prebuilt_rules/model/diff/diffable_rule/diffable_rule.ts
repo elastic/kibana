@@ -9,11 +9,9 @@ import { z } from '@kbn/zod';
 import {
   AlertSuppression,
   AnomalyThreshold,
-  EventCategoryOverride,
   HistoryWindowStart,
   InvestigationFields,
   InvestigationGuide,
-  KqlQueryLanguage,
   MachineLearningJobId,
   MaxSignals,
   NewTermsFields,
@@ -37,8 +35,6 @@ import {
   ThreatMapping,
   Threshold,
   ThresholdAlertSuppression,
-  TiebreakerField,
-  TimestampField,
 } from '../../../../model/rule_schema';
 
 import {
@@ -113,9 +109,6 @@ export const DiffableEqlFields = z.object({
   type: z.literal('eql'),
   eql_query: RuleEqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
-  event_category_override: EventCategoryOverride.optional(),
-  timestamp_field: TimestampField.optional(),
-  tiebreaker_field: TiebreakerField.optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 
@@ -137,7 +130,6 @@ export const DiffableThreatMatchFields = z.object({
   threat_mapping: ThreatMapping,
   data_source: RuleDataSource.optional(), // NOTE: new field
   threat_indicator_path: ThreatIndicatorPath.optional(),
-  threat_language: KqlQueryLanguage.optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 

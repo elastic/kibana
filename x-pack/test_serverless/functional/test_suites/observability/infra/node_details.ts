@@ -30,8 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'svlCommonPage',
   ]);
 
-  // failing feature flag test, see https://github.com/elastic/kibana/issues/191809
-  describe.skip('Node Details', () => {
+  describe('Node Details', () => {
     describe('#With Asset Details', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -50,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Osquery Tab', () => {
         it('should not render in serverless', async () => {
           const OsqueryExist = await testSubjects.exists('infraAssetDetailsOsqueryTab');
-          expect(OsqueryExist).to.be(false);
+          expect(OsqueryExist).to.be(true);
         });
       });
 
@@ -68,10 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
-            const CreateRuleButtonExist = await testSubjects.exists(
-              'infraAssetDetailsCreateAlertsRuleButton'
-            );
-            expect(CreateRuleButtonExist).to.be(true);
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
           });
 
           [

@@ -21,6 +21,7 @@ import { renderNavigation } from './utils';
 describe('Panel', () => {
   test('should render group as panel opener', async () => {
     const navigationTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [
         {
           id: 'root',
@@ -60,6 +61,7 @@ describe('Panel', () => {
 
   test('should not render group if all children are hidden', async () => {
     const navigationTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [
         {
           id: 'root',
@@ -88,6 +90,7 @@ describe('Panel', () => {
               id: 'group2',
               title: 'Group 2',
               path: 'root.group2',
+              href: '/app/group2',
               renderAs: 'panelOpener',
               children: [
                 // sideNavStatus is "visible" by default
@@ -146,6 +149,7 @@ describe('Panel', () => {
       ]);
 
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',
@@ -196,6 +200,7 @@ describe('Panel', () => {
   describe('auto generated content', () => {
     test('should rendre block groups with title', async () => {
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',
@@ -262,6 +267,7 @@ describe('Panel', () => {
 
     test('should rendre block groups without title', async () => {
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',
@@ -327,6 +333,7 @@ describe('Panel', () => {
 
     test('should rendre accordion groups', async () => {
       const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
         body: [
           {
             id: 'root',

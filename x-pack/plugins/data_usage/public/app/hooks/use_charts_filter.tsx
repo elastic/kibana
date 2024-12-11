@@ -6,14 +6,16 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { DEFAULT_SELECTED_OPTIONS } from '../../../common';
 import {
-  isDefaultMetricType,
-  METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
+  METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
+  isDefaultMetricType,
 } from '../../../common/rest_types';
-import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
-import { FILTER_NAMES } from '../translations';
+import { FILTER_NAMES } from '../../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
+import { formatBytes } from '../../utils/format_bytes';
+import { ChartsFilterProps } from '../components/filters/charts_filter';
 
 export type FilterName = keyof typeof FILTER_NAMES;
 
@@ -26,14 +28,11 @@ export type FilterItems = Array<{
 }>;
 
 export const useChartsFilter = ({
-  filterName,
-  searchString,
+  filterOptions,
 }: {
-  filterName: FilterName;
-  searchString: string;
+  filterOptions: ChartsFilterProps['filterOptions'];
 }): {
   areDataStreamsSelectedOnMount: boolean;
-  isLoading: boolean;
   items: FilterItems;
   setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
   hasActiveFilters: boolean;
@@ -49,15 +48,12 @@ export const useChartsFilter = ({
 } => {
   const {
     dataStreams: selectedDataStreamsFromUrl,
+    metricTypes: selectedMetricTypesFromUrl,
     setUrlMetricTypesFilter,
     setUrlDataStreamsFilter,
   } = useDataUsageMetricsUrlParams();
-  const isMetricTypesFilter = filterName === 'metricTypes';
-  const isDataStreamsFilter = filterName === 'dataStreams';
-  const { data: dataStreams, isFetching } = useGetDataUsageDataStreams({
-    searchString,
-    selectedDataStreams: selectedDataStreamsFromUrl,
-  });
+  const isMetricTypesFilter = filterOptions.filterName === 'metricTypes';
+  const isDataStreamsFilter = filterOptions.filterName === 'dataStreams';
 
   // track the state of selected data streams via URL
   //  when the page is loaded via selected data streams on URL
@@ -78,25 +74,31 @@ export const useChartsFilter = ({
       ? METRIC_TYPE_VALUES.map((metricType) => ({
           key: metricType,
           label: METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[metricType],
-          checked: isDefaultMetricType(metricType) ? 'on' : undefined, // default metrics are selected by default
-          disabled: isDefaultMetricType(metricType),
-          'data-test-subj': `${filterName}-filter-option`,
+          checked: selectedMetricTypesFromUrl
+            ? selectedMetricTypesFromUrl.includes(metricType)
+              ? 'on'
+              : undefined
+            : isDefaultMetricType(metricType) // default metrics are selected by default
+            ? 'on'
+            : undefined,
+          'data-test-subj': `${filterOptions.filterName}-filter-option`,
+        }))
+      : isDataStreamsFilter && !!filterOptions.options.length
+      ? filterOptions.options?.map((filterOption, i) => ({
+          key: filterOption,
+          label: filterOption,
+          append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
+          checked: selectedDataStreamsFromUrl
+            ? selectedDataStreamsFromUrl.includes(filterOption)
+              ? 'on'
+              : undefined
+            : i < DEFAULT_SELECTED_OPTIONS
+            ? 'on'
+            : undefined,
+          'data-test-subj': `${filterOptions.filterName}-filter-option`,
         }))
       : []
   );
-
-  useEffect(() => {
-    if (isDataStreamsFilter && dataStreams) {
-      setItems(
-        dataStreams?.map((dataStream) => ({
-          key: dataStream.name,
-          label: dataStream.name,
-          checked: dataStream.selected ? 'on' : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
-      );
-    }
-  }, [dataStreams, filterName, isDataStreamsFilter, setItems]);
 
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
   const numActiveFilters = useMemo(
@@ -110,7 +112,6 @@ export const useChartsFilter = ({
 
   return {
     areDataStreamsSelectedOnMount,
-    isLoading: isDataStreamsFilter && isFetching,
     items,
     setItems,
     hasActiveFilters,

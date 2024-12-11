@@ -10,13 +10,10 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { IndexDataEnricher } from '../services';
 import { Index } from '..';
 import { RouteDependencies } from '../types';
+import type { MeteringStats } from './types';
 
 interface MeteringStatsResponse {
-  indices: Array<{
-    name: string;
-    num_docs: number;
-    size_in_bytes: number;
-  }>;
+  indices: MeteringStats[];
 }
 
 async function fetchIndicesCall(

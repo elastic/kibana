@@ -31,9 +31,9 @@ import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.3.0';
+const OTEL_KUBE_STACK_VERSION = '0.3.3';
 const OTEL_KUBE_STACK_VALUES_FILE_URL =
-  'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/main/resources/kubernetes/operator/helm/values.yaml';
+  'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/8.16/resources/kubernetes/operator/helm/values.yaml';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
@@ -101,7 +101,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
-                    defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. For automatic certificate renewal, we recommend installing the {link}."
+                    defaultMessage="Install the OpenTelemetry Operator using the kube-stack Helm chart and the provided values file. For automatic certificate renewal, we recommend installing the {link}, and customize the values.yaml file before the installation as described {doc}."
                     values={{
                       link: (
                         <EuiLink
@@ -112,6 +112,18 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                           {i18n.translate(
                             'xpack.observability_onboarding.otelKubernetesPanel.certmanagerLinkLabel',
                             { defaultMessage: 'cert-manager' }
+                          )}
+                        </EuiLink>
+                      ),
+                      doc: (
+                        <EuiLink
+                          href="https://ela.st/8-16-otel-cert-manager"
+                          target="_blank"
+                          data-test-subj="observabilityOnboardingOtelKubernetesPanelCertManagerDocsLink"
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelKubernetesPanel.certmanagerDocsLinkLabel',
+                            { defaultMessage: 'in our documentation' }
                           )}
                         </EuiLink>
                       ),
@@ -175,7 +187,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                     'xpack.observability_onboarding.otelKubernetesPanel.theOperatorAutomatesTheLabel',
                     {
                       defaultMessage:
-                        'The Operator automates the injection of auto-instrumentation libraries into the annotated pods for some languages.',
+                        'Enable automatic instrumentation for your applications by annotating the pods template (spec.template.metadata.annotations) in your Deployment or relevant workload object (StatefulSet, Job, CronJob, etc.)',
                     }
                   )}
                 </p>
@@ -213,17 +225,33 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   ]}
                 />
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="yaml" lineNumbers={{ highlight: '5-6' }}>
-                  {`apiVersion: v1
-kind: Pod
+                <EuiCodeBlock paddingSize="m" language="yaml">
+                  {`# To annotate specific deployment Pods modify its manifest
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: my-app
-  annotations:
-    instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
+  name: myapp
 spec:
-  containers:
-  - name: my-app
-    image: my-app:latest`}
+  ...
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-${idSelected}: "${namespace}/elastic-instrumentation"
+      ...
+    spec:
+      containers:
+      - image: myapplication-image
+        name: app
+      ...
+
+# To annotate all resources in a namespace
+kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"
+
+# Restart your deployment
+kubectl rollout restart deployment myapp -n my-namespace
+
+# Check annotations have been applied correctly and auto-instrumentation library is injected
+kubectl describe pod <myapp-pod-name> -n my-namespace`}
                 </EuiCodeBlock>
                 <EuiSpacer />
                 <CopyToClipboardButton
@@ -239,7 +267,7 @@ spec:
                     values={{
                       link: (
                         <EuiLink
-                          href={`/path`}
+                          href="https://ela.st/8-16-otel-apm-instrumentation"
                           data-test-subj="observabilityOnboardingOtelKubernetesPanelReferToTheDocumentationLink"
                           target="_blank"
                         >

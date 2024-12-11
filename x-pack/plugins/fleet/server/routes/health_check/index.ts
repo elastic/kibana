@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import https from 'https';
 
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
@@ -17,7 +16,6 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
 
-import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -28,7 +26,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
-      description: `Check Fleet Server health`,
+      summary: `Check Fleet Server health`,
+      options: {
+        tags: ['oas-tag:Fleet internals'],
+      },
     })
     .addVersion(
       {
@@ -83,9 +84,6 @@ export const postHealthCheckHandler: FleetRequestHandler<
         accept: '*/*',
       },
       method: 'GET',
-      agent: new https.Agent({
-        rejectUnauthorized: false,
-      }),
       signal: abortController.signal,
     });
     const bodyRes = await res.json();
@@ -107,6 +105,6 @@ export const postHealthCheckHandler: FleetRequestHandler<
         body: { status: `OFFLINE`, host_id: request.body.id },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };

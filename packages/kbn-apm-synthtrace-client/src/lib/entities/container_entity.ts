@@ -15,8 +15,8 @@ class ContainerEntity extends Serializable<EntityFields> {
     super({
       ...fields,
       'entity.type': 'container',
-      'entity.definitionId': 'builtin_containers_from_ecs_data',
-      'entity.identityFields': ['container.id'],
+      'entity.definition_id': 'builtin_containers_from_ecs_data',
+      'entity.identity_fields': ['container.id'],
     });
   }
 }
@@ -36,7 +36,7 @@ export function containerEntity({
     'source_data_stream.type': dataStreamType,
     'agent.name': agentName,
     'container.id': containerId,
-    'entity.displayName': containerId,
+    'entity.display_name': containerId,
     'entity.id': entityId,
   });
 }

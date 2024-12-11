@@ -936,7 +936,6 @@ export const sendBulkEventsToTimelineAction = async (
 export const sendAlertToTimelineAction = async ({
   createTimeline,
   ecsData: ecs,
-  updateTimelineIsLoading,
   searchStrategyClient,
   getExceptionFilter,
 }: SendAlertToTimelineActionProps) => {
@@ -962,7 +961,6 @@ export const sendAlertToTimelineAction = async ({
   // For now we do not want to populate the template timeline if we have alertIds
   if (!isEmpty(timelineId)) {
     try {
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
         getTimelineTemplate(timelineId),
         lastValueFrom(
@@ -1092,7 +1090,6 @@ export const sendAlertToTimelineAction = async ({
     } catch (error) {
       /* eslint-disable-next-line no-console */
       console.error(error);
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       return createTimeline({
         from,
         notes: null,

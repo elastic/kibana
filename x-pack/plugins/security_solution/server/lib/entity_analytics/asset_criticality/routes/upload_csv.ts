@@ -35,8 +35,12 @@ export const assetCriticalityPublicCSVUploadRoute = (
     .post({
       access: 'public',
       path: ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
         body: {
           output: 'stream',
           accepts: 'multipart/form-data',
@@ -98,6 +102,7 @@ export const assetCriticalityPublicCSVUploadRoute = (
             recordsStream,
             retries: errorRetries,
             flushBytes: maxBulkRequestBodySizeBytes,
+            streamIndexStart: 1, // It is the first line number
           });
           const end = new Date();
 

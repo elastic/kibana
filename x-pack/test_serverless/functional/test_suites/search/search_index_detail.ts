@@ -20,6 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const es = getService('es');
   const security = getService('security');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
@@ -89,6 +91,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await svlSearchNavigation.navigateToIndexDetailPage(indexName);
       });
 
+      describe('API key details', () => {
+        it('should show api key', async () => {
+          await pageObjects.svlApiKeys.deleteAPIKeys();
+          await svlSearchNavigation.navigateToIndexDetailPage(indexName);
+          // sometimes the API key exists in the cluster and its lost in sessionStorage
+          // if fails we retry to delete the API key and refresh the browser
+          await retry.try(
+            async () => {
+              await pageObjects.svlApiKeys.expectAPIKeyExists();
+            },
+            async () => {
+              await pageObjects.svlApiKeys.deleteAPIKeys();
+              await browser.refresh();
+            }
+          );
+          await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+          const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
+          await pageObjects.svlSearchIndexDetailPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
+        });
+      });
+
       it('should show code examples for adding documents', async () => {
         await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
         await pageObjects.svlSearchIndexDetailPage.expectSelectedLanguage('python');
@@ -127,9 +150,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have index documents', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectHasIndexDocuments();
         });
+        it('should have one document in quick stats', async () => {
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(1);
+        });
         it('should have with data tabs', async () => {
           await pageObjects.svlSearchIndexDetailPage.expectWithDataTabsExists();
-          await pageObjects.svlSearchIndexDetailPage.expectShouldDefaultToDataTab();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
         });
         it('should be able to change tabs to mappings and mappings is shown', async () => {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('mappingsTab');
@@ -145,6 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.withDataChangeTabs('dataTab');
           await pageObjects.svlSearchIndexDetailPage.clickFirstDocumentDeleteAction();
           await pageObjects.svlSearchIndexDetailPage.expectAddDocumentCodeExamples();
+          await pageObjects.svlSearchIndexDetailPage.expectQuickStatsToHaveDocumentCount(0);
         });
       });
 
@@ -183,10 +210,37 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await es.indices.create({ index: indexName });
         await security.testUser.setRoles(['index_management_user']);
+      });
+      beforeEach(async () => {
         await pageObjects.common.navigateToApp('indexManagement');
         // Navigate to the indices tab
         await pageObjects.indexManagement.changeTabs('indicesTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+      after(async () => {
+        await esDeleteAllIndices(indexName);
+      });
+      describe('manage index action', () => {
+        beforeEach(async () => {
+          await pageObjects.indexManagement.manageIndex(indexName);
+          await pageObjects.indexManagement.manageIndexContextMenuExists();
+        });
+        it('navigates to overview tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('data');
+        });
+
+        it('navigates to settings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('settings');
+        });
+        it('navigates to mappings tab', async () => {
+          await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
+          await pageObjects.svlSearchIndexDetailPage.expectIndexDetailPageHeader();
+          await pageObjects.svlSearchIndexDetailPage.expectUrlShouldChangeTo('mappings');
+        });
       });
       describe('can view search index details', function () {
         it('renders search index details with no documents', async () => {

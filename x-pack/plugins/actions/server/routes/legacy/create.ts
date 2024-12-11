@@ -38,7 +38,16 @@ export const createActionRoute = (
         access: 'public',
         summary: `Create a connector`,
         tags: ['oas-tag:connectors'],
-        deprecated: true,
+        deprecated: {
+          documentationUrl:
+            'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacycreateconnector',
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiPath: `${BASE_ACTION_API_PATH}/connector/{id?}`,
+            newApiMethod: 'POST',
+          },
+        },
       },
       validate: {
         request: {

@@ -23,3 +23,8 @@ export const editGlobalParamAction = createAsyncAction<
   },
   SyntheticsParams
 >('EDIT GLOBAL PARAM');
+
+export const deleteGlobalParamsAction = createAsyncAction<
+  string[],
+  Array<{ id: string; deleted: boolean }>
+>('DELETE GLOBAL PARAMS');

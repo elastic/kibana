@@ -7,24 +7,25 @@
 
 import expect from '@kbn/expect';
 import { SavedTimeline, TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
-
+import { TIMELINE_URL, TIMELINES_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
-import {
-  createBasicTimeline,
-  createBasicTimelineTemplate,
-} from '../../saved_objects/tests/helpers';
+import { createBasicTimeline, createBasicTimelineTemplate } from '../../utils/timelines';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
-  const supertest = getService('supertest');
+  const utils = getService('securitySolutionUtils');
   const esArchiver = getService('esArchiver');
+  let supertest: TestAgent;
 
   describe('Timeline', () => {
+    before(async () => (supertest = await utils.createSuperTest()));
+
     describe('timelines', () => {
       it('Make sure that we get Timeline data', async () => {
         const titleToSaved = 'hello timeline';
         await createBasicTimeline(supertest, titleToSaved);
 
-        const resp = await supertest.get('/api/timelines').set('kbn-xsrf', 'true');
+        const resp = await supertest.get(TIMELINES_URL).set('kbn-xsrf', 'true');
 
         const timelines = resp.body.timeline;
 
@@ -36,7 +37,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         await createBasicTimeline(supertest, titleToSaved);
 
         const resp = await supertest
-          .get('/api/timelines?page_size=1&page_index=1')
+          .get(`${TIMELINES_URL}?page_size=1&page_index=1`)
           .set('kbn-xsrf', 'true');
 
         const timelines = resp.body.timeline;
@@ -49,7 +50,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         await createBasicTimelineTemplate(supertest, titleToSaved);
 
         const resp = await supertest
-          .get('/api/timelines?timeline_type=template')
+          .get(`${TIMELINES_URL}?timeline_type=template`)
           .set('kbn-xsrf', 'true');
 
         const templates: SavedTimeline[] = resp.body.timeline;
@@ -79,7 +80,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       it('should return outcome exactMatch when the id is unchanged', async () => {
         const resp = await supertest
-          .get('/api/timeline/resolve')
+          .get(`${TIMELINE_URL}/resolve`)
           .query({ id: '8dc70950-1012-11ec-9ad3-2d7c6600c0f7' });
         expect(resp.body.data.outcome).to.be('exactMatch');
         expect(resp.body.data.alias_target_id).to.be(undefined);
@@ -89,7 +90,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       describe('notes', () => {
         it('should return notes with eventId', async () => {
           const resp = await supertest
-            .get('/api/timeline/resolve')
+            .get(`${TIMELINE_URL}/resolve`)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
           expect(resp.body.data.timeline.notes[0].eventId).to.be('Edo00XsBEVtyvU-8LGNe');
@@ -97,7 +98,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
         it('should return notes with the timelineId matching request id', async () => {
           const resp = await supertest
-            .get('/api/timeline/resolve')
+            .get(`${TIMELINE_URL}/resolve`)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
           expect(resp.body.data.timeline.notes[0].timelineId).to.be(
@@ -112,7 +113,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       describe('pinned events', () => {
         it('should pinned events with eventId', async () => {
           const resp = await supertest
-            .get('/api/timeline/resolve')
+            .get(`${TIMELINE_URL}/resolve`)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
           expect(resp.body.data.timeline.pinnedEventsSaveObject[0].eventId).to.be(
@@ -125,7 +126,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
         it('should return pinned events with the timelineId matching request id', async () => {
           const resp = await supertest
-            .get('/api/timeline/resolve')
+            .get(`${TIMELINE_URL}/resolve`)
             .query({ id: '6484cc90-126e-11ec-83d2-db1096c73738' });
 
           expect(resp.body.data.timeline.pinnedEventsSaveObject[0].timelineId).to.be(

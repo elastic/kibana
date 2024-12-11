@@ -91,7 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             connectorId,
             persist: true,
             screenContexts: params.screenContexts || [],
-            scope: 'all',
+            scopes: ['all'],
           })
           .then((response: Response) => resolve(response))
           .catch((err: Error) => reject(err));
@@ -164,7 +164,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           persist: false,
           screenContexts: [],
-          scope: 'all',
+          scopes: ['all'],
         })
         .pipe(passThrough);
 
@@ -179,16 +179,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
       await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
+      await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
       const parsedEvents = decodeEvents(receivedChunks.join(''));
 
-      expect(parsedEvents.map((event) => event.type)).to.eql([
+      expect(
+        parsedEvents
+          .map((event) => event.type)
+          .filter((eventType) => eventType !== StreamingChatResponseEventType.BufferFlush)
+      ).to.eql([
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.ChatCompletionChunk,
+        StreamingChatResponseEventType.ChatCompletionMessage,
         StreamingChatResponseEventType.MessageAdd,
       ]);
 
@@ -255,6 +261,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         events = await getEvents({}, async (conversationSimulator) => {
           await conversationSimulator.next('Hello');
           await conversationSimulator.next(' again');
+          await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
           await conversationSimulator.complete();
         });
       });
@@ -273,6 +280,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
         expect(omit(events[2], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.ChatCompletionMessage,
+          message: {
+            content: 'Hello again',
+          },
+        });
+        expect(omit(events[3], 'id', 'message.@timestamp')).to.eql({
           type: StreamingChatResponseEventType.MessageAdd,
           message: {
             message: {
@@ -289,7 +302,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(
           omit(
-            events[3],
+            events[4],
             'conversation.id',
             'conversation.last_updated',
             'conversation.token_count'
@@ -301,7 +314,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        const tokenCount = (events[3] as ConversationCreateEvent).conversation.token_count!;
+        const tokenCount = (events[4] as ConversationCreateEvent).conversation.token_count!;
 
         expect(tokenCount.completion).to.be.greaterThan(0);
         expect(tokenCount.prompt).to.be.greaterThan(0);
@@ -357,8 +370,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           async (conversationSimulator) => {
             await conversationSimulator.next({
-              function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
+              tool_calls: [
+                {
+                  id: 'fake-id',
+                  index: 'fake-index',
+                  function: {
+                    name: 'my_action',
+                    arguments: JSON.stringify({ foo: 'bar' }),
+                  },
+                },
+              ],
             });
+            await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 1 });
             await conversationSimulator.complete();
           }
         );
@@ -436,7 +459,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
-                scope: 'all',
+                scopes: ['all'],
               },
             },
           })
@@ -483,7 +506,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
-                scope: 'all',
+                scopes: ['all'],
               },
             },
           })

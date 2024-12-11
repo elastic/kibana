@@ -37,6 +37,25 @@ export const dataStreamStatRt = rt.intersection([
 
 export type DataStreamStat = rt.TypeOf<typeof dataStreamStatRt>;
 
+export const dataStreamDocsStatRt = rt.type({
+  dataset: rt.string,
+  count: rt.number,
+});
+
+export type DataStreamDocsStat = rt.TypeOf<typeof dataStreamDocsStatRt>;
+
+export const getDataStreamTotalDocsResponseRt = rt.type({
+  totalDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamTotalDocsResponse = rt.TypeOf<typeof getDataStreamTotalDocsResponseRt>;
+
+export const getDataStreamDegradedDocsResponseRt = rt.type({
+  degradedDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamDegradedDocsResponse = rt.TypeOf<typeof getDataStreamDegradedDocsResponseRt>;
+
 export const integrationDashboardRT = rt.type({
   id: rt.string,
   title: rt.string,
@@ -76,22 +95,24 @@ export const integrationRt = rt.intersection([
 
 export type IntegrationType = rt.TypeOf<typeof integrationRt>;
 
+export const checkAndLoadIntegrationResponseRt = rt.union([
+  rt.type({ isIntegration: rt.literal(false), areAssetsAvailable: rt.boolean }),
+  rt.type({
+    isIntegration: rt.literal(true),
+    areAssetsAvailable: rt.literal(true),
+    integration: integrationRt,
+  }),
+]);
+
+export type CheckAndLoadIntegrationResponse = rt.TypeOf<typeof checkAndLoadIntegrationResponseRt>;
+
 export const getIntegrationsResponseRt = rt.exact(
   rt.type({
     integrations: rt.array(integrationRt),
   })
 );
 
-export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
-
-export const degradedDocsRt = rt.type({
-  dataset: rt.string,
-  count: rt.number,
-  docsCount: rt.number,
-  percentage: rt.number,
-});
-
-export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
+export type IntegrationsResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
 export const degradedFieldRt = rt.type({
   name: rt.string,
@@ -134,21 +155,38 @@ export const degradedFieldAnalysisRt = rt.intersection([
       type: rt.string,
       ignore_above: rt.number,
     }),
+    defaultPipeline: rt.string,
   }),
 ]);
 
 export type DegradedFieldAnalysis = rt.TypeOf<typeof degradedFieldAnalysisRt>;
 
-export const dataStreamSettingsRt = rt.intersection([
+export const updateFieldLimitResponseRt = rt.intersection([
   rt.type({
-    lastBackingIndexName: rt.string,
+    isComponentTemplateUpdated: rt.union([rt.boolean, rt.undefined]),
+    isLatestBackingIndexUpdated: rt.union([rt.boolean, rt.undefined]),
+    customComponentTemplateName: rt.string,
   }),
   rt.partial({
-    createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
-    integration: rt.string,
-    datasetUserPrivileges: datasetUserPrivilegesRt,
+    error: rt.string,
   }),
 ]);
+
+export type UpdateFieldLimitResponse = rt.TypeOf<typeof updateFieldLimitResponseRt>;
+
+export const dataStreamRolloverResponseRt = rt.type({
+  acknowledged: rt.boolean,
+});
+
+export type DataStreamRolloverResponse = rt.TypeOf<typeof dataStreamRolloverResponseRt>;
+
+export const dataStreamSettingsRt = rt.partial({
+  lastBackingIndexName: rt.string,
+  indexTemplate: rt.string,
+  createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+  integration: rt.string,
+  datasetUserPrivileges: datasetUserPrivilegesRt,
+});
 
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 
@@ -168,12 +206,6 @@ export const getDataStreamsStatsResponseRt = rt.exact(
   rt.type({
     datasetUserPrivileges: datasetUserPrivilegesRt,
     dataStreamsStats: rt.array(dataStreamStatRt),
-  })
-);
-
-export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
-  rt.type({
-    degradedDocs: rt.array(degradedDocsRt),
   })
 );
 

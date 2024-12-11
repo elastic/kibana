@@ -9,7 +9,6 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -24,8 +23,6 @@ import { timelineSelectors } from '../../store';
 import { createTimeline as dispatchCreateNewTimeline } from '../../store/actions';
 
 import { useGetAllTimeline } from '../../containers/all';
-
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, useQueryTimelineById } from './helpers';
@@ -56,7 +53,7 @@ import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
 
 interface OwnProps<TCache = object> {
@@ -160,9 +157,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-      'unifiedComponentsInTimelineDisabled'
-    );
 
     const {
       customTemplateTimelineCount,
@@ -251,13 +245,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
+              columns: defaultUdtHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
-              excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
-                ? timelineDefaults.excludedRowRendererIds
-                : [],
+              excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
             })
           );
         }
@@ -265,15 +257,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds, searchIds);
         refetch();
       },
-      [
-        startTransaction,
-        timelineSavedObjectId,
-        refetch,
-        dispatch,
-        dataViewId,
-        selectedPatterns,
-        unifiedComponentsInTimelineDisabled,
-      ]
+      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -374,7 +358,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
-          unifiedComponentsInTimelineDisabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

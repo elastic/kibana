@@ -18,6 +18,7 @@ export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTION_RESPONSES_DS}-
 export const ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN = `${ENDPOINT_ACTION_RESPONSES_DS}-*`;
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
+export const FILE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.file-*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
 // metadata datastream
@@ -53,6 +54,7 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 export const ENDPOINT_HEARTBEAT_INDEX = '.logs-endpoint.heartbeat-default';
+export const ENDPOINT_HEARTBEAT_INDEX_PATTERN = '.logs-endpoint.heartbeat-*';
 
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
@@ -102,6 +104,7 @@ export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
 export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
 export const SCAN_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scan`;
+export const RUN_SCRIPT_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/run_script`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
@@ -135,3 +138,11 @@ export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePolicies
 /** The list of OS types that support. Value usually found in ECS `host.os.type` */
 export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
 export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];
+
+/**
+ * Workflow Insights
+ */
+
+export const BASE_WORKFLOW_INSIGHTS_ROUTE = `/workflow_insights`;
+export const WORKFLOW_INSIGHTS_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}${BASE_WORKFLOW_INSIGHTS_ROUTE}`;
+export const WORKFLOW_INSIGHTS_UPDATE_ROUTE = `${WORKFLOW_INSIGHTS_ROUTE}/{insightId}`;

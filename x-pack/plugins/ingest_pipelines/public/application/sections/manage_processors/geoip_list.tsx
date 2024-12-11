@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-import { IPINFO_NAME_OPTIONS } from './constants';
+import { getDatabaseText } from './utils';
 import type { GeoipDatabase } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 import { getTypeLabel } from './constants';
@@ -71,9 +71,8 @@ export const GeoipList: React.FunctionComponent = () => {
         sortable: true,
         render: (name: string, row) => {
           if (row.type === 'ipinfo') {
-            // find the name in the options to get the translated value
-            const option = IPINFO_NAME_OPTIONS.find((opt) => opt.value === name);
-            return option?.text ?? name;
+            // Use the translated text for this database, if it exists
+            return getDatabaseText(name, 'ipinfo') ?? name;
           }
 
           return name;
@@ -162,7 +161,7 @@ export const GeoipList: React.FunctionComponent = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.ingestPipelines.manageProcessors.geoip.tableTitle"
-                  defaultMessage="GeoIP"
+                  defaultMessage="IP Location"
                 />
               </h2>
             </EuiTitle>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
@@ -31,11 +32,7 @@ interface Params {
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared }: Params) => {
-    const {
-      navigateToApp,
-      knowledgeBase,
-      assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
-    } = useAssistantContext();
+    const { navigateToApp, knowledgeBase } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
 
@@ -90,12 +87,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       closePopover();
     }, [closePopover, showAlertSettingsModal]);
 
-    // We are migrating away from the settings modal in favor of the new Stack Management UI
-    // Currently behind `assistantKnowledgeBaseByDefault` FF
-    const newItems: ReactElement[] = useMemo(
+    const items = useMemo(
       () => [
         <EuiContextMenuItem
           aria-label={'ai-assistant-settings'}
+          key={'ai-assistant-settings'}
           onClick={handleNavigateToSettings}
           icon={'gear'}
           data-test-subj={'ai-assistant-settings'}
@@ -104,6 +100,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'knowledge-base'}
+          key={'knowledge-base'}
           onClick={handleNavigateToKnowledgeBase}
           icon={'documents'}
           data-test-subj={'knowledge-base'}
@@ -112,6 +109,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'anonymization'}
+          key={'anonymization'}
           onClick={handleNavigateToAnonymization}
           icon={'eye'}
           data-test-subj={'anonymization'}
@@ -120,6 +118,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           aria-label={'alerts-to-analyze'}
+          key={'alerts-to-analyze'}
           onClick={handleShowAlertsModal}
           icon={'magnifyWithExclamation'}
           data-test-subj={'alerts-to-analyze'}
@@ -133,21 +132,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-      ],
-      [
-        handleNavigateToAnonymization,
-        handleNavigateToKnowledgeBase,
-        handleNavigateToSettings,
-        handleShowAlertsModal,
-        knowledgeBase.latestAlerts,
-      ]
-    );
-
-    const items = useMemo(
-      () => [
-        ...(enableKnowledgeBaseByDefault ? newItems : []),
         <EuiContextMenuItem
           aria-label={'clear-chat'}
+          key={'clear-chat'}
           onClick={showDestroyModal}
           icon={'refresh'}
           data-test-subj={'clear-chat'}
@@ -159,7 +146,14 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
       ],
 
-      [enableKnowledgeBaseByDefault, newItems, showDestroyModal]
+      [
+        handleNavigateToAnonymization,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToSettings,
+        handleShowAlertsModal,
+        knowledgeBase.latestAlerts,
+        showDestroyModal,
+      ]
     );
 
     const handleReset = useCallback(() => {
@@ -172,13 +166,15 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       <>
         <EuiPopover
           button={
-            <EuiButtonIcon
-              aria-label="test"
-              isDisabled={isDisabled}
-              iconType="boxesVertical"
-              onClick={onButtonClick}
-              data-test-subj="chat-context-menu"
-            />
+            <KnowledgeBaseTour>
+              <EuiButtonIcon
+                aria-label="test"
+                isDisabled={isDisabled}
+                iconType="boxesVertical"
+                onClick={onButtonClick}
+                data-test-subj="chat-context-menu"
+              />
+            </KnowledgeBaseTour>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}

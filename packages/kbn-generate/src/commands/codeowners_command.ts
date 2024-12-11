@@ -38,6 +38,10 @@ const ULTIMATE_PRIORITY_RULES = `
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
 `;
 
 export const CodeownersCommand: GenerateCommand = {
@@ -63,7 +67,11 @@ export const CodeownersCommand: GenerateCommand = {
     }
 
     const newCodeowners = `${GENERATED_START}${pkgs
-      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
+      .map(
+        (pkg) =>
+          pkg.normalizedRepoRelativeDir +
+          (pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '')
+      )
       .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
 
     if (newCodeowners === oldCodeowners) {

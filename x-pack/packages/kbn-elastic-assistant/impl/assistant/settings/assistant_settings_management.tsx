@@ -37,7 +37,7 @@ interface Props {
   dataViews: DataViewsContract;
   selectedConversation: Conversation;
   onTabChange?: (tabId: string) => void;
-  currentTab?: SettingsTabs;
+  currentTab: SettingsTabs;
 }
 
 /**
@@ -66,12 +66,12 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const tabsConfig = useMemo(
       () => [
         {
-          id: CONNECTORS_TAB,
-          label: i18n.CONNECTORS_MENU_ITEM,
-        },
-        {
           id: CONVERSATIONS_TAB,
           label: i18n.CONVERSATIONS_MENU_ITEM,
+        },
+        {
+          id: CONNECTORS_TAB,
+          label: i18n.CONNECTORS_MENU_ITEM,
         },
         {
           id: SYSTEM_PROMPTS_TAB,

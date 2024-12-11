@@ -147,6 +147,12 @@ const registerHttpRequestMockHelpers = (
   const setSimulateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate`, response, error);
 
+  const setSimulateTemplateByNameResponse = (
+    name: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate/${name}`, response, error);
+
   const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
 
@@ -166,6 +172,13 @@ const registerHttpRequestMockHelpers = (
       response,
       error
     );
+  const setGetMatchingDataStreams = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse(
+      'POST',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_data_streams`,
+      response,
+      error
+    );
 
   const setGetFieldsFromIndices = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse(
@@ -174,9 +187,6 @@ const registerHttpRequestMockHelpers = (
       response,
       error
     );
-
-  const setGetPrivilegesResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${INTERNAL_API_BASE_PATH}/enrich_policies/privileges`, response, error);
 
   const setCreateEnrichPolicy = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
@@ -229,6 +239,7 @@ const registerHttpRequestMockHelpers = (
     setLoadIndexStatsResponse,
     setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,
+    setSimulateTemplateByNameResponse,
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
@@ -239,9 +250,9 @@ const registerHttpRequestMockHelpers = (
     setCreateIndexResponse,
     setGetMatchingIndices,
     setGetFieldsFromIndices,
-    setGetPrivilegesResponse,
     setCreateEnrichPolicy,
     setInferenceModels,
+    setGetMatchingDataStreams,
   };
 };
 

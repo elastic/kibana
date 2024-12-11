@@ -8,6 +8,7 @@
 import { EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { css } from '@emotion/react/dist/emotion-react.cjs';
 
 export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Element }) => {
   return (
@@ -26,11 +27,15 @@ export const EmptyList = ({ addDatabaseButton }: { addDatabaseButton: JSX.Elemen
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.manageProcessors.geoip.emptyPromptDescription"
-            defaultMessage="Use a custom database when setting up IP Location processor."
+            defaultMessage="Set up a connection to a custom database when setting up IP Location processor."
           />
         </p>
       }
       actions={addDatabaseButton}
+      css={css`
+        width: 450px;
+        padding: 0 20px 0 20px;
+      `}
     />
   );
 };

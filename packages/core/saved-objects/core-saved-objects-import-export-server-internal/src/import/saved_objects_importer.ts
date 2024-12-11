@@ -62,7 +62,6 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     compatibilityMode,
     managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
-    this.#log.debug('Starting the import process');
     return importSavedObjectsFromStream({
       readStream,
       createNewCopies,
@@ -75,6 +74,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
       managed,
+      log: this.#log,
     });
   }
 

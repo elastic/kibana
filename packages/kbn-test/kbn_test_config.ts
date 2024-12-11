@@ -54,4 +54,21 @@ export const kbnTestConfig = new (class KbnTestConfig {
       password,
     };
   }
+
+  /**
+   * Use to get `port:undefined` for assertions if the port is default for the
+   * used protocol and thus would be stripped by the browser
+   */
+  getUrlPartsWithStrippedDefaultPort(user: UserAuth = kibanaTestUser): UrlParts {
+    const urlParts = this.getUrlParts(user);
+
+    if (
+      (urlParts.protocol === 'http' && urlParts.port === 80) ||
+      (urlParts.protocol === 'https' && urlParts.port === 443)
+    ) {
+      urlParts.port = undefined;
+    }
+
+    return urlParts;
+  }
 })();

@@ -30,9 +30,6 @@ describe('IndexPatternsApiClient', () => {
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, {
       // not sure what asResponse is but the rest of the results are useful
       asResponse: true,
-      headers: {
-        'user-hash': '',
-      },
       query: {
         allow_hidden: undefined,
         allow_no_index: undefined,

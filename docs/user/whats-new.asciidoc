@@ -1,175 +1,93 @@
 [[whats-new]]
-== What's new in 8.15
+== What's new in 8.17
 
-Here are the highlights of what's new and improved in 8.15.
+Here are the highlights of what's new and improved in 8.17.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
+Previous versions: {kibana-ref-all}/8.16/whats-new.html[8.16] | {kibana-ref-all}/8.15/whats-new.html[8.15] | {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 [discrete]
-=== ES|QL
+=== Discover and ES|QL
 
 [discrete]
-==== Filter UX improvements in ES|QL
+==== Improving column reordering with draggable columns
 
-We're thrilled to unveil a complete overhaul of filtering in the ES|QL UX. Now, you can seamlessly filter data by browsing a time series chart, allowing for quick and intuitive time-based filtering. Interactive chart filtering lets you refine your data directly by clicking on any chart, while creating WHERE clause filters from the Discover table or sidebar has never been easier. These enhancements streamline data exploration and analysis, making your ES|QL experience more efficient and user-friendly than ever.
+We’re excited to announce an enhancement to the Discover table. You can now reorder columns by simply dragging them directly in the data table header. This intuitive feature reduces the number of interactions required to adjust your column layout by eliminating the need to open the Columns popover for sorting. This enhancement saves users valuable time and improves overall usability, leading to smoother and more efficient data exploration. 
 
-*Filter by clicking a chart:*
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt965a5190f246f7c8/669a7d41e5f7c84793b031cb/filter-by-clicking-chart.gif[Filter by clicking a chart]
-
-*Filter by browsing a time series chart:*
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta20c9a93dded707c/669a7d40843f93a02fe51013/filter-by-brushing-time-series.gif[Filter by browsing a time series chart]
-
-*Create WHERE clause filters from Discover table or sidebar:*
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt50ac35ab3af29ff8/669a7d4006a6fafe4c7cb39d/create-where-clause-filters-from-sidebar.gif[Create WHERE clause filters from Discover table or sidebar]
-
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6fa3a9ee893e5603/67533de0e995a041b8dea1d9/dragging-columns-in-discover.gif[Dragging a column to adjust column layout in Discover]
 
 [discrete]
-==== Field statistics in ES|QL
+==== Starred ES|QL queries for quick access and reusability
 
-Field statistics are now available in ES|QL. This feature is designed to provide comprehensive insights for each data field. With this enhancement, you can access detailed statistics such as distributions, averages, and other key metrics, helping you quickly understand your data. This makes data exploration and quality assessment more efficient, providing deeper insights and streamlining the analysis of field-level data in ES|QL.
+With this release, you can bookmark your ES|QL queries directly from your query history by starring them. These starred queries are saved under a dedicated Starred tab, allowing you quick access to your most-used queries across {kib} – not just within Discover. You can reuse these queries in other areas of {kib}, such as the dashboard in-line editor and alerts. With the ability to manage up to 100 starred queries per user, you can sort them by timestamp and receive warnings as you approach the limit.
 
-image::images/field-statistics-esql.png[Field statistics in ES|QL]
-
-[discrete]
-==== Integrations support in the ES|QL editor when using FROM command.
-
-We're excited to announce enhanced support for integrations in the ES|QL editor with the *FROM* command. Previously, you could only access indices, but now you can also view a list of installed integrations directly within the editor. This improvement streamlines your workflow, making it easier to manage and utilize various integrations while working with your data.
-
-image::images/integrations-in-esql.png[Accessing an integration from ES|QL]
-
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltdaffacc1de686bcc/67533eadb02aaf3aa84c8a3f/starred-esql-queries.gif[Running a starred query from the Starred tab in Discover]
 
 [discrete]
 === Dashboards
 
 [discrete]
-==== Field statistics in Dashboards
+==== Log Rate panels
+You can now add Log Rate Analysis panels to your dashboards. Find them in the Logs analysis section alongside https://www.elastic.co/guide/en/kibana/8.16/whats-new.html#_log_pattern_analysis_dashboard_panels[Log Pattern Analysis panels] from 8.16. Find field-value pairs and log patterns that correlate with log spikes or dips across thousands of logs with just a few clicks, and move your analysis to Discover with ease. 
 
-It's now easier than ever to include your field statistics view from **Discover** into **Dashboards**. While running investigations, it is very common that you need to see some field information, such as unique values and their distribution, to make sense of the data. Select the fields that you want with your ES|QL query and get the document count, values, and distribution in your dashboard so you don't have to navigate back and forth to **Discover** to see this information.
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt9bc52ff7851acc52/669a4f6a490fbc64fa22f279/field-statistics.gif[Showing field statistics panel in Dashboards]
-
-[discrete]
-==== Statistics in legends
-
-Accelerate time to insights by summarizing the values of your charts using average, minimum, maximum, median, and variance, among many others. You can add these statistics for **Lens** and ES|QL visualizations. It is important to note that these statistics are computed using the data points from the chart considering the aggregation used and not the raw data. In the following example, the chart shows the median memory per host, so the Max = 15.3KB for the first series (artifacts.elastic.co) is the maximum value of the median memory per host. 
-
-image::images/statistics-in-legends.png[Statistics in legends]
-
-You can find the option to select statistics for your legends along with an explanation for each calculation when editing your visualization, as shown in the following image.
-
-image::images/statistics-in-legends2.png[Select statistics in legends]
-
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb69ebc37cbbaf5a8/6753413228d3fee1541b86ad/log-rate-panels.gif[Log Rate Analysis panel]
 
 [discrete]
-==== View dashboard creator and last editor
+==== Dashboard hover actions
+We received feedback from users that the View and Edit modes in dashboards look too different, mainly because of the top bar in each panel that shows the panel menu. This bar created visual problems and changed the height of panels in Edit mode, especially when they didn’t have a title.
 
-You can now see who created and who last updated a dashboard. 
+We fixed the issue by removing this top bar and making panel information and actions appear on top of the panel when users hover over it. Now users can get the same look in both Edit and View modes and the most common actions are accessible without having to click on the panel menu. This change improves the look and usability of dashboards. 
 
-You can find the creator information right from the dashboard list. 
-
-image::images/dashboard-creator.png[Dashboard creator column in dashboard list]
-
-Quickly find all dashboards created by the same user with a simple filter. 
-
-image::images/dashboard-creator-filter.png[Filtering dashboards by creator]
-
-Note that the creator information will be visible only for dashboards created on or after version 8.14. 
-
-You can also see who last updated a dashboard by clicking the dashboard information icon from the dashboard list. The creator is also visible next to it. This information is immutable and cannot be changed.
-
-image::images/dashboard-last-editor.png[Dashboard details panel with the name of the last editor]
+image::images/before-after-hover-actions.png[Before and After view of dashboard panels, width=90%]
 
 [discrete]
-=== Discover
+==== Legacy visualization editors
+Lens is the preferred visualization editor over TSVB and Aggregation-based since it already incorporates most features of the other two editors and is much easier to use. Offering three editors at this point makes the product more complex and calls for users to learn three different ways to visualize their data for no reason.
+
+However, we are aware that there are still a few features that Lens is missing, such as small multiples or the ability to insert data and change the CSS in a Markdown file. For this reason, TSVB and Aggregation-based editors are being marked as legacy for now to encourage shifting to Lens. We will continue supporting them for some time until all features are fully incorporated into Lens, but we recommend that you start using Lens if you can. If you have good reasons to keep using TSVB or Aggregation-based editors, please add a comment to this public https://github.com/elastic/kibana/issues/198136[Github issue].
+
+image::images/legacy-visualizations.png[New Legacy tab in the Create Visualization window]
 
 [discrete]
-==== Push flyout for Discover document viewer
+==== Improving CSV download for tables
+When exporting tables in CSV in the past, you may have encountered issues with incorrect formatting of the data, rows, and columns. These issues have now been addressed and your exported CSV file shows exactly what you see in {kib}.
 
-You can now seamlessly view document details and the main table simultaneously in **Discover** with the new _push_ flyout. You can adjust the width of the flyout to suit your needs and explore your data much more easily.
+image::images/csv-download-1.png[Exported CSV in the past]
+_Exported CSV in the past_
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb40a408acf4ab688/669a58ea9fecd85219d58ed2/discover-push-flyout.gif[Resizable push flyout in Discover]
+image::images/csv-download-2.png[Exported CSV now, with formatting improvements]
+_Exported CSV now_
+
+
+//[discrete]
+//=== Alerting, cases, and connectors
 
 
 [discrete]
 === Alerting, cases, and connectors
 
 [discrete]
-==== Case templates
+==== Alerting scalability improvements
+The {kib} alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all {ecloud} hosted deployments. These improvements will provide you with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new {kib} alerting framework:  
 
-{kib} cases offer a new powerful capability to enhance the efficiency of your analyst teams with <<case-templates,templates>>. 
-You can manage multiple templates, each of which can be used to auto-populate values in a case with pre-defined knowledge.
-This streamlines the investigative process and significantly reduces time to resolution.
+** 10x reduction in alerting task delays
+** 2x increase in task execution throughput on average
+** 50% fewer requests to Elasticsearch, resulting in lower overhead
 
-[discrete]
-==== Case custom fields are GA
+These customers are now enjoying higher alerting capacity and faster response times without the need for any additional configuration or hardware. Furthermore, these improvements also bring in a new unparalleled scalability for our largest alerting customers, enabling deployments of up to 192 {kib} nodes running alerting rules.
 
-In 8.11, <<case-custom-fields,custom fields>> were added to cases and they are now moving from technical preview to general availability.
-You can set custom field values in your templates to enhance consistency across cases.
-
-[discrete]
-==== {sn} additional fields
-
-You can now create enriched {sn} tickets based on detected alerts with a more comprehensive structure that matches the {sn} ticket scheme.
-A new JSON field is now available as part of the {sn} action, which enables you to send any field from {kib} alerts to {sn} tickets. 
+We are very excited to see how these enhancements empower your alerting strategies with faster, more efficient, and scalable performance.
 
 [discrete]
-==== {webhook-cm} SSL auth support
+==== Support for case file attachments through API actions 
+The latest enhancements to {kib} Cases introduce highly requested functionality for managing security incidents and workflows. You can now use the public API to attach files to cases to enrich them with supporting documentation, evidence, and other critical information. This improvement marks a significant enhancement in case management, providing incident response teams with greater flexibility to include all relevant details directly within their cases.
 
-It's common for organizations to integrate with third parties using secured authentication.
-Currently, most of the available case connectors use basic authentication (user and passwords or tokens), which might not be sufficient to meet organization security policies.
-With this release, the <<cases-webhook-action-type,{webhook-cm} connector>> now supports client certification, which enables you to leverage the connector for secured integration with third parties.
-
-The {webhook-cm} connector also moves from technical preview to general availability in this release.
+Additionally, this release expands integration capabilities with third-party systems such as ServiceNow and Tines. You can now programmatically update cases through API calls from external platforms, streamlining workflows and fostering seamless collaboration across tools. These features make it easier to automate case updates and efficiently track complex security incidents in real time. For more details, check out the https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createcasedefaultspace[API documentation].
 
 [discrete]
-=== Machine Learning
+==== Jira Connector now supports Jira Data Center
+This release introduces support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with {kib}, enabling more efficient workflows and streamlined incident management.
 
-[discrete]
-==== Improved UX for Log Pattern Analysis in Discover 
+With this update, users can create and manage Jira issues directly from {kib}, regardless of their Jira deployment model. This expanded compatibility highlights our commitment to supporting diverse customer deployment setups and delivering enhanced functionality tailored to enterprise environments.
 
-Analyze large volumes of logs efficiently, in very short times with Log Pattern Analysis in **Discover**. In 8.15, we redesigned the Log Pattern Analysis user flow in **Discover** to make it easier to use. Discover log patterns with one click for the message field (and other applicable text fields) and easily filter in and out logs to drastically reduce MTTR.
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt7e63d7e764ab183e/669a807bd316c7015db35458/ml-log-pattern-analysis.gif[New log pattern analysis interface]
-
-[discrete]
-==== Log Rate Analysis contextual insights in serverless Observability
-
-You can now see insights in natural language, for example for the root cause of a log rate change or threshold alert, in Log Rate Analysis. This feature is currently only available for Observability serverless projects.
-
-image::images/obs-log-rate-analysis-insigths.png[Log Rate Analysis contextual insights in serverless Observability]
-
-[discrete]
-==== Inference API improvements
-
-The inference API provides a seamless, intuitive interface to perform inference and other tasks against proprietary, hosted, and integrated external services. In 8.15, we're extending it with the following capabilities:
-
-* Support for Anthropic's chat completion API.
-* Ability to host cross encoder models and perform the reranking task.
-
-
-[discrete]
-=== Managing {kib} users and objects
-
-[discrete]
-==== Sharing improvements
-
-You can now share a dashboard, search, or Lens object in one click. When sharing an object, the most common actions are directly presented to you, and a short link is automatically generated, making it simpler than ever to share your work.
-
-image::images/share-modal.png[New object share modal, width=50%]
-
-[discrete]
-==== Quick API key creation
-
-Many API keys don’t require custom settings, so we made it simple to generate a standard key. From the **Endpoints & API keys** top menu in Search, you can create a key in seconds. 
-
-image::images/create-simple-api-key.png[Shortcut to create an API key, width=60%]
-
-[discrete]
-==== Filtering by User in Kibana Audit Logs
-
-We are pleased to share that ignoring events by user in Kibana audit logs is now possible. This enhancement will give you more flexibility to reduce the overall number of events logged by the Kibana audit logs service and to control the volume of data being generated in audit logs. While we currently offer a number of ways to do this using the `xpack.security.audit.ignore_filters.[]` configuration setting, there wasn't an easy option to filter by user. With this addition, you can configure Kibana audit logs to ignore events based on values from the following fields: users, spaces, outcomes, categories, types and actions. 

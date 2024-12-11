@@ -17,20 +17,33 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { IndexEntry } from '@kbn/elastic-assistant-common';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { HttpSetup } from '@kbn/core-http-browser';
 import * as i18n from './translations';
+import { isGlobalEntry } from './helpers';
+import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 
 interface Props {
+  http: HttpSetup;
   dataViews: DataViewsContract;
   entry?: IndexEntry;
+  originalEntry?: IndexEntry;
   setEntry: React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>;
   hasManageGlobalKnowledgeBase: boolean;
 }
 
 export const IndexEntryEditor: React.FC<Props> = React.memo(
-  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase }) => {
+  ({ http, dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry }) => {
+    const privateUsers = useMemo(() => {
+      const originalUsers = originalEntry?.users;
+      if (originalEntry && !isGlobalEntry(originalEntry)) {
+        return originalUsers;
+      }
+      return undefined;
+    }, [originalEntry]);
+
     // Name
     const setName = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -43,9 +56,9 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       (value: string) =>
         setEntry((prevEntry) => ({
           ...prevEntry,
-          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : undefined,
+          users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : privateUsers,
         })),
-      [setEntry]
+      [privateUsers, setEntry]
     );
     const sharingOptions = [
       {
@@ -83,42 +96,54 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
     // Index
-    const indexOptions = useAsync(async () => {
-      const indices = await dataViews.getIndices({
-        pattern: '*',
-        isRollupIndex: () => false,
-      });
-
-      return indices.map((index) => ({
-        'data-test-subj': index.name,
-        label: index.name,
-        value: index.name,
+    const { data: kbIndices } = useKnowledgeBaseIndices({
+      http,
+    });
+    const indexOptions = useMemo(() => {
+      return kbIndices?.indices.map((index) => ({
+        'data-test-subj': index,
+        label: index,
+        value: index,
       }));
-    }, [dataViews]);
+    }, [kbIndices?.indices]);
 
-    const fieldOptions = useAsync(async () => {
-      const fields = await dataViews.getFieldsForWildcard({
-        pattern: entry?.index ?? '',
-        fieldTypes: ['semantic_text'],
-      });
+    const { value: isMissingIndex } = useAsync(async () => {
+      if (!entry?.index?.length) return false;
 
-      return fields
-        .filter((field) => field.esTypes?.includes('semantic_text'))
-        .map((field) => ({
+      return !(await dataViews.getExistingIndices([entry.index])).length;
+    }, [entry?.index]);
+
+    const indexFields = useAsync(
+      async () =>
+        dataViews.getFieldsForWildcard({
+          pattern: entry?.index ?? '',
+        }),
+      [entry?.index]
+    );
+
+    const fieldOptions = useMemo(
+      () =>
+        indexFields?.value
+          ?.filter((field) => field.esTypes?.includes('semantic_text'))
+          .map((field) => ({
+            'data-test-subj': field.name,
+            label: field.name,
+            value: field.name,
+          })) ?? [],
+      [indexFields?.value]
+    );
+
+    const outputFieldOptions = useMemo(
+      () =>
+        indexFields?.value?.map((field) => ({
           'data-test-subj': field.name,
           label: field.name,
           value: field.name,
-        }));
-    }, [entry]);
-
-    const setIndex = useCallback(
-      async (e: Array<EuiComboBoxOptionOption<string>>) => {
-        setEntry((prevEntry) => ({ ...prevEntry, index: e[0]?.value }));
-      },
-      [setEntry]
+        })) ?? [],
+      [indexFields?.value]
     );
 
-    const onCreateOption = (searchValue: string) => {
+    const onCreateIndexOption = (searchValue: string) => {
       const normalizedSearchValue = searchValue.trim().toLowerCase();
 
       if (!normalizedSearchValue) {
@@ -131,7 +156,6 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       };
 
       setIndex([newOption]);
-      setField([{ label: '', value: '' }]);
     };
 
     const onCreateFieldOption = (searchValue: string) => {
@@ -170,6 +194,52 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       [setEntry]
     );
 
+    // Field
+    const setOutputFields = useCallback(
+      async (e: Array<EuiComboBoxOptionOption<string>>) => {
+        setEntry((prevEntry) => ({
+          ...prevEntry,
+          outputFields: e
+            ?.filter((option) => !!option.value)
+            .map((option) => option.value as string),
+        }));
+      },
+      [setEntry]
+    );
+
+    const setIndex = useCallback(
+      async (e: Array<EuiComboBoxOptionOption<string>>) => {
+        setEntry((prevEntry) => ({ ...prevEntry, index: e[0]?.value }));
+        setField([]);
+        setOutputFields([]);
+      },
+      [setEntry, setField, setOutputFields]
+    );
+
+    const onCreateOutputFieldsOption = useCallback(
+      (searchValue: string) => {
+        const normalizedSearchValue = searchValue.trim().toLowerCase();
+
+        if (!normalizedSearchValue) {
+          return;
+        }
+
+        const newOption: EuiComboBoxOptionOption<string> = {
+          label: searchValue,
+          value: searchValue,
+        };
+
+        setOutputFields([
+          ...(entry?.outputFields?.map((field) => ({
+            label: field,
+            value: field,
+          })) ?? []),
+          newOption,
+        ]);
+      },
+      [entry?.outputFields, setOutputFields]
+    );
+
     return (
       <EuiForm>
         <EuiFormRow
@@ -198,15 +268,22 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
             fullWidth
           />
         </EuiFormRow>
-        <EuiFormRow label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL} fullWidth>
+        <EuiFormRow
+          label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
+          fullWidth
+          isInvalid={isMissingIndex}
+          error={isMissingIndex && <>{i18n.MISSING_INDEX_ERROR}</>}
+          helpText={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION}
+        >
           <EuiComboBox
             data-test-subj="index-combobox"
             aria-label={i18n.ENTRY_INDEX_NAME_INPUT_LABEL}
             isClearable={true}
+            isInvalid={isMissingIndex}
             singleSelection={{ asPlainText: true }}
-            onCreateOption={onCreateOption}
+            onCreateOption={onCreateIndexOption}
             fullWidth
-            options={indexOptions.value ?? []}
+            options={indexOptions ?? []}
             selectedOptions={
               entry?.index
                 ? [
@@ -228,7 +305,7 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
             singleSelection={{ asPlainText: true }}
             onCreateOption={onCreateFieldOption}
             fullWidth
-            options={fieldOptions.value ?? []}
+            options={fieldOptions}
             selectedOptions={
               entry?.field
                 ? [
@@ -281,11 +358,17 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           <EuiComboBox
             aria-label={i18n.ENTRY_OUTPUT_FIELDS_INPUT_LABEL}
             isClearable={true}
-            singleSelection={{ asPlainText: true }}
-            onCreateOption={onCreateOption}
+            onCreateOption={onCreateOutputFieldsOption}
             fullWidth
-            selectedOptions={[]}
-            onChange={setIndex}
+            options={outputFieldOptions}
+            isDisabled={!entry?.index?.length}
+            selectedOptions={
+              entry?.outputFields?.map((field) => ({
+                label: field,
+                value: field,
+              })) ?? []
+            }
+            onChange={setOutputFields}
           />
         </EuiFormRow>
       </EuiForm>

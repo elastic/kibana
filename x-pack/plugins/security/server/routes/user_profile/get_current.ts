@@ -20,6 +20,13 @@ export function defineGetCurrentUserProfileRoute({
   router.get(
     {
       path: '/internal/security/user_profile',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the internal authorization service; a currently authenticated user is required',
+        },
+      },
       validate: {
         query: schema.object({ dataPath: schema.maybe(schema.string()) }),
       },

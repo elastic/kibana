@@ -34,6 +34,12 @@ export const registerFindRoute = (
   router.get(
     {
       path: '/api/kibana/management/saved_objects/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),

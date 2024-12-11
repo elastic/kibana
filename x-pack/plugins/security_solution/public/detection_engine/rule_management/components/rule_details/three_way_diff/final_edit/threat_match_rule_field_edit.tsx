@@ -6,14 +6,10 @@
  */
 
 import React from 'react';
-import { FieldFormWrapper } from './field_form_wrapper';
-import {
-  KqlQueryEdit,
-  kqlQuerySchema,
-  kqlQuerySerializer,
-  kqlQueryDeserializer,
-} from './fields/kql_query';
 import type { UpgradeableThreatMatchFields } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { KqlQueryEditForm } from './fields/kql_query';
+import { DataSourceEditForm } from './fields/data_source';
+import { AlertSuppressionEditForm } from './fields/alert_suppression';
 
 interface ThreatMatchRuleFieldEditProps {
   fieldName: UpgradeableThreatMatchFields;
@@ -22,14 +18,11 @@ interface ThreatMatchRuleFieldEditProps {
 export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEditProps) {
   switch (fieldName) {
     case 'kql_query':
-      return (
-        <FieldFormWrapper
-          component={KqlQueryEdit}
-          fieldFormSchema={kqlQuerySchema}
-          serializer={kqlQuerySerializer}
-          deserializer={kqlQueryDeserializer}
-        />
-      );
+      return <KqlQueryEditForm />;
+    case 'data_source':
+      return <DataSourceEditForm />;
+    case 'alert_suppression':
+      return <AlertSuppressionEditForm />;
     default:
       return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
   }

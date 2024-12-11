@@ -1,6 +1,9 @@
-
 {
-    "id": "@kbn/cloud-security-posture-common",
-    "owner": "@elastic/kibana-cloud-security-posture",
-    "type": "shared-common"
-  }
+  "type": "shared-common",
+  "id": "@kbn/cloud-security-posture-common",
+  "owner": [
+    "@elastic/kibana-cloud-security-posture"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

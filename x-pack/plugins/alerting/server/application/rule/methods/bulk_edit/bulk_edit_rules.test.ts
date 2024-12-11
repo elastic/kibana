@@ -37,11 +37,11 @@ import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter } from '../../../../connector_adapters/types';
-import { RuleAttributes } from '../../../../data/rule/types';
 import { SavedObject } from '@kbn/core/server';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { RawRule } from '../../../../types';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -1175,7 +1175,7 @@ describe('bulkEdit()', () => {
       });
 
       const rule = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<
-        SavedObject<RuleAttributes>
+        SavedObject<RawRule>
       >;
 
       expect(rule[0].attributes.actions).toEqual([

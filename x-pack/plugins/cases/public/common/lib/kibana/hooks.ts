@@ -15,7 +15,7 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
-  FEATURE_ID,
+  FEATURE_ID_V2,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
@@ -166,7 +166,7 @@ interface Capabilities {
 }
 interface UseApplicationCapabilities {
   actions: Capabilities;
-  generalCases: CasesPermissions;
+  generalCasesV2: CasesPermissions;
   visualize: Capabilities;
   dashboard: Capabilities;
 }
@@ -178,13 +178,13 @@ interface UseApplicationCapabilities {
 
 export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
-  const casesCapabilities = capabilities[FEATURE_ID];
+  const casesCapabilities = capabilities[FEATURE_ID_V2];
   const permissions = getUICapabilities(casesCapabilities);
 
   return useMemo(
     () => ({
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
-      generalCases: {
+      generalCasesV2: {
         all: permissions.all,
         create: permissions.create,
         read: permissions.read,
@@ -193,6 +193,8 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
         push: permissions.push,
         connectors: permissions.connectors,
         settings: permissions.settings,
+        reopenCase: permissions.reopenCase,
+        createComment: permissions.createComment,
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
@@ -215,6 +217,8 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       permissions.push,
       permissions.connectors,
       permissions.settings,
+      permissions.reopenCase,
+      permissions.createComment,
     ]
   );
 };

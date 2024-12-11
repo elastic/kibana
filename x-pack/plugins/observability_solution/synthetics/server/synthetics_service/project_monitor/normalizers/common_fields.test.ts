@@ -21,6 +21,14 @@ describe('isValidUrl', () => {
   it('returns true for valid URL', () => {
     expect(isValidURL('https://elastic.co')).toBeTruthy();
   });
+
+  it('returns skips validation vars', () => {
+    expect(isValidURL('${urlParam}')).toBeTruthy();
+  });
+
+  it('returns skips validation vars with http', () => {
+    expect(isValidURL('http://${urlParam}')).toBeTruthy();
+  });
 });
 
 describe('getUrlsField', () => {

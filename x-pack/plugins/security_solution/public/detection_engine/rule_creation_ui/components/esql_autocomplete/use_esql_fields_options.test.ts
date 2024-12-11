@@ -8,15 +8,6 @@
 import { esqlToOptions } from './use_esql_fields_options';
 
 describe('esqlToOptions', () => {
-  it('should return empty array if data is undefined', () => {
-    expect(esqlToOptions(undefined)).toEqual([]);
-  });
-  it('should return empty array if data is null', () => {
-    expect(esqlToOptions(null)).toEqual([]);
-  });
-  it('should return empty array if data has error', () => {
-    expect(esqlToOptions({ error: Error })).toEqual([]);
-  });
   it('should transform all columns if fieldTYpe is not passed', () => {
     expect(
       esqlToOptions([

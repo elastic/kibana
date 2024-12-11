@@ -7,31 +7,39 @@
 
 import expect from '@kbn/expect';
 import {
+  deleteInferenceEndpoint,
   createKnowledgeBaseModel,
   TINY_ELSER,
+  deleteKnowledgeBaseModel,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
-import { deleteKnowledgeBaseModel } from './helpers';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
+  const es = getService('es');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
-    // TODO: https://github.com/elastic/kibana/issues/192757
     this.tags(['skipMKI']);
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('editor');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await createKnowledgeBaseModel(ml);
       await observabilityAIAssistantAPIClient
         .slsUser({
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          params: {
+            query: {
+              model_id: TINY_ELSER.id,
+            },
+          },
           roleAuthc,
           internalReqHeader,
         })
@@ -40,6 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID }).catch((err) => {});
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
@@ -51,12 +60,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           internalReqHeader,
         })
         .expect(200);
-      expect(res.body.deployment_state).to.eql('started');
-      expect(res.body.model_name).to.eql(TINY_ELSER.id);
+
+      expect(res.body.enabled).to.be(true);
+      expect(res.body.ready).to.be(true);
+      expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER.id);
     });
 
     it('returns correct status after elser is stopped', async () => {
-      await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
+      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID });
 
       const res = await observabilityAIAssistantAPIClient
         .slsUser({
@@ -66,10 +77,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body).to.eql({
-        ready: false,
-        model_name: TINY_ELSER.id,
-      });
+      expect(res.body.enabled).to.be(true);
+      expect(res.body.ready).to.be(false);
     });
   });
 }

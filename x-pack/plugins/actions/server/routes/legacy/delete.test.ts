@@ -39,6 +39,16 @@ describe('deleteActionRoute', () => {
     const [config, handler] = router.delete.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}"`);
+    expect(config.options?.deprecated).toEqual({
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacydeleteconnector',
+      severity: 'warning',
+      reason: {
+        type: 'migrate',
+        newApiPath: `/api/actions/connector/{id}`,
+        newApiMethod: 'DELETE',
+      },
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.delete.mockResolvedValueOnce({});

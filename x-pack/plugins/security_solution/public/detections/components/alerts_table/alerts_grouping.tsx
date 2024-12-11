@@ -25,7 +25,7 @@ import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
-import { track } from '../../../common/lib/telemetry';
+import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
 
 export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status[];
@@ -78,14 +78,18 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
       onGroupChange: ({ groupByField, tableId }: { groupByField: string; tableId: string }) => {
-        telemetry.reportAlertsGroupingChanged({ groupByField, tableId });
+        telemetry.reportEvent(AlertsEventTypes.AlertsGroupingChanged, { groupByField, tableId });
       },
       onGroupToggle: (param: {
         isOpen: boolean;
         groupName?: string | undefined;
         groupNumber: number;
         groupingId: string;
-      }) => telemetry.reportAlertsGroupingToggled({ ...param, tableId: param.groupingId }),
+      }) =>
+        telemetry.reportEvent(AlertsEventTypes.AlertsGroupingToggled, {
+          ...param,
+          tableId: param.groupingId,
+        }),
     }),
     [telemetry]
   );

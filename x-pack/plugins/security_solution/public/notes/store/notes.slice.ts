@@ -58,7 +58,7 @@ export interface NotesState extends EntityState<Note> {
     direction: 'asc' | 'desc';
   };
   filter: string;
-  userFilter: string;
+  createdByFilter: string;
   search: string;
   associatedFilter: AssociatedFilter;
   selectedIds: string[];
@@ -94,7 +94,7 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
     direction: 'desc',
   },
   filter: '',
-  userFilter: '',
+  createdByFilter: '',
   associatedFilter: AssociatedFilter.all,
   search: '',
   selectedIds: [],
@@ -129,13 +129,13 @@ export const fetchNotes = createAsyncThunk<
     sortField: string;
     sortOrder: string;
     filter: string;
-    userFilter: string;
+    createdByFilter: string;
     associatedFilter: AssociatedFilter;
     search: string;
   },
   {}
 >('notes/fetchNotes', async (args) => {
-  const { page, perPage, sortField, sortOrder, filter, userFilter, associatedFilter, search } =
+  const { page, perPage, sortField, sortOrder, filter, createdByFilter, associatedFilter, search } =
     args;
   const res = await fetchNotesApi({
     page,
@@ -143,7 +143,7 @@ export const fetchNotes = createAsyncThunk<
     sortField,
     sortOrder,
     filter,
-    userFilter,
+    createdByFilter,
     associatedFilter,
     search,
   });
@@ -169,7 +169,7 @@ export const deleteNotes = createAsyncThunk<string[], { ids: string[]; refetch?:
     await deleteNotesApi(ids);
     if (refetch) {
       const state = getState() as State;
-      const { search, pagination, userFilter, associatedFilter, sort } = state.notes;
+      const { search, pagination, createdByFilter, associatedFilter, sort } = state.notes;
       dispatch(
         fetchNotes({
           page: pagination.page,
@@ -177,7 +177,7 @@ export const deleteNotes = createAsyncThunk<string[], { ids: string[]; refetch?:
           sortField: sort.field,
           sortOrder: sort.direction,
           filter: '',
-          userFilter,
+          createdByFilter,
           associatedFilter,
           search,
         })
@@ -206,8 +206,8 @@ const notesSlice = createSlice({
     userFilteredNotes: (state: NotesState, action: { payload: string }) => {
       state.filter = action.payload;
     },
-    userFilterUsers: (state: NotesState, action: { payload: string }) => {
-      state.userFilter = action.payload;
+    userFilterCreatedBy: (state: NotesState, action: { payload: string }) => {
+      state.createdByFilter = action.payload;
     },
     userFilterAssociatedNotes: (state: NotesState, action: { payload: AssociatedFilter }) => {
       state.associatedFilter = action.payload;
@@ -332,7 +332,7 @@ export const selectNotesTableSelectedIds = (state: State) => state.notes.selecte
 
 export const selectNotesTableSearch = (state: State) => state.notes.search;
 
-export const selectNotesTableUserFilters = (state: State) => state.notes.userFilter;
+export const selectNotesTableCreatedByFilter = (state: State) => state.notes.createdByFilter;
 
 export const selectNotesTableAssociatedFilter = (state: State) => state.notes.associatedFilter;
 
@@ -423,7 +423,7 @@ export const {
   userSelectedPerPage,
   userSortedNotes,
   userFilteredNotes,
-  userFilterUsers,
+  userFilterCreatedBy,
   userFilterAssociatedNotes,
   userSearchedNotes,
   userSelectedRow,

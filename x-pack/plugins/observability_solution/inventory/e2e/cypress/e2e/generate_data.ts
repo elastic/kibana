@@ -9,10 +9,12 @@ import { apm, entities, log, timerange } from '@kbn/apm-synthtrace-client';
 import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 
 const SYNTH_NODE_TRACES_LOGS_ENTITY_ID = generateLongIdWithSeed('service');
+const SERVICE_LOGS_ONLY_ENTITY_ID = generateLongIdWithSeed('service-logs-only');
 const HOST_SERVER_1_LOGS_ENTITY_ID = generateLongIdWithSeed('host');
 const CONTAINER_ID_METRICS_ENTITY_ID = generateLongIdWithSeed('container');
 
 const SYNTH_NODE_TRACE_LOGS = 'synth-node-trace-logs';
+const SERVICE_LOGS_ONLY = 'service-logs-only';
 const HOST_NAME = 'server1';
 const CONTAINER_ID = 'foo';
 
@@ -25,6 +27,13 @@ export function generateEntities({ from, to }: { from: number; to: number }) {
     dataStreamType: ['traces', 'logs'],
     environment: ENVIRONMENT,
     entityId: SYNTH_NODE_TRACES_LOGS_ENTITY_ID,
+  });
+
+  const serviceLogsOnly = entities.serviceEntity({
+    serviceName: SERVICE_LOGS_ONLY,
+    agentName: ['host'],
+    dataStreamType: ['logs'],
+    entityId: SERVICE_LOGS_ONLY_ENTITY_ID,
   });
 
   const hostServer1Logs = entities.hostEntity({
@@ -49,6 +58,7 @@ export function generateEntities({ from, to }: { from: number; to: number }) {
     .generator((timestamp) => {
       return [
         serviceSynthNodeTracesLogs.timestamp(timestamp),
+        serviceLogsOnly.timestamp(timestamp),
         hostServer1Logs.timestamp(timestamp),
         containerMetrics.timestamp(timestamp),
       ];
@@ -90,23 +100,43 @@ export function generateLogs({ from, to }: { from: number; to: number }) {
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
-      return Array(3)
-        .fill(0)
-        .map(() => {
-          const index = Math.floor(Math.random() * 3);
-          const logMessage = MESSAGE_LOG_LEVELS[index];
+      return [
+        ...Array(3)
+          .fill(0)
+          .map(() => {
+            const index = Math.floor(Math.random() * 3);
+            const logMessage = MESSAGE_LOG_LEVELS[index];
 
-          return log
-            .create({ isLogsDb: false })
-            .service(SYNTH_NODE_TRACE_LOGS)
-            .message(logMessage.message)
-            .logLevel(logMessage.level)
-            .setGeoLocation([1])
-            .setHostIp('223.72.43.22')
-            .defaults({
-              'agent.name': 'nodejs',
-            })
-            .timestamp(timestamp);
-        });
+            return log
+              .create({ isLogsDb: false })
+              .service(SYNTH_NODE_TRACE_LOGS)
+              .message(logMessage.message)
+              .logLevel(logMessage.level)
+              .setGeoLocation([1])
+              .setHostIp('223.72.43.22')
+              .defaults({
+                'agent.name': 'nodejs',
+              })
+              .timestamp(timestamp);
+          }),
+        ...Array(3)
+          .fill(0)
+          .map(() => {
+            const index = Math.floor(Math.random() * 3);
+            const logMessage = MESSAGE_LOG_LEVELS[index];
+
+            return log
+              .create({ isLogsDb: false })
+              .service(SERVICE_LOGS_ONLY)
+              .message(logMessage.message)
+              .logLevel(logMessage.level)
+              .setGeoLocation([1])
+              .setHostIp('223.72.43.22')
+              .defaults({
+                'agent.name': 'nodejs',
+              })
+              .timestamp(timestamp);
+          }),
+      ];
     });
 }

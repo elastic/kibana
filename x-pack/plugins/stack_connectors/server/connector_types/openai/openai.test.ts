@@ -292,6 +292,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: true,
+              stream_options: { include_usage: true },
               model: DEFAULT_OPENAI_MODEL,
             }),
             headers: {
@@ -338,6 +339,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...body,
               stream: true,
+              stream_options: { include_usage: true },
             }),
             headers: {
               Authorization: 'Bearer 123',
@@ -397,6 +399,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: true,
+              stream_options: { include_usage: true },
               model: DEFAULT_OPENAI_MODEL,
             }),
             headers: {
@@ -422,6 +425,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: true,
+              stream_options: { include_usage: true },
               model: DEFAULT_OPENAI_MODEL,
             }),
             headers: {
@@ -448,6 +452,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...sampleOpenAiBody,
               stream: true,
+              stream_options: { include_usage: true },
               model: DEFAULT_OPENAI_MODEL,
             }),
             headers: {
@@ -1274,7 +1279,11 @@ describe('OpenAIConnector', () => {
             url: 'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
             method: 'post',
             responseSchema: StreamingResponseSchema,
-            data: JSON.stringify({ ...sampleAzureAiBody, stream: true }),
+            data: JSON.stringify({
+              ...sampleAzureAiBody,
+              stream: true,
+              stream_options: { include_usage: true },
+            }),
             headers: {
               'api-key': '123',
               'content-type': 'application/json',
@@ -1314,6 +1323,7 @@ describe('OpenAIConnector', () => {
             data: JSON.stringify({
               ...body,
               stream: true,
+              stream_options: { include_usage: true },
             }),
             headers: {
               'api-key': '123',

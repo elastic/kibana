@@ -37,20 +37,14 @@ import { SearchIndexDetailsPageMenuItemPopover } from './details_page_menu_item'
 import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const {
-    console: consolePlugin,
-    docLinks,
-    application,
-    history,
-    share,
-    chrome,
-    serverless,
-  } = useKibana().services;
+  const { console: consolePlugin, docLinks, application, history, share } = useKibana().services;
   const {
     data: index,
     refetch,
@@ -82,23 +76,12 @@ export const SearchIndexDetailsPage = () => {
     setHasDocuments(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
   }, [indexDocuments, isInitialLoading, setHasDocuments, setDocumentsLoading]);
 
-  useEffect(() => {
-    chrome.docTitle.change(indexName);
-
-    if (serverless) {
-      serverless.setBreadcrumbs([
-        {
-          text: i18n.translate('xpack.searchIndices.indexBreadcrumbLabel', {
-            defaultMessage: 'Index Management',
-          }),
-          href: '/app/management/data/index_management/indices',
-        },
-        {
-          text: indexName,
-        },
-      ]);
-    }
-  }, [chrome, indexName, serverless]);
+  usePageChrome(indexName, [
+    ...IndexManagementBreadcrumbs,
+    {
+      text: indexName,
+    },
+  ]);
 
   const usageTracker = useUsageTracker();
 
@@ -190,7 +173,7 @@ export const SearchIndexDetailsPage = () => {
   }, [isShowingDeleteModal]);
   const { euiTheme } = useEuiTheme();
 
-  if (isInitialLoading || isMappingsInitialLoading) {
+  if (isInitialLoading || isMappingsInitialLoading || indexDocumentsIsInitialLoading) {
     return (
       <SectionLoading>
         {i18n.translate('xpack.searchIndices.loadingDescription', {
@@ -209,7 +192,7 @@ export const SearchIndexDetailsPage = () => {
       panelled
       bottomBorder
     >
-      {isIndexError || isMappingsError || !index || !mappings ? (
+      {isIndexError || isMappingsError || !index || !mappings || !indexDocuments ? (
         <IndexloadingError
           error={indexError}
           navigateToIndexListPage={navigateToIndexListPage}
@@ -297,7 +280,7 @@ export const SearchIndexDetailsPage = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <QuickStats index={index} mappings={mappings} />
+                    <QuickStats indexDocuments={indexDocuments} index={index} mappings={mappings} />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

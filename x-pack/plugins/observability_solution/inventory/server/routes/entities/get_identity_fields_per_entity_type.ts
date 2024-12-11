@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ENTITY_IDENTITY_FIELDS, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { Entity, EntityType } from '../../../common/entities';
+import { castArray } from 'lodash';
+import type { InventoryEntity } from '../../../common/entities';
 
-export type IdentityFieldsPerEntityType = Map<EntityType, string[]>;
+export type IdentityFieldsPerEntityType = Map<string, string[]>;
 
-export const getIdentityFieldsPerEntityType = (entities: Entity[]) => {
-  const identityFieldsPerEntityType: IdentityFieldsPerEntityType = new Map();
+export const getIdentityFieldsPerEntityType = (latestEntities: InventoryEntity[]) => {
+  const identityFieldsPerEntityType = new Map<string, string[]>();
 
-  entities.forEach((entity) =>
-    identityFieldsPerEntityType.set(entity[ENTITY_TYPE], [entity[ENTITY_IDENTITY_FIELDS]].flat())
+  latestEntities.forEach((entity) =>
+    identityFieldsPerEntityType.set(entity.entityType, castArray(entity.entityIdentityFields))
   );
 
   return identityFieldsPerEntityType;

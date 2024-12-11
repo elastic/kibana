@@ -18,10 +18,12 @@ export const findListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .get({
       access: 'public',
-      options: {
-        tags: ['access:lists-read'],
-      },
       path: `${LIST_URL}/_find`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-read'],
+        },
+      },
     })
     .addVersion(
       {

@@ -9,6 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { LogsSourceConfiguration, normalizeLogsSource } from '../../utils/logs_source';
 import { LogCategories, LogCategoriesDependencies } from '../log_categories';
 import { LogsOverviewErrorContent } from './logs_overview_error_content';
@@ -26,6 +27,7 @@ export interface LogsOverviewProps {
 
 export type LogsOverviewDependencies = LogCategoriesDependencies & {
   logsDataAccess: LogsDataAccessPluginStart;
+  dataViews: DataViewsContract;
 };
 
 export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
@@ -36,8 +38,12 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
     timeRange,
   }) => {
     const normalizedLogsSource = useAsync(
-      () => normalizeLogsSource({ logsDataAccess: dependencies.logsDataAccess })(logsSource),
-      [dependencies.logsDataAccess, logsSource]
+      () =>
+        normalizeLogsSource({
+          logsDataAccess: dependencies.logsDataAccess,
+          dataViewsService: dependencies.dataViews,
+        })(logsSource),
+      [dependencies.dataViews, dependencies.logsDataAccess, logsSource]
     );
 
     if (normalizedLogsSource.loading) {

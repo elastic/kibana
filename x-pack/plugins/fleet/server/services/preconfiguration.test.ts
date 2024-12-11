@@ -306,10 +306,8 @@ jest.mock('./app_context', () => ({
     }),
     getExternalCallbacks: jest.fn(),
     getCloud: jest.fn(),
-    getExperimentalFeatures: jest.fn().mockReturnValue({
-      agentless: false,
-    }),
     getConfig: jest.fn(),
+    getExperimentalFeatures: jest.fn().mockReturnValue({}),
     getInternalUserSOClientForSpaceId: jest.fn(),
   },
 }));
@@ -1074,10 +1072,6 @@ describe('policy preconfiguration', () => {
         mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
-
-      jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-        agentless: true,
-      } as any);
 
       expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledTimes(1);
       expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith(TEST_NAMESPACE);

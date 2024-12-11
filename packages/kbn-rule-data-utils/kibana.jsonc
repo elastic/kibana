@@ -5,5 +5,7 @@
     "@elastic/security-detections-response",
     "@elastic/response-ops",
     "@elastic/obs-ux-management-team"
-  ]
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

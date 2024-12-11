@@ -17,7 +17,7 @@ import {
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
+import { DashboardSavedObjectAttributes, SavedDashboardPanel } from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 
@@ -95,7 +95,7 @@ export const collectPanelsByType = (
 
 export const controlsCollectorFactory =
   (embeddableService: EmbeddablePersistableStateService) =>
-  (attributes: DashboardAttributes, collectorData: DashboardCollectorData) => {
+  (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
     if (!isEmpty(attributes.controlGroupInput)) {
       collectorData.controls = embeddableService.telemetry(
         {

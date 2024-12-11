@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/securitysolution-list-api",
-  "owner": "@elastic/security-detection-engine"
+  "owner": [
+    "@elastic/security-detection-engine"
+  ],
+  "group": "security",
+  "visibility": "private"
 }

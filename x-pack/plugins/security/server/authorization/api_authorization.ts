@@ -14,18 +14,28 @@ import type {
   PrivilegeSet,
   RouteAuthz,
 } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 
-import { API_OPERATION_PREFIX } from '../../common/constants';
+import { API_OPERATION_PREFIX, SUPERUSER_PRIVILEGES } from '../../common/constants';
 
 const isAuthzDisabled = (authz?: RecursiveReadonly<RouteAuthz>): authz is AuthzDisabled => {
   return (authz as AuthzDisabled)?.enabled === false;
 };
 
+const isReservedPrivilegeSet = (privilege: string): privilege is ReservedPrivilegesSet => {
+  return Object.hasOwn(ReservedPrivilegesSet, privilege);
+};
+
 export function initAPIAuthorization(
   http: HttpServiceSetup,
-  { actions, checkPrivilegesDynamicallyWithRequest, mode }: AuthorizationServiceSetup,
+  {
+    actions,
+    checkPrivilegesDynamicallyWithRequest,
+    checkPrivilegesWithRequest,
+    mode,
+  }: AuthorizationServiceSetup,
   logger: Logger
 ) {
   http.registerOnPostAuth(async (request, response, toolkit) => {
@@ -38,33 +48,59 @@ export function initAPIAuthorization(
 
     if (security) {
       if (isAuthzDisabled(security.authz)) {
-        logger.warn(
-          `Route authz is disabled for ${request.url.pathname}${request.url.search}": ${security.authz.reason}`
-        );
-
         return toolkit.next();
       }
 
       const authz = security.authz as AuthzEnabled;
 
-      const requestedPrivileges = authz.requiredPrivileges.flatMap((privilegeEntry) => {
-        if (typeof privilegeEntry === 'object') {
-          return [...(privilegeEntry.allRequired ?? []), ...(privilegeEntry.anyRequired ?? [])];
+      const { requestedPrivileges, requestedReservedPrivileges } = authz.requiredPrivileges.reduce(
+        (acc, privilegeEntry) => {
+          const privileges =
+            typeof privilegeEntry === 'object'
+              ? [...(privilegeEntry.allRequired ?? []), ...(privilegeEntry.anyRequired ?? [])]
+              : [privilegeEntry];
+
+          for (const privilege of privileges) {
+            if (isReservedPrivilegeSet(privilege)) {
+              acc.requestedReservedPrivileges.push(privilege);
+            } else {
+              acc.requestedPrivileges.push(privilege);
+            }
+          }
+
+          return acc;
+        },
+        {
+          requestedPrivileges: [] as string[],
+          requestedReservedPrivileges: [] as string[],
         }
+      );
 
-        return privilegeEntry;
-      });
-
-      const apiActions = requestedPrivileges.map((permission) => actions.api.get(permission));
       const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-      const checkPrivilegesResponse = await checkPrivileges({ kibana: apiActions });
-
       const privilegeToApiOperation = (privilege: string) =>
         privilege.replace(API_OPERATION_PREFIX, '');
+
       const kibanaPrivileges: Record<string, boolean> = {};
 
-      for (const kbPrivilege of checkPrivilegesResponse.privileges.kibana) {
-        kibanaPrivileges[privilegeToApiOperation(kbPrivilege.privilege)] = kbPrivilege.authorized;
+      if (requestedPrivileges.length > 0) {
+        const checkPrivilegesResponse = await checkPrivileges({
+          kibana: requestedPrivileges.map((permission) => actions.api.get(permission)),
+        });
+
+        for (const kbPrivilege of checkPrivilegesResponse.privileges.kibana) {
+          kibanaPrivileges[privilegeToApiOperation(kbPrivilege.privilege)] = kbPrivilege.authorized;
+        }
+      }
+
+      for (const reservedPrivilege of requestedReservedPrivileges) {
+        if (reservedPrivilege === ReservedPrivilegesSet.superuser) {
+          const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(
+            request
+          ).globally(SUPERUSER_PRIVILEGES);
+
+          kibanaPrivileges[ReservedPrivilegesSet.superuser] =
+            checkSuperuserPrivilegesResponse.hasAllRequested;
+        }
       }
 
       const hasRequestedPrivilege = (kbPrivilege: Privilege | PrivilegeSet) => {

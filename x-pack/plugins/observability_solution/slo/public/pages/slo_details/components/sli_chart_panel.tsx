@@ -12,7 +12,7 @@ import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-sc
 import React from 'react';
 import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ChartData } from '../../../typings/slo';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { WideChart } from './wide_chart';

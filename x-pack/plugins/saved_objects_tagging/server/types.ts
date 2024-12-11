@@ -10,8 +10,8 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { ITagsClient } from '../common/types';
-import { IAssignmentService } from './services';
+import type { ITagsClient } from '../common/types';
+import type { IAssignmentService } from './services';
 
 export interface ITagsRequestHandlerContext {
   tagsClient: ITagsClient;

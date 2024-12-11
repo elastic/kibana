@@ -20,8 +20,10 @@ import {
   MAX_CARD_HEIGHT_IN_PX,
   ONBOARDING_APP_ID,
   ONBOARDING_LINK,
+  TELEMETRY_INTEGRATION_CARD,
 } from './constants';
 import type { GetAppUrl, NavigateTo } from '../../../../../common/lib/kibana';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 const addPathParamToUrl = (url: string, onboardingLink: string) => {
   const encoded = encodeURIComponent(onboardingLink);
@@ -97,6 +99,8 @@ const addSecuritySpecificProps = ({
     showInstallationStatus: true,
     url,
     onCardClick: () => {
+      const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
+      trackOnboardingLinkClick(trackId);
       if (url.startsWith(APP_INTEGRATIONS_PATH)) {
         navigateTo({
           appId: INTEGRATION_APP_ID,

@@ -172,7 +172,7 @@ describe('SamlSessionManager', () => {
   describe('for cloud session', () => {
     const hostOptions = {
       protocol: 'https' as 'http' | 'https',
-      hostname: 'cloud',
+      hostname: 'my-test-deployment.test.elastic.cloud',
       username: 'elastic',
       password: 'changeme',
     };
@@ -326,6 +326,33 @@ describe('SamlSessionManager', () => {
         `User with '${noCredentialsRole}' role is not defined`
       );
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
+    });
+  });
+
+  describe(`for cloud session with 'isCloud' set to false`, () => {
+    const hostOptions = {
+      protocol: 'http' as 'http' | 'https',
+      hostname: 'my-test-deployment.test.elastic.cloud',
+      username: 'elastic',
+      password: 'changeme',
+    };
+    const samlSessionManagerOptions = {
+      hostOptions,
+      isCloud: false,
+      log,
+      cloudUsersFilePath,
+    };
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    test('should throw an error when kbnHost points to a Cloud instance', () => {
+      const kbnHost = `${hostOptions.protocol}://${hostOptions.hostname}`;
+      expect(() => new SamlSessionManager(samlSessionManagerOptions)).toThrow(
+        `SamlSessionManager: 'isCloud' was set to false, but 'kbnHost' appears to be a Cloud instance: ${kbnHost}
+Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
+      );
     });
   });
 });

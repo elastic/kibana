@@ -14,8 +14,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AgentRequiredCallout } from './agent_required_callout';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
+import { trackOnboardingLinkClick } from '../../../../lib/telemetry';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../lib/telemetry');
 
 describe('AgentRequiredCallout', () => {
   beforeEach(() => {
@@ -29,5 +31,13 @@ describe('AgentRequiredCallout', () => {
       getByText('Elastic Agent is required for one or more of your integrations. Add Elastic Agent')
     ).toBeInTheDocument();
     expect(getByTestId('agentLink')).toBeInTheDocument();
+  });
+
+  it('should track the agent link click', () => {
+    const { getByTestId } = render(<AgentRequiredCallout />, { wrapper: TestProviders });
+
+    getByTestId('agentLink').click();
+
+    expect(trackOnboardingLinkClick).toHaveBeenCalledWith('agent_required');
   });
 });

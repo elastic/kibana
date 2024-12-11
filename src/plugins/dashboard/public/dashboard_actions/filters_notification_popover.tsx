@@ -26,8 +26,11 @@ import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import {
+  apiCanLockHoverActions,
+  getViewModeSubject,
+  useBatchedOptionalPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationActionApi } from './filters_notification_action';
 
@@ -59,8 +62,9 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const dataViews = useStateFromPublishingSubject(
-    api.parentApi?.dataViews ? api.parentApi.dataViews : new BehaviorSubject(undefined)
+  const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
+    api.parentApi?.dataViews,
+    getViewModeSubject(api ?? undefined)
   );
 
   return (
@@ -69,13 +73,23 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
         <EuiButtonIcon
           color="text"
           iconType={'filter'}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+            if (apiCanLockHoverActions(api)) {
+              api?.lockHoverActions(!api.hasLockedHoverActions$.value);
+            }
+          }}
           data-test-subj={`embeddablePanelNotification-${api.uuid}`}
           aria-label={displayName}
         />
       }
       isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
+      closePopover={() => {
+        setIsPopoverOpen(false);
+        if (apiCanLockHoverActions(api)) {
+          api.lockHoverActions(false);
+        }
+      }}
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
@@ -112,8 +126,8 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
           </EuiFormRow>
         )}
       </EuiForm>
-      <EuiPopoverFooter>
-        {!disableEditbutton && (
+      {!disableEditbutton && parentViewMode === 'edit' && (
+        <EuiPopoverFooter>
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
@@ -132,8 +146,8 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-      </EuiPopoverFooter>
+        </EuiPopoverFooter>
+      )}
     </EuiPopover>
   );
 }

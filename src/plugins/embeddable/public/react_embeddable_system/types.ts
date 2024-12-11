@@ -14,6 +14,7 @@ import {
 } from '@kbn/presentation-containers';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
+  CanLockHoverActions,
   HasType,
   PublishesPhaseEvents,
   PublishesUnsavedChanges,
@@ -48,7 +49,7 @@ export type SetReactEmbeddableApiRegistration<
     SerializedState,
     RuntimeState
   >
-> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | keyof CanLockHoverActions>;
 
 /**
  * Defines the subset of the default embeddable API that the `buildApi` method uses, which allows implementors

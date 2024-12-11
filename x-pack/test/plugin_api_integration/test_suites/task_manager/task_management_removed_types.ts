@@ -47,13 +47,19 @@ export default function ({ getService }: FtrProviderContext) {
   const UNREGISTERED_TASK_TYPE_ID = 'ce7e1250-3322-11eb-94c1-db6995e83f6b';
   const REMOVED_TASK_TYPE_ID = 'be7e1250-3322-11eb-94c1-db6995e83f6a';
 
-  describe('not registered task types', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/200154
+  describe.skip('not registered task types', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_removed_types');
+    });
+
+    afterEach(async () => {
+      // clean up after each test
+      return await request.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
     function scheduleTask(
@@ -86,6 +92,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       let scheduledTaskRuns = 0;
       let scheduledTaskInstanceRunAt = scheduledTask.runAt;
+
+      await request
+        .post('/api/sample_tasks/run_mark_removed_tasks_as_unrecognized')
+        .set('kbn-xsrf', 'xxx')
+        .send({})
+        .expect(200);
 
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;

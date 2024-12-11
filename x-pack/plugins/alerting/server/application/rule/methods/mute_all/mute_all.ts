@@ -14,7 +14,6 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import { RulesClientContext } from '../../../../rules_client/types';
 import { updateMetaAttributes } from '../../../../rules_client/lib';
 import { clearUnscheduledSnoozeAttributes } from '../../../../rules_client/common';
-import { RuleAttributes } from '../../../../data/rule/types';
 import { MuteAllRuleParams } from './types';
 import { muteAllRuleParamsSchema } from './schemas';
 
@@ -77,7 +76,7 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
   const updateAttributes = updateMetaAttributes(context, {
     muteAll: true,
     mutedInstanceIds: [],
-    snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes as RuleAttributes),
+    snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });

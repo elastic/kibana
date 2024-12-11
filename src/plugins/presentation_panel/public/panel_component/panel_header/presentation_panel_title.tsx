@@ -131,8 +131,8 @@ export const PresentationPanelTitle = ({
   }, [api, onClick]);
 
   const describedPanelTitleElement = useMemo(() => {
+    if (hideTitle) return null;
     if (!panelDescription) {
-      if (hideTitle) return null;
       return (
         <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
           {panelTitleElement}

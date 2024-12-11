@@ -36,6 +36,7 @@ export const CLAIM_STRATEGY_MGET = 'mget';
 export const DEFAULT_DISCOVERY_INTERVAL_MS = 1000 * 10; // 10 seconds
 const MIN_DISCOVERY_INTERVAL_MS = 1000; // 1 second
 const MAX_DISCOVERY_INTERVAL_MS = 1000 * 60 * 5; // 5 minutes
+export const DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS = 6 * 1000 * 10; // 60 seconds
 
 export const DEFAULT_ACTIVE_NODES_LOOK_BACK_DURATION = '30s';
 const FIVE_MIN_IN_MS = 5 * 60 * 1000;
@@ -202,7 +203,7 @@ export const configSchema = schema.object(
       max: 100,
       min: 1,
     }),
-    claim_strategy: schema.maybe(schema.string()),
+    claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
   },

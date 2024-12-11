@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  DefaultInspectorAdapters,
+  ExecutionContext,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
@@ -22,7 +26,8 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
   'lens_choropleth_chart',
   Datatable,
   Omit<ChoroplethChartConfig, 'layerType'>,
-  ChoroplethChartRender
+  ChoroplethChartRender,
+  ExecutionContext<DefaultInspectorAdapters>
 > => ({
   name: 'lens_choropleth_chart',
   type: 'render',

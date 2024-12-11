@@ -163,6 +163,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean?)',
         'monitoring.ui.min_interval_seconds (number?)',
         'monitoring.ui.show_license_expiration (boolean?)',
+        'monitoring.ui.logs.index (string?)',
         'newsfeed.fetchInterval (duration?)',
         'newsfeed.mainInterval (duration?)',
         'newsfeed.service.pathTemplate (string?)',
@@ -273,6 +274,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean?)',
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
+        'xpack.index_management.enableProjectLevelRetentionChecks (boolean?|never)',
         'xpack.integration_assistant.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
@@ -291,6 +293,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
         'xpack.index_management.enableIndexStats (boolean?|never)',
         'xpack.index_management.enableDataStreamStats (boolean?|never)',
+        'xpack.index_management.enableSizeAndDocCount (boolean?|never)',
         'xpack.index_management.editableIndexSettings (all?|limited?|never)',
         'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
         'xpack.index_management.dev.enableSemanticText (boolean?)',
@@ -351,6 +354,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
+        'xpack.upgrade_assistant.featureSet.migrateDataStreams (boolean?)',
         'xpack.upgrade_assistant.ui.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean?)',
@@ -360,6 +364,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
+        'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

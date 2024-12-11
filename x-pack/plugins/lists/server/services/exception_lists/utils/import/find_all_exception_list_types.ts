@@ -52,57 +52,40 @@ export const findAllListTypes = async (
   nonAgnosticListItems: ExceptionListQueryInfo[],
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<FoundExceptionListSchema | null> => {
-  // Agnostic filter
-  const agnosticFilter = getListFilter({
-    namespaceType: 'agnostic',
-    objects: agnosticListItems,
-  });
-
-  // Non-agnostic filter
-  const nonAgnosticFilter = getListFilter({
-    namespaceType: 'single',
-    objects: nonAgnosticListItems,
-  });
-
   if (!agnosticListItems.length && !nonAgnosticListItems.length) {
     return null;
-  } else if (agnosticListItems.length && !nonAgnosticListItems.length) {
-    return findExceptionList({
-      filter: agnosticFilter,
-      namespaceType: ['agnostic'],
-      page: undefined,
-      perPage: CHUNK_PARSED_OBJECT_SIZE,
-      pit: undefined,
-      savedObjectsClient,
-      searchAfter: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
-    });
-  } else if (!agnosticListItems.length && nonAgnosticListItems.length) {
-    return findExceptionList({
-      filter: nonAgnosticFilter,
-      namespaceType: ['single'],
-      page: undefined,
-      perPage: CHUNK_PARSED_OBJECT_SIZE,
-      pit: undefined,
-      savedObjectsClient,
-      searchAfter: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
-    });
-  } else {
-    return findExceptionList({
-      filter: `${agnosticFilter} OR ${nonAgnosticFilter}`,
-      namespaceType: ['single', 'agnostic'],
-      page: undefined,
-      perPage: CHUNK_PARSED_OBJECT_SIZE,
-      pit: undefined,
-      savedObjectsClient,
-      searchAfter: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
-    });
   }
+
+  const filters: string[] = [];
+  if (agnosticListItems.length > 0) {
+    filters.push(
+      getListFilter({
+        namespaceType: 'agnostic',
+        objects: agnosticListItems,
+      })
+    );
+  }
+
+  if (nonAgnosticListItems.length > 0) {
+    filters.push(
+      getListFilter({
+        namespaceType: 'single',
+        objects: nonAgnosticListItems,
+      })
+    );
+  }
+
+  return findExceptionList({
+    filter: filters.join(' OR '),
+    namespaceType: ['single', 'agnostic'],
+    page: undefined,
+    perPage: CHUNK_PARSED_OBJECT_SIZE,
+    pit: undefined,
+    savedObjectsClient,
+    searchAfter: undefined,
+    sortField: undefined,
+    sortOrder: undefined,
+  });
 };
 
 /**

@@ -276,10 +276,6 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const deprecationsSetup = await this.deprecations.setup({
-      http: httpSetup,
-    });
-
     // setup i18n prior to any other service, to have translations ready
     const i18nServiceSetup = await this.i18n.setup({ http: httpSetup, pluginPaths });
 
@@ -303,11 +299,17 @@ export class Server {
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
 
+    const deprecationsSetup = await this.deprecations.setup({
+      http: httpSetup,
+      coreUsageData: coreUsageDataSetup,
+    });
+
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      docLinks: docLinksSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({

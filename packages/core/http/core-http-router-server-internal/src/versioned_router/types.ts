@@ -7,25 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  AddVersionOpts,
-  RequestHandler,
-  RouteMethod,
-  VersionedRouteConfig,
-} from '@kbn/core-http-server';
+import type { AddVersionOpts, RouteMethod } from '@kbn/core-http-server';
 
 export type Method = Exclude<RouteMethod, 'options'>;
 
 /** @internal */
-export interface VersionedRouterRoute {
-  method: string;
-  path: string;
-  options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
-  handlers: Array<{
-    fn: RequestHandler;
-    options: AddVersionOpts<unknown, unknown, unknown>;
-  }>;
-}
+export type Options = AddVersionOpts<unknown, unknown, unknown>;
 
 /**
  * Specifies resolution strategy to use if a request does not provide a version.

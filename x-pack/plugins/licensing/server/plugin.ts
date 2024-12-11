@@ -125,6 +125,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       clusterClient,
       logger: this.logger,
       cacheDurationMs: this.config.license_cache_duration.asMilliseconds(),
+      maxRetryDelay: pollingFrequency,
     });
 
     const { license$, refreshManually } = createLicenseUpdate(

@@ -9,7 +9,15 @@
 
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { BehaviorSubject, combineLatest, filter, firstValueFrom, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  firstValueFrom,
+  race,
+  switchMap,
+} from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -27,7 +35,11 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import { DataMsg, SavedSearchData } from '../state_management/discover_data_state_container';
+import {
+  DataMain$,
+  DataMsg,
+  SavedSearchData,
+} from '../state_management/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import { InternalState } from '../state_management/discover_internal_state_container';
@@ -92,13 +104,9 @@ export function fetchAll(
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$, { query });
-
-    // histogram for data view mode will send `loading` for totalHits$
-    if (isEsqlQuery) {
-      sendLoadingMsg(dataSubjects.totalHits$, {
-        result: dataSubjects.totalHits$.getValue().result,
-      });
-    }
+    sendLoadingMsg(dataSubjects.totalHits$, {
+      result: dataSubjects.totalHits$.getValue().result,
+    });
 
     // Start fetching all required requests
     const response = isEsqlQuery
@@ -177,12 +185,17 @@ export function fetchAll(
       // but their errors will be shown in-place (e.g. of the chart).
       .catch(sendErrorTo(dataSubjects.documents$, dataSubjects.main$));
 
-    // Return a promise that will resolve once all the requests have finished or failed
+    // Return a promise that will resolve once all the requests have finished or failed, or no results are found
     return firstValueFrom(
-      combineLatest([
-        isComplete(dataSubjects.documents$).pipe(switchMap(async () => onFetchRecordsComplete?.())),
-        isComplete(dataSubjects.totalHits$),
-      ])
+      race(
+        combineLatest([
+          isComplete(dataSubjects.documents$).pipe(
+            switchMap(async () => onFetchRecordsComplete?.())
+          ),
+          isComplete(dataSubjects.totalHits$),
+        ]),
+        noResultsFound(dataSubjects.main$)
+      )
     ).then(() => {
       // Send a complete message to main$ once all queries are done and if main$
       // is not already in an ERROR state, e.g. because the document query has failed.
@@ -254,6 +267,18 @@ export async function fetchMoreDocuments(
 
 const isComplete = <T extends DataMsg>(subject: BehaviorSubject<T>) => {
   return subject.pipe(
-    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus))
+    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+    distinctUntilChanged((a, b) => a.fetchStatus === b.fetchStatus)
+  );
+};
+
+const noResultsFound = (subject: DataMain$) => {
+  return subject.pipe(
+    filter(
+      ({ fetchStatus, foundDocuments }) => fetchStatus === FetchStatus.COMPLETE && !foundDocuments
+    ),
+    distinctUntilChanged(
+      (a, b) => a.fetchStatus === b.fetchStatus && a.foundDocuments === b.foundDocuments
+    )
   );
 };

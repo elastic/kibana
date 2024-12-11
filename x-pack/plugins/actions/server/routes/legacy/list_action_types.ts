@@ -27,7 +27,16 @@ export const listActionTypesRoute = (
       options: {
         access: 'public',
         summary: `Get connector types`,
-        deprecated: true,
+        deprecated: {
+          documentationUrl:
+            'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacygetconnectortypes',
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiPath: `${BASE_ACTION_API_PATH}/connector_types`,
+            newApiMethod: 'GET',
+          },
+        },
         tags: ['oas-tag:connectors'],
       },
       validate: {},

@@ -9,10 +9,11 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { EuiFlyoutHeader } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { FlyoutHeader, FlyoutTitle } from '@kbn/security-solution-common';
 import { getNetworkDetailsUrl } from '../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../common/components/links';
 import type { FlowTargetSourceDest } from '../../../common/search_strategy';
+import { FlyoutHeader } from '../shared/components/flyout_header';
+import { FlyoutTitle } from '../shared/components/flyout_title';
 import { encodeIpv6 } from '../../common/lib/helpers';
 
 export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
@@ -27,7 +28,7 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
 }
 
 /**
- *
+ *  Header component for the network details flyout
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ ip, flowTarget, ...flyoutHeaderProps }: PanelHeaderProps) => {

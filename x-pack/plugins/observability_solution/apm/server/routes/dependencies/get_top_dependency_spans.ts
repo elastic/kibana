@@ -41,7 +41,7 @@ export interface DependencySpan {
   serviceName: string;
   agentName: AgentName;
   traceId: string;
-  transactionId: string;
+  transactionId?: string;
   transactionType?: string;
   transactionName?: string;
   duration: number;
@@ -72,7 +72,6 @@ export async function getTopDependencySpans({
   const topDedsRequiredFields = asMutableArray([
     SPAN_ID,
     TRACE_ID,
-    TRANSACTION_ID,
     SPAN_NAME,
     SERVICE_NAME,
     SERVICE_ENVIRONMENT,
@@ -98,7 +97,6 @@ export async function getTopDependencySpans({
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
               ...termQuery(SPAN_NAME, spanName),
-              { exists: { field: TRANSACTION_ID } },
               ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
                 ? [
                     {
@@ -119,9 +117,10 @@ export async function getTopDependencySpans({
     })
   ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, topDedsRequiredFields));
 
-  const transactionIds = spans.map((span) => span.transaction.id);
+  const traceIds = spans.map((span) => span.trace.id);
 
   const txRequiredFields = asMutableArray([
+    TRACE_ID,
     TRANSACTION_ID,
     TRANSACTION_TYPE,
     TRANSACTION_NAME,
@@ -134,10 +133,10 @@ export async function getTopDependencySpans({
       },
       body: {
         track_total_hits: false,
-        size: transactionIds.length,
+        size: traceIds.length,
         query: {
           bool: {
-            filter: [...termsQuery(TRANSACTION_ID, ...transactionIds)],
+            filter: [...termsQuery(TRACE_ID, ...traceIds), { exists: { field: TRANSACTION_ID } }],
           },
         },
         fields: txRequiredFields,
@@ -148,10 +147,10 @@ export async function getTopDependencySpans({
     })
   ).hits.hits.map((hit) => unflattenKnownApmEventFields(hit.fields, txRequiredFields));
 
-  const transactionsById = keyBy(transactions, (transaction) => transaction.transaction.id);
+  const transactionsByTraceId = keyBy(transactions, (transaction) => transaction.trace.id);
 
   return spans.map((span): DependencySpan => {
-    const transaction = maybe(transactionsById[span.transaction!.id]);
+    const transaction = maybe(transactionsByTraceId[span.trace!.id]);
 
     return {
       '@timestamp': new Date(span['@timestamp']).getTime(),
@@ -162,7 +161,7 @@ export async function getTopDependencySpans({
       duration: span.span.duration.us,
       traceId: span.trace.id,
       outcome: (span.event?.outcome || EventOutcome.unknown) as EventOutcome,
-      transactionId: span.transaction!.id,
+      transactionId: transaction?.transaction.id,
       transactionType: transaction?.transaction.type,
       transactionName: transaction?.transaction.name,
     };

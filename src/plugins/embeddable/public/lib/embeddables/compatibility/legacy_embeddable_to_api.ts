@@ -37,14 +37,11 @@ import {
   IEmbeddable,
   LegacyEmbeddableAPI,
 } from '../i_embeddable';
-import { canEditEmbeddable, editLegacyEmbeddable } from './edit_legacy_embeddable';
 import {
   embeddableInputToSubject,
   embeddableOutputToSubject,
   viewModeToSubject,
 } from './embeddable_compatibility_utils';
-import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
-import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
 export type CommonLegacyInput = EmbeddableInput & { savedObjectId?: string; timeRange: TimeRange };
 export type CommonLegacyOutput = EmbeddableOutput & { indexPatterns: DataView[] };
@@ -93,13 +90,15 @@ export const legacyEmbeddableToApi = (
   /**
    * Support editing of legacy embeddables
    */
-  const onEdit = () => editLegacyEmbeddable(embeddable);
+  const onEdit = () => {
+    throw new Error('Edit legacy embeddable not supported');
+  };
   const getTypeDisplayName = () =>
     embeddableStart.getEmbeddableFactory(embeddable.type)?.getDisplayName() ??
     i18n.translate('embeddableApi.compatibility.defaultTypeDisplayName', {
       defaultMessage: 'chart',
     });
-  const isEditingEnabled = () => canEditEmbeddable(embeddable);
+  const isEditingEnabled = () => false;
 
   /**
    * Performance tracking
@@ -245,6 +244,8 @@ export const legacyEmbeddableToApi = (
     return !isInputControl && !isMarkdown && !isImage && !isLinks;
   };
 
+  const hasLockedHoverActions$ = new BehaviorSubject<boolean>(false);
+
   return {
     api: {
       parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
@@ -270,6 +271,9 @@ export const legacyEmbeddableToApi = (
       disabledActionIds,
       setDisabledActionIds: (ids) => disabledActionIds.next(ids),
 
+      hasLockedHoverActions$,
+      lockHoverActions: (lock: boolean) => hasLockedHoverActions$.next(lock),
+
       panelTitle,
       setPanelTitle,
       defaultPanelTitle,
@@ -281,11 +285,15 @@ export const legacyEmbeddableToApi = (
       panelDescription,
       defaultPanelDescription,
 
-      canLinkToLibrary: () => canLinkLegacyEmbeddable(embeddable),
-      linkToLibrary: () => linkLegacyEmbeddable(embeddable),
+      canLinkToLibrary: async () => false,
+      linkToLibrary: () => {
+        throw new Error('Link to library not supported for legacy embeddable');
+      },
 
-      canUnlinkFromLibrary: () => canUnlinkLegacyEmbeddable(embeddable),
-      unlinkFromLibrary: () => unlinkLegacyEmbeddable(embeddable),
+      canUnlinkFromLibrary: async () => false,
+      unlinkFromLibrary: () => {
+        throw new Error('Unlink from library not supported for legacy embeddable');
+      },
 
       savedObjectId,
     },

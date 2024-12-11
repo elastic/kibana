@@ -21,10 +21,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
 
   describe('Metric', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {

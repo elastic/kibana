@@ -13,12 +13,13 @@ import * as module from '@kbn/fleet-plugin/public';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
-} from '../../../../hooks/use_stored_state';
+} from '../../../hooks/use_stored_state';
 import { DEFAULT_TAB } from './constants';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 jest.mock('../../../onboarding_context');
-jest.mock('../../../../hooks/use_stored_state');
-
+jest.mock('../../../hooks/use_stored_state');
+jest.mock('../../../lib/telemetry');
 jest.mock('../../../../../common/lib/kibana', () => ({
   ...jest.requireActual('../../../../../common/lib/kibana'),
   useNavigation: jest.fn().mockReturnValue({
@@ -116,6 +117,33 @@ describe('IntegrationsCardGridTabsComponent', () => {
       fireEvent.click(tabButton);
     });
     expect(mockSetTabId).toHaveBeenCalledWith('user');
+  });
+
+  it('tracks the tab clicks', () => {
+    (useStoredIntegrationTabId as jest.Mock).mockReturnValue(['recommended', mockSetTabId]);
+
+    mockUseAvailablePackages.mockReturnValue({
+      isLoading: false,
+      filteredCards: [],
+      setCategory: mockSetCategory,
+      setSelectedSubCategory: mockSetSelectedSubCategory,
+      setSearchTerm: mockSetSearchTerm,
+    });
+
+    const { getByTestId } = render(
+      <IntegrationsCardGridTabsComponent
+        {...props}
+        useAvailablePackages={mockUseAvailablePackages}
+      />
+    );
+
+    const tabButton = getByTestId('user');
+
+    act(() => {
+      fireEvent.click(tabButton);
+    });
+
+    expect(trackOnboardingLinkClick).toHaveBeenCalledWith('tab_user');
   });
 
   it('renders no search tools when showSearchTools is false', async () => {

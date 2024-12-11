@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ReactElement } from 'react';
+import type { ComponentType, ReactElement, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -20,6 +20,10 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClientFactoryCreateParams,
   BrowserShortUrlClient
 >;
+
+export interface ShareContextObjectTypeConfig {
+  draftModeCallOut?: ReactNode;
+}
 
 /**
  * @public
@@ -37,6 +41,7 @@ export interface ShareContext {
    */
   objectTypeMeta: {
     title: string;
+    config?: Partial<Record<'link' | 'export' | 'embed', ShareContextObjectTypeConfig>>;
   };
   objectId?: string;
   /**
@@ -132,11 +137,12 @@ export interface ShareMenuItemV2 extends ShareMenuItemBase {
   layoutOption?: 'print';
   generateCopyUrl?: URL;
   renderCopyURLButton?: boolean;
+  warnings?: Array<{ title: string; message: string }>;
 }
 
 export interface ShareMenuProviderV2 {
   readonly id: string;
-  getShareMenuItems: (context: ShareContext) => Array<Omit<ShareMenuItemV2, 'intl'>>;
+  getShareMenuItems: (context: ShareContext) => ShareMenuItemV2[];
 }
 export interface ShareMenuProviderLegacy {
   readonly id: string;

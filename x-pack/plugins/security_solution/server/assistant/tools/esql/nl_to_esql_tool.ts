@@ -49,11 +49,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           connectorId,
           input: question,
           ...(isOssModel ? { functionCalling: 'simulated' } : {}),
-          logger: {
-            debug: (source) => {
-              logger.debug(typeof source === 'function' ? source() : source);
-            },
-          },
+          logger,
         })
       );
     };

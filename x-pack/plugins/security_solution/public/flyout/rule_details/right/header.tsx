@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import {
   EuiTitle,
   EuiText,
@@ -15,7 +15,6 @@ import {
   EuiBadge,
   EuiLink,
 } from '@elastic/eui';
-import { FlyoutHeader, FlyoutTitle } from '@kbn/security-solution-common';
 import { DELETED_RULE } from '../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 import { CreatedBy, UpdatedBy } from '../../../detections/components/rules/rule_info';
 import {
@@ -27,6 +26,8 @@ import {
 } from './test_ids';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 export interface PanelHeaderProps {
   /**
@@ -42,7 +43,7 @@ export interface PanelHeaderProps {
 /**
  * Title component that shows basic information of a rule. This is displayed above rule overview body
  */
-export const PanelHeader: React.FC<PanelHeaderProps> = ({ rule, isSuppressed }) => {
+export const PanelHeader: React.FC<PanelHeaderProps> = memo(({ rule, isSuppressed }) => {
   const href = useRuleDetailsLink({ ruleId: rule.id });
 
   return (
@@ -85,6 +86,6 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({ rule, isSuppressed }) 
       </EuiFlexGroup>
     </FlyoutHeader>
   );
-};
+});
 
 PanelHeader.displayName = 'PanelHeader';

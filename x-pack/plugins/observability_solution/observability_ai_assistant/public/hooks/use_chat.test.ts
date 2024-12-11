@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { act, renderHook, type RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, act, type RenderHookResult } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import {
   MessageRole,
@@ -39,7 +39,7 @@ const mockChatService: MockedChatService = {
       role: MessageRole.System,
     },
   }),
-  getScope: jest.fn(),
+  getScopes: jest.fn(),
 };
 
 const addErrorMock = jest.fn();
@@ -57,7 +57,7 @@ jest.spyOn(useKibanaModule, 'useKibana').mockReturnValue({
   },
 } as any);
 
-let hookResult: RenderHookResult<UseChatProps, UseChatResult>;
+let hookResult: RenderHookResult<UseChatResult, UseChatProps>;
 
 describe('useChat', () => {
   beforeEach(() => {
@@ -83,7 +83,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
-          scope: 'observability',
+          scopes: ['observability'],
         } as UseChatProps,
       });
     });
@@ -113,7 +113,7 @@ describe('useChat', () => {
           service: {
             getScreenContexts: () => [],
           } as unknown as ObservabilityAIAssistantService,
-          scope: 'observability',
+          scopes: ['observability'],
         } as UseChatProps,
       });
 

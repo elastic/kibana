@@ -48,6 +48,7 @@ export class DatatableVisualization {
       return getDatatableVisualization({
         paletteService: palettes,
         kibanaTheme: core.theme,
+        formatFactory,
       });
     });
   }

@@ -23,9 +23,11 @@ export interface Response {
 export function useFetchEvents({
   rangeFrom,
   rangeTo,
+  filter,
 }: {
   rangeFrom?: string;
   rangeTo?: string;
+  filter?: string;
 }): Response {
   const {
     core: {
@@ -35,12 +37,13 @@ export function useFetchEvents({
   } = useKibana();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: investigationKeys.events(rangeFrom, rangeTo),
+    queryKey: investigationKeys.events(rangeFrom, rangeTo, filter),
     queryFn: async ({ signal }) => {
       return await http.get<GetEventsResponse>(`/api/observability/events`, {
         query: {
           rangeFrom,
           rangeTo,
+          filter,
         },
         version: '2023-10-31',
         signal,

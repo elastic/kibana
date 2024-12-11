@@ -28,6 +28,7 @@ export const OtelKubernetesPage = () => (
             defaultMessage: 'Unified Kubernetes observability with the OpenTelemetry Operator',
           }
         )}
+        isTechnicalPreview={true}
       />
     }
   >

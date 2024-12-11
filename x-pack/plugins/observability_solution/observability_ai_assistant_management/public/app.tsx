@@ -15,7 +15,11 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { StartDependencies, AiAssistantManagementObservabilityPluginStart } from './plugin';
+import {
+  StartDependencies,
+  AiAssistantManagementObservabilityPluginStart,
+  ConfigSchema,
+} from './plugin';
 import { aIAssistantManagementObservabilityRouter } from './routes/config';
 import { RedirectToHomeIfUnauthorized } from './routes/components/redirect_to_home_if_unauthorized';
 import { AppContextProvider } from './context/app_context';
@@ -23,9 +27,10 @@ import { AppContextProvider } from './context/app_context';
 interface MountParams {
   core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>;
   mountParams: ManagementAppMountParams;
+  config: ConfigSchema;
 }
 
-export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
+export const mountManagementSection = async ({ core, mountParams, config }: MountParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
 
   if (!startDeps.observabilityAIAssistant) return () => {};
@@ -35,7 +40,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
 
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.observabilityAiAssistantManagement.app.titleBar', {
-      defaultMessage: 'AI Assistant for Observability Settings',
+      defaultMessage: 'AI Assistant for Observability and Search Settings',
     })
   );
 
@@ -46,7 +51,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
       <RedirectToHomeIfUnauthorized coreStart={coreStart}>
         <I18nProvider>
           <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-            <AppContextProvider value={{ setBreadcrumbs }}>
+            <AppContextProvider value={{ setBreadcrumbs, config }}>
               <QueryClientProvider client={queryClient}>
                 <RouterProvider
                   history={history}

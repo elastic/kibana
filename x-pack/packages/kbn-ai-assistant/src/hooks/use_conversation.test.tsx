@@ -55,9 +55,9 @@ const mockService: MockedService = {
     predefinedConversation$: new Observable(),
   },
   navigate: jest.fn().mockReturnValue(of()),
-  scope$: new BehaviorSubject<AssistantScope>('all') as MockedService['scope$'],
-  setScope: jest.fn(),
-  getScope: jest.fn(),
+  scope$: new BehaviorSubject<AssistantScope[]>(['all']) as MockedService['scope$'],
+  setScopes: jest.fn(),
+  getScopes: jest.fn(),
 };
 
 const mockChatService = createMockChatService();

@@ -6,18 +6,32 @@
  */
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import type { Message } from '../../common';
 import { chatFeedbackEventSchema, ChatFeedback } from './schemas/chat_feedback';
 import { insightFeedbackEventSchema, InsightFeedback } from './schemas/insight_feedback';
+import { insightResponseEventSchema, InsightResponse } from './schemas/insight_response';
 import { userSentPromptEventSchema } from './schemas/user_sent_prompt';
 import { ObservabilityAIAssistantTelemetryEventType } from './telemetry_event_type';
 
-const schemas = [chatFeedbackEventSchema, insightFeedbackEventSchema, userSentPromptEventSchema];
+const schemas = [
+  chatFeedbackEventSchema,
+  insightFeedbackEventSchema,
+  userSentPromptEventSchema,
+  insightResponseEventSchema,
+];
 
 export type TelemetryEventTypeWithPayload =
   | { type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback; payload: ChatFeedback }
   | { type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback; payload: InsightFeedback }
-  | { type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat; payload: Message };
+  | {
+      type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat;
+      payload: Message & { scopes: AssistantScope[] };
+    }
+  | {
+      type: ObservabilityAIAssistantTelemetryEventType.InsightResponse;
+      payload: InsightResponse;
+    };
 
 export const registerTelemetryEventTypes = (analytics: AnalyticsServiceSetup) => {
   schemas.forEach((schema) => {

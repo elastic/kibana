@@ -67,30 +67,6 @@ export const unsavedChangesBadgeStrings = {
       defaultMessage:
         ' You have unsaved changes in this dashboard. To remove this label, save the dashboard.',
     }),
-  getHasRunMigrationsText: () =>
-    i18n.translate('dashboard.hasRunMigrationsBadge', {
-      defaultMessage: 'Save recommended',
-    }),
-  getHasRunMigrationsToolTipContent: () =>
-    i18n.translate('dashboard.hasRunMigrationsBadgeToolTipContent', {
-      defaultMessage:
-        'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
-    }),
-};
-
-export const leaveConfirmStrings = {
-  getLeaveTitle: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
-      defaultMessage: 'Unsaved changes',
-    }),
-  getLeaveSubtitle: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
-      defaultMessage: 'Leave Dashboard with unsaved work?',
-    }),
-  getLeaveCancelButtonText: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
-    }),
 };
 
 export const getCreateVisualizationButtonTitle = () =>
@@ -153,6 +129,22 @@ export const shareModalStrings = {
     i18n.translate('dashboard.snapshotShare.longUrlWarning', {
       defaultMessage:
         'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.',
+    }),
+  getDraftSharePanelChangesWarning: () =>
+    i18n.translate('dashboard.snapshotShare.panelChangesWarning', {
+      defaultMessage:
+        'You are about to share a dashboard with unsaved changes, and the link may not work properly. Save the dashboard first to create a permanent link.',
+    }),
+  getEmbedSharePanelChangesWarning: () =>
+    i18n.translate('dashboard.embedShare.draftWarning', {
+      defaultMessage:
+        'You are about to create an embedded dashboard with unsaved changes, and the embed code may not work properly. Save the dashboard first to create a permanent embedded dashboard.',
+    }),
+  getDraftShareWarning: (shareType: 'embed' | 'link') =>
+    i18n.translate('dashboard.snapshotShare.draftWarning', {
+      defaultMessage:
+        'This dashboard has unsaved changes. Consider saving your dashboard before generating the {shareType}.',
+      values: { shareType: shareType === 'embed' ? 'embed code' : 'link' },
     }),
 };
 

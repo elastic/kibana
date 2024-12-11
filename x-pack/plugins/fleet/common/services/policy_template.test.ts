@@ -10,6 +10,7 @@ import type {
   RegistryPolicyIntegrationTemplate,
   PackageInfo,
   RegistryVarType,
+  PackageListItem,
 } from '../types';
 
 import {
@@ -17,6 +18,7 @@ import {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  filterPolicyTemplatesTiles,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -278,5 +280,163 @@ describe('getNormalizedDataStreams', () => {
     expect(result).toHaveLength(1);
     expect(result[0].streams).toHaveLength(1);
     expect(result?.[0].streams?.[0]?.vars).toEqual([datasetVar]);
+  });
+});
+
+describe('filterPolicyTemplatesTiles', () => {
+  const topPackagePolicy: PackageListItem = {
+    id: 'nginx',
+    integration: 'nginx',
+    title: 'Nginx',
+    name: 'nginx',
+    version: '0.0.1',
+    status: 'not_installed',
+    description: 'nginx',
+    download: 'nginx',
+    path: 'nginx',
+  };
+
+  const childPolicyTemplates: PackageListItem[] = [
+    {
+      id: 'nginx-template1',
+      integration: 'nginx-template-1',
+      title: 'Nginx Template 1',
+      name: 'nginx',
+      version: '0.0.1',
+      status: 'not_installed',
+      description: 'nginx-template-1',
+      download: 'nginx-template-1',
+      path: 'nginx-template-1',
+    },
+    {
+      id: 'nginx-template2',
+      integration: 'nginx-template-2',
+      title: 'Nginx Template 2',
+      name: 'nginx',
+      version: '0.0.1',
+      status: 'not_installed',
+      description: 'nginx-template-2',
+      download: 'nginx-template-2',
+      path: 'nginx-template-2',
+    },
+  ];
+  it('should return all tiles as undefined value', () => {
+    expect(filterPolicyTemplatesTiles(undefined, topPackagePolicy, childPolicyTemplates)).toEqual([
+      {
+        id: 'nginx',
+        integration: 'nginx',
+        title: 'Nginx',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx',
+        download: 'nginx',
+        path: 'nginx',
+      },
+      {
+        id: 'nginx-template1',
+        integration: 'nginx-template-1',
+        title: 'Nginx Template 1',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx-template-1',
+        download: 'nginx-template-1',
+        path: 'nginx-template-1',
+      },
+      {
+        id: 'nginx-template2',
+        integration: 'nginx-template-2',
+        title: 'Nginx Template 2',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx-template-2',
+        download: 'nginx-template-2',
+        path: 'nginx-template-2',
+      },
+    ]);
+  });
+  it('should return all tiles', () => {
+    expect(filterPolicyTemplatesTiles('all', topPackagePolicy, childPolicyTemplates)).toEqual([
+      {
+        id: 'nginx',
+        integration: 'nginx',
+        title: 'Nginx',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx',
+        download: 'nginx',
+        path: 'nginx',
+      },
+      {
+        id: 'nginx-template1',
+        integration: 'nginx-template-1',
+        title: 'Nginx Template 1',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx-template-1',
+        download: 'nginx-template-1',
+        path: 'nginx-template-1',
+      },
+      {
+        id: 'nginx-template2',
+        integration: 'nginx-template-2',
+        title: 'Nginx Template 2',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx-template-2',
+        download: 'nginx-template-2',
+        path: 'nginx-template-2',
+      },
+    ]);
+  });
+  it('should return just the combined policy tile', () => {
+    expect(
+      filterPolicyTemplatesTiles('combined_policy', topPackagePolicy, childPolicyTemplates)
+    ).toEqual([
+      {
+        id: 'nginx',
+        integration: 'nginx',
+        title: 'Nginx',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx',
+        download: 'nginx',
+        path: 'nginx',
+      },
+    ]);
+  });
+  it('should return just the individual policies (tiles)', () => {
+    expect(
+      filterPolicyTemplatesTiles('individual_policies', topPackagePolicy, childPolicyTemplates)
+    ).toEqual([
+      {
+        id: 'nginx-template1',
+        integration: 'nginx-template-1',
+        title: 'Nginx Template 1',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx-template-1',
+        download: 'nginx-template-1',
+        path: 'nginx-template-1',
+      },
+      {
+        id: 'nginx-template2',
+        integration: 'nginx-template-2',
+        title: 'Nginx Template 2',
+        name: 'nginx',
+        version: '0.0.1',
+        status: 'not_installed',
+        description: 'nginx-template-2',
+        download: 'nginx-template-2',
+        path: 'nginx-template-2',
+      },
+    ]);
   });
 });

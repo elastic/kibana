@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { observabilityAlertFeatureIds } from '../../../common/constants';
+import {
+  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  observabilityAlertFeatureIds,
+} from '../../../common/constants';
 import { paths } from '../../../common/locators/paths';
 import { LoadingObservability } from '../../components/loading_observability';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
@@ -56,13 +59,18 @@ export function OverviewPage() {
 
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
-  useBreadcrumbs([
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ],
     {
-      text: i18n.translate('xpack.observability.breadcrumbs.overviewLinkText', {
-        defaultMessage: 'Overview',
-      }),
-    },
-  ]);
+      classicOnly: true,
+    }
+  );
 
   const { data: newsFeed } = useFetcher(
     () => getNewsFeed({ http, kibanaVersion }),
@@ -230,7 +238,8 @@ export function OverviewPage() {
             hasError={false}
           >
             <AlertSummaryWidget
-              featureIds={observabilityAlertFeatureIds}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+              consumers={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
@@ -238,7 +247,8 @@ export function OverviewPage() {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={observabilityAlertFeatureIds}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+              consumers={observabilityAlertFeatureIds}
               hideLazyLoader
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}

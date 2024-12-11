@@ -7,6 +7,8 @@ xpack.infra.enabled: true
 xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
 xpack.search.notebooks.enabled: false
+xpack.searchPlayground.enabled: false
+xpack.searchInferenceEndpoints.enabled: false
 
 ## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -183,6 +185,7 @@ xpack.apm.featureFlags.storageExplorerAvailable: false
 
 ## Set the AI Assistant type
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAIAssistant.scope: "observability"
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability

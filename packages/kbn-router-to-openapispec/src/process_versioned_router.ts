@@ -10,15 +10,13 @@
 import {
   type CoreVersionedRouter,
   versionHandlerResolvers,
-  VersionedRouterRoute,
   unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
-import type { RouteMethod } from '@kbn/core-http-server';
+import type { RouteMethod, VersionedRouterRoute } from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
+import { extractAuthzDescription } from './extract_authz_description';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
-import { isReferenceObject } from './oas_converter/common';
-import type { OperationIdCounter } from './operation_id_counter';
 import {
   prepareRoutes,
   getPathParameters,
@@ -29,13 +27,16 @@ import {
   extractTags,
   mergeResponseContent,
   getXsrfHeaderForMethod,
+  setXState,
+  GetOpId,
 } from './util';
+import { isReferenceObject } from './oas_converter/common';
 
 export const processVersionedRouter = (
   appRouter: CoreVersionedRouter,
   converter: OasConverter,
-  getOpId: OperationIdCounter,
-  filters?: GenerateOpenApiDocumentOptionsFilters
+  getOpId: GetOpId,
+  filters: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const routes = prepareRoutes(appRouter.getRoutes(), filters);
   const paths: OpenAPIV3.PathsObject = {};
@@ -43,8 +44,8 @@ export const processVersionedRouter = (
     const pathParams = getPathParameters(route.path);
 
     let parameters: OpenAPIV3.ParameterObject[] = [];
-    let version: undefined | string;
     let handler: undefined | VersionedRouterRoute['handlers'][0];
+    let version: undefined | string;
     let versions: string[] = versionHandlerResolvers.sort(
       route.handlers.map(({ options: { version: v } }) => v),
       route.options.access
@@ -83,35 +84,52 @@ export const processVersionedRouter = (
           queryObjects = converter.convertQuery(reqQuery);
         }
         parameters = [
-          getVersionedHeaderParam(version, versions),
           ...getXsrfHeaderForMethod(route.method as RouteMethod, route.options.options),
           ...pathObjects,
           ...queryObjects,
         ];
       }
+      parameters = [
+        ...(route.options.access === 'internal'
+          ? [getVersionedHeaderParam(version, versions)]
+          : ([] as OpenAPIV3.ParameterObject[])),
+      ].concat(...parameters);
+      let description = `${route.options.description ?? ''}`;
+      if (route.options.security) {
+        const authzDescription = extractAuthzDescription(route.options.security);
+
+        description += `${route.options.description && authzDescription ? '<br/><br/>' : ''}${
+          authzDescription ?? ''
+        }`;
+      }
 
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
       const contentType = extractContentType(route.options.options?.body);
+      // If any handler is deprecated we show deprecated: true in the spec
+      const hasDeprecations = route.handlers.some(({ options }) => !!options.options?.deprecated);
       const hasVersionFilter = Boolean(filters?.version);
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
-        ...(route.options.description ? { description: route.options.description } : {}),
-        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
+        ...(description ? { description } : {}),
+        ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: hasBody
           ? {
               content: hasVersionFilter
-                ? extractVersionedRequestBody(handler, converter, contentType)
+                ? extractVersionedRequestBody(handler, route.options.access, converter, contentType)
                 : extractVersionedRequestBodies(route, converter, contentType),
             }
           : undefined,
         responses: hasVersionFilter
-          ? extractVersionedResponse(handler, converter, contentType)
+          ? extractVersionedResponse(handler, route.options.access, converter, contentType)
           : extractVersionedResponses(route, converter, contentType),
         parameters,
-        operationId: getOpId(route.path),
+        operationId: getOpId({ path: route.path, method: route.method }),
       };
+
+      setXState(route.options.options?.availability, operation);
+
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,
       };
@@ -126,21 +144,6 @@ export const processVersionedRouter = (
   return { paths };
 };
 
-export const extractVersionedRequestBody = (
-  handler: VersionedRouterRoute['handlers'][0],
-  converter: OasConverter,
-  contentType: string[]
-) => {
-  const schemas = extractValidationSchemaFromVersionedHandler(handler);
-  if (!schemas?.request) return {};
-  const schema = converter.convert(schemas.request.body);
-  return {
-    [getVersionedContentTypeString(handler.options.version, contentType)]: {
-      schema,
-    },
-  };
-};
-
 export const extractVersionedRequestBodies = (
   route: VersionedRouterRoute,
   converter: OasConverter,
@@ -149,13 +152,30 @@ export const extractVersionedRequestBodies = (
   return route.handlers.reduce<OpenAPIV3.RequestBodyObject['content']>((acc, handler) => {
     return {
       ...acc,
-      ...extractVersionedRequestBody(handler, converter, contentType),
+      ...extractVersionedRequestBody(handler, route.options.access, converter, contentType),
     };
   }, {});
 };
 
+export const extractVersionedRequestBody = (
+  handler: VersionedRouterRoute['handlers'][0],
+  access: 'public' | 'internal',
+  converter: OasConverter,
+  contentType: string[]
+) => {
+  const schemas = extractValidationSchemaFromVersionedHandler(handler);
+  if (!schemas?.request) return {};
+  const schema = converter.convert(schemas.request.body);
+  return {
+    [getVersionedContentTypeString(handler.options.version, access, contentType)]: {
+      schema,
+    },
+  };
+};
+
 export const extractVersionedResponse = (
   handler: VersionedRouterRoute['handlers'][0],
+  access: 'public' | 'internal',
   converter: OasConverter,
   contentType: string[]
 ) => {
@@ -170,6 +190,7 @@ export const extractVersionedResponse = (
       const schema = converter.convert(maybeSchema);
       const contentTypeString = getVersionedContentTypeString(
         handler.options.version,
+        access,
         responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
       );
       newContent = {
@@ -223,7 +244,12 @@ export const extractVersionedResponses = (
   contentType: string[]
 ): OpenAPIV3.ResponsesObject => {
   return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
-    const responses = extractVersionedResponse(handler, converter, contentType);
+    const responses = extractVersionedResponse(
+      handler,
+      route.options.access,
+      converter,
+      contentType
+    );
     return mergeVersionedResponses(acc, responses);
   }, {});
 };

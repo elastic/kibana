@@ -123,4 +123,17 @@ describe('getValueForSelectedField', () => {
       seeking consolation and, eventually, redemption through basic compassion"
     `);
   });
+
+  test('should return when path is semantic field', () => {
+    const hit = {
+      _index: 'sample-index',
+      _id: '8jSNY48B6iHEi98DL1C-',
+      _score: 0.7789394,
+      _source: {
+        test: { text: 'The Shawshank Redemption' },
+      },
+    };
+
+    expect(getValueForSelectedField(hit, 'test')).toEqual('The Shawshank Redemption');
+  });
 });

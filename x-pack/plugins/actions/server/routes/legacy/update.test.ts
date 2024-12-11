@@ -39,6 +39,16 @@ describe('updateActionRoute', () => {
     const [config, handler] = router.put.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}"`);
+    expect(config.options?.deprecated).toEqual({
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacyupdateconnector',
+      severity: 'warning',
+      reason: {
+        type: 'migrate',
+        newApiPath: `/api/actions/connector/{id}`,
+        newApiMethod: 'PUT',
+      },
+    });
 
     const updateResult = {
       id: '1',

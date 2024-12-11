@@ -12,16 +12,20 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EmbeddablePanel, ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
+import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardPanelState } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
+import { presentationUtilService } from '../../../services/kibana_services';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
 export interface Props extends DivProps {
+  appFixedViewport?: HTMLElement;
+  dashboardContainer?: HTMLElement;
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
@@ -34,6 +38,8 @@ export interface Props extends DivProps {
 export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
+      appFixedViewport,
+      dashboardContainer,
       expandedPanelId,
       focusedPanelId,
       id,
@@ -49,10 +55,11 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     ref
   ) => {
     const dashboardApi = useDashboardApi();
+    const dashboardInternalApi = useDashboardInternalApi();
     const [highlightPanelId, scrollToPanelId, useMargins, viewMode] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
-      dashboardApi.useMargins$,
+      dashboardApi.settings.useMargins$,
       dashboardApi.viewMode
     );
 
@@ -91,12 +98,19 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
+    const dashboardContainerTopOffset = dashboardContainer?.offsetTop || 0;
+    const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
+
     const focusStyles = blurPanel
       ? css`
           pointer-events: none;
           opacity: 0.25;
         `
-      : undefined;
+      : css`
+          scroll-margin-top: ${dashboardContainerTopOffset +
+          globalNavTopOffset +
+          DASHBOARD_MARGIN_SIZE}px;
+        `;
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
@@ -106,29 +120,20 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         showShadow: false,
       };
 
-      // render React embeddable
-      if (embeddableService.reactEmbeddableRegistryHasKey(type)) {
-        return (
-          <ReactEmbeddableRenderer
-            type={type}
-            maybeId={id}
-            getParentApi={() => dashboardApi}
-            key={`${type}_${id}`}
-            panelProps={panelProps}
-            onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
-          />
-        );
-      }
-      // render legacy embeddable
       return (
-        <EmbeddablePanel
-          key={type}
-          index={index}
-          embeddable={() => dashboardApi.untilEmbeddableLoaded(id)}
-          {...panelProps}
+        <ReactEmbeddableRenderer
+          type={type}
+          maybeId={id}
+          getParentApi={() => ({
+            ...dashboardApi,
+            reload$: dashboardInternalApi.panelsReload$,
+          })}
+          key={`${type}_${id}`}
+          panelProps={panelProps}
+          onApiAvailable={(api) => dashboardInternalApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, type, index, useMargins]);
+    }, [id, dashboardApi, dashboardInternalApi, type, useMargins]);
 
     return (
       <div

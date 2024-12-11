@@ -90,7 +90,7 @@ describe.skip('Case View Page files tab', () => {
       exact: false,
     });
 
-    expect(customFields.length).toBe(4);
+    expect(customFields.length).toBe(6);
 
     expect(await within(customFields[0]).findByRole('heading')).toHaveTextContent(
       'My test label 1'
@@ -103,6 +103,12 @@ describe.skip('Case View Page files tab', () => {
     );
     expect(await within(customFields[3]).findByRole('heading')).toHaveTextContent(
       'My test label 4'
+    );
+    expect(await within(customFields[4]).findByRole('heading')).toHaveTextContent(
+      'My test label 5'
+    );
+    expect(await within(customFields[5]).findByRole('heading')).toHaveTextContent(
+      'My test label 6'
     );
   });
 

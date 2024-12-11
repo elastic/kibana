@@ -29,6 +29,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      summary: `Get proxies`,
+      options: {
+        tags: ['oas-tag:Fleet proxies'],
+      },
     })
     .addVersion(
       {
@@ -43,6 +47,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: FLEET_PROXY_API_ROUTES.CREATE_PATTERN,
       fleetAuthz: {
         fleet: { allSettings: true },
+      },
+      summary: `Create a proxy`,
+      options: {
+        tags: ['oas-tag:Fleet proxies'],
       },
     })
     .addVersion(
@@ -59,6 +67,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      summary: `Update a proxy`,
+      description: `Update a proxy by ID.`,
+      options: {
+        tags: ['oas-tag:Fleet proxies'],
+      },
     })
     .addVersion(
       {
@@ -74,6 +87,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      summary: `Get a proxy`,
+      description: `Get a proxy by ID.`,
+      options: {
+        tags: ['oas-tag:Fleet proxies'],
+      },
     })
     .addVersion(
       {
@@ -88,6 +106,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: FLEET_PROXY_API_ROUTES.DELETE_PATTERN,
       fleetAuthz: {
         fleet: { allSettings: true },
+      },
+      summary: `Delete a proxy`,
+      description: `Delete a proxy by ID`,
+      options: {
+        tags: ['oas-tag:Fleet proxies'],
       },
     })
     .addVersion(

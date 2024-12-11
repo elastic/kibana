@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import {
   FeatureFeedbackButton,
@@ -18,6 +18,7 @@ import { useEntityManager } from '../../hooks/use_entity_manager';
 import { Welcome } from '../entity_enablement/welcome_modal';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { EmptyState } from '../empty_states/empty_state';
+import { useIsLoadingComplete } from '../../hooks/use_is_loading_complete';
 
 const pageTitle = (
   <EuiFlexGroup gutterSize="s">
@@ -36,7 +37,7 @@ const INVENTORY_FEEDBACK_LINK = 'https://ela.st/feedback-new-inventory';
 
 export function InventoryPageTemplate({ children }: { children: React.ReactNode }) {
   const {
-    services: { observabilityShared, inventoryAPIClient, kibanaEnvironment },
+    services: { observabilityShared, inventoryAPIClient, kibanaEnvironment, telemetry },
   } = useKibana();
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
@@ -61,6 +62,23 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
     },
     [inventoryAPIClient]
   );
+
+  const isLoadingComplete = useIsLoadingComplete({
+    loadingStates: [isEnablementLoading, hasDataLoading],
+  });
+
+  useEffect(() => {
+    if (isLoadingComplete) {
+      const viewState = isEntityManagerEnabled
+        ? value.hasData
+          ? 'populated'
+          : 'empty'
+        : 'eem_disabled';
+      telemetry.reportEntityInventoryViewed({
+        view_state: viewState,
+      });
+    }
+  }, [isEntityManagerEnabled, value.hasData, telemetry, isLoadingComplete]);
 
   if (isEnablementLoading || hasDataLoading) {
     return (

@@ -20,13 +20,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  assistantKnowledgeBaseByDefault:
-                    type: boolean
                   assistantModelEvaluation:
                     type: boolean
+                  defendInsights:
+                    type: boolean
                 required:
-                  - assistantKnowledgeBaseByDefault
                   - assistantModelEvaluation
+                  - defendInsights
         '400':
           description: Generic Error
           content:

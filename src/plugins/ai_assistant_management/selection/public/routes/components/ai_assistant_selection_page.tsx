@@ -139,7 +139,7 @@ export function AiAssistantSelectionPage() {
             isDisabled={!observabilityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',
-              { defaultMessage: 'Elastic AI Assistant for Observability' }
+              { defaultMessage: 'Elastic AI Assistant for Observability and Search' }
             )}
             titleSize="xs"
           />

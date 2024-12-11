@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useChoices, UseChoices, UseChoicesProps } from './use_choices';
+import { useChoices } from './use_choices';
 import { getChoices } from './api';
 
 jest.mock('./api');
@@ -73,7 +73,7 @@ describe('UseChoices', () => {
   const fields = ['category'];
 
   it('init', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+    const { result } = renderHook(() =>
       useChoices({
         http: services.http,
         actionConnector,
@@ -82,13 +82,11 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual(useChoicesResponse);
+    await waitFor(() => expect(result.current).toEqual(useChoicesResponse));
   });
 
   it('returns an empty array if the field is not in response', async () => {
-    const { result, waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+    const { result } = renderHook(() =>
       useChoices({
         http: services.http,
         actionConnector,
@@ -97,16 +95,16 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual({
-      isLoading: false,
-      choices: { priority: [], category: getChoicesResponse },
-    });
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        choices: { priority: [], category: getChoicesResponse },
+      })
+    );
   });
 
   it('returns an empty array when connector is not presented', async () => {
-    const { result } = renderHook<UseChoicesProps, UseChoices>(() =>
+    const { result } = renderHook(() =>
       useChoices({
         http: services.http,
         actionConnector: undefined,
@@ -127,7 +125,7 @@ describe('UseChoices', () => {
       serviceMessage: 'An error occurred',
     });
 
-    const { waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>
+    renderHook(() =>
       useChoices({
         http: services.http,
         actionConnector,
@@ -136,12 +134,12 @@ describe('UseChoices', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 
   it('it displays an error when http throws an error', async () => {
@@ -149,7 +147,7 @@ describe('UseChoices', () => {
       throw new Error('An error occurred');
     });
 
-    renderHook<UseChoicesProps, UseChoices>(() =>
+    renderHook(() =>
       useChoices({
         http: services.http,
         actionConnector,
@@ -158,9 +156,11 @@ describe('UseChoices', () => {
       })
     );
 
-    expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
-      text: 'An error occurred',
-      title: 'Unable to get choices',
-    });
+    await waitFor(() =>
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        text: 'An error occurred',
+        title: 'Unable to get choices',
+      })
+    );
   });
 });

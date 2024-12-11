@@ -62,7 +62,7 @@ function lastSeenTimestampTransform() {
       const timestamp = document['@timestamp'];
       if (timestamp) {
         const isoString = new Date(timestamp).toISOString();
-        document['entity.lastSeenTimestamp'] = isoString;
+        document['entity.last_seen_timestamp'] = isoString;
         document['event.ingested'] = isoString;
         delete document['@timestamp'];
       }
@@ -75,14 +75,13 @@ function getRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<EntityFields>, encoding, callback) {
-      const entityType: string | undefined = document['entity.type'];
-      if (entityType === undefined) {
-        throw new Error(`entity.type was not defined: ${JSON.stringify(document)}`);
+      const definitionId: string | undefined = document['entity.definition_id'];
+      if (definitionId === undefined) {
+        throw new Error(`entity.definition_id was not defined: ${JSON.stringify(document)}`);
       }
-      const entityIndexName = `${entityType}s`;
       document._action = {
         index: {
-          _index: `.entities.v1.latest.builtin_${entityIndexName}_from_ecs_data`,
+          _index: `.entities.v1.latest.${definitionId}`.toLocaleLowerCase(),
           _id: document['entity.id'],
         },
       };

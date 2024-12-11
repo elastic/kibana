@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   EuiFlexGroup,
@@ -38,7 +38,7 @@ import { CodeBlock } from './code_block';
 import { SavedObjectNamesCombo } from './saved_object_names_combo';
 
 const fetchSavedObjects = async (type?: string, name?: string) => {
-  if (!type || !name) return;
+  if (!type || !name) return [];
 
   const response = await sendRequest({
     method: 'post',
@@ -101,12 +101,9 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
   const [name, setName] = useState<string | undefined>();
   const [namesStatus, setNamesStatus] = useState();
 
-  const childRef = useRef<{ refetchNames: Function }>();
-
   const onTypeChange = (e: any) => {
     setType(e.target.value);
     setName(undefined);
-    childRef.current!.refetchNames();
   };
 
   const { data: savedObjectResult, status } = useQuery(['debug-saved-objects', type, name], () =>
@@ -154,11 +151,10 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
         >
           <EuiFormRow>
             <SavedObjectNamesCombo
-              name={name!}
+              name={name}
               setName={setName}
               type={type}
               setNamesStatus={setNamesStatus}
-              ref={childRef}
             />
           </EuiFormRow>
         </EuiFlexItem>

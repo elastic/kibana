@@ -10,6 +10,7 @@
 import type { ZodType } from '@kbn/zod';
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
+import type { RouterRoute, VersionedRouterRoute } from '@kbn/core-http-server';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 
 type RoutesMeta = ReturnType<Router['getRoutes']>[number];
@@ -27,7 +28,7 @@ export const createVersionedRouter = (args: { routes: VersionedRoutesMeta[] }) =
   } as unknown as CoreVersionedRouter;
 };
 
-export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
+export const getRouterDefaults = (bodySchema?: RuntimeSchema): RouterRoute => ({
   isVersioned: false,
   path: '/foo/{id}/{path*}',
   method: 'get',
@@ -35,6 +36,7 @@ export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
     tags: ['foo', 'oas-tag:bar'],
     summary: 'route summary',
     description: 'route description',
+    access: 'public',
   },
   validationSchemas: {
     request: {
@@ -57,22 +59,29 @@ export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   handler: jest.fn(),
 });
 
-export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
+export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): VersionedRouterRoute => ({
   method: 'get',
   path: '/bar',
   options: {
     summary: 'versioned route',
     access: 'public',
-    deprecated: true,
     discontinued: 'route discontinued version or date',
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
     },
   },
+  isVersioned: true,
   handlers: [
     {
       fn: jest.fn(),
       options: {
+        options: {
+          deprecated: {
+            documentationUrl: 'https://fake-url',
+            reason: { type: 'remove' },
+            severity: 'critical',
+          },
+        },
         validate: {
           request: {
             body:
@@ -92,7 +101,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
           },
           response: {
             [200]: {
-              description: 'OK response oas-test-version-1',
+              description: 'OK response 2023-10-31',
               body: () =>
                 schema.object(
                   { fooResponseWithDescription: schema.string() },
@@ -101,7 +110,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
             },
           },
         },
-        version: 'oas-test-version-1',
+        version: '2023-10-31',
       },
     },
     {
@@ -111,14 +120,14 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
           request: { body: schema.object({ foo: schema.string() }) },
           response: {
             [200]: {
-              description: 'OK response oas-test-version-2',
+              description: 'OK response 9999-99-99',
               body: () => schema.stream({ meta: { description: 'stream response' } }),
               bodyContentType: 'application/octet-stream',
             },
             unsafe: { body: true },
           },
         },
-        version: 'oas-test-version-2',
+        version: '9999-99-99',
       },
     },
   ],

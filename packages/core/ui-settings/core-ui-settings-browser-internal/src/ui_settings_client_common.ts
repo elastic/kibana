@@ -38,7 +38,11 @@ export abstract class UiSettingsClientCommon implements IUiSettingsClient {
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
-    this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
+    this.cache = defaultsDeep(
+      Object.create(null),
+      this.defaults,
+      cloneDeep(params.initialSettings)
+    );
 
     params.done$.subscribe({
       complete: () => {
@@ -102,7 +106,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   isDeclared(key: string) {
-    return key in this.cache;
+    return (
+      // @ts-ignore
+      (key !== '__proto__' || key !== 'constructor' || key !== 'prototype') && key in this.cache
+    );
   }
 
   isDefault(key: string) {

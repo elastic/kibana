@@ -34,7 +34,6 @@
       "max_concurrent_shard_requests": [
         "5"
       ],
-      "min_compatible_shard_node": "",
       "preference": "",
       "pre_filter_shard_size": "",
       "request_cache": "__flag__",

@@ -22,10 +22,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('XY', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
@@ -43,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickBucket('Dot size', 'metrics');
       await visEditor.selectAggregation('Max', 'metrics');
       await visEditor.selectField('memory', 'metrics');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
@@ -52,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickBucket('Split chart');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
@@ -69,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectYAxisPosition('ValueAxis-1', 'left');
       await visEditor.clickYAxisOptions('ValueAxis-2');
       await visEditor.selectYAxisPosition('ValueAxis-2', 'left');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
@@ -80,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.os.raw');
       await visEditor.clickBucket('Split series');
       await visEditor.selectAggregation('Date histogram', 'buckets', false, 1);
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
@@ -91,7 +89,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickBucket('Split series');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
@@ -101,7 +99,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Serial diff', 'metrics');
       await visEditor.clickBucket('Split series');
       await visEditor.selectAggregation('Date histogram');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       const button = await testSubjects.exists('visualizeEditInLensButton');
       expect(button).to.eql(false);
@@ -116,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setSeriesType(0, 'area');
       await visEditor.toggleAccordion('visEditorSeriesAccordion2');
       await visEditor.setSeriesType(1, 'histogram');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
@@ -143,7 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setSeriesType(0, 'histogram');
       await visEditor.toggleAccordion('visEditorSeriesAccordion2');
       await visEditor.setSeriesType(1, 'histogram');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
@@ -165,7 +163,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Cumulative sum', 'metrics');
       await visEditor.clickBucket('Split series');
       await visEditor.selectAggregation('Date histogram');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
@@ -182,7 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert sibling pipeline aggregation', async () => {
       await visEditor.clickMetricEditor();
       await visEditor.selectAggregation('Max Bucket', 'metrics');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -204,7 +202,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should draw a reference line', async () => {
       await visEditor.clickOptionsTab();
       await visEditor.toggleShowThresholdLine();
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       const line = await visChart.getReferenceLine('xyVisChart');
       expect(line?.length).to.be(1);
       await header.waitUntilLoadingHasFinished();
@@ -229,7 +227,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.toggleAccordion('visEditorSeriesAccordion1');
       await visEditor.setSeriesType(0, 'line');
       await visEditor.selectChartMode('stacked');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -249,7 +247,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectChartMode('normal');
       await visEditor.clickYAxisOptions('ValueAxis-1');
       await visEditor.selectYAxisMode('percentage');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -268,7 +266,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setSeriesType(0, 'histogram');
       await visEditor.clickYAxisOptions('ValueAxis-1');
       await visEditor.selectYAxisPosition('ValueAxis-1', 'top');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -294,7 +292,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectYAxisPosition('ValueAxis-1', 'left');
       await visEditor.clickYAxisOptions('ValueAxis-2');
       await visEditor.selectYAxisPosition('ValueAxis-2', 'right');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -322,7 +320,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
       await header.waitUntilLoadingHasFinished();
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -344,7 +342,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickBucket('X-axis');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
       await visualize.navigateToLensFromAnotherVisualization();

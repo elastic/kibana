@@ -24,7 +24,7 @@ import React, { useRef } from 'react';
 import { useAnnotations } from '@kbn/observability-plugin/public';
 import { TimeBounds } from '../../pages/slo_details/types';
 import { getBrushTimeBounds } from '../../utils/slo/duration';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { openInDiscover } from '../../utils/slo/get_discover_link';
 
 export interface Props {

@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
-  NodeContainer,
+  NodeShapeContainer,
   NodeLabel,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
@@ -18,72 +18,69 @@ import {
   HandleStyleOverride,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
+import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
+import { NodeExpandButton } from './node_expand_button';
 
 const NODE_WIDTH = 90;
 const NODE_HEIGHT = 90;
 
 export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
-    <NodeContainer>
-      {interactive && (
-        <NodeShapeOnHoverSvg
-          width={NODE_WIDTH}
-          height={NODE_HEIGHT}
-          viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
+    <>
+      <NodeShapeContainer>
+        {interactive && (
+          <NodeShapeOnHoverSvg
+            width={NODE_WIDTH}
+            height={NODE_HEIGHT}
+            viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <EllipseHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
+          </NodeShapeOnHoverSvg>
+        )}
+        <NodeShapeSvg
+          width="72"
+          height="72"
+          viewBox="0 0 72 72"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <circle
-            opacity="0.5"
-            cx="45"
-            cy="45"
-            r="44.5"
+          <EllipseShape
+            fill={useEuiBackgroundColor(color ?? 'primary')}
             stroke={euiTheme.colors[color ?? 'primary']}
-            strokeDasharray="2 2"
           />
-        </NodeShapeOnHoverSvg>
-      )}
-      <NodeShapeSvg
-        width="72"
-        height="72"
-        viewBox="0 0 72 72"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle
-          cx="36"
-          cy="36"
-          r="35.5"
-          fill={useEuiBackgroundColor(color ?? 'primary')}
-          stroke={euiTheme.colors[color ?? 'primary']}
+          {icon && <NodeIcon x="11" y="12" icon={icon} color={color} />}
+        </NodeShapeSvg>
+        {interactive && (
+          <>
+            <NodeButton onClick={(e) => nodeClick?.(e, props)} />
+            <NodeExpandButton
+              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 2}px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+            />
+          </>
+        )}
+        <Handle
+          type="target"
+          isConnectable={false}
+          position={Position.Left}
+          id="in"
+          style={HandleStyleOverride}
         />
-        {icon && <NodeIcon x="11" y="12" icon={icon} color={color} />}
-      </NodeShapeSvg>
-      {interactive && (
-        <NodeButton
-          onClick={(e) => expandButtonClick?.(e, props)}
-          x={`${NODE_WIDTH - NodeButton.ExpandButtonSize / 2}px`}
-          y={`${(NODE_HEIGHT - NodeButton.ExpandButtonSize) / 2}px`}
+        <Handle
+          type="source"
+          isConnectable={false}
+          position={Position.Right}
+          id="out"
+          style={HandleStyleOverride}
         />
-      )}
-      <Handle
-        type="target"
-        isConnectable={false}
-        position={Position.Left}
-        id="in"
-        style={HandleStyleOverride}
-      />
-      <Handle
-        type="source"
-        isConnectable={false}
-        position={Position.Right}
-        id="out"
-        style={HandleStyleOverride}
-      />
+      </NodeShapeContainer>
       <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
-    </NodeContainer>
+    </>
   );
 });

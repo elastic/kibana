@@ -23,7 +23,16 @@ export const getAllActionRoute = (
       options: {
         access: 'public',
         summary: `Get all connectors`,
-        deprecated: true,
+        deprecated: {
+          documentationUrl:
+            'https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-legacygetconnectors',
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiPath: `${BASE_ACTION_API_PATH}/connectors`,
+            newApiMethod: 'GET',
+          },
+        },
         tags: ['oas-tag:connectors'],
       },
       validate: {},

@@ -103,7 +103,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       ref={ref}
       role="button"
       aria-pressed="false"
-      style={{
+      css={{
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

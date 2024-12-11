@@ -12,16 +12,7 @@ import type {
 } from '@elastic/eui/src/components/date_picker/types';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { DateRangePickerValues } from '../components/filters/date_picker';
-
-export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
-  autoRefreshOptions: {
-    enabled: false,
-    duration: 10000,
-  },
-  startDate: 'now-24h/h',
-  endDate: 'now',
-  recentlyUsedDateRanges: [],
-});
+import { DEFAULT_DATE_RANGE_OPTIONS } from '../../../common/utils';
 
 export const useDateRangePicker = () => {
   const {

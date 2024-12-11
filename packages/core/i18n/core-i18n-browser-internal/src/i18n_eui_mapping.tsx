@@ -724,19 +724,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiDisplaySelector.labelExpanded': i18n.translate('core.euiDisplaySelector.labelExpanded', {
       defaultMessage: 'Expanded',
     }),
-    'euiDisplaySelector.labelSingle': i18n.translate('core.euiDisplaySelector.labelSingle', {
-      defaultMessage: 'Single',
-    }),
     'euiDisplaySelector.labelAuto': i18n.translate('core.euiDisplaySelector.labelAuto', {
-      defaultMessage: 'Auto fit',
+      defaultMessage: 'Auto',
     }),
-    'euiDisplaySelector.labelCustom': i18n.translate('core.euiDisplaySelector.labelCustom', {
-      defaultMessage: 'Custom',
+    'euiDisplaySelector.labelStatic': i18n.translate('core.euiDisplaySelector.labelStatic', {
+      defaultMessage: 'Static',
+    }),
+    'euiDisplaySelector.labelMax': i18n.translate('core.euiDisplaySelector.labelMax', {
+      defaultMessage: 'Max',
     }),
     'euiDisplaySelector.rowHeightLabel': i18n.translate('core.euiDisplaySelector.rowHeightLabel', {
-      defaultMessage: 'Row height',
-    }),
-    'euiDisplaySelector.lineCountLabel': i18n.translate('core.euiDisplaySelector.lineCountLabel', {
       defaultMessage: 'Lines per row',
     }),
     'euiFieldPassword.showPassword': i18n.translate('core.euiFieldPassword.showPassword', {

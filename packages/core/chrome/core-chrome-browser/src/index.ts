@@ -38,6 +38,7 @@ export type {
   PanelSelectedNode,
   AppDeepLinkId,
   AppId,
+  SolutionId,
   CloudLinkId,
   CloudLink,
   CloudLinks,

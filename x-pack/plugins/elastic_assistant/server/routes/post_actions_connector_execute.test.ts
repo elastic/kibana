@@ -46,7 +46,18 @@ jest.mock('../lib/executor', () => ({
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
 const mockLangChainExecute = langChainExecute as jest.Mock;
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
-jest.mock('./helpers');
+jest.mock('./helpers', () => {
+  const original = jest.requireActual('./helpers');
+
+  return {
+    ...original,
+    getIsKnowledgeBaseInstalled: jest.fn(),
+    appendAssistantMessageToConversation: jest.fn(),
+    langChainExecute: jest.fn(),
+    getPluginNameFromRequest: jest.fn(),
+    getSystemPromptFromUserConversation: jest.fn(),
+  };
+});
 const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
 const appendConversationMessages = jest.fn();
@@ -56,6 +67,7 @@ const mockContext = {
       actions: {
         getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
       },
+      llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
       getRegisteredTools: jest.fn(() => []),
       getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
       logger: loggingSystemMock.createLogger(),

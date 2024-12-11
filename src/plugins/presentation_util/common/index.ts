@@ -36,7 +36,6 @@ export {
 } from './labs';
 
 export {
-  defaultTheme$,
   getElasticLogo,
   getElasticOutline,
   isValidUrl,

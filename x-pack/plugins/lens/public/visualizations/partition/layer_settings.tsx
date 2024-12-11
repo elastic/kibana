@@ -30,7 +30,7 @@ export function LayerSettings(
 
   return (
     <EuiFormRow
-      display="columnCompressedSwitch"
+      display="columnCompressed"
       label={i18n.translate('xpack.lens.pieChart.multipleMetrics', {
         defaultMessage: 'Multiple metrics',
       })}

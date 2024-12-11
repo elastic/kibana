@@ -29,6 +29,7 @@ import { createFleetActionsClientMock } from '../services/actions/mocks';
 import { createFleetFilesClientFactoryMock } from '../services/files/mocks';
 
 import { createArtifactsClientMock } from '../services/artifacts/mocks';
+import { createOutputClientMock } from '../services/output_client.mock';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
@@ -113,6 +114,7 @@ export const createAppContextStartContractMock = (
     experimentalFeatures: {
       agentTamperProtectionEnabled: true,
       diagnosticFileUploadEnabled: true,
+      enableReusableIntegrationPolicies: true,
     } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
@@ -186,7 +188,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
-    getByIDs: jest.fn(),
+    getByIDs: jest.fn().mockResolvedValue(Promise.resolve([])),
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
@@ -224,13 +226,13 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
  */
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
-    get: jest.fn(),
-    list: jest.fn(),
-    getFullAgentPolicy: jest.fn(),
-    getByIds: jest.fn(),
-    turnOffAgentTamperProtections: jest.fn(),
-    fetchAllAgentPolicies: jest.fn(),
-    fetchAllAgentPolicyIds: jest.fn(),
+    get: jest.fn().mockReturnValue(Promise.resolve()),
+    list: jest.fn().mockReturnValue(Promise.resolve()),
+    getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    getByIds: jest.fn().mockReturnValue(Promise.resolve()),
+    turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -300,6 +302,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     uninstallTokenService: createUninstallTokenServiceMock(),
     createFleetActionsClient: jest.fn((_) => fleetActionsClient),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
+    createOutputClient: jest.fn(async (_) => createOutputClientMock()),
   };
 
   return startContract;

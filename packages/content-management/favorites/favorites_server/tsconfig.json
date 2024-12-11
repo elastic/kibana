@@ -19,5 +19,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-lifecycle-server",
     "@kbn/usage-collection-plugin",
+    "@kbn/content-management-favorites-common",
   ]
 }

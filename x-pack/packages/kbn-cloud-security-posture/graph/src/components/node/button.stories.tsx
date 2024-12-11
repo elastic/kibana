@@ -8,7 +8,7 @@
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { Story } from '@storybook/react';
-import { NodeButton, type NodeButtonProps, NodeContainer } from './styles';
+import { NodeButton, type NodeButtonProps, NodeShapeContainer } from './styles';
 
 export default {
   title: 'Components/Graph Components',
@@ -20,10 +20,10 @@ export default {
 
 const Template: Story<NodeButtonProps> = (args) => (
   <ThemeProvider theme={{ darkMode: false }}>
-    <NodeContainer>
+    <NodeShapeContainer>
       Hover me
       <NodeButton onClick={args.onClick} />
-    </NodeContainer>
+    </NodeShapeContainer>
   </ThemeProvider>
 );
 

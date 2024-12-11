@@ -52,6 +52,7 @@ export function DataViewPicker({
         data-test-subj="open-data-view-picker"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         label={label}
+        size="s"
         fullWidth
         {...colorProp}
         {...rest}

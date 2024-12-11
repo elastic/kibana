@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { IconType } from '@elastic/eui';
-import type { ToolSchema } from '@kbn/inference-plugin/common';
+import type { ToolSchema } from '@kbn/inference-common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
 import type { FunctionResponse } from './functions/types';
@@ -82,8 +82,8 @@ export type ConversationUpdateRequest = ConversationRequestBase & {
 export interface KnowledgeBaseEntry {
   '@timestamp': string;
   id: string;
+  title?: string;
   text: string;
-  doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
@@ -96,12 +96,12 @@ export interface KnowledgeBaseEntry {
 }
 
 export interface Instruction {
-  doc_id: string;
+  id: string;
   text: string;
 }
 
 export interface AdHocInstruction {
-  doc_id?: string;
+  id?: string;
   text: string;
   instruction_type: 'user_instruction' | 'application_instruction';
 }

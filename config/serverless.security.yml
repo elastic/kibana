@@ -8,6 +8,8 @@ xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.search.notebooks.enabled: false
+xpack.searchPlayground.enabled: false
+xpack.searchInferenceEndpoints.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -118,6 +120,9 @@ xpack.ml.compatibleModuleType: 'security'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Enable project level rentention checks in DSL form from Index Management UI
+xpack.index_management.enableProjectLevelRetentionChecks: true
 
 # Experimental Security Solution features
 

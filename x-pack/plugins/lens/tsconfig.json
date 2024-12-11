@@ -88,7 +88,6 @@
     "@kbn/core-plugins-server",
     "@kbn/esql",
     "@kbn/field-utils",
-    "@kbn/panel-loader",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
     "@kbn/presentation-containers",
@@ -111,8 +110,14 @@
     "@kbn/licensing-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
+    "@kbn/embeddable-enhanced-plugin",
     "@kbn/es-types",
     "@kbn/esql-datagrid",
+    "@kbn/transpose-utils",
+    "@kbn/core-application-browser",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-capabilities-common",
+    "@kbn/presentation-panel-plugin",
   ],
   "exclude": ["target/**/*"]
 }

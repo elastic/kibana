@@ -52,20 +52,21 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     {
       field: 'endpoint',
       name: i18n.ENDPOINT,
-      render: (endpoint: string) => {
+      'data-test-subj': 'endpointCell',
+      render: (endpoint: string, additionalInfo: InferenceEndpointUI) => {
         if (endpoint) {
-          return <EndpointInfo inferenceId={endpoint} />;
+          return <EndpointInfo inferenceId={endpoint} provider={additionalInfo.provider} />;
         }
 
         return null;
       },
       sortable: true,
-      truncateText: true,
       width: '300px',
     },
     {
       field: 'provider',
       name: i18n.SERVICE_PROVIDER,
+      'data-test-subj': 'providerCell',
       render: (provider: InferenceAPIConfigResponse) => {
         if (provider) {
           return <ServiceProvider providerEndpoint={provider} />;
@@ -79,6 +80,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     {
       field: 'type',
       name: i18n.TASK_TYPE,
+      'data-test-subj': 'typeCell',
       render: (type: TaskTypes) => {
         if (type) {
           return <TaskType type={type} />;
@@ -150,6 +152,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           onChange={handleTableChange}
           pagination={pagination}
           sorting={sorting}
+          data-test-subj="inferenceEndpointTable"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

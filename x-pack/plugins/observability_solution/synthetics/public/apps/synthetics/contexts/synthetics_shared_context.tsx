@@ -40,6 +40,7 @@ export const SyntheticsSharedContext: React.FC<
         unifiedSearch: startPlugins.unifiedSearch,
         embeddable: startPlugins.embeddable,
         slo: startPlugins.slo,
+        serverless: startPlugins.serverless,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>
@@ -49,6 +50,9 @@ export const SyntheticsSharedContext: React.FC<
               <RedirectAppLinks
                 coreStart={{
                   application: coreStart.application,
+                }}
+                style={{
+                  height: '100%',
                 }}
               >
                 {children}

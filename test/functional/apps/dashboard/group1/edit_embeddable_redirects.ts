@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newTitle = 'wowee, my title just got cooler';
       await header.waitUntilLoadingHasFinished();
       const originalPanelCount = await dashboard.getPanelCount();
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.editPanelByTitle('wowee, looks like I have a new title');
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: true,
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
       const newTitle = 'wowee, my title just got cooler again';
       await header.waitUntilLoadingHasFinished();
-      await dashboardPanelActions.editPanelByTitle('wowee, my title just got cooler');
+      await dashboardPanelActions.clickEdit();
       await visualize.linkedToOriginatingApp();
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,

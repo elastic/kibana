@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         maintenanceWindow: 0,
         stackAlerts: 0,
         generalCases: 0,
+        generalCasesV2: 0,
         maps: 2,
         canvas: 2,
         ml: 0,
@@ -73,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         fleet: 0,
         osquery: 0,
         observabilityCases: 0,
+        observabilityCasesV2: 0,
         uptime: 0,
         slo: 0,
         infrastructure: 0,
@@ -81,9 +83,13 @@ export default function ({ getService }: FtrProviderContext) {
         monitoring: 0,
         apm: 0,
         enterpriseSearch: 0,
+        enterpriseSearchApplications: 0,
+        enterpriseSearchAnalytics: 0,
         searchInferenceEndpoints: 0,
+        searchPlayground: 0,
         siem: 0,
         securitySolutionCases: 0,
+        securitySolutionCasesV2: 0,
         securitySolutionAssistant: 0,
         securitySolutionAttackDiscovery: 0,
         discover: 0,
@@ -97,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
         dataQuality: 0,
+        entityManager: 0,
       });
     });
 

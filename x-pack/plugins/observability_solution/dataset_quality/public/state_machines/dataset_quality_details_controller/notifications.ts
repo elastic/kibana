@@ -44,16 +44,34 @@ export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error:
   });
 };
 
-export const fetchDataStreamIntegrationFailedNotifier = (
-  toasts: IToasts,
-  error: Error,
-  integrationName?: string
-) => {
+export const fetchDataStreamIntegrationFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.details.fetchIntegrationsFailed', {
-      defaultMessage: "We couldn't get {integrationName} integration info.",
+      defaultMessage: "We couldn't get integration info.",
+    }),
+    text: error.message,
+  });
+};
+
+export const updateFieldLimitFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.updateFieldLimitFailed', {
+      defaultMessage: "We couldn't update the field limit.",
+    }),
+    text: error.message,
+  });
+};
+
+export const rolloverDataStreamFailedNotifier = (
+  toasts: IToasts,
+  error: Error,
+  dataStream: string
+) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.details.rolloverDataStreamFailed', {
+      defaultMessage: "We couldn't rollover the data stream: {dataStream}.",
       values: {
-        integrationName,
+        dataStream,
       },
     }),
     text: error.message,

@@ -15,6 +15,7 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 import { clearLog, readLog, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
+import { getFips } from 'crypto';
 
 const logFilePath = join(__dirname, 'read_batch_size.log');
 
@@ -36,33 +37,39 @@ describe('migration v2 - read batch size', () => {
     await delay(5); // give it a few seconds... cause we always do ¯\_(ツ)_/¯
   });
 
-  it('reduces the read batchSize in half if a batch exceeds maxReadBatchSizeBytes', async () => {
-    root = createRoot({ maxReadBatchSizeBytes: 15000 });
-    await root.preboot();
-    await root.setup();
-    await root.start();
+  if (getFips() === 0) {
+    it('reduces the read batchSize in half if a batch exceeds maxReadBatchSizeBytes', async () => {
+      root = createRoot({ maxReadBatchSizeBytes: 15000 });
+      await root.preboot();
+      await root.setup();
+      await root.start();
 
-    // Check for migration steps present in the logs
-    logs = await readLog(logFilePath);
+      // Check for migration steps present in the logs
+      logs = await readLog(logFilePath);
 
-    expect(logs).toMatch(
-      /Read a batch with a response content length of \d+ bytes which exceeds migrations\.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 15/
-    );
-    expect(logs).toMatch('[.kibana] Migration completed');
-  });
+      expect(logs).toMatch(
+        /Read a batch with a response content length of \d+ bytes which exceeds migrations\.maxReadBatchSizeBytes, retrying by reducing the batch size in half to 15/
+      );
+      expect(logs).toMatch('[.kibana] Migration completed');
+    });
 
-  it('does not reduce the read batchSize in half if no batches exceeded maxReadBatchSizeBytes', async () => {
-    root = createRoot({ maxReadBatchSizeBytes: 50000 });
-    await root.preboot();
-    await root.setup();
-    await root.start();
+    it('does not reduce the read batchSize in half if no batches exceeded maxReadBatchSizeBytes', async () => {
+      root = createRoot({ maxReadBatchSizeBytes: 50000 });
+      await root.preboot();
+      await root.setup();
+      await root.start();
 
-    // Check for migration steps present in the logs
-    logs = await readLog(logFilePath);
+      // Check for migration steps present in the logs
+      logs = await readLog(logFilePath);
 
-    expect(logs).not.toMatch('retrying by reducing the batch size in half to');
-    expect(logs).toMatch('[.kibana] Migration completed');
-  });
+      expect(logs).not.toMatch('retrying by reducing the batch size in half to');
+      expect(logs).toMatch('[.kibana] Migration completed');
+    });
+  } else {
+    it('cannot run tests with dataArchives that have a basic licesne in FIPS mode', () => {
+      expect(getFips()).toBe(1);
+    });
+  }
 });
 
 function createRoot({ maxReadBatchSizeBytes }: { maxReadBatchSizeBytes?: number }) {
