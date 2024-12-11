@@ -29,7 +29,6 @@ export {
 export {
   canTrackContentfulRender,
   type TrackContentfulRender,
-  type TracksQueryPerformance,
 } from './interfaces/performance_trackers';
 export {
   apiIsPresentationContainer,

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { InvestigationFieldsReadOnly } from './investigation_fields';
-import { FieldReadOnly } from '../../field_readonly';
+import { FieldFinalReadOnly } from '../../field_final_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockCustomQueryRule } from '../../storybook/mocks';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
@@ -25,8 +25,11 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="investigation_fields" />
+    <ThreeWayDiffStorybookProviders
+      finalDiffableRule={args.finalDiffableRule}
+      fieldName="investigation_fields"
+    >
+      <FieldFinalReadOnly />
     </ThreeWayDiffStorybookProviders>
   );
 };

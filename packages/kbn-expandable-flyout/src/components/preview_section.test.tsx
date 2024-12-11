@@ -30,6 +30,7 @@ describe('PreviewSection', () => {
               id: 'key',
             },
           ],
+          history: [],
         },
       },
     },

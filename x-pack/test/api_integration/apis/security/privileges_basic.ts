@@ -44,6 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
             apm: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: ['all', 'read', 'minimal_all', 'minimal_read'],
             enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
+            enterpriseSearchApplications: ['all', 'read', 'minimal_all', 'minimal_read'],
+            enterpriseSearchAnalytics: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -269,6 +271,8 @@ export default function ({ getService }: FtrProviderContext) {
               'packs_read',
             ],
             enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
+            enterpriseSearchApplications: ['all', 'read', 'minimal_all', 'minimal_read'],
+            enterpriseSearchAnalytics: ['all', 'read', 'minimal_all', 'minimal_read'],
             rulesSettings: [
               'all',
               'read',

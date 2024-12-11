@@ -25,7 +25,7 @@ describe('AnalyticsEventsExistApiLogic', () => {
       const result = checkAnalyticsEventsExist({ indexName });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        `/internal/enterprise_search/analytics/collection/${indexName}/events/exist`
+        `/internal/elasticsearch/analytics/collection/${indexName}/events/exist`
       );
       await expect(result).resolves.toEqual({ exists: true });
     });

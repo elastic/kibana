@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
@@ -50,14 +51,14 @@ export interface RulePanelProps extends Record<string, unknown> {
 /**
  * Displays a rule overview panel
  */
-export const RulePanel = memo(({ ruleId, isPreviewMode }: RulePanelProps) => {
+export const RulePanel: FC<RulePanelProps> = memo(({ ruleId, isPreviewMode }) => {
   const { rule, loading, isExistingRule } = useRuleDetails({ ruleId });
 
   return loading ? (
     <FlyoutLoading data-test-subj={LOADING_TEST_ID} />
   ) : rule ? (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={false} isPreviewMode={isPreviewMode} />
       <PanelHeader rule={rule} isSuppressed={!isExistingRule} />
       <PanelContent rule={rule} />
       {isPreviewMode && <PreviewFooter ruleId={ruleId} />}

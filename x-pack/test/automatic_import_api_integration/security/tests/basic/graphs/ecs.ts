@@ -13,7 +13,8 @@ import { User } from '../../../../common/lib/authentication/types';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
-  describe('Run ecs_mapping', () => {
+  describe('Run ecs_mapping', function () {
+    this.tags('skipFIPS');
     it('should get 404 when trying to run ecs_mapping with basic license', async () => {
       return await postEcsMapping({
         supertest,

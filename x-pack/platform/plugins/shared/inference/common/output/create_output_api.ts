@@ -10,17 +10,22 @@ import {
   ChatCompletionEventType,
   MessageRole,
   OutputAPI,
+  OutputCompositeResponse,
   OutputEventType,
   OutputOptions,
   ToolSchema,
+  isToolValidationError,
   withoutTokenCountEvents,
 } from '@kbn/inference-common';
 import { isObservable, map } from 'rxjs';
 import { ensureMultiTurn } from '../utils/ensure_multi_turn';
 
+type DefaultOutputOptions = OutputOptions<string, ToolSchema | undefined, boolean>;
+
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI;
+
 export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
-  return ({
+  return function callOutputApi({
     id,
     connectorId,
     input,
@@ -29,19 +34,26 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     previousMessages,
     functionCalling,
     stream,
-  }: OutputOptions<string, ToolSchema | undefined, boolean>) => {
+    retry,
+  }: DefaultOutputOptions): OutputCompositeResponse<string, ToolSchema | undefined, boolean> {
+    if (stream && retry !== undefined) {
+      throw new Error(`Retry options are not supported in streaming mode`);
+    }
+
+    const messages = ensureMultiTurn([
+      ...(previousMessages || []),
+      {
+        role: MessageRole.User,
+        content: input,
+      },
+    ]);
+
     const response = chatCompleteApi({
       connectorId,
       stream,
       functionCalling,
       system,
-      messages: ensureMultiTurn([
-        ...(previousMessages || []),
-        {
-          role: MessageRole.User,
-          content: input,
-        },
-      ]),
+      messages,
       ...(schema
         ? {
             tools: {
@@ -79,16 +91,55 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
         })
       );
     } else {
-      return response.then((chatResponse) => {
-        return {
-          id,
-          content: chatResponse.content,
-          output:
-            chatResponse.toolCalls.length && 'arguments' in chatResponse.toolCalls[0].function
-              ? chatResponse.toolCalls[0].function.arguments
-              : undefined,
-        };
-      });
+      return response.then(
+        (chatResponse) => {
+          return {
+            id,
+            content: chatResponse.content,
+            output:
+              chatResponse.toolCalls.length && 'arguments' in chatResponse.toolCalls[0].function
+                ? chatResponse.toolCalls[0].function.arguments
+                : undefined,
+          };
+        },
+        (error: Error) => {
+          if (isToolValidationError(error) && retry?.onValidationError) {
+            const retriesLeft =
+              typeof retry.onValidationError === 'number' ? retry.onValidationError : 1;
+
+            return callOutputApi({
+              id,
+              connectorId,
+              input,
+              schema,
+              system,
+              previousMessages: messages.concat(
+                {
+                  role: MessageRole.Assistant as const,
+                  content: '',
+                  toolCalls: error.meta.toolCalls!,
+                },
+                ...(error.meta.toolCalls?.map((toolCall) => {
+                  return {
+                    name: toolCall.function.name,
+                    role: MessageRole.Tool as const,
+                    toolCallId: toolCall.toolCallId,
+                    response: {
+                      error: error.meta,
+                    },
+                  };
+                }) ?? [])
+              ),
+              functionCalling,
+              stream: false,
+              retry: {
+                onValidationError: retriesLeft - 1,
+              },
+            }) as OutputCompositeResponse<string, ToolSchema | undefined, false>;
+          }
+          throw error;
+        }
+      );
     }
   };
 }

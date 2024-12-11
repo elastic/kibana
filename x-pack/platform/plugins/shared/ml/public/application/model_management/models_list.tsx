@@ -427,7 +427,8 @@ export const ModelsList: FC<Props> = ({
       render: (item: TrainedModelUIItem) => {
         const { description, model_id: modelId, type } = item;
 
-        const isTechPreview = description?.includes('(Tech Preview)');
+        const isTechPreview =
+          description?.includes('(Tech Preview)') || (isNLPModelItem(item) && item.techPreview);
 
         let descriptionText = description?.replace('(Tech Preview)', '');
 

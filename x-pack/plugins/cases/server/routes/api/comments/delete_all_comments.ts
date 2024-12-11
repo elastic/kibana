@@ -9,10 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const deleteAllCommentsRoute = createCasesRoute({
   method: 'delete',
   path: CASE_COMMENTS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',
     summary: `Delete all case comments and alerts`,

@@ -8,6 +8,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypesWithoutBody from '@elastic/elasticsearch/lib/api/types';
 import type {
   Field,
   QueryDslFieldAndFormat,
@@ -26,6 +27,7 @@ import {
 
 export type ESFilter = estypes.QueryDslQueryContainer;
 export type ESSearchRequest = estypes.SearchRequest;
+export type ESSearchRequestWithoutBody = estypesWithoutBody.SearchRequest;
 export type AggregationOptionsByType = Required<estypes.AggregationsAggregationContainer>;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be

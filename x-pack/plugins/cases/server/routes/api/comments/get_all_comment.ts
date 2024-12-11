@@ -12,6 +12,7 @@ import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { attachmentDomainV1 } from '../../../../common/types/domain';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 /**
  * @deprecated since version 8.1.0
@@ -26,6 +27,7 @@ export const getAllCommentsRoute = ({
   createCasesRoute({
     method: 'get',
     path: CASE_COMMENTS_URL,
+    security: DEFAULT_CASES_ROUTE_SECURITY,
     params: {
       params: schema.object({
         case_id: schema.string(),

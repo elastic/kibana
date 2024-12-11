@@ -26,7 +26,6 @@ const STORYBOOKS = [
   'dashboard_enhanced',
   'dashboard',
   'data',
-  'embeddable',
   'esql_editor',
   'expression_error',
   'expression_image',

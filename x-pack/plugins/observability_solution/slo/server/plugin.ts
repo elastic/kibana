@@ -9,6 +9,7 @@ import {
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -36,6 +37,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { getSloClientWithRequest } from './client';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -179,6 +181,14 @@ export class SLOPlugin
       ?.start(plugins.taskManager, internalSoClient, internalEsClient)
       .catch(() => {});
 
-    return {};
+    return {
+      getSloClientWithRequest: (request: KibanaRequest) => {
+        return getSloClientWithRequest({
+          request,
+          soClient: core.savedObjects.getScopedClient(request),
+          esClient: internalEsClient,
+        });
+      },
+    };
   }
 }
