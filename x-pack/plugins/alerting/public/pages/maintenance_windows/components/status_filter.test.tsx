@@ -43,7 +43,7 @@ describe('StatusFilter', () => {
     expect(result.getByTestId('status-filter-archived')).toBeInTheDocument();
   });
 
-  test.only('should have 2 active filters', async () => {
+  test('should have 2 active filters', async () => {
     const result = appMockRenderer.render(
       <StatusFilter
         selectedStatuses={[MaintenanceWindowStatus.Running, MaintenanceWindowStatus.Upcoming]}

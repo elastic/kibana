@@ -15,6 +15,7 @@ import { SavedObjectsFindResponse } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  MaintenanceWindowStatus,
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import { findMaintenanceWindowsParamsSchema } from './schemas';
@@ -274,7 +275,7 @@ describe('getStatusFilter', () => {
   });
 
   it('return empty string if status does not exist', () => {
-    expect(getStatusFilter(['weird' as any])).toMatchInlineSnapshot(`""`);
+    expect(getStatusFilter(['weird' as MaintenanceWindowStatus])).toMatchInlineSnapshot(`""`);
   });
 
   it('return empty string if pass empty arguments', () => {
