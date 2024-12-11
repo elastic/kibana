@@ -14,6 +14,8 @@ import { css } from '@emotion/react';
 import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiToolTip,
+  EuiBetaBadge,
   EuiButton,
   EuiTitle,
   EuiFlyoutFooter,
@@ -424,13 +426,36 @@ export function ESQLControlsFlyout({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>
-            {i18n.translate('esql.flyout.title', {
-              defaultMessage: 'Create ES|QL control',
-            })}
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
+              <h2>
+                {i18n.translate('esql.flyout.title', {
+                  defaultMessage: 'Create ES|QL control',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              title={i18n.translate('esql.flyout.experimentalLabel.title', {
+                defaultMessage: 'Technical preview',
+              })}
+              content={i18n.translate('esql.flyout.experimentalLabel.content', {
+                defaultMessage: 'ES|QL variables are currently on Technical preview.',
+              })}
+            >
+              <EuiBetaBadge
+                label=""
+                iconType="beaker"
+                size="s"
+                css={css`
+                  vertical-align: middle;
+                `}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         css={css`
