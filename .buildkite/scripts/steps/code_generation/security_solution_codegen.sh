@@ -10,7 +10,7 @@ echo -e "\n[Security Solution OpenAPI Code Generation] OpenAPI Common Package\n"
 (cd packages/kbn-openapi-common && yarn openapi:generate)
 
 echo -e "\n[Security Solution OpenAPI Code Generation] Lists Common Package\n"
-(cd packages/kbn-securitysolution-lists-common && yarn openapi:generate)
+(cd x-pack/solutions/security/packages/kbn-securitysolution-lists-common && yarn openapi:generate)
 
 echo -e "\n[Security Solution OpenAPI Code Generation] Exceptions Common Package\n"
 (cd x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common && yarn openapi:generate)

@@ -854,7 +854,7 @@
     "@kbn/securitysolution-list-constants": "link:x-pack/solutions/security/packages/kbn-securitysolution-list-constants",
     "@kbn/securitysolution-list-hooks": "link:x-pack/solutions/security/packages/kbn-securitysolution-list-hooks",
     "@kbn/securitysolution-list-utils": "link:x-pack/solutions/security/packages/kbn-securitysolution-list-utils",
-    "@kbn/securitysolution-lists-common": "link:packages/kbn-securitysolution-lists-common",
+    "@kbn/securitysolution-lists-common": "link:x-pack/solutions/security/packages/kbn-securitysolution-lists-common",
     "@kbn/securitysolution-rules": "link:packages/kbn-securitysolution-rules",
     "@kbn/securitysolution-t-grid": "link:packages/kbn-securitysolution-t-grid",
     "@kbn/securitysolution-utils": "link:packages/kbn-securitysolution-utils",

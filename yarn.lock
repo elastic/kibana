@@ -7184,7 +7184,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-lists-common@link:packages/kbn-securitysolution-lists-common":
+"@kbn/securitysolution-lists-common@link:x-pack/solutions/security/packages/kbn-securitysolution-lists-common":
   version "0.0.0"
   uid ""
 
