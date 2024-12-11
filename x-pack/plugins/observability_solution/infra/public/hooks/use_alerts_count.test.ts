@@ -6,7 +6,7 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { ALERT_STATUS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { ALERT_STATUS } from '@kbn/rule-data-utils';
 
 import { useAlertsCount } from './use_alerts_count';
 import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -53,7 +53,8 @@ const mockUseKibana = () => {
 };
 
 describe('useAlertsCount', () => {
-  const featureIds: ValidFeatureId[] = ['infrastructure'];
+  const ruleTypeIds = ['metrics.alert.inventory.threshold'];
+  const consumers = ['foo'];
 
   beforeAll(() => {
     mockUseKibana();
@@ -66,7 +67,7 @@ describe('useAlertsCount', () => {
   it('should return the mocked data from API', async () => {
     mockedPostAPI.mockResolvedValue(mockedAlertsCountResponse);
 
-    const { result } = renderHook(() => useAlertsCount({ featureIds }));
+    const { result } = renderHook(() => useAlertsCount({ ruleTypeIds }));
 
     expect(result.current.loading).toBe(true);
     expect(result.current.alertsCount).toEqual(undefined);
@@ -90,7 +91,8 @@ describe('useAlertsCount', () => {
 
     renderHook(() =>
       useAlertsCount({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         query,
       })
     );
@@ -101,7 +103,8 @@ describe('useAlertsCount', () => {
           terms: { field: ALERT_STATUS },
         },
       },
-      feature_ids: featureIds,
+      rule_type_ids: ruleTypeIds,
+      consumers,
       query,
       size: 0,
     });
@@ -118,7 +121,7 @@ describe('useAlertsCount', () => {
     const error = new Error('Fetch Alerts Count Failed');
     mockedPostAPI.mockRejectedValueOnce(error);
 
-    const { result } = renderHook(() => useAlertsCount({ featureIds }));
+    const { result } = renderHook(() => useAlertsCount({ ruleTypeIds }));
 
     await waitFor(() => expect(result.current.error?.message).toMatch(error.message));
   });

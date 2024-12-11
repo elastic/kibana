@@ -33,6 +33,8 @@ import {
 import { SYNTHETICS_DEFAULT_GROUPINGS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { CreateSLOForm } from './types';
 
+export const MAX_WIDTH = 900;
+
 export const SLI_OPTIONS: Array<{
   value: IndicatorType;
   text: string;
@@ -205,6 +207,13 @@ export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndic
   },
 };
 
+export const SETTINGS_DEFAULT_VALUES = {
+  frequency: 1,
+  preventInitialBackfill: false,
+  syncDelay: 1,
+  syncField: null,
+};
+
 export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   name: '',
   description: '',
@@ -219,9 +228,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
-  settings: {
-    preventInitialBackfill: false,
-  },
+  settings: SETTINGS_DEFAULT_VALUES,
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
@@ -238,9 +245,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
     target: 99,
   },
   groupBy: ALL_VALUE,
-  settings: {
-    preventInitialBackfill: false,
-  },
+  settings: SETTINGS_DEFAULT_VALUES,
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm = {
@@ -257,9 +262,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY: CreateSLOForm
     target: 99,
   },
   groupBy: SYNTHETICS_DEFAULT_GROUPINGS,
-  settings: {
-    preventInitialBackfill: false,
-  },
+  settings: SETTINGS_DEFAULT_VALUES,
 };
 
 export const COMPARATOR_GT = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.gtLabel', {

@@ -45,7 +45,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
         const siemResponse = buildSiemResponse(response);
         const ctx = await context.resolve(['core', 'alerting']);
         const savedObjectsClient = ctx.core.savedObjects.client;
-        const rulesClient = ctx.alerting.getRulesClient();
+        const rulesClient = await ctx.alerting.getRulesClient();
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
         try {
