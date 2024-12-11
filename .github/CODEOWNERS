@@ -610,6 +610,7 @@ src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualiz
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
+src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
@@ -627,7 +628,6 @@ src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-man
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
-src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
