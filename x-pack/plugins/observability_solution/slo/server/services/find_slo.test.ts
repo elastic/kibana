@@ -12,7 +12,7 @@ import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
 import { SLORepository } from './slo_repository';
-import { SummaryResult, SummarySearchClient } from './summary_search_client';
+import { SummaryResult, SummarySearchClient } from './summary_search_client/summary_search_client';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
