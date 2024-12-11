@@ -16,6 +16,11 @@ const DEFAULT_COLOR_COUNT = 10;
 export interface KbnColorFnPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
   type: KbnPaletteType;
   colorFn: (n: number) => string[];
+  /**
+   * Default number of colors returned from `colors` method.
+   *
+   * @default `colorCount`
+   */
   defaultNumberOfColors?: number;
 }
 
