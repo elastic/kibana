@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FieldReadOnly } from '../../field_readonly';
+import { FieldFinalReadOnly } from '../../field_final_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { EqlQueryReadOnly } from './eql_query';
@@ -34,8 +34,9 @@ const Template: Story<TemplateProps> = (args) => {
     <ThreeWayDiffStorybookProviders
       kibanaServicesOverrides={args.kibanaServicesOverrides}
       finalDiffableRule={args.finalDiffableRule}
+      fieldName="eql_query"
     >
-      <FieldReadOnly fieldName="eql_query" />
+      <FieldFinalReadOnly />
     </ThreeWayDiffStorybookProviders>
   );
 };

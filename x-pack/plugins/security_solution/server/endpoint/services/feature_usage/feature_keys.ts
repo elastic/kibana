@@ -24,6 +24,7 @@ export const FEATURE_KEYS = {
   UPLOAD: 'Upload file',
   EXECUTE: 'Execute command',
   SCAN: 'Scan files',
+  RUN_SCRIPT: 'Run script',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
 } as const;
@@ -41,6 +42,7 @@ const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<Record<ResponseActionsApiCommandNam
     execute: 'EXECUTE',
     upload: 'UPLOAD',
     scan: 'SCAN',
+    runscript: 'RUN_SCRIPT',
   };
 
 export const getResponseActionFeatureKey = (
