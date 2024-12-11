@@ -15,7 +15,13 @@ const initialPackageMap = {
 };
 const initialPackagesTexts = Object.values(initialPackageMap);
 
-const expectedDataViews = ['logs-*', 'logstash-*', 'metrics-*'];
+const expectedDataViews = [
+  'Log Threshold Alerting Rule Source',
+  'Metric AND Inventory Threshold Alerting Rule Source',
+  'logs-*',
+  'logstash-*',
+  'metrics-*',
+];
 const sortedExpectedDataViews = expectedDataViews.slice().sort();
 
 const uncategorized = ['logs-gaming-*', 'logs-manufacturing-*', 'logs-retail-*'];
@@ -654,7 +660,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
               );
 
-            expect(menuEntries.length).to.be(2);
+            expect(menuEntries.length).to.be(3);
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 
@@ -683,9 +689,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
               );
 
-            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[2]);
-            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[1]);
-            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[0]);
+            expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[4]);
+            expect(await menuEntries[1].getVisibleText()).to.be(sortedExpectedDataViews[3]);
+            expect(await menuEntries[2].getVisibleText()).to.be(sortedExpectedDataViews[2]);
+            expect(await menuEntries[3].getVisibleText()).to.be(sortedExpectedDataViews[1]);
+            expect(await menuEntries[4].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 
           // Test back ascending order
@@ -764,8 +772,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
               );
 
-            expect(await menuEntries[2].getVisibleText()).to.be(expectedDataViews[2]);
-            await menuEntries[2].click();
+            expect(await menuEntries[4].getVisibleText()).to.be(expectedDataViews[4]);
+            await menuEntries[4].click();
           });
 
           await retry.try(async () => {
@@ -773,7 +781,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(url).to.contain(`/app/discover`);
           });
 
-          await dataViews.waitForSwitcherToBe(expectedDataViews[2]);
+          await dataViews.waitForSwitcherToBe(expectedDataViews[4]);
         });
       });
 

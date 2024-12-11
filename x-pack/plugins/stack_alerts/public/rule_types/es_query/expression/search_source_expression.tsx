@@ -67,7 +67,11 @@ export const SearchSourceExpression = ({
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
         const defaultDataView = await data.dataViews.getDefaultDataView();
-        if (defaultDataView) {
+        if (
+          defaultDataView &&
+          defaultDataView.id !== 'log_rules_data_view' &&
+          defaultDataView.id !== 'infra_rules_data_view'
+        ) {
           newSearchSource.setField('index', defaultDataView);
         }
         initialSearchConfiguration = newSearchSource.getSerializedFields();
