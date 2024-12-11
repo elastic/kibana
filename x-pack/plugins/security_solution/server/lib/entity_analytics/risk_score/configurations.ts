@@ -9,6 +9,7 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 import {
   RiskScoreEntity,
+  SERVICE_RISK_SCORE_ENTITY,
   riskScoreBaseIndexName,
 } from '../../../../common/entity_analytics/risk_engine';
 import type { IIndexPatternString } from '../utils/create_datastream';
@@ -136,7 +137,7 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.service),
+  ...buildIdentityRiskFields(SERVICE_RISK_SCORE_ENTITY),
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';

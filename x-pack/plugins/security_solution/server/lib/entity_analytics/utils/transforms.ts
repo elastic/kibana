@@ -236,7 +236,11 @@ const upgradeLatestTransformIfNeeded = async ({
   if (isTransformOutdated(response.transforms[0], newConfig)) {
     if (doesTransformRequireReinstall(response.transforms[0], newConfig)) {
       logger.info(`Reinstalling transform ${transformId}`);
-      reinstallTransform({ esClient, logger, config: { ...newConfig, transform_id: transformId } });
+      await reinstallTransform({
+        esClient,
+        logger,
+        config: { ...newConfig, transform_id: transformId },
+      });
     } else {
       logger.info(`Upgrading transform ${transformId}`);
       const { latest: _unused, ...changes } = newConfig;

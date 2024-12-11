@@ -21,6 +21,7 @@ import type { AfterKeys } from '../../../../../common/api/entity_analytics/commo
 import {
   type IdentifierType,
   RiskScoreEntity,
+  SERVICE_RISK_SCORE_ENTITY,
 } from '../../../../../common/entity_analytics/risk_engine';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
@@ -293,7 +294,7 @@ export const runTask = async ({
     const identifierTypes: IdentifierType[] = configuredIdentifierType
       ? [configuredIdentifierType]
       : experimentalFeatures.serviceEntityStoreEnabled
-      ? [RiskScoreEntity.host, RiskScoreEntity.user, RiskScoreEntity.service]
+      ? [RiskScoreEntity.host, RiskScoreEntity.user, SERVICE_RISK_SCORE_ENTITY]
       : [RiskScoreEntity.host, RiskScoreEntity.user];
 
     const runs: Array<{

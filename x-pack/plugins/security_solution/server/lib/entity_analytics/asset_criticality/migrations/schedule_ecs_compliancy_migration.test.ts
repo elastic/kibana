@@ -61,6 +61,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       taskManager,
       logger,
       getStartServices,
+      kibanaVersion: '8.0.0',
     });
 
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
@@ -75,6 +76,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         taskManager: undefined,
         logger,
         getStartServices,
+        kibanaVersion: '8.0.0',
       })
     ).resolves.not.toThrow();
   });
@@ -89,6 +91,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       taskManager,
       logger,
       getStartServices,
+      kibanaVersion: '8.0.0',
     });
 
     expect(mockMigrateEcsMappings).toHaveBeenCalled();
@@ -104,6 +107,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       taskManager,
       logger,
       getStartServices,
+      kibanaVersion: '8.0.0',
     });
 
     expect(mockMigrateEcsMappings).not.toHaveBeenCalled();
@@ -117,6 +121,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       taskManager: taskManagerMock.createSetup(),
       logger,
       getStartServices,
+      kibanaVersion: '8.0.0',
     });
 
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
@@ -136,6 +141,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       taskManager: taskManagerMock.createSetup(),
       logger,
       getStartServices,
+      kibanaVersion: '8.0.0',
     });
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -151,6 +157,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       taskManager: taskManagerMock.createSetup(),
       logger,
       getStartServices,
+      kibanaVersion: '8.0.0',
     });
 
     expect(mockTaskManagerStart.ensureScheduled).not.toHaveBeenCalled();
