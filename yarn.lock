@@ -7140,7 +7140,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
+"@kbn/securitysolution-exception-list-components@link:x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components":
   version "0.0.0"
   uid ""
 
