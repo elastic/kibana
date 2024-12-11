@@ -210,7 +210,7 @@ export const reindexActionsFactory = (
     async getFlatSettings(indexName: string) {
       let flatSettings;
 
-      if (versionService.getMajorVersion() === 7) {
+      if (versionService.getMajorVersion() === 8) {
         // On 7.x, we need to get index settings with mapping type
         flatSettings = await esClient.indices.get({
           index: indexName,

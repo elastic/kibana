@@ -87,7 +87,6 @@ export function InternalDashboardTopNav({
     allDataViews,
     focusedPanelId,
     fullScreenMode,
-    hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
     query,
@@ -97,7 +96,6 @@ export function InternalDashboardTopNav({
     dashboardApi.dataViews,
     dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
-    dashboardApi.hasRunMigrations$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.savedObjectId,
     dashboardApi.query$,
@@ -267,19 +265,6 @@ export function InternalDashboardTopNav({
         } as EuiToolTipProps,
       });
     }
-    if (hasRunMigrations && viewMode === 'edit') {
-      allBadges.push({
-        'data-test-subj': 'dashboardSaveRecommendedBadge',
-        badgeText: unsavedChangesBadgeStrings.getHasRunMigrationsText(),
-        title: '',
-        color: 'success',
-        iconType: 'save',
-        toolTipProps: {
-          content: unsavedChangesBadgeStrings.getHasRunMigrationsToolTipContent(),
-          position: 'bottom',
-        } as EuiToolTipProps,
-      });
-    }
 
     const { showWriteControls } = getDashboardCapabilities();
     if (showWriteControls && dashboardApi.isManaged) {
@@ -328,7 +313,7 @@ export function InternalDashboardTopNav({
       });
     }
     return allBadges;
-  }, [hasUnsavedChanges, viewMode, hasRunMigrations, isPopoverOpen, dashboardApi, maybeRedirect]);
+  }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
 
   return (
     <div className="dashboardTopNav">
