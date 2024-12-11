@@ -845,7 +845,7 @@
     "@kbn/securitysolution-es-utils": "link:src/platform/packages/shared/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-exception-list-components": "link:x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components",
     "@kbn/securitysolution-exceptions-common": "link:x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common",
-    "@kbn/securitysolution-hook-utils": "link:packages/kbn-securitysolution-hook-utils",
+    "@kbn/securitysolution-hook-utils": "link:x-pack/solutions/security/packages/kbn-securitysolution-hook-utils",
     "@kbn/securitysolution-io-ts-alerting-types": "link:packages/kbn-securitysolution-io-ts-alerting-types",
     "@kbn/securitysolution-io-ts-list-types": "link:packages/kbn-securitysolution-io-ts-list-types",
     "@kbn/securitysolution-io-ts-types": "link:packages/kbn-securitysolution-io-ts-types",

@@ -7148,7 +7148,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-hook-utils@link:packages/kbn-securitysolution-hook-utils":
+"@kbn/securitysolution-hook-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-hook-utils":
   version "0.0.0"
   uid ""
 
