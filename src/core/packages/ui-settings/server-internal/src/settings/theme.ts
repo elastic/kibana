@@ -12,32 +12,48 @@ import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import {
   type UiSettingsParams,
+  type ThemeName,
   parseThemeTags,
   SUPPORTED_THEME_NAMES,
+  DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 
-function getThemeInfo(options: GetThemeSettingsOptions) {
-  if (options?.isDist ?? true) {
-    return {
-      defaultDarkMode: false,
-    };
-  }
-
-  const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
-  return {
-    defaultDarkMode: themeTags[0].endsWith('dark'),
-  };
+interface ThemeInfo {
+  defaultDarkMode: boolean;
+  defaultThemeName: ThemeName;
 }
 
+const getThemeInfo = ({ isDist = true, isServerless }: GetThemeSettingsOptions): ThemeInfo => {
+  const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
+
+  const themeInfo: ThemeInfo = {
+    defaultDarkMode: false,
+    defaultThemeName: DEFAULT_THEME_NAME,
+  };
+
+  if (!isDist) {
+    // Allow environment-specific config when not building for distribution
+    themeInfo.defaultDarkMode = themeTags[0]?.endsWith('dark') || false;
+
+    if (!isServerless) {
+      // Default to Borealis theme in non-serverless
+      themeInfo.defaultThemeName = 'borealis';
+    }
+  }
+
+  return themeInfo;
+};
+
 interface GetThemeSettingsOptions {
+  isServerless: boolean;
   isDist?: boolean;
   isThemeSwitcherEnabled?: boolean;
 }
 
 export const getThemeSettings = (
-  options: GetThemeSettingsOptions = {}
+  options: GetThemeSettingsOptions
 ): Record<string, UiSettingsParams> => {
-  const { defaultDarkMode } = getThemeInfo(options);
+  const { defaultDarkMode, defaultThemeName } = getThemeInfo(options);
 
   return {
     'theme:darkMode': {
@@ -109,7 +125,7 @@ export const getThemeSettings = (
           defaultMessage: 'Borealis',
         }),
       },
-      value: 'amsterdam',
+      value: defaultThemeName,
       readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
         ? !options.isThemeSwitcherEnabled
         : true,
