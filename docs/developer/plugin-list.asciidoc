@@ -258,7 +258,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard.
 
 
-|{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual management section into it. This plugin does not contain any individual
 management section itself.
