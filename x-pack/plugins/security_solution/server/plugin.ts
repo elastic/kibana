@@ -280,6 +280,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         all: allRiskScoreIndexPattern,
         latest: latestRiskScoreIndexPattern,
       },
+      legacySignalsIndex: config.signalsIndex,
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
@@ -396,6 +397,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       previewRuleDataClient,
       this.telemetryReceiver,
       this.pluginContext.env.packageInfo.buildFlavor === 'serverless',
+      core.docLinks,
       this.endpointContext
     );
 
