@@ -19,7 +19,7 @@ echo -e "\n[Security Solution OpenAPI Bundling] Lists API\n"
 (cd packages/kbn-securitysolution-lists-common && yarn openapi:bundle)
 
 echo -e "\n[Security Solution OpenAPI Bundling] Exceptions API\n"
-(cd packages/kbn-securitysolution-exceptions-common && yarn openapi:bundle)
+(cd x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common && yarn openapi:bundle)
 
 echo -e "\n[Security Solution OpenAPI Bundling] Endpoint Exceptions API\n"
 (cd x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common && yarn openapi:bundle)

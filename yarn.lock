@@ -7144,7 +7144,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-exceptions-common@link:packages/kbn-securitysolution-exceptions-common":
+"@kbn/securitysolution-exceptions-common@link:x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common":
   version "0.0.0"
   uid ""
 
