@@ -193,3 +193,4 @@ export const getSimilarCases = async () => allCasesSnake;
 
 export const postObservable = jest.fn();
 export const patchObservable = jest.fn();
+export const deleteObservable = jest.fn();
