@@ -18,7 +18,6 @@ import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '../../../common/constants';
-import { stringifySearchParams } from '../helpers/app_context.mock';
 
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.

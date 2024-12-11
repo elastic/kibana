@@ -18,10 +18,7 @@ import {
 } from '../../../../../common/constants';
 import { DataPublicPluginStart } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import {
-  uiMetricService,
-  UIM_DISCOVER_CLICK,
-} from '../../../lib/ui_metric';
+import { uiMetricService, UIM_DISCOVER_CLICK } from '../../../lib/ui_metric';
 
 import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../../../../common/constants';
 
