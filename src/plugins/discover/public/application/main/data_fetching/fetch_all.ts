@@ -247,6 +247,7 @@ export async function fetchMoreDocuments(
       services,
       sort: getAppState().sort as SortOrder[],
       customFilters: getInternalState().customFilters,
+      inputTimeRange: dataSubjects.main$.getValue().timeRange,
     });
 
     // Fetch more documents

@@ -24,7 +24,11 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
-import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
+import {
+  checkHitCount,
+  sendErrorTo,
+  sendFetchStartMsg,
+} from '../../hooks/use_saved_search_messages';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -378,6 +382,23 @@ describe('useDiscoverHistogram', () => {
         fetch$.next();
       });
       expect(hook.result.current.isChartLoading).toBe(true);
+    });
+
+    it('should use timerange + timeRangeRelative + query given by the data main$ observable', async () => {
+      const fetch$ = new Subject<void>();
+      const stateContainer = getStateContainer();
+      const timeRange = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+      const timeRangeRelative = { from: 'now-15m', to: 'now' };
+      const query = { esql: 'test' };
+      sendFetchStartMsg(stateContainer.dataState.data$.main$, timeRange, timeRangeRelative, query);
+
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      act(() => {
+        fetch$.next();
+      });
+      expect(hook.result.current.timeRange).toBe(timeRange);
+      expect(hook.result.current.relativeTimeRange).toBe(timeRangeRelative);
+      expect(hook.result.current.query).toBe(query);
     });
   });
 
