@@ -15,11 +15,11 @@ import {
   DEFAULT_LOG_VIEW,
   getLogsLocatorFromUrlService,
   getNodeQuery,
-  getTimeRange,
   LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
+import moment from 'moment';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -89,10 +89,21 @@ export const Logs = () => {
         nodeId: asset.id,
         filter: textQueryDebounced,
       }),
-      timeRange: getTimeRange(state.startTimestamp),
+      timeRange: {
+        from: moment(state.startTimestamp).toISOString(),
+        to: moment(state.currentTimestamp).toISOString(),
+      },
       logView,
     });
-  }, [logsLocator, asset.id, asset.type, state.startTimestamp, textQueryDebounced, logView]);
+  }, [
+    logsLocator,
+    asset.id,
+    asset.type,
+    state.startTimestamp,
+    state.currentTimestamp,
+    textQueryDebounced,
+    logView,
+  ]);
 
   return (
     <EuiFlexGroup direction="column" ref={ref}>
