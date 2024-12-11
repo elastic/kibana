@@ -72,22 +72,25 @@ export const useUnifiedSearch = () => {
   const onFiltersChange = useCallback(
     (filters: Filter[]) => {
       setSearch({ type: 'SET_FILTERS', filters });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onPanelFiltersChange = useCallback(
     (panelFilters: Filter[]) => {
       setSearch({ type: 'SET_PANEL_FILTERS', panelFilters });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onLimitChange = useCallback(
     (limit: number) => {
       setSearch({ type: 'SET_LIMIT', limit });
+      updateSearchSessionId();
     },
-    [setSearch]
+    [setSearch, updateSearchSessionId]
   );
 
   const onDateRangeChange = useCallback(
@@ -104,11 +107,12 @@ export const useUnifiedSearch = () => {
         setError(null);
         validateQuery(query);
         setSearch({ type: 'SET_QUERY', query });
+        updateSearchSessionId();
       } catch (err) {
         setError(err);
       }
     },
-    [validateQuery, setSearch]
+    [validateQuery, setSearch, updateSearchSessionId]
   );
 
   const onSubmit = useCallback(
