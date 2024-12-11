@@ -62,7 +62,6 @@ export const FieldSummary = (props: SchemaEditorFlyoutProps) => {
     nextFieldFormat,
     setNextFieldFormat,
     toggleIsEditing,
-    reset,
   } = props;
 
   const router = useStreamsAppRouter();
