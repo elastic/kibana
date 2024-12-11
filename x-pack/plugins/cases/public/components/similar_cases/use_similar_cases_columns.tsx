@@ -12,13 +12,12 @@ import type {
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import { EuiBadgeGroup, EuiBadge, EuiHealth, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBadgeGroup, EuiBadge, EuiHealth, EuiToolTip } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI, SimilarCaseUI } from '../../../common/ui/types';
 import { getEmptyCellValue } from '../empty_value';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import { TruncatedText } from '../truncated_text';
 import { severities } from '../severity/config';
@@ -40,9 +39,6 @@ const getLineClampedCss = css`
   word-break: normal;
 `;
 
-const renderStringField = (field: string, dataTestSubj: string) =>
-  field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
-
 const SIMILARITIES_FIELD = 'similarities' as const;
 
 export interface UseSimilarCasesColumnsReturnValue {
@@ -57,7 +53,7 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
       {
         field: casesColumnsConfig.title.field,
         name: casesColumnsConfig.title.name,
-        sortable: true,
+        sortable: false,
         render: (title: string, theCase: SimilarCaseUI) => {
           if (theCase.id != null && theCase.title != null) {
             const caseDetailsLinkComponent = (
@@ -67,18 +63,6 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
             );
 
             return caseDetailsLinkComponent;
-          }
-          return getEmptyCellValue();
-        },
-        width: '20%',
-      },
-      {
-        field: SIMILARITIES_FIELD,
-        name: i18n.SIMILARITY_REASON,
-        sortable: true,
-        render: (similarities: SimilarCaseUI['similarities'], theCase: SimilarCaseUI) => {
-          if (theCase.id != null && theCase.title != null) {
-            return similarities.observables.map((similarity) => similarity.value).join(', ');
           }
           return getEmptyCellValue();
         },
@@ -139,19 +123,9 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         width: '12%',
       },
       {
-        field: casesColumnsConfig.totalAlerts.field,
-        name: casesColumnsConfig.totalAlerts.name,
-        align: RIGHT_ALIGNMENT,
-        render: (totalAlerts: CaseUI['totalAlerts']) =>
-          totalAlerts != null
-            ? renderStringField(`${totalAlerts}`, `similar-cases-table-column-alertsCount`)
-            : getEmptyCellValue(),
-        width: '80px',
-      },
-      {
         field: casesColumnsConfig.category.field,
         name: casesColumnsConfig.category.name,
-        sortable: true,
+        sortable: false,
         render: (category: CaseUI['category']) => {
           if (category != null) {
             return (
@@ -165,54 +139,9 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
         width: '120px',
       },
       {
-        field: casesColumnsConfig.closedAt.field,
-        name: casesColumnsConfig.closedAt.name,
-        sortable: true,
-        render: (closedAt: CaseUI['closedAt']) => {
-          if (closedAt != null) {
-            return (
-              <span data-test-subj={`similar-cases-table-column-closedAt`}>
-                <FormattedRelativePreferenceDate value={closedAt} />
-              </span>
-            );
-          }
-          return getEmptyCellValue();
-        },
-      },
-      {
-        field: casesColumnsConfig.createdAt.field,
-        name: casesColumnsConfig.createdAt.name,
-        sortable: true,
-        render: (createdAt: CaseUI['createdAt']) => {
-          if (createdAt != null) {
-            return (
-              <span data-test-subj={`similar-cases-table-column-createdAt`}>
-                <FormattedRelativePreferenceDate value={createdAt} stripMs={true} />
-              </span>
-            );
-          }
-          return getEmptyCellValue();
-        },
-      },
-      {
-        field: casesColumnsConfig.updatedAt.field,
-        name: casesColumnsConfig.updatedAt.name,
-        sortable: true,
-        render: (updatedAt: CaseUI['updatedAt']) => {
-          if (updatedAt != null) {
-            return (
-              <span data-test-subj="similar-cases-table-column-updatedAt">
-                <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
-              </span>
-            );
-          }
-          return getEmptyCellValue();
-        },
-      },
-      {
         field: casesColumnsConfig.status.field,
         name: casesColumnsConfig.status.name,
-        sortable: true,
+        sortable: false,
         render: (status: CaseUI['status']) => {
           if (status != null) {
             return <Status status={status} />;
@@ -225,7 +154,7 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
       {
         field: casesColumnsConfig.severity.field,
         name: casesColumnsConfig.severity.name,
-        sortable: true,
+        sortable: false,
         render: (severity: CaseUI['severity']) => {
           if (severity != null) {
             const severityData = severities[severity ?? CaseSeverity.LOW];
@@ -241,6 +170,18 @@ export const useSimilarCasesColumns = (): UseSimilarCasesColumnsReturnValue => {
           return getEmptyCellValue();
         },
         width: '90px',
+      },
+      {
+        field: SIMILARITIES_FIELD,
+        name: i18n.SIMILARITY_REASON,
+        sortable: false,
+        render: (similarities: SimilarCaseUI['similarities'], theCase: SimilarCaseUI) => {
+          if (theCase.id != null && theCase.title != null) {
+            return similarities.observables.map((similarity) => similarity.value).join(', ');
+          }
+          return getEmptyCellValue();
+        },
+        width: '20%',
       },
     ],
     [casesColumnsConfig]
