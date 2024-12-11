@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './field_upgrade_state';
+export * from './field_upgrade_state_enum';
 export * from './fields_upgrade_state';
 export * from './rule_upgrade_state';
 export * from './rules_upgrade_state';
