@@ -42,16 +42,14 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
           field: originalColumn.sourceField,
           ...(originalColumn.params && 'format' in (originalColumn.params as object)
             ? {
-              params: (originalColumn.params as Record<string, unknown>)
-                .format as SerializedFieldFormat,
-            }
+                params: (originalColumn.params as Record<string, unknown>)
+                  .format as SerializedFieldFormat,
+              }
             : {}),
           ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
           sourceParams: {
             ...(column.meta?.sourceParams ?? {}),
-            ...('sourceField' in originalColumn
-              ? { sourceField: originalColumn.sourceField }
-              : {}),
+            ...('sourceField' in originalColumn ? { sourceField: originalColumn.sourceField } : {}),
             ...('operationType' in originalColumn
               ? { operationType: originalColumn.operationType }
               : {}),
