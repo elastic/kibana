@@ -109,13 +109,25 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
-      const result = await countEntities(supertest, {}, 200);
+      // counts all existing types
+      let result = await countEntities(supertest, {}, 200);
 
       expect(result).toEqual({
         total: 60,
         types: {
           shleem: 15,
           chumble: 20,
+          shmuckle: 25,
+        },
+      });
+
+      // only counts requested types
+      result = await countEntities(supertest, { types: ['shleem', 'shmuckle'] }, 200);
+
+      expect(result).toEqual({
+        total: 40,
+        types: {
+          shleem: 15,
           shmuckle: 25,
         },
       });
