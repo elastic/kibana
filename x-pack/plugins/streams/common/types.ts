@@ -88,6 +88,7 @@ export const streamWithoutIdDefinitonSchema = z.object({
   processing: z.array(processingDefinitionSchema).default([]),
   fields: z.array(fieldDefinitionSchema).default([]),
   children: z.array(streamChildSchema).default([]),
+  dashboards: z.optional(z.array(z.string())),
 });
 
 export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;

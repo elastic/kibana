@@ -35,15 +35,21 @@ export const readStreamRoute = createServerRoute({
     getScopedClients,
   }): Promise<ReadStreamDefinition> => {
     try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+      const { scopedClusterClient, assetClient } = await getScopedClients({ request });
       const streamEntity = await readStream({
         scopedClusterClient,
         id: params.path.id,
+      });
+      const dashboards = await assetClient.getAssetIds({
+        entityId: streamEntity.definition.id,
+        entityType: 'stream',
+        assetType: 'dashboard',
       });
 
       if (streamEntity.definition.managed === false) {
         return {
           ...streamEntity.definition,
+          dashboards,
           inheritedFields: [],
         };
       }
@@ -58,6 +64,7 @@ export const readStreamRoute = createServerRoute({
         inheritedFields: ancestors.flatMap(({ definition: { id, fields } }) =>
           fields.map((field) => ({ ...field, from: id }))
         ),
+        dashboards,
       };
 
       return body;

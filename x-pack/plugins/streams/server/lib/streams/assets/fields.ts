@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export type { Asset, AssetType } from './assets';
-export type { StreamDefinition, ReadStreamDefinition } from './types';
+export const ASSET_ENTITY_ID = 'entity.id';
+export const ASSET_ENTITY_TYPE = 'entity.type';
+export const ASSET_ASSET_ID = 'asset.id';
+export const ASSET_TYPE = 'asset.type';
