@@ -62,14 +62,14 @@ export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
       <TopValues
         stats={stats}
         fieldFormat={fieldFormat}
-        barColor="success"
+        barColor="accentSecondary"
         onAddFilter={onAddFilter}
       />
       {config.stats?.sampledValues && fieldName !== undefined ? (
         <TopValues
           stats={stats}
           fieldFormat={fieldFormat}
-          barColor="success"
+          barColor="accentSecondary"
           onAddFilter={onAddFilter}
           showSampledValues={true}
         />

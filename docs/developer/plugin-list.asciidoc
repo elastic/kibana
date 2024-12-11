@@ -643,7 +643,7 @@ Index Management by running this series of requests in Console:
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/inference/README.md[inference]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/inference/README.md[inference]
 |The inference plugin is a central place to handle all interactions with the Elasticsearch Inference API and
 external LLM APIs. Its goals are:
 
@@ -698,7 +698,7 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/llm_tasks/README.md[llmTasks]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/llm_tasks/README.md[llmTasks]
 |This plugin contains various LLM tasks.
 
 
@@ -779,7 +779,7 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/product_doc_base/README.md[productDocBase]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md[productDocBase]
 |This plugin contains the product documentation base service.
 
 
@@ -988,4 +988,4 @@ include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
-include::{kibana-root}/x-pack/plugins/translations/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/platform/plugins/private/translations/README.asciidoc[leveloffset=+1]
