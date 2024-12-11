@@ -17,24 +17,26 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '2': {
-    changes: [{
-      type: 'mappings_addition',
-      addedMappings: {
-        title: {
-          type: 'text',
-          fields: {
-            keyword: {
-              type: 'keyword',
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          title: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+              },
             },
           },
+          expirationDate: {
+            type: 'date',
+          },
         },
-        expirationDate: {
-          type: 'date',
-        },
-      }
-    }],
+      },
+    ],
     schemas: {
       forwardCompatibility: rawMaintenanceWindowSchemaV1.extends({}, { unknowns: 'ignore' }),
-    }
-  }
+    },
+  },
 };

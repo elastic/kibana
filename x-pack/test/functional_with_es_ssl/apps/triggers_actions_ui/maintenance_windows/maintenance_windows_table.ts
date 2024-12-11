@@ -236,7 +236,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.maintenanceWindows.searchMaintenanceWindows('archived-mw');
 
-      let list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      const list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
       expect(list.length).to.eql(3);
       expect(list[0].status).to.eql('Running');
 
