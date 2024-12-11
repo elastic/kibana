@@ -55,7 +55,7 @@ export const storybookAliases = {
   observability_ai_assistant:
     'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
-    'x-pack/plugins/observability_solution/observability_ai_assistant_app/.storybook',
+    'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
   observability_shared: 'x-pack/plugins/observability_solution/observability_shared/.storybook',
   observability_slo: 'x-pack/plugins/observability_solution/slo/.storybook',
