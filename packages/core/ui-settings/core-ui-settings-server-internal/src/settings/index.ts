@@ -17,12 +17,13 @@ import { getStateSettings } from './state';
 import { getAnnouncementsSettings } from './announcements';
 
 interface GetCoreSettingsOptions {
+  isServerless: boolean;
   isDist?: boolean;
   isThemeSwitcherEnabled?: boolean;
 }
 
 export const getCoreSettings = (
-  options?: GetCoreSettingsOptions
+  options: GetCoreSettingsOptions
 ): Record<string, UiSettingsParams> => {
   return {
     ...getAccessibilitySettings(),
