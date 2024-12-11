@@ -15,7 +15,10 @@ import { RowHeightSettings, RowHeightSettingsProps } from '../..';
 const renderRowHeightSettings = ({
   maxRowHeight,
   onChangeRowHeightLines,
-}: { maxRowHeight?: number; onChangeRowHeightLines?: jest.Mock } = {}) => {
+}: {
+  maxRowHeight?: number;
+  onChangeRowHeightLines?: jest.Mock;
+} = {}) => {
   const Wrapper = () => {
     const [rowHeight, setRowHeight] = useState<RowHeightSettingsProps['rowHeight']>();
     const [rowHeightLines, setRowHeightLines] = useState<number>();
