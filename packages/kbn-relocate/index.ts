@@ -8,7 +8,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { findAndRelocateModules } from './relocate';
+import { findAndRelocateModules, findAndMoveModule } from './relocate';
 
 const toStringArray = (flag: string | boolean | string[] | undefined): string[] => {
   if (typeof flag === 'string') {
@@ -41,26 +41,32 @@ const toOptString = (
 export const runKbnRelocateCli = () => {
   run(
     async ({ log, flags }) => {
-      const { pr, team, path, include, exclude, baseBranch } = flags;
-      await findAndRelocateModules({
-        prNumber: toOptString('prNumber', pr),
-        baseBranch: toOptString('baseBranch', baseBranch, 'main')!,
-        teams: toStringArray(team),
-        paths: toStringArray(path),
-        included: toStringArray(include),
-        excluded: toStringArray(exclude),
-        log,
-      });
+      if (typeof flags.moveOnly === 'string' && flags.moveOnly.length > 0) {
+        log.info('When using --moveOnly flag, the rest of flags are ignored.');
+        await findAndMoveModule(flags.moveOnly, log);
+      } else {
+        const { pr, team, path, include, exclude, baseBranch } = flags;
+        await findAndRelocateModules({
+          prNumber: toOptString('prNumber', pr),
+          baseBranch: toOptString('baseBranch', baseBranch, 'main')!,
+          teams: toStringArray(team),
+          paths: toStringArray(path),
+          included: toStringArray(include),
+          excluded: toStringArray(exclude),
+          log,
+        });
+      }
     },
     {
       log: {
         defaultLevel: 'info',
       },
       flags: {
-        string: ['pr', 'team', 'path', 'include', 'exclude', 'baseBranch'],
+        string: ['pr', 'team', 'path', 'include', 'exclude', 'baseBranch', 'moveOnly'],
         help: `
           Usage: node scripts/relocate [options]
 
+          --moveOnly <moduleId> Only move the specified module in the current branch (no cleanup, no branching, no commit)
           --pr <number> Use the given PR number instead of creating a new one
           --team <owner> Include all modules (packages and plugins) belonging to the specified owner (can specify multiple teams)
           --path <path> Include all modules (packages and plugins) under the specified path (can specify multiple paths)

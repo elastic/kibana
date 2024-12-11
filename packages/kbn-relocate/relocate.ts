@@ -33,7 +33,7 @@ import { safeExec } from './utils.exec';
 import { relocatePlan, relocateSummary } from './utils.logging';
 import { checkoutBranch, checkoutResetPr } from './utils.git';
 
-const relocateModule = async (module: Package, log: ToolingLog) => {
+const moveModule = async (module: Package, log: ToolingLog) => {
   const destination = calculateModuleTargetFolder(module);
   log.info(`Moving ${module.directory} to ${destination}`);
   const chunks = destination.split('/');
@@ -61,7 +61,7 @@ const relocateModules = async (toMove: Package[], log: ToolingLog): Promise<numb
     log.info('--------------------------------------------------------------------------------');
     log.info(`\t${module.id} (${i + 1} of ${toMove.length})`);
     log.info('--------------------------------------------------------------------------------');
-    await relocateModule(module, log);
+    await moveModule(module, log);
 
     // after move operations
     await safeExec('yarn kbn bootstrap');
@@ -126,6 +126,15 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams) =>
       .filter(({ id }) => !excluded.includes(id)),
     'id'
   );
+};
+
+export const findAndMoveModule = async (moduleId: string, log: ToolingLog) => {
+  const modules = findModules({ teams: [], paths: [], included: [moduleId], excluded: [] });
+  if (!modules.length) {
+    log.warning(`Cannot move ${moduleId}, either not found or not allowed!`);
+  } else {
+    await moveModule(modules[0], log);
+  }
 };
 
 export const findAndRelocateModules = async (params: RelocateModulesParams) => {
