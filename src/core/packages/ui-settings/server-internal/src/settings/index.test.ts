@@ -18,14 +18,14 @@ import { getAnnouncementsSettings } from './announcements';
 
 describe('getCoreSettings', () => {
   it('should not have setting overlaps', () => {
-    const coreSettingsLength = Object.keys(getCoreSettings()).length;
+    const coreSettingsLength = Object.keys(getCoreSettings({ isServerless: false })).length;
     const summedLength = [
       getAccessibilitySettings(),
       getAnnouncementsSettings(),
       getDateFormatSettings(),
       getMiscUiSettings(),
       getNotificationsSettings(),
-      getThemeSettings(),
+      getThemeSettings({ isServerless: false }),
       getStateSettings(),
     ].reduce((sum, settings) => sum + Object.keys(settings).length, 0);
 

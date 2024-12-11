@@ -44,7 +44,7 @@ const getThemeInfo = ({ isDist = true, isServerless }: GetThemeSettingsOptions):
   return themeInfo;
 };
 
-interface GetThemeSettingsOptions {
+export interface GetThemeSettingsOptions {
   isServerless: boolean;
   isDist?: boolean;
   isThemeSwitcherEnabled?: boolean;
@@ -57,7 +57,7 @@ export const getThemeSettings = (
 
   // Make `theme:name` readonly in serverless unless the theme switcher is enabled
   let isThemeNameReadonly = options.isServerless;
-  if (Object.hasOwn(options, 'themeSwitcherEnabled')) {
+  if (Object.hasOwn(options, 'isThemeSwitcherEnabled')) {
     isThemeNameReadonly = !options.isThemeSwitcherEnabled;
   }
 
