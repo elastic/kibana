@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/css';
@@ -107,6 +107,7 @@ export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) 
 
 interface RuleDetailsFlyoutProps {
   rule: RuleResponse;
+  subHeader?: ReactNode;
   ruleActions?: React.ReactNode;
   size?: EuiFlyoutProps['size'];
   extraTabs?: EuiTabbedContentTab[];
@@ -115,15 +116,16 @@ interface RuleDetailsFlyoutProps {
   closeFlyout: () => void;
 }
 
-export const RuleDetailsFlyout = ({
+export function RuleDetailsFlyout({
   rule,
   ruleActions,
+  subHeader,
   size = 'm',
   extraTabs = [],
   dataTestSubj,
   id,
   closeFlyout,
-}: RuleDetailsFlyoutProps) => {
+}: RuleDetailsFlyoutProps): JSX.Element {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
   const overviewTab: EuiTabbedContentTab = useMemo(
@@ -202,7 +204,13 @@ export const RuleDetailsFlyout = ({
         <EuiTitle size="m">
           <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
         </EuiTitle>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
+        {subHeader && (
+          <>
+            {subHeader}
+            <EuiSpacer size="s" />
+          </>
+        )}
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
         <ScrollableFlyoutTabbedContent
@@ -223,4 +231,4 @@ export const RuleDetailsFlyout = ({
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
-};
+}
