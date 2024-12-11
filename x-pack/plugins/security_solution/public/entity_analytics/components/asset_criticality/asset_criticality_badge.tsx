@@ -6,17 +6,9 @@
  */
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
-import { euiLightVars } from '@kbn/ui-theme';
 import { CRITICALITY_LEVEL_TITLE } from './translations';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
-
-export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevelWithUnassigned, string> = {
-  extreme_impact: '#E7664C',
-  high_impact: '#DA8B45',
-  medium_impact: 'D6BF57',
-  low_impact: '#54B399',
-  unassigned: euiLightVars.euiColorMediumShade,
-};
+import { useCriticalityLevelColors } from '../../hooks/use_criticality_level_colors';
 
 export const AssetCriticalityBadge: React.FC<{
   criticalityLevel?: CriticalityLevelWithUnassigned;
@@ -29,10 +21,11 @@ export const AssetCriticalityBadge: React.FC<{
   dataTestSubj = 'asset-criticality-badge',
   className,
 }) => {
+  const criticalityColors = useCriticalityLevelColors();
   return (
     <EuiHealth
       data-test-subj={dataTestSubj}
-      color={CRITICALITY_LEVEL_COLOR[criticalityLevel]}
+      color={criticalityColors[criticalityLevel]}
       style={style}
       className={className}
     >
