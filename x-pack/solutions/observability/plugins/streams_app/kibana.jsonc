@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/streams-app-plugin",
+  "owner": "@elastic/streams-program-team",
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "streamsApp",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "streamsApp"],
+    "requiredPlugins": [
+      "streams",
+      "observabilityShared",
+      "data",
+      "dataViews",
+      "unifiedSearch",
+      "share",
+      "navigation"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

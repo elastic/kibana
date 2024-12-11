@@ -12,34 +12,33 @@ import * as i18n from './translations';
 import type { TableColumn } from './constants';
 
 interface NameProps {
-  name: string;
   rule: RuleMigration;
-  openMigrationRulePreview: (rule: RuleMigration) => void;
+  openMigrationRuleDetails: (rule: RuleMigration) => void;
 }
 
-const Name = ({ name, rule, openMigrationRulePreview }: NameProps) => {
+const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
   return (
     <EuiLink
       onClick={() => {
-        openMigrationRulePreview(rule);
+        openMigrationRuleDetails(rule);
       }}
       data-test-subj="ruleName"
     >
-      {name}
+      {rule.elastic_rule?.title}
     </EuiLink>
   );
 };
 
 export const createNameColumn = ({
-  openMigrationRulePreview,
+  openMigrationRuleDetails,
 }: {
-  openMigrationRulePreview: (rule: RuleMigration) => void;
+  openMigrationRuleDetails: (rule: RuleMigration) => void;
 }): TableColumn => {
   return {
-    field: 'original_rule.title',
+    field: 'elastic_rule.title',
     name: i18n.COLUMN_NAME,
-    render: (value: RuleMigration['original_rule']['title'], rule: RuleMigration) => (
-      <Name name={value} rule={rule} openMigrationRulePreview={openMigrationRulePreview} />
+    render: (_, rule: RuleMigration) => (
+      <Name rule={rule} openMigrationRuleDetails={openMigrationRuleDetails} />
     ),
     sortable: true,
     truncateText: true,

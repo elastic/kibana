@@ -20,26 +20,26 @@ import type {
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { Observable } from 'rxjs';
 import type { ActionsPlugin } from '@kbn/actions-plugin/server';
-import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
-import type {
+import { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
 } from '@kbn/fleet-plugin/server';
-import type { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
-import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   CustomIntegrationsPluginSetup,
   CustomIntegrationsPluginStart,
@@ -82,7 +82,7 @@ export interface APMPluginSetupDependencies {
   // optional dependencies
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   actions?: ActionsPlugin['setup'];
-  alerting?: AlertingPlugin['setup'];
+  alerting?: AlertingServerSetup;
   cloud?: CloudSetup;
   fleet?: FleetPluginSetup;
   home?: HomeServerPluginSetup;
@@ -110,7 +110,7 @@ export interface APMPluginStartDependencies {
   // optional dependencies
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   actions?: ActionsPlugin['start'];
-  alerting?: AlertingPlugin['start'];
+  alerting?: AlertingServerStart;
   cloud?: undefined;
   fleet?: FleetPluginStart;
   home?: HomeServerPluginStart;

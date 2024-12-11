@@ -23,10 +23,16 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   setExpandedCardId,
   checkCompleteMetadata,
   checkComplete,
+  isCardAvailable,
 }) => {
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
+  );
+
+  const isIntegrationsCardAvailable = useMemo(
+    () => isCardAvailable(OnboardingCardId.integrations),
+    [isCardAvailable]
   );
 
   const expandIntegrationsCard = useCallback(() => {
@@ -45,13 +51,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
             <CardSubduedText size="s">{i18n.ASSISTANT_CARD_DESCRIPTION}</CardSubduedText>
           </EuiFlexItem>
           <EuiFlexItem>
-            {isIntegrationsCardComplete ? (
-              <ConnectorCards
-                canCreateConnectors={canCreateConnectors}
-                connectors={connectors}
-                onConnectorSaved={checkComplete}
-              />
-            ) : (
+            {isIntegrationsCardAvailable && !isIntegrationsCardComplete ? (
               <EuiFlexItem
                 className={css`
                   width: 45%;
@@ -73,6 +73,12 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
                   }
                 />
               </EuiFlexItem>
+            ) : (
+              <ConnectorCards
+                canCreateConnectors={canCreateConnectors}
+                connectors={connectors}
+                onConnectorSaved={checkComplete}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

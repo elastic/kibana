@@ -92,7 +92,6 @@ export class ReportingCore {
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
-  private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private executeTask: ExecuteReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
@@ -114,11 +113,9 @@ export class ReportingCore {
     this.getExportTypes().forEach((et) => {
       this.exportTypesRegistry.register(et);
     });
-    this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
 
     this.getContract = () => ({
-      usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
       getSpaceId: this.getSpaceId.bind(this),
     });
@@ -255,15 +252,6 @@ export class ReportingCore {
    */
   public getConfig(): ReportingConfigType {
     return this.config;
-  }
-
-  /*
-   * If deprecated feature has not been disabled,
-   * this returns an array of allowed role names
-   * that have access to Reporting.
-   */
-  public getDeprecatedAllowedRoles(): string[] | false {
-    return this.deprecatedAllowedRoles;
   }
 
   /*

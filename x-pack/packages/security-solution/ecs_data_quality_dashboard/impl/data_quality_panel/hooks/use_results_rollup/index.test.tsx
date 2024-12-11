@@ -9,7 +9,7 @@
 // so when tests are run in different timezones, the results are consistent
 process.env.TZ = 'UTC';
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 import type { TelemetryEvents } from '../../types';

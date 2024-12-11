@@ -53,7 +53,7 @@ export const bulkCreateWithSuppression = async <
 }: {
   alertWithSuppression: SuppressedAlertService;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  wrappedDocs: Array<WrappedFieldsLatest<T>>;
+  wrappedDocs: Array<WrappedFieldsLatest<T> & { subAlerts?: Array<WrappedFieldsLatest<T>> }>;
   services: RuleServices;
   suppressionWindow: string;
   alertTimestampOverride: Date | undefined;
@@ -97,13 +97,19 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
+  const alerts = wrappedDocs.map((doc) => ({
+    _id: doc._id,
+    // `fields` should have already been merged into `doc._source`
+    _source: doc._source,
+    subAlerts:
+      doc?.subAlerts != null
+        ? doc?.subAlerts?.map((subAlert) => ({ _id: subAlert._id, _source: subAlert._source }))
+        : undefined,
+  }));
+
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
     await alertWithSuppression(
-      wrappedDocs.map((doc) => ({
-        _id: doc._id,
-        // `fields` should have already been merged into `doc._source`
-        _source: doc._source,
-      })),
+      alerts,
       suppressionWindow,
       enrichAlertsWrapper,
       alertTimestampOverride,

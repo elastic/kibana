@@ -738,11 +738,13 @@
         "type": "Function",
         "tags": [],
         "label": "correctCommonEsqlMistakes",
-        "description": [],
-        "signature": [
-          "(query: string) => { isCorrection: boolean; input: string; output: string; }"
+        "description": [
+          "\nCorrect some common ES|QL syntax and grammar mistakes that LLM can potentially do.\n\nCorrecting the query is done in two steps:\n1. we try to correct the *syntax*, without AST (given it requires a valid syntax)\n2. we try to correct the *grammar*, using AST this time."
         ],
-        "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/correct_common_esql_mistakes.ts",
+        "signature": [
+          "(query: string) => { input: string; output: string; isCorrection: boolean; }"
+        ],
+        "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/correct_esql_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -756,7 +758,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/correct_common_esql_mistakes.ts",
+            "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/correct_esql_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -929,7 +931,7 @@
         "signature": [
           "(query: string) => { name: string | undefined; command: string; }[]"
         ],
-        "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/correct_common_esql_mistakes.ts",
+        "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/non_ast/correct_common_esql_mistakes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -943,7 +945,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/correct_common_esql_mistakes.ts",
+            "path": "x-pack/plugins/inference/common/tasks/nl_to_esql/non_ast/correct_common_esql_mistakes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
