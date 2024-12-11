@@ -17,7 +17,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/repo-info",
     "@kbn/repo-packages",
-    "@kbn/safer-lodash-set",
     "@kbn/tooling-log",
   ]
 }
