@@ -13,7 +13,9 @@ module.exports = {
     '<rootDir>/x-pack/solutions/observability/plugins/streams_app/common',
     '<rootDir>/x-pack/solutions/observability/plugins/streams_app/server',
   ],
-  setupFiles: ['<rootDir>/x-pack/solutions/observability/plugins/streams_app/.storybook/jest_setup.js'],
+  setupFiles: [
+    '<rootDir>/x-pack/solutions/observability/plugins/streams_app/.storybook/jest_setup.js',
+  ],
   collectCoverage: true,
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/observability/plugins/streams_app/{public,common,server}/**/*.{js,ts,tsx}',
