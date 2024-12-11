@@ -65,7 +65,7 @@ export const registerRiskScoreModulesDeprecation = ({ deprecationsService }: Dep
               }),
               i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.manualStep3', {
                 defaultMessage:
-                  'If the original user and host risk score modules are enabled, you will see a button to "Start update". Click on it and follow the instructions.',
+                  'If the original user and host risk score modules are enabled, you'll see a button to "Start update". Click the button, and follow the instructions.',
               }),
             ],
           },
