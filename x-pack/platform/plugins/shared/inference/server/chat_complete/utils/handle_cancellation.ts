@@ -6,15 +6,9 @@
  */
 
 import { OperatorFunction, Observable, Subject, takeUntil } from 'rxjs';
-import {
-  createInferenceRequestAbortedError,
-  ToolOptions,
-  ChatCompletionEvent,
-} from '@kbn/inference-common';
+import { createInferenceRequestAbortedError } from '@kbn/inference-common';
 
-export function handleCancellation<TToolOptions extends ToolOptions>(
-  abortSignal: AbortSignal
-): OperatorFunction<ChatCompletionEvent<TToolOptions>, ChatCompletionEvent<TToolOptions>> {
+export function handleCancellation<T>(abortSignal: AbortSignal): OperatorFunction<T, T> {
   return (source$) => {
     const stop$ = new Subject<void>();
     if (abortSignal.aborted) {
@@ -24,7 +18,7 @@ export function handleCancellation<TToolOptions extends ToolOptions>(
       stop$.next();
     });
 
-    return new Observable<ChatCompletionEvent<TToolOptions>>((subscriber) => {
+    return new Observable<T>((subscriber) => {
       return source$.pipe(takeUntil(stop$)).subscribe({
         next: (value) => {
           subscriber.next(value);

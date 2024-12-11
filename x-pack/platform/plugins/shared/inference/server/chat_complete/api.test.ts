@@ -94,6 +94,17 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  it('throws if the connector is not compatible', async () => {
+    getInferenceAdapterMock.mockReturnValue(undefined);
+
+    await expect(
+      chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Adapter for type .gen-ai not implemented"`);
+  });
+
   describe('response mode', () => {
     it('returns a promise resolving with the response', async () => {
       inferenceAdapter.chatComplete.mockReturnValue(
