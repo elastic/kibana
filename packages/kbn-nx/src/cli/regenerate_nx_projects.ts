@@ -60,7 +60,11 @@ function updateFieldsFromTsConfig(
 async function updateProjectJestConfig(projectConfig: any, params: { log: ToolingLog }) {
   const { log } = params;
 
-  const jestConfigName = findAny(projectConfig.sourceRoot, ['jest.config.js', 'jest.config.json']);
+  const jestConfigName = findAny(projectConfig.sourceRoot, [
+    'jest.config.js',
+    'jest.config.cjs',
+    'jest.config.json',
+  ]);
 
   if (!jestConfigName) {
     log.warning(

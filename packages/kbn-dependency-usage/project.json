@@ -18,7 +18,13 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.cjs"
+      }
+    },
+    "lint": {}
   },
   "projectType": "library",
   "sourceRoot": "packages/kbn-dependency-usage"
