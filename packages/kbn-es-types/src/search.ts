@@ -686,7 +686,7 @@ export interface ESQLSearchResponse {
 }
 
 interface ESQLFieldNamedParam {
-  [key: string]: string;
+  [key: string]: string | number;
 }
 
 export interface ESQLSearchParams {
@@ -701,5 +701,5 @@ export interface ESQLSearchParams {
   dropNullColumns?: boolean;
   params?:
     | estypesWithoutBodyKey.ScalarValue[]
-    | Array<Record<string, string | ESQLFieldNamedParam | undefined>>;
+    | Array<Record<string, string | number | ESQLFieldNamedParam | undefined>>;
 }

@@ -39,7 +39,7 @@ export interface ESQLSourceResult {
 
 export interface ESQLControlVariable {
   key: string;
-  value: string;
+  value: string | number;
   type: EsqlControlType;
 }
 

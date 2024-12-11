@@ -45,7 +45,10 @@ export class EsqlVariablesService {
     if (variableExists) {
       return;
     }
-    variables.push(variable);
+    variables.push({
+      ...variable,
+      value: Number.isNaN(Number(variable.value)) ? variable.value : Number(variable.value),
+    });
     this.esqlVariables$.next(variables);
     this.esqlVariables = variables;
   }
@@ -62,13 +65,17 @@ export class EsqlVariablesService {
     return this.esqlVariables.filter((variable) => variable.type === type);
   }
 
-  updateVariable(key: string, value: string, type: ESQLControlVariable['type']) {
-    const variables = this.esqlVariables.map((variable) => {
-      if (variable.key === key) {
-        return { ...variable, value, type };
+  updateVariable(variable: ESQLControlVariable) {
+    const variables = this.esqlVariables.map((v) => {
+      if (v.key === variable.key) {
+        const value = Number.isNaN(Number(variable.value))
+          ? variable.value
+          : Number(variable.value);
+        return { ...v, value, type: variable.type };
       }
-      return variable;
+      return v;
     });
+
     this.esqlVariables$.next(variables);
     this.esqlVariables = variables;
   }

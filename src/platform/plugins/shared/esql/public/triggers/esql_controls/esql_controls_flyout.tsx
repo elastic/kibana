@@ -182,7 +182,6 @@ export function ESQLControlsFlyout({
     ? initialState.availableOptions.join(',')
     : getSuggestedValues(controlType);
   const [values, setValues] = useState<string | undefined>(suggestedStaticValues);
-
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
   const [grow, setGrow] = useState(initialState?.grow ?? false);
