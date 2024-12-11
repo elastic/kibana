@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
+import { inKnownTimeInterval } from '@kbn/esql-validation-autocomplete';
 
 export const updateQueryStringWithVariable = (
   queryString: string,
   variable: string,
   cursorPosition: monaco.Position
 ) => {
+  const variableName = `?${variable}`;
   const cursorColumn = cursorPosition?.column ?? 0;
   const cursorLine = cursorPosition?.lineNumber ?? 0;
   const lines = queryString.split('\n');
@@ -22,7 +24,7 @@ export const updateQueryStringWithVariable = (
     const queryPartToBeUpdated = queryArray[cursorLine - 1];
     const queryWithVariable = [
       queryPartToBeUpdated.slice(0, cursorColumn - 1),
-      variable,
+      variableName,
       queryPartToBeUpdated.slice(cursorColumn - 1),
     ].join('');
     queryArray[cursorLine - 1] = queryWithVariable;
@@ -31,7 +33,15 @@ export const updateQueryStringWithVariable = (
 
   return [
     queryString.slice(0, cursorColumn - 1),
-    variable,
+    variableName,
     queryString.slice(cursorColumn - 1),
   ].join('');
+};
+
+export const areValuesIntervalsValid = (values: string | undefined) => {
+  return values?.split(',').every((value) => {
+    // remove digits and empty spaces from the string to get the unit
+    const unit = value.replace(/[0-9]/g, '').replace(/\s/g, '');
+    return inKnownTimeInterval(unit);
+  });
 };

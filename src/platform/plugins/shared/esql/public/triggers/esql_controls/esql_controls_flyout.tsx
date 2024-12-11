@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { css } from '@emotion/react';
@@ -47,7 +47,7 @@ import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { esqlVariablesService } from '../../../common';
 import { EsqlControlFlyoutType, type ESQLControlState } from './types';
-import { updateQueryStringWithVariable } from './helpers';
+import { updateQueryStringWithVariable, areValuesIntervalsValid } from './helpers';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
@@ -90,25 +90,25 @@ const getValuesFromQueryField = (queryString: string) => {
 const getVariableName = (controlType: EsqlControlType, queryString: string) => {
   switch (controlType) {
     case EsqlControlType.TIME_LITERAL:
-      return '?interval';
+      return 'interval';
     case EsqlControlType.FIELDS:
-      return '?field';
+      return 'field';
     case EsqlControlType.VALUES:
       const field = getValuesFromQueryField(queryString);
       if (field) {
         // variables names can't have special characters, only underscore
-        return `?${field.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        return `${field.replace(/[^a-zA-Z0-9]/g, '_')}`;
       }
       return '';
     default:
-      return '?variable';
+      return 'variable';
   }
 };
 
 const getSuggestedValues = (controlType: EsqlControlType) => {
   switch (controlType) {
     case EsqlControlType.TIME_LITERAL:
-      return '5 minutes, 1 hour, 1 day, 1 week, 1 year';
+      return '5 minutes, 1 hour, 1 day, 1 week, 1 month';
     default:
       return undefined;
   }
@@ -173,7 +173,7 @@ export function ESQLControlsFlyout({
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const dashboardPanels = useStateFromPublishingSubject(dashboardApi.children$);
   const suggestedVariableName = initialState
-    ? `?${initialState.variableName}`
+    ? `${initialState.variableName}`
     : getVariableName(controlType, queryString);
   const [variableName, setVariableName] = useState(suggestedVariableName);
 
@@ -205,6 +205,13 @@ export function ESQLControlsFlyout({
 
   // values from query control option
   const [valuesQuery, setValuesQuery] = useState<string>(initialState?.esqlQuery ?? '');
+
+  const areValuesValid = useMemo(() => {
+    if (controlType === EsqlControlType.TIME_LITERAL) {
+      return areValuesIntervalsValid(values);
+    }
+    return true;
+  }, [controlType, values]);
 
   const onFlyoutTypeChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setControlFlyoutType(selectedOptions);
@@ -257,13 +264,12 @@ export function ESQLControlsFlyout({
       controlType === EsqlControlType.TIME_LITERAL || controlType === EsqlControlType.VALUES
         ? values?.split(',').map((value) => value.trim()) ?? []
         : selectedFields.map((field) => field.label);
-    const varName = variableName.replace('?', '');
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      title: label || varName,
-      variableName: varName,
+      title: label || variableName,
+      variableName,
       variableType: controlType,
       esqlQuery: valuesQuery || queryString,
       grow,
@@ -281,7 +287,7 @@ export function ESQLControlsFlyout({
 
       const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
 
-      addToESQLVariablesService(varName, availableOptions[0], controlType, query);
+      addToESQLVariablesService(variableName, availableOptions[0], controlType, query);
       const embeddable = dashboardPanels[panelId!];
       // open the edit flyout to continue editing
       await (embeddable as { onEdit: () => Promise<void> }).onEdit();
@@ -291,7 +297,7 @@ export function ESQLControlsFlyout({
         panelType: 'esqlControl',
         initialState: state,
       });
-      addToESQLVariablesService(varName, availableOptions[0], controlType, '');
+      addToESQLVariablesService(variableName, availableOptions[0], controlType, '');
     }
     closeFlyout();
   }, [
@@ -316,11 +322,13 @@ export function ESQLControlsFlyout({
   const onCancel = useCallback(() => {
     closeFlyout();
     // remove the variable from the service
-    esqlVariablesService.removeVariable(variableName);
+    if (!isControlInEditMode) {
+      esqlVariablesService.removeVariable(variableName);
+    }
 
     const overlayTracker = tracksOverlays(dashboardApi) ? dashboardApi : undefined;
     overlayTracker?.clearOverlays();
-  }, [closeFlyout, dashboardApi, variableName]);
+  }, [closeFlyout, dashboardApi, isControlInEditMode, variableName]);
 
   useEffect(() => {
     if (controlType === EsqlControlType.FIELDS && !availableFieldsOptions.length) {
@@ -355,13 +363,21 @@ export function ESQLControlsFlyout({
     }
 
     if (controlType === EsqlControlType.TIME_LITERAL) {
-      setFormIsInvalid(!values || !variableName || variableExists);
+      setFormIsInvalid(!values || !variableName || variableExists || !areValuesValid);
     }
 
     if (controlType === EsqlControlType.VALUES) {
       setFormIsInvalid(!valuesQuery || !variableName || variableExists);
     }
-  }, [controlType, isControlInEditMode, selectedFields.length, values, valuesQuery, variableName]);
+  }, [
+    areValuesValid,
+    controlType,
+    isControlInEditMode,
+    selectedFields.length,
+    values,
+    valuesQuery,
+    variableName,
+  ]);
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
@@ -473,8 +489,7 @@ export function ESQLControlsFlyout({
               ? i18n.translate('esql.flyout.variableName.error', {
                   defaultMessage: 'Variable name is required',
                 })
-              : esqlVariablesService.variableExists(variableName.replace('?', '')) &&
-                !isControlInEditMode
+              : esqlVariablesService.variableExists(variableName) && !isControlInEditMode
               ? i18n.translate('esql.flyout.variableNameExists.error', {
                   defaultMessage: 'Variable name already exists',
                 })
@@ -574,11 +589,15 @@ export function ESQLControlsFlyout({
                 'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
             })}
             fullWidth
-            isInvalid={!values}
+            isInvalid={!values || !areValuesValid}
             error={
               !values
                 ? i18n.translate('esql.flyout.values.error', {
                     defaultMessage: 'Values are required',
+                  })
+                : !areValuesValid
+                ? i18n.translate('esql.flyout.valuesInterval.error', {
+                    defaultMessage: 'Interval values are not valid',
                   })
                 : undefined
             }
