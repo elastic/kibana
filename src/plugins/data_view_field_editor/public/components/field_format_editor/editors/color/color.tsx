@@ -15,6 +15,7 @@ import {
   EuiColorPicker,
   EuiIcon,
   EuiFieldText,
+  EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -89,7 +90,11 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
         ),
         render: (value: string, item: IndexedColor) => {
           return (
-            <EuiFieldText
+            <EuiSelect
+              options={[
+                { value: 'true', text: 'true' },
+                { value: 'false', text: 'false' },
+              ]}
               value={value}
               data-test-subj={`colorEditorKeyBoolean ${item.index}`}
               onChange={(e) => {

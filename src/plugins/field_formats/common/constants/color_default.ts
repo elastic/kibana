@@ -12,5 +12,5 @@ export const DEFAULT_CONVERTER_COLOR = {
   regex: '<insert regex>',
   text: '#000000',
   background: '#ffffff',
-  boolean: 'true or false',
+  boolean: 'true',
 };
