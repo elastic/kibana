@@ -319,8 +319,8 @@ describe('map_to_columns', () => {
       );
 
       expect(result.columns).toStrictEqual([
-        { id: 'a', name: 'A', meta: { type: 'number' } },
-        { id: 'b', name: 'B', meta: { type: 'number' } },
+        { id: 'a', name: 'A', meta: { type: 'number', field: undefined, params: undefined } },
+        { id: 'b', name: 'B', meta: { type: 'number', field: undefined, params: undefined } },
       ]);
 
       expect(result.rows).toStrictEqual([

@@ -59,6 +59,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
           key: 'sourceB',
         },
       ],
+      color: '#000',
       'data-test-subj': 'testing',
     };
   });
