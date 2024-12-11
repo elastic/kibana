@@ -100,8 +100,3 @@ export const riskScoreServiceFactory = ({
     scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
   refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
 });
-
-// TODO WRITE DOCS ABOUT UPDATES
-// IF YOU ONLY NEED TO CHANGE TRANSFORM SETTINGS THAT ARE SUPPORTED BY THE UPDATE API, CHANGE THE CONFIG AND BUMP THE TRANSFORM M VERSION
-// IF YOU NEED TO UPDATE THE A TRANSFORM CONFIG THAT ISN'T SUPPORTED YOU NEED TO DELETE THE TRANSFORM AND CREATE A NEW ONE
-// IF YOU need to upgrade mapping?

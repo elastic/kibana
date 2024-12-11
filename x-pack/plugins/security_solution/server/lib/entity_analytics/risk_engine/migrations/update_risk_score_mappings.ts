@@ -11,43 +11,46 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { RiskEngineDataClient } from '../risk_engine_data_client';
 import { getDefaultRiskEngineConfiguration } from '../utils/saved_object_configuration';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
+import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 
 export const MAX_PER_PAGE = 10_000;
 
-// ADD entity type service to the entity analytics indices
 export const updateRiskScoreMappings = async ({
   auditLogger,
   logger,
   getStartServices,
   kibanaVersion,
 }: EntityAnalyticsMigrationsParams) => {
+  logger.info(`Risk Score ----------------------------------`);
   const [coreStart] = await getStartServices();
-  const esClient = coreStart.elasticsearch.client.asInternalUser;
+  const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
 
-  const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace: '*' });
-
-  const savedObjectsResponse = await soClient.find<RiskEngineConfiguration>({
+  // Get all installed Risk Engine Configurations
+  const savedObjectsResponse = await soClientKibanaUser.find<RiskEngineConfiguration>({
     type: riskEngineConfigurationTypeName,
     perPage: MAX_PER_PAGE,
+    namespaces: ['*'],
   });
 
   await asyncForEach(savedObjectsResponse.saved_objects, async (savedObject) => {
-    // we only install one Risk Engine Configuration object per space
-    const namespace = first(savedObject.namespaces);
+    const namespace = first(savedObject.namespaces); // We install one Risk Engine Configuration object per space
+
     if (!namespace) {
       logger.error('Unexpected saved object. Risk Score saved objects must have a namespace');
       return;
     }
+
     const newConfig = await getDefaultRiskEngineConfiguration({ namespace });
 
     if (savedObject.attributes._meta?.mappingsVersion !== newConfig._meta.mappingsVersion) {
       logger.info(
-        `Starting Risk Score mappings update from version ${savedObject.attributes._meta?.mappingsVersion} to version ${newConfig._meta.mappingsVersion}`
+        `Starting Risk Score mappings update from version ${savedObject.attributes._meta?.mappingsVersion} to version ${newConfig._meta.mappingsVersion} on namespace ${namespace}`
       );
 
+      const esClient = coreStart.elasticsearch.client.asInternalUser;
+      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
       const riskEngineDataClient = new RiskEngineDataClient({
         logger,
         kibanaVersion,
@@ -65,25 +68,18 @@ export const updateRiskScoreMappings = async ({
         auditLogger,
       });
 
-      if (savedObject.attributes._meta?.mappingsVersion !== newConfig._meta.mappingsVersion) {
-        await riskScoreDataClient.createOrUpdateRiskScoreLatestIndex();
-        await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
-        await riskScoreDataClient.updateRiskScoreTimeSeriesIndexMappings();
-        await riskEngineDataClient.updateConfiguration({
-          _meta: {
-            mappingsVersion: newConfig._meta.mappingsVersion,
-          },
-        });
+      await riskScoreDataClient.createOrUpdateRiskScoreLatestIndex();
+      await riskScoreDataClient.createOrUpdateRiskScoreIndexTemplate();
+      await riskScoreDataClient.updateRiskScoreTimeSeriesIndexMappings();
+      await riskEngineDataClient.updateConfiguration({
+        _meta: {
+          mappingsVersion: newConfig._meta.mappingsVersion,
+        },
+      });
 
-        logger.debug(`Risk score mappings updated to version ${newConfig._meta.mappingsVersion}`);
-      }
+      logger.debug(
+        `Risk score mappings updated to version ${newConfig._meta.mappingsVersion} on namespace ${namespace}`
+      );
     }
   });
 };
-
-// TODO CREATE A MIGRATION CLIENT LIKE THE ONE FOR ASSET CRITICALITY?
-
-// TODO TEST MULTIPLE NAMESPACES
-// TODO TEST NO NAMESPACES
-// TODO TEST 1 NAMESPACES
-// TODO DOES THE BUNDLE SIZE EXPLODE?
