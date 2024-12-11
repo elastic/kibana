@@ -557,7 +557,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
               <EuiPopover
                 id={`panelContextMenu_${panelIndex}`}
                 button={
-                  <EuiButtonIcon
+                  <EuiButton
                     data-test-subj="aiopsChangePointDetectionContextMenuButton"
                     aria-label={i18n.translate(
                       'xpack.aiops.changePointDetection.configActionsLabel',
@@ -565,10 +565,16 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         defaultMessage: 'Context menu',
                       }
                     )}
-                    iconType="boxesHorizontal"
-                    color="text"
+                    iconSide="right"
+                    isSelected={isActionMenuOpen}
+                    iconType={isActionMenuOpen ? 'arrowUp' : 'arrowDown'}
                     onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
-                  />
+                  >
+                    <FormattedMessage
+                      id="xpack.aiops.changePointDetection.attachmentsMenuButtonLabel"
+                      defaultMessage="Add to"
+                    />
+                  </EuiButton>
                 }
                 isOpen={isActionMenuOpen}
                 closePopover={setIsActionMenuOpen.bind(null, false)}
