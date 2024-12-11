@@ -5,7 +5,6 @@
  * 2.0.
  */
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
-import { once } from 'lodash';
 import { Elasticsearch, Kibana } from '../create_apm_users';
 
 export async function callKibana<T>({
@@ -29,7 +28,7 @@ export async function callKibana<T>({
   return data;
 }
 
-const getBaseUrl = once(async (kibanaHostname: string) => {
+const getBaseUrl = async (kibanaHostname: string) => {
   try {
     await axios.request({ url: kibanaHostname, maxRedirects: 0 });
   } catch (e) {
@@ -43,7 +42,7 @@ const getBaseUrl = once(async (kibanaHostname: string) => {
     throw e;
   }
   return kibanaHostname;
-});
+};
 
 export function isAxiosError(e: AxiosError | Error): e is AxiosError {
   return 'isAxiosError' in e;
