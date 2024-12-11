@@ -299,7 +299,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-search-types/,
         /^packages\/kbn-securitysolution-.*/,
         /^packages\/kbn-securitysolution-ecs/,
-        /^packages\/kbn-securitysolution-io-ts-alerting-types/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
         /^packages\/kbn-securitysolution-io-ts-list-types/,
         /^packages\/kbn-securitysolution-list-hooks/,
         /^packages\/kbn-securitysolution-t-grid/,
