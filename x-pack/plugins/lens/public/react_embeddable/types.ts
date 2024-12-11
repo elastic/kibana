@@ -90,7 +90,6 @@ import type { LensPluginStartDependencies } from '../plugin';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { PieVisualizationState } from '../../common/types';
 import type { FormBasedPersistedState } from '..';
-import type { TextBasedPersistedState } from '../datasources/text_based/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
 
@@ -467,7 +466,6 @@ type TypedLensAttributes<TVisType, TVisState> = Simplify<
       Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {
         datasourceStates: {
           formBased?: FormBasedPersistedState;
-          textBased?: TextBasedPersistedState;
         };
         visualization: TVisState;
       }

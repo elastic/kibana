@@ -6,16 +6,20 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { TextBasedPersistedState } from '../../datasources/text_based/types';
+import { FormBasedPersistedState } from '../..';
 import { LensApi, LensRuntimeState } from '../types';
 
 function getInternalTables(states: Record<string, unknown>) {
   const result: Record<string, Datatable> = {};
-  if ('textBased' in states) {
-    const layers = (states.textBased as TextBasedPersistedState).layers;
-    for (const layer in layers) {
-      if (layers[layer]?.table) {
-        result[layer] = layers[layer].table!;
+  if ('formBased' in states) {
+    const layers = (states.formBased as FormBasedPersistedState).layers;
+    for (const layerId in layers) {
+      if (!(layerId in layers)) {
+        continue;
+      }
+      const layer = layers[layerId];
+      if (layer.type === 'esql' && layer.table) {
+        result[layerId] = layer.table;
       }
     }
   }
