@@ -7156,7 +7156,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-list-types@link:packages/kbn-securitysolution-io-ts-list-types":
+"@kbn/securitysolution-io-ts-list-types@link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types":
   version "0.0.0"
   uid ""
 
