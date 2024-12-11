@@ -294,7 +294,7 @@ const CODES = Object.freeze({
   ),
 
   // Dev:
-  // scan success/competed
+  // scan success/completed
   ra_scan_success_done: i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.scan.success',
     { defaultMessage: 'Scan complete' }

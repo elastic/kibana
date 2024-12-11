@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
 import { CreateField, FieldsList, SemanticTextInfo } from './fields';
@@ -16,19 +16,21 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const DocumentFieldsTreeEditor = ({
   onCancelAddingNewFields,
   isAddingFields,
   semanticTextInfo,
+  pendingFieldsRef,
 }: Props) => {
   const dispatch = useDispatch();
   const {
     fields: { byId, rootLevelFields },
     documentFields: { status, fieldToAddFieldTo },
   } = useMappingsState();
-
+  const createFieldFormRef = useRef<HTMLDivElement>(null);
   const getField = useCallback((fieldId: string) => byId[fieldId], [byId]);
   const fields = useMemo(() => rootLevelFields.map(getField), [rootLevelFields, getField]);
 
@@ -52,6 +54,7 @@ export const DocumentFieldsTreeEditor = ({
         onCancelAddingNewFields={onCancelAddingNewFields}
         isAddingFields={isAddingFields}
         semanticTextInfo={semanticTextInfo}
+        createFieldFormRef={createFieldFormRef}
       />
     );
   };
@@ -77,7 +80,12 @@ export const DocumentFieldsTreeEditor = ({
 
   return (
     <>
-      <FieldsList fields={fields} state={useMappingsState()} isAddingFields={isAddingFields} />
+      <FieldsList
+        fields={fields}
+        state={useMappingsState()}
+        isAddingFields={isAddingFields}
+        pendingFieldsRef={pendingFieldsRef}
+      />
       {renderCreateField()}
       {renderAddFieldButton()}
     </>

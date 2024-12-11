@@ -61,7 +61,6 @@ describe('ContextAppContent test', () => {
       defaultStepSize: 5,
       predecessorCount: 10,
       successorCount: 10,
-      useNewFieldsApi: true,
       isPaginationEnabled: false,
       onAddColumn: () => {},
       onRemoveColumn: () => {},
