@@ -33,6 +33,7 @@ export {
   isESQLColumnGroupable,
   isESQLFieldGroupable,
   TextBasedLanguages,
+  sanitazeESQLInput,
   queryCannotBeSampled,
 } from './src';
 

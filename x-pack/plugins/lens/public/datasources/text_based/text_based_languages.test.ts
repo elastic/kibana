@@ -69,6 +69,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: jest.fn(),
+    getFormatterForField: jest.fn(),
     spec: {},
     isPersisted: true,
   },

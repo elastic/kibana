@@ -211,7 +211,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const { uiSettings } = core;
+  const { uiSettings, featureFlags } = core;
 
   const DATASOURCE_ID = 'formBased';
   const ALIAS_IDS = ['indexpattern'];
@@ -450,15 +450,25 @@ export function getFormBasedDatasource({
       );
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
+    toExpression: (
+      state,
+      layerId,
+      indexPatterns,
+      dateRange,
+      nowInstant,
+      searchSessionId,
+      forceDSL
+    ) =>
       toExpression(
         state,
         layerId,
         indexPatterns,
         uiSettings,
+        featureFlags,
         dateRange,
         nowInstant,
-        searchSessionId
+        searchSessionId,
+        forceDSL
       ),
 
     LayerSettingsComponent(props) {

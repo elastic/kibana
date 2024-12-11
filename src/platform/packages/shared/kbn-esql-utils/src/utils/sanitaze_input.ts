@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TimeBuckets } from './time_buckets';
-export { convertDurationToNormalizedEsInterval } from './calc_es_interval';
+export function sanitazeESQLInput(input: string): string | undefined {
+  return `\`${input.replace(/`/g, '``')}\``;
+}

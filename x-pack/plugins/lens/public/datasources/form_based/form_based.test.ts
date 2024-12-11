@@ -171,6 +171,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields: fieldsOne,
     getFieldByName: getFieldByNameFactory(fieldsOne),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     spec: {},
     isPersisted: true,
   },
@@ -181,6 +182,7 @@ const expectedIndexPatterns = {
     hasRestrictions: true,
     fields: fieldsTwo,
     getFieldByName: getFieldByNameFactory(fieldsTwo),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     spec: {},
     isPersisted: true,
   },
@@ -589,6 +591,9 @@ describe('IndexPattern Data Source', () => {
               "arguments": Object {
                 "idMap": Array [
                   "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"timestampLabel\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
+                ],
+                "isTextBased": Array [
+                  false,
                 ],
               },
               "function": "lens_map_to_columns",
@@ -3032,6 +3037,7 @@ describe('IndexPattern Data Source', () => {
         hasRestrictions: false,
         fields: fieldsOne,
         getFieldByName: getFieldByNameFactory(fieldsOne),
+        getFormatterForField: () => ({ convert: (v: unknown) => v }),
         spec: {},
         isPersisted: true,
       };

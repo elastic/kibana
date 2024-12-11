@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -27,9 +28,16 @@ import {
   search,
   UI_SETTINGS,
 } from '@kbn/data-plugin/public';
-import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
+import {
+  extendedBoundsToAst,
+  intervalOptions,
+  getCalculateAutoTimeExpression,
+} from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { DateRange } from '../../../../../common/types';
+import { IndexPattern } from '../../../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
@@ -81,6 +89,48 @@ function getMultipleDateHistogramsErrorMessage(
   ];
 }
 
+function getTimeZoneAndInterval(
+  column: DateHistogramIndexPatternColumn,
+  indexPattern: IndexPattern
+) {
+  const usedField = indexPattern.getFieldByName(column.sourceField);
+  let timeZone: string | undefined;
+  let interval = column.params?.interval ?? autoInterval;
+
+  if (
+    usedField &&
+    usedField.aggregationRestrictions &&
+    usedField.aggregationRestrictions.date_histogram
+  ) {
+    interval = restrictedInterval(usedField.aggregationRestrictions) as string;
+    timeZone = usedField.aggregationRestrictions.date_histogram.time_zone;
+  }
+
+  return { usedField, timeZone, interval };
+}
+
+export function mapToEsqlInterval(dateRange: DateRange, _interval: string) {
+  if (_interval !== 'm' && _interval.endsWith('m')) {
+    return _interval.replace('m', ' minutes');
+  }
+  switch (_interval) {
+    case '1M':
+      return '1 month';
+    case 'd':
+      return '1d';
+    case 'h':
+      return '1h';
+    case 'm':
+      return '1 minute';
+    case 's':
+      return '1s';
+    case 'ms':
+      return '1ms';
+    default:
+      return _interval;
+  }
+}
+
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
   'field',
@@ -110,7 +160,18 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, columns, indexPattern) => getSafeName(column.sourceField, indexPattern),
+  getDefaultLabel: (column, columns, indexPattern, uiSettings, dateRange) => {
+    const field = getSafeName(column.sourceField, indexPattern);
+    let interval = column.params?.interval || autoInterval;
+    if (dateRange && uiSettings) {
+      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+      interval =
+        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, interval, false)
+          ?.description || 'hour';
+      return `${field} per ${interval}`;
+    }
+    return field;
+  },
   buildColumn({ field }, columnParams) {
     return {
       label: field.displayName,
@@ -143,23 +204,54 @@ export const dateHistogramOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
+  getSerializedFormat: (column, targetColumn, indexPattern, uiSettings, dateRange) => {
+    if (!indexPattern || !dateRange || !uiSettings)
+      return {
+        id: 'date',
+      };
+    const { interval } = getTimeZoneAndInterval(column, indexPattern);
+    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+    const usedInterval =
+      calcAutoInterval(
+        { from: dateRange.fromDate, to: dateRange.toDate },
+        interval,
+        false
+      )?.asMilliseconds() || 3600000;
+    const rules = uiSettings?.get('dateFormat:scaled');
+    for (let i = rules.length - 1; i >= 0; i--) {
+      const rule = rules[i];
+      if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
+        return { id: 'date', params: { pattern: rule[1] } };
+      }
+    }
+    return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
+  },
+  toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
+    const { timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
+
+    if (timeZone || column.params?.includeEmptyRows) return;
+
+    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+
+    if (interval === 'auto') {
+      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
+        dateRange,
+        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+      )})`;
+    }
+    return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
+      dateRange,
+      interval
+    )})`;
+  },
   toEsAggsFn: (column, columnId, indexPattern) => {
-    const usedField = indexPattern.getFieldByName(column.sourceField);
-    let timeZone: string | undefined;
-    let interval = column.params?.interval ?? autoInterval;
+    const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
     const dropPartials = Boolean(
       column.params?.dropPartials &&
         // set to false when detached from time picker
         (indexPattern.timeFieldName === usedField?.name || !column.params?.ignoreTimeRange)
     );
-    if (
-      usedField &&
-      usedField.aggregationRestrictions &&
-      usedField.aggregationRestrictions.date_histogram
-    ) {
-      interval = restrictedInterval(usedField.aggregationRestrictions) as string;
-      timeZone = usedField.aggregationRestrictions.date_histogram.time_zone;
-    }
+
     return buildExpressionFunction<AggFunctionsMapping['aggDateHistogram']>('aggDateHistogram', {
       id: columnId,
       enabled: true,
