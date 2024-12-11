@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -45,7 +46,6 @@ import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
 import type { DVKey, DVStorageMapped } from '../index_data_visualizer/types/storage';
 import { DV_FROZEN_TIER_PREFERENCE } from '../index_data_visualizer/types/storage';
-import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import type { DataComparisonFullAppState } from './types';
 import { getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
@@ -264,10 +264,10 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const colors = {
-    referenceColor: euiTheme.euiColorVis2,
-    comparisonColor: euiTheme.euiColorVis1,
+    referenceColor: euiTheme.colors.vis.euiColorVis2,
+    comparisonColor: euiTheme.colors.vis.euiColorVis1,
     overlapColor: '#490771',
   };
 

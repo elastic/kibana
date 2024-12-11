@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
+  useEuiTheme,
   EuiButtonIcon,
   EuiIcon,
   EuiInMemoryTable,
@@ -20,7 +21,6 @@ import {
 import { FieldTypeIcon } from '../common/components/field_type_icon';
 import { COLLAPSE_ROW, EXPAND_ROW } from '../../../common/i18n_constants';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
-import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import { type DataDriftField, type Feature, FETCH_STATUS } from './types';
 import { formatSignificanceLevel } from './data_drift_utils';
 import { SingleDistributionChart } from './charts/single_distribution_chart';
@@ -47,12 +47,12 @@ export const DataDriftOverviewTable = ({
   data: Feature[];
   status: FETCH_STATUS;
 } & UseTableState<Feature>) => {
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const colors = useMemo(
     () => ({
-      referenceColor: euiTheme.euiColorVis2,
-      comparisonColor: euiTheme.euiColorVis1,
+      referenceColor: euiTheme.colors.vis.euiColorVis2,
+      comparisonColor: euiTheme.colors.vis.euiColorVis1,
     }),
     [euiTheme]
   );
