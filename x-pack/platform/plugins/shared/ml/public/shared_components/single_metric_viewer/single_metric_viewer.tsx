@@ -32,8 +32,8 @@ import type {
   SingleMetricViewerEmbeddableApi,
 } from '../../embeddables/types';
 import {
-  getTimeseriesExplorerStyles,
-  getAnnotationStyles,
+  useTimeseriesExplorerStyles,
+  useAnnotationStyles,
 } from '../../application/timeseriesexplorer/styles';
 
 const containerPadding = 20;
@@ -88,9 +88,6 @@ export interface SingleMetricViewerProps {
 type Zoom = AppStateZoom | undefined;
 type ForecastId = string | undefined;
 
-const timeseriesExplorerStyles = getTimeseriesExplorerStyles();
-const annotationStyles = getAnnotationStyles();
-
 const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   // Component dependencies
   api,
@@ -111,6 +108,8 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   shouldShowForecastButton,
   uuid,
 }) => {
+  const timeseriesExplorerStyles = useTimeseriesExplorerStyles();
+  const annotationStyles = useAnnotationStyles();
   const [chartDimensions, setChartDimensions] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
