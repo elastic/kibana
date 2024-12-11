@@ -764,7 +764,8 @@
     "enabled",
     "events",
     "expirationDate",
-    "title"
+    "title",
+    "updatedAt"
   ],
   "map": [
     "bounds",
