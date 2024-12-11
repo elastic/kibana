@@ -35,6 +35,5 @@
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/kibana-react-plugin",
   ]
 }
