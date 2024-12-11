@@ -5832,7 +5832,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/grokdebugger-plugin@link:x-pack/plugins/grokdebugger":
+"@kbn/grokdebugger-plugin@link:x-pack/platform/plugins/private/grokdebugger":
   version "0.0.0"
   uid ""
 

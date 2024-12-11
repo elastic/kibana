@@ -55,7 +55,7 @@
     "xpack.graph": [
       "plugins/graph"
     ],
-    "xpack.grokDebugger": "plugins/grokdebugger",
+    "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.idxMgmtPackage": "packages/index-management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
