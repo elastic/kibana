@@ -45,6 +45,12 @@ export const WORKFLOW_INSIGHTS = {
         defaultMessage: 'No issues had been found',
       }
     ),
+    insightRemediationButtonAriaLabel: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonAriaLabel',
+      {
+        defaultMessage: 'Create trusted app',
+      }
+    ),
   },
   toasts: {
     scanError: i18n.translate(

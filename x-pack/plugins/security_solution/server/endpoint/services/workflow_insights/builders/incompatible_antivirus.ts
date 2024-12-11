@@ -32,9 +32,10 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
 
   const osEndpointIdsMap = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
   return defendInsights.flatMap((defendInsight: DefendInsight) => {
-    const filePaths = (defendInsight.events ?? []).map((event) => event.value);
-    return Object.keys(osEndpointIdsMap).map((os) => {
-      return {
+    const filePaths = Array.from(new Set((defendInsight.events ?? []).map((event) => event.value)));
+
+    return Object.keys(osEndpointIdsMap).flatMap((os) =>
+      filePaths.map((filePath) => ({
         '@timestamp': currentTime,
         // TODO add i18n support
         message: 'Incompatible antiviruses detected',
@@ -64,10 +65,10 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
               description: 'Suggested by Security Workflow Insights',
               entries: [
                 {
-                  field: 'process.executable.caseless', // TODO: handle different OS keys
+                  field: 'process.executable.caseless',
                   operator: 'included',
-                  type: 'wildcard', // TODO: verify this is correct
-                  value: filePaths[0], // TODO: handle multiple file paths?
+                  type: 'match',
+                  value: filePath,
                 },
               ],
               // TODO add per policy support
@@ -81,7 +82,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             llm_model: apiConfig.model ?? '',
           },
         },
-      };
-    });
+      }))
+    );
   });
 }

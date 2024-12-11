@@ -16,10 +16,9 @@ import { WORKFLOW_INSIGHTS } from '../../../translations';
 
 interface WorkflowInsightsProps {
   endpointId: string;
-  endpointOs?: string;
 }
 
-export const WorkflowInsights = React.memo(({ endpointId, endpointOs }: WorkflowInsightsProps) => {
+export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProps) => {
   const [isScanButtonDisabled, setIsScanButtonDisabled] = useState(true);
   const [scanCompleted, setIsScanCompleted] = useState(false);
   const [userTriggeredScan, setUserTriggeredScan] = useState(false);
@@ -104,7 +103,6 @@ export const WorkflowInsights = React.memo(({ endpointId, endpointOs }: Workflow
           results={insights}
           scanCompleted={scanCompleted && userTriggeredScan}
           endpointId={endpointId}
-          endpointOs={endpointOs}
         />
         <EuiHorizontalRule />
       </EuiAccordion>

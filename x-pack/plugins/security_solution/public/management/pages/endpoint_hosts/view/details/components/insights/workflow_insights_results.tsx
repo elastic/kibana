@@ -23,13 +23,15 @@ interface WorkflowInsightsResultsProps {
   results?: SecurityWorkflowInsight[];
   scanCompleted: boolean;
   endpointId: string;
-  endpointOs?: string;
 }
 import type { EndpointInsightRouteState } from '../../../../types';
 import { getEndpointDetailsPath } from '../../../../../../common/routing';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { APP_PATH, TRUSTED_APPS_PATH } from '../../../../../../../../common/constants';
-import type { SecurityWorkflowInsight } from '../../../../../../../../common/endpoint/types/workflow_insights';
+import type {
+  ExceptionListRemediationType,
+  SecurityWorkflowInsight,
+} from '../../../../../../../../common/endpoint/types/workflow_insights';
 
 const CustomEuiCallOut = styled(EuiCallOut)`
   & .euiButtonIcon {
@@ -41,7 +43,6 @@ export const WorkflowInsightsResults = ({
   results,
   scanCompleted,
   endpointId,
-  endpointOs,
 }: WorkflowInsightsResultsProps) => {
   const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(false);
   const hideEmptyStateCallout = () => setShowEmptyResultsCallout(false);
@@ -57,46 +58,44 @@ export const WorkflowInsightsResults = ({
   const openArtifactCreationPage = ({
     remediation,
     id,
-  }: Pick<SecurityWorkflowInsight, 'remediation' | 'id'>) => {
-    const url = `${APP_PATH}${TRUSTED_APPS_PATH}?show=create`;
+  }: {
+    remediation: ExceptionListRemediationType;
+    id?: string;
+  }) => {
+    const getUrlBasedOnListId = (listId: string) => {
+      switch (listId) {
+        case 'endpoint_trusted_apps':
+        default:
+          return TRUSTED_APPS_PATH;
+      }
+    };
 
-    // TODO: handle multiple exception list items
-    const state: EndpointInsightRouteState | {} = {
-      ...(remediation.exception_list_items && remediation.exception_list_items.length
-        ? {
-            insight: {
-              id,
-              back_url: `${APP_PATH}${getEndpointDetailsPath({
-                name: 'endpointDetails',
-                selected_endpoint: endpointId,
-              })}`,
-              item: {
-                comments: [],
-                description: remediation.exception_list_items[0].description,
-                entries: remediation.exception_list_items[0].entries,
-                list_id: remediation.exception_list_items[0].list_id,
-                name: remediation.exception_list_items[0].name,
-                namespace_type: 'agnostic',
-                tags: remediation.exception_list_items[0].tags,
-                type: 'simple',
-                os_types: [endpointOs], // TODO: is this needed?
-              },
-            },
-          }
-        : {}),
+    const url = `${APP_PATH}${getUrlBasedOnListId(remediation.list_id)}?show=create`;
+
+    const state: EndpointInsightRouteState = {
+      insight: {
+        id,
+        back_url: `${APP_PATH}${getEndpointDetailsPath({
+          name: 'endpointDetails',
+          selected_endpoint: endpointId,
+        })}`,
+        item: {
+          comments: [],
+          description: remediation.description,
+          entries: remediation.entries,
+          list_id: remediation.list_id,
+          name: remediation.name,
+          namespace_type: 'agnostic',
+          tags: remediation.tags,
+          type: 'simple',
+          os_types: remediation.os_types,
+        },
+      },
     };
 
     navigateToUrl(url, {
       state,
     });
-  };
-
-  const onInsightClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    { remediation, id }: Pick<SecurityWorkflowInsight, 'remediation' | 'id'>
-  ) => {
-    e.preventDefault();
-    openArtifactCreationPage({ remediation, id });
   };
 
   const renderContent = () => {
@@ -107,42 +106,44 @@ export const WorkflowInsightsResults = ({
         </CustomEuiCallOut>
       );
     } else if (results?.length) {
-      return results.map((insight, index) => {
-        return (
-          <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
-            <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="warning" size="l" color="warning" />
-              </EuiFlexItem>
+      return results.flatMap((insight, index) => {
+        return (insight.remediation.exception_list_items ?? []).map((item) => {
+          return (
+            <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
+              <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="warning" size="l" color="warning" />
+                </EuiFlexItem>
 
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <EuiText size={'s'}>
-                    <strong>{insight.value}</strong>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <EuiText size={'s'}>
+                      <strong>{insight.value}</strong>
+                    </EuiText>
+                    <EuiText size={'s'} color={'subdued'}>
+                      {insight.message}
+                    </EuiText>
+                    <EuiText size={'xs'} color={'subdued'}>
+                      {(item.entries[0] as { value: string }).value}
+                    </EuiText>
                   </EuiText>
-                  <EuiText size={'s'} color={'subdued'}>
-                    {insight.message}
-                  </EuiText>
-                </EuiText>
-              </EuiFlexItem>
+                </EuiFlexItem>
 
-              <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-                <EuiButtonIcon
-                  aria-label="Navigate to create trusted app" // TODO: localize
-                  iconType="popout"
-                  href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
-                  onClick={
-                    (e: React.MouseEvent<HTMLAnchorElement>) =>
-                      onInsightClick(e, {
-                        remediation: insight.remediation,
-                        id: insight.id || 'test',
-                      }) // TODO: remove test
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        );
+                <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+                  <EuiButtonIcon
+                    aria-label={WORKFLOW_INSIGHTS.issues.insightRemediationButtonAriaLabel}
+                    iconType="popout"
+                    href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
+                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                      e.preventDefault();
+                      openArtifactCreationPage({ remediation: item, id: insight.id });
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          );
+        });
       });
     }
     return null;

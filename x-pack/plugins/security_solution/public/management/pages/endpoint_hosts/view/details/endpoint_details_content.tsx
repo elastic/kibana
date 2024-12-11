@@ -185,12 +185,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
     }, [hostInfo, policyInfo, missingPolicies, policyStatus, policyStatusClickHandler]);
     return (
       <div>
-        {isWorkflowInsightsEnabled && (
-          <WorkflowInsights
-            endpointId={hostInfo.metadata.agent.id}
-            endpointOs={hostInfo.metadata.host.os.type}
-          />
-        )}
+        {isWorkflowInsightsEnabled && <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />}
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed
