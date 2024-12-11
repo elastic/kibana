@@ -7152,7 +7152,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-io-ts-alerting-types@link:packages/kbn-securitysolution-io-ts-alerting-types":
+"@kbn/securitysolution-io-ts-alerting-types@link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types":
   version "0.0.0"
   uid ""
 
