@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName, TIMELINE_FEATURE_ID, TIMELINES_PATH } from '../../common/constants';
+import {
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
+  TIMELINE_FEATURE_ID,
+  TIMELINES_PATH,
+} from '../../common/constants';
 import { TIMELINES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
@@ -15,7 +20,8 @@ export const links: LinkItem = {
   title: TIMELINES,
   path: TIMELINES_PATH,
   globalNavPosition: 7,
-  capabilities: [`${TIMELINE_FEATURE_ID}.read`],
+  // It only makes sense to show this link when the user is also granted access to security solution
+  capabilities: [`${SECURITY_FEATURE_ID}.show`, `${TIMELINE_FEATURE_ID}.read`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.timelines', {
       defaultMessage: 'Timelines',
