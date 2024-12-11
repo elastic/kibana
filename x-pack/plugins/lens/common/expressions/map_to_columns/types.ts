@@ -10,7 +10,7 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export type OriginalColumn = { id: string; label: string; format?: SerializedFieldFormat } & (
   | { operationType: 'date_histogram'; sourceField: string; interval: number }
-  | { operationType: string; sourceField: never; interval: never }
+  | { operationType: string; sourceField?: string; interval: never }
 );
 
 export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<

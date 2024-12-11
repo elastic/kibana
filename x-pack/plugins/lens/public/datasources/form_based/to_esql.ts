@@ -95,7 +95,7 @@ export function getESQLForLayer(
         {
           ...col,
           id: colId,
-          params: { format: format as unknown as ValueFormatConfig },
+          format: format as unknown as ValueFormatConfig,
           interval: undefined as never,
           label: col.customLabel
             ? col.label
@@ -216,7 +216,7 @@ export function getESQLForLayer(
         {
           ...col,
           id: colId,
-          params: { format: format as unknown as ValueFormatConfig },
+          format: format as unknown as ValueFormatConfig,
           interval: interval as never,
           ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
           label: col.customLabel
