@@ -74,7 +74,7 @@ export class DatatableUtilitiesService {
       timeZone: string;
     }> = {}
   ): DateHistogramMeta | undefined {
-    if (!column.meta.sourceParams) {
+    if (!column.meta.sourceParams || !column.meta.sourceParams.params) {
       return;
     }
 

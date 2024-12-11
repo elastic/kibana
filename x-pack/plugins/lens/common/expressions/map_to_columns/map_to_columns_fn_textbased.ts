@@ -33,34 +33,32 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
       if (!(column.id in idMap)) {
         return [];
       }
-
-      return idMap[column.id].map((originalColumn) => {
-        return {
-          ...column,
-          id: originalColumn.id,
-          name: originalColumn.label,
-          meta: {
-            ...column.meta,
-            ...(originalColumn.params && 'format' in (originalColumn.params as object)
-              ? {
-                  params: (originalColumn.params as Record<string, unknown>)
-                    .format as SerializedFieldFormat,
-                }
+      return idMap[column.id].map((originalColumn) => ({
+        ...column,
+        id: originalColumn.id,
+        name: originalColumn.label,
+        meta: {
+          ...column.meta,
+          field: originalColumn.sourceField,
+          ...(originalColumn.params && 'format' in (originalColumn.params as object)
+            ? {
+              params: (originalColumn.params as Record<string, unknown>)
+                .format as SerializedFieldFormat,
+            }
+            : {}),
+          ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
+          sourceParams: {
+            ...(column.meta?.sourceParams ?? {}),
+            ...('sourceField' in originalColumn
+              ? { sourceField: originalColumn.sourceField }
               : {}),
-            ...(originalColumn.sourceField ? { field: originalColumn.sourceField } : {}),
-            sourceParams: {
-              ...(column.meta?.sourceParams ?? {}),
-              ...('sourceField' in originalColumn
-                ? { sourceField: originalColumn.sourceField }
-                : {}),
-              ...('operationType' in originalColumn
-                ? { operationType: originalColumn.operationType }
-                : {}),
-              ...('interval' in originalColumn ? { interval: originalColumn.interval } : {}),
-            },
+            ...('operationType' in originalColumn
+              ? { operationType: originalColumn.operationType }
+              : {}),
+            ...('interval' in originalColumn ? { interval: originalColumn.interval } : {}),
           },
-        };
-      });
+        },
+      }));
     }),
   };
 };

@@ -67,7 +67,6 @@ export interface LoadDashboardReturn {
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: SavedDashboardInput;
-  anyMigrationRun?: boolean;
 
   /**
    * Raw references returned directly from the Dashboard saved object. These
