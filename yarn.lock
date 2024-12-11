@@ -7172,7 +7172,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-constants@link:packages/kbn-securitysolution-list-constants":
+"@kbn/securitysolution-list-constants@link:x-pack/solutions/security/packages/kbn-securitysolution-list-constants":
   version "0.0.0"
   uid ""
 
