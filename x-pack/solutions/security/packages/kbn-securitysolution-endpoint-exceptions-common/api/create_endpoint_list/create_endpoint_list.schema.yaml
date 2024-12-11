@@ -23,23 +23,23 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                  - $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                  - $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         401:
           description: Unsuccessful authentication
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         403:
           description: Insufficient privileges
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         500:
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
