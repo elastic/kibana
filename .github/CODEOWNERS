@@ -2490,7 +2490,7 @@ x-pack/test/automatic_import_api_integration @elastic/security-scalability
 
 ## Packages
 x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
-x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
 ## Plugins
 x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
