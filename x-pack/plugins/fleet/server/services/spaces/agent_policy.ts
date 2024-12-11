@@ -170,48 +170,54 @@ export async function updateAgentPolicySpaces({
     refresh: true,
   });
 
+  const agentIndexExists = await esClient.indices.exists({
+    index: AGENTS_INDEX,
+  });
+
   // Update agent actions
-  const pitId = await openPointInTime(esClient);
+  if (agentIndexExists) {
+    const pitId = await openPointInTime(esClient);
 
-  try {
-    let hasMore = true;
-    let searchAfter: SortResults | undefined;
-    while (hasMore) {
-      const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
-        kuery: `policy_id:"${agentPolicyId}"`,
-        showInactive: true,
-        perPage: UPDATE_AGENT_BATCH_SIZE,
-        pitId,
-        searchAfter,
-      });
+    try {
+      let hasMore = true;
+      let searchAfter: SortResults | undefined;
+      while (hasMore) {
+        const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
+          kuery: `policy_id:"${agentPolicyId}"`,
+          showInactive: true,
+          perPage: UPDATE_AGENT_BATCH_SIZE,
+          pitId,
+          searchAfter,
+        });
 
-      if (agents.length === 0) {
-        hasMore = false;
-        break;
-      }
+        if (agents.length === 0) {
+          hasMore = false;
+          break;
+        }
 
-      const lastAgent = agents[agents.length - 1];
-      searchAfter = lastAgent.sort;
+        const lastAgent = agents[agents.length - 1];
+        searchAfter = lastAgent.sort;
 
-      await esClient.updateByQuery({
-        index: AGENT_ACTIONS_INDEX,
-        query: {
-          bool: {
-            must: {
-              terms: {
-                agents: agents.map(({ id }) => id),
+        await esClient.updateByQuery({
+          index: AGENT_ACTIONS_INDEX,
+          query: {
+            bool: {
+              must: {
+                terms: {
+                  agents: agents.map(({ id }) => id),
+                },
               },
             },
           },
-        },
-        script: `ctx._source.namespaces = [${newSpaceIds
-          .map((spaceId) => `"${spaceId}"`)
-          .join(',')}]`,
-        ignore_unavailable: true,
-        refresh: true,
-      });
+          script: `ctx._source.namespaces = [${newSpaceIds
+            .map((spaceId) => `"${spaceId}"`)
+            .join(',')}]`,
+          ignore_unavailable: true,
+          refresh: true,
+        });
+      }
+    } finally {
+      await closePointInTime(esClient, pitId);
     }
-  } finally {
-    await closePointInTime(esClient, pitId);
   }
 }
