@@ -14,7 +14,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
-import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
@@ -60,13 +59,6 @@ async function mountDoc(update = false) {
         apis: {
           indexExists: 'mockUrl',
         },
-      },
-    },
-    uiSettings: {
-      get: (key: string) => {
-        if (key === mockSearchFieldsFromSource) {
-          return false;
-        }
       },
     },
     locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
