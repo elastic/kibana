@@ -14,7 +14,7 @@ exports[`OpenSearchPanel render 1`] = `
     >
       <h2>
         <MemoizedFormattedMessage
-          defaultMessage="Open Discover Session"
+          defaultMessage="Open Discover session"
           id="discover.topNav.openSearchPanel.openSearchTitle"
         />
       </h2>
@@ -25,7 +25,7 @@ exports[`OpenSearchPanel render 1`] = `
       id="discoverOpenSearch"
       noItemsMessage={
         <Memo(MemoizedFormattedMessage)
-          defaultMessage="No matching Discover Sessions found."
+          defaultMessage="No matching Discover sessions found."
           id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
         />
       }
@@ -34,7 +34,7 @@ exports[`OpenSearchPanel render 1`] = `
         Array [
           Object {
             "getIconForSavedObject": [Function],
-            "name": "Discover Session",
+            "name": "Discover session",
             "type": "search",
           },
         ]
@@ -63,7 +63,7 @@ exports[`OpenSearchPanel render 1`] = `
           onClick={[MockFunction]}
         >
           <MemoizedFormattedMessage
-            defaultMessage="Manage Discover Sessions"
+            defaultMessage="Manage Discover sessions"
             id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
           />
         </EuiButton>
