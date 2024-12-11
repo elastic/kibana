@@ -13,7 +13,7 @@ import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkReadAccess } from '../../../lib/streams/stream_crud';
 
-const SAMPLE_SIZE = 20;
+const SAMPLE_SIZE = 200;
 
 export const schemaFieldsSimulationRoute = createServerRoute({
   endpoint: 'POST /api/streams/{id}/schema/fields_simulation',
@@ -52,7 +52,20 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
       }
 
+      const propertiesForSample = Object.fromEntries(
+        params.body.field_definitions.map((field) => [field.name, { type: 'keyword' }])
+      );
+
       const documentSamplesSearchBody = {
+        // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
+        runtime_mappings: propertiesForSample,
+        query: {
+          bool: {
+            filter: Object.keys(propertiesForSample).map((field) => ({
+              exists: { field },
+            })),
+          },
+        },
         sort: [
           {
             '@timestamp': {
@@ -80,14 +93,14 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         };
       }
 
-      const properties = Object.fromEntries(
+      const propertiesForSimulation = Object.fromEntries(
         params.body.field_definitions.map((field) => [
           field.name,
           { type: field.type, ...(field.format ? { format: field.format } : {}) },
         ])
       );
 
-      const fieldDefinitionKeys = Object.keys(properties);
+      const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
       const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => ({
         _index: params.path.id,
@@ -106,7 +119,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
             template: {
               mappings: {
                 dynamic: 'strict',
-                properties,
+                properties: propertiesForSimulation,
               },
             },
           },

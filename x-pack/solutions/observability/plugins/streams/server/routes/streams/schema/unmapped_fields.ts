@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { internal, notFound } from '@hapi/boom';
 import { getFlattenedObject } from '@kbn/std';
 import { DefinitionNotFound } from '../../../lib/streams/errors';
-import { readAncestors, readStream } from '../../../lib/streams/stream_crud';
+import { checkReadAccess, readAncestors, readStream } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 
 const SAMPLE_SIZE = 500;
@@ -38,6 +38,11 @@ export const unmappedFieldsRoute = createServerRoute({
   }): Promise<{ unmappedFields: string[] }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
+
+      const hasAccess = await checkReadAccess({ id: params.path.id, scopedClusterClient });
+      if (!hasAccess) {
+        throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
+      }
 
       const streamEntity = await readStream({
         scopedClusterClient,

@@ -57,11 +57,11 @@ export const SchemaEditorFlyout = (props: SchemaEditorFlyoutProps) => {
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <FieldSummary {...props} />
-          <EuiFlexItem grow={false}>
-            {isEditing && definition.children.length > 0 ? (
+          {isEditing && definition.children.length > 0 ? (
+            <EuiFlexItem grow={false}>
               <ChildrenAffectedCallout childStreams={definition.children} />
-            ) : null}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <SamplePreviewTable
               definition={definition}
