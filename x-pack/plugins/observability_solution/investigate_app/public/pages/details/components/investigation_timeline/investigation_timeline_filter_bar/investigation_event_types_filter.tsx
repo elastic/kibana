@@ -79,7 +79,7 @@ export function InvestigationEventTypesFilter({ onSelected }: Props) {
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup compressed>
       <EuiPopover
         id={filterGroupPopoverId}
         button={button}

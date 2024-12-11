@@ -32,6 +32,7 @@ export function InvestigationTimelineFilterBar({ onEventTypesSelected }: Props) 
       <InvestigationEventTypesFilter onSelected={onEventTypesSelected} />
 
       <EuiDatePickerRange
+        compressed
         startDateControl={
           <EuiDatePicker
             selected={moment(globalParams.timeRange.from)}

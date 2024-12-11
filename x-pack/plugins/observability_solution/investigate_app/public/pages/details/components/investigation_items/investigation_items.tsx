@@ -14,7 +14,7 @@ import { InvestigationTimeline } from '../investigation_timeline/investigation_t
 
 export function InvestigationItems() {
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="m" responsive>
       <InvestigationTimeline />
       <AssistantHypothesis />
       <InvestigationItemsList />
