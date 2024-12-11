@@ -17,6 +17,7 @@ export const servers: ScoutLoaderConfig = {
     serverArgs: [...defaultConfig.esTestCluster.serverArgs],
   },
   kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--serverless=es',
