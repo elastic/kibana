@@ -84,8 +84,10 @@ export const useChartsFilter = ({
         'data-test-subj': `${filterOptions.filterName}-filter-option`,
       })) as FilterItems;
     }
+    let dataStreamOptions: FilterItems = [];
+
     if (isDataStreamsFilter && !!filterOptions.options.length) {
-      const dataStreamOptions: FilterItems = filterOptions.options?.map((filterOption, i) => ({
+      dataStreamOptions = filterOptions.options?.map((filterOption, i) => ({
         key: filterOption,
         label: filterOption,
         append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
@@ -102,28 +104,27 @@ export const useChartsFilter = ({
           truncationOffset: 15,
         },
       }));
-
-      return [
-        {
-          label: UX_LABELS.filters.dataStreams.label,
-          append: (
-            <span css={{ display: 'flex', alignItems: 'flex-end', marginLeft: 'auto' }}>
-              {UX_LABELS.filters.dataStreams.append}
-              <EuiIconTip
-                content={UX_LABELS.filters.dataStreams.appendTooltip}
-                type="iInCircle"
-                color="subdued"
-                css={{ alignContent: 'flex-start', justifyContent: 'flex-start' }}
-              />
-            </span>
-          ),
-          isGroupLabel: true,
-          'data-test-subj': `${filterOptions.filterName}-group-label`,
-        },
-        ...dataStreamOptions,
-      ];
     }
-    return [];
+
+    return [
+      {
+        label: UX_LABELS.filters.dataStreams.label,
+        append: (
+          <span css={{ display: 'flex', alignItems: 'flex-end', marginLeft: 'auto' }}>
+            {UX_LABELS.filters.dataStreams.append}
+            <EuiIconTip
+              content={UX_LABELS.filters.dataStreams.appendTooltip}
+              type="iInCircle"
+              color="subdued"
+              css={{ alignContent: 'flex-start', justifyContent: 'flex-start' }}
+            />
+          </span>
+        ),
+        isGroupLabel: true,
+        'data-test-subj': `${filterOptions.filterName}-group-label`,
+      },
+      ...dataStreamOptions,
+    ];
   }, [
     filterOptions.appendOptions,
     filterOptions.filterName,

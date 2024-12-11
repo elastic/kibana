@@ -14,6 +14,7 @@ import type {
   DataStreamsResponseBodySchemaBody,
 } from '../../../common/rest_types/data_streams';
 import { NoIndicesMeteringError, NoPrivilegeMeteringError } from '../../errors';
+import { CustomHttpRequestError } from '../../utils';
 
 export const getDataStreamsHandler = (
   dataUsageContext: DataUsageContext
@@ -26,24 +27,33 @@ export const getDataStreamsHandler = (
 
     try {
       const core = await context.core;
-      const { datastreams: meteringStats } = await getMeteringStats(
+      const { datastreams: meteringStatsDataStreams } = await getMeteringStats(
         core.elasticsearch.client.asSecondaryAuthUser
       );
 
-      const body =
-        meteringStats && !!meteringStats.length
-          ? meteringStats
-              .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
-              .reduce<DataStreamsResponseBodySchemaBody>((acc, stat) => {
-                if (includeZeroStorage || stat.size_in_bytes > 0) {
-                  acc.push({
-                    name: stat.name,
-                    storageSizeBytes: stat.size_in_bytes ?? 0,
-                  });
-                }
-                return acc;
-              }, [])
-          : [];
+      const nonSystemDataStreams = meteringStatsDataStreams?.filter((dataStream) => {
+        return !dataStream.name?.startsWith('.');
+      });
+
+      if (!nonSystemDataStreams || !nonSystemDataStreams.length) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('No user defined data streams found', 404)
+        );
+      }
+
+      const body = nonSystemDataStreams
+        .reduce<DataStreamsResponseBodySchemaBody>((acc, stat) => {
+          if (includeZeroStorage || stat.size_in_bytes > 0) {
+            acc.push({
+              name: stat.name,
+              storageSizeBytes: stat.size_in_bytes,
+            });
+          }
+          return acc;
+        }, [])
+        .sort((a, b) => b.storageSizeBytes - a.storageSizeBytes);
 
       return response.ok({
         body,
