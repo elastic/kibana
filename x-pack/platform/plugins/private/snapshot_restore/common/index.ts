@@ -6,6 +6,5 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110892
-/* eslint-disable @kbn/eslint/no_export_all */
 
 export * from './constants';
