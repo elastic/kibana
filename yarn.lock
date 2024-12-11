@@ -6464,7 +6464,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-server@link:x-pack/packages/observability/observability_ai/observability_ai_server":
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
   version "0.0.0"
   uid ""
 

@@ -10,6 +10,6 @@ module.exports = {
   rootDir: '../../../../../..',
   roots: [
     '<rootDir>/x-pack/solutions/observability/packages/observability_ai/observability_ai_common',
-    '<rootDir>/x-pack/packages/observability/observability_ai/observability_ai_server',
+    '<rootDir>/x-pack/solutions/observability/packages/observability_ai/observability_ai_server',
   ],
 };
