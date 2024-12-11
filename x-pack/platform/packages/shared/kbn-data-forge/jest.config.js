@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/kbn-data-forge'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-data-forge'],
 };

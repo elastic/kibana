@@ -1,9 +1,9 @@
 #!/bin/sh
 
-cd ../../../../../../../../../ecs
-NAME=mongodb
+cd ../../../../../../../../../../../ecs
+NAME=message_processor
 
-BASE=../kibana/x-pack/packages/kbn-data-forge/src/data_sources/fake_stack/$NAME
+BASE=../kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/$NAME
 ECS=$BASE/ecs
 
 python3 ./scripts/generator.py --ref v8.0.0 \
