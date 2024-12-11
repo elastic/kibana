@@ -298,7 +298,6 @@ packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
-packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-bfetch-error @elastic/appex-sharedux
 packages/kbn-calculate-auto @elastic/obs-ux-management-team
 packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
@@ -421,6 +420,7 @@ packages/kbn-mapbox-gl @elastic/kibana-presentation
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
+packages/kbn-nx @elastic/kibana-operations
 packages/kbn-object-versioning @elastic/appex-sharedux
 packages/kbn-object-versioning-utils @elastic/appex-sharedux
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -2098,7 +2098,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/security-solution @elastic/appex-qa
-x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/security-solution @elastic/appex-qa 
+x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/security-solution @elastic/appex-qa
 x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/security-solution @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/security-solution
@@ -2631,6 +2631,10 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
+
+# NX Configs
+nx.json @elastic/kibana-operations
+**/project.json @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

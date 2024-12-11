@@ -48,18 +48,18 @@ export const CodeownersCommand: GenerateCommand = {
     const pkgs = getPackages(REPO_ROOT);
     const path = Path.resolve(REPO_ROOT, REL);
     const oldCodeowners = await Fsp.readFile(path, 'utf8');
-    let content = oldCodeowners;
+    let manualContent = oldCodeowners;
 
     // strip the old generated output
-    const genEnd = content.indexOf(GENERATED_END);
+    const genEnd = manualContent.indexOf(GENERATED_END);
     if (genEnd !== -1) {
-      content = content.slice(genEnd + GENERATED_END.length);
+      manualContent = manualContent.slice(genEnd + GENERATED_END.length);
     }
 
     // strip the old ultimate rules
-    const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES);
+    const ultStart = manualContent.indexOf(ULTIMATE_PRIORITY_RULES);
     if (ultStart !== -1) {
-      content = content.slice(0, ultStart);
+      manualContent = manualContent.slice(0, ultStart);
     }
 
     // sort genarated entries by directory name
@@ -67,13 +67,15 @@ export const CodeownersCommand: GenerateCommand = {
     // test plugins is not overriden by the parent package's entry
     pkgs.sort((a, b) => a.directory.localeCompare(b.directory));
 
-    const newCodeowners = `${GENERATED_START}${pkgs
+    const fileListing = pkgs
       .map(
         (pkg) =>
           pkg.normalizedRepoRelativeDir +
           (pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '')
       )
-      .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
+      .join('\n');
+
+    const newCodeowners = `${GENERATED_START}${fileListing}${GENERATED_END}${manualContent}${ULTIMATE_PRIORITY_RULES}`;
 
     if (newCodeowners === oldCodeowners) {
       log.success(`${REL} is already up-to-date`);
