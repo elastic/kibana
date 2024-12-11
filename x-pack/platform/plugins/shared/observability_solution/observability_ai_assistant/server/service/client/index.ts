@@ -481,13 +481,24 @@ export class ObservabilityAIAssistantClient {
       tracer: LangTracer;
     }
   ): Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent> => {
-    const tools = functions?.reduce((acc, fn) => {
-      acc[fn.name] = {
-        description: fn.description,
-        schema: fn.parameters,
-      };
-      return acc;
-    }, {} as Record<string, { description: string; schema: any }>);
+    let tools: Record<string, { description: string; schema: any }> | undefined;
+    let toolChoice: ToolChoiceType | { function: string } | undefined;
+
+    if (functions && functions.length > 0) {
+      tools = functions?.reduce((acc, fn) => {
+        acc[fn.name] = {
+          description: fn.description,
+          schema: fn.parameters,
+        };
+        return acc;
+      }, {} as Record<string, { description: string; schema: any }>);
+
+      toolChoice = functionCall
+        ? {
+            function: functionCall,
+          }
+        : ToolChoiceType.auto;
+    }
 
     const chatComplete$ = defer(() =>
       this.dependencies.inferenceClient.chatComplete({
@@ -497,11 +508,7 @@ export class ObservabilityAIAssistantClient {
           messages.filter((message) => message.message.role !== MessageRole.System)
         ),
         functionCalling: simulateFunctionCalling ? 'simulated' : 'native',
-        toolChoice: functionCall
-          ? {
-              function: functionCall,
-            }
-          : ToolChoiceType.auto,
+        toolChoice,
         tools,
       })
     ).pipe(
