@@ -800,6 +800,8 @@ x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-tea
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
+x-pack/packages/observability/observability_ai/observability_ai_common @elastic/obs-ai-assistant
+x-pack/packages/observability/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
@@ -869,6 +871,7 @@ x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/private/transform @elastic/ml-ui
+x-pack/platform/plugins/private/translations @elastic/kibana-localization
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
@@ -985,18 +988,17 @@ x-pack/plugins/snapshot_restore @elastic/kibana-management
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
-x-pack/plugins/streams @elastic/streams-program-team
-x-pack/plugins/streams_app @elastic/streams-program-team
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
-x-pack/plugins/translations @elastic/kibana-localization
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
+x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
+x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
@@ -1142,6 +1144,8 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
 src/plugins/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
+# TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
+src/plugins/discover/public/context_awareness/profile_providers/common/deprecation_logs @elastic/kibana-data-discovery @elastic/kibana-core
 src/plugins/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-ux-logs-team
 
 # Platform Docs
@@ -1840,7 +1844,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
 /src/core/public/i18n/  @elastic/kibana-localization @elastic/kibana-core
-#CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
+#CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
 # security
@@ -2560,7 +2564,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /src/plugins/home/public/application/components/guided_onboarding @elastic/appex-sharedux
 
 # Changes to translation files should not ping code reviewers
-x-pack/plugins/translations/translations
+x-pack/platform/plugins/private/translations/translations
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
