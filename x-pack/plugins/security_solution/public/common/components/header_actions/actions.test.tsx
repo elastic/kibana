@@ -600,4 +600,28 @@ describe('Actions', () => {
       expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeTruthy();
     });
   });
+
+  describe('Timeline action', () => {
+    test('should show timeline action by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="send-alert-to-timeline-button"]').exists()
+      ).toBeTruthy();
+    });
+
+    test('should hide timeline action when disableTimelineAction = true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableTimelineAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="send-alert-to-timeline-button"]').exists()).toBeFalsy();
+    });
+  });
 });

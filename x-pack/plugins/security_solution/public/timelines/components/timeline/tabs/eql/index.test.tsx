@@ -29,6 +29,8 @@ import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer'
 import { defaultRowRenderers } from '../../body/renderers';
 import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
@@ -55,6 +57,7 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/components/user_privileges');
 
 let useTimelineEventsMock = jest.fn();
 
@@ -177,6 +180,45 @@ describe('EQL Tab', () => {
       );
 
       expect(await screen.findByText('No results found')).toBeVisible();
+    });
+
+    describe('privileges', () => {
+      it('should render the notes and pin buttons when the user has the correct privileges', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...initialUserPrivilegesState(),
+          notesPrivileges: { crud: true, read: true },
+          timelinePrivileges: { crud: true },
+        });
+
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
+
+        // wait for the table to load
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        expect(await screen.findByTestId('timeline-notes-button-small')).toBeVisible();
+        expect(await screen.findByTestId('pin')).toBeVisible();
+      });
+
+      it('should not render the notes and pin buttons when the user does not have the correct privilege', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...initialUserPrivilegesState(),
+          notesPrivileges: { read: false },
+          timelinePrivileges: { crud: false },
+        });
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
+
+        // wait for the table to load
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+        expect(await screen.queryByTestId('timeline-notes-button-small')).not.toBeInTheDocument();
+        expect(await screen.queryByTestId('pin')).not.toBeInTheDocument();
+      });
     });
 
     describe('pagination', () => {
