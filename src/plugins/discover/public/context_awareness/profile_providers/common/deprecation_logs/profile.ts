@@ -12,35 +12,35 @@ import { type DataSourceProfileProvider } from '../../../profiles';
 import { DEPRECATION_LOGS_PATTERN_PREFIX, DEPRECATION_LOGS_PROFILE_ID } from './consts';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 
-export const createDeprecationLogsDataSourceProfileProvider = (): DataSourceProfileProvider<{
-}> => ({
-  profileId: DEPRECATION_LOGS_PROFILE_ID,
-  profile: {
-    getDefaultAppState: () => () => ({
-      columns: [
-        { name: 'log.level', width: 150 },
-        { name: 'message' },
-        { name: 'elasticsearch.http.request.x_opaque_id', width: 250 },
-        { name: 'elasticsearch.cluster.name', width: 250 },
-        { name: 'elasticsearch.event.category', width: 250 },
-      ],
-    }),
-  },
-  resolve: (params) => {
-    const indexPattern = extractIndexPatternFrom(params);
+export const createDeprecationLogsDataSourceProfileProvider =
+  (): DataSourceProfileProvider<{}> => ({
+    profileId: DEPRECATION_LOGS_PROFILE_ID,
+    profile: {
+      getDefaultAppState: () => () => ({
+        columns: [
+          { name: 'log.level', width: 150 },
+          { name: 'message' },
+          { name: 'elasticsearch.http.request.x_opaque_id', width: 250 },
+          { name: 'elasticsearch.cluster.name', width: 250 },
+          { name: 'elasticsearch.event.category', width: 250 },
+        ],
+      }),
+    },
+    resolve: (params) => {
+      const indexPattern = extractIndexPatternFrom(params);
 
-    if (!checkAllIndicesInPatternAreDeprecationLogs(indexPattern)) {
-      return { isMatch: false };
-    }
+      if (!checkAllIndicesInPatternAreDeprecationLogs(indexPattern)) {
+        return { isMatch: false };
+      }
 
-    return {
-      isMatch: true,
-      context: {
-        category: DataSourceCategory.Logs,
-      },
-    };
-  },
-});
+      return {
+        isMatch: true,
+        context: {
+          category: DataSourceCategory.Logs,
+        },
+      };
+    },
+  });
 
 /*
   This function returns true if the index pattern belongs to deprecation logs.
