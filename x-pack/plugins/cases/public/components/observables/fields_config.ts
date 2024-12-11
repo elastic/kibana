@@ -7,7 +7,9 @@
 
 import { type ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { parseAddressList } from 'email-addresses';
+import ipaddr from 'ipaddr.js';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+
 import {
   OBSERVABLE_TYPE_DOMAIN,
   OBSERVABLE_TYPE_EMAIL,
@@ -27,11 +29,6 @@ export const normalizeValueType = (value: string): keyof typeof fieldsConfig.val
 
 const DOMAIN_REGEX = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\]+$/;
-
-// NOTE: consider if making this more sophisitcated makes sense
-const IPV4_SIMPLIFIED = /^(\d{1,3}\.){3}\d{1,3}$/;
-// NOTE: consider if making this more sophisitcated makes sense
-const IPV6_SIMPLIFIED = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
 
 const notStringError = (path: string) => ({
   code: 'ERR_NOT_STRING',
@@ -65,8 +62,37 @@ const validatorFactory =
 
 export const genericValidator = validatorFactory(GENERIC_REGEX);
 export const domainValidator = validatorFactory(DOMAIN_REGEX);
-export const ipv4Validator = validatorFactory(IPV4_SIMPLIFIED);
-export const ipv6Validator = validatorFactory(IPV6_SIMPLIFIED);
+
+const ipValidatorFactory =
+  (kind: 'ipv6' | 'ipv4') =>
+  (...args: Parameters<ValidationFunc>) => {
+    const [{ value, path }] = args;
+
+    if (typeof value !== 'string') {
+      return notStringError(path);
+    }
+
+    try {
+      const parsed = ipaddr.parse(value);
+
+      if (parsed.kind() !== kind) {
+        return {
+          code: 'ERR_NOT_VALID',
+          message: i18n.INVALID_VALUE,
+          path,
+        };
+      }
+    } catch (error) {
+      return {
+        code: 'ERR_NOT_VALID',
+        message: i18n.INVALID_VALUE,
+        path,
+      };
+    }
+  };
+
+export const ipv6Validator = ipValidatorFactory('ipv6');
+export const ipv4Validator = ipValidatorFactory('ipv4');
 
 export const urlValidator = (...args: Parameters<ValidationFunc>) => {
   const [{ value, path }] = args;
