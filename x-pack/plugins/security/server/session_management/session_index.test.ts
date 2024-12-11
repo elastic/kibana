@@ -446,6 +446,7 @@ describe('Session index', () => {
         {
           index: aliasName,
           keep_alive: '5m',
+          allow_partial_search_results: true,
         },
         { ignore: [404], meta: true }
       );
@@ -454,6 +455,7 @@ describe('Session index', () => {
         {
           index: aliasName,
           keep_alive: '5m',
+          allow_partial_search_results: true,
         },
         { meta: true }
       );
@@ -473,7 +475,6 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
-        allow_partial_search_results: true,
         sort: '_shard_doc',
         track_total_hits: false,
         search_after: undefined,
@@ -556,7 +557,6 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
-        allow_partial_search_results: true,
         sort: '_shard_doc',
         track_total_hits: false,
         search_after: undefined,
@@ -651,7 +651,6 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
-        allow_partial_search_results: true,
         sort: '_shard_doc',
         track_total_hits: false,
         search_after: undefined,
@@ -740,7 +739,6 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
-        allow_partial_search_results: true,
         sort: '_shard_doc',
         track_total_hits: false,
         search_after: undefined,
@@ -854,7 +852,6 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
-        allow_partial_search_results: true,
         sort: '_shard_doc',
         track_total_hits: false,
         search_after: undefined,
