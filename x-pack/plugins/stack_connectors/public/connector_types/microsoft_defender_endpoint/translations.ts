@@ -8,17 +8,43 @@
 import { i18n } from '@kbn/i18n';
 
 // config form
-export const URL_LABEL = i18n.translate(
-  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.urlTextFieldLabel',
+export const OAUTH_URL_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.oAuthUrlLabel',
   {
-    defaultMessage: 'Microsoft Defender for Endpoint API URL',
+    defaultMessage: 'OAuth Server URL',
+  }
+);
+export const OAUTH_SCOPE = i18n.translate(
+  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.oAuthScope',
+  {
+    defaultMessage: 'OAuth scope',
+  }
+);
+export const API_URL_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.apiUrlLabel',
+  {
+    defaultMessage: 'API URL',
   }
 );
 
-export const TOKEN_LABEL = i18n.translate(
-  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.tokenTextFieldLabel',
+export const CLIENT_ID_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.clientIdLabel',
   {
-    defaultMessage: 'API token',
+    defaultMessage: 'Application client ID',
+  }
+);
+
+export const CLIENT_SECRET_VALUE_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.clientSecretValueLabel',
+  {
+    defaultMessage: 'Client secret value',
+  }
+);
+
+export const TENANT_ID_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.config.tenantIdLabel',
+  {
+    defaultMessage: 'Tenant ID',
   }
 );
 

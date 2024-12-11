@@ -11,9 +11,15 @@ import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from './constants';
 // ----------------------------------
 // Connector setup schemas
 // ----------------------------------
-export const MicrosoftDefenderEndpointConfigSchema = schema.object({ url: schema.string() });
+export const MicrosoftDefenderEndpointConfigSchema = schema.object({
+  clientId: schema.string({ minLength: 1 }),
+  tenantId: schema.string({ minLength: 1 }),
+  oAuthServerUrl: schema.string({ minLength: 1 }),
+  oAuthScope: schema.string({ minLength: 1 }),
+  apiUrl: schema.string({ minLength: 1 }),
+});
 export const MicrosoftDefenderEndpointSecretsSchema = schema.object({
-  token: schema.string(),
+  clientSecret: schema.string({ minLength: 1 }),
 });
 
 // ----------------------------------
