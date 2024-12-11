@@ -78,18 +78,18 @@ export const Footer = React.memo<FooterProps>(
       if (currentStep === 3) {
         return <AnalyzeButtonText isGenerating={isGenerating} />;
       }
-      if (currentStep === 4 && (!isGenerateCelEnabled || !hasCelInput)) {
+      if (currentStep === 4 && !hasCelInput) {
         return i18n.ADD_TO_ELASTIC;
       }
-      if (currentStep === 5 && isGenerateCelEnabled && hasCelInput) {
+      if (currentStep === 5 && hasCelInput) {
         return <AnalyzeCelButtonText isGenerating={isGenerating} />;
       }
-      if (currentStep === 6 && isGenerateCelEnabled) {
+      if (currentStep === 6) {
         return i18n.ADD_TO_ELASTIC;
       }
-    }, [currentStep, isGenerating, hasCelInput, isGenerateCelEnabled]);
+    }, [currentStep, isGenerating, hasCelInput]);
 
-    if (currentStep === 7 || (currentStep === 5 && (!isGenerateCelEnabled || !hasCelInput))) {
+    if (currentStep === 7 || (currentStep === 5 && !hasCelInput)) {
       return <ButtonsFooter cancelButtonText={i18n.CLOSE} />;
     }
     return (

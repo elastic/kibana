@@ -29,7 +29,5 @@ export function registerRoutes(
   registerRelatedRoutes(router);
   registerPipelineRoutes(router);
 
-  if (experimentalFeatures.generateCel) {
-    registerCelInputRoutes(router, validateCelTask);
-  }
+  registerCelInputRoutes(router, validateCelTask);
 }
