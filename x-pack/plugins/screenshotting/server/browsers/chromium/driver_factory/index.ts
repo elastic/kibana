@@ -124,6 +124,9 @@ export class HeadlessChromiumDriverFactory {
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
+      console.timeEnd('*** pre-processing');
+      console.time('*** headless prep');
+
       const logger = pLogger.get('browser-driver');
       logger.info(`Creating browser page driver`);
 
