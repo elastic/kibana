@@ -48,6 +48,11 @@ export const TENANT_ID_LABEL = i18n.translate(
   }
 );
 
+export const RUN_CONNECTOR_TEST_MESSAGE = i18n.translate(
+  'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.params.testMessage',
+  { defaultMessage: "Run a test to validate the connector's configuration" }
+);
+
 export const ACTION_REQUIRED = i18n.translate(
   'xpack.stackConnectors.security.MicrosoftDefenderEndpoint.params.error.requiredActionText',
   {

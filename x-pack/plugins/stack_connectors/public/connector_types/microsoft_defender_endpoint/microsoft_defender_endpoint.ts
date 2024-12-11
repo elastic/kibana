@@ -60,6 +60,6 @@ export function getConnectorType(): ConnectorTypeModel<
       return { errors };
     },
     actionConnectorFields: lazy(() => import('./microsoft_defender_endpoint_connector')),
-    actionParamsFields: lazy(() => import('./microsoft_defender_endpoint_params_empty')),
+    actionParamsFields: lazy(() => import('./microsoft_defender_endpoint_params')),
   };
 }
