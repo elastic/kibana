@@ -59,7 +59,6 @@ export function templatesHelpers(getService: FtrProviderContext['getService']) {
       name,
       indexPatterns,
       version: 1,
-      indexMode: 'standard',
       template: { ...getTemplateMock(isMappingsSourceFieldEnabled) },
       _kbnMeta: {
         isLegacy,
