@@ -58,14 +58,11 @@ export const registerRiskScoreModulesDeprecation = ({ deprecationsService }: Dep
           correctiveActions: {
             manualSteps: [
               i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.manualStep1', {
-                defaultMessage: 'In the left bar, under "Security", click on "Manage".',
-              }),
-              i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.manualStep2', {
-                defaultMessage: 'Select Entity Risk Score.',
+                defaultMessage: 'In the main menu, go to Security > Manage > Entity Risk Score.',
               }),
               i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.manualStep3', {
                 defaultMessage:
-                  'If the original user and host risk score modules are enabled, you'll see a button to "Start update". Click the button, and follow the instructions.',
+                  'If the original user and host risk score modules are enabled, you\'ll see a button to "Start update". Click the button, and follow the instructions.',
               }),
             ],
           },
