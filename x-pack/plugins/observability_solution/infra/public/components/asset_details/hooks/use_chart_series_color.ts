@@ -17,5 +17,5 @@ export const useChartSeriesColor = (seriesColor?: string): string => {
   const { euiTheme } = useEuiTheme();
 
   // Prevent empty string being used as a valid color
-  return seriesColor || euiTheme.colors.backgroundLightText;
+  return seriesColor || euiTheme.colors.lightestShade;
 };
