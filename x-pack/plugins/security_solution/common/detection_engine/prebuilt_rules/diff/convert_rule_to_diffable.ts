@@ -213,7 +213,6 @@ const extractDiffableThreatMatchFieldsFromRuleObject = (
     threat_index: rule.threat_index,
     threat_mapping: rule.threat_mapping,
     threat_indicator_path: rule.threat_indicator_path,
-    threat_language: rule.threat_language,
     alert_suppression: rule.alert_suppression,
   };
 };
