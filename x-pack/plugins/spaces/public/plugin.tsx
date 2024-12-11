@@ -59,6 +59,10 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   }
 
   public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
+    if (this.config.allowSolutionVisibility === undefined) {
+      throw new Error('allowSolutionVisibility has not been set in the Spaces plugin config.');
+    }
+
     const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
 
     this.spacesManager = new SpacesManager(core.http);
