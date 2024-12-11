@@ -109,7 +109,7 @@ export const createStartServicesMock = (
 ): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   core.settings.client.get.mockImplementation(createUseUiSettingMock());
-  core.chrome.getChromeStyle$.mockReturnValue(of('classic'));
+  core.chrome.getChromeStyle$.mockReturnValue(of("classic"))
   const { storage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();

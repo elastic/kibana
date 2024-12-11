@@ -14,15 +14,16 @@ import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CoreStart, UserProfileService } from '@kbn/core/public';
-import { createKibanaContextProviderMock } from '@kbn/security-solution-plugin/public/common/lib/kibana/kibana_react.mock';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { createKibanaContextProviderMock } from '@kbn/security-solution-plugin/public/common/lib/kibana/kibana_react.mock';
+
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
   children: React.ReactNode;
   providerContext?: Partial<AssistantProviderProps>;
-  core?: CoreStart;
+  core?: CoreStart
 }
 
 window.scrollTo = jest.fn();
@@ -64,7 +65,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => {},
+      error: () => { },
     },
   });
 

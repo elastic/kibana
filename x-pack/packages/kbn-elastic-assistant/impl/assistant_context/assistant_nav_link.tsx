@@ -34,10 +34,13 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
   defaultMessage: 'AI Assistant',
 });
 
-export const AssistantNavLink: FC<Props> = ({ showAssistantOverlay, hasAssistantPrivilege }) => {
+export const AssistantNavLink: FC<Props> = ({
+  showAssistantOverlay,
+  hasAssistantPrivilege
+}) => {
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
   const { chrome } = useKibana().services;
-  const { navControls, getChromeStyle$ } = chrome;
+  const { navControls, getChromeStyle$ } = chrome
   const chromeStyle$ = useMemo(() => getChromeStyle$(), [chrome]);
   const chromeStyle = useObservable(chromeStyle$, undefined);
 
