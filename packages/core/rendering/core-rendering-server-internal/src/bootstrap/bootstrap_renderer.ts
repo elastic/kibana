@@ -10,7 +10,11 @@
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
-import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
+import {
+  type DarkModeValue,
+  DEFAULT_THEME_NAME,
+  parseDarkModeValue,
+} from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
@@ -58,7 +62,11 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    let themeName: string = 'amsterdam';
+    let themeName: string = DEFAULT_THEME_NAME;
+
+    if (packageInfo.buildFlavor !== 'serverless') {
+      themeName = 'borealis';
+    }
 
     try {
       const authenticated = isAuthenticated(request);
