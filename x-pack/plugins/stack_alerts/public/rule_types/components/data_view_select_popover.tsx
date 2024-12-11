@@ -64,7 +64,8 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   onSelectDataView,
   onChangeMetaData,
 }) => {
-  const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>();
+  const [loadingDataViews, setLoadingDataViews] = useState(true);
+  const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const isMobile = useIsWithinBreakpoints(['xs']);
@@ -88,11 +89,13 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   );
 
   const loadPersistedDataViews = useCallback(async () => {
+    setLoadingDataViews(true);
     // Calling getIds with refresh = true to make sure we don't get stale data
     const ids = await dataViews.getIds(true);
     const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
 
     setDataViewsItems(dataViewsList.map(toDataViewListItem));
+    setLoadingDataViews(false);
   }, [dataViews]);
 
   const onAddAdHocDataView = useCallback(
@@ -155,14 +158,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
     [dataViews, onAddAdHocDataView, onChangeDataView]
   );
 
-  if (!dataViewItems) {
-    // If dataViewItem is nullish then the data views are still initially loading.
-    // The loading indicator is to make sure we don't render an empty popover
+  if (loadingDataViews) {
+    // The loading indicator is to make sure we don't render an
+    // empty popover when the DV cache is initially loading
     return <EuiLoadingSpinner />;
-  }
-
-  if (!allDataViewItems) {
-    return null;
   }
 
   return (
