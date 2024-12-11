@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useDeleteList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -25,14 +25,14 @@ describe('useDeleteList', () => {
   });
 
   it('invokes Api.deleteList', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useDeleteList());
+    const { result } = renderHook(() => useDeleteList());
     act(() => {
       result.current.start({ http: httpMock, id: 'list' });
     });
-    await waitForNextUpdate();
-
-    expect(Api.deleteList).toHaveBeenCalledWith(
-      expect.objectContaining({ http: httpMock, id: 'list' })
+    await waitFor(() =>
+      expect(Api.deleteList).toHaveBeenCalledWith(
+        expect.objectContaining({ http: httpMock, id: 'list' })
+      )
     );
   });
 });
