@@ -6212,7 +6212,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-field-definition@link:packages/kbn-management/settings/field_definition":
+"@kbn/management-settings-field-definition@link:src/platform/packages/shared/kbn-management/settings/field_definition":
   version "0.0.0"
   uid ""
 
