@@ -42,6 +42,8 @@ import {
   replaceCustomField,
   postObservable,
   getSimilarCases,
+  patchObservable,
+  deleteObservable,
 } from './api';
 
 import {
@@ -1239,6 +1241,84 @@ describe('Cases API', () => {
         abortCtrl.signal
       );
       expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('patchObservable', () => {
+    const observableId = 'afa44220-862c-4a21-b574-351ab4d0a732';
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await patchObservable(
+        {
+          observable: {
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        observableId,
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/${observableId}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            observable: {
+              value: 'test value',
+              description: '',
+            },
+          }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await patchObservable(
+        {
+          observable: {
+            value: 'test value',
+            description: '',
+          },
+        },
+        mockCase.id,
+        observableId,
+        abortCtrl.signal
+      );
+      expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('deleteObservable', () => {
+    const observableId = 'afa44220-862c-4a21-b574-351ab4d0a732';
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/${observableId}`,
+        {
+          method: 'DELETE',
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
+      expect(resp).toEqual(undefined);
     });
   });
 });
