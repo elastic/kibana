@@ -483,6 +483,10 @@
             "references": [
               {
                 "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
@@ -8353,6 +8357,10 @@
             "references": [
               {
                 "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
               },
               {
@@ -14044,7 +14052,7 @@
               },
               {
                 "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
+                "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               },
               {
                 "plugin": "canvas",
@@ -14056,79 +14064,79 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_details.tsx"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_details.tsx"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
+                "path": "x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+                "path": "x-pack/platform/plugins/shared/ml/server/models/job_service/new_job_caps/rollup.ts"
               },
               {
                 "plugin": "@kbn/ml-data-view-utils",
-                "path": "x-pack/packages/ml/data_view_utils/actions/data_view_handler.ts"
+                "path": "x-pack/platform/packages/private/ml/data_view_utils/actions/data_view_handler.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14207,14 +14215,6 @@
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/hooks/use_data_view_exists.ts"
-              },
-              {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
@@ -14241,10 +14241,6 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/public/applications/analytics/utils/find_or_create_data_view.test.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
               },
               {
                 "plugin": "exploratoryView",
@@ -14280,7 +14276,19 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
+                "path": "x-pack/platform/plugins/private/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/public/app/hooks/use_data_view_exists.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/platform/plugins/private/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -16870,6 +16878,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/tabs/utils.ts"
+              },
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/management_app/data_view_management_service.ts"
