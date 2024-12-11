@@ -9,6 +9,7 @@ paths:
       operationId: AlertsMigrationCleanup
       x-codegen-enabled: true
       summary: Clean up detection alert migrations
+      deprecated: true
       description: |
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
         the migration process. A successful migration will result in both the old and new indices being present.
