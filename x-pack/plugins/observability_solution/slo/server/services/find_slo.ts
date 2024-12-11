@@ -10,12 +10,12 @@ import { isArray, keyBy } from 'lodash';
 import { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
 import { SLORepository } from './slo_repository';
-import {
+import type {
   Pagination,
   Sort,
   SummaryResult,
   SummarySearchClient,
-} from './summary_search_client/summary_search_client';
+} from './summary_search_client/types';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
