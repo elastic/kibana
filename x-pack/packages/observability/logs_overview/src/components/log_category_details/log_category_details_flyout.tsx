@@ -17,28 +17,32 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { StateFrom } from 'xstate5';
 import { i18n } from '@kbn/i18n';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { css } from '@emotion/react';
+import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { LogCategory } from '../../types';
 import { LogCategoryPattern } from '../shared/log_category_pattern';
-import { categoryDetailsService } from '../../services/category_details_service';
 import {
   LogCategoryDocumentExamplesTable,
   LogCategoryDocumentExamplesTableDependencies,
 } from './log_category_document_examples_table';
 import { type ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-import { LogCategoryDetailsLoadingContent } from './log_category_details_loading_content';
-import { LogCategoryDetailsErrorContent } from './log_category_details_error_content';
-import { DiscoverLink } from '../discover_link';
+import { DiscoverLink, DiscoverLinkDependencies } from '../discover_link';
 import { createCategoryQuery } from '../../services/categorize_logs_service/queries';
 
-export type LogCategoriesFlyoutDependencies = LogCategoryDocumentExamplesTableDependencies;
+export type LogCategoriesFlyoutDependencies = LogCategoryDocumentExamplesTableDependencies &
+  DiscoverLinkDependencies;
+
+const flyoutBodyCss = css`
+  .euiFlyoutBody__overflowContent {
+    height: 100%;
+  }
+`;
 
 interface LogCategoryDetailsFlyoutProps {
   onCloseFlyout: () => void;
   logCategory: LogCategory;
-  categoryDetailsServiceState: StateFrom<typeof categoryDetailsService>;
   dependencies: LogCategoriesFlyoutDependencies;
   logsSource: ResolvedIndexNameLogsSourceConfiguration;
   documentFilters?: QueryDslQueryContainer[];
@@ -51,7 +55,6 @@ interface LogCategoryDetailsFlyoutProps {
 export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> = ({
   onCloseFlyout,
   logCategory,
-  categoryDetailsServiceState,
   dependencies,
   logsSource,
   documentFilters,
@@ -61,11 +64,19 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
     prefix: 'flyoutTitle',
   });
 
+  const categoryFilter = useMemo(() => {
+    return createCategoryQuery(logsSource.messageField)(logCategory.terms);
+  }, [logCategory.terms, logsSource.messageField]);
+
+  const documentAndCategoryFilters = useMemo(() => {
+    return [...(documentFilters ?? []), categoryFilter];
+  }, [categoryFilter, documentFilters]);
+
   const linkFilters = useMemo(() => {
     return [
       ...(documentFilters ? documentFilters.map((filter) => ({ filter })) : []),
       {
-        filter: createCategoryQuery(logsSource.messageField)(logCategory.terms),
+        filter: categoryFilter,
         meta: {
           name: i18n.translate(
             'xpack.observabilityLogsOverview.logCategoryDetailsFlyout.discoverLinkFilterName',
@@ -79,7 +90,20 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
         },
       },
     ];
-  }, [documentFilters, logCategory.terms, logsSource.messageField]);
+  }, [categoryFilter, documentFilters, logCategory.terms]);
+
+  const filters = useMemo(() => {
+    return documentAndCategoryFilters.map((filter) =>
+      buildCustomFilter(
+        logsSource.indexName,
+        filter,
+        false,
+        false,
+        'Document filters',
+        FilterStateStore.APP_STATE
+      )
+    );
+  }, [documentAndCategoryFilters, logsSource.indexName]);
 
   return (
     <EuiFlyout ownFocus onClose={() => onCloseFlyout()} aria-labelledby={flyoutTitleId}>
@@ -107,32 +131,12 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {categoryDetailsServiceState.matches({ hasCategory: 'fetchingDocuments' }) ? (
-          <LogCategoryDetailsLoadingContent
-            message={i18n.translate(
-              'xpack.observabilityLogsOverview.logCategoryDetailsFlyout.loadingMessage',
-              {
-                defaultMessage: 'Loading latest documents',
-              }
-            )}
-          />
-        ) : categoryDetailsServiceState.matches({ hasCategory: 'error' }) ? (
-          <LogCategoryDetailsErrorContent
-            title={i18n.translate(
-              'xpack.observabilityLogsOverview.logCategoryDetailsFlyout.fetchingDocumentsErrorTitle',
-              {
-                defaultMessage: 'Failed to fetch documents',
-              }
-            )}
-          />
-        ) : (
-          <LogCategoryDocumentExamplesTable
-            dependencies={dependencies}
-            categoryDocuments={categoryDetailsServiceState.context.categoryDocuments}
-            logsSource={logsSource}
-          />
-        )}
+      <EuiFlyoutBody css={flyoutBodyCss}>
+        <LogCategoryDocumentExamplesTable
+          dependencies={dependencies}
+          logsSource={logsSource}
+          filters={filters}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

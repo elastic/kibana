@@ -3701,6 +3701,17 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.isServerless",
+            "type": "boolean",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4700,21 +4711,6 @@
           "\".alerts-ilm-policy\""
         ],
         "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-server.DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT",
-        "type": "number",
-        "tags": [],
-        "label": "DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT",
-        "description": [],
-        "signature": [
-          "10"
-        ],
-        "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

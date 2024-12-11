@@ -7,9 +7,9 @@
 
 import type { ProductName } from './product';
 
-export const productDocIndexPrefix = '.kibana-ai-product-doc';
-export const productDocIndexPattern = `${productDocIndexPrefix}-*`;
+export const productDocIndexPrefix = '.kibana_ai_product_doc';
+export const productDocIndexPattern = `${productDocIndexPrefix}_*`;
 
 export const getProductDocIndexName = (productName: ProductName): string => {
-  return `${productDocIndexPrefix}-${productName.toLowerCase()}`;
+  return `${productDocIndexPrefix}_${productName.toLowerCase()}`;
 };

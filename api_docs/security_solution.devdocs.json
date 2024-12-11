@@ -266,6 +266,108 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.registerDiscoverSharedFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDiscoverSharedFeatures",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<",
+              "StartPluginsDependencies",
+              ", ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              },
+              ">, plugins: ",
+              "SetupPlugins",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<",
+                  "StartPluginsDependencies",
+                  ", ",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
+                    "text": "PluginStart"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "SetupPlugins"
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.getLazyDiscoverSharedDeps",
+            "type": "Function",
+            "tags": [],
+            "label": "getLazyDiscoverSharedDeps",
+            "description": [],
+            "signature": [
+              "() => Promise<typeof ",
+              "x-pack/plugins/security_solution/public/one_discover/index",
+              ">"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1829,7 +1931,7 @@
           "label": "setComponents",
           "description": [],
           "signature": [
-            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; }>) => void"
+            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; EnablementModalCallout: React.ComponentType<{}>; }>) => void"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -1844,7 +1946,7 @@
               "label": "components",
               "description": [],
               "signature": [
-                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; }"
+                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; EnablementModalCallout?: React.ComponentType<{}> | undefined; }"
               ],
               "path": "x-pack/plugins/security_solution/public/contract_components.ts",
               "deprecated": false,

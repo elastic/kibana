@@ -65,9 +65,14 @@ export const CreateConnector: React.FC = () => {
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
 
+  const { config } = useValues(KibanaLogic);
+  const isRunningLocally = (config.host ?? '').includes('localhost');
+
   useEffect(() => {
-    // TODO: separate this to ability and preference
-    if (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') {
+    if (
+      (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
+      isRunningLocally
+    ) {
       setSelfManagePreference('selfManaged');
     }
   }, [selectedConnector]);
@@ -141,6 +146,7 @@ export const CreateConnector: React.FC = () => {
           setSelfManagePreference(preference);
         }}
         error={errorToText(error)}
+        isRunningLocally={isRunningLocally}
       />
     ),
   };

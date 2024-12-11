@@ -133,7 +133,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
   params: t.type({
     body: t.type({
       id: t.string,
-      text: nonEmptyStringRt,
+      text: t.string,
       public: toBooleanRt,
     }),
   }),

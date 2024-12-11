@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { sortBy, uniqBy } from 'lodash';
+import pMap from 'p-map';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -19,6 +20,7 @@ import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
 import { retryTransientEsErrors } from '../retry';
+import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 
 interface FleetTransformMetadata {
   fleet_transform_version?: string;
@@ -119,8 +121,9 @@ export async function handleTransformReauthorizeAndStart({
     );
   }
 
-  const transformInfos = await Promise.all(
-    transforms.map(({ transformId }) =>
+  const transformInfos = await pMap(
+    transforms,
+    ({ transformId }) =>
       retryTransientEsErrors(
         () =>
           esClient.transform.getTransform(
@@ -130,8 +133,10 @@ export async function handleTransformReauthorizeAndStart({
             { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
           ),
         { logger, additionalResponseStatuses: [400] }
-      )
-    )
+      ),
+    {
+      concurrency: MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
+    }
   );
 
   const transformsMetadata: FleetTransformMetadata[] = transformInfos
@@ -168,17 +173,20 @@ export async function handleTransformReauthorizeAndStart({
     }
   } else {
     // Else, create & start all the transforms at once for speed
-    const transformsPromises = transformsMetadata.map(async ({ transformId, ...meta }) => {
-      return await reauthorizeAndStartTransform({
-        esClient,
-        logger,
-        transformId,
-        secondaryAuth,
-        meta: { ...meta, last_authorized_by: username },
-      });
-    });
-
-    authorizedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
+    authorizedTransforms = await pMap(
+      transformsMetadata,
+      async ({ transformId, ...meta }) =>
+        reauthorizeAndStartTransform({
+          esClient,
+          logger,
+          transformId,
+          secondaryAuth,
+          meta: { ...meta, last_authorized_by: username },
+        }),
+      {
+        concurrency: MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
+      }
+    ).then((results) => results.flat());
   }
 
   const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);

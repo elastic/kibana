@@ -36,8 +36,6 @@ import {
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
-import { CannotConnect } from '../search_index/components/cannot_connect';
-
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 
 import { ConnectorStats } from './connector_stats';
@@ -240,12 +238,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
       >
         {productFeatures.hasDefaultIngestPipeline && showDefaultSettingsFlyout && (
           <DefaultSettingsFlyout closeFlyout={() => setShowDefaultSettingsFlyout(false)} />
-        )}
-        {Boolean(errorConnectingMessage) && (
-          <>
-            <CannotConnect />
-            <EuiSpacer />
-          </>
         )}
         <ConnectorStats isCrawler={isCrawler} />
         <EuiSpacer />

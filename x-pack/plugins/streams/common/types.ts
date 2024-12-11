@@ -94,6 +94,15 @@ export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;
 
 export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
   id: z.string(),
+  managed: z.boolean().default(true),
+  unmanaged_elasticsearch_assets: z.optional(
+    z.array(
+      z.object({
+        type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
+        id: z.string(),
+      })
+    )
+  ),
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;

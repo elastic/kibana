@@ -71,6 +71,7 @@ describe('When using get-file action from response actions console', () => {
       endpointAgentId: 'a.b.c',
       endpointCapabilities: [...ENDPOINT_CAPABILITIES],
       endpointPrivileges,
+      platform: 'linux',
     };
 
     render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {

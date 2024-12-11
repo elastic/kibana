@@ -14,7 +14,7 @@ import {
 } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
-interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
+export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
   };
@@ -30,3 +30,6 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     await use(extendedPageObjects);
   },
 });
+
+export * as testData from './constants';
+export * as assertionMessages from './assertion_messages';

@@ -91,7 +91,14 @@ export default function ({ getService }: FtrProviderContext) {
         'execute_operations_all',
         'scan_operations_all',
       ],
-      uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
+      uptime: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'elastic_managed_locations_enabled',
+        'can_manage_private_locations',
+      ],
       securitySolutionAssistant: [
         'all',
         'read',

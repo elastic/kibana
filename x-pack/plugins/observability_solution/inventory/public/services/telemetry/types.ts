@@ -30,6 +30,11 @@ export interface EntityInventorySearchQuerySubmittedParams {
   action: 'submit' | 'refresh';
 }
 
+export interface EntityInventoryEntityTypeFilteredParams {
+  include_entity_types: string[];
+  exclude_entity_types: string[];
+}
+
 export interface EntityViewClickedParams {
   entity_type: string;
   view_type: 'detail' | 'flyout';
@@ -39,7 +44,8 @@ export type TelemetryEventParams =
   | InventoryAddDataParams
   | EntityInventoryViewedParams
   | EntityInventorySearchQuerySubmittedParams
-  | EntityViewClickedParams;
+  | EntityViewClickedParams
+  | EntityInventoryEntityTypeFilteredParams;
 
 export interface ITelemetryClient {
   reportInventoryAddData(params: InventoryAddDataParams): void;
@@ -48,6 +54,7 @@ export interface ITelemetryClient {
     params: EntityInventorySearchQuerySubmittedParams
   ): void;
   reportEntityViewClicked(params: EntityViewClickedParams): void;
+  reportEntityInventoryEntityTypeFiltered(params: EntityInventoryEntityTypeFilteredParams): void;
 }
 
 export enum TelemetryEventTypes {

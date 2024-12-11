@@ -122,7 +122,7 @@ export class Percentiles extends Component {
                 {/* If the series is grouped by, then these colors are not respected,
                  no need to display the color picker */}
                 {!isGroupedBy && !['table', 'metric', 'markdown'].includes(panel.type) && (
-                  <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+                  <EuiFlexItem grow={false} css={{ justifyContent: 'center' }}>
                     <ColorPicker
                       disableTrash={true}
                       onChange={this.handleColorChange(model)}
