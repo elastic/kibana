@@ -135,6 +135,53 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should return matching items when search is passed in and comments have newline chars', async () => {
+        // create exception list
+        await supertest
+          .post(EXCEPTION_LIST_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getCreateExceptionListDetectionSchemaMock())
+          .expect(200);
+
+        // create exception list items
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getCreateExceptionListItemMinimalSchemaMockWithoutId(),
+            list_id: getCreateExceptionListDetectionSchemaMock().list_id,
+            item_id: '1',
+            entries: [
+              { field: 'host.name', value: 'some host', operator: 'included', type: 'match' },
+            ],
+            comments: [{ comment: 'hello\nworld' }],
+          })
+          .expect(200);
+        await supertest
+          .post(EXCEPTION_LIST_ITEM_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getCreateExceptionListItemMinimalSchemaMockWithoutId(),
+            item_id: '2',
+            list_id: getCreateExceptionListDetectionSchemaMock().list_id,
+            entries: [{ field: 'foo', operator: 'included', type: 'exists' }],
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(
+            `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${
+              getCreateExceptionListMinimalSchemaMock().list_id
+            }&namespace_type=single&page=1&per_page=25&search=host&sort_field=exception-list.created_at&sort_order=desc`
+          )
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        body.data = [removeExceptionListItemServerGeneratedProperties(body.data[0])];
+        expect(body.data[0].comments[0].comment).to.eql('hello\nworld');
+      });
+
       it('should return 404 if given a list_id that does not exist', async () => {
         const { body } = await supertest
           .get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=non_exist`)
