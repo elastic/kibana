@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   InfraWaffleMapBounds,
   InfraFormatter,
@@ -56,7 +56,7 @@ const TickLabel = ({ value, bounds, formatter }: TickProps) => {
   );
 };
 
-const LegendContainer = euiStyled.div`
+const LegendContainer = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -64,7 +64,7 @@ const LegendContainer = euiStyled.div`
   align-items: center;
 `;
 
-const GradientContainer = euiStyled.div`
+const GradientContainer = styled.div`
   height: 200px;
   width: 10px;
   display: flex;
@@ -72,14 +72,14 @@ const GradientContainer = euiStyled.div`
   align-items: stretch;
 `;
 
-const GradientStep = euiStyled.div`
+const GradientStep = styled.div`
   flex: 1 1 auto;
   &:first-child {
-    border-radius: ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
-  props.theme.eui.euiBorderRadius} 0 0;
+    border-radius: ${(props) => props.theme.euiTheme.border.radius}
+      ${(props) => props.theme.euiTheme.border.radius} 0 0;
   }
   &:last-child {
-    border-radius: 0 0 ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
-  props.theme.eui.euiBorderRadius};
+    border-radius: 0 0 ${(props) => props.theme.euiTheme.border.radius}
+      ${(props) => props.theme.euiTheme.border.radius};
   }
 `;
