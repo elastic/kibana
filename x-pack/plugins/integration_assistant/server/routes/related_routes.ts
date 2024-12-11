@@ -36,9 +36,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         version: '1',
         security: {
           authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because the privileges are not defined yet.',
+            requiredPrivileges: ['createIntegrations'],
           },
         },
         validate: {
