@@ -619,7 +619,7 @@
     "@kbn/license-management-plugin": "link:x-pack/plugins/license_management",
     "@kbn/licensing-plugin": "link:x-pack/plugins/licensing",
     "@kbn/links-plugin": "link:src/plugins/links",
-    "@kbn/lists-plugin": "link:x-pack/plugins/lists",
+    "@kbn/lists-plugin": "link:x-pack/solutions/security/plugins/lists",
     "@kbn/llm-tasks-plugin": "link:x-pack/platform/plugins/shared/ai_infra/llm_tasks",
     "@kbn/locator-examples-plugin": "link:examples/locator_examples",
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",

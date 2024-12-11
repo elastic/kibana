@@ -6132,7 +6132,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lists-plugin@link:x-pack/plugins/lists":
+"@kbn/lists-plugin@link:x-pack/solutions/security/plugins/lists":
   version "0.0.0"
   uid ""
 
