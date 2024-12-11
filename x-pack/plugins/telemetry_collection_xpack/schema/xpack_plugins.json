@@ -13775,17 +13775,6 @@
         }
       }
     },
-    "kibana_settings": {
-      "properties": {
-        "xpack": {
-          "properties": {
-            "default_admin_email": {
-              "type": "text"
-            }
-          }
-        }
-      }
-    },
     "logs_data": {
       "properties": {
         "data": {
@@ -14868,94 +14857,6 @@
                 },
                 "avg": {
                   "type": "float"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "monitoring": {
-      "properties": {
-        "hasMonitoringData": {
-          "type": "boolean"
-        },
-        "clusters": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "license": {
-                "type": "keyword"
-              },
-              "clusterUuid": {
-                "type": "keyword"
-              },
-              "metricbeatUsed": {
-                "type": "boolean"
-              },
-              "elasticsearch": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "kibana": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "logstash": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "beats": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
-                }
-              },
-              "apm": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean"
-                  },
-                  "count": {
-                    "type": "long"
-                  },
-                  "metricbeatUsed": {
-                    "type": "boolean"
-                  }
                 }
               }
             }
