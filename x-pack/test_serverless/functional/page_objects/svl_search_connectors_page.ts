@@ -6,6 +6,8 @@
  */
 import expect from '@kbn/expect';
 
+import { filterOptionsList } from '@kbn/test-suites-src/functional/services/combo_box';
+
 import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -63,10 +65,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       async editType(type: string) {
         await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
-        await testSubjects.click('serverlessSearchEditConnectorTypeChoices');
-        await testSubjects.setValue('serverlessSearchEditConnectorTypeChoices', type);
-        await testSubjects.exists(`serverlessSearchConnectorServiceType-${type}`);
-        await testSubjects.click(`serverlessSearchConnectorServiceType-${type}`);
+        await filterOptionsList('serverlessSearchEditConnectorTypeChoices', type);
       },
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
