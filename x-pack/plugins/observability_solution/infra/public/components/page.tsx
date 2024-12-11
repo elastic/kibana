@@ -6,24 +6,23 @@
  */
 
 import { EuiPage } from '@elastic/eui';
+import styled from '@emotion/styled';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
-export const ColumnarPage = euiStyled.div`
+export const ColumnarPage = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 0 auto;
-  width: 100%
+  width: 100%;
 `;
 
-export const PageContent = euiStyled.div`
+export const PageContent = styled.div`
   flex: 1 0 0%;
   display: flex;
   flex-direction: row;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
 `;
 
-export const FlexPage = euiStyled(EuiPage)`
+export const FlexPage = styled(EuiPage)`
   align-self: stretch;
   flex: 1 0 0%;
 `;

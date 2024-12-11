@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiDatePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  WithEuiThemeProps,
+  withEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
-  theme: EuiTheme | undefined;
   interval: string;
 }
 
-export const WaffleTimeControls = withTheme(({ interval }: Props) => {
+type PropsWithTheme = Props & WithEuiThemeProps;
+
+export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) => {
   const { currentTime, isAutoReloading, startAutoReload, stopAutoReload, jumpToTime } =
     useWaffleTimeContext();
 

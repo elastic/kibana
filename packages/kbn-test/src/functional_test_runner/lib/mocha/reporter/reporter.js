@@ -20,6 +20,7 @@ import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 import { setupCiStatsFtrTestGroupReporter } from './ci_stats_ftr_reporter';
+import { ScoutFTRReporter } from './scout_ftr_reporter';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
@@ -64,6 +65,10 @@ export function MochaReporterProvider({ getService }) {
             runner,
           });
         }
+      }
+
+      if (config.get('scoutReporter.enabled')) {
+        new ScoutFTRReporter(runner);
       }
     }
 

@@ -27,6 +27,7 @@ import {
 
 const installPrebuiltRules = async (
   rulesToInstall: StoredRuleMigration[],
+  enabled: boolean,
   securitySolutionContext: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
@@ -41,7 +42,7 @@ const installPrebuiltRules = async (
       if (item.current) {
         acc.installed.push(item.current);
       } else {
-        acc.installable.push(item.target);
+        acc.installable.push({ ...item.target, enabled });
       }
       return acc;
     },
@@ -85,6 +86,7 @@ const installPrebuiltRules = async (
 
 export const installCustomRules = async (
   rulesToInstall: StoredRuleMigration[],
+  enabled: boolean,
   detectionRulesClient: IDetectionRulesClient,
   logger: Logger
 ): Promise<UpdateRuleMigrationInput[]> => {
@@ -96,8 +98,11 @@ export const installCustomRules = async (
       if (!isMigrationCustomRule(rule.elastic_rule)) {
         return;
       }
-      const payloadRule = convertMigrationCustomRuleToSecurityRulePayload(rule.elastic_rule);
-      const createdRule = await detectionRulesClient.createPrebuiltRule({
+      const payloadRule = convertMigrationCustomRuleToSecurityRulePayload(
+        rule.elastic_rule,
+        enabled
+      );
+      const createdRule = await detectionRulesClient.createCustomRule({
         params: payloadRule,
       });
       rulesToUpdate.push({
@@ -132,6 +137,11 @@ interface InstallTranslatedProps {
   ids?: string[];
 
   /**
+   * Indicates whether the installed migration rules should be enabled
+   */
+  enabled: boolean;
+
+  /**
    * The security solution context
    */
   securitySolutionContext: SecuritySolutionApiRequestHandlerContext;
@@ -155,6 +165,7 @@ interface InstallTranslatedProps {
 export const installTranslated = async ({
   migrationId,
   ids,
+  enabled,
   securitySolutionContext,
   rulesClient,
   savedObjectsClient,
@@ -186,6 +197,7 @@ export const installTranslated = async ({
 
   const updatedPrebuiltRules = await installPrebuiltRules(
     prebuiltRulesToInstall,
+    enabled,
     securitySolutionContext,
     rulesClient,
     savedObjectsClient,
@@ -194,6 +206,7 @@ export const installTranslated = async ({
 
   const updatedCustomRules = await installCustomRules(
     customRulesToInstall,
+    enabled,
     detectionRulesClient,
     logger
   );

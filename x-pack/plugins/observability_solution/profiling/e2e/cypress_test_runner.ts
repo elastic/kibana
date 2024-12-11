@@ -13,6 +13,10 @@ import { FtrProviderContext } from './ftr_provider_context';
 import { loadProfilingData } from './load_profiling_data';
 import { setupProfilingResources } from './setup_profiling_resources';
 
+const DEFAULT_HEADERS = {
+  'kbn-xsrf': true,
+  'x-elastic-internal-origin': 'Kibana',
+};
 export async function cypressTestRunner({
   ftrProviderContext: { getService },
   cypressExecution,
@@ -42,11 +46,11 @@ export async function cypressTestRunner({
   });
 
   // Ensure Fleet setup is complete
-  await axios.post(`${kibanaUrlWithAuth}/api/fleet/setup`, {}, { headers: { 'kbn-xsrf': true } });
+  await axios.post(`${kibanaUrlWithAuth}/api/fleet/setup`, {}, { headers: DEFAULT_HEADERS });
 
   const profilingResources = await axios.get<{ has_setup: boolean; has_data: boolean }>(
     `${kibanaUrlWithAuth}/internal/profiling/setup/es_resources`,
-    { headers: { 'kbn-xsrf': true } }
+    { headers: DEFAULT_HEADERS }
   );
 
   // Only runs the setup once. This is useful when runing the tests with --times args

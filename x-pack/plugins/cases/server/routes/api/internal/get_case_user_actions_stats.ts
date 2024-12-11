@@ -9,10 +9,12 @@ import type { userActionApiV1 } from '../../../../common/types/api';
 import { INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const getCaseUserActionStatsRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

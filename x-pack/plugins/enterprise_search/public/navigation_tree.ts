@@ -21,11 +21,9 @@ import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
 
 export interface DynamicSideNavItems {
-  appSearch?: Array<EuiSideNavItemType<unknown>>;
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
   searchApps?: Array<EuiSideNavItemType<unknown>>;
-  workplaceSearch?: Array<EuiSideNavItemType<unknown>>;
 }
 
 const title = i18n.translate(
@@ -79,7 +77,7 @@ export const getNavigationTreeDefinition = ({
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
       debounceTime(10),
-      map(({ appSearch, indices, searchApps, collections, workplaceSearch }) => {
+      map(({ indices, searchApps, collections }) => {
         const navTree: NavigationTreeDefinition = {
           body: [
             {
@@ -127,7 +125,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/content${SEARCH_INDICES_PATH}`)
+                          prepend(`/app/elasticsearch/content${SEARCH_INDICES_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchContent:searchIndices',
@@ -163,7 +161,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/applications${SEARCH_APPLICATIONS_PATH}`)
+                          prepend(`/app/elasticsearch/applications${SEARCH_APPLICATIONS_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
@@ -190,7 +188,7 @@ export const getNavigationTreeDefinition = ({
 
                         if (someSubItemSelected) return false;
 
-                        return pathNameSerialized === prepend(`/app/enterprise_search/analytics`);
+                        return pathNameSerialized === prepend(`/app/elasticsearch/analytics`);
                       },
                       link: 'enterpriseSearchAnalytics',
                       renderAs: 'item',
@@ -213,50 +211,6 @@ export const getNavigationTreeDefinition = ({
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
-                  }),
-                },
-                {
-                  children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(
-                          prepend('/app/enterprise_search/app_search')
-                        );
-                      },
-                      link: 'appSearch:engines',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.entsearch.appSearch',
-                        {
-                          defaultMessage: 'App Search',
-                        }
-                      ),
-                      ...(appSearch
-                        ? {
-                            children: appSearch.map(euiItemTypeToNodeDefinition),
-                            isCollapsible: false,
-                            renderAs: 'accordion',
-                          }
-                        : {}),
-                    },
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(
-                          prepend('/app/enterprise_search/workplace_search')
-                        );
-                      },
-                      link: 'workplaceSearch',
-                      ...(workplaceSearch
-                        ? {
-                            children: workplaceSearch.map(euiItemTypeToNodeDefinition),
-                            isCollapsible: false,
-                            renderAs: 'accordion',
-                          }
-                        : {}),
-                    },
-                  ],
-                  id: 'entsearch',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.entsearch', {
-                    defaultMessage: 'Enterprise Search',
                   }),
                 },
                 {

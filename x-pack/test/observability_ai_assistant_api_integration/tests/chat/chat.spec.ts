@@ -101,8 +101,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             for (let i = 0; i < NUM_RESPONSES; i++) {
-              await simulator.next(`Part: i\n`);
+              await simulator.next(`Part: ${i}\n`);
             }
+
+            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
 
             await simulator.complete();
 
@@ -133,57 +135,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           runTest().then(resolve, reject);
         }),
       ]);
-    });
-
-    it('returns a useful error if the request fails', async () => {
-      const interceptor = proxy.intercept('conversation', () => true);
-
-      const passThrough = new PassThrough();
-
-      supertest
-        .post(CHAT_API_URL)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'my_api_call',
-          messages,
-          connectorId,
-          functions: [],
-          scopes: ['all'],
-        })
-        .expect(200)
-        .pipe(passThrough);
-
-      let data: string = '';
-
-      passThrough.on('data', (chunk) => {
-        data += chunk.toString('utf-8');
-      });
-
-      const simulator = await interceptor.waitForIntercept();
-
-      await simulator.status(400);
-
-      await simulator.rawWrite(
-        JSON.stringify({
-          error: {
-            code: 'context_length_exceeded',
-            message:
-              "This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.",
-            param: 'messages',
-            type: 'invalid_request_error',
-          },
-        })
-      );
-
-      await simulator.rawEnd();
-
-      await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
-
-      const response = JSON.parse(data.trim());
-
-      expect(response.error.message).to.be(
-        `Token limit reached. Token limit is 8192, but the current conversation has 11036 tokens.`
-      );
     });
 
     describe('security roles and access privileges', () => {

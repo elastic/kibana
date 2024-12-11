@@ -15,7 +15,8 @@ const TEST_SUBJ = Object.freeze({
 });
 
 export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
-  ConsoleResponseActionCommands,
+  // TODO: currently runscript is not supported in Endpoint
+  Exclude<ConsoleResponseActionCommands, 'runscript'>,
   string
 > => {
   return {
@@ -28,6 +29,8 @@ export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
     execute: 'endpointResponseActionsConsole-commandList-Responseactions-execute',
     upload: 'endpointResponseActionsConsole-commandList-Responseactions-upload',
     scan: 'endpointResponseActionsConsole-commandList-Responseactions-scan',
+    // Not implemented in Endpoint yet
+    // runscript: 'endpointResponseActionsConsole-commandList-Responseactions-runscript',
   };
 };
 

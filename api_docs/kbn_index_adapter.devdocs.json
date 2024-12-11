@@ -1306,7 +1306,7 @@
         "label": "EcsFieldMap",
         "description": [],
         "signature": [
-          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; fields?: Record<string, { type: string; }> | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
           {
             "pluginId": "@kbn/index-adapter",
             "scope": "server",
@@ -1329,7 +1329,7 @@
         "label": "FieldMap",
         "description": [],
         "signature": [
-          "{ [P in T]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          "{ [P in T]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; fields?: Record<string, { type: string; }> | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
           {
             "pluginId": "@kbn/index-adapter",
             "scope": "server",
@@ -1438,7 +1438,7 @@
         "label": "ecsFieldMap",
         "description": [],
         "signature": [
-          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; fields?: Record<string, { type: string; }> | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
           {
             "pluginId": "@kbn/index-adapter",
             "scope": "server",

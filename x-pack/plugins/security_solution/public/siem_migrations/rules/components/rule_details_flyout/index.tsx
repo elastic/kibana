@@ -84,7 +84,8 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
     const rule = useMemo(() => {
       if (isMigrationCustomRule(ruleMigration.elastic_rule)) {
         return convertMigrationCustomRuleToSecurityRulePayload(
-          ruleMigration.elastic_rule
+          ruleMigration.elastic_rule,
+          false
         ) as RuleResponse; // TODO: we need to adjust RuleOverviewTab to allow partial RuleResponse as a parameter;
       }
       return matchedPrebuiltRule;

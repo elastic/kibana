@@ -6,10 +6,10 @@
  */
 
 export const ROUTES = {
-  CRAWLER_INDEX: '/app/enterprise_search/content/crawlers/new_crawler',
-  NEW_INDEX: '/app/enterprise_search/content/search_indices/new_index',
-  SEARCH_INDICES_OVERVIEW: '/app/enterprise_search/content/search_indices/',
-  SELECT_CONNECTOR: '/app/enterprise_search/content/connectors/select_connector',
+  CRAWLER_INDEX: '/app/elasticsearch/content/crawlers/new_crawler',
+  NEW_INDEX: '/app/elasticsearch/content/search_indices/new_index',
+  SEARCH_INDICES_OVERVIEW: '/app/elasticsearch/content/search_indices/',
+  SELECT_CONNECTOR: '/app/elasticsearch/content/connectors/select_connector',
 };
 
 export const SEARCH_INDICES = {
@@ -66,5 +66,5 @@ export const INDEX_OVERVIEW = {
 };
 
 export const getIndexRoute = (indexName: string) => {
-  return `/app/enterprise_search/content/search_indices/search-${indexName}/`;
+  return `/app/elasticsearch/content/search_indices/search-${indexName}/`;
 };

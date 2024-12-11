@@ -12,10 +12,12 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const pushCaseRoute: CaseRoute = createCasesRoute({
   method: 'post',
   path: CASE_PUSH_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',
     summary: `Push a case to an external service`,

@@ -16,6 +16,8 @@ export const SentinelOneSecretsSchema = schema.object({
   token: schema.string(),
 });
 
+export const SentinelOneApiDoNotValidateResponsesSchema = schema.any();
+
 export const SentinelOneBaseApiResponseSchema = schema.maybe(
   schema.object({}, { unknowns: 'allow' })
 );

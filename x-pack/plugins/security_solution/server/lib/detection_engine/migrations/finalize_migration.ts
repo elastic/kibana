@@ -35,12 +35,14 @@ export const finalizeMigration = async ({
   signalsAlias,
   soClient,
   username,
+  legacySiemSignalsAlias,
 }: {
   esClient: ElasticsearchClient;
   migration: SignalsMigrationSO;
   signalsAlias: string;
   soClient: SavedObjectsClientContract;
   username: string;
+  legacySiemSignalsAlias: string;
 }): Promise<SignalsMigrationSO> => {
   if (!isMigrationPending(migration)) {
     return migration;
@@ -86,6 +88,7 @@ export const finalizeMigration = async ({
     esClient,
     newIndex: destinationIndex,
     oldIndex: sourceIndex,
+    legacySiemSignalsAlias,
   });
 
   const updatedMigration = await updateMigrationSavedObject({

@@ -10,7 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Story } from '@storybook/react';
 import { RelatedIntegrationsReadOnly } from './related_integrations';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
-import { FieldReadOnly } from '../../field_readonly';
+import { FieldFinalReadOnly } from '../../field_final_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockCustomQueryRule } from '../../storybook/mocks';
 
@@ -45,9 +45,12 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
+    <ThreeWayDiffStorybookProviders
+      finalDiffableRule={args.finalDiffableRule}
+      fieldName="related_integrations"
+    >
       <MockRelatedIntegrationsData>
-        <FieldReadOnly fieldName="related_integrations" />
+        <FieldFinalReadOnly />
       </MockRelatedIntegrationsData>
     </ThreeWayDiffStorybookProviders>
   );

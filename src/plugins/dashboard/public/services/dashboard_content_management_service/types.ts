@@ -20,6 +20,7 @@ import {
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
+import { DashboardState } from '../../dashboard_api/types';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;
@@ -66,7 +67,6 @@ export interface LoadDashboardReturn {
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: SavedDashboardInput;
-  anyMigrationRun?: boolean;
 
   /**
    * Raw references returned directly from the Dashboard saved object. These
@@ -82,7 +82,7 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 
 export interface SaveDashboardProps {
   controlGroupReferences?: Reference[];
-  currentState: SavedDashboardInput;
+  currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   panelReferences?: Reference[];
   lastSavedId?: string;

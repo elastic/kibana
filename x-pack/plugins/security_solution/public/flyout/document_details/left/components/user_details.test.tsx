@@ -37,7 +37,7 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
-import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 jest.mock('@kbn/expandable-flyout');
@@ -291,10 +291,11 @@ describe('<UserDetails />', () => {
 
       getAllByTestId(USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID)[0].click();
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: NetworkPanelKey,
+        id: NetworkPreviewPanelKey,
         params: {
           ip: '100.XXX.XXX',
           flowTarget: 'source',
+          scopeId: defaultProps.scopeId,
           banner: NETWORK_PREVIEW_BANNER,
         },
       });

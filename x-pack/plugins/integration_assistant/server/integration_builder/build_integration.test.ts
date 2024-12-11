@@ -209,24 +209,29 @@ describe('buildPackage', () => {
 
     await buildPackage(testIntegration);
 
-    expect(createReadme).toHaveBeenCalledWith(integrationPath, testIntegration.name, [
-      {
-        datastream: firstDatastreamName,
-        fields: [
-          { name: 'name a', description: 'description 1', type: 'type 1' },
+    expect(createReadme).toHaveBeenCalledWith(
+      integrationPath,
+      testIntegration.name,
+      testIntegration.dataStreams,
+      [
+        {
+          datastream: firstDatastreamName,
+          fields: [
+            { name: 'name a', description: 'description 1', type: 'type 1' },
 
-          { name: 'name b', description: 'description 1', type: 'type 1' },
-        ],
-      },
-      {
-        datastream: secondDatastreamName,
-        fields: [
-          { name: 'name c', description: 'description 2', type: 'type 2' },
-          { name: 'name d', description: 'description 2', type: 'type 2' },
-          { name: 'name e', description: 'description 3', type: 'type 3' },
-        ],
-      },
-    ]);
+            { name: 'name b', description: 'description 1', type: 'type 1' },
+          ],
+        },
+        {
+          datastream: secondDatastreamName,
+          fields: [
+            { name: 'name c', description: 'description 2', type: 'type 2' },
+            { name: 'name d', description: 'description 2', type: 'type 2' },
+            { name: 'name e', description: 'description 3', type: 'type 3' },
+          ],
+        },
+      ]
+    );
   });
 });
 

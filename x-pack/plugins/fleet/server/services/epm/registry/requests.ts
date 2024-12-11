@@ -13,6 +13,8 @@ import { streamToString } from '../streams';
 import { appContextService } from '../../app_context';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 
+import { airGappedUtils } from '../airgapped';
+
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
@@ -20,6 +22,7 @@ type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 // not sure what to call this function, but we're not exporting it
 async function registryFetch(url: string) {
   const response = await fetch(url, getFetchOptions(url));
+
   if (response.ok) {
     return response;
   } else {
@@ -34,7 +37,16 @@ async function registryFetch(url: string) {
   }
 }
 
-export async function getResponse(url: string, retries: number = 5): Promise<Response> {
+export async function getResponse(url: string, retries: number = 5): Promise<Response | null> {
+  const logger = appContextService.getLogger();
+
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    logger.debug(
+      'getResponse: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+    );
+    return null;
+  }
+
   try {
     // we only want to retry certain failures like network issues
     // the rest should only try the one time then fail as they do now
@@ -72,11 +84,20 @@ export async function getResponseStream(
   retries?: number
 ): Promise<NodeJS.ReadableStream> {
   const res = await getResponse(url, retries);
-  return res.body;
+  if (res) {
+    return res?.body;
+  }
+  throw new RegistryResponseError('isAirGapped config enabled, registry not reacheable');
 }
 
 export async function fetchUrl(url: string, retries?: number): Promise<string> {
-  return getResponseStream(url, retries).then(streamToString);
+  const logger = appContextService.getLogger();
+  try {
+    return getResponseStream(url, retries).then(streamToString);
+  } catch (error) {
+    logger.warn(`getResponseStream failed with error: ${error}`);
+    throw error;
+  }
 }
 
 // node-fetch throws a FetchError for those types of errors and
