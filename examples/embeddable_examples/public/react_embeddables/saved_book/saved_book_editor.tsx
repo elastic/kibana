@@ -126,6 +126,7 @@ export const SavedBookEditor = ({
       attributesManager.numberOfPages
     );
   const [addToLibrary, setAddToLibrary] = useState(Boolean(libraryId));
+  const [saving, setSaving] = useState(false);
 
   return (
     <>
@@ -149,6 +150,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiFieldText
+            disabled={saving}
             value={authorName ?? ''}
             onChange={(e) => attributesManager.authorName.next(e.target.value)}
           />
@@ -159,6 +161,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiFieldText
+            disabled={saving}
             value={bookTitle ?? ''}
             onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
           />
@@ -169,6 +172,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiFieldNumber
+            disabled={saving}
             value={numberOfPages ?? ''}
             onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
           />
@@ -179,6 +183,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiTextArea
+            disabled={saving}
             value={synopsis ?? ''}
             onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
           />
@@ -187,7 +192,7 @@ export const SavedBookEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onCancel} flush="left">
+            <EuiButtonEmpty disabled={saving} iconType="cross" onClick={onCancel} flush="left">
               {i18n.translate('embeddableExamples.savedBook.editor.cancel', {
                 defaultMessage: 'Discard changes',
               })}
@@ -201,11 +206,19 @@ export const SavedBookEditor = ({
                     defaultMessage: 'Save to library',
                   })}
                   checked={addToLibrary}
+                  disabled={saving}
                   onChange={() => setAddToLibrary(!addToLibrary)}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => onSubmit(addToLibrary)} fill>
+                <EuiButton
+                  isLoading={saving}
+                  onClick={() => {
+                    setSaving(true);
+                    onSubmit(addToLibrary);
+                  }}
+                  fill
+                >
                   {isCreate
                     ? i18n.translate('embeddableExamples.savedBook.editor.create', {
                         defaultMessage: 'Create book',

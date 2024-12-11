@@ -174,7 +174,7 @@ export function initializePanelsManager(
     return titles;
   }
 
-  async function duplicateReactEmbeddableInput(
+  function duplicateReactEmbeddableInput(
     childApi: unknown,
     panelToClone: DashboardPanelState,
     panelTitles: string[]
@@ -191,7 +191,7 @@ export function initializePanelsManager(
      * use in-place library transforms
      */
     if (apiHasLibraryTransforms(childApi)) {
-      const byValueSerializedState = await childApi.getByValueState();
+      const byValueSerializedState = childApi.getByValueState();
       if (panelToClone.references) {
         pushReferences(prefixReferencesFromPanel(id, panelToClone.references));
       }
@@ -277,7 +277,7 @@ export function initializePanelsManager(
       canRemovePanels: () => trackPanel.expandedPanelId.value === undefined,
       children$,
       duplicatePanel: async (idToDuplicate: string) => {
-        const panelToClone = await getDashboardPanelFromId(idToDuplicate);
+        const panelToClone = getDashboardPanelFromId(idToDuplicate);
 
         const duplicatedPanelState = await duplicateReactEmbeddableInput(
           children$.value[idToDuplicate],
@@ -407,10 +407,10 @@ export function initializePanelsManager(
         }
         if (resetChangedPanelCount) children$.next(currentChildren);
       },
-      getState: async (): Promise<{
+      getState: (): {
         panels: DashboardState['panels'];
         references: Reference[];
-      }> => {
+      } => {
         const references: Reference[] = [];
 
         const panels = Object.keys(panels$.value).reduce((acc, id) => {
