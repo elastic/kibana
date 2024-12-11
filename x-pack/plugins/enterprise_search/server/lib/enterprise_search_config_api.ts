@@ -13,7 +13,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 import { ConfigType } from '..';
 import { isVersionMismatch } from '../../common/is_version_mismatch';
 import { stripTrailingSlash } from '../../common/strip_slashes';
-import { InitialAppData } from '../../common/types';
+import { InitialAppData, ProductAccess } from '../../common/types';
 
 import { entSearchHttpAgent } from './enterprise_search_http_agent';
 
@@ -97,13 +97,21 @@ export const callEnterpriseSearchConfigAPI = async ({
 
     warnMismatchedVersions(data?.version?.number, log);
 
+    // When `appsDisabled` is used we explicitly disable App Search & Workplace Search in Kibana
+    const access: ProductAccess = config.appsDisabled
+      ? {
+          hasAppSearchAccess: false,
+          hasWorkplaceSearchAccess: false,
+        }
+      : {
+          hasAppSearchAccess: !!data?.current_user?.access?.app_search,
+          hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
+        };
+
     return {
       enterpriseSearchVersion: data?.version?.number,
       kibanaVersion: kibanaPackageJson.version,
-      access: {
-        hasAppSearchAccess: !!data?.current_user?.access?.app_search,
-        hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
-      },
+      access,
       features: {
         hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,

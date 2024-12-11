@@ -16,6 +16,7 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 export const configSchema = schema.object({
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  appsDisabled: schema.boolean({ defaultValue: false }),
   canDeployEntSearch: schema.boolean({ defaultValue: true }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   enabled: schema.boolean({ defaultValue: true }),

@@ -44,6 +44,10 @@ export const checkAccess = async ({
   request,
   log,
 }: CheckAccess): Promise<ProductAccess> => {
+  if (config.appsDisabled) {
+    // When `appsDisabled` is used we explicitly disable App Search & Workplace Search in Kibana
+    return DENY_ALL_PLUGINS;
+  }
   const isRbacEnabled = security.authz.mode.useRbacForRequest(request);
 
   // If security has been disabled, always hide app search and workplace search
