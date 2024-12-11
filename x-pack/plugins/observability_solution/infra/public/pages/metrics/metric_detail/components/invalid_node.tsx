@@ -8,7 +8,7 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { ViewSourceConfigurationButton } from '../../../../components/source_configuration/view_source_configuration_button';
 
@@ -72,6 +72,6 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
   );
 };
 
-const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
+const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
 `;

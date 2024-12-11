@@ -17,6 +17,7 @@ import { SearchBar, IUnifiedSearchPluginServices } from '@kbn/unified-search-plu
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { merge } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { of } from 'rxjs';
 import type { EsqlQueryMeta } from '../public/services/esql';
 import type { InvestigateAppServices } from '../public/services/types';
 import { InvestigateAppKibanaContext } from '../public/hooks/use_kibana';
@@ -54,6 +55,10 @@ export function getMockInvestigateAppContext(): DeeplyMockedKeys<InvestigateAppK
         }),
     },
     charts: {} as any,
+    investigateAppRepositoryClient: {
+      fetch: jest.fn().mockImplementation(() => Promise.resolve()),
+      stream: jest.fn().mockImplementation(() => of()) as any,
+    },
   };
 
   const core = coreMock.createStart();

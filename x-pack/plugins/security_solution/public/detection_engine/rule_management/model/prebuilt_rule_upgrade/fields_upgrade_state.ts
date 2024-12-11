@@ -5,6 +5,16 @@
  * 2.0.
  */
 
-import type { FieldUpgradeState } from './field_upgrade_state';
+import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
+import type { FieldUpgradeStateEnum } from './field_upgrade_state_enum';
 
-export type FieldsUpgradeState = Record<string, FieldUpgradeState>;
+export type FieldsUpgradeState = Record<
+  string,
+  | {
+      state: Exclude<FieldUpgradeStateEnum, FieldUpgradeStateEnum.Accepted>;
+    }
+  | {
+      state: FieldUpgradeStateEnum.Accepted;
+      resolvedValue: DiffableAllFields[keyof DiffableAllFields];
+    }
+>;

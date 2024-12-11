@@ -9,7 +9,8 @@ import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
-import { TaskManagerConfig } from '../config';
+import { DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS, TaskManagerConfig } from '../config';
+import { isClusterBlockException } from '../lib/bulk_update_error';
 
 interface DiscoveryServiceParams {
   config: TaskManagerConfig['discovery'];
@@ -59,6 +60,7 @@ export class KibanaDiscoveryService {
   }
 
   private async scheduleUpsertCurrentNode() {
+    let retryInterval = this.discoveryInterval;
     if (!this.stopped) {
       const lastSeenDate = new Date();
       const lastSeen = lastSeenDate.toISOString();
@@ -69,9 +71,12 @@ export class KibanaDiscoveryService {
           this.started = true;
         }
       } catch (e) {
+        if (isClusterBlockException(e)) {
+          retryInterval = DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS;
+        }
         if (!this.started) {
           this.logger.error(
-            `Kibana Discovery Service couldn't be started and will be retried in ${this.discoveryInterval}ms, error:${e.message}`
+            `Kibana Discovery Service couldn't be started and will be retried in ${retryInterval}ms, error:${e.message}`
           );
         } else {
           this.logger.error(
@@ -82,7 +87,7 @@ export class KibanaDiscoveryService {
         this.timer = setTimeout(
           async () => await this.scheduleUpsertCurrentNode(),
           // The timeout should not be less than the default timeout of two seconds
-          Math.max(this.discoveryInterval - (Date.now() - lastSeenDate.getTime()), DEFAULT_TIMEOUT)
+          Math.max(retryInterval - (Date.now() - lastSeenDate.getTime()), DEFAULT_TIMEOUT)
         );
       }
     }

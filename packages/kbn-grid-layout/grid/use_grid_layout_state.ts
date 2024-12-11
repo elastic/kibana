@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
+import { cloneDeep } from 'lodash';
 
 import {
   ActivePanel,
@@ -21,6 +22,7 @@ import {
   RuntimeGridSettings,
 } from './types';
 import { shouldShowMobileView } from './utils/mobile_view';
+import { resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
@@ -59,7 +61,12 @@ export const useGridLayoutState = ({
   }, [accessMode, accessMode$]);
 
   const gridLayoutStateManager = useMemo(() => {
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
+    const resolvedLayout = cloneDeep(layout);
+    resolvedLayout.forEach((row, rowIndex) => {
+      resolvedLayout[rowIndex] = resolveGridRow(row);
+    });
+
+    const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
@@ -77,6 +84,7 @@ export const useGridLayoutState = ({
       panelIds$,
       gridLayout$,
       activePanel$,
+      accessMode$,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,

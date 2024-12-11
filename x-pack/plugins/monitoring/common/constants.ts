@@ -10,6 +10,8 @@ import { CommonAlertParamDetail, ExpressionConfig } from './types/alerts';
 import { AlertParamType } from './enums';
 import { validateDuration } from './validate_duration';
 
+export const USAGE_COLLECTION_APP_NAME = 'stack_monitoring';
+
 /**
  * Helper string to add as a tag in every logging call
  */

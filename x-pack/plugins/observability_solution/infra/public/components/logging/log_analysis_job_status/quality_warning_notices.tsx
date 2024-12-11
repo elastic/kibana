@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { groupBy } from 'lodash';
 import React, { Fragment, useState } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   CategoryQualityWarning,
   CategoryQualityWarningReason,
@@ -83,10 +83,10 @@ export const CategoryQualityWarnings: React.FC<{
   );
 };
 
-const QualityWarningReasonDescription = euiStyled(EuiDescriptionListDescription)`
+const QualityWarningReasonDescription = styled(EuiDescriptionListDescription)`
   display: list-item;
   list-style-type: disc;
-  margin-left: ${(props) => props.theme.eui.euiSizeM};
+  margin-left: ${(props) => props.theme.euiTheme.size.m};
 `;
 
 const categoryQualityWarningCalloutTitle = i18n.translate(

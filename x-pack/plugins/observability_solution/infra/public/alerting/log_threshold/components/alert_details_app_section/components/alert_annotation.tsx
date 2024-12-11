@@ -8,13 +8,14 @@
 import React from 'react';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import moment from 'moment';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+
 export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
   const { uiSettings } = useKibanaContextForPlugin().services;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <LineAnnotation
@@ -32,7 +33,7 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
       style={{
         line: {
           strokeWidth: 3,
-          stroke: euiThemeVars.euiColorDangerText,
+          stroke: euiTheme.colors.textDanger,
           opacity: 1,
         },
       }}

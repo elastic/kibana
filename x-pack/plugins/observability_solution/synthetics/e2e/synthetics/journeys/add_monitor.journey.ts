@@ -201,7 +201,7 @@ const createMonitorJourney = ({
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         await page.waitForSelector('text=Monitor name already exists');
         await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
-        await page.waitForSelector('text=Cancel');
+        await page.click('text=Cancel');
       });
 
       step('delete monitor', async () => {

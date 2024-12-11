@@ -32,6 +32,7 @@ export const registerCollector: RegisterCollector = ({
   usageCollection,
   logger,
   riskEngineIndexPatterns,
+  legacySignalsIndex,
 }) => {
   if (!usageCollection) {
     logger.debug('Usage collection is undefined, therefore returning early without registering it');
@@ -3076,6 +3077,21 @@ export const registerCollector: RegisterCollector = ({
             },
           },
         },
+        legacy_siem_signals: {
+          non_migrated_indices_total: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of non migrated legacy siem signals indices',
+            },
+          },
+          spaces_total: {
+            type: 'long',
+            _meta: {
+              description:
+                'Total number of Kibana spaces that have non migrated legacy siem signals indices',
+            },
+          },
+        },
       },
       endpointMetrics: {
         unique_endpoint_count: {
@@ -3130,6 +3146,7 @@ export const registerCollector: RegisterCollector = ({
             savedObjectsClient,
             logger,
             mlClient: ml,
+            legacySignalsIndex,
           }),
           getEndpointMetrics({ esClient, logger }),
           getDashboardMetrics({

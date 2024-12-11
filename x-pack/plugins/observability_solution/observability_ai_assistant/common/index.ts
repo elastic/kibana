@@ -17,6 +17,8 @@ export {
 
 export type {
   ChatCompletionChunkEvent,
+  ChatCompletionMessageEvent,
+  TokenCountEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   MessageAddEvent,

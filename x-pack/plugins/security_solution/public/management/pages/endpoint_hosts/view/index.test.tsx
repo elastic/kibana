@@ -192,6 +192,11 @@ describe('when on the endpoint list page', () => {
     // to use services that we have in our test `mockedContext`
     (useToasts as jest.Mock).mockReturnValue(coreStart.notifications.toasts);
     (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
+
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      siem: { readPolicyManagement: true },
+    };
   });
 
   it('should NOT display timeline', async () => {

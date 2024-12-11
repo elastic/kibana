@@ -9,6 +9,7 @@ paths:
       operationId: FinalizeAlertsMigration
       x-codegen-enabled: true
       summary: Finalize detection alert migrations
+      deprecated: true
       description: |
         Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
         The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,

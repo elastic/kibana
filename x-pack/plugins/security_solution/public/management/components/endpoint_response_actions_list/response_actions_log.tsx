@@ -38,6 +38,7 @@ export const ResponseActionsLog = memo<
     isFlyout?: boolean;
     setIsDataInResponse?: (isData: boolean) => void;
     'data-test-subj'?: string;
+    'data-test-height'?: number;
   }
 >(
   ({
@@ -46,6 +47,7 @@ export const ResponseActionsLog = memo<
     isFlyout = true,
     setIsDataInResponse,
     'data-test-subj': dataTestSubj = 'response-actions-list',
+    'data-test-height': dataTestHeight,
   }) => {
     const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
       useUrlPagination();
@@ -295,6 +297,7 @@ export const ResponseActionsLog = memo<
           onTimeChange={onTimeChange}
           showHostsFilter={showHostNames}
           data-test-subj={dataTestSubj}
+          data-test-height={dataTestHeight}
         />
         {isFetched && !totalItemCount ? (
           <ManagementEmptyStateWrapper>

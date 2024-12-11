@@ -33,6 +33,8 @@ import { AgentRequestDiagnosticsModal } from '../../components/agent_request_dia
 
 import { useExportCSV } from '../hooks/export_csv';
 
+import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
+
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
@@ -82,6 +84,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
+  const [isExportCSVModalOpen, setIsExportCSVModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
@@ -241,10 +244,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             icon: <EuiIcon type="exportAction" size="m" />,
             onClick: () => {
               closeMenu();
-              generateReportingJobCSV(agents, {
-                field: sortField,
-                direction: sortOrder,
-              });
+              setIsExportCSVModalOpen(true);
             },
           },
         ]
@@ -285,6 +285,23 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
               setIsUnenrollModalOpen(false);
               refreshAgents({ refreshTags: true });
             }}
+          />
+        </EuiPortal>
+      )}
+      {isExportCSVModalOpen && (
+        <EuiPortal>
+          <AgentExportCSVModal
+            onSubmit={(columns: Array<{ field: string }>) => {
+              generateReportingJobCSV(agents, columns, {
+                field: sortField,
+                direction: sortOrder,
+              });
+              setIsExportCSVModalOpen(false);
+            }}
+            onClose={() => {
+              setIsExportCSVModalOpen(false);
+            }}
+            agentCount={agentCount}
           />
         </EuiPortal>
       )}

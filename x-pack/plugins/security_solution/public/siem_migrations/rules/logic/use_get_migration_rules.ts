@@ -18,6 +18,8 @@ export const useGetMigrationRules = (params: {
   migrationId: string;
   page?: number;
   perPage?: number;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
   searchTerm?: string;
 }) => {
   const { addError } = useAppToasts();

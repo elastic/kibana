@@ -23,6 +23,8 @@ import {
 import type { Agent } from '../../../../../../../common';
 import { getSortConfig, removeSOAttributes } from '../../../../../../../common';
 
+import type { ExportField } from '../../components/agent_export_csv_modal';
+
 import { getSortFieldForAPI } from './use_fetch_agents_data';
 
 export function useExportCSV(enableExportCSV?: boolean) {
@@ -36,19 +38,9 @@ export function useExportCSV(enableExportCSV?: boolean) {
 
   const getJobParams = (
     agents: Agent[] | string,
+    columns: Array<{ field: string }>,
     sortOptions?: { field?: string; direction?: string }
   ) => {
-    // TODO pass columns from Agent list UI
-    // TODO set readable column names
-    const columns = [
-      { field: 'agent.id' },
-      { field: 'status' },
-      { field: 'local_metadata.host.hostname' },
-      { field: 'policy_id' }, // policy name would need to be enriched
-      { field: 'last_checkin' },
-      { field: 'local_metadata.elastic.agent.version' },
-    ];
-
     const index = new DataView({
       spec: {
         title: '.fleet-agents',
@@ -108,9 +100,12 @@ export function useExportCSV(enableExportCSV?: boolean) {
   // copied and adapted logic from here: https://github.com/elastic/kibana/blob/2846a162de7e56d2107eeb2e33e006a3310a4ae1/packages/kbn-reporting/public/share/share_context_menu/register_csv_modal_reporting.tsx#L86
   const generateReportingJobCSV = (
     agents: Agent[] | string,
+    columns: ExportField[],
     sortOptions?: { field?: string; direction?: string }
   ) => {
-    const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams(agents, sortOptions));
+    const decoratedJobParams = apiClient.getDecoratedJobParams(
+      getJobParams(agents, columns, sortOptions)
+    );
     return apiClient
       .createReportingShareJob('csv_searchsource', decoratedJobParams)
       .then(() => {
