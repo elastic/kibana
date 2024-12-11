@@ -91,6 +91,7 @@ export const SearchExamplesApp = ({
   const [timeTook, setTimeTook] = useState<number | undefined>();
   const [total, setTotal] = useState<number>(100);
   const [loaded, setLoaded] = useState<number>(0);
+  const [executedAt, setExecutedAt] = useState<number>(0);
   const [dataView, setDataView] = useState<DataView | null>();
   const [fields, setFields] = useState<DataViewField[]>();
   const [selectedFields, setSelectedFields] = useState<DataViewField[]>([]);
@@ -113,6 +114,7 @@ export const SearchExamplesApp = ({
     setLoaded(response.loaded!);
     setTotal(response.total!);
     setTimeTook(response.rawResponse.took);
+    setExecutedAt((response as IMyStrategyResponse).executed_at);
   }
 
   // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
@@ -215,7 +217,6 @@ export const SearchExamplesApp = ({
                 res.rawResponse.aggregations[1].value
               : undefined;
             const isCool = (res as IMyStrategyResponse).cool;
-            const executedAt = (res as IMyStrategyResponse).executed_at;
             const message = (
               <EuiText>
                 Searched {res.rawResponse.hits.total as number} documents. <br />
@@ -223,10 +224,6 @@ export const SearchExamplesApp = ({
                 {aggResult ? Math.floor(aggResult) : 0}.
                 <br />
                 {isCool ? `Is it Cool? ${isCool}` : undefined}
-                <br />
-                <EuiText data-test-subj="requestExecutedAt">
-                  {executedAt ? `Executed at? ${executedAt}` : undefined}
-                </EuiText>
               </EuiText>
             );
             notifications.toasts.addSuccess(
@@ -469,6 +466,13 @@ export const SearchExamplesApp = ({
               id="searchExamples.timestampText"
               defaultMessage="Took: {time} ms"
               values={{ time: timeTook ?? 'Unknown' }}
+            />
+          </EuiText>
+          <EuiText size="xs" data-test-subj="requestExecutedAt">
+            <FormattedMessage
+              id="searchExamples.executedAtText"
+              defaultMessage="Executed at: {time}"
+              values={{ time: executedAt ?? 'Unknown' }}
             />
           </EuiText>
           <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />
