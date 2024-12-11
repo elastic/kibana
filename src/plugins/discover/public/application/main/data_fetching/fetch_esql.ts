@@ -51,20 +51,16 @@ export function fetchEsql({
   expressions: ExpressionsStart;
   profilesManager: ProfilesManager;
 }): Promise<RecordsFetchResponse> {
-  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getAbsoluteTime();
-  return textBasedQueryStateToAstWithValidation({
-    filters,
+  const props = getTextBasedQueryStateToAstProps({
     query,
-    time: timeRange,
-    dataView,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
-      defaultMessage: 'Table',
-    }),
-    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-    }),
-  })
+    filters,
+    inputTimeRange,
+    dataView,
+    inspectorAdapters,
+    data,
+  });
+  return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
       if (ast) {
         const contract = expressions.execute(ast, null, {
@@ -117,4 +113,35 @@ export function fetchEsql({
     .catch((err) => {
       throw new Error(err.message);
     });
+}
+export function getTextBasedQueryStateToAstProps({
+  query,
+  inputQuery,
+  filters,
+  inputTimeRange,
+  dataView,
+  data,
+}: {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  inputTimeRange?: TimeRange;
+  dataView: DataView;
+  inspectorAdapters: Adapters;
+  data: DataPublicPluginStart;
+}) {
+  const timeRange = inputTimeRange ?? data.query.timefilter.timefilter.getAbsoluteTime();
+  return {
+    filters,
+    query,
+    time: timeRange,
+    dataView,
+    inputQuery,
+    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
+      defaultMessage: 'Table',
+    }),
+    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
+      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+    }),
+  };
 }
