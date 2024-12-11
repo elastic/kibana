@@ -10,6 +10,7 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { ITelemetryEventsSender } from '../sender';
 import { TaskMetricsService } from '../task_metrics';
 import { createTelemetryIndicesMetadataTaskConfig } from '../tasks/indices.metadata';
+import { telemetryConfiguration } from '../configuration';
 
 // TODO: just to test the POC, remove
 export const getTriggerIndicesMetadataTaskRoute = (
@@ -28,8 +29,8 @@ export const getTriggerIndicesMetadataTaskRoute = (
       },
       validate: {
         query: schema.object({
-          maxPrefixes: schema.maybe(schema.number()),
-          maxGroupSize: schema.maybe(schema.number()),
+          datastreamsThreshold: schema.maybe(schema.number()),
+          indicesThreshold: schema.maybe(schema.number()),
         }),
       },
     },
@@ -38,21 +39,27 @@ export const getTriggerIndicesMetadataTaskRoute = (
       const task = createTelemetryIndicesMetadataTaskConfig();
       const timeStart = performance.now();
 
-      const { maxPrefixes, maxGroupSize } = request.query;
+      const taskConfig = telemetryConfiguration.indices_metadata_config;
 
-      logger.info(
-        `Triggering indices metadata task with pageSize: ${maxPrefixes} and dataStreamsLimit: ${maxGroupSize}`
-      );
+      taskConfig.indices_threshold = request.query.indicesThreshold || 100;
+      taskConfig.datastreams_threshold = request.query.datastreamsThreshold || 100;
+
+      const detail = `[pageSize: ${taskConfig.indices_threshold}, dataStreamsLimit: ${taskConfig.datastreams_threshold}]`;
+
+      logger.info(`Triggering indices metadata task ${detail}`);
 
       const result = await task.runTask('id', logger, receiver, sender, taskMetricsService, {
-        last: `${maxPrefixes || 10}`,
-        current: `${maxGroupSize || 100}`,
+        last: '',
+        current: '',
       });
       const elapsedTime = performance.now() - timeStart;
 
       return response.ok({
         body: {
-          message: `Task finished, it processed ${result} indices, took ${elapsedTime} ms to run `,
+          message: `Task finished`,
+          indices: result,
+          execution_detail: detail,
+          elapsed_time: elapsedTime,
         },
       });
     }
