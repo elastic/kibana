@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import { TopNavMenuItem } from './top_nav_menu_item';
-import { TopNavMenuData } from './top_nav_menu_data';
+import { TopNavMenuItem, TopNavMenuItemProps } from './top_nav_menu_item';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButtonIcon } from '@elastic/eui';
 
 describe('TopNavMenu', () => {
-  const ensureMenuItemDisabled = (data: TopNavMenuData) => {
+  const ensureMenuItemDisabled = (data: TopNavMenuItemProps) => {
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
     expect(component.prop('isDisabled')).toEqual(true);
 
@@ -24,10 +23,11 @@ describe('TopNavMenu', () => {
   };
 
   it('Should render and click an item', () => {
-    const data: TopNavMenuData = {
+    const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
       run: jest.fn(),
+      closePopover: jest.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -43,13 +43,14 @@ describe('TopNavMenu', () => {
   });
 
   it('Should render item with all attributes', () => {
-    const data: TopNavMenuData = {
+    const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
       description: 'description',
       testId: 'test-class-name',
       disableButton: false,
       run: jest.fn(),
+      closePopover: jest.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -61,13 +62,14 @@ describe('TopNavMenu', () => {
   });
 
   it('Should render emphasized item which should be clickable', () => {
-    const data: TopNavMenuData = {
+    const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
       iconType: 'beaker',
       iconSide: 'right',
       emphasize: true,
       run: jest.fn(),
+      closePopover: jest.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -78,12 +80,13 @@ describe('TopNavMenu', () => {
   });
 
   it('Should render an icon-only item', () => {
-    const data: TopNavMenuData = {
+    const data: TopNavMenuItemProps = {
       id: 'test',
       label: 'test',
       iconType: 'share',
       iconOnly: true,
       run: jest.fn(),
+      closePopover: jest.fn(),
     };
 
     const component = shallowWithIntl(<TopNavMenuItem {...data} />);
@@ -100,6 +103,7 @@ describe('TopNavMenu', () => {
       label: 'test',
       disableButton: true,
       run: jest.fn(),
+      closePopover: jest.fn(),
     });
   });
 
@@ -109,6 +113,7 @@ describe('TopNavMenu', () => {
       label: 'test',
       disableButton: () => true,
       run: jest.fn(),
+      closePopover: jest.fn(),
     });
   });
 
@@ -121,6 +126,7 @@ describe('TopNavMenu', () => {
       emphasize: true,
       disableButton: true,
       run: jest.fn(),
+      closePopover: jest.fn(),
     });
   });
 
@@ -133,6 +139,26 @@ describe('TopNavMenu', () => {
       emphasize: true,
       disableButton: () => true,
       run: jest.fn(),
+      closePopover: jest.fn(),
     });
+  });
+
+  it('Should render emphasized item in mobile mode, which should be clickable and call closePopover on click', () => {
+    const data: TopNavMenuItemProps = {
+      id: 'test',
+      label: 'test',
+      iconType: 'beaker',
+      iconSide: 'right',
+      emphasize: true,
+      isMobileMenu: true,
+      run: jest.fn(),
+      closePopover: jest.fn(),
+    };
+
+    const component = shallowWithIntl(<TopNavMenuItem {...data} />);
+    const event = { currentTarget: { value: 'a' } };
+    component.simulate('click', event);
+    expect(data.run).toHaveBeenCalledTimes(1);
+    expect(data.closePopover).toHaveBeenCalledTimes(1);
   });
 });
