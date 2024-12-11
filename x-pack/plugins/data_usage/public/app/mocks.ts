@@ -56,3 +56,10 @@ export const mockUseKibana = {
     },
   },
 };
+
+export const generateDataStreams = (count: number) => {
+  return Array.from({ length: count }, (_, i) => ({
+    name: `.ds-${i}`,
+    storageSizeBytes: 1024 ** 2 * (22 / 7),
+  }));
+};

@@ -12,7 +12,7 @@ import { DataUsageMetrics } from './data_usage_metrics';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
-import { mockUseKibana } from '../mocks';
+import { mockUseKibana, generateDataStreams } from '../mocks';
 
 jest.mock('../../utils/use_breadcrumbs', () => {
   return {
@@ -81,13 +81,6 @@ const getBaseMockedDataUsageMetrics = () => ({
   isFetching: false,
   refetch: jest.fn(),
 });
-
-const generateDataStreams = (count: number) => {
-  return Array.from({ length: count }, (_, i) => ({
-    name: `.ds-${i}`,
-    storageSizeBytes: 1024 ** 2 * (22 / 7),
-  }));
-};
 
 describe('DataUsageMetrics', () => {
   let user: UserEvent;
