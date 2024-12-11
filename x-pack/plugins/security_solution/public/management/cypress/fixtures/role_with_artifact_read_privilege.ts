@@ -18,7 +18,7 @@ export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
         feature: {
           ...endpointSecurityPolicyManagerRole.kibana[0].feature,
           siemV2: [
-            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
+            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siemV2.filter(
               (privilege) => privilege !== `${privilegePrefix}all`
             ),
             `${privilegePrefix}read`,
