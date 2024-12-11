@@ -6224,7 +6224,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-types@link:packages/kbn-management/settings/types":
+"@kbn/management-settings-types@link:src/platform/packages/shared/kbn-management/settings/types":
   version "0.0.0"
   uid ""
 

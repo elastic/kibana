@@ -640,7 +640,7 @@
     "@kbn/management-settings-field-definition": "link:src/platform/packages/shared/kbn-management/settings/field_definition",
     "@kbn/management-settings-ids": "link:packages/kbn-management/settings/setting_ids",
     "@kbn/management-settings-section-registry": "link:packages/kbn-management/settings/section_registry",
-    "@kbn/management-settings-types": "link:packages/kbn-management/settings/types",
+    "@kbn/management-settings-types": "link:src/platform/packages/shared/kbn-management/settings/types",
     "@kbn/management-settings-utilities": "link:packages/kbn-management/settings/utilities",
     "@kbn/management-test-plugin": "link:test/plugin_functional/plugins/management_test_plugin",
     "@kbn/mapbox-gl": "link:packages/kbn-mapbox-gl",
