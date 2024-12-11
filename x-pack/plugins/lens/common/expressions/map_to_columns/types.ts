@@ -9,8 +9,8 @@ import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export type OriginalColumn = { id: string; label: string; format?: SerializedFieldFormat } & (
-  | { operationType: 'date_histogram'; sourceField: string }
-  | { operationType: string; sourceField: never }
+  | { operationType: 'date_histogram'; sourceField: string; interval: number }
+  | { operationType: string; sourceField: never; interval: never }
 );
 
 export type MapToColumnsExpressionFunction = ExpressionFunctionDefinition<
