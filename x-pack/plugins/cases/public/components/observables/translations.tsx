@@ -81,10 +81,6 @@ export const DELETE_OBSERVABLE_CONFIRM = i18n.translate(
   }
 );
 
-export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observables.updated', {
-  defaultMessage: 'Observable updated',
-});
-
 export const SAVE_OBSERVABLE = i18n.translate('xpack.cases.caseView.observables.save', {
   defaultMessage: 'Save observable',
 });

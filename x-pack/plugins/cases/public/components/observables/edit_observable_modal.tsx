@@ -13,8 +13,6 @@ import { ObservableForm } from './observable_form';
 import * as i18n from './translations';
 import { usePatchObservable } from '../../containers/use_patch_observables';
 import { type CaseUI } from '../../containers/types';
-import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
-import { useCasesToast } from '../../common/use_cases_toast';
 
 export interface EditObservableModalProps {
   closeModal: VoidFunction;
@@ -31,16 +29,11 @@ export const EditObservableModal: FC<EditObservableModalProps> = ({
     caseData.id,
     observable.id as string
   );
-  const refreshCaseViewPage = useRefreshCaseViewPage();
-  const { showSuccessToast } = useCasesToast();
-
   const handleUpdateObservable = async (updatedObservable: ObservablePatch) => {
     patchObservable({
       observable: updatedObservable,
     }).then(() => {
       closeModal();
-      showSuccessToast(i18n.OBSERVABLE_UPDATED);
-      refreshCaseViewPage();
     });
   };
 

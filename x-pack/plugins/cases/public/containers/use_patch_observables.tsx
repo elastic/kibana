@@ -15,7 +15,7 @@ import { casesMutationsKeys } from './constants';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 export const usePatchObservable = (caseId: string, observableId: string) => {
-  const { showErrorToast } = useCasesToast();
+  const { showErrorToast, showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
@@ -28,6 +28,7 @@ export const usePatchObservable = (caseId: string, observableId: string) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
       onSuccess: () => {
+        showSuccessToast(i18n.OBSERVABLE_UPDATED);
         refreshCaseViewPage();
       },
     }
