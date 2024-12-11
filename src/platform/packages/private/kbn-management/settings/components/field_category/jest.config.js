@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/packages/kbn-management/settings/components/field_category'],
+  rootDir: '../../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-management/settings/components/field_category'],
 };
