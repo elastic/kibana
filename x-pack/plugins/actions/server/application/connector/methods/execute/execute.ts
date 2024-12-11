@@ -20,7 +20,6 @@ export async function execute(
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const log = context.logger;
   const { actionId, params, source, relatedSavedObjects } = connectorExecuteParams;
-  const additionalPrivileges = getActionKibanaPrivileges(context, actionId, params, source?.type);
   let actionTypeId: string | undefined;
 
   try {
@@ -42,6 +41,12 @@ export async function execute(
     log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
   }
 
+  const additionalPrivileges = getActionKibanaPrivileges(
+    context,
+    actionTypeId,
+    params,
+    source?.type
+  );
   await context.authorization.ensureAuthorized({
     operation: 'execute',
     additionalPrivileges,

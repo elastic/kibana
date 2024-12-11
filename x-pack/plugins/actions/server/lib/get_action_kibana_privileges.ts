@@ -11,21 +11,16 @@ import { ExecuteOptions } from './action_executor';
 
 export function getActionKibanaPrivileges(
   context: ActionsClientContext,
-  connectorId: string,
+  actionTypeId?: string,
   params?: ExecuteOptions['params'],
   source?: ActionExecutionSourceType
 ) {
-  const inMemoryConnector = context.inMemoryConnectors.find(
-    (connector) => connector.id === connectorId
-  );
-
-  const additionalPrivileges = inMemoryConnector
-    ? context.actionTypeRegistry.getActionKibanaPrivileges(
-        inMemoryConnector.actionTypeId,
-        params,
-        source
-      )
-    : [];
+  const additionalPrivileges =
+    actionTypeId &&
+    (context.actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      context.actionTypeRegistry.hasSubFeatureType(actionTypeId))
+      ? context.actionTypeRegistry.getActionKibanaPrivileges(actionTypeId, params, source)
+      : [];
 
   return additionalPrivileges;
 }

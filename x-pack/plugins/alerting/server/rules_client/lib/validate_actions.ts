@@ -89,7 +89,7 @@ export async function validateActions(
   if (edrActionTypeIds.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.edrConnector', {
-        defaultMessage: 'Invalid EDR connectors.',
+        defaultMessage: 'Invalid EDR connectors',
       })
     );
   }

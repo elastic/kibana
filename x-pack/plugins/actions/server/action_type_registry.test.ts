@@ -9,8 +9,8 @@ import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
-import { ActionType, ExecutorType } from './types';
-import { ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
+import { ActionType, ExecutorType, SubFeatureType } from './types';
+import { ActionExecutionSourceType, ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -249,7 +249,7 @@ describe('actionTypeRegistry', () => {
       ).not.toThrow();
     });
 
-    test('throws if the kibana privileges are defined but the action type is not a system action type', () => {
+    test('throws if the kibana privileges are defined but the action type is not a system action type or sub-feature type', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       expect(() =>
@@ -268,7 +268,7 @@ describe('actionTypeRegistry', () => {
           executor,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Kibana privilege authorization is only supported for system action types"`
+        `"Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature"`
       );
     });
   });
@@ -418,6 +418,42 @@ describe('actionTypeRegistry', () => {
           minimumLicenseRequired: 'platinum',
           supportedFeatureIds: ['alerting'],
           isSystemActionType: true,
+        },
+      ]);
+    });
+
+    test('sets the subFeatureType correctly for sub-feature type actions', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      actionTypeRegistry.register({
+        id: 'test.sub-feature-action',
+        name: 'EDR',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['siem'],
+        getKibanaPrivileges: () => ['test/create-sub-feature'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        subFeatureType: SubFeatureType.EDR,
+        executor,
+      });
+
+      const actionTypes = actionTypeRegistry.list();
+
+      expect(actionTypes).toEqual([
+        {
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          id: 'test.sub-feature-action',
+          isSystemActionType: false,
+          minimumLicenseRequired: 'platinum',
+          name: 'EDR',
+          subFeatureType: 'edr',
+          supportedFeatureIds: ['siem'],
         },
       ]);
     });
@@ -767,8 +803,67 @@ describe('actionTypeRegistry', () => {
     });
   });
 
+  describe('hasSubFeatureType()', () => {
+    it('should return true if the action type has a sub-feature type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'test.sub-feature-action',
+        name: 'EDR',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['siem'],
+        getKibanaPrivileges: () => ['test/create-sub-feature'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        subFeatureType: SubFeatureType.EDR,
+        executor,
+      });
+
+      const result = registry.hasSubFeatureType('test.sub-feature-action');
+      expect(result).toBe(true);
+    });
+
+    it('should return false if the action type does not have a sub-feature type', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      const allTypes = registry.getAllTypes();
+      expect(allTypes.length).toBe(1);
+
+      const result = registry.hasSubFeatureType('foo');
+      expect(result).toBe(false);
+    });
+
+    it('should return false if the action type does not exists', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      const allTypes = registry.getAllTypes();
+      expect(allTypes.length).toBe(0);
+
+      const result = registry.hasSubFeatureType('not-exist');
+      expect(result).toBe(false);
+    });
+  });
+
   describe('getActionKibanaPrivileges()', () => {
-    it('should get the kibana privileges correctly for system actions', () => {
+    it('should get the kibana privileges correctly', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       registry.register({
@@ -785,12 +880,28 @@ describe('actionTypeRegistry', () => {
         isSystemActionType: true,
         executor,
       });
+      registry.register({
+        id: 'test.sub-feature-action',
+        name: 'EDR',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['siem'],
+        getKibanaPrivileges: () => ['test/create-sub-feature'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        subFeatureType: SubFeatureType.EDR,
+        executor,
+      });
 
-      const result = registry.getActionKibanaPrivileges('test.system-action');
+      let result = registry.getActionKibanaPrivileges('test.system-action');
       expect(result).toEqual(['test/create']);
+      result = registry.getActionKibanaPrivileges('test.sub-feature-action');
+      expect(result).toEqual(['test/create-sub-feature']);
     });
 
-    it('should return an empty array if the system action does not define any kibana privileges', () => {
+    it('should return an empty array if the action type does not define any kibana privileges', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       registry.register({
@@ -806,12 +917,27 @@ describe('actionTypeRegistry', () => {
         isSystemActionType: true,
         executor,
       });
+      registry.register({
+        id: 'test.sub-feature-action',
+        name: 'EDR',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['siem'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        subFeatureType: SubFeatureType.EDR,
+        executor,
+      });
 
-      const result = registry.getActionKibanaPrivileges('test.system-action');
+      let result = registry.getActionKibanaPrivileges('test.system-action');
+      expect(result).toEqual([]);
+      result = registry.getActionKibanaPrivileges('test.sub-feature-action');
       expect(result).toEqual([]);
     });
 
-    it('should return an empty array if the action type is not a system action', () => {
+    it('should return an empty array if the action type is not a system action or a sub-feature type action', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       registry.register({
@@ -831,7 +957,7 @@ describe('actionTypeRegistry', () => {
       expect(result).toEqual([]);
     });
 
-    it('should pass the params correctly', () => {
+    it('should pass the params and source correctly', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
       const getKibanaPrivileges = jest.fn().mockReturnValue(['test/create']);
 
@@ -850,8 +976,15 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      registry.getActionKibanaPrivileges('test.system-action', { foo: 'bar' });
-      expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
+      registry.getActionKibanaPrivileges(
+        'test.system-action',
+        { foo: 'bar' },
+        ActionExecutionSourceType.HTTP_REQUEST
+      );
+      expect(getKibanaPrivileges).toHaveBeenCalledWith({
+        params: { foo: 'bar' },
+        source: ActionExecutionSourceType.HTTP_REQUEST,
+      });
     });
   });
 });

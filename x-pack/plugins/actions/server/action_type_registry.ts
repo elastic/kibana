@@ -117,6 +117,12 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
+   * Returns true if the connector type has a sub-feature type defined
+   */
+  public hasSubFeatureType = (actionTypeId: string): boolean =>
+    Boolean(this.actionTypes.get(actionTypeId)?.subFeatureType);
+
+  /**
    * Returns the kibana privileges
    */
   public getActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
@@ -187,7 +193,7 @@ export class ActionTypeRegistry {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
           defaultMessage:
-            'Kibana privilege authorization is only supported for system actions and action types that are registered under a sub feature',
+            'Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature',
         })
       );
     }

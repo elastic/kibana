@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SubFeatureType } from '..';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import {
@@ -117,14 +118,35 @@ describe('Registration', () => {
     });
   });
 
-  it('add support for setting the kibana privileges for system connectors', async () => {
+  it('registers a sub-feature connector correctly', async () => {
+    register<TestConfig, TestSecrets>({
+      actionTypeRegistry,
+      connector: { ...connector, subFeatureType: SubFeatureType.EDR },
+      configurationUtilities: mockedActionsConfig,
+      logger,
+    });
+
+    expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
+    expect(actionTypeRegistry.register).toHaveBeenCalledWith({
+      id: connector.id,
+      name: connector.name,
+      minimumLicenseRequired: connector.minimumLicenseRequired,
+      supportedFeatureIds: connector.supportedFeatureIds,
+      validate: expect.anything(),
+      executor: expect.any(Function),
+      getService: expect.any(Function),
+      renderParameterTemplates: expect.any(Function),
+      subFeatureType: 'edr',
+    });
+  });
+
+  it('add support for setting the kibana privileges', async () => {
     const getKibanaPrivileges = () => ['my-privilege'];
 
     register<TestConfig, TestSecrets>({
       actionTypeRegistry,
       connector: {
         ...connector,
-        isSystemActionType: true,
         getKibanaPrivileges,
       },
       configurationUtilities: mockedActionsConfig,
@@ -141,7 +163,6 @@ describe('Registration', () => {
       executor: expect.any(Function),
       getService: expect.any(Function),
       renderParameterTemplates: expect.any(Function),
-      isSystemActionType: true,
       getKibanaPrivileges,
     });
   });

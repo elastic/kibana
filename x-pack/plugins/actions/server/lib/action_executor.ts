@@ -731,17 +731,22 @@ const ensureAuthorizedToExecute = async ({
   source,
 }: EnsureAuthorizedToExecuteOpts) => {
   try {
-    const additionalPrivileges = actionTypeRegistry.getActionKibanaPrivileges(
-      actionTypeId,
-      params,
-      source
-    );
+    if (
+      actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      actionTypeRegistry.hasSubFeatureType(actionTypeId)
+    ) {
+      const additionalPrivileges = actionTypeRegistry.getActionKibanaPrivileges(
+        actionTypeId,
+        params,
+        source
+      );
 
-    await authorization.ensureAuthorized({
-      operation: 'execute',
-      additionalPrivileges,
-      actionTypeId,
-    });
+      await authorization.ensureAuthorized({
+        operation: 'execute',
+        additionalPrivileges,
+        actionTypeId,
+      });
+    }
   } catch (error) {
     throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {
       actionId,

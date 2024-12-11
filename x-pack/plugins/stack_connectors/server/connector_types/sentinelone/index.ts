@@ -16,8 +16,8 @@ import {
   SubFeatureType,
 } from '@kbn/actions-plugin/server';
 import {
-  CONNECTORS_EDR_EXECUTE_PRIVILEGE,
-  SUB_ACTIONS_EDR_EXECUTE_PRIVILEGE,
+  EDR_EXECUTE_PRIVILEGE,
+  EDR_SUB_ACTIONS_EXECUTE_PRIVILEGE,
 } from '@kbn/actions-plugin/server/feature';
 import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
@@ -47,12 +47,12 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
   renderParameterTemplates,
   subFeatureType: SubFeatureType.EDR,
   getKibanaPrivileges: (args) => {
-    const privileges = [CONNECTORS_EDR_EXECUTE_PRIVILEGE];
+    const privileges = [EDR_EXECUTE_PRIVILEGE];
     if (
       args?.source === ActionExecutionSourceType.HTTP_REQUEST &&
       args?.params?.subAction !== SUB_ACTION.GET_AGENTS
     ) {
-      privileges.push(SUB_ACTIONS_EDR_EXECUTE_PRIVILEGE);
+      privileges.push(EDR_SUB_ACTIONS_EXECUTE_PRIVILEGE);
     }
     return privileges;
   },

@@ -14,12 +14,9 @@ import {
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 
-export const CONNECTORS_ADVANCED_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-advanced-connectors';
-export const CONNECTORS_BASIC_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-basic-connectors';
-
-export const CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-edr-connectors';
-export const CONNECTORS_EDR_EXECUTE_PRIVILEGE = `api:${CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG}`;
-export const SUB_ACTIONS_EDR_EXECUTE_PRIVILEGE = `api:actions:execute-edr-sub_actions`;
+const EDR_EXECUTE_PRIVILEGE_API_TAG = 'actions:execute-edr-connectors';
+export const EDR_EXECUTE_PRIVILEGE = `api:${EDR_EXECUTE_PRIVILEGE_API_TAG}`;
+export const EDR_SUB_ACTIONS_EXECUTE_PRIVILEGE = `api:actions:execute-edr-sub-actions`;
 
 /**
  * The order of appearance in the feature privilege page
@@ -75,17 +72,20 @@ export const ACTIONS_FEATURE = {
   subFeatures: [
     {
       name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureName', {
-        defaultMessage: 'EDR Connectors',
+        defaultMessage: 'Endpoint Security',
+      }),
+      description: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureDescription', {
+        defaultMessage: 'Includes: Sentinel One, Crowdstrike',
       }),
       privilegeGroups: [
         {
           groupType: 'independent',
           privileges: [
             {
-              api: [CONNECTORS_EDR_EXECUTE_PRIVILEGE_API_TAG],
+              api: [EDR_EXECUTE_PRIVILEGE_API_TAG],
               id: 'executeEdrConnectors',
-              name: i18n.translate('xpack.actions.featureRegistry.edrSubFeatureDetails', {
-                defaultMessage: 'Execute advanced EDR connectors',
+              name: i18n.translate('xpack.actions.featureRegistry.edrSubFeaturePrivilege', {
+                defaultMessage: 'Execute',
               }),
               includeIn: 'all',
               savedObject: {
