@@ -134,7 +134,7 @@
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/plugins/usage_collection",
     "userProfileComponents": "packages/kbn-user-profile-components",
-    "utils": "packages/kbn-securitysolution-utils/src",
+    "utils": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/plugins/vis_default_editor",
     "visTypeGauge": "src/plugins/vis_types/gauge",
     "visTypeHeatmap": "src/plugins/vis_types/heatmap",
