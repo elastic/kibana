@@ -78,7 +78,7 @@ export const SpaceListInternal = ({
           defaultMessage: `* All spaces`,
         }),
         initials: '*',
-        color: euiTheme.colors.vis.euiColorVis3,
+        color: euiTheme.colors.vis.euiColorVisGrey0,
       },
     ];
   } else {
