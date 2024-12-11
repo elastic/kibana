@@ -285,6 +285,7 @@ export const createCustomThresholdExecutor = ({
               metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
+              spaceId,
             }),
             ...additionalContext,
           },

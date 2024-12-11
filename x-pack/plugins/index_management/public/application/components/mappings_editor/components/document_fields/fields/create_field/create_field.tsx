@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { isSemanticTextField } from '../../../../lib/utils';
@@ -62,6 +62,7 @@ interface Props {
   onCancelAddingNewFields?: () => void;
   isAddingFields?: boolean;
   semanticTextInfo?: SemanticTextInfo;
+  createFieldFormRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const CreateField = React.memo(function CreateFieldComponent({
@@ -74,9 +75,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
   onCancelAddingNewFields,
   isAddingFields,
   semanticTextInfo,
+  createFieldFormRef,
 }: Props) {
   const { isSemanticTextEnabled, ml, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
+  const fieldTypeInputRef = useRef<HTMLInputElement>(null);
 
   const { form } = useForm<Field>({
     serializer: fieldSerializer,
@@ -111,6 +114,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const isSemanticText = form.getFormData().type === 'semantic_text';
 
+  useEffect(() => {
+    if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
+  }, [createFieldFormRef]);
+
   const submitForm = async (
     e?: React.FormEvent,
     exitAfter: boolean = false,
@@ -133,6 +140,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
         cancel();
       }
       form.reset();
+    }
+
+    if (fieldTypeInputRef.current) {
+      fieldTypeInputRef.current.focus();
     }
   };
 
@@ -157,6 +168,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           isMultiField={isMultiField}
           showDocLink
           isSemanticTextEnabled={isSemanticTextEnabled}
+          fieldTypeInputRef={fieldTypeInputRef}
         />
       </EuiFlexItem>
 
@@ -266,6 +278,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
                   : paddingLeft
               }px`,
             }}
+            ref={createFieldFormRef}
+            tabIndex={0}
           >
             <div className="mappingsEditor__createFieldContent">
               {renderFormFields()}

@@ -338,7 +338,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           <EuiToolTip content={tooltipMessage}>
             <EuiButton
               fill={false}
-              color={needsUpdate ? 'success' : 'primary'}
+              color={needsUpdate ? 'accentSecondary' : 'primary'}
               iconType={needsUpdate ? 'kqlFunction' : 'refresh'}
               onClick={handleRefresh}
               data-test-subj={`mlDatePickerRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
