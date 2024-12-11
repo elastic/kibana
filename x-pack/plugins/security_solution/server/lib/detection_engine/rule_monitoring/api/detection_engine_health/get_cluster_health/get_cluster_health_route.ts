@@ -10,7 +10,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-
 import type {
   GetClusterHealthRequest,
   GetClusterHealthResponse,
@@ -111,7 +110,10 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
     const params = resolveParameters();
     const { healthClient } = await resolveDependencies();
 
-    const clusterHealthParameters = { interval: params.interval };
+    const clusterHealthParameters = {
+      interval: params.interval,
+      num_of_top_rules: params.num_of_top_rules,
+    };
     const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
     const responseBody: GetClusterHealthResponse = {
