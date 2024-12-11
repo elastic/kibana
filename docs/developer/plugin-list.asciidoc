@@ -755,7 +755,7 @@ Elastic.
 |This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
 |The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
