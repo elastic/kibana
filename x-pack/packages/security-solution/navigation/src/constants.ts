@@ -75,7 +75,7 @@ export enum ExternalPageName {
   // No deepLinkId registered, using path for the security search
   integrationsSecurity = 'integrations:/browse/security',
   // Management
-  // Ref: packages/default-nav/management/default_navigation.ts
+  // Ref: src/platform/packages/private/default-nav/management/default_navigation.ts
   management = 'management:',
   managementIngestPipelines = 'management:ingest_pipelines',
   managementPipelines = 'management:pipelines',

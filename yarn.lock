@@ -5324,7 +5324,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/default-nav-management@link:packages/default-nav/management":
+"@kbn/default-nav-management@link:src/platform/packages/private/default-nav/management":
   version "0.0.0"
   uid ""
 
