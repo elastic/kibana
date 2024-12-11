@@ -109,7 +109,6 @@ export const getFileHandler: FleetRequestHandler<
       return response.custom({
         body: {},
         statusCode: 400,
-        headers: { ...CACHE_CONTROL_10_MINUTES_HEADER },
       });
 
     const headersToProxy: KnownHeaders[] = ['content-type'];
