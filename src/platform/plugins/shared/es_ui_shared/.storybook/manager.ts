@@ -15,7 +15,8 @@ addons.setConfig({
   theme: create({
     base: 'light',
     brandTitle: 'Platform Deployment Management Storybook',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/es_ui_shared',
+    brandUrl:
+      'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/es_ui_shared',
   }),
   showPanel: () => true,
   selectedPanel: PANEL_ID,
