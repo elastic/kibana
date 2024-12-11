@@ -91,6 +91,19 @@ export const upgradeBuiltinDefinitions = async (
   return response.body;
 };
 
+export const createEntityTypeDefinition = (
+  supertest: Agent,
+  params: {
+    type: { id: string };
+  }
+) => {
+  return supertest
+    .post('/internal/entities/v2/definitions/types')
+    .set('kbn-xsrf', 'xxx')
+    .send({ type: params.type })
+    .expect(201);
+};
+
 export const createEntitySourceDefinition = (
   supertest: Agent,
   params: {

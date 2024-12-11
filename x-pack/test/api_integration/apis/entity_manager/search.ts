@@ -8,7 +8,11 @@
 import moment from 'moment';
 import expect from 'expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { createEntitySourceDefinition, searchEntities } from './helpers/request';
+import {
+  createEntitySourceDefinition,
+  createEntityTypeDefinition,
+  searchEntities,
+} from './helpers/request';
 import { createIndexWithDocuments } from './helpers/data_generation';
 import { clearEntityDefinitions } from './helpers/clear_entity_definitions';
 
@@ -55,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
+      await createEntityTypeDefinition(supertest, { type: { id: 'services-with-timestamp' } });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'source-1-with-services',
@@ -105,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
+      await createEntityTypeDefinition(supertest, { type: { id: 'home-appliances' } });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'appliances-no-timestamp',
@@ -203,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
+      await createEntityTypeDefinition(supertest, { type: { id: 'hosts-with-agents' } });
       await Promise.all([
         createEntitySourceDefinition(supertest, {
           source: {
@@ -343,6 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
+      await createEntityTypeDefinition(supertest, { type: { id: 'services-with-hosts' } });
       await Promise.all([
         createEntitySourceDefinition(supertest, {
           source: {
@@ -445,6 +453,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
+      await createEntityTypeDefinition(supertest, { type: { id: 'services-one-type' } });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'source-1-with-services',
@@ -505,6 +514,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
+      await createEntityTypeDefinition(supertest, { type: { id: 'most-refined-cars' } });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'source-1-with-cars',
@@ -598,6 +608,7 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
+      await createEntityTypeDefinition(supertest, { type: { id: 'most-refined-cars' } });
       await Promise.all([
         createEntitySourceDefinition(supertest, {
           source: {
@@ -678,6 +689,9 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'type-with-conflicting-mappings' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'conflicting-mappings',
@@ -717,6 +731,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns error if index does not exist', async () => {
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'type-with-non-existing-index' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'non-existing-index',
@@ -753,6 +770,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'type-with-unmapped-id-fields' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'unmapped-fields',
