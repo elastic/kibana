@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getField, getFieldArray } from './utils';
+import { getField, getFieldArray, getEventTitle, getAlertTitle } from './utils';
 
-describe('test getField', () => {
+describe('getField', () => {
   it('should return the string value if field is a string', () => {
     expect(getField('test string')).toBe('test string');
   });
@@ -29,7 +29,7 @@ describe('test getField', () => {
   });
 });
 
-describe('test getFieldArray', () => {
+describe('getFieldArray', () => {
   it('should return the string value in an array if field is a string', () => {
     expect(getFieldArray('test string')).toStrictEqual(['test string']);
   });
@@ -45,5 +45,45 @@ describe('test getFieldArray', () => {
   it('should return empty array if field is null or empty', () => {
     expect(getFieldArray(undefined)).toStrictEqual([]);
     expect(getFieldArray(null)).toStrictEqual([]);
+  });
+});
+
+describe('getEventTitle', () => {
+  it('should return event title based on category when event kind is event', () => {
+    expect(
+      getEventTitle({
+        eventKind: 'event',
+        eventCategory: 'process',
+        getFieldsData: (field) => (field === 'process.name' ? 'process name' : ''),
+      })
+    ).toBe('process name');
+  });
+
+  it('should return External alert details when event kind is alert', () => {
+    expect(
+      getEventTitle({ eventKind: 'alert', eventCategory: null, getFieldsData: jest.fn() })
+    ).toBe('External alert details');
+  });
+
+  it('should return generic event details when event kind is not event or alert', () => {
+    expect(
+      getEventTitle({ eventKind: 'metric', eventCategory: null, getFieldsData: jest.fn() })
+    ).toBe('Metric details');
+  });
+
+  it('should return Event details when event kind is null', () => {
+    expect(getEventTitle({ eventKind: null, eventCategory: null, getFieldsData: jest.fn() })).toBe(
+      'Event details'
+    );
+  });
+});
+
+describe('getAlertTitle', () => {
+  it('should return Document details when ruleName is undefined', () => {
+    expect(getAlertTitle({ ruleName: undefined })).toBe('Document details');
+  });
+
+  it('should return ruleName when ruleName is defined', () => {
+    expect(getAlertTitle({ ruleName: 'test rule' })).toBe('test rule');
   });
 });

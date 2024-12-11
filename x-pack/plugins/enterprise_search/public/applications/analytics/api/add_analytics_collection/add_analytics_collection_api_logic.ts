@@ -20,7 +20,7 @@ export const createAnalyticsCollection = async ({
   name,
 }: AddAnalyticsCollectionApiLogicArgs): Promise<AddAnalyticsCollectionApiLogicResponse> => {
   const { http } = HttpLogic.values;
-  const route = '/internal/enterprise_search/analytics/collections';
+  const route = '/internal/elasticsearch/analytics/collections';
   const response = await http.post<AnalyticsCollection>(route, {
     body: JSON.stringify({ name }),
   });
