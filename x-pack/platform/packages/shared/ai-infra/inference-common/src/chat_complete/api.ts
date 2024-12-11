@@ -94,7 +94,7 @@ export type ChatCompleteOptions<
    */
   functionCalling?: FunctionCallingMode;
   /**
-   * Optional signal that can be used to forcefully cancel the request.
+   * Optional signal that can be used to forcefully abort the request.
    */
   abortSignal?: AbortSignal;
 } & TToolOptions;

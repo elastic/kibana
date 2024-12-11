@@ -9,7 +9,7 @@ import { of, Subject, toArray, firstValueFrom } from 'rxjs';
 import { handleCancellation } from './handle_cancellation';
 
 describe('handleCancellation', () => {
-  it('mirror the source when the abort signal is not triggered', async () => {
+  it('mirrors the source when the abort signal is not triggered', async () => {
     const abortController = new AbortController();
 
     const source$ = of(1, 2, 3);
