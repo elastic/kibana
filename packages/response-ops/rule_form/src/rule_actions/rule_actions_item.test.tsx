@@ -182,9 +182,6 @@ describe('ruleActionsItem', () => {
           },
         },
       },
-      formData: {
-        notifyWhen: null,
-      },
       connectors: mockConnectors,
       connectorTypes: mockActionTypes,
       aadTemplateFields: [],

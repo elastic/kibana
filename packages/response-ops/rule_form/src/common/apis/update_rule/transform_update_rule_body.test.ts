@@ -86,6 +86,7 @@ describe('transformUpdateRuleBody', () => {
         active: 10,
       },
       name: 'test',
+      notifyWhen: 'onActionGroupChange',
       params: {
         aggType: 'count',
         groupBy: 'all',
