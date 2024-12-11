@@ -10,12 +10,12 @@
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
-import { createDeprecationLogsDocumentProfileProvider } from './profile';
+import { createDeprecationLogsDataSourceProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
 
 describe('deprecationLogsProfileProvider', () => {
-  const deprecationLogsProfileProvider = createDeprecationLogsDocumentProfileProvider();
+  const deprecationLogsProfileProvider = createDeprecationLogsDataSourceProfileProvider();
   const VALID_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
   const VALID_MIXED_INDEX_PATTERN =
     '.logs-deprecation.elasticsearch-default,.logs-deprecation.abc,.logs-deprecation.def';
@@ -29,7 +29,6 @@ describe('deprecationLogsProfileProvider', () => {
     isMatch: true,
     context: {
       category: DataSourceCategory.Logs,
-      formatRecord: expect.any(Function),
     },
   };
   const RESOLUTION_MISMATCH = {
