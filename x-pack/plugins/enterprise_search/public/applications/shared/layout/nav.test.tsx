@@ -35,7 +35,7 @@ const DEFAULT_PRODUCT_ACCESS: ProductAccess = {
 const baseNavItems = [
   expect.objectContaining({
     'data-test-subj': 'searchSideNav-Home',
-    href: '/app/enterprise_search/overview',
+    href: '/app/elasticsearch/overview',
     id: 'home',
     items: undefined,
   }),
@@ -45,21 +45,21 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
-        href: '/app/enterprise_search/content/search_indices',
+        href: '/app/elasticsearch/content/search_indices',
         id: 'search_indices',
         items: [],
         name: 'Indices',
       },
       {
         'data-test-subj': 'searchSideNav-Connectors',
-        href: '/app/enterprise_search/content/connectors',
+        href: '/app/elasticsearch/content/connectors',
         id: 'connectors',
         items: undefined,
         name: 'Connectors',
       },
       {
         'data-test-subj': 'searchSideNav-Crawlers',
-        href: '/app/enterprise_search/content/crawlers',
+        href: '/app/elasticsearch/content/crawlers',
         id: 'crawlers',
         items: undefined,
         name: 'Web Crawlers',
@@ -149,22 +149,22 @@ const baseNavItems = [
 const mockNavLinks = [
   {
     id: 'enterpriseSearch',
-    url: '/app/enterprise_search/overview',
+    url: '/app/elasticsearch/overview',
   },
   {
     id: 'enterpriseSearchContent:searchIndices',
     title: 'Indices',
-    url: '/app/enterprise_search/content/search_indices',
+    url: '/app/elasticsearch/content/search_indices',
   },
   {
     id: 'enterpriseSearchContent:connectors',
     title: 'Connectors',
-    url: '/app/enterprise_search/content/connectors',
+    url: '/app/elasticsearch/content/connectors',
   },
   {
     id: 'enterpriseSearchContent:webCrawlers',
     title: 'Web Crawlers',
-    url: '/app/enterprise_search/content/crawlers',
+    url: '/app/elasticsearch/content/crawlers',
   },
   {
     id: 'searchPlayground',
