@@ -9,15 +9,18 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { createHtmlPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
+import { ChromeNavControls } from '@kbn/core/public';
 import { EuiToolTip, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/security-solution-plugin/public/common/lib/kibana/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 import { UseAssistantContext } from '.';
 import { AssistantAvatar } from '../..';
 
 interface Props {
   hasAssistantPrivilege: UseAssistantContext['assistantAvailability']['hasAssistantPrivilege'];
+  navControls: ChromeNavControls;
   showAssistantOverlay: UseAssistantContext['showAssistantOverlay'];
 }
 
@@ -36,12 +39,12 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 
 export const AssistantNavLink: FC<Props> = ({
   showAssistantOverlay,
-  hasAssistantPrivilege
+  hasAssistantPrivilege,
+  navControls,
 }) => {
   const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
   const { chrome } = useKibana().services;
-  const { navControls, getChromeStyle$ } = chrome
-  const chromeStyle$ = useMemo(() => getChromeStyle$(), [chrome]);
+  const chromeStyle$ = useMemo(() => chrome?.getChromeStyle$() ?? EMPTY, [chrome]);
   const chromeStyle = useObservable(chromeStyle$, undefined);
 
   useEffect(() => {

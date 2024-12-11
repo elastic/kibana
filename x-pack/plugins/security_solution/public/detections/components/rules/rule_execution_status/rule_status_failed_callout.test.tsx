@@ -19,6 +19,7 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BASE_SECURITY_CONVERSATIONS } from '../../../../assistant/content/conversations';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { chromeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -68,6 +69,7 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'security'}
       userProfileService={jest.fn() as unknown as UserProfileService}
+      navControls={chromeServiceMock.createStartContract().navControls}
     >
       {children}
     </AssistantProvider>

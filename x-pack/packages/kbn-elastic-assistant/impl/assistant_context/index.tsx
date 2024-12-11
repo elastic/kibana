@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ChromeNavControls, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -78,6 +78,7 @@ export interface AssistantProviderProps {
   toasts?: IToasts;
   currentAppId: string;
   userProfileService: UserProfileService;
+  navControls: ChromeNavControls;
 }
 
 export interface UserAvatar {
@@ -152,6 +153,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   toasts,
   currentAppId,
   userProfileService,
+  navControls,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -347,6 +349,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       <AssistantNavLink
         hasAssistantPrivilege={assistantAvailability.hasAssistantPrivilege}
         showAssistantOverlay={showAssistantOverlay}
+        navControls={navControls}
       />
       {children}
     </AssistantContext.Provider>

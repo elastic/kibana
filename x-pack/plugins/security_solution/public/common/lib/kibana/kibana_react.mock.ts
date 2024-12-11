@@ -58,7 +58,6 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
-import { of } from 'rxjs';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -109,7 +108,6 @@ export const createStartServicesMock = (
 ): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   core.settings.client.get.mockImplementation(createUseUiSettingMock());
-  core.chrome.getChromeStyle$.mockReturnValue(of("classic"))
   const { storage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();

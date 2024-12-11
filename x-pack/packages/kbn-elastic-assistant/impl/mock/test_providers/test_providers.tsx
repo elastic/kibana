@@ -13,23 +13,20 @@ import React from 'react';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CoreStart, UserProfileService } from '@kbn/core/public';
+import { ChromeNavControls, UserProfileService } from '@kbn/core/public';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
-import { createKibanaContextProviderMock } from '@kbn/security-solution-plugin/public/common/lib/kibana/kibana_react.mock';
-
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
+  navControls?: ChromeNavControls;
   children: React.ReactNode;
   providerContext?: Partial<AssistantProviderProps>;
-  core?: CoreStart
 }
 
 window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
-
-const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 export const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
@@ -43,6 +40,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
+  navControls = chromeServiceMock.createStartContract().navControls,
   children,
   providerContext,
 }) => {
@@ -65,7 +63,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => { },
+      error: () => {},
     },
   });
 
@@ -73,27 +71,26 @@ export const TestProvidersComponent: React.FC<Props> = ({
     <I18nProvider>
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
-          <MockKibanaContextProvider>
-            <AssistantProvider
-              actionTypeRegistry={actionTypeRegistry}
-              assistantAvailability={assistantAvailability}
-              augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
-              basePath={'https://localhost:5601/kbn'}
-              docLinks={{
-                ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-                DOC_LINK_VERSION: 'current',
-              }}
-              getComments={mockGetComments}
-              http={mockHttp}
-              baseConversations={{}}
-              navigateToApp={mockNavigateToApp}
-              {...providerContext}
-              currentAppId={'test'}
-              userProfileService={jest.fn() as unknown as UserProfileService}
-            >
-              {children}
-            </AssistantProvider>
-          </MockKibanaContextProvider>
+          <AssistantProvider
+            actionTypeRegistry={actionTypeRegistry}
+            assistantAvailability={assistantAvailability}
+            augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}
+            basePath={'https://localhost:5601/kbn'}
+            docLinks={{
+              ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+              DOC_LINK_VERSION: 'current',
+            }}
+            getComments={mockGetComments}
+            http={mockHttp}
+            baseConversations={{}}
+            navigateToApp={mockNavigateToApp}
+            {...providerContext}
+            currentAppId={'test'}
+            userProfileService={jest.fn() as unknown as UserProfileService}
+            navControls={navControls}
+          >
+            {children}
+          </AssistantProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </I18nProvider>
