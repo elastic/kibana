@@ -76,9 +76,11 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
         name: schema.maybe(schema.string()),
       }),
       schema.object({
+        name: schema.string(),
         role: schema.literal(MessageRole.Tool),
         toolCallId: schema.string(),
         response: schema.recordOf(schema.string(), schema.any()),
+        data: schema.maybe(schema.recordOf(schema.string(), schema.any())),
       }),
     ])
   ),

@@ -135,7 +135,7 @@ export function getTextBasedQueryStateToAstProps({
     filters,
     query,
     time: timeRange,
-    dataView,
+    timeFieldName: dataView.timeFieldName,
     inputQuery,
     titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
       defaultMessage: 'Table',
