@@ -15,9 +15,8 @@ import { casesMutationsKeys } from './constants';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 export const usePostObservable = (caseId: string) => {
-  const { showErrorToast } = useCasesToast();
+  const { showErrorToast, showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
-  const { showSuccessToast } = useCasesToast();
 
   return useMutation(
     (request: AddObservableRequest) => {
