@@ -157,40 +157,6 @@ describe('ES deprecation logs', () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
     });
 
-    test('Has a link to see logs in observability app', async () => {
-      await act(async () => {
-        testBed = await setupESDeprecationLogsPage(httpSetup, {
-          http: {
-            basePath: {
-              prepend: (url: string) => url,
-            },
-          },
-        });
-      });
-
-      const { component, exists, find } = testBed;
-
-      component.update();
-
-      expect(exists('viewObserveLogs')).toBe(true);
-      const locatorParams = stringifySearchParams({
-        id: DEPRECATION_LOGS_INDEX,
-        timeRange: {
-          from: MOCKED_TIME,
-          to: 'now',
-        },
-        query: {
-          language: 'kuery',
-          query: `not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(
-            ' or '
-          )})`,
-        },
-      });
-      const href = find('viewObserveLogs').props().href;
-      expect(href).toContain('logsExplorerUrl');
-      expect(href).toContain(locatorParams);
-    });
-
     test('Has a link to see logs in discover app', async () => {
       await act(async () => {
         testBed = await setupESDeprecationLogsPage(httpSetup);

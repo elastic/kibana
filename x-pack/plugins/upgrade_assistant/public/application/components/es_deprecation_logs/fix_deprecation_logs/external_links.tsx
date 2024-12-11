@@ -10,7 +10,7 @@ import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
   APPS_WITH_DEPRECATION_LOGS,
@@ -143,7 +143,7 @@ export const ExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>
   }, [dataService, checkpoint, share.url.locators]);
 
   return (
-    <EuiFlexItem>
+    <>
       <EuiText size="s">
         <p>
           <FormattedMessage
@@ -156,6 +156,6 @@ export const ExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>
       {deprecationDataView ? (
         <DiscoverAppLink checkpoint={checkpoint} deprecationDataView={deprecationDataView} />
       ) : null}
-    </EuiFlexItem>
+    </>
   );
 };
