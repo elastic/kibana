@@ -554,12 +554,6 @@ export interface ISavedObjectsRepository {
   getCurrentNamespace(namespace?: string): string | undefined;
 
   /**
-   * Given a list of namespace strings, returns a subset that the user is authorized to search in.
-   * If a wildcard '*' is used, it is expanded to an explicit list of namespace strings.
-   */
-  getSearchableNamespaces: (namespaces: string[] | undefined) => Promise<string[]>;
-
-  /**
    * Returns a new Saved Objects repository scoped to the specified namespace.
    * @param namespace Space to which the repository should be scoped to.
    */

@@ -336,17 +336,6 @@ describe('SavedObjectsClient', () => {
     expect(mockRepository.getCurrentNamespace).toHaveBeenCalledWith();
   });
 
-  test('#getSearchableNamespaces', async () => {
-    const searchableNamespaces = ['ns-default', 'ns-a'];
-    mockRepository.getSearchableNamespaces.mockResolvedValue(searchableNamespaces);
-    const client = new SavedObjectsClient(mockRepository);
-
-    await expect(client.getSearchableNamespaces(['*'])).resolves.toStrictEqual(
-      searchableNamespaces
-    );
-    expect(mockRepository.getSearchableNamespaces).toHaveBeenCalledWith(['*']);
-  });
-
   test('#asScopedToNamespace', () => {
     const client = new SavedObjectsClient(mockRepository);
 

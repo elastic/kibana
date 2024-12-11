@@ -566,16 +566,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
-   * {@inheritDoc ISavedObjectsRepository.getSearchableNamespaces}
-   */
-  async getSearchableNamespaces(namespaces?: string[]) {
-    if (this.extensions.spacesExtension) {
-      return this.extensions.spacesExtension.getSearchableNamespaces(namespaces);
-    }
-    return [];
-  }
-
-  /**
    * {@inheritDoc ISavedObjectsRepository.asScopedToNamespace}
    */
   asScopedToNamespace(namespace: string) {

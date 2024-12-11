@@ -77,18 +77,6 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
-  describe('#getSearchableNamespaces', () => {
-    it('returns an empty list when the spacesExtension is missing', async () => {
-      await expect(repository.getSearchableNamespaces([])).resolves.toStrictEqual([]);
-      await expect(repository.getSearchableNamespaces(['*'])).resolves.toStrictEqual([]);
-      await expect(repository.getSearchableNamespaces(['default'])).resolves.toStrictEqual([]);
-      await expect(repository.getSearchableNamespaces(['space-a'])).resolves.toStrictEqual([]);
-      await expect(
-        repository.getSearchableNamespaces(['default', 'space-a'])
-      ).resolves.toStrictEqual([]);
-    });
-  });
-
   describe('#asScopedToNamespace', () => {
     it('returns a new client with undefined spacesExtensions (not available)', () => {
       const scopedRepository = repository.asScopedToNamespace('space-a');
@@ -122,17 +110,6 @@ describe('SavedObjectsRepository', () => {
         [],
         { spacesExtension }
       );
-    });
-
-    describe('#getSearchableNamespaces', () => {
-      it('returns the list of searchable spaces returned by the spacesExtension', async () => {
-        const searchableSpaces = ['default', 'space-a'];
-        spacesExtension.getSearchableNamespaces.mockResolvedValue(searchableSpaces);
-        await expect(repository.getSearchableNamespaces(['*'])).resolves.toStrictEqual(
-          searchableSpaces
-        );
-        expect(spacesExtension.getSearchableNamespaces).toHaveBeenCalledWith(['*']);
-      });
     });
 
     describe('#asScopedToNamespace', () => {

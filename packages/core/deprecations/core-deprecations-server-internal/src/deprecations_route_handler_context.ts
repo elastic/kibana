@@ -13,6 +13,7 @@ import type {
   DeprecationsRequestHandlerContext,
   DeprecationsClient,
 } from '@kbn/core-deprecations-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalDeprecationsServiceStart } from './deprecations_service';
 
 /**
@@ -25,14 +26,16 @@ export class CoreDeprecationsRouteHandlerContext implements DeprecationsRequestH
   constructor(
     private readonly deprecationsStart: InternalDeprecationsServiceStart,
     private readonly elasticsearchRouterHandlerContext: CoreElasticsearchRouteHandlerContext,
-    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
+    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext,
+    private readonly request: KibanaRequest
   ) {}
 
   public get client() {
     if (this.#client == null) {
       this.#client = this.deprecationsStart.asScopedToClient(
         this.elasticsearchRouterHandlerContext.client,
-        this.savedObjectsRouterHandlerContext.client
+        this.savedObjectsRouterHandlerContext.client,
+        this.request
       );
     }
     return this.#client;

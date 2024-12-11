@@ -11,12 +11,13 @@
     "requiredPlugins": [
       "charts",
       "data",
-      "fieldFormats", 
+      "fieldFormats",
       "dataViews",
       "discoverShared",
       "logsDataAccess",
       "observabilityShared",
       "share",
+      "spaces",
       "usageCollection",
       "embeddable",
     ],
@@ -27,4 +28,3 @@
     "extraPublicDirs": ["common"]
   }
 }
- 

@@ -6,6 +6,7 @@
  */
 
 import pMap from 'p-map';
+import { CONCURRENT_SPACES_TO_CHECK } from '../../deprecations/constants';
 import { defaultLogViewId } from '../../../common/log_views';
 import { MIGRATE_LOG_VIEW_SETTINGS_URL } from '../../../common/http_api/deprecations';
 import { logSourcesKibanaAdvancedSettingRT } from '../../../common';
@@ -25,14 +26,16 @@ export const initMigrateLogViewSettingsRoute = ({
     async (context, request, response) => {
       try {
         const { elasticsearch, savedObjects } = await context.core;
-        const allAvailableSpaces = await savedObjects.client.getSearchableNamespaces(['*']);
-
         const [_, pluginStartDeps, pluginStart] = await getStartServices();
+
+        const allAvailableSpaces = await pluginStartDeps.spaces.spacesService
+          .createSpacesClient(request)
+          .getAll({ purpose: 'any' });
 
         const updated = await pMap(
           allAvailableSpaces,
-          async (spaceId) => {
-            const spaceScopedSavedObjectsClient = savedObjects.client.asScopedToNamespace(spaceId);
+          async (space) => {
+            const spaceScopedSavedObjectsClient = savedObjects.client.asScopedToNamespace(space.id);
 
             const logSourcesServicePromise =
               pluginStartDeps.logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
@@ -65,10 +68,11 @@ export const initMigrateLogViewSettingsRoute = ({
 
             return true;
           },
-          { concurrency: 20 }
+          { concurrency: CONCURRENT_SPACES_TO_CHECK }
         );
 
         if (!updated.includes(true)) {
+          // Only throw if none of the spaces was able to migrate
           return response.customError({
             body: new Error(
               "Unable to migrate log view settings. A log view either doesn't exist or is already using the Kibana advanced setting."

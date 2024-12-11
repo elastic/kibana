@@ -21,12 +21,6 @@ export interface ISavedObjectsSpacesExtension {
    */
   getCurrentNamespace: (namespace: string | undefined) => string | undefined;
   /**
-   * Given a list of namespace strings, returns a subset that the user is authorized to search in.
-   * If a wildcard '*' is used, it is expanded to an explicit list of namespace strings the current user has access to.
-   * It lists the namespaces without specifying what type of access it has (all, read, or partially to some features only).
-   */
-  getSearchableNamespaces: (namespaces: string[] | undefined) => Promise<string[]>;
-  /**
    * Returns a new Saved Objects Spaces Extension scoped to the specified namespace.
    * @param namespace Space to which the extension should be scoped to.
    */
