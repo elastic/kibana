@@ -8,7 +8,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { Notes } from './notes';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
@@ -22,6 +21,7 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { getAlertTitle } from '../../shared/utils';
 
 // minWidth for each block, allows to switch for a 1 row 4 blocks to 2 rows with 2 block each
 const blockStyles = {
@@ -44,17 +44,15 @@ export const AlertHeaderTitle = memo(() => {
     'securitySolutionNotesDisabled'
   );
 
-  const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
-    dataFormattedForFieldBrowser
-  );
-
+  const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
   const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
   const ruleTitle = useMemo(
     () =>
       href ? (
         <EuiLink href={href} target="_blank" external={false}>
           <FlyoutTitle
-            title={ruleName}
+            title={title}
             iconType={'warning'}
             isLink
             data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
@@ -62,12 +60,12 @@ export const AlertHeaderTitle = memo(() => {
         </EuiLink>
       ) : (
         <FlyoutTitle
-          title={ruleName}
+          title={title}
           iconType={'warning'}
           data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
         />
       ),
-    [ruleName, href]
+    [title, href]
   );
 
   const { refetch } = useRefetchByScope({ scopeId });
@@ -86,17 +84,7 @@ export const AlertHeaderTitle = memo(() => {
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
-      {isAlert && ruleName ? (
-        ruleTitle
-      ) : (
-        <FlyoutTitle
-          title={i18n.translate('xpack.securitySolution.flyout.right.header.headerTitle', {
-            defaultMessage: 'Document details',
-          })}
-          iconType={'warning'}
-          data-test-subj={FLYOUT_ALERT_HEADER_TITLE_TEST_ID}
-        />
-      )}
+      {ruleTitle}
       <EuiSpacer size="m" />
       {securitySolutionNotesDisabled ? (
         <EuiFlexGroup

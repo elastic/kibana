@@ -9,8 +9,8 @@ import React from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
-import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar_field';
+import { RuleFieldEditFormWrapper } from '../../../field_final_side';
 import {
   KqlQueryLanguage,
   KqlQueryType,

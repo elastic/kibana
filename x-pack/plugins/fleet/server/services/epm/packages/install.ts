@@ -1354,44 +1354,48 @@ export async function installAssetsForInputPackagePolicy(opts: {
       `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
     );
   }
-  if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
-    const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
-      ignoreUnverified: force,
+  try {
+    if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
+      const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
+        ignoreUnverified: force,
+      });
+
+      const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
+      packageInstallContext = {
+        assetsMap: pkg.assetsMap,
+        packageInfo: pkg.packageInfo,
+        paths: pkg.paths,
+        archiveIterator,
+      };
+    } else {
+      const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
+      packageInstallContext = {
+        assetsMap: installedPkgWithAssets.assetsMap,
+        packageInfo: installedPkgWithAssets.packageInfo,
+        paths: installedPkgWithAssets.paths,
+        archiveIterator,
+      };
+    }
+
+    await installIndexTemplatesAndPipelines({
+      installedPkg: installedPkgWithAssets.installation,
+      packageInstallContext,
+      esReferences: installedPkgWithAssets.installation.installed_es || [],
+      savedObjectsClient: soClient,
+      esClient,
+      logger,
+      onlyForDataStreams: [dataStream],
     });
-
-    const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
-    packageInstallContext = {
-      assetsMap: pkg.assetsMap,
-      packageInfo: pkg.packageInfo,
-      paths: pkg.paths,
-      archiveIterator,
-    };
-  } else {
-    const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
-    packageInstallContext = {
-      assetsMap: installedPkgWithAssets.assetsMap,
-      packageInfo: installedPkgWithAssets.packageInfo,
-      paths: installedPkgWithAssets.paths,
-      archiveIterator,
-    };
+    // Upate ES index patterns
+    await optimisticallyAddEsAssetReferences(
+      soClient,
+      installedPkgWithAssets.installation.name,
+      [],
+      generateESIndexPatterns([dataStream])
+    );
+  } catch (error) {
+    logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
   }
-
-  await installIndexTemplatesAndPipelines({
-    installedPkg: installedPkgWithAssets.installation,
-    packageInstallContext,
-    esReferences: installedPkgWithAssets.installation.installed_es || [],
-    savedObjectsClient: soClient,
-    esClient,
-    logger,
-    onlyForDataStreams: [dataStream],
-  });
-  // Upate ES index patterns
-  await optimisticallyAddEsAssetReferences(
-    soClient,
-    installedPkgWithAssets.installation.name,
-    [],
-    generateESIndexPatterns([dataStream])
-  );
 }
 
 interface NoPkgArgs {

@@ -22,7 +22,7 @@ import { HostPreviewPanelKey } from '../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../document_details/right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../document_details/right/components/user_entity_overview';
-import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 
@@ -46,9 +46,10 @@ const getPreviewParams = (
 ): PreviewParams | null => {
   if (getEcsField(field)?.type === IP_FIELD_TYPE) {
     return {
-      id: NetworkPanelKey,
+      id: NetworkPreviewPanelKey,
       params: {
         ip: value,
+        scopeId,
         flowTarget: field.includes(FlowTargetSourceDest.destination)
           ? FlowTargetSourceDest.destination
           : FlowTargetSourceDest.source,

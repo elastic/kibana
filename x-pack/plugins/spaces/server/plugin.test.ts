@@ -36,10 +36,7 @@ describe('Spaces plugin', () => {
           "hasOnlyDefaultSpace$": Observable {
             "operator": [Function],
             "source": Observable {
-              "operator": [Function],
-              "source": Observable {
-                "_subscribe": [Function],
-              },
+              "_subscribe": [Function],
             },
           },
           "spacesClient": Object {
@@ -123,10 +120,7 @@ describe('Spaces plugin', () => {
           "hasOnlyDefaultSpace$": Observable {
             "operator": [Function],
             "source": Observable {
-              "operator": [Function],
-              "source": Observable {
-                "_subscribe": [Function],
-              },
+              "_subscribe": [Function],
             },
           },
           "spacesService": Object {

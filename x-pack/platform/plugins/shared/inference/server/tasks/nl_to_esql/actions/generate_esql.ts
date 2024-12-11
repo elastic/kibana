@@ -34,6 +34,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   docBase,
   functionCalling,
   logger,
+  system,
 }: {
   connectorId: string;
   systemMessage: string;
@@ -43,6 +44,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
   docBase: EsqlDocumentBase;
   functionCalling?: FunctionCallingMode;
   logger: Pick<Logger, 'debug'>;
+  system?: string;
 }) => {
   return function askLlmToRespond({
     documentationRequest: { commands, functions },
@@ -97,7 +99,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
 
           When converting queries from one language to ES|QL, make sure that the functions are available
           and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
-        `,
+          ${system ? `## Additional instructions\n\n${system}` : ''}`,
         messages: [
           ...messages,
           {
@@ -106,6 +108,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
             toolCalls: [fakeRequestDocsToolCall],
           },
           {
+            name: fakeRequestDocsToolCall.function.name,
             role: MessageRole.Tool,
             response: {
               documentation: requestedDocumentation,

@@ -181,6 +181,8 @@ export default function ({ getService }: FtrProviderContext) {
         'packs_read',
       ],
       enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
+      enterpriseSearchApplications: ['all', 'read', 'minimal_all', 'minimal_read'],
+      enterpriseSearchAnalytics: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
       filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
       rulesSettings: [

@@ -54,7 +54,7 @@ import {
   SEMANTIC_SEARCH_PLUGIN,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
-import { ClientConfigType, InitialAppData, ProductAccess } from '../common/types';
+import { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { ENGINES_PATH } from './applications/app_search/routes';
@@ -575,12 +575,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       // to the base set of classic side nav items to the search-navigation plugin.
       import('./applications/shared/layout/base_nav').then(({ buildBaseClassicNavItems }) => {
         plugins.searchNavigation?.setGetBaseClassicNavItems(() => {
-          const productAccess: ProductAccess = this.data?.access ?? {
-            hasAppSearchAccess: false,
-            hasWorkplaceSearchAccess: false,
-          };
-
-          return buildBaseClassicNavItems({ productAccess });
+          return buildBaseClassicNavItems();
         });
       });
 

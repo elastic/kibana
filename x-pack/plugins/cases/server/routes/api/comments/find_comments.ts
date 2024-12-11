@@ -11,10 +11,12 @@ import type { attachmentApiV1 } from '../../../../common/types/api';
 import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
 import { createCaseError } from '../../../common/error';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const findCommentsRoute = createCasesRoute({
   method: 'get',
   path: CASE_FIND_ATTACHMENTS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

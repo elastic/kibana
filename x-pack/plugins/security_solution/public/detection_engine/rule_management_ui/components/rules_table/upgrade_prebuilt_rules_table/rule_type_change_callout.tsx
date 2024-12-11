@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import {
   RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION,
   RULE_TYPE_CHANGE_CALLOUT_TITLE,
+  RULE_TYPE_CHANGE_WITH_CUSTOMIZATIONS_CALLOUT_DESCRIPTION,
 } from './translations';
 
-export const RuleTypeChangeCallout = () => {
+interface RuleTypeChangeCalloutProps {
+  hasCustomizations: boolean;
+}
+
+export function RuleTypeChangeCallout({
+  hasCustomizations,
+}: RuleTypeChangeCalloutProps): JSX.Element {
   return (
     <EuiCallOut title={RULE_TYPE_CHANGE_CALLOUT_TITLE} color="danger" iconType="warning">
-      <p>{RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION}</p>
+      <p>
+        {hasCustomizations
+          ? RULE_TYPE_CHANGE_WITH_CUSTOMIZATIONS_CALLOUT_DESCRIPTION
+          : RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION}
+      </p>
     </EuiCallOut>
   );
-};
+}
