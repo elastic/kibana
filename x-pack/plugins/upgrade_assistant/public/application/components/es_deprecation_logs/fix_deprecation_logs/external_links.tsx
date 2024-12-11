@@ -10,12 +10,8 @@ import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
-import {
-  OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID,
-  ObsLogsExplorerDataViewLocatorParams,
-} from '@kbn/deeplinks-observability';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
@@ -24,7 +20,6 @@ import { DataPublicPluginStart } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import {
   uiMetricService,
-  UIM_OBSERVABILITY_CLICK,
   UIM_DISCOVER_CLICK,
 } from '../../../lib/ui_metric';
 
@@ -129,48 +124,6 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint, deprecationData
   );
 };
 
-const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint, deprecationDataView }) => {
-  const {
-    plugins: {
-      share: { url },
-    },
-  } = useAppContext();
-
-  const logsLocator = url.locators.get<ObsLogsExplorerDataViewLocatorParams>(
-    OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID
-  )!;
-
-  if (!deprecationDataView.id) return null;
-
-  const logsUrl = logsLocator.getRedirectUrl({
-    id: deprecationDataView.id,
-    timeRange: {
-      from: checkpoint,
-      to: 'now',
-    },
-    query: {
-      language: 'kuery',
-      query: `not ${DEPRECATION_LOGS_ORIGIN_FIELD} : (${APPS_WITH_DEPRECATION_LOGS.join(' or ')})`,
-    },
-  });
-
-  return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      href={logsUrl}
-      onClick={() => {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_OBSERVABILITY_CLICK);
-      }}
-      data-test-subj="viewObserveLogs"
-    >
-      <FormattedMessage
-        id="xpack.upgradeAssistant.overview.viewObservabilityResultsAction"
-        defaultMessage="View deprecation logs in Logs Explorer"
-      />
-    </EuiLink>
-  );
-};
-
 export const ExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>> = ({
   checkpoint,
 }) => {
@@ -190,42 +143,19 @@ export const ExternalLinks: FunctionComponent<Omit<Props, 'deprecationDataView'>
   }, [dataService, checkpoint, share.url.locators]);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiPanel>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.overview.observe.observabilityDescription"
-                defaultMessage="Get insight into which deprecated APIs are being used and what applications you need to update."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          {deprecationDataView ? (
-            <ObservabilityAppLink
-              checkpoint={checkpoint}
-              deprecationDataView={deprecationDataView}
-            />
-          ) : null}
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel>
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.overview.observe.discoveryDescription"
-                defaultMessage="Search and filter the deprecation logs to understand the types of changes you need to make."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          {deprecationDataView ? (
-            <DiscoverAppLink checkpoint={checkpoint} deprecationDataView={deprecationDataView} />
-          ) : null}
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overview.observe.discoveryDescription"
+            defaultMessage="Search and filter the deprecation logs to understand the types of changes you need to make."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      {deprecationDataView ? (
+        <DiscoverAppLink checkpoint={checkpoint} deprecationDataView={deprecationDataView} />
+      ) : null}
+    </EuiFlexItem>
   );
 };
