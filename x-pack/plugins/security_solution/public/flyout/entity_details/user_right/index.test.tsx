@@ -10,7 +10,16 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
-
+import type {
+  FlyoutPanelProps,
+  ExpandableFlyoutState,
+  ExpandableFlyoutApi,
+} from '@kbn/expandable-flyout';
+import {
+  useExpandableFlyoutApi,
+  useExpandableFlyoutState,
+  useExpandableFlyoutHistory,
+} from '@kbn/expandable-flyout';
 import { mockManagedUserData, mockObservedUser } from './mocks';
 import { mockRiskScoreState } from '../../shared/mocks';
 
@@ -44,11 +53,25 @@ jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
 }));
 
+const flyoutContextValue = {
+  closeLeftPanel: jest.fn(),
+} as unknown as ExpandableFlyoutApi;
+
+const flyoutHistory = [{ id: 'id1', params: {} }] as unknown as FlyoutPanelProps[];
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  useExpandableFlyoutHistory: jest.fn(),
+  useExpandableFlyoutState: jest.fn(),
+}));
+
 describe('UserPanel', () => {
   beforeEach(() => {
     mockedUseRiskScore.mockReturnValue(mockRiskScoreState);
     mockedUseManagedUser.mockReturnValue(mockManagedUserData);
     mockedUseObservedUser.mockReturnValue(mockObservedUser);
+    jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
+    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('renders', () => {
