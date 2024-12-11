@@ -20,9 +20,8 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { versionService } from '../version';
 import { generateNewIndexName } from './index_settings';
-import { FlatSettings, FlatSettingsWithTypeName } from './types';
+import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -80,10 +79,7 @@ export interface ReindexActions {
    * Retrieve index settings (in flat, dot-notation style) and mappings.
    * @param indexName
    */
-  getFlatSettings(
-    indexName: string,
-    withTypeName?: boolean
-  ): Promise<FlatSettings | FlatSettingsWithTypeName | null>;
+  getFlatSettings(indexName: string): Promise<FlatSettings | null>;
 }
 
 export const reindexActionsFactory = (
@@ -208,23 +204,10 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      let flatSettings;
-
-      if (versionService.getMajorVersion() === 7) {
-        // On 7.x, we need to get index settings with mapping type
-        flatSettings = await esClient.indices.get({
-          index: indexName,
-          flat_settings: true,
-          // This @ts-ignore is needed on master since the flag is deprecated on >7.x
-          // @ts-ignore
-          include_type_name: true,
-        });
-      } else {
-        flatSettings = await esClient.indices.get({
-          index: indexName,
-          flat_settings: true,
-        });
-      }
+      const flatSettings = await esClient.indices.get({
+        index: indexName,
+        flat_settings: true,
+      });
 
       if (!flatSettings[indexName]) {
         return null;
