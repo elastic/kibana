@@ -7168,7 +7168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-api@link:packages/kbn-securitysolution-list-api":
+"@kbn/securitysolution-list-api@link:x-pack/solutions/security/packages/kbn-securitysolution-list-api":
   version "0.0.0"
   uid ""
 
