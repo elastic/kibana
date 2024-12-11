@@ -4,6 +4,7 @@
   "owner": [
     "@elastic/kibana-visualizations"
   ],
+  // currently used from both visualisations and observability/infra
   "group": "platform",
   "visibility": "shared",
   "description": "Registers the TSVB visualization. TSVB has its one editor, works with index patterns and index strings and contains 6 types of charts: timeseries, topN, table. markdown, metric and gauge.",

@@ -645,7 +645,8 @@ export const WorkplaceSearchGate: React.FC = () => {
           )}
         >
           <EuiSelect
-            hasNoInitialSelection
+            data-test-subj="enterpriseSearchWorkplaceSearchGateSelect"
+            hasNoInitialSelection={participateInUXLabs === null}
             options={[
               {
                 text: i18n.translate(

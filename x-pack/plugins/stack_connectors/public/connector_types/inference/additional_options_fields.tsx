@@ -111,7 +111,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
           <div
             css={css`
               font-size: ${xsFontSize};
-              color: ${euiTheme.colors.subduedText};
+              color: ${euiTheme.colors.textSubdued};
             `}
           >
             <FormattedMessage
@@ -255,7 +255,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
             <div
               css={css`
                 font-size: ${xsFontSize};
-                color: ${euiTheme.colors.subduedText};
+                color: ${euiTheme.colors.textSubdued};
               `}
             >
               <FormattedMessage
@@ -289,7 +289,7 @@ export const AdditionalOptionsConnectorFields: React.FC<AdditionalOptionsConnect
         <div
           css={css`
             font-size: ${xsFontSize};
-            color: ${euiTheme.colors.subduedText};
+            color: ${euiTheme.colors.textSubdued};
           `}
         >
           <FormattedMessage

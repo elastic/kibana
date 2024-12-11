@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { TlsTranslations } from '../../../../../common/rules/synthetics/translations';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
-import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
 import type { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
 
 import type { AlertTypeInitializer } from './types';

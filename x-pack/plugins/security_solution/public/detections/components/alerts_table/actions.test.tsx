@@ -25,7 +25,6 @@ import {
   getThresholdDetectionAlertAADMock,
   mockEcsDataWithAlert,
   mockTimelineDetails,
-  mockTimelineResult,
   mockAADEcsDataWithAlert,
   mockGetOneTimelineResult,
   mockTimelineData,
@@ -283,7 +282,7 @@ describe('alert actions', () => {
       search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
     };
 
-    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResult);
+    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockGetOneTimelineResult);
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -355,7 +354,6 @@ describe('alert actions', () => {
               eventCategoryField: 'event.category',
               query: '',
               size: 100,
-              tiebreakerField: '',
               timestampField: '@timestamp',
             },
             eventIdToNoteIds: {},
@@ -442,11 +440,13 @@ describe('alert actions', () => {
 
       test('it invokes createTimeline with kqlQuery.filterQuery.kuery.kind as "kuery" if not specified in returned timeline template', async () => {
         const mockTimelineResultModified = {
-          ...mockTimelineResult,
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
-                expression: [''],
+          body: {
+            ...mockGetOneTimelineResult,
+            kqlQuery: {
+              filterQuery: {
+                kuery: {
+                  expression: [''],
+                },
               },
             },
           },
@@ -460,7 +460,6 @@ describe('alert actions', () => {
           getExceptionFilter: mockGetExceptionFilter,
         });
         const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
-
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');

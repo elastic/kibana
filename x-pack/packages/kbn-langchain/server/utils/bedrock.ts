@@ -10,6 +10,7 @@ import { finished } from 'stream/promises';
 import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { Message } from '@aws-sdk/client-bedrock-runtime';
 import { StreamParser } from './types';
 
 export const parseBedrockStreamAsAsyncIterator = async function* (
@@ -227,7 +228,7 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
  * Prepare messages for the bedrock API by combining messages from the same role
  * @param messages
  */
-export const prepareMessages = (messages: Array<{ role: string; content: string[] }>) =>
+export const prepareMessages = (messages: Message[]) =>
   messages.reduce((acc, { role, content }) => {
     const lastMessage = acc[acc.length - 1];
 
@@ -236,13 +237,13 @@ export const prepareMessages = (messages: Array<{ role: string; content: string[
       return acc;
     }
 
-    if (lastMessage.role === role) {
-      acc[acc.length - 1].content = lastMessage.content.concat(content);
+    if (lastMessage.role === role && lastMessage.content) {
+      acc[acc.length - 1].content = lastMessage.content.concat(content || []);
       return acc;
     }
 
     return acc;
-  }, [] as Array<{ role: string; content: string[] }>);
+  }, [] as Message[]);
 
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';

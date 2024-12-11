@@ -189,7 +189,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'packages/kbn-esql-validation-autocomplete/scripts/**/*',
+  'src/platform/packages/shared/kbn-esql-validation-autocomplete/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -919,6 +919,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -938,6 +939,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
         'x-pack/plugins/observability_solution/slo/**/*.stories.*',
+        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'react/function-component-definition': [
@@ -952,6 +954,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
@@ -959,15 +962,16 @@ module.exports = {
           'error',
           {
             additionalHooks:
-              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
       },
     },
     {
       files: [
-        'x-pack/plugins/aiops/**/*.tsx',
+        'x-pack/platform/plugins/shared/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'src/plugins/ai_assistant_management/**/*.tsx',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
@@ -984,6 +988,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/{streams,streams_app}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -1070,11 +1075,12 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -2013,6 +2019,22 @@ module.exports = {
       rules: {
         '@kbn/imports/no_group_crossing_manifests': 'warn',
         '@kbn/imports/no_group_crossing_imports': 'warn',
+      },
+    },
+    {
+      files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
+        // disabling it since package is marked as module and it requires extension for files written
+        '@kbn/imports/uniform_imports': 'off',
+      },
+    },
+    {
+      files: ['packages/kbn-dependency-ownership/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
       },
     },
   ],

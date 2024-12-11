@@ -1,5 +1,9 @@
 {
   "type": "shared-server",
   "id": "@kbn/observability-utils-server",
-  "owner": "@elastic/observability-ui"
+  "owner": [
+    "@elastic/observability-ui"
+  ],
+  "group": "observability",
+  "visibility": "private"
 }

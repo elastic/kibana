@@ -163,6 +163,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean?)',
         'monitoring.ui.min_interval_seconds (number?)',
         'monitoring.ui.show_license_expiration (boolean?)',
+        'monitoring.ui.logs.index (string?)',
         'newsfeed.fetchInterval (duration?)',
         'newsfeed.mainInterval (duration?)',
         'newsfeed.service.pathTemplate (string?)',
@@ -319,8 +320,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
-        // 'xpack.reporting.roles.allow (array)',
-        // 'xpack.reporting.roles.enabled (boolean)',
         // 'xpack.reporting.poll.jobCompletionNotifier.interval (number)',
         // 'xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier (number)',
         // 'xpack.reporting.poll.jobsRefresh.interval (number)',
@@ -353,6 +352,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
+        'xpack.upgrade_assistant.featureSet.migrateDataStreams (boolean?)',
         'xpack.upgrade_assistant.ui.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean?)',

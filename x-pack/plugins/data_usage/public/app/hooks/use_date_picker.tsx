@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { useCallback, useState } from 'react';
 import type {
   DurationRange,
@@ -13,16 +12,7 @@ import type {
 } from '@elastic/eui/src/components/date_picker/types';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { DateRangePickerValues } from '../components/filters/date_picker';
-
-export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
-  autoRefreshOptions: {
-    enabled: false,
-    duration: 10000,
-  },
-  startDate: moment().subtract(24, 'hours').startOf('day').toISOString(),
-  endDate: moment().toISOString(),
-  recentlyUsedDateRanges: [],
-});
+import { DEFAULT_DATE_RANGE_OPTIONS } from '../../../common/utils';
 
 export const useDateRangePicker = () => {
   const {

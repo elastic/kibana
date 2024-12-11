@@ -25,6 +25,7 @@ import {
   LlmResponseSimulator,
 } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createOpenAiChunk } from '@kbn/test-suites-xpack/observability_ai_assistant_api_integration/common/create_openai_chunk';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   decodeEvents,
@@ -39,6 +40,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const log = getService('log');
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+
+  let supertestEditorWithCookieCredentials: SupertestWithRoleScope;
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
@@ -63,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/197175
+  // Failing: See https://github.com/elastic/kibana/issues/203407
   describe.skip('/internal/observability_ai_assistant/chat/complete', function () {
     // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
@@ -83,10 +87,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         (body) => !isFunctionTitleRequest(body)
       );
       const responsePromise = new Promise<Response>((resolve, reject) => {
-        supertestWithoutAuth
+        supertestEditorWithCookieCredentials
           .post(COMPLETE_API_URL)
-          .set(roleAuthc.apiKeyHeader)
-          .set(internalReqHeader)
           .send({
             messages,
             connectorId,
@@ -135,6 +137,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         roleAuthc,
         internalReqHeader,
       });
+
+      supertestEditorWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'editor',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
     });
 
     after(async () => {
@@ -156,10 +166,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const passThrough = new PassThrough();
 
-      supertestWithoutAuth
+      supertestEditorWithCookieCredentials
         .post(COMPLETE_API_URL)
-        .set(roleAuthc.apiKeyHeader)
-        .set(internalReqHeader)
         .send({
           messages,
           connectorId,
@@ -180,16 +188,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
       await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
+      await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
       const parsedEvents = decodeEvents(receivedChunks.join(''));
 
-      expect(parsedEvents.map((event) => event.type)).to.eql([
+      expect(
+        parsedEvents
+          .map((event) => event.type)
+          .filter((eventType) => eventType !== StreamingChatResponseEventType.BufferFlush)
+      ).to.eql([
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.ChatCompletionChunk,
+        StreamingChatResponseEventType.ChatCompletionMessage,
         StreamingChatResponseEventType.MessageAdd,
       ]);
 
@@ -249,6 +263,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       });
     });
+
     describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
@@ -256,6 +271,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         events = await getEvents({}, async (conversationSimulator) => {
           await conversationSimulator.next('Hello');
           await conversationSimulator.next(' again');
+          await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
           await conversationSimulator.complete();
         });
       });
@@ -267,13 +283,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             content: 'Hello',
           },
         });
+
         expect(omit(events[1], 'id')).to.eql({
           type: StreamingChatResponseEventType.ChatCompletionChunk,
           message: {
             content: ' again',
           },
         });
+
         expect(omit(events[2], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.ChatCompletionMessage,
+          message: {
+            content: 'Hello again',
+          },
+        });
+        expect(omit(events[3], 'id', 'message.@timestamp')).to.eql({
           type: StreamingChatResponseEventType.MessageAdd,
           message: {
             message: {
@@ -290,7 +314,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(
           omit(
-            events[3],
+            events[4],
             'conversation.id',
             'conversation.last_updated',
             'conversation.token_count'
@@ -302,7 +326,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        const tokenCount = (events[3] as ConversationCreateEvent).conversation.token_count!;
+        const tokenCount = (events[4] as ConversationCreateEvent).conversation.token_count!;
 
         expect(tokenCount.completion).to.be.greaterThan(0);
         expect(tokenCount.prompt).to.be.greaterThan(0);
@@ -317,10 +341,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )[0]?.conversation.id;
 
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-            roleAuthc,
-            internalReqHeader,
             params: {
               path: {
                 conversationId: createdConversationId,
@@ -358,8 +380,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           async (conversationSimulator) => {
             await conversationSimulator.next({
-              function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
+              tool_calls: [
+                {
+                  id: 'fake-id',
+                  index: 'fake-index',
+                  function: {
+                    name: 'my_action',
+                    arguments: JSON.stringify({ foo: 'bar' }),
+                  },
+                },
+              ],
             });
+            await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 1 });
             await conversationSimulator.complete();
           }
         );
@@ -395,10 +427,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(0);
 
         const conversations = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
-            roleAuthc,
-            internalReqHeader,
           })
           .expect(200);
 
@@ -427,10 +457,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .completeAfterIntercept();
 
         const createResponse = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-            roleAuthc,
-            internalReqHeader,
             params: {
               body: {
                 messages,
@@ -448,10 +476,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.slsUser({
+        const fullConversation = await observabilityAIAssistantAPIClient.slsEditor({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-          internalReqHeader,
-          roleAuthc,
           params: {
             path: {
               conversationId,
@@ -464,10 +490,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .completeAfterIntercept();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
-            internalReqHeader,
-            roleAuthc,
             params: {
               body: {
                 messages: [
@@ -497,10 +521,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .slsUser({
+          .slsEditor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-            internalReqHeader,
-            roleAuthc,
             params: {
               path: {
                 conversationId: conversationCreatedEvent.conversation.id,

@@ -31,8 +31,8 @@
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/config-schema",
+    "@kbn/core-http-server-utils",
   ]
 }

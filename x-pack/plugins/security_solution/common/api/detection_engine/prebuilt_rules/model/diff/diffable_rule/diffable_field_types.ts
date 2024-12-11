@@ -9,14 +9,17 @@ import { z } from '@kbn/zod';
 import {
   BuildingBlockType,
   DataViewId,
+  EventCategoryOverride,
   IndexPatternArray,
   KqlQueryLanguage,
   RuleFilterArray,
   RuleNameOverride,
   RuleQuery,
   SavedQueryId,
+  TiebreakerField,
   TimelineTemplateId,
   TimelineTemplateTitle,
+  TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
 } from '../../../../model/rule_schema';
@@ -78,6 +81,9 @@ export const RuleEqlQuery = z.object({
   query: RuleQuery,
   language: z.literal('eql'),
   filters: RuleFilterArray,
+  event_category_override: EventCategoryOverride.optional(),
+  timestamp_field: TimestampField.optional(),
+  tiebreaker_field: TiebreakerField.optional(),
 });
 
 export type RuleEsqlQuery = z.infer<typeof RuleEsqlQuery>;

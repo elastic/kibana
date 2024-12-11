@@ -6,7 +6,7 @@
  */
 
 import type { FrameworkRequest } from '../../../framework';
-import { persistNote } from './saved_object';
+import { persistNote, type InternalNoteResponse } from './saved_object';
 import { getOverridableNote } from './get_overridable_note';
 import type { Note } from '../../../../../common/api/timeline';
 
@@ -16,7 +16,7 @@ export const persistNotes = async (
   existingNoteIds?: string[] | null,
   newNotes?: Note[],
   overrideOwner: boolean = true
-) => {
+): Promise<InternalNoteResponse[]> => {
   return Promise.all(
     newNotes?.map(async (note) => {
       const newNote = await getOverridableNote(
@@ -31,6 +31,6 @@ export const persistNotes = async (
         note: newNote,
         overrideOwner,
       });
-    }) ?? []
+    }) ?? ([] as InternalNoteResponse[])
   );
 };

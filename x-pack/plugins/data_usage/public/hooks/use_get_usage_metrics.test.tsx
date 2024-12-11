@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React, { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetDataUsageMetrics } from './use_get_usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
-import { dataUsageTestQueryClientOptions } from '../../common/test_utils/test_query_client_options';
+import { dataUsageTestQueryClientOptions } from '../../common/test_utils';
+import { transformToUTCtime } from '../../common/utils';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -41,16 +41,31 @@ jest.mock('../utils/use_kibana', () => {
   };
 });
 
-const defaultUsageMetricsRequestBody = {
-  from: moment().subtract(15, 'minutes').toISOString(),
-  to: moment().toISOString(),
-  metricTypes: ['ingest_rate'],
-  dataStreams: ['ds-1'],
-};
-
 describe('useGetDataUsageMetrics', () => {
+  const timeRange = {
+    start: 'now-15m',
+    end: 'now',
+  };
+  const getUtcTimeRange = (range: { start: string; end: string }) =>
+    transformToUTCtime({
+      ...range,
+      isISOString: true,
+    });
+  let defaultUsageMetricsRequestBody = {
+    from: 'now-15m',
+    to: 'now',
+    metricTypes: ['ingest_rate'],
+    dataStreams: ['ds-1'],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    defaultUsageMetricsRequestBody = {
+      ...defaultUsageMetricsRequestBody,
+      from: getUtcTimeRange(timeRange).start as string,
+      to: getUtcTimeRange(timeRange).end as string,
+    };
   });
 
   it('should call the correct API', async () => {
@@ -66,6 +81,19 @@ describe('useGetDataUsageMetrics', () => {
       version: '1',
       body: JSON.stringify(defaultUsageMetricsRequestBody),
     });
+  });
+
+  it('should not call the API if invalid date range', async () => {
+    const requestBody = {
+      ...defaultUsageMetricsRequestBody,
+      from: 'invalid-date',
+      to: 'invalid-date',
+    };
+    await renderHook(() => useGetDataUsageMetrics(requestBody, { enabled: true }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(mockServices.http.post).not.toHaveBeenCalled();
   });
 
   it('should not call the API if disabled', async () => {

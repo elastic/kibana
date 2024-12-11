@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
@@ -51,13 +50,11 @@ import {
   basicCaseSnake,
   pushedCaseSnake,
   categories,
-  casesStatus,
   casesSnake,
   cases,
   pushedCase,
   tags,
   findCaseUserActionsResponse,
-  casesStatusSnake,
   basicCaseId,
   caseWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
@@ -69,7 +66,6 @@ import {
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
-import { getCasesStatus } from '../api';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
@@ -528,38 +524,6 @@ describe('Cases API', () => {
         }),
         signal: abortCtrl.signal,
       });
-    });
-  });
-
-  describe('getCasesStatus', () => {
-    const http = httpServiceMock.createStartContract({ basePath: '' });
-    http.get.mockResolvedValue(casesStatusSnake);
-
-    beforeEach(() => {
-      fetchMock.mockClear();
-    });
-
-    it('should be called with correct check url, method, signal', async () => {
-      await getCasesStatus({
-        http,
-        signal: abortCtrl.signal,
-        query: { owner: [SECURITY_SOLUTION_OWNER] },
-      });
-
-      expect(http.get).toHaveBeenCalledWith(`${CASES_URL}/status`, {
-        signal: abortCtrl.signal,
-        query: { owner: [SECURITY_SOLUTION_OWNER] },
-      });
-    });
-
-    it('should return correct response', async () => {
-      const resp = await getCasesStatus({
-        http,
-        signal: abortCtrl.signal,
-        query: { owner: SECURITY_SOLUTION_OWNER },
-      });
-
-      expect(resp).toEqual(casesStatus);
     });
   });
 

@@ -18,6 +18,7 @@ import {
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
+  EuiIconTip,
 } from '@elastic/eui';
 
 interface BaseQuickStatProps {
@@ -33,6 +34,7 @@ interface BaseQuickStatProps {
   }>;
   setOpen: (open: boolean) => void;
   first?: boolean;
+  tooltipContent?: string;
 }
 
 export const QuickStat: React.FC<BaseQuickStatProps> = ({
@@ -45,6 +47,7 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
   secondaryTitle,
   iconColor,
   content,
+  tooltipContent,
   ...rest
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -93,6 +96,11 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
                 {secondaryTitle}
               </EuiText>
             </EuiFlexItem>
+            {tooltipContent && (
+              <EuiFlexItem>
+                <EuiIconTip content={tooltipContent} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       }

@@ -41,7 +41,7 @@ export const initUptimeServer = (
   router: UptimeRouter
 ) => {
   legacyUptimeRestApiRoutes.forEach((route) => {
-    const { method, options, handler, validate, path } = uptimeRouteWrapper(
+    const { method, options, handler, validate, path, security } = uptimeRouteWrapper(
       createRouteWithAuth(libs, route),
       server
     );
@@ -50,6 +50,7 @@ export const initUptimeServer = (
       path,
       validate,
       options,
+      security,
     };
 
     switch (method) {
@@ -71,18 +72,12 @@ export const initUptimeServer = (
   });
 
   legacyUptimePublicRestApiRoutes.forEach((route) => {
-    const { method, options, handler, path, ...rest } = uptimeRouteWrapper(
+    const { method, options, handler, path, security, ...rest } = uptimeRouteWrapper(
       createRouteWithAuth(libs, route),
       server
     );
 
     const validate = rest.validate ? getRequestValidation(rest.validate) : rest.validate;
-
-    const routeDefinition = {
-      path,
-      validate,
-      options,
-    };
 
     switch (method) {
       case 'GET':
@@ -90,7 +85,7 @@ export const initUptimeServer = (
           .get({
             access: 'public',
             description: `Get uptime settings`,
-            path: routeDefinition.path,
+            path,
             options: {
               tags: options?.tags,
             },
@@ -98,6 +93,7 @@ export const initUptimeServer = (
           .addVersion(
             {
               version: INITIAL_REST_VERSION,
+              security,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,
@@ -117,7 +113,7 @@ export const initUptimeServer = (
           .put({
             access: 'public',
             description: `Update uptime settings`,
-            path: routeDefinition.path,
+            path,
             options: {
               tags: options?.tags,
             },
@@ -125,6 +121,7 @@ export const initUptimeServer = (
           .addVersion(
             {
               version: INITIAL_REST_VERSION,
+              security,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,

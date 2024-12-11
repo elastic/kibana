@@ -49,6 +49,8 @@ export function DefaultEdge({
         path={edgePath}
         style={{
           stroke: euiTheme.colors[color],
+        }}
+        css={{
           strokeDasharray: '2,2',
         }}
         markerEnd={

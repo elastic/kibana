@@ -8,16 +8,9 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import type {
-  ElasticsearchClient,
-  SavedObjectsServiceStart,
-  HttpServiceSetup,
-  Logger,
-  KibanaRequest,
-  SecurityServiceStart,
-} from '@kbn/core/server';
 
-import { CoreKibanaRequest } from '@kbn/core/server';
+import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
@@ -29,8 +22,12 @@ import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plu
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { Logger } from '@kbn/logging';
 
 import type { FleetConfigType } from '../../common/types';
 import {
@@ -188,7 +185,7 @@ class AppContextService {
     return this.savedObjectsTagging;
   }
   public getInternalUserSOClientForSpaceId(spaceId?: string) {
-    const request = CoreKibanaRequest.from({
+    const request = kibanaRequestFactory({
       headers: {},
       path: '/',
       route: { settings: {} },

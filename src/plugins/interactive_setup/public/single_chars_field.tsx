@@ -73,13 +73,13 @@ export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
         <EuiFlexItem
           key={`${i}separator`}
           grow={false}
-          style={{ width: parseInt(euiThemeVars.euiFormControlHeight, 10) / 8 }}
+          css={{ width: parseInt(euiThemeVars.euiFormControlHeight, 10) / 8 }}
         />
       );
     }
 
     children.push(
-      <EuiFlexItem key={i} grow={false} style={{ width: euiThemeVars.euiFormControlHeight }}>
+      <EuiFlexItem key={i} grow={false} css={{ width: euiThemeVars.euiFormControlHeight }}>
         <EuiFieldText
           inputRef={(el) => {
             inputRefs.current[i] = el;
@@ -125,7 +125,7 @@ export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
           }}
           maxLength={1}
           isInvalid={isInvalid}
-          style={{ textAlign: 'center' }}
+          css={{ textAlign: 'center' }}
           aria-label={i18n.translate('interactiveSetup.singleCharsField.digitLabel', {
             defaultMessage: 'Digit {index}',
             values: { index: i + 1 },

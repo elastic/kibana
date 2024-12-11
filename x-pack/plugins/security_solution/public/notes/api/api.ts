@@ -7,7 +7,6 @@
 
 import type {
   BareNote,
-  DeleteNoteResponse,
   GetNotesResponse,
   PersistNoteRouteResponse,
 } from '../../../common/api/timeline';
@@ -27,11 +26,7 @@ export const createNote = async ({ note }: { note: BareNote }) => {
       body: JSON.stringify({ note }),
       version: '2023-10-31',
     });
-    const noteResponse = response.data.persistNote;
-    if (noteResponse.code !== 200) {
-      throw new Error(noteResponse.message);
-    }
-    return noteResponse.note;
+    return response.note;
   } catch (err) {
     throw new Error(('message' in err && err.message) || 'Request failed');
   }
@@ -98,7 +93,7 @@ export const fetchNotesBySaveObjectIds = async (savedObjectIds: string[]) => {
  * Deletes multiple notes
  */
 export const deleteNotes = async (noteIds: string[]) => {
-  const response = await KibanaServices.get().http.delete<DeleteNoteResponse>(NOTE_URL, {
+  const response = await KibanaServices.get().http.delete(NOTE_URL, {
     body: JSON.stringify({ noteIds }),
     version: '2023-10-31',
   });

@@ -6,17 +6,19 @@
  */
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IndexPatternAdapter, type FieldMap, type InstallParams } from '@kbn/index-adapter';
-import {
-  ruleMigrationsFieldMap,
-  ruleMigrationResourcesFieldMap,
-} from './rule_migrations_field_maps';
 import type { IndexNameProvider, IndexNameProviders } from './rule_migrations_data_client';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
+import {
+  integrationsFieldMap,
+  prebuiltRulesFieldMap,
+  ruleMigrationResourcesFieldMap,
+  ruleMigrationsFieldMap,
+} from './rule_migrations_field_maps';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 
-export type AdapterId = 'rules' | 'resources';
+export type AdapterId = 'rules' | 'resources' | 'integrations' | 'prebuiltrules';
 
 interface CreateClientParams {
   spaceId: string;
@@ -31,6 +33,8 @@ export class RuleMigrationsDataService {
     this.adapters = {
       rules: this.createAdapter({ id: 'rules', fieldMap: ruleMigrationsFieldMap }),
       resources: this.createAdapter({ id: 'resources', fieldMap: ruleMigrationResourcesFieldMap }),
+      integrations: this.createAdapter({ id: 'integrations', fieldMap: integrationsFieldMap }),
+      prebuiltrules: this.createAdapter({ id: 'prebuiltrules', fieldMap: prebuiltRulesFieldMap }),
     };
   }
 
@@ -49,6 +53,8 @@ export class RuleMigrationsDataService {
     await Promise.all([
       this.adapters.rules.install({ ...params, logger: this.logger }),
       this.adapters.resources.install({ ...params, logger: this.logger }),
+      this.adapters.integrations.install({ ...params, logger: this.logger }),
+      this.adapters.prebuiltrules.install({ ...params, logger: this.logger }),
     ]);
   }
 
@@ -56,6 +62,8 @@ export class RuleMigrationsDataService {
     const indexNameProviders: IndexNameProviders = {
       rules: this.createIndexNameProvider('rules', spaceId),
       resources: this.createIndexNameProvider('resources', spaceId),
+      integrations: this.createIndexNameProvider('integrations', spaceId),
+      prebuiltrules: this.createIndexNameProvider('prebuiltrules', spaceId),
     };
 
     return new RuleMigrationsDataClient(

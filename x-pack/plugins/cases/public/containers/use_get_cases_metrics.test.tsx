@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import * as api from '../api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -33,17 +33,20 @@ describe('useGetCasesMetrics', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCasesMetrics');
-    const { waitForNextUpdate } = renderHook(() => useGetCasesMetrics(), {
+    renderHook(() => useGetCasesMetrics(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith({
-      http: expect.anything(),
-      signal: abortCtrl.signal,
-      query: { owner: [SECURITY_SOLUTION_OWNER], features: [CaseMetricsFeature.MTTR] },
-    });
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({
+        http: expect.anything(),
+        signal: abortCtrl.signal,
+        query: {
+          owner: [SECURITY_SOLUTION_OWNER],
+          features: [CaseMetricsFeature.MTTR, CaseMetricsFeature.STATUS],
+        },
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -51,12 +54,12 @@ describe('useGetCasesMetrics', () => {
       .spyOn(api, 'getCasesMetrics')
       .mockRejectedValue(new Error('useGetCasesMetrics: Test error'));
 
-    const { waitForNextUpdate } = renderHook(() => useGetCasesMetrics(), {
+    renderHook(() => useGetCasesMetrics(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

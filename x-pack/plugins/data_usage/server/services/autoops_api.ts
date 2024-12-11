@@ -6,7 +6,7 @@
  */
 
 import https from 'https';
-import dateMath from '@kbn/datemath';
+
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import apm from 'elastic-apm-node';
 
@@ -14,23 +14,22 @@ import { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
+import { momentDateParser } from '../../common/utils';
 import {
   UsageMetricsAutoOpsResponseSchema,
-  UsageMetricsAutoOpsResponseSchemaBody,
-  UsageMetricsRequestBody,
+  type UsageMetricsAutoOpsResponseSchemaBody,
+  type UsageMetricsRequestBody,
 } from '../../common/rest_types';
 import { AutoOpsConfig } from '../types';
-import { AutoOpsError } from './errors';
+import { AutoOpsError } from '../errors';
 import { appContextService } from './app_context';
 
-const AGENT_CREATION_FAILED_ERROR = 'AutoOps API could not create the autoops agent';
-const AUTO_OPS_AGENT_CREATION_PREFIX = '[AutoOps API] Creating autoops agent failed';
+const AUTO_OPS_REQUEST_FAILED_PREFIX = '[AutoOps API] Request failed';
 const AUTO_OPS_MISSING_CONFIG_ERROR = 'Missing autoops configuration';
 
 const getAutoOpsAPIRequestUrl = (url?: string, projectId?: string): string =>
   `${url}/monitoring/serverless/v1/projects/${projectId}/metrics`;
 
-const dateParser = (date: string) => dateMath.parse(date)?.toISOString();
 export class AutoOpsAPIService {
   private logger: Logger;
   constructor(logger: Logger) {
@@ -52,12 +51,23 @@ export class AutoOpsAPIService {
       throw new AutoOpsError(AUTO_OPS_MISSING_CONFIG_ERROR);
     }
 
+    if (!autoopsConfig.api?.url) {
+      this.logger.error(`[AutoOps API] Missing API URL in the configuration.`, errorMetadata);
+      throw new AutoOpsError('Missing API URL in AutoOps configuration.');
+    }
+
+    if (!autoopsConfig.api?.tls?.certificate || !autoopsConfig.api?.tls?.key) {
+      this.logger.error(
+        `[AutoOps API] Missing required TLS certificate or key in the configuration.`,
+        errorMetadata
+      );
+      throw new AutoOpsError('Missing required TLS certificate or key in AutoOps configuration.');
+    }
+
     this.logger.debug(
-      `[AutoOps API] Creating autoops agent with TLS cert: ${
-        autoopsConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
-      } and TLS key: ${autoopsConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
-      and TLS ca: ${autoopsConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
+      `[AutoOps API] Creating autoops agent with request URL: ${autoopsConfig.api.url} and TLS cert: [REDACTED] and TLS key: [REDACTED]`
     );
+
     const controller = new AbortController();
     const tlsConfig = this.createTlsConfig(autoopsConfig);
     const cloudSetup = appContextService.getCloud();
@@ -65,8 +75,8 @@ export class AutoOpsAPIService {
     const requestConfig: AxiosRequestConfig = {
       url: getAutoOpsAPIRequestUrl(autoopsConfig.api?.url, cloudSetup?.serverless.projectId),
       data: {
-        from: dateParser(requestBody.from),
-        to: dateParser(requestBody.to),
+        from: momentDateParser(requestBody.from)?.toISOString(),
+        to: momentDateParser(requestBody.to)?.toISOString(),
         size: requestBody.dataStreams.length,
         level: 'datastream',
         metric_types: requestBody.metricTypes,
@@ -109,10 +119,10 @@ export class AutoOpsAPIService {
       (error: Error | AxiosError) => {
         if (!axios.isAxiosError(error)) {
           this.logger.error(
-            `${AUTO_OPS_AGENT_CREATION_PREFIX} with an error ${error} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} with an error ${error}, request config: ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
-          throw new Error(withRequestIdMessage(error.message));
+          throw new AutoOpsError(withRequestIdMessage(error.message));
         }
 
         const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
@@ -120,9 +130,11 @@ export class AutoOpsAPIService {
         if (error.response) {
           // The request was made and the server responded with a status code and error data
           this.logger.error(
-            `${AUTO_OPS_AGENT_CREATION_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} because the AutoOps API responded with a status code that falls out of the range of 2xx: ${JSON.stringify(
               error.response.status
-            )}} ${JSON.stringify(error.response.data)}} ${requestConfigDebugStatus}`,
+            )}} ${JSON.stringify(
+              error.response.data
+            )}}, request config: ${requestConfigDebugStatus}`,
             {
               ...errorMetadataWithRequestConfig,
               http: {
@@ -134,30 +146,28 @@ export class AutoOpsAPIService {
               },
             }
           );
-          throw new AutoOpsError(withRequestIdMessage(AGENT_CREATION_FAILED_ERROR));
+          throw new AutoOpsError(withRequestIdMessage(AUTO_OPS_REQUEST_FAILED_PREFIX));
         } else if (error.request) {
           // The request was made but no response was received
           this.logger.error(
-            `${AUTO_OPS_AGENT_CREATION_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause}, request config: ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
-          throw new Error(withRequestIdMessage(`no response received from the AutoOps API`));
+          throw new AutoOpsError(withRequestIdMessage(`no response received from the AutoOps API`));
         } else {
           // Something happened in setting up the request that triggered an Error
           this.logger.error(
-            `${AUTO_OPS_AGENT_CREATION_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_REQUEST_FAILED_PREFIX} with ${errorLogCodeCause}, request config: ${requestConfigDebugStatus}, error: ${error.toJSON()}`,
             errorMetadataWithRequestConfig
           );
-          throw new AutoOpsError(withRequestIdMessage(AGENT_CREATION_FAILED_ERROR));
+          throw new AutoOpsError(
+            withRequestIdMessage(`${AUTO_OPS_REQUEST_FAILED_PREFIX}, ${error.message}`)
+          );
         }
       }
     );
 
-    const validatedResponse = response.data.metrics
-      ? UsageMetricsAutoOpsResponseSchema.body().validate(response.data)
-      : UsageMetricsAutoOpsResponseSchema.body().validate({
-          metrics: response.data,
-        });
+    const validatedResponse = UsageMetricsAutoOpsResponseSchema.body().validate(response.data);
 
     this.logger.debug(`[AutoOps API] Successfully created an autoops agent ${response}`);
     return validatedResponse;
@@ -169,7 +179,6 @@ export class AutoOpsAPIService {
         enabled: true,
         certificate: autoopsConfig?.api?.tls?.certificate,
         key: autoopsConfig?.api?.tls?.key,
-        certificateAuthorities: autoopsConfig?.api?.tls?.ca,
       })
     );
   }
@@ -187,7 +196,6 @@ export class AutoOpsAPIService {
           ...requestConfig.httpsAgent.options,
           cert: requestConfig.httpsAgent.options.cert ? 'REDACTED' : undefined,
           key: requestConfig.httpsAgent.options.key ? 'REDACTED' : undefined,
-          ca: requestConfig.httpsAgent.options.ca ? 'REDACTED' : undefined,
         },
       },
     });

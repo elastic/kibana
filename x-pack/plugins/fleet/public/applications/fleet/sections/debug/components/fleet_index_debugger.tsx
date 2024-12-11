@@ -31,7 +31,7 @@ import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
 import { CodeBlock } from './code_block';
 
 const fetchIndex = async (index?: string) => {
-  if (!index) return;
+  if (!index) return null;
   const response = await sendRequest({
     method: 'post',
     path: debugRoutesService.getIndexPath(),

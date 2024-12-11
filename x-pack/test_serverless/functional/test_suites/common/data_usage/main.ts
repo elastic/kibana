@@ -24,8 +24,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.svlManagementPage.clickDataUsageManagementCard();
     });
 
-    after(async () => {});
-
     it('renders data usage page', async () => {
       await retry.waitFor('page to be visible', async () => {
         return await testSubjects.exists('DataUsagePage');
