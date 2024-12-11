@@ -90,11 +90,18 @@ export const getSecurityBaseKibanaFeature = ({
   ),
   privileges: {
     all: {
-      replacedBy: [
-        { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
-        { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
-        { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-      ],
+      replacedBy: {
+        default: [
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
+          { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
+          { feature: NOTES_FEATURE_ID, privileges: ['all'] },
+        ],
+        minimal: [
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_all'] },
+          { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
+          { feature: NOTES_FEATURE_ID, privileges: ['all'] },
+        ],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
@@ -126,12 +133,18 @@ export const getSecurityBaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
-      replacedBy: [
-        { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
-        { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
-        { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-      ],
-
+      replacedBy: {
+        default: [
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
+          { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
+          { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+        ],
+        minimal: [
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['minimal_read'] },
+          { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
+          { feature: NOTES_FEATURE_ID, privileges: ['read'] },
+        ],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],
