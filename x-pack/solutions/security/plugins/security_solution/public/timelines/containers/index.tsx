@@ -397,23 +397,33 @@ export const useTimelineEventsHandler = ({
         finalFieldRequest = prevRequest?.fieldRequested ?? [];
       }
 
+      let newPagination = {
+        /*
+         *
+         * fetches data cumulatively for the batches upto the activeBatch
+         * This is needed because, we want to get incremental data as well for the old batches
+         * For example, newly requested fields
+         *
+         * */
+        activePage: activeBatch,
+        querySize: limit,
+      };
+
+      if (newFieldsRequested.length > 0) {
+        newPagination = {
+          activePage: 0,
+          querySize: (newActiveBatch + 1) * limit,
+        };
+        console.log(`Pagination with new Fields:`, { newPagination });
+      }
+
       const currentRequest = {
         defaultIndex: indexNames,
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: finalFieldRequest,
         fields: finalFieldRequest,
         filterQuery: createFilter(filterQuery),
-        pagination: {
-          /*
-           *
-           * fetches data cumulatively for the batches upto the activeBatch
-           * This is needed because, we want to get incremental data as well for the old batches
-           * For example, newly requested fields
-           *
-           * */
-          activePage: 0,
-          querySize: (newActiveBatch + 1) * limit,
-        },
+        pagination: newPagination,
         language,
         runtimeMappings,
         sort,
@@ -513,6 +523,7 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>([[]]);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
@@ -530,10 +541,46 @@ export const useTimelineEvents = ({
     timerangeKind,
   });
 
+  console.log({ timelineResponse: timelineResponse.pageInfo });
+
+  useEffect(() => {
+    /*
+     * `timelineSearchHandler` only returns the events for the current page.
+     * This effect is responsible for storing the events for each page so that
+     * the combined list of events can be supplied to DataGrid.
+     *
+     * */
+
+    if (dataLoadingState !== DataLoadingState.loaded) return;
+
+    const { activePage, querySize } = timelineResponse.pageInfo;
+
+    setEventsPerPage((prev) => {
+      let result = [...prev];
+      if (querySize === limit) {
+        result[activePage] = timelineResponse.events;
+      } else {
+        result = [timelineResponse.events];
+      }
+      console.log({ result, activePage });
+      return result;
+    });
+  }, [timelineResponse.events, timelineResponse.pageInfo, dataLoadingState, limit]);
+
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
   }, [timelineSearchHandler]);
 
-  return [dataLoadingState, timelineResponse];
+  const combinedEvents = useMemo(() => eventsPerPage.flat(), [eventsPerPage]);
+
+  const combinedResponse = useMemo(
+    () => ({
+      ...timelineResponse,
+      events: combinedEvents,
+    }),
+    [timelineResponse, combinedEvents]
+  );
+
+  return [dataLoadingState, combinedResponse];
 };

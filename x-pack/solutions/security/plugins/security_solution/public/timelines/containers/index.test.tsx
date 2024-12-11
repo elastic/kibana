@@ -8,13 +8,15 @@
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
-import { initSortDefault, useTimelineEvents } from '.';
+import * as useTimelineEventsModule from '.';
 import { SecurityPageName } from '../../../common/constants';
 import { TimelineId } from '../../../common/types/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { mockTimelineData } from '../../common/mock';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
+
+const { initSortDefault, useTimelineEvents, useTimelineEventsHandler } = useTimelineEventsModule;
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -30,7 +32,7 @@ jest.mock('../../notes/hooks/use_fetch_notes');
 const onLoadMock = jest.fn();
 const useFetchNotesMock = useFetchNotes as jest.Mock;
 
-const mockEvents = mockTimelineData.slice(0, 10);
+const mockEvents = structuredClone(mockTimelineData);
 
 const mockSearch = jest.fn();
 
@@ -60,6 +62,8 @@ jest.mock('../../common/lib/kibana', () => ({
             mockSearch(args);
             return {
               subscribe: jest.fn().mockImplementation(({ next }) => {
+                const start = args.pagination.activePage * args.pagination.querySize;
+                const end = start + args.pagination.querySize;
                 const timelineOut = setTimeout(() => {
                   next({
                     isRunning: false,
@@ -68,10 +72,10 @@ jest.mock('../../common/lib/kibana', () => ({
                       dsl: [],
                       response: [],
                     },
-                    edges: mockEvents.map((item) => ({ node: item })),
+                    edges: mockEvents.map((item) => ({ node: item })).slice(start, end),
                     pageInfo: {
                       activePage: args.pagination.activePage,
-                      totalPages: 10,
+                      querySize: args.pagination.querySize,
                     },
                     rawResponse: {},
                     totalCount: mockTimelineData.length,
@@ -111,7 +115,23 @@ mockUseRouteSpy.mockReturnValue([
   },
 ]);
 
-describe('useTimelineEvents', () => {
+const startDate: string = '2020-07-07T08:20:18.966Z';
+const endDate: string = '3000-01-01T00:00:00.000Z';
+const props: UseTimelineEventsProps = {
+  dataViewId: 'data-view-id',
+  endDate,
+  id: TimelineId.active,
+  indexNames: ['filebeat-*'],
+  fields: ['@timestamp', 'event.kind'],
+  filterQuery: '',
+  startDate,
+  limit: 25,
+  runtimeMappings: {},
+  sort: initSortDefault,
+  skip: false,
+};
+
+describe('useTimelineEventsHandler', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
   beforeEach(() => {
@@ -123,22 +143,6 @@ describe('useTimelineEvents', () => {
       onLoad: onLoadMock,
     });
   });
-
-  const startDate: string = '2020-07-07T08:20:18.966Z';
-  const endDate: string = '3000-01-01T00:00:00.000Z';
-  const props: UseTimelineEventsProps = {
-    dataViewId: 'data-view-id',
-    endDate,
-    id: TimelineId.active,
-    indexNames: ['filebeat-*'],
-    fields: ['@timestamp', 'event.kind'],
-    filterQuery: '',
-    startDate,
-    limit: 25,
-    runtimeMappings: {},
-    sort: initSortDefault,
-    skip: false,
-  };
 
   test('init', async () => {
     const { result } = renderHook((args) => useTimelineEvents(args), {
@@ -480,5 +484,146 @@ describe('useTimelineEvents', () => {
         );
       });
     });
+
+    test('should query all batches when new column is added', async () => {
+      const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props },
+      });
+
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+        );
+      });
+      mockSearch.mockClear();
+
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
+
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({ pagination: { activePage: 1, querySize: 25 } })
+        );
+      });
+
+      mockSearch.mockClear();
+
+      rerender({ ...props, fields: [...props.fields, 'new_column'] });
+
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({ pagination: { activePage: 0, querySize: 50 } })
+        );
+      });
+      mockSearch.mockClear();
+
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
+
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalledWith(
+          expect.objectContaining({ pagination: { activePage: 2, querySize: 25 } })
+        );
+      });
+    });
+
+    test.only('should combine batches correctly when new column is added', async () => {
+      const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props, limit: 5 },
+      });
+
+      await waitFor(() => {
+        expect(result.current[1].events.length).toBe(5);
+      });
+
+      act(() => {
+        result.current[1].loadNextBatch();
+      });
+
+      await waitFor(() => {
+        expect(result.current[1].events.length).toBe(10);
+      });
+    });
+  });
+});
+
+describe.skip('useTimelineEvents', () => {
+  const mockUseTimelineEventsHandler = jest.spyOn(
+    useTimelineEventsModule,
+    'useTimelineEventsHandler'
+  );
+
+  const mockSearchOutput = {
+    isRunning: false,
+    isPartial: false,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    edges: mockEvents.map((item) => ({ node: item })),
+    pageInfo: {
+      activePage: 0,
+      querySize: 10,
+    },
+    rawResponse: {},
+    totalCount: mockTimelineData.length,
+  };
+  beforeEach(() => {
+    mockUseTimelineEventsHandler.mockReturnValue([DataLoadingState.loaded, mockSearchOutput]);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should process Events PerPage correctly', async () => {
+    // default events per Batch = 10
+    const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+      initialProps: { ...props, limit: 10 },
+    });
+
+    await waitFor(() => {
+      expect(result.current[1].events.length).toEqual(mockEvents.length);
+    });
+
+    // return second page.
+    const secondPageMockOutput = {
+      ...mockSearchOutput,
+      pageInfo: {
+        activePage: 1,
+        querySize: 10,
+      },
+    };
+
+    console.log(`should be `, { secondPageMockOutput });
+    mockUseTimelineEventsHandler.mockImplementation(() => [
+      DataLoadingState.loaded,
+      secondPageMockOutput,
+    ]);
+
+    rerender({ ...props, limit: 10 });
+
+    await waitFor(() => {
+      expect(result.current[1].events.length).toEqual(mockEvents.length * 2);
+    });
+    /////////
+    // return third page.
+    const thirdPageMockOutput = {
+      ...mockSearchOutput,
+      pageInfo: {
+        activePage: 2,
+        querySize: 10,
+      },
+    };
+
+    mockUseTimelineEventsHandler.mockReturnValue([DataLoadingState.loaded, secondPageMockOutput]);
+
+    rerender({ ...props, limit: 10 });
+
+    expect(result.current[1].events.length).toEqual(mockEvents.length * 3);
+
+    /////////
   });
 });
