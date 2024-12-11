@@ -86,7 +86,6 @@ export function LensEditConfigurationFlyout({
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
-  // const queryWithVariables = esqlVariablesService.getEsqlQueryWithVariables();
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
 
   const [esqlVariables, setEsqlVariables] = useState<ESQLControlVariable[]>(
