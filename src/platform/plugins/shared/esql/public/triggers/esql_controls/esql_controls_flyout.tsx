@@ -89,21 +89,45 @@ const getValuesFromQueryField = (queryString: string) => {
   }
 };
 
+const getRecurrentVariableName = (name: string, existingNames: string[]) => {
+  let newName = name;
+  let i = 1;
+  while (existingNames.includes(newName)) {
+    newName = `${name}${i}`;
+    i++;
+  }
+  return newName;
+};
+
 const getVariableName = (controlType: EsqlControlType, queryString: string) => {
+  const existingVariables = esqlVariablesService.getVariablesByType(controlType);
   switch (controlType) {
     case EsqlControlType.TIME_LITERAL:
-      return 'interval';
+      return getRecurrentVariableName(
+        'interval',
+        existingVariables.map((variable) => variable.key)
+      );
     case EsqlControlType.FIELDS:
-      return 'field';
+      return getRecurrentVariableName(
+        'field',
+        existingVariables.map((variable) => variable.key)
+      );
     case EsqlControlType.VALUES:
       const field = getValuesFromQueryField(queryString);
       if (field) {
         // variables names can't have special characters, only underscore
-        return `${field.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        const fieldVariableName = field.replace(/[^a-zA-Z0-9]/g, '_');
+        return getRecurrentVariableName(
+          fieldVariableName,
+          existingVariables.map((variable) => variable.key)
+        );
       }
       return '';
     default:
-      return 'variable';
+      return getRecurrentVariableName(
+        'variable',
+        existingVariables.map((variable) => variable.key)
+      );
   }
 };
 
@@ -251,6 +275,9 @@ export function ESQLControlsFlyout({
 
   const addToESQLVariablesService = useCallback(
     (varName: string, variableValue: string, variableType: EsqlControlType, query: string) => {
+      if (esqlVariablesService.variableExists(varName)) {
+        esqlVariablesService.removeVariable(varName);
+      }
       esqlVariablesService.addVariable({
         key: varName,
         value: variableValue,
@@ -294,7 +321,7 @@ export function ESQLControlsFlyout({
       // open the edit flyout to continue editing
       await (embeddable as { onEdit: () => Promise<void> }).onEdit();
     } else if (isControlInEditMode && panelId && availableOptions.length) {
-      // edit an existing control
+      // edit an existing control, variable needs to be updated
       controlGroupApi?.replacePanel(panelId, {
         panelType: 'esqlControl',
         initialState: state,
@@ -324,7 +351,7 @@ export function ESQLControlsFlyout({
   const onCancel = useCallback(() => {
     closeFlyout();
     // remove the variable from the service
-    if (!isControlInEditMode) {
+    if (!isControlInEditMode && !esqlVariablesService.variableExists(variableName)) {
       esqlVariablesService.removeVariable(variableName);
     }
 
