@@ -302,7 +302,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-list-hooks/,
-        /^packages\/kbn-securitysolution-t-grid/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
         /^packages\/kbn-ui-theme/,
         /^packages\/kbn-utility-types/,
         /^packages\/react/,
