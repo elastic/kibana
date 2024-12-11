@@ -7548,11 +7548,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-app-plugin@link:x-pack/plugins/streams_app":
+"@kbn/streams-app-plugin@link:x-pack/solutions/observability/plugins/streams_app":
   version "0.0.0"
   uid ""
 
-"@kbn/streams-plugin@link:x-pack/plugins/streams":
+"@kbn/streams-plugin@link:x-pack/solutions/observability/plugins/streams":
   version "0.0.0"
   uid ""
 
