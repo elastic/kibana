@@ -194,7 +194,7 @@ export class ContentStream extends Duplex {
       ...this.document,
       // Write head faster
       // TODO: Ensure refresh wait_for on last write
-      refresh: false,
+      refresh: 'wait_for',
       body: {
         doc: {
           output: { content },
@@ -216,7 +216,7 @@ export class ContentStream extends Duplex {
       index: REPORTING_DATA_STREAM_ALIAS,
       // Write chunk faster
       // TODO: Ensure refresh wait_for on last write
-      refresh: false,
+      refresh: 'wait_for',
       op_type: 'create',
       body: {
         parent_id: parentId,

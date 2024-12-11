@@ -428,6 +428,7 @@ export class ExecuteReportTask implements ReportingTask {
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
+          console.time('*** generate-report');
           console.time('*** pre-processing');
           let report: SavedReport | undefined;
           const isLastAttempt = taskAttempts >= this.getMaxAttempts();
@@ -550,6 +551,7 @@ export class ExecuteReportTask implements ReportingTask {
           }
 
           console.timeEnd('*** post-processing');
+          console.timeEnd('*** generate-report');
         },
 
         /*

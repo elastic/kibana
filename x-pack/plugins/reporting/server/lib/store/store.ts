@@ -86,7 +86,7 @@ const esDocForUpdate = (
     if_seq_no: report._seq_no,
     if_primary_term: report._primary_term,
     // No need to wait for document to be refreshed before moving onto next step
-    refresh: false as estypes.Refresh,
+    refresh: 'wait_for' as estypes.Refresh,
     body: { doc },
   };
 };
@@ -141,7 +141,7 @@ export class ReportingStore {
       index: REPORTING_DATA_STREAM_ALIAS,
       id: report._id,
       // Speeds up the time it takes to request a report to be generated
-      refresh: false as estypes.Refresh,
+      refresh: 'wait_for' as estypes.Refresh,
       op_type: 'create' as const,
       body: {
         ...report.toReportSource(),
