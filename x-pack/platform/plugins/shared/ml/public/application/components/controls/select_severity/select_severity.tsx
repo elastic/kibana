@@ -17,20 +17,16 @@ import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import {
+  getSeverityColor,
+  ML_ANOMALY_THRESHOLD,
+  ML_ANOMALY_SEVERITY_TYPES,
+} from '@kbn/ml-anomaly-utils';
 
-const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
-  defaultMessage: 'warning',
-});
-const minorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', {
-  defaultMessage: 'minor',
-});
-const majorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', {
-  defaultMessage: 'major',
-});
-const criticalLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', {
-  defaultMessage: 'critical',
-});
+const warningLabel = ML_ANOMALY_SEVERITY_TYPES.warning.label;
+const minorLabel = ML_ANOMALY_SEVERITY_TYPES.minor.label;
+const majorLabel = ML_ANOMALY_SEVERITY_TYPES.major.label;
+const criticalLabel = ML_ANOMALY_SEVERITY_TYPES.critical.label;
 
 const optionsMap = {
   [warningLabel]: ML_ANOMALY_THRESHOLD.LOW,

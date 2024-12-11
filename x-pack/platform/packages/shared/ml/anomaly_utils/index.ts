@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 export { type MlSeverityType, ML_ANOMALY_SEVERITY } from './anomaly_severity';
 export { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 export { ML_SEVERITY_COLORS } from './severity_colors';
