@@ -18,7 +18,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={100} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.textSubdued
+          result.current.euiTheme.colors.backgroundBaseSubdued
         );
       });
     });
@@ -28,7 +28,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={200} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.textSuccess
+          result.current.euiTheme.colors.backgroundBaseSuccess
         );
       });
     });
@@ -38,7 +38,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={301} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.textSubdued
+          result.current.euiTheme.colors.backgroundBaseSubdued
         );
       });
     });
@@ -48,7 +48,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={404} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.textWarning
+          result.current.euiTheme.colors.backgroundBaseWarning
         );
       });
     });
@@ -58,7 +58,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={502} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.textDanger
+          result.current.euiTheme.colors.backgroundBaseDanger
         );
       });
     });
