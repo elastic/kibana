@@ -69,7 +69,7 @@ it('discovers failures in ftr report', async () => {
         at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }",
         "likelyIrrelevant": true,
         "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
-        "owners": "elastic/kibana-presentation",
+        "owners": "elastic/ml-ui",
         "system-out": "[00:21:57]         └-: machine learning...",
         "time": "6.040",
       },
