@@ -33,6 +33,9 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
     });
   };
 
+  const isPreconfigured = isEndpointPreconfigured(selectedEndpoint.endpoint);
+  const testSubj = `inferenceUIDeleteAction-${isPreconfigured ? 'preconfigured' : 'user-defined'}`;
+
   return (
     <>
       <EuiButtonIcon
@@ -40,8 +43,8 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
           defaultMessage: 'Delete inference endpoint {selectedEndpointName}',
           values: { selectedEndpointName: selectedEndpoint.endpoint },
         })}
-        data-test-subj="inferenceUIDeleteAction"
-        disabled={isEndpointPreconfigured(selectedEndpoint.endpoint)}
+        data-test-subj={testSubj}
+        disabled={isPreconfigured}
         key="delete"
         iconType="trash"
         color="danger"

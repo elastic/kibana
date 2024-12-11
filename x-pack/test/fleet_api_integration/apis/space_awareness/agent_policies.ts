@@ -27,6 +27,10 @@ export default function (providerContext: FtrProviderContext) {
       username: testUsers.fleet_all_int_all.username,
       password: testUsers.fleet_all_int_all.password,
     });
+    const apiClientReadOnly = new SpaceTestApiClient(supertestWithoutAuth, {
+      username: testUsers.fleet_read_only.username,
+      password: testUsers.fleet_read_only.password,
+    });
 
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
@@ -111,6 +115,20 @@ export default function (providerContext: FtrProviderContext) {
           has_fleet_server: true,
         });
         expect(res.item.id).to.eql(`${TEST_SPACE_1}-fleet-server-policy`);
+      });
+    });
+
+    describe('GET /agent_policies_spaces', () => {
+      it('should return all spaces user can write agent policies to', async () => {
+        const res = await apiClient.getAgentPoliciesSpaces();
+
+        expect(res.items.map(({ id }: { id: string }) => id)).to.eql(['default', 'test1']);
+      });
+
+      it('should return no spaces for user with readonly access', async () => {
+        const res = await apiClientReadOnly.getAgentPoliciesSpaces();
+
+        expect(res.items.map(({ id }: { id: string }) => id)).to.eql([]);
       });
     });
   });
