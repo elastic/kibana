@@ -7180,7 +7180,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-list-utils@link:packages/kbn-securitysolution-list-utils":
+"@kbn/securitysolution-list-utils@link:x-pack/solutions/security/packages/kbn-securitysolution-list-utils":
   version "0.0.0"
   uid ""
 
