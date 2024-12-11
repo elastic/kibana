@@ -5300,7 +5300,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-observability@link:packages/deeplinks/observability":
+"@kbn/deeplinks-observability@link:src/platform/packages/shared/deeplinks/observability":
   version "0.0.0"
   uid ""
 

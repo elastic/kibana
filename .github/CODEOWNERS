@@ -265,7 +265,6 @@ packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-pres
 packages/deeplinks/devtools @elastic/kibana-management
 packages/deeplinks/fleet @elastic/fleet
 packages/deeplinks/management @elastic/kibana-management
-packages/deeplinks/observability @elastic/obs-ux-management-team
 packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/security @elastic/security-solution
 packages/deeplinks/shared @elastic/appex-sharedux
@@ -621,6 +620,7 @@ src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
+src/platform/packages/shared/deeplinks/observability @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
