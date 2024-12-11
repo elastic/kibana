@@ -18,6 +18,8 @@ export type {
   ObservabilityAIAssistantServerSetup,
 } from './types';
 
+export type { ObservabilityAIAssistantClient } from './service/client';
+
 export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
@@ -25,6 +27,9 @@ export {
 } from '../common';
 
 export { streamIntoObservable } from './service/util/stream_into_observable';
+
+export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
+export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
 
 export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
   deprecations: ({ unusedFromRoot }) => [
