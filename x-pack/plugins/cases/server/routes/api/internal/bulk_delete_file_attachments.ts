@@ -14,10 +14,12 @@ import { createCaseError } from '../../../common/error';
 import { escapeHatch } from '../utils';
 import type { attachmentApiV1 } from '../../../../common/types/api';
 import { BulkDeleteFileAttachmentsRequestRt } from '../../../../common/types/api/attachment/v1';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const bulkDeleteFileAttachments = createCasesRoute({
   method: 'post',
   path: INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),
