@@ -37,7 +37,7 @@ export const renderApp = ({
         defaultMessage: 'Read only',
       }),
       tooltip: i18n.translate('discover.badge.readOnly.tooltip', {
-        defaultMessage: 'Unable to save Discover Sessions',
+        defaultMessage: 'Unable to save Discover sessions',
       }),
       iconType: 'glasses',
     });

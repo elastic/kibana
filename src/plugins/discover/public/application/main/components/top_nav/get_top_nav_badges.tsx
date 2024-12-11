@@ -71,7 +71,7 @@ export const getTopNavBadges = ({
       getManagedContentBadge(
         i18n.translate('discover.topNav.managedContentLabel', {
           defaultMessage:
-            'This Discover Session is managed by Elastic. Changes here must be saved to a new Discover Session.',
+            'This Discover session is managed by Elastic. Changes here must be saved to a new Discover session.',
         })
       )
     );

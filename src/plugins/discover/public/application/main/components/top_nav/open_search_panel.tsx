@@ -42,7 +42,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
           <h2>
             <FormattedMessage
               id="discover.topNav.openSearchPanel.openSearchTitle"
-              defaultMessage="Open Discover Session"
+              defaultMessage="Open Discover session"
             />
           </h2>
         </EuiTitle>
@@ -58,7 +58,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
           noItemsMessage={
             <FormattedMessage
               id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-              defaultMessage="No matching Discover Sessions found."
+              defaultMessage="No matching Discover sessions found."
             />
           }
           savedObjectMetaData={[
@@ -66,7 +66,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
               type: SavedSearchType,
               getIconForSavedObject: () => 'discoverApp',
               name: i18n.translate('discover.savedSearch.savedObjectName', {
-                defaultMessage: 'Discover Session',
+                defaultMessage: 'Discover session',
               }),
             },
           ]}
@@ -92,7 +92,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
               >
                 <FormattedMessage
                   id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
-                  defaultMessage="Manage Discover Sessions"
+                  defaultMessage="Manage Discover sessions"
                 />
               </EuiButton>
             </EuiFlexItem>

@@ -48,7 +48,7 @@ export const useLinkedSearchUpdates = (
         if (showToast) {
           services.toastNotifications.addSuccess(
             i18n.translate('visualizations.linkedToSearch.unlinkSuccessNotificationText', {
-              defaultMessage: `Unlinked from Discover Session ''{searchTitle}''`,
+              defaultMessage: `Unlinked from Discover session ''{searchTitle}''`,
               values: {
                 searchTitle: savedSearch.title,
               },

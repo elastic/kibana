@@ -293,10 +293,10 @@ Learn more about how to use ES|QL queries in <<try-esql, Using ES|QL>>.
 
 [float]
 [[save-discover-search]]
-==== Save your Discover Session for later use
+==== Save your Discover session for later use
 
-Save your Discover Session so you can use it later, generate a CSV report, or use it to create visualizations, dashboards, and Canvas workpads.
-Saving a Discover Session saves the query text, filters,
+Save your Discover session so you can use it later, generate a CSV report, or use it to create visualizations, dashboards, and Canvas workpads.
+Saving a Discover session saves the query text, filters,
 and current view of *Discover*, including the columns selected in
 the document table, the sort order, and the {data-source}.
 
@@ -310,7 +310,7 @@ the document table, the sort order, and the {data-source}.
 
 [float]
 [[share-your-findings]]
-==== Share your Discover Session
+==== Share your Discover session
 
 To share your search and **Discover** view with a larger audience, click *Share* in the application menu bar.
 For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.

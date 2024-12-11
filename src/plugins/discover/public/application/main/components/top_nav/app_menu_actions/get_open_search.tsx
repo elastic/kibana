@@ -22,7 +22,7 @@ export const getOpenSearchAppMenuItem = ({
     type: AppMenuActionType.primary,
     controlProps: {
       label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
-        defaultMessage: 'Open a saved Discover Session',
+        defaultMessage: 'Open a saved Discover session',
       }),
       iconType: 'folderOpen',
       testId: 'discoverOpenButton',

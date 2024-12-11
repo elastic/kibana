@@ -44,7 +44,7 @@ describe('useSavedSearchAliasMatchRedirect', () => {
     expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
       path: '#/view/aliasTargetId?_g=foo',
       aliasPurpose: 'savedObjectConversion',
-      objectNoun: `'my-title' Discover Session`,
+      objectNoun: `'my-title' Discover session`,
     });
   });
 

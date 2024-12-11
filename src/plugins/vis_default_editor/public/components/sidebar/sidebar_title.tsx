@@ -63,7 +63,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   const linkButtonAriaLabel = i18n.translate(
     'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
     {
-      defaultMessage: 'Link to Discover Session. Click to learn more or break link.',
+      defaultMessage: 'Link to Discover session. Click to learn more or break link.',
     }
   );
 
@@ -82,7 +82,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
         <EuiTitle size="xs" className="eui-textTruncate">
           <h2
             title={i18n.translate('visDefaultEditor.sidebar.savedSearch.titleAriaLabel', {
-              defaultMessage: 'Discover Session: {title}',
+              defaultMessage: 'Discover session: {title}',
               values: {
                 title: savedSearch.title,
               },
@@ -113,7 +113,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           <EuiPopoverTitle>
             <FormattedMessage
               id="visDefaultEditor.sidebar.savedSearch.popoverTitle"
-              defaultMessage="Linked to Discover Session"
+              defaultMessage="Linked to Discover session"
             />
           </EuiPopoverTitle>
           <div css={{ width: 260 }}>
@@ -134,7 +134,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
               <p>
                 <FormattedMessage
                   id="visDefaultEditor.sidebar.savedSearch.popoverHelpText"
-                  defaultMessage="Subsequent modifications to this Discover Session are reflected in the visualization. To disable automatic updates, remove the link."
+                  defaultMessage="Subsequent modifications to this Discover session are reflected in the visualization. To disable automatic updates, remove the link."
                 />
               </p>
               <p>
@@ -147,7 +147,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
                 >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.unlinkSavedSearchButtonText"
-                    defaultMessage="Remove link to Discover Session"
+                    defaultMessage="Remove link to Discover session"
                   />
                 </EuiButton>
               </p>
