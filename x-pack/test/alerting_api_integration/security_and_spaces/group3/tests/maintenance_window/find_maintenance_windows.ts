@@ -480,7 +480,6 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
                 count: 1,
               },
             });
-          console.log('upcomingMaintenanceWindow');
 
           objectRemover.add(
             space.id,

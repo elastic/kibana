@@ -28,7 +28,7 @@ export const findMaintenanceWindowsRequestQuerySchema = schema.object(
         description: 'The page number to return.',
       },
     }),
-    // we do not need to use schema.maybe here, because if we do not pass property page, defaultValue will be used
+    // we do not need to use schema.maybe here, because if we do not pass property per_page, defaultValue will be used
     per_page: schema.number({
       defaultValue: 1000,
       min: 0,

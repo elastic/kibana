@@ -212,12 +212,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should filter maintenance windows by the archived status', async () => {
       const running = await createMaintenanceWindow({
-        name: 'running-mw',
+        name: 'archived-mw',
         getService,
       });
       objectRemover.add(running.id, 'rules/maintenance_window', 'alerting', true);
       const finished = await createMaintenanceWindow({
-        name: 'archived-mw',
+        name: 'finished-mw',
         startDate: new Date('05-01-2023'),
         notRecurring: true,
         getService,
@@ -234,7 +234,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       objectRemover.add(upcoming.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
 
-      await pageObjects.maintenanceWindows.searchMaintenanceWindows('running-mw');
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('archived-mw');
 
       let list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
       expect(list.length).to.eql(3);
@@ -246,10 +246,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Cancelled and archived running maintenance window 'running-mw'`);
+        expect(toastTitle).to.eql(
+          `Cancelled and archived running maintenance window 'archived-mw'`
+        );
       });
 
-      await pageObjects.maintenanceWindows.searchMaintenanceWindows('running-mw');
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('archived-mw');
       await testSubjects.click('status-filter-button');
       await testSubjects.click('status-filter-archived'); // select Archived status filter
 
@@ -258,37 +260,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(archivedList.length).to.equal(1);
         expect(archivedList[0].status).to.equal('Archived');
       });
-    });
-
-    it('should cancel and archive a running maintenance window', async () => {
-      const name = generateUniqueKey();
-      const createdMaintenanceWindow = await createMaintenanceWindow({
-        name,
-        getService,
-      });
-      objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
-      await browser.refresh();
-
-      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
-
-      let list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
-      expect(list.length).to.eql(1);
-      expect(list[0].status).to.eql('Running');
-
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-cancel-and-archive');
-      await testSubjects.click('confirmModalConfirmButton');
-
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Cancelled and archived running maintenance window '${name}'`);
-      });
-
-      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
-
-      list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
-      expect(list.length).to.eql(1);
-      expect(list[0].status).to.eql('Archived');
     });
 
     it('paginates maintenance windows correctly', async () => {

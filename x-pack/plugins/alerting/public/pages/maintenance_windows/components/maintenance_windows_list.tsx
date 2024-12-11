@@ -19,7 +19,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SortDirection } from '../types';
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
@@ -45,10 +44,10 @@ interface MaintenanceWindowsListProps {
   total: number;
   onPageChange: ({ page: { index, size } }: { page: { index: number; size: number } }) => void;
   inputText: string;
-  onSearchKeyup: (e: any) => void;
+  onSearchKeyup: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onSelectedStatusesChange: (statuses: MaintenanceWindowStatus[]) => void;
   selectedStatuses: MaintenanceWindowStatus[];
-  onSearchChange: (e: any) => void;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
@@ -95,14 +94,6 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
     render: (endDate: string) => formatDate(endDate, MAINTENANCE_WINDOW_DATE_FORMAT),
   },
 ];
-
-// use it!!
-const sorting = {
-  sort: {
-    field: 'status',
-    direction: SortDirection.asc,
-  },
-};
 
 const rowProps = (item: MaintenanceWindow) => ({
   className: item.status,

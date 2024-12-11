@@ -30,7 +30,6 @@ export async function findMaintenanceWindows({
       query: {
         page,
         per_page: perPage,
-        // maybe changes the name?
         search: searchText,
         statuses: selectedStatuses,
       },

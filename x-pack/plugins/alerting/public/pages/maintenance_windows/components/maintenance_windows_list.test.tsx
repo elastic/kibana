@@ -7,7 +7,8 @@
 
 import React from 'react';
 import moment from 'moment';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
 import { MaintenanceWindowStatus, MaintenanceWindow } from '../../../../common';
@@ -95,6 +96,15 @@ describe('MaintenanceWindowsList', () => {
         isLoading={false}
         items={items}
         readOnly={false}
+        page={1}
+        perPage={10}
+        total={22}
+        onPageChange={() => {}}
+        inputText={''}
+        onSearchKeyup={() => {}}
+        onSelectedStatusesChange={() => {}}
+        selectedStatuses={[]}
+        onSearchChange={() => {}}
       />
     );
 
@@ -128,6 +138,15 @@ describe('MaintenanceWindowsList', () => {
         isLoading={false}
         items={items}
         readOnly={true}
+        page={1}
+        perPage={10}
+        total={22}
+        onPageChange={() => {}}
+        inputText={''}
+        onSearchKeyup={() => {}}
+        onSelectedStatusesChange={() => {}}
+        selectedStatuses={[]}
+        onSearchChange={() => {}}
       />
     );
 
@@ -145,6 +164,15 @@ describe('MaintenanceWindowsList', () => {
         isLoading={false}
         items={items}
         readOnly={false}
+        page={1}
+        perPage={10}
+        total={22}
+        onPageChange={() => {}}
+        inputText={''}
+        onSearchKeyup={() => {}}
+        onSelectedStatusesChange={() => {}}
+        selectedStatuses={[]}
+        onSearchChange={() => {}}
       />
     );
     fireEvent.click(result.getByTestId('refresh-button'));
