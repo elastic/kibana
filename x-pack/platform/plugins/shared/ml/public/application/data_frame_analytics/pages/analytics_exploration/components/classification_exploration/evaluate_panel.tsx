@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
+  useEuiTheme,
   EuiButtonEmpty,
   EuiDataGrid,
   EuiFlexGroup,
@@ -27,7 +28,7 @@ import {
   type DataFrameTaskStateType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import { useCurrentThemeVars, useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../../../../../components/vega_chart';
@@ -111,7 +112,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
 
   const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
   const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);

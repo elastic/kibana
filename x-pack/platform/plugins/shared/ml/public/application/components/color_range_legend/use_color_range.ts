@@ -9,7 +9,6 @@ import d3 from 'd3';
 
 import { useEuiTheme } from '@elastic/eui';
 
-import type { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -185,5 +184,3 @@ export const useColorRange = (
 
   return scaleTypes[colorRangeScale];
 };
-
-export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;

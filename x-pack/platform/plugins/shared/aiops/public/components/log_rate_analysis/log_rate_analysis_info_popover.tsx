@@ -7,13 +7,11 @@
 
 import React, { useState, type FC } from 'react';
 
-import { EuiBadge, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { useEuiTheme, EuiBadge, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { i18n } from '@kbn/i18n';
-
-import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 export const LogRateAnalysisInfoPopoverButton: FC<{
   onClick: React.MouseEventHandler<HTMLButtonElement>;
@@ -37,7 +35,7 @@ export const LogRateAnalysisInfoPopoverButton: FC<{
 };
 
 export const LogRateAnalysisInfoPopover: FC = () => {
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const showInfoPopover = useAppSelector(
     (s) => s.logRateAnalysisResults.significantItems.length > 0
@@ -117,7 +115,7 @@ export const LogRateAnalysisInfoPopover: FC = () => {
         </EuiPopoverTitle>
       )}
 
-      <EuiText size="s" css={{ maxWidth: `calc(${euiTheme.euiSizeXL} * 15);` }}>
+      <EuiText size="s" css={{ maxWidth: `calc(${euiTheme.size.xl} * 15);` }}>
         <p>
           {infoContent}
           {fieldSelectionMessage && ` ${fieldSelectionMessage}`}

@@ -7,10 +7,16 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonEmpty,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { OpenInDiscover } from './use_open_in_discover';
 
 interface Props {
@@ -24,9 +30,9 @@ export const TableHeader: FC<Props> = ({
   selectedCategoriesCount,
   openInDiscover,
 }) => {
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center" css={{ minHeight: euiTheme.euiSizeXL }}>
+    <EuiFlexGroup gutterSize="none" alignItems="center" css={{ minHeight: euiTheme.size.xl }}>
       <EuiFlexItem>
         <EuiText size="s" data-test-subj="aiopsLogPatternsFoundCount">
           <FormattedMessage

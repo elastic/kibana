@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
 
 import type { ChartTooltipService } from '../components/chart_tooltip';
-import { getAnnotationStyles } from '../timeseriesexplorer/styles';
+import { useAnnotationStyles } from '../timeseriesexplorer/styles';
 
 import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';
 
@@ -35,14 +35,13 @@ interface SwimlaneAnnotationContainerProps {
   tooltipService: ChartTooltipService;
 }
 
-const annotationStyles = getAnnotationStyles();
-
 export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> = ({
   chartWidth,
   domain,
   annotationsData,
   tooltipService,
 }) => {
+  const annotationStyles = useAnnotationStyles();
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
