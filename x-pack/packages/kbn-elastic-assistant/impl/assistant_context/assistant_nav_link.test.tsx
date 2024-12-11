@@ -12,6 +12,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { ChromeNavControl } from '@kbn/core/public';
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { of } from 'rxjs';
+import { useAssistantContext } from '.';
 
 const MockNavigationBar = OutPortal;
 
@@ -19,16 +20,21 @@ const mockShowAssistantOverlay = jest.fn();
 const mockNavControls = chromeServiceMock.createStartContract().navControls;
 const mockGetChromeStyle = jest.fn();
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
+const mockAssistantContext = {
+  chrome: {
+    getChromeStyle$: mockGetChromeStyle,
+    navControls: mockNavControls
+  },
+  showAssistantOverlay: mockShowAssistantOverlay,
+  assistantAvailability: {
+    hasAssistantPrivilege: true
+  }
+}
+
+jest.mock('.', () => {
   return {
-    ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-    useKibana: () => ({
-      services: {
-        chrome: {
-          getChromeStyle$: mockGetChromeStyle,
-        },
-      },
-    }),
+    ...jest.requireActual('.'),
+    useAssistantContext: jest.fn(() => mockAssistantContext),
   };
 });
 
@@ -36,14 +42,14 @@ describe('AssistantNavLink', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetChromeStyle.mockReturnValue(of('classic'));
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      ...mockAssistantContext
+    })
   });
 
   it('should register link in nav bar', () => {
     render(
       <AssistantNavLink
-        hasAssistantPrivilege
-        showAssistantOverlay={mockShowAssistantOverlay}
-        navControls={mockNavControls}
       />
     );
     expect(mockNavControls.registerRight).toHaveBeenCalledTimes(1);
@@ -63,11 +69,7 @@ describe('AssistantNavLink', () => {
     const { queryByTestId } = render(
       <>
         <MockNavigationBar node={portalNode.current} />
-        <AssistantNavLink
-          hasAssistantPrivilege
-          showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
-        />
+        <AssistantNavLink />
       </>
     );
     expect(queryByTestId('assistantNavLink')).not.toHaveStyle(
@@ -89,11 +91,7 @@ describe('AssistantNavLink', () => {
     const { queryByTestId } = render(
       <>
         <MockNavigationBar node={portalNode.current} />
-        <AssistantNavLink
-          hasAssistantPrivilege
-          showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
-        />
+        <AssistantNavLink />
       </>
     );
     expect(queryByTestId('assistantNavLink')).toHaveStyle('background-color: rgb(204, 228, 245)');
@@ -111,11 +109,7 @@ describe('AssistantNavLink', () => {
     const { queryByText, queryByTestId } = render(
       <>
         <MockNavigationBar node={portalNode.current} />
-        <AssistantNavLink
-          hasAssistantPrivilege
-          showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
-        />
+        <AssistantNavLink />
       </>
     );
     expect(queryByTestId('assistantNavLink')).toBeInTheDocument();
@@ -131,14 +125,17 @@ describe('AssistantNavLink', () => {
       chromeNavControl.mount(portalNode.current.element);
     });
 
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      ...mockAssistantContext,
+      assistantAvailability: {
+        hasAssistantPrivilege: false
+      }
+    })
+
     const { queryByText, queryByTestId } = render(
       <>
         <MockNavigationBar node={portalNode.current} />
-        <AssistantNavLink
-          hasAssistantPrivilege={false}
-          showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
-        />
+        <AssistantNavLink />
       </>
     );
     expect(queryByTestId('assistantNavLink')).not.toBeInTheDocument();
@@ -157,11 +154,7 @@ describe('AssistantNavLink', () => {
     const { queryByTestId } = render(
       <>
         <MockNavigationBar node={portalNode.current} />
-        <AssistantNavLink
-          hasAssistantPrivilege
-          showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
-        />
+        <AssistantNavLink />
       </>
     );
     queryByTestId('assistantNavLink')?.click();
