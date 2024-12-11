@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 18000
+  aiops: 32733
   alerting: 106936
   apm: 64385
   assetInventory: 18478
@@ -65,7 +65,7 @@ pageLoadAssetSize:
   expressionTagcloud: 27505
   expressionXY: 45000
   features: 21723
-  fieldFormats: 65209
+  fieldFormats: 80485
   fieldsMetadata: 21885
   files: 22673
   filesManagement: 18683
