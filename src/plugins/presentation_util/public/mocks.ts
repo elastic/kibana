@@ -8,9 +8,7 @@
  */
 
 import { PresentationUtilPluginStart } from './types';
-import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
-import { createReduxEmbeddableTools } from './redux_tools/redux_embeddables/create_redux_embeddable_tools';
-import { createReduxTools } from './redux_tools/create_redux_tools';
+import { registerExpressionsLanguage } from '.';
 import { setStubKibanaServices } from './services/mocks';
 
 const createStartContract = (): PresentationUtilPluginStart => {
@@ -29,14 +27,6 @@ const createStartContract = (): PresentationUtilPluginStart => {
 
 export const presentationUtilPluginMock = {
   createStartContract,
-};
-
-/**
- * A non async-imported version of the real redux embeddable tools package for mocking purposes.
- */
-export const mockedReduxEmbeddablePackage: ReduxToolsPackage = {
-  createReduxEmbeddableTools,
-  createReduxTools,
 };
 
 export * from './__stories__/fixtures/flights';
