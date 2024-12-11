@@ -8,6 +8,10 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ObservabilityAIAssistantAppPublicSetup,
+  ObservabilityAIAssistantAppPublicStart,
+} from '@kbn/observability-ai-assistant-app-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -43,6 +47,7 @@ export interface InvestigateAppSetupDependencies {
   investigate: InvestigatePublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistantApp: ObservabilityAIAssistantAppPublicSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
@@ -58,6 +63,7 @@ export interface InvestigateAppStartDependencies {
   investigate: InvestigatePublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistantApp: ObservabilityAIAssistantAppPublicStart;
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
