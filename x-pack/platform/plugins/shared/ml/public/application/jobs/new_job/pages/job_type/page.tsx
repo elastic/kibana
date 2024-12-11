@@ -95,7 +95,7 @@ export const Page: FC = () => {
 
   const pageTitleLabel = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
-        defaultMessage: 'saved search {savedSearchTitle}',
+        defaultMessage: 'Discover session {savedSearchTitle}',
         values: { savedSearchTitle: selectedSavedSearch.title ?? '' },
       })
     : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewPageTitleLabel', {
@@ -285,7 +285,7 @@ export const Page: FC = () => {
             <EuiLink onClick={onSelectDifferentIndex}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
-                defaultMessage="Select a different data view or saved search"
+                defaultMessage="Select a different data view or saved Discover session"
               />
             </EuiLink>
           </EuiCallOut>

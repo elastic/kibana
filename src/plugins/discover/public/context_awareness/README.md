@@ -54,7 +54,7 @@ The context awareness framework is driven by two main supporting services called
 
 Each context level has a dedicated profile service, e.g. `RootProfileService`, which is responsible for accepting profile provider registrations and looping over each provider in order during context resolution to identify a matching profile. Each resolution call can result in only one matching profile, which is the first to return a match based on execution order.
 
-A single `ProfilesManager` is instantiated on Discover load, or one per saved search panel in a dashboard. The profiles manager is responsible for the following:
+A single `ProfilesManager` is instantiated on Discover load, or one per Discover session panel in a dashboard. The profiles manager is responsible for the following:
 
 - Managing state associated with the current Discover context.
 - Coordinating profile services and exposing resolution methods for each context level.

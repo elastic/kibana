@@ -636,7 +636,7 @@ const reportingFeatures: {
           {
             id: 'download_csv_report',
             name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
-              defaultMessage: 'Generate CSV reports from Saved Search panels',
+              defaultMessage: 'Generate CSV reports from Discover session panels',
             }),
             includeIn: 'all',
             savedObject: { all: [], read: [] },

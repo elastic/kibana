@@ -153,7 +153,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                 noItemsMessage={i18n.translate(
                   'xpack.ml.newJob.wizard.datafeedStep.dataView.step1.noMatchingError',
                   {
-                    defaultMessage: 'No matching indices or saved searches found.',
+                    defaultMessage: 'No matching data views found.',
                   }
                 )}
                 savedObjectMetaData={[

@@ -18,7 +18,7 @@ It is recommended for advanced users only.
 [role="screenshot"]
 image::fleet/images/fleet-start.png[{fleet} app in {kib}]
 
-Most integration content installed by {fleet} isn’t editable. This content is tagged with a **Managed** badge in the {kib} UI. Managed content itself cannot be edited or deleted, however managed visualizations, dashboards, and saved searches can be cloned.   
+Most integration content installed by {fleet} isn’t editable. This content is tagged with a **Managed** badge in the {kib} UI. Managed content itself cannot be edited or deleted, however managed visualizations, dashboards, and Discover sessions can be cloned.   
 
 [role="screenshot"]
 image::fleet/images/system-managed.png[An image of the new managed badge.]
