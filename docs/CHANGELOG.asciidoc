@@ -90,26 +90,6 @@ coming::[8.17.0]
 
 For information about the {kib} 8.17.0 release, review the following information.
 
-The 8.17.0 release includes the following known issues.
-
-[float]
-[[known-issues-8.17.0]]
-=== Known issues
-
-[discrete]
-[[known-203553]]
-.Unable to create index templates when the Create data stream toggle is turned off
-[%collapsible]
-====
-*Details* +
-Creating a template from Index Management leads to an "Unable to create template" error when the Create data stream toggle is turned off. 
-
-*Workaround* +
-When creating the template, copy the request from the Review step and run it in **Console** instead.
-
-For more information, refer to {kibana-issue}203553[#203553].
-====
-
 [float]
 [[deprecations-8.17.0]]
 === Deprecations
