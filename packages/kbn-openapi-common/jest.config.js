@@ -7,24 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { addDecorator } from '@storybook/react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
-
-import { servicesContextDecorator } from './decorator';
-
-addDecorator(servicesContextDecorator);
-
-export const parameters = {
-  docs: {
-    page: () => (
-      <>
-        <Title />
-        <Subtitle />
-        <Description />
-        <Primary />
-        <Stories />
-      </>
-    ),
-  },
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-openapi-common'],
 };
