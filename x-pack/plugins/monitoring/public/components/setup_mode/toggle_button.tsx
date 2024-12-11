@@ -8,9 +8,10 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { TELEMETRY_METRIC_BUTTON_CLICK } from '../../../common/constants';
 import { SetupModeExitButton } from './exit_button';
+import { useUiTracker } from '../../application/hooks/use_track_metric';
 
 export interface SetupModeToggleButtonProps {
   enabled: boolean;
@@ -21,7 +22,7 @@ export const SetupModeToggleButton: React.FC<SetupModeToggleButtonProps> = (
   props: SetupModeToggleButtonProps
 ) => {
   const [isLoading, setIsLoading] = React.useState(false);
-  const trackStat = useUiTracker({ app: 'stack_monitoring' });
+  const trackStat = useUiTracker();
 
   function toggleSetupMode(enabled: boolean, stat: string) {
     setIsLoading(true);

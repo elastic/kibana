@@ -34,16 +34,26 @@ describe('delete_list_item', () => {
 
   test('Delete returns the same list item if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItem as unknown as jest.Mock)
+      .mockResolvedValueOnce(listItem)
+      .mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
+    (options.esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValueOnce({
+      deleted: true,
+    });
     const deletedListItem = await deleteListItem(options);
     expect(deletedListItem).toEqual(listItem);
   });
 
   test('Delete calls "deleteByQuery" if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
+    (getListItem as unknown as jest.Mock)
+      .mockResolvedValueOnce(listItem)
+      .mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
+    (options.esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValueOnce({
+      deleted: true,
+    });
     await deleteListItem(options);
     const deleteByQuery = {
       index: LIST_ITEM_INDEX,

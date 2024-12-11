@@ -91,7 +91,7 @@ const rawAdHocRunParamsRuleActionSchema = schema.object({
 });
 
 const rawAdHocRunParamsRuleSchema = rawAdHocRunParamsRuleSchemaV1.extends({
-  actions: schema.arrayOf(rawAdHocRunParamsRuleActionSchema),
+  actions: schema.maybe(schema.arrayOf(rawAdHocRunParamsRuleActionSchema)),
 });
 
 export const rawAdHocRunParamsSchema = rawAdHocRunParamsSchemaV1.extends({
