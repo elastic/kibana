@@ -51,7 +51,7 @@ export const registerRiskScoreModulesDeprecation = ({ deprecationsService }: Dep
             defaultMessage: 'The original user and host risk score modules are deprecated.',
           }),
           message: i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.message', {
-            defaultMessage: `We have detected that you have the original user and host risk score modules installed in at least one space. These modules are deprecated and your data will not be displayed in the next release (data will not be deleted). Please migrate to the new risk engine in each space before upgrading.`,
+            defaultMessage: `We have detected that you have the original user and host risk score modules installed in at least one space. These modules are deprecated, and your risk score data will not be displayed after you upgrade (your data will not be deleted). Please migrate to the latest risk engine in each space before upgrading.`,
           }),
           level: 'warning',
           deprecationType: 'feature',
