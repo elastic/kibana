@@ -12,6 +12,7 @@ import { FieldDefinition } from '@kbn/streams-plugin/common/types';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
+import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { PreviewTable } from '../../preview_table';
 import { isFullFieldDefinition } from '../hooks/use_editing_state';
@@ -31,6 +32,8 @@ export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
     return null;
   }
 };
+
+const SAMPLE_DOCUMENTS_TO_SHOW = 20;
 
 const SamplePreviewTableContent = ({
   definition,
@@ -80,6 +83,7 @@ const SamplePreviewTableContent = ({
   }
 
   if ((value && value.status === 'failure') || error) {
+    const formattedError = getFormattedError(error);
     return (
       <EuiCallOut
         color="danger"
@@ -88,7 +92,7 @@ const SamplePreviewTableContent = ({
             'There was an error simulating these mapping changes with a sample of documents',
         })}
       >
-        {value?.simulationError ?? error?.body?.message}
+        {value?.simulationError ?? formattedError?.message}
       </EuiCallOut>
     );
   }
@@ -101,7 +105,7 @@ const SamplePreviewTableContent = ({
         `}
       >
         <PreviewTable
-          documents={value.documentsWithRuntimeFieldsApplied}
+          documents={value.documentsWithRuntimeFieldsApplied.slice(0, SAMPLE_DOCUMENTS_TO_SHOW)}
           displayColumns={columns}
         />
       </div>
