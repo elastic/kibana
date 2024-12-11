@@ -41,24 +41,6 @@ describe('updateSearchSource', () => {
 
   const customSampleSize = 70;
 
-  it('updates a given search source', async () => {
-    const searchSource = createSearchSourceMock({});
-    updateSearchSource(
-      discoverServiceMock,
-      searchSource,
-      dataViewMock,
-      [] as SortOrder[],
-      customSampleSize,
-      false,
-      defaultFetchContext,
-      defaults
-    );
-    expect(searchSource.getField('fields')).toBe(undefined);
-    // does not explicitly request fieldsFromSource when not using fields API
-    expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
-    expect(searchSource.getField('size')).toEqual(customSampleSize);
-  });
-
   it('updates a given search source with the usage of the new fields api', async () => {
     const searchSource = createSearchSourceMock({});
     updateSearchSource(
@@ -67,7 +49,6 @@ describe('updateSearchSource', () => {
       dataViewMock,
       [] as SortOrder[],
       customSampleSize,
-      true,
       defaultFetchContext,
       defaults
     );
@@ -84,7 +65,6 @@ describe('updateSearchSource', () => {
       dataViewMock,
       [] as SortOrder[],
       customSampleSize,
-      true,
       defaultFetchContext,
       defaults
     );
@@ -97,7 +77,6 @@ describe('updateSearchSource', () => {
       dataViewMockWithTimeField,
       [] as SortOrder[],
       customSampleSize,
-      true,
       defaultFetchContext,
       {
         sortDir: 'desc',
@@ -112,7 +91,6 @@ describe('updateSearchSource', () => {
       dataViewMockWithTimeField,
       [['bytes', 'desc']] as SortOrder[],
       customSampleSize,
-      true,
       defaultFetchContext,
       defaults
     );
@@ -137,7 +115,6 @@ describe('updateSearchSource', () => {
       dataViewMock,
       [] as SortOrder[],
       customSampleSize,
-      true,
       defaultFetchContext,
       defaults
     );
@@ -177,7 +154,6 @@ describe('updateSearchSource', () => {
       dataViewMockWithTimeField,
       [] as SortOrder[],
       customSampleSize,
-      true,
       defaultFetchContext,
       defaults
     );
