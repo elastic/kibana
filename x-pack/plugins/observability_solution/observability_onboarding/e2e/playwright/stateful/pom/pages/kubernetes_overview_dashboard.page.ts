@@ -14,6 +14,10 @@ export class KubernetesOverviewDashboardPage {
     this.page = page;
   }
 
+  private readonly nodesNoResults = () =>
+    this.page.locator(
+      'xpath=//div[@data-test-subj="embeddablePanelHoverActions-Nodes"]//p[contains(text(), "No results found")]'
+    );
   private readonly nodesPanelHeader = () =>
     this.page.locator('xpath=//figcaption[@data-test-subj="embeddablePanelHeading-Nodes"]');
 
@@ -25,6 +29,13 @@ export class KubernetesOverviewDashboardPage {
     this.page.locator(
       'xpath=//div[@data-test-subj="inspectorTable"]//td//div[contains(text(), "Status")]'
     );
+
+  public async assertNodesNoResultsNotVisible() {
+    await expect(
+      this.nodesNoResults(),
+      'Nodes "No results" message should not be visible'
+    ).toBeHidden();
+  }
 
   public async openNodesInspector() {
     await this.nodesPanelHeader().hover();
