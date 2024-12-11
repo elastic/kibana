@@ -113,6 +113,7 @@ const SAVED_SEARCH_DOCS_URL =
 const DeprecationCallout = () => {
   const { euiTheme } = useEuiTheme();
   const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
+  const { euiTheme } = useEuiTheme();
 
   if (isDismissed) {
     return null;

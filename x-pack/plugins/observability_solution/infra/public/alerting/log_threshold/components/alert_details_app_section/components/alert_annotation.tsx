@@ -12,9 +12,11 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+
 export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useKibanaContextForPlugin().services;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <LineAnnotation

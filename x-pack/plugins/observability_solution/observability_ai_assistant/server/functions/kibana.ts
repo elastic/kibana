@@ -77,6 +77,7 @@ export function registerKibanaFunction({
         'referer',
         'user-agent',
         'x-elastic-internal-origin',
+        'x-elastic-product-origin',
         'x-kbn-context',
       ];
 
