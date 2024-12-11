@@ -176,7 +176,9 @@ export const DataUsageMetrics = memo(
     );
 
     const filterOptions: ChartsFiltersProps['filterOptions'] = useMemo(() => {
-      const dataStreamsOptions = dataStreams?.reduce<Record<string, number>>((acc, ds) => {
+      const dataStreamsOptions = dataStreams?.reduce<
+        Required<ChartsFiltersProps['filterOptions']['dataStreams']>['appendOptions']
+      >((acc, ds) => {
         acc[ds.name] = ds.storageSizeBytes;
         return acc;
       }, {});

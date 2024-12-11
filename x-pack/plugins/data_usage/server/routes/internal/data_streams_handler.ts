@@ -9,7 +9,10 @@ import { RequestHandler } from '@kbn/core/server';
 import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import { getMeteringStats } from '../../utils/get_metering_stats';
-import { DataStreamsRequestQuery } from '../../../common/rest_types/data_streams';
+import type {
+  DataStreamsRequestQuery,
+  DataStreamsResponseBodySchemaBody,
+} from '../../../common/rest_types/data_streams';
 import { NoIndicesMeteringError, NoPrivilegeMeteringError } from '../../errors';
 
 export const getDataStreamsHandler = (
@@ -31,7 +34,7 @@ export const getDataStreamsHandler = (
         meteringStats && !!meteringStats.length
           ? meteringStats
               .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
-              .reduce<Array<{ name: string; storageSizeBytes: number }>>((acc, stat) => {
+              .reduce<DataStreamsResponseBodySchemaBody>((acc, stat) => {
                 if (includeZeroStorage || stat.size_in_bytes > 0) {
                   acc.push({
                     name: stat.name,

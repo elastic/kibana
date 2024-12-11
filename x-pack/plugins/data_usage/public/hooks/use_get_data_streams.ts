@@ -8,14 +8,15 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { DataStreamsResponseBodySchemaBody } from '../../common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE, DEFAULT_SELECTED_OPTIONS } from '../../common';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
-type GetDataUsageDataStreamsResponse = Array<{
-  name: string;
-  storageSizeBytes: number;
-  selected: boolean;
-}>;
+type GetDataUsageDataStreamsResponse = Array<
+  DataStreamsResponseBodySchemaBody[number] & {
+    selected: boolean;
+  }
+>;
 
 export const useGetDataUsageDataStreams = ({
   selectedDataStreams,
