@@ -90,11 +90,14 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 
   const loadPersistedDataViews = useCallback(async () => {
     setLoadingDataViews(true);
-    // Calling getIds with refresh = true to make sure we don't get stale data
-    const ids = await dataViews.getIds(true);
-    const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
-
-    setDataViewsItems(dataViewsList.map(toDataViewListItem));
+    try {
+      // Calling getIds with refresh = true to make sure we don't get stale data
+      const ids = await dataViews.getIds(true);
+      const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
+      setDataViewsItems(dataViewsList.map(toDataViewListItem));
+    } catch (e) {
+      // Error fetching data views
+    }
     setLoadingDataViews(false);
   }, [dataViews]);
 
