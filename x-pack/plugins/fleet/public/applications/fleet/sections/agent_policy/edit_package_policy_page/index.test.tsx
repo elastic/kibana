@@ -293,8 +293,6 @@ describe('edit package policy page', () => {
 
     fireEvent.click(renderResult.getByText('Change defaults'));
 
-    await waitFor(() => Promise.resolve(null));
-
     fireEvent.change(renderResult.getByDisplayValue('/var/log/nginx/access.log*'), {
       target: { value: '' },
     });
@@ -319,8 +317,6 @@ describe('edit package policy page', () => {
     });
 
     fireEvent.click(renderResult.getByRole('switch'));
-
-    await waitFor(() => Promise.resolve(null));
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -356,8 +352,6 @@ describe('edit package policy page', () => {
     });
     fireEvent.click(renderResult.getByRole('switch'));
 
-    await waitFor(() => Promise.resolve(null));
-
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
     await waitFor(() => {
@@ -383,8 +377,6 @@ describe('edit package policy page', () => {
     });
 
     fireEvent.click(renderResult.getByRole('switch'));
-
-    await waitFor(() => Promise.resolve(null));
 
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
@@ -515,8 +507,6 @@ describe('edit package policy page', () => {
 
     fireEvent.click(renderResult.getByRole('switch'));
 
-    await waitFor(() => Promise.resolve(null));
-
     fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
 
     await waitFor(() => expect(sendUpdatePackagePolicy).toHaveBeenCalled());
@@ -557,11 +547,7 @@ describe('edit package policy page', () => {
 
       fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton'));
 
-      await waitFor(() => Promise.resolve(null));
-
       fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
-
-      await waitFor(() => Promise.resolve(null));
 
       fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
 
@@ -627,8 +613,6 @@ describe('edit package policy page', () => {
       await waitFor(() => Promise.resolve(null));
 
       fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
-
-      await waitFor(() => Promise.resolve(null));
 
       fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
 
