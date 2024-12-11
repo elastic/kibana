@@ -15,6 +15,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 import { AppearanceModal } from './appearance_modal';
+import { useAppearance } from './use_appearance_hook';
 
 interface Props {
   security: SecurityPluginStart;
@@ -25,18 +26,16 @@ interface Props {
 export const AppearanceSelector = ({ security, core, closePopover }: Props) => {
   return (
     <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-      <AppearanceSelectorUI core={core} closePopover={closePopover} />
+      <AppearanceSelectorUI core={core} security={security} closePopover={closePopover} />
     </UserProfilesKibanaProvider>
   );
 };
 
-function AppearanceSelectorUI({
-  core,
-  closePopover,
-}: {
-  core: CoreStart;
-  closePopover: () => void;
-}) {
+function AppearanceSelectorUI({ security, core, closePopover }: Props) {
+  const { isVisible } = useAppearance({
+    uiSettingsClient: core.uiSettings,
+  });
+
   const modalRef = useRef<OverlayRef | null>(null);
 
   const closeModal = () => {
@@ -47,28 +46,32 @@ function AppearanceSelectorUI({
   const openModal = () => {
     modalRef.current = core.overlays.openModal(
       toMountPoint(
-        <AppearanceModal closeModal={closeModal} uiSettingsClient={core.uiSettings} />,
+        <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
+          <AppearanceModal closeModal={closeModal} uiSettingsClient={core.uiSettings} />
+        </UserProfilesKibanaProvider>,
         core
       ),
       { 'data-test-subj': 'appearanceModal', maxWidth: 600 }
     );
   };
 
+  if (!isVisible) {
+    return null;
+  }
+
   return (
-    <>
-      <EuiContextMenuItem
-        icon="brush"
-        size="s"
-        onClick={() => {
-          openModal();
-          closePopover();
-        }}
-        data-test-subj="appearanceSelector"
-      >
-        {i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceLinkText', {
-          defaultMessage: 'Appearance',
-        })}
-      </EuiContextMenuItem>
-    </>
+    <EuiContextMenuItem
+      icon="brush"
+      size="s"
+      onClick={() => {
+        openModal();
+        closePopover();
+      }}
+      data-test-subj="appearanceSelector"
+    >
+      {i18n.translate('xpack.cloudLinks.userMenuLinks.appearanceLinkText', {
+        defaultMessage: 'Appearance',
+      })}
+    </EuiContextMenuItem>
   );
 }
