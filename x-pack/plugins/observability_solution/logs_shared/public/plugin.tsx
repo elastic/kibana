@@ -34,10 +34,6 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
           const [_, pluginsStart] = await coreSetup.getStartServices();
           return pluginsStart.logsDataAccess.services.logSourcesService;
         },
-        getDataViewsService: async () => {
-          const [_, pluginsStart] = await coreSetup.getStartServices();
-          return pluginsStart.dataViews;
-        },
       })
     );
 

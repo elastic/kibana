@@ -9,7 +9,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 /**
  * Locator used to link to all log sources in Discover.
@@ -28,7 +28,6 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     private readonly deps: {
       locators: LocatorClient;
       getLogSourcesService(): Promise<LogsDataAccessPluginStart['services']['logSourcesService']>;
-      getDataViewsService(): Promise<DataViewsContract>;
     }
   ) {}
 
@@ -42,18 +41,12 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     });
   };
 
-  private async getLogSourcesDataViewSpec() {
-    const [logSourcesService, dataViewsService] = await Promise.all([
-      this.deps.getLogSourcesService(),
-      this.deps.getDataViewsService(),
-    ]);
-
+  private async getLogSourcesDataViewSpec(): Promise<DataViewSpec> {
+    const logSourcesService = await this.deps.getLogSourcesService();
     const logSources = await logSourcesService.getLogSources();
-    const dataView = await dataViewsService.create({
+    return {
       title: logSources.map((logSource) => logSource.indexPattern).join(','),
       timeFieldName: '@timestamp',
-    });
-
-    return dataView.toSpec();
+    };
   }
 }
