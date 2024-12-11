@@ -6,41 +6,19 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { ThresholdReadOnly } from './threshold';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockThresholdRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: ThresholdReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/threshold',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="threshold"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockThresholdRule({
-    threshold: {
+export const Default = () => (
+  <ThresholdReadOnly
+    threshold={{
       field: ['Responses.process.pid'],
       value: 100,
       cardinality: [{ field: 'host.id', value: 2 }],
-    },
-  }),
-};
+    }}
+  />
+);

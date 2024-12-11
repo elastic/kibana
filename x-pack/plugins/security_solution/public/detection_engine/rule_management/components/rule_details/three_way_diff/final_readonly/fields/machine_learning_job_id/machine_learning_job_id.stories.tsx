@@ -7,15 +7,11 @@
 
 import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Story } from '@storybook/react';
 import { MachineLearningJobIdReadOnly } from './machine_learning_job_id';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 import { GET_MODULES_QUERY_KEY } from '../../../../../../../../common/components/ml_popover/hooks/use_fetch_modules_query';
 import { GET_RECOGNIZER_QUERY_KEY } from '../../../../../../../../common/components/ml_popover/hooks/use_fetch_recognizer_query';
 import { GET_JOBS_SUMMARY_QUERY_KEY } from '../../../../../../../../common/components/ml/hooks/use_fetch_jobs_summary_query';
-import { mockMachineLearningRule } from '../../storybook/mocks';
 
 export default {
   component: MachineLearningJobIdReadOnly,
@@ -58,27 +54,10 @@ function MockMlData({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
-
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="machine_learning_job_id"
-    >
-      <MockMlData>
-        <FieldFinalReadOnly />
-      </MockMlData>
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockMachineLearningRule({
-    machine_learning_job_id: 'auth_high_count_logon_events',
-  }),
-};
+export const Default = () => (
+  <ThreeWayDiffStorybookProviders>
+    <MockMlData>
+      <MachineLearningJobIdReadOnly machineLearningJobId="auth_high_count_logon_events" />
+    </MockMlData>
+  </ThreeWayDiffStorybookProviders>
+);

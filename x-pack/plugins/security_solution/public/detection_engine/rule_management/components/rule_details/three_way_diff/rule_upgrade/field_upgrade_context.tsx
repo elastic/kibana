@@ -78,6 +78,7 @@ export function FieldUpgradeContextProvider({
   setRuleFieldResolvedValue,
   children,
 }: FieldUpgradeContextProviderProps) {
+  console.log('dbg ruleUpgradeState', ruleUpgradeState);
   const { state: fieldUpgradeState } = ruleUpgradeState.fieldsUpgradeState[fieldName];
   const fieldDiff = ruleUpgradeState.diff.fields[fieldName];
   const initialRightSideMode =
