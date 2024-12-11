@@ -986,8 +986,6 @@ x-pack/plugins/snapshot_restore @elastic/kibana-management
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
-x-pack/plugins/streams @elastic/streams-program-team
-x-pack/plugins/streams_app @elastic/streams-program-team
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
@@ -997,6 +995,8 @@ x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
+x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
+x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
@@ -1842,7 +1842,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
 /src/core/public/i18n/  @elastic/kibana-localization @elastic/kibana-core
-#CC# /x-pack/plugins/translations/ @elastic/kibana-localization @elastic/kibana-core
+#CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
 
 # Kibana Platform Security
 # security
@@ -2562,7 +2562,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /src/plugins/home/public/application/components/guided_onboarding @elastic/appex-sharedux
 
 # Changes to translation files should not ping code reviewers
-x-pack/plugins/translations/translations
+x-pack/platform/plugins/private/translations/translations
 
 # Profiling api integration testing
 x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
