@@ -307,7 +307,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentAppId,
       codeBlockRef,
       userProfileService,
-      chrome
+      chrome,
     }),
     [
       actionTypeRegistry,
@@ -343,13 +343,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentAppId,
       codeBlockRef,
       userProfileService,
-      chrome
+      chrome,
     ]
   );
 
   return (
     <AssistantContext.Provider value={value}>
-      <AssistantNavLink/>
+      <AssistantNavLink />
       {children}
     </AssistantContext.Provider>
   );
