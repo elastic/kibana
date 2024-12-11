@@ -800,6 +800,8 @@ x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-tea
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
+x-pack/packages/observability/observability_ai/observability_ai_common @elastic/obs-ai-assistant
+x-pack/packages/observability/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
