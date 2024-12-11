@@ -75,7 +75,7 @@
     "xpack.licenseApiGuard": "plugins/license_api_guard",
     "xpack.licenseMgmt": "plugins/license_management",
     "xpack.licensing": "plugins/licensing",
-    "xpack.lists": "plugins/lists",
+    "xpack.lists": "solutions/security/plugins/lists",
     "xpack.logstash": [
       "plugins/logstash"
     ],
