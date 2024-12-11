@@ -103,4 +103,22 @@ describe('Charts Filters', () => {
       toggleFilterButton.querySelector('.euiNotificationBadge')?.getAttribute('aria-label')
     ).toBe('50 active filters');
   });
+
+  it('renders data streams filter with no options selected and select all is disabled', async () => {
+    const { getByTestId, queryByTestId } = renderComponent({
+      ...defaultProps,
+      filterOptions: {
+        ...defaultProps.filterOptions,
+        options: [],
+      },
+    });
+    expect(getByTestId(`${testIdFilter}-dataStreams-popoverButton`)).toBeTruthy();
+
+    const filterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+    expect(filterButton).toBeTruthy();
+    await user.click(filterButton);
+    expect(queryByTestId('dataStreams-filter-option')).toBeFalsy();
+    expect(getByTestId('dataStreams-group-label')).toBeTruthy();
+    expect(getByTestId(`${testIdFilter}-dataStreams-selectAllButton`)).toBeDisabled();
+  });
 });
