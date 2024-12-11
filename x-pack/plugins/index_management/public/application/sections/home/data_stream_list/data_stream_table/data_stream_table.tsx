@@ -307,6 +307,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       }),
       icon: 'trash',
       onClick: () => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name)),
+      className: 'dataStreamsBulkDeleteButton',
     });
   }
 
