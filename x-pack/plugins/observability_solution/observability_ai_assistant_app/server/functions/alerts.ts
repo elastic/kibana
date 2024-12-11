@@ -196,17 +196,17 @@ export function registerAlertsFunction({
                       lte: end,
                     },
                   },
-                  ...kqlQuery,
-                  ...(!includeRecovered
-                    ? [
-                        {
-                          term: {
-                            [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                          },
-                        },
-                      ]
-                    : []),
                 },
+                ...kqlQuery,
+                ...(!includeRecovered
+                  ? [
+                      {
+                        term: {
+                          [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                        },
+                      },
+                    ]
+                  : []),
               ],
             },
           },
