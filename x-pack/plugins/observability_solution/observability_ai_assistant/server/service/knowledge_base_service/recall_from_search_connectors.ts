@@ -158,7 +158,7 @@ async function recallFromLegacyConnectors({
               sparse_vector: {
                 field: vectorField,
                 query: text,
-                inference_id: modelId,
+                inference_id: modelId, // TODO: use preconfigured ELSER endpoint `.elser-2-elasticsearch` when we can set `min_number_of_allocations:1`
                 boost,
               },
             },
