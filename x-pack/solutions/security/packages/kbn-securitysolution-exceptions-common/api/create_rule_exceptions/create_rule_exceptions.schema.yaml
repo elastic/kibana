@@ -9,7 +9,7 @@ paths:
       operationId: CreateRuleExceptionListItems
       x-codegen-enabled: true
       summary: Create rule exception list items
-      description: Create exception items that apply to a single detection rule. 
+      description: Create exception items that apply to a single detection rule.
       parameters:
         - name: id
           in: path
@@ -45,37 +45,37 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                  - $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                  - $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
 
 components:
   schemas:
     RuleId:
-      $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/UUID'
+      $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/UUID'
 
     CreateRuleExceptionListItemComment:
       type: object
       properties:
         comment:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
       required:
         - comment
 

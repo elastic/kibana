@@ -17,9 +17,9 @@ components:
           type: string
           enum: [match]
         field:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         value:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
       required:
@@ -35,11 +35,11 @@ components:
           type: string
           enum: [match_any]
         field:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         value:
           type: array
           items:
-            $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
           minItems: 1
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
@@ -56,14 +56,14 @@ components:
           type: string
           enum: [list]
         field:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         list:
           type: object
           properties:
             id:
-              $ref: '../../../../../../kbn-securitysolution-lists-common/api/model/list_common.schema.yaml#/components/schemas/ListId'
+              $ref: '../../../kbn-securitysolution-lists-common/api/model/list_common.schema.yaml#/components/schemas/ListId'
             type:
-              $ref: '../../../../../../kbn-securitysolution-lists-common/api/model/list_common.schema.yaml#/components/schemas/ListType'
+              $ref: '../../../kbn-securitysolution-lists-common/api/model/list_common.schema.yaml#/components/schemas/ListType'
           required: [id, type]
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
@@ -80,7 +80,7 @@ components:
           type: string
           enum: [exists]
         field:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
       required:
@@ -101,7 +101,7 @@ components:
           type: string
           enum: [nested]
         field:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         entries:
           type: array
           items:
@@ -119,9 +119,9 @@ components:
           type: string
           enum: [wildcard]
         field:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         value:
-          $ref: '../../../../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../../../../../../../packages/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
       required:
