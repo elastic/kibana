@@ -39,6 +39,7 @@ import { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
+import { ACTIVE_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS } from '../../common/constants';
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
@@ -65,6 +66,7 @@ const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
 const ParamsSchema = schema.object({
   connector: schema.string(),
   message: schema.string({ minLength: 1 }),
+  status: schema.string(),
 });
 
 const RuleSchema = schema.object({
@@ -83,6 +85,7 @@ const AlertSummarySchema = schema.object({
 
 const ConnectorParamsSchema = schema.object({
   connector: schema.string(),
+  status: schema.string(),
   message: schema.string({ minLength: 1 }),
   rule: RuleSchema,
   alerts: AlertSummarySchema,
@@ -141,6 +144,7 @@ function renderParameterTemplates(
   return {
     connector: params.connector,
     message: params.message,
+    status: params.status,
     rule: params.rule,
     alerts: params.alerts,
   };
@@ -151,11 +155,27 @@ async function executor(
   initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
   alertDetailsContextService: AlertDetailsContextualInsightsService
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const request = execOptions.request;
-  const alerts = execOptions.params.alerts;
+  const { request, params } = execOptions;
+  const alerts = {
+    new: [...(params.alerts?.new || [])],
+    recovered: [...(params.alerts?.recovered || [])],
+  };
 
   if (!request) {
     throw new Error('AI Assistant connector requires a kibana request');
+  }
+
+  if (
+    execOptions.params.status === ACTIVE_ALERTS.id ||
+    execOptions.params.status === RECOVERED_ALERTS.id ||
+    execOptions.params.status === UNTRACKED_ALERTS.id
+  ) {
+    alerts.new = alerts.new.filter(
+      (alert) => get(alert, 'kibana.alert.status') === execOptions.params.status
+    );
+    alerts.recovered = alerts.recovered.filter(
+      (alert) => get(alert, 'kibana.alert.status') === execOptions.params.status
+    );
   }
 
   if (alerts.new.length === 0 && alerts.recovered.length === 0) {
@@ -220,7 +240,7 @@ If available, include the link of the conversation at the end of your answer.`
 
   const alertsContext = await getAlertsContext(
     execOptions.params.rule,
-    execOptions.params.alerts,
+    alerts,
     async (alert: Record<string, any>) => {
       const prompt = await alertDetailsContextService.getAlertDetailsContext(
         {
@@ -342,6 +362,7 @@ export const getObsAIAssistantConnectorAdapter = (): ConnectorAdapter<
       return {
         connector: params.connector,
         message: params.message,
+        status: params.status,
         rule: { id: rule.id, name: rule.name, tags: rule.tags, ruleUrl: ruleUrl ?? null },
         alerts: {
           new: alerts.new.data,
