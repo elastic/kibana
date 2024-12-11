@@ -119,7 +119,11 @@ export class EntityClient {
   }
 
   async storeTypeDefinition(type: EntityTypeDefinition) {
-    return storeTypeDefinition(type, this.options.clusterClient, this.options.logger);
+    return storeTypeDefinition({
+      type,
+      clusterClient: this.options.clusterClient,
+      logger: this.options.logger,
+    });
   }
 
   async readTypeDefinitions() {
@@ -127,7 +131,11 @@ export class EntityClient {
   }
 
   async storeSourceDefinition(source: EntitySourceDefinition) {
-    return storeSourceDefinition(source, this.options.clusterClient, this.options.logger);
+    return storeSourceDefinition({
+      source,
+      clusterClient: this.options.clusterClient,
+      logger: this.options.logger,
+    });
   }
 
   async readSourceDefinitions(options?: ReadSourceDefinitionOptions) {
