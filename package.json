@@ -849,7 +849,7 @@
     "@kbn/securitysolution-io-ts-alerting-types": "link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types",
     "@kbn/securitysolution-io-ts-list-types": "link:x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types",
     "@kbn/securitysolution-io-ts-types": "link:src/platform/packages/shared/kbn-securitysolution-io-ts-types",
-    "@kbn/securitysolution-io-ts-utils": "link:packages/kbn-securitysolution-io-ts-utils",
+    "@kbn/securitysolution-io-ts-utils": "link:src/platform/packages/shared/kbn-securitysolution-io-ts-utils",
     "@kbn/securitysolution-list-api": "link:packages/kbn-securitysolution-list-api",
     "@kbn/securitysolution-list-constants": "link:packages/kbn-securitysolution-list-constants",
     "@kbn/securitysolution-list-hooks": "link:packages/kbn-securitysolution-list-hooks",
