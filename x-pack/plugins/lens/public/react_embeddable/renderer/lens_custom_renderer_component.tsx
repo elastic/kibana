@@ -59,6 +59,7 @@ export function LensRenderer({
   filters,
   timeRange,
   disabledActions,
+  searchSessionId,
   hidePanelTitles,
   ...props
 }: LensRendererProps) {
