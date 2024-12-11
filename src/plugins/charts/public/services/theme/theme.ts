@@ -116,6 +116,7 @@ function getChartTheme(theme: CoreTheme): Theme {
   if (theme.name !== 'amsterdam') {
     const backgroundColor = euiThemeVars.euiColorEmptyShade;
     chartTheme.background.color = backgroundColor;
+    chartTheme.background.fallbackColor = backgroundColor;
   }
 
   return chartTheme;
