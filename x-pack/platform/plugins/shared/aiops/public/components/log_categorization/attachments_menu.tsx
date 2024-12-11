@@ -8,7 +8,6 @@
 import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexItem,
   EuiForm,
