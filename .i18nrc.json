@@ -156,7 +156,7 @@
     "unifiedHistogram": "src/plugins/unified_histogram",
     "unifiedDataTable": "packages/kbn-unified-data-table",
     "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
-    "unsavedChangesPrompt": "packages/kbn-unsaved-changes-prompt",
+    "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",
     "managedContentBadge": "packages/kbn-managed-content-badge",
     "responseOpsRuleForm": "packages/response-ops/rule_form"
   },
