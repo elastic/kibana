@@ -23,8 +23,8 @@ ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
 1. Copy and edit the template in the right area section of this file. Most recent entries should be at the top of the section. 
 2. Edit the anchor ID [[REPO-PR]] of the template with proper values. 
 3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
-  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/get_doc_links.ts
-  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/types.ts
+  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/get_doc_links.ts
+  - https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-doc-links/src/types.ts
 
 The entry in the main links file should look like this:
 
@@ -334,6 +334,56 @@ The `xpack.actions.enabled` setting has been removed. For more information, refe
 Before you upgrade to 8.0.0, remove `xpack.actions.enabled` from kibana.yml.
 ====
 
+[discrete]
+[[breaking-legacy-rbac]]
+.[Alerting] Legacy RBAC exemption (9.0.0)
+[%collapsible]
+====
+*Details* +
+The legacy role-based action control exemption for alerting rules has been removed in version 9.0.0.
+
+*Impact* +
+Any alerting rules that rely on the legacy exemption will fail to trigger actions for alerts starting
+from version 9.0.0.
+
+*Action* +
+To identify the affected rules run the following query in *{dev-tools-app}*:
+
+[source,js]
+----------------------------------
+GET .kibana*/_search
+{
+  "runtime_mappings": {
+    "apiKeyVersion": {
+      "type": "keyword",
+      "script": {
+        "source": "def alert = params._source['alert']; if (alert != null) { def meta = alert.meta; if (meta != null) { emit(meta.versionApiKeyLastmodified); } else { emit('');}}"
+      }
+    }
+  },
+  "size": 10000,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "type": "alert"
+          }
+        },
+        {
+          "term": {
+            "apiKeyVersion": "pre-7.10.0"
+          }
+        }
+      ]
+    }
+  },
+  "_source": ["alert.name", "namespaces"]
+}
+----------------------------------
+
+To use normal RBAC authorization, edit each affected rule to update the API key.
+====
 
 // Data views
 

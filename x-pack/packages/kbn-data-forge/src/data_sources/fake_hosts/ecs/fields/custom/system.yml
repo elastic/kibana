@@ -44,3 +44,7 @@
       level: custom
       type: long
       description: "Number of outgoing bytes"
+    - name: core.system.ticks
+      level: custom
+      type: long
+      description: "The amount of CPU time spent in kernel space"
