@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  correctCommonEsqlMistakes,
-  isChatCompletionChunkEvent,
-  isOutputEvent,
-} from '@kbn/inference-plugin/common';
+import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/inference-common';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
   FunctionVisibility,
@@ -135,9 +132,10 @@ export function registerQueryFunction({
         ),
         logger: resources.logger,
         tools: Object.fromEntries(
-          actions
-            .concat(esqlFunctions)
-            .map((fn) => [fn.name, { description: fn.description, schema: fn.parameters }])
+          [...actions, ...esqlFunctions].map((fn) => [
+            fn.name,
+            { description: fn.description, schema: fn.parameters } as ToolDefinition,
+          ])
         ),
         functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
       });
