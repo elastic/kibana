@@ -22,7 +22,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "x-pack/examples/triggers_actions_ui_example"

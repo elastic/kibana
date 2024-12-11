@@ -18,7 +18,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "x-pack/plugins/drilldowns/url_drilldown"

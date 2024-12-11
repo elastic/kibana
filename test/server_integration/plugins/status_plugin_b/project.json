@@ -20,7 +20,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "test/server_integration/plugins/status_plugin_b"

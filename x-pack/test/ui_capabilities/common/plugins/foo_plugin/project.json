@@ -20,7 +20,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "x-pack/test/ui_capabilities/common/plugins/foo_plugin"

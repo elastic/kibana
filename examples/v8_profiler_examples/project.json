@@ -20,7 +20,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "examples/v8_profiler_examples"

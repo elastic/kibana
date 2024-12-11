@@ -21,7 +21,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "test/analytics/plugins/analytics_plugin_a"

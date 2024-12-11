@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/eslint-plugin-eslint",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/src/**"
+    ]
+  },
+  "targets": {
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js"
+      }
+    },
+    "lint": {}
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-eslint-plugin-eslint"
+}

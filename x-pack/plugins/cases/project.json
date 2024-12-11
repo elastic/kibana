@@ -23,15 +23,11 @@
       ]
     },
     "jest": {
-      "outputs": [
-        "{projectRoot}/coverage"
-      ],
       "options": {
-        "jestConfig": "{projectRoot}/jest.config.js",
-        "passWithNoTests": true,
-        "runInBand": true
+        "jestConfig": "{projectRoot}/jest.config.js"
       }
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "x-pack/plugins/cases"

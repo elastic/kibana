@@ -20,7 +20,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type"

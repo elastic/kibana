@@ -26,6 +26,8 @@
         "jestConfig": "{projectRoot}/jest.config.js",
         "passWithNoTests": true
       }
+    },
+    "lint": {
     }
   }
 }

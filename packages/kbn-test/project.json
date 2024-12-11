@@ -24,14 +24,11 @@
       ]
     },
     "jest": {
-      "outputs": [
-        "{projectRoot}/coverage"
-      ],
       "options": {
-        "jestConfig": "{projectRoot}/jest.config.js",
-        "passWithNoTests": true
+        "jestConfig": "{projectRoot}/jest.config.js"
       }
-    }
+    },
+    "lint": {}
   },
   "projectType": "library",
   "sourceRoot": "packages/kbn-test"

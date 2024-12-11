@@ -19,7 +19,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin"

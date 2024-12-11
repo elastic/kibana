@@ -23,7 +23,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "library",
   "sourceRoot": "src/core"

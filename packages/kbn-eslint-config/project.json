@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/eslint-config",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/src/**"
+    ]
+  },
+  "targets": {},
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-eslint-config"
+}

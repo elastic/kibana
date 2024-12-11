@@ -18,7 +18,8 @@
       "outputs": [
         "{projectRoot}/target"
       ]
-    }
+    },
+    "lint": {}
   },
   "projectType": "application",
   "sourceRoot": "x-pack/test/api_integration/apis/entity_manager/fixture_plugin"
