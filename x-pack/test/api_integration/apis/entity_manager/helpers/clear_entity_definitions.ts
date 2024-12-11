@@ -6,10 +6,11 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { DEFINITIONS_ALIAS } from '@kbn/entityManager-plugin/server/lib/v2/constants';
 
 export async function clearEntityDefinitions(esClient: ElasticsearchClient) {
   await esClient.deleteByQuery({
-    index: '.kibana-entities-definitions',
+    index: DEFINITIONS_ALIAS,
     query: {
       match_all: {},
     },
