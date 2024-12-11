@@ -8,6 +8,10 @@ import axios, { AxiosRequestConfig, AxiosError } from 'axios';
 import { once } from 'lodash';
 import { Elasticsearch, Kibana } from '../create_apm_users';
 
+const DEFAULT_HEADERS = {
+  'kbn-xsrf': 'true',
+  'x-elastic-internal-origin': 'Kibana',
+};
 export async function callKibana<T>({
   elasticsearch,
   kibana,
@@ -24,14 +28,18 @@ export async function callKibana<T>({
     ...options,
     baseURL: baseUrl,
     auth: { username, password },
-    headers: { 'kbn-xsrf': 'true', ...options.headers },
+    headers: { ...DEFAULT_HEADERS, ...options.headers },
   });
   return data;
 }
 
 const getBaseUrl = once(async (kibanaHostname: string) => {
   try {
-    await axios.request({ url: kibanaHostname, maxRedirects: 0 });
+    await axios.request({
+      url: kibanaHostname,
+      maxRedirects: 0,
+      headers: DEFAULT_HEADERS,
+    });
   } catch (e) {
     if (isAxiosError(e)) {
       const location = e.response?.headers?.location ?? '';

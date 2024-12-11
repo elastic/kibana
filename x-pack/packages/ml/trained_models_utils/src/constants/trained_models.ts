@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
 export const ELSER_MODEL_ID = '.elser_model_2';
 export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';
 export const E5_MODEL_ID = '.multilingual-e5-small';
 export const E5_LINUX_OPTIMIZED_MODEL_ID = '.multilingual-e5-small_linux-x86_64';
+export const RERANK_MODEL_ID = '.rerank-v1';
 export const LANG_IDENT_MODEL_ID = 'lang_ident_model_1';
 export const ELSER_ID_V1 = '.elser_model_1' as const;
 export const LATEST_ELSER_VERSION: ElserVersion = 2;
@@ -147,9 +149,25 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<
         'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
     }),
   },
+  [RERANK_MODEL_ID]: {
+    techPreview: true,
+    default: true,
+    hidden: true,
+    modelName: 'rerank',
+    version: 1,
+    config: {
+      input: {
+        field_names: ['input', 'query'],
+      },
+    },
+    description: i18n.translate('xpack.ml.trainedModels.modelsList.rerankDescription', {
+      defaultMessage: 'Elastic Rerank v1',
+    }),
+    type: ['pytorch', 'text_similarity'],
+  },
 } as const);
 
-export type ElasticCuratedModelName = 'elser' | 'e5';
+export type ElasticCuratedModelName = 'elser' | 'e5' | 'rerank';
 
 export interface ModelDefinition {
   /**
@@ -176,6 +194,8 @@ export interface ModelDefinition {
   licenseUrl?: string;
   type?: readonly string[];
   disclaimer?: string;
+  /** Indicates if model is in tech preview */
+  techPreview?: boolean;
 }
 
 export type ModelDefinitionResponse = ModelDefinition & {
@@ -308,14 +328,7 @@ export type InferenceServiceSettings =
       };
     };
 
-export type InferenceAPIConfigResponse = {
-  // Refers to a deployment id
-  inference_id: string;
-  task_type: 'sparse_embedding' | 'text_embedding';
-  task_settings: {
-    model?: string;
-  };
-} & InferenceServiceSettings;
+export type InferenceAPIConfigResponse = InferenceInferenceEndpointInfo & InferenceServiceSettings;
 
 export function isLocalModel(
   model: InferenceServiceSettings
