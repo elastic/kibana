@@ -35,9 +35,9 @@ to enable the {kib} server to have screenshotting capabilities.
 [float]
 [[grant-user-access]]
 === Grant users access to reporting
-When security is enabled, the preferred method to grant users access to {report-features} is with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
+When security is enabled, the preferred method to grant users access to {report-features} is with <<kibana-privileges, {kib} application privileges>>.  This will allow you to create custom roles that control the spaces and applications where users may generate reports.
 
-. We recommend that you enable application privileges in Reporting. To do this, change a setting that controls the Reporting access control model in `kibana.yml`:
+. We recommend you explicitly opt-out of the default access control model, which will enable application privileges in Reporting. To do this, change a setting that controls the Reporting access control model in `kibana.yml`:
 +
 [source,yaml]
 ------------------------------------

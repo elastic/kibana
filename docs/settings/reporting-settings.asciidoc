@@ -68,10 +68,10 @@ are allowed to generate reports.
 
 [NOTE]
 ============================================================================
-In Kibana 8.x versions, the `xpack.reporting.roles.enabled` setting controls the model of access control features used for Reporting. The default `true`
-value of this setting uses an older access control model separate from {kib} application privileges. The default model grants users with the built-in
-`reporting_user` role access to create any type of report in Kibana. Since the default model is not based on {kib} application privileges, users that do
-not have permission to create reports will see {report-features} in Kibana, but will receive an error if they attempt to request a report. The default
+In Kibana 8.x, the `xpack.reporting.roles.enabled` setting controls the model of access control features used for Reporting, which defaults to `true`.
+This enables an older access control model separate from {kib} application privileges, and grants any user with the built-in
+`reporting_user` role the ability to create any type of report in Kibana. But as this model is not based on {kib} application privileges, users that do
+not have permission to create reports will still see {report-features} in Kibana, but will actually receive an error if they attempt to request a report. The default
 model also does not allow API keys or authentication tokens to authorize report generation. 
 
 We recommend that you explicitly opt-out of the default access control model by adding `xpack.reporting.roles.enabled: false` to kibana.yml. This will
