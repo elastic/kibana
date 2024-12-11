@@ -350,7 +350,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       ((await doAnyChangesMatch([
-        /^x-pack\/plugins\/osquery/,
+        /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
         /^x-pack\/plugins\/security_solution/,
       ])) ||
