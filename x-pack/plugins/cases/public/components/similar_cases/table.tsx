@@ -11,13 +11,13 @@ import { css } from '@emotion/react';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 
-import type { CasesSimilarResponseUI, SimilarCaseUI } from '../../../common/ui/types';
+import type { SimilarCaseUI } from '../../../common/ui/types';
 
 import * as i18n from './translations';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
 
 interface SimilarCasesTableProps {
-  data: CasesSimilarResponseUI;
+  cases: SimilarCaseUI[];
   isCasesLoading: boolean;
   tableRowProps: EuiBasicTableProps<SimilarCaseUI>['rowProps'];
   onChange: EuiBasicTableProps<SimilarCaseUI>['onChange'];
@@ -25,8 +25,7 @@ interface SimilarCasesTableProps {
 }
 
 export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
-  data,
-  tableRef,
+  cases,
   tableRowProps,
   isCasesLoading,
   onChange,
@@ -52,7 +51,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
         columns={columns}
         data-test-subj="similar-cases-table"
         itemId="id"
-        items={data.cases}
+        items={cases}
         noItemsMessage={
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}
@@ -60,7 +59,6 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
             body={i18n.NO_CASES_BODY}
           />
         }
-        ref={tableRef}
         rowProps={tableRowProps}
       />
     </>
