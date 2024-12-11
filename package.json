@@ -852,7 +852,7 @@
     "@kbn/securitysolution-io-ts-utils": "link:src/platform/packages/shared/kbn-securitysolution-io-ts-utils",
     "@kbn/securitysolution-list-api": "link:x-pack/solutions/security/packages/kbn-securitysolution-list-api",
     "@kbn/securitysolution-list-constants": "link:x-pack/solutions/security/packages/kbn-securitysolution-list-constants",
-    "@kbn/securitysolution-list-hooks": "link:packages/kbn-securitysolution-list-hooks",
+    "@kbn/securitysolution-list-hooks": "link:x-pack/solutions/security/packages/kbn-securitysolution-list-hooks",
     "@kbn/securitysolution-list-utils": "link:packages/kbn-securitysolution-list-utils",
     "@kbn/securitysolution-lists-common": "link:packages/kbn-securitysolution-lists-common",
     "@kbn/securitysolution-rules": "link:packages/kbn-securitysolution-rules",
