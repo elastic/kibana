@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 
-import { filterOptionsList } from '@kbn/test-suites-src/functional/services/combo_box';
+import { ComboBoxService } from '@kbn/test-suites-src/functional/services/combo_box';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderContext) {
@@ -14,6 +14,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
   const browser = getService('browser');
   const retry = getService('retry');
   const es = getService('es');
+  const comboBox = getService('comboBox') as ComboBoxService;
   return {
     helpers: {
       async deleteAllConnectors() {
@@ -65,7 +66,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       async editType(type: string) {
         await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
-        await filterOptionsList('serverlessSearchEditConnectorTypeChoices', type);
+        await comboBox.filterOptionsList('serverlessSearchEditConnectorTypeChoices', type);
       },
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
