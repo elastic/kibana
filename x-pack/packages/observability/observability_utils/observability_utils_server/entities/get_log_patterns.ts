@@ -339,8 +339,9 @@ export async function getLogPatterns({
       }
 
       const patternsToExclude = topMessagePatterns.filter((pattern) => {
+        // elasticsearch will barf because the query is too complex. this measures
+        // the # of groups to capture for a measure of complexity.
         const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
-        // elasticsearch will barf because the query is too complex
         return (
           complexity <= 25 &&
           // anything less than 50 messages should be re-processed with the ml_standard tokenizer
