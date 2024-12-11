@@ -298,7 +298,7 @@ describe('ruleActionsSettings', () => {
     expect(mockOnUseDefaultMessageChange).toHaveBeenCalled();
   });
 
-  test('should render notify when with rule level notify when value', async () => {
+  test('should render notify when with rule level notify when', async () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         settings: {},

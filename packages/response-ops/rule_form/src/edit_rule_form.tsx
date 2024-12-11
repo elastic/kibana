@@ -101,8 +101,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           schedule: newFormData.schedule,
           params: newFormData.params,
           actions: newFormData.actions,
-          notifyWhen: newFormData.notifyWhen,
-          throttle: newFormData.throttle,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
         },

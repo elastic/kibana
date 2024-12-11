@@ -170,19 +170,22 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
 
   const intervalUnit = getDurationUnitValue(interval);
 
-  const actionNotifyWhen = ruleNotifyWhen ? ruleNotifyWhen : action?.frequency?.notifyWhen;
+  const actionNotifyWhen =
+    !action?.frequency && ruleNotifyWhen ? ruleNotifyWhen : action?.frequency?.notifyWhen;
 
-  const actionThrottle = action.frequency?.throttle
-    ? getDurationNumberInItsUnit(action.frequency.throttle)
-    : ruleThrottle
-    ? getDurationNumberInItsUnit(ruleThrottle)
-    : null;
+  const actionThrottle =
+    !action.frequency?.throttle && ruleThrottle
+      ? getDurationNumberInItsUnit(ruleThrottle)
+      : action.frequency?.throttle
+      ? getDurationNumberInItsUnit(action.frequency.throttle)
+      : null;
 
-  const actionThrottleUnit = action.frequency?.throttle
-    ? getDurationUnitValue(action.frequency?.throttle)
-    : ruleThrottle
-    ? getDurationUnitValue(ruleThrottle)
-    : 'h';
+  const actionThrottleUnit =
+    !action.frequency?.throttle && ruleThrottle
+      ? getDurationUnitValue(ruleThrottle)
+      : action.frequency?.throttle
+      ? getDurationUnitValue(action.frequency?.throttle)
+      : 'h';
 
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = [
     intervalNumber,
@@ -212,8 +215,13 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
           <EuiFlexItem>
             <RuleActionsNotifyWhen
               frequency={{
-                ...(action.frequency ?? DEFAULT_FREQUENCY),
-                notifyWhen: actionNotifyWhen ?? DEFAULT_FREQUENCY.notifyWhen,
+                ...(action.frequency ?? {
+                  notifyWhen: actionNotifyWhen ?? DEFAULT_FREQUENCY.notifyWhen,
+                  throttle: actionThrottle
+                    ? `${actionThrottle}${actionThrottleUnit}`
+                    : DEFAULT_FREQUENCY.throttle,
+                  summary: false,
+                }),
               }}
               throttle={actionThrottle}
               throttleUnit={actionThrottleUnit}

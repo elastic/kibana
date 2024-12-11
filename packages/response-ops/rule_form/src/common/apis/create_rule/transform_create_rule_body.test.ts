@@ -52,7 +52,6 @@ const ruleToCreate: CreateRuleBody<RuleTypeParams> = {
       actionTypeId: '.system-action',
     },
   ],
-  notifyWhen: 'onActionGroupChange',
   alertDelay: {
     active: 10,
   },
@@ -82,7 +81,6 @@ describe('transformCreateRuleBody', () => {
       name: 'test',
       enabled: true,
       throttle: null,
-      notify_when: 'onActionGroupChange',
       rule_type_id: '.index-threshold',
       actions: [
         {

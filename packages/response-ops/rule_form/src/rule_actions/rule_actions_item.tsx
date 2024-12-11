@@ -101,7 +101,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const {
     plugins: { actionTypeRegistry, http },
-    formData: { notifyWhen: ruleNotifyWhen },
     actionsParamsErrors = {},
     selectedRuleType,
     selectedRuleTypeModel,
@@ -342,34 +341,19 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
 
   const onNotifyWhenChange = useCallback(
     (frequency: RuleActionFrequency) => {
-      if (ruleNotifyWhen) {
-        dispatch({
-          type: 'setNotifyWhen',
-          payload: frequency.notifyWhen,
-        });
-
-        dispatch({
-          type: 'setRuleProperty',
-          payload: {
-            property: 'throttle',
-            value: frequency.throttle,
-          },
-        });
-      } else {
-        dispatch({
-          type: 'setActionProperty',
-          payload: {
-            uuid: action.uuid!,
-            key: 'frequency',
-            value: frequency,
-          },
-        });
-        if (frequency.summary !== action.frequency?.summary) {
-          onDefaultParamsChange(action.group, frequency.summary);
-        }
+      dispatch({
+        type: 'setActionProperty',
+        payload: {
+          uuid: action.uuid!,
+          key: 'frequency',
+          value: frequency,
+        },
+      });
+      if (frequency.summary !== action.frequency?.summary) {
+        onDefaultParamsChange(action.group, frequency.summary);
       }
     },
-    [action, onDefaultParamsChange, dispatch, ruleNotifyWhen]
+    [action, onDefaultParamsChange, dispatch]
   );
 
   const onActionGroupChange = useCallback(

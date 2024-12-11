@@ -124,8 +124,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           params: newFormData.params,
           schedule: newFormData.schedule,
           actions: newFormData.actions,
-          notifyWhen: newFormData.notifyWhen,
-          throttle: newFormData.throttle,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
         },
