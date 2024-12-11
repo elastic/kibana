@@ -6,8 +6,7 @@
  */
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { fetch$, type FetchContext } from '@kbn/presentation-publishing';
-import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
@@ -21,6 +20,7 @@ import {
   map,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
+import { pick } from 'lodash';
 import { getEditPath } from '../../common/constants';
 import type {
   GetStateType,
@@ -53,6 +53,24 @@ type ReloadReason =
   | 'disableTriggers'
   | 'viewMode'
   | 'searchContext';
+
+function getSearchContext(parentApi: unknown) {
+  const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
+    ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
+    : {
+        filters$: new BehaviorSubject(undefined),
+        query$: new BehaviorSubject(undefined),
+        timeslice$: new BehaviorSubject(undefined),
+        timeRange$: new BehaviorSubject(undefined),
+      };
+
+  return {
+    filters: unifiedSearch$.filters$.getValue(),
+    query: unifiedSearch$.query$.getValue(),
+    timeRange: unifiedSearch$.timeRange$.getValue(),
+    timeslice: unifiedSearch$.timeslice$?.getValue(),
+  };
+}
 
 /**
  * The function computes the expression used to render the panel and produces the necessary props
@@ -112,16 +130,6 @@ export function loadEmbeddableData(
     }
   };
 
-  const unifiedSearch$ = new BehaviorSubject<
-    Pick<FetchContext, 'query' | 'filters' | 'timeRange' | 'timeslice' | 'searchSessionId'>
-  >({
-    query: undefined,
-    filters: undefined,
-    timeRange: undefined,
-    timeslice: undefined,
-    searchSessionId: undefined,
-  });
-
   async function reload(
     // make reload easier to debug
     sourceId: ReloadReason
@@ -141,8 +149,6 @@ export function loadEmbeddableData(
     }
 
     const currentState = getState();
-
-    const { searchSessionId, ...unifiedSearch } = unifiedSearch$.getValue();
 
     const getExecutionContext = () => {
       const parentContext = getParentContext(parentApi);
@@ -198,7 +204,7 @@ export function loadEmbeddableData(
 
     const searchContext = getMergedSearchContext(
       currentState,
-      unifiedSearch,
+      getSearchContext(parentApi),
       api.timeRange$,
       parentApi,
       services
@@ -216,7 +222,7 @@ export function loadEmbeddableData(
         },
         renderMode: getRenderMode(parentApi),
         services,
-        searchSessionId,
+        searchSessionId: api.searchSessionId$.getValue(),
         abortController: internalApi.expressionAbortController$.getValue(),
         getExecutionContext,
         logError: getLogError(getExecutionContext),
@@ -259,20 +265,8 @@ export function loadEmbeddableData(
   }
 
   const mergedSubscriptions = merge(
-    // on data change from the parentApi, reload
-    fetch$(api).pipe(
-      tap((data) => {
-        const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
-        unifiedSearch$.next({
-          query: data.query,
-          filters: data.filters,
-          timeRange: data.timeRange,
-          timeslice: data.timeslice,
-          searchSessionId,
-        });
-      }),
-      map(() => 'searchContext' as ReloadReason)
-    ),
+    // on search context change, reload
+    fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
