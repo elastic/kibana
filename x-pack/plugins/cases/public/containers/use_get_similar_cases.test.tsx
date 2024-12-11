@@ -31,7 +31,7 @@ describe('useGetSimilarCases', () => {
   it('calls getSimilarCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getSimilarCases');
     const { waitFor } = renderHook(
-      () => useGetSimilarCases({ caseData: mockCase, pageSize: 10, pageIndex: 0 }),
+      () => useGetSimilarCases({ caseData: mockCase, perPage: 10, page: 0 }),
       {
         wrapper: appMockRender.AppWrapper,
       }
@@ -59,7 +59,7 @@ describe('useGetSimilarCases', () => {
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
     const { waitFor } = renderHook(
-      () => useGetSimilarCases({ caseData: mockCase, pageSize: 10, pageIndex: 0 }),
+      () => useGetSimilarCases({ caseData: mockCase, perPage: 10, page: 0 }),
       {
         wrapper: appMockRender.AppWrapper,
       }

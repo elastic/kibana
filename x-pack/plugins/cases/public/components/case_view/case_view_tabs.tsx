@@ -168,8 +168,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
 
   const { data: similarCasesData } = useGetSimilarCases({
     caseData,
-    pageSize: 0,
-    pageIndex: 0,
+    perPage: 0,
+    page: 0,
   });
   const { observablesAuthorized: canShowObservableTabs } = useCasesFeatures();
 

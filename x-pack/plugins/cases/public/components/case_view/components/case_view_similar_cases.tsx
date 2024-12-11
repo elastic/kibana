@@ -26,8 +26,8 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
 
   const { data = initialData, isFetching: isLoadingCases } = useGetSimilarCases({
     caseData,
-    pageIndex: pageIndex + 1,
-    pageSize,
+    page: pageIndex + 1,
+    perPage: pageSize,
   });
 
   const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {

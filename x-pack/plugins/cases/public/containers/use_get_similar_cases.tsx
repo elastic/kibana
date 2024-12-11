@@ -23,8 +23,8 @@ export const initialData: CasesSimilarResponseUI = {
 
 export const useGetSimilarCases = (params: {
   caseData: CaseUI;
-  pageSize: number;
-  pageIndex: number;
+  perPage: number;
+  page: number;
 }): UseQueryResult<CasesSimilarResponseUI> => {
   const toasts = useToasts();
 
@@ -33,8 +33,8 @@ export const useGetSimilarCases = (params: {
     ({ signal }) => {
       return getSimilarCases({
         caseId: params.caseData.id,
-        perPage: params.pageSize,
-        page: params.pageIndex,
+        perPage: params.perPage,
+        page: params.page,
         signal,
       });
     },
