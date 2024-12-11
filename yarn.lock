@@ -7132,7 +7132,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-endpoint-exceptions-common@link:packages/kbn-securitysolution-endpoint-exceptions-common":
+"@kbn/securitysolution-endpoint-exceptions-common@link:x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common":
   version "0.0.0"
   uid ""
 
