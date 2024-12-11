@@ -57,6 +57,7 @@ import {
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
+  getCaseDeleteObservableUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -653,7 +654,7 @@ export const deleteObservable = async (
   observableId: string,
   signal?: AbortSignal
 ): Promise<void> => {
-  await KibanaServices.get().http.fetch<Case>(getCaseUpdateObservableUrl(caseId, observableId), {
+  await KibanaServices.get().http.fetch<Case>(getCaseDeleteObservableUrl(caseId, observableId), {
     method: 'DELETE',
     signal,
   });

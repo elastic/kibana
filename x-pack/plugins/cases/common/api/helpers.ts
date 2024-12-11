@@ -103,3 +103,6 @@ export const getCaseUpdateObservableUrl = (id: string, observableId: string): st
     observableId
   );
 };
+
+export const getCaseDeleteObservableUrl = (id: string, observableId: string): string =>
+  getCaseUpdateObservableUrl(id, observableId);
