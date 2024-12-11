@@ -182,7 +182,7 @@ export async function reportFailuresToFile(
             <div>
                 <strong>Owners</strong>:
                 <pre>${escape(
-                  failure?.owners ? failure?.owners : 'Unable to determine code owners'
+                  failure?.owners ? (failure?.owners as string) : 'Unable to determine code owners'
                 )}</pre>
             </div>
             <div>
