@@ -326,6 +326,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
         timelineId,
         timeline?.confirmingNoteId,
         showToggleEventDetailsAction,
+        canCrudNotes,
       ]
     );
 
