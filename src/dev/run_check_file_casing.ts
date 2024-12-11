@@ -29,6 +29,7 @@ run(async ({ log }) => {
       // temporarily allow non-snake case for module names
       // during relocation packages and plugins
       // in the context of Sustainable Kibana Architecture
+      'src/core/packages/**',
       'src/platform/**',
       'x-pack/platform/**',
       'x-pack/solutions/**',
