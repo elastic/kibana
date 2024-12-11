@@ -16,16 +16,16 @@ import type { SimilarCaseUI } from '../../../common/ui/types';
 import * as i18n from './translations';
 import { useSimilarCasesColumns } from './use_similar_cases_columns';
 
-interface SimilarCasesTableProps {
+export interface SimilarCasesTableProps {
   cases: SimilarCaseUI[];
-  isCasesLoading: boolean;
+  isLoading: boolean;
   onChange: EuiBasicTableProps<SimilarCaseUI>['onChange'];
   pagination: Pagination;
 }
 
 export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   cases,
-  isCasesLoading,
+  isLoading,
   onChange,
   pagination,
 }) => {
@@ -40,13 +40,13 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
     []
   );
 
-  return isCasesLoading ? (
+  return isLoading ? (
     <div
       css={css`
         margin-top: ${euiTheme.size.m};
       `}
     >
-      <EuiSkeletonText data-test-subj="initialLoadingPanelSimilarCases" lines={10} />
+      <EuiSkeletonText data-test-subj="similar-cases-table-loading" lines={10} />
     </div>
   ) : (
     <>

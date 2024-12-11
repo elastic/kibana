@@ -52,7 +52,7 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
         <EuiFlexGroup>
           <EuiFlexItem>
             <SimilarCasesTable
-              isCasesLoading={isLoadingCases}
+              isLoading={isLoadingCases}
               cases={data.cases}
               pagination={pagination}
               onChange={tableOnChangeCallback}
