@@ -139,7 +139,7 @@ export class DiscoverEBTManager {
             type: 'keyword',
             _meta: {
               description:
-                'The profile level at which it was resolved i.e. rootLevel, dataSourceLevel, documentLevel',
+                'The context level at which it was resolved i.e. rootLevel, dataSourceLevel, documentLevel',
             },
           },
           [CONTEXTUAL_PROFILE_ID]: {
