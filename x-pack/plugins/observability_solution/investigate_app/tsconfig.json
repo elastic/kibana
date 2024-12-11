@@ -69,5 +69,6 @@
     "@kbn/observability-utils-browser",
     "@kbn/usage-collection-plugin",
     "@kbn/inference-common",
+    "@kbn/std",
   ],
 }

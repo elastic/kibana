@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import dedent from 'dedent';
-import {
-  ALERT_RULE_PARAMETERS,
-  ALERT_START,
-  ALERT_RULE_CATEGORY,
-  ALERT_REASON,
-} from '@kbn/rule-data-utils';
+import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EntityWithSource } from '@kbn/investigation-shared';
+import {
+  ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_PARAMETERS,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
+import dedent from 'dedent';
 import React, { useCallback } from 'react';
+import { useFetchEntities } from '../../../../hooks/use_fetch_entities';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInvestigation } from '../../contexts/investigation_context';
-import { useFetchEntities } from '../../../../hooks/use_fetch_entities';
 
 export interface InvestigationContextualInsight {
   key: string;
@@ -24,8 +25,8 @@ export interface InvestigationContextualInsight {
   data: unknown;
 }
 
-export function AssistantHypothesis({ investigationId }: { investigationId: string }) {
-  const { alert } = useInvestigation();
+export function AssistantHypothesis() {
+  const { alert, investigation } = useInvestigation();
   const {
     dependencies: {
       start: {
@@ -37,7 +38,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
     },
   } = useKibana();
   const { data: entitiesData } = useFetchEntities({
-    investigationId,
+    investigationId: investigation!.id,
     serviceName: alert?.['service.name'] ? `${alert?.['service.name']}` : undefined,
     serviceEnvironment: alert?.['service.environment']
       ? `${alert?.['service.environment']}`
@@ -99,13 +100,15 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
   }
 
   return alert && entitiesData ? (
-    <ObservabilityAIAssistantContextualInsight
-      title={i18n.translate(
-        'xpack.investigateApp.assistantHypothesis.observabilityAIAssistantContextualInsight.helpMeInvestigateThisLabel',
-        { defaultMessage: 'Help me investigate this failure' }
-      )}
-      messages={getAlertContextMessages}
-    />
+    <EuiFlexItem grow={false}>
+      <ObservabilityAIAssistantContextualInsight
+        title={i18n.translate(
+          'xpack.investigateApp.assistantHypothesis.observabilityAIAssistantContextualInsight.helpMeInvestigateThisLabel',
+          { defaultMessage: 'Help me investigate this failure' }
+        )}
+        messages={getAlertContextMessages}
+      />
+    </EuiFlexItem>
   ) : null;
 }
 const formatEntityMetrics = (entity: EntityWithSource): string => {
