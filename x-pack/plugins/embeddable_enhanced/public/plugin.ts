@@ -6,10 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   apiHasUniqueId,
   EmbeddableApiContext,

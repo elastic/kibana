@@ -177,10 +177,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart, deps: EmbeddableStartDependencies): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
-      this.embeddableFactories.set(
-        def.type,
-        defaultEmbeddableFactoryProvider(def)
-      );
+      this.embeddableFactories.set(def.type, defaultEmbeddableFactoryProvider(def));
     });
 
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
@@ -323,10 +320,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     if (!this.embeddableFactories.get(type)) {
       const def = this.embeddableFactoryDefinitions.get(type);
       if (!def) return;
-      this.embeddableFactories.set(
-        type,
-        defaultEmbeddableFactoryProvider(def)
-      );
+      this.embeddableFactories.set(type, defaultEmbeddableFactoryProvider(def));
     }
   };
 }
