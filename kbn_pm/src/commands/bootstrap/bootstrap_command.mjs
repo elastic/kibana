@@ -52,7 +52,7 @@ export const command = {
     --no-validate        By default bootstrap validates the yarn.lock file to check for a handfull of
                           conditions. If you run into issues with this process locally you can disable it by
                           passing this flag.
-    --disable-nx-cache   Prevents NX from using any cached build artifacts. This is useful when you want to
+    --no-cache           Prevents NX from using any cached build artifacts. This is useful when you want to
                           ensure that all packages are built from scratch.
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
@@ -67,7 +67,8 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
-    const disableNXCache = args.getBooleanValue('disable-nx-cache') ?? false;
+    const disableNXCache = !(args.getBooleanValue('cache') ?? true);
+
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 

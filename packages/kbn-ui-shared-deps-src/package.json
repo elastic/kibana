@@ -13,5 +13,12 @@
       "src/**/*"
     ],
     "exclude": []
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": ["{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-src"]
+      }
+    }
   }
 }
