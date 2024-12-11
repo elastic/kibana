@@ -48,8 +48,6 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
     },
   } = useKibanaContextForPlugin();
 
-  const { euiTheme } = useEuiTheme();
-
   const { dismissalStorageKey, message } = pageConfigurations[page];
 
   const [isDismissed, setDismissed] = useLocalStorage(dismissalStorageKey, false);

@@ -16,7 +16,6 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useKibanaContextForPlugin().services;
-  const { euiTheme } = useEuiTheme();
 
   return (
     <LineAnnotation
