@@ -801,7 +801,6 @@ x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-tea
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
-x-pack/packages/observability/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/packages/observability/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
@@ -994,6 +993,7 @@ x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
 x-pack/plugins/watcher @elastic/kibana-management
+x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_solution/entities_data_access @elastic/obs-entities
