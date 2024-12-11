@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 export enum RowHeightMode {
+  single = 'single',
   auto = 'auto',
   custom = 'custom',
 }
