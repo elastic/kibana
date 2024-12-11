@@ -224,15 +224,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             )}
 
             {/* Index mode */}
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
-                defaultMessage="Index mode"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {indexModeLabels[indexMode]}
-            </EuiDescriptionListDescription>
+            {indexMode && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
+                    defaultMessage="Index mode"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {indexModeLabels[indexMode]}
+                </EuiDescriptionListDescription>
+              </>
+            )}
 
             {/* Allow auto create */}
             {isLegacy !== true &&
