@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-console-messages-common",
+  "owner": "@elastic/kibana-core"
+}

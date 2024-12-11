@@ -99,6 +99,10 @@ export class InjectedMetadataService {
       getFeatureFlags: () => {
         return this.state.featureFlags;
       },
+
+      isConsoleMessagesEnabled: () => {
+        return this.state.consoleMessages;
+      },
     };
   }
 }
