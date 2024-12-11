@@ -62,7 +62,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       core: coreContext,
 
       actions: startPlugins.actions,
-
+      auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,
 
       getServerBasePath: () => core.http.basePath.serverBasePath,
@@ -94,7 +94,6 @@ export class RequestContextFactory implements IRequestContextFactory {
             capabilityPath: 'securitySolutionAssistant.*',
           }
         );
-
         return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
           spaceId: getSpaceId(),
           logger: this.logger,

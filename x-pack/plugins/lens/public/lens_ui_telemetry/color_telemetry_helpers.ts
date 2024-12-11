@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ColorMapping, NeutralPalette, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
+import { ColorMapping, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
 import { isEqual } from 'lodash';
+import { KbnPalette } from '@kbn/palettes';
 import { nonNullable } from '../utils';
 
 const COLOR_MAPPING_PREFIX = 'color_mapping_';
@@ -83,8 +84,8 @@ const getUnassignedTermsType = (
           : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'loop'
           ? 'loop'
           : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
-            NeutralPalette.id
-          ? NeutralPalette.id
+            KbnPalette.Neutral
+          ? KbnPalette.Neutral
           : 'palette'
       }`
     : undefined;

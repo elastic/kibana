@@ -20,6 +20,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { IKbnPalette } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
 import { addGradientColorStep } from '../../state/color_mapping';
 import { colorPickerVisibility } from '../../state/ui';
@@ -30,7 +31,7 @@ export function AddStop({
   at,
 }: {
   colorMode: ColorMapping.GradientColorMode;
-  currentPalette: ColorMapping.CategoricalPalette;
+  currentPalette: IKbnPalette;
   at: number;
 }) {
   const euiTheme = useEuiTheme();
