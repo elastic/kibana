@@ -46,13 +46,13 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
       JSON.stringify(serviceEntitySummary, null, 2)
     );
 
-    const eemAPIServiceEntity = await entityManagerClient.searchEntities({
+    const eemAPIServiceEntity = await entityManagerClient.v2.searchEntities({
       start: moment().subtract(15, 'm').toISOString(),
       end: moment().toISOString(),
-      type: 'service',
-      filters: [`${SERVICE_NAME} == "${serviceName}"`],
+      type: 'built_in_services_from_ecs_data',
+      filters: [`${SERVICE_NAME}: "${serviceName}"`],
       limit: 1,
-      metadataFields: [DATA_STREAM_TYPE],
+      metadata_fields: [DATA_STREAM_TYPE],
     });
 
     console.log(
