@@ -277,6 +277,7 @@ export const useHostsTable = () => {
                   <EuiToolTip position="top" content={TABLE_CONTENT_LABEL.activeAlerts}>
                     <EuiBadge
                       iconType="warning"
+                      data-test-subj="hostInventoryAlertsBadgeLink"
                       color="danger"
                       onClick={() => {
                         setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
