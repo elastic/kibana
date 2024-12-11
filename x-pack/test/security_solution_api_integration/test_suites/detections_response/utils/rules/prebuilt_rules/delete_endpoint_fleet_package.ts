@@ -8,13 +8,15 @@
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { ENDPOINT_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import type SuperTest from 'supertest';
+import { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * Delete the endpoint package using fleet API.
  *
  * @param supertest Supertest instance
  */
-export async function deleteEndpointFleetPackage(supertest: SuperTest.Agent) {
+export async function deleteEndpointFleetPackage(supertest: SuperTest.Agent, log: ToolingLog) {
+  log.debug('Checking if endpoint package is installed');
   const resp = await supertest
     .get(epmRouteService.getInfoPath(ENDPOINT_PACKAGE_NAME))
     .set('kbn-xsrf', 'true')
@@ -22,9 +24,12 @@ export async function deleteEndpointFleetPackage(supertest: SuperTest.Agent) {
     .send();
 
   if (resp.status === 200 && resp.body.response.status === 'installed') {
+    log.debug('Deleting endpoint package');
     await supertest
       .delete(epmRouteService.getRemovePath(ENDPOINT_PACKAGE_NAME, resp.body.response.version))
       .set('kbn-xsrf', 'true')
       .send({ force: true });
+
+    log.debug('Deleted endpoint package');
   }
 }
