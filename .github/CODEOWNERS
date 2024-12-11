@@ -474,25 +474,7 @@ packages/kbn-search-index-documents @elastic/search-kibana
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 packages/kbn-search-types @elastic/kibana-data-discovery
 packages/kbn-security-hardening @elastic/kibana-security
-packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
-packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
-packages/kbn-securitysolution-es-utils @elastic/security-detection-engine
-packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
-packages/kbn-securitysolution-exceptions-common @elastic/security-detection-engine
-packages/kbn-securitysolution-hook-utils @elastic/security-detection-engine
-packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engine
-packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
-packages/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
-packages/kbn-securitysolution-io-ts-utils @elastic/security-detection-engine
-packages/kbn-securitysolution-list-api @elastic/security-detection-engine
-packages/kbn-securitysolution-list-constants @elastic/security-detection-engine
-packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
-packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
-packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
-packages/kbn-securitysolution-rules @elastic/security-detection-engine
-packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
-packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/obs-knowledge-team
 packages/kbn-server-route-repository-client @elastic/obs-knowledge-team
@@ -626,6 +608,10 @@ src/platform/packages/shared/kbn-esql-ast @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
+src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
+src/platform/packages/shared/kbn-securitysolution-io-ts-utils @elastic/security-detection-engine
+src/platform/packages/shared/kbn-securitysolution-rules @elastic/security-detection-engine
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
@@ -921,7 +907,6 @@ x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/license_api_guard @elastic/kibana-management
 x-pack/plugins/license_management @elastic/kibana-management
 x-pack/plugins/licensing @elastic/kibana-core
-x-pack/plugins/lists @elastic/security-detection-engine
 x-pack/plugins/logstash @elastic/logstash
 x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/plugins/monitoring @elastic/stack-monitoring
@@ -997,6 +982,21 @@ x-pack/solutions/observability/plugins/observability_solution/entities_data_acce
 x-pack/solutions/observability/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
 x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
+x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-hook-utils @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-list-api @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
+x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine
+x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/test
 x-pack/test_serverless
 x-pack/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
