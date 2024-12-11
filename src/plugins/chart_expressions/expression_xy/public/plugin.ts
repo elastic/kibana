@@ -31,7 +31,7 @@ import {
   extendedAnnotationLayerFunction,
   referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
-import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
+import { GetStartDeps, getXyChartRenderer } from './expression_renderers';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export interface XYPluginStartDependencies {
@@ -71,7 +71,7 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
 
-    const getStartDeps: GetStartDepsFn = async () => {
+    const getStartDeps = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const {
         data,
@@ -100,7 +100,7 @@ export class ExpressionXyPlugin {
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),
         startServices: coreStart,
-      };
+      } satisfies GetStartDeps;
     };
 
     expressions.registerRenderer(getXyChartRenderer({ getStartDeps }));
