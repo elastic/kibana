@@ -55,6 +55,12 @@ export const getThemeSettings = (
 ): Record<string, UiSettingsParams> => {
   const { defaultDarkMode, defaultThemeName } = getThemeInfo(options);
 
+  // Make `theme:name` readonly in serverless unless the theme switcher is enabled
+  let isThemeNameReadonly = options.isServerless;
+  if (Object.hasOwn(options, 'themeSwitcherEnabled')) {
+    isThemeNameReadonly = !options.isThemeSwitcherEnabled;
+  }
+
   return {
     'theme:darkMode': {
       name: i18n.translate('core.ui_settings.params.darkModeTitle', {
@@ -126,9 +132,7 @@ export const getThemeSettings = (
         }),
       },
       value: defaultThemeName,
-      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
-        ? !options.isThemeSwitcherEnabled
-        : true,
+      readonly: isThemeNameReadonly,
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('amsterdam'),
