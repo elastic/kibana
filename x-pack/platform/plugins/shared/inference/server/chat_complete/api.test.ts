@@ -7,7 +7,7 @@
 
 import { getInferenceExecutorMock, getInferenceAdapterMock } from './api.test.mocks';
 
-import { of, Subject } from 'rxjs';
+import { of, Subject, isObservable, toArray, firstValueFrom } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -94,49 +94,133 @@ describe('createChatCompleteApi', () => {
     });
   });
 
-  describe('request cancellation', () => {
-    it('passes the abortSignal down to `inferenceAdapter.chatComplete`', async () => {
-      const abortController = new AbortController();
+  describe('response mode', () => {
+    it('returns a promise resolving with the response', async () => {
+      inferenceAdapter.chatComplete.mockReturnValue(
+        of(chunkEvent('chunk-1'), chunkEvent('chunk-2'))
+      );
 
-      await chatComplete({
+      const response = await chatComplete({
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'question' }],
-        abortSignal: abortController.signal,
       });
 
-      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
-      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith({
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        executor: inferenceExecutor,
-        abortSignal: abortController.signal,
-        logger,
+      expect(response).toEqual({
+        content: 'chunk-1chunk-2',
+        toolCalls: [],
       });
     });
 
-    it('throws an error when the signal is triggered', async () => {
-      const abortController = new AbortController();
+    describe('request cancellation', () => {
+      it('passes the abortSignal down to `inferenceAdapter.chatComplete`', async () => {
+        const abortController = new AbortController();
 
-      const subject = new Subject<ChatCompletionChunkEvent>();
-      inferenceAdapter.chatComplete.mockReturnValue(subject.asObservable());
+        await chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        });
 
-      subject.next(chunkEvent('chunk-1'));
-
-      let caughtError: any;
-
-      const promise = chatComplete({
-        connectorId: 'connectorId',
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        abortSignal: abortController.signal,
-      }).catch((err) => {
-        caughtError = err;
+        expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+        expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith({
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          executor: inferenceExecutor,
+          abortSignal: abortController.signal,
+          logger,
+        });
       });
 
-      abortController.abort();
+      it('throws an error when the signal is triggered', async () => {
+        const abortController = new AbortController();
 
-      await promise;
+        const subject = new Subject<ChatCompletionChunkEvent>();
+        inferenceAdapter.chatComplete.mockReturnValue(subject.asObservable());
 
-      expect(caughtError).toBeInstanceOf(Error);
-      expect(caughtError.message).toContain('Request was aborted');
+        subject.next(chunkEvent('chunk-1'));
+
+        let caughtError: any;
+
+        const promise = chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        }).catch((err) => {
+          caughtError = err;
+        });
+
+        abortController.abort();
+
+        await promise;
+
+        expect(caughtError).toBeInstanceOf(Error);
+        expect(caughtError.message).toContain('Request was aborted');
+      });
+    });
+  });
+
+  describe('stream mode', () => {
+    it('returns an observable of events', async () => {
+      inferenceAdapter.chatComplete.mockReturnValue(
+        of(chunkEvent('chunk-1'), chunkEvent('chunk-2'))
+      );
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+      });
+
+      expect(isObservable(events$)).toBe(true);
+
+      const events = await firstValueFrom(events$.pipe(toArray()));
+      expect(events).toEqual([
+        {
+          content: 'chunk-1',
+          tool_calls: [],
+          type: 'chatCompletionChunk',
+        },
+        {
+          content: 'chunk-2',
+          tool_calls: [],
+          type: 'chatCompletionChunk',
+        },
+        {
+          content: 'chunk-1chunk-2',
+          toolCalls: [],
+          type: 'chatCompletionMessage',
+        },
+      ]);
+    });
+
+    describe('request cancellation', () => {
+      it('throws an error when the signal is triggered', async () => {
+        const abortController = new AbortController();
+
+        const subject = new Subject<ChatCompletionChunkEvent>();
+        inferenceAdapter.chatComplete.mockReturnValue(subject.asObservable());
+
+        subject.next(chunkEvent('chunk-1'));
+
+        let caughtError: any;
+
+        const events$ = chatComplete({
+          stream: true,
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        });
+
+        events$.subscribe({
+          error: (err: any) => {
+            caughtError = err;
+          },
+        });
+
+        abortController.abort();
+
+        expect(caughtError).toBeInstanceOf(Error);
+        expect(caughtError.message).toContain('Request was aborted');
+      });
     });
   });
 });
