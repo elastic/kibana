@@ -22,25 +22,45 @@ import {
 } from './gradient';
 export { logLevelPalette } from './semantic';
 
-export const getPalettes = (darkMode: boolean) =>
-  new KbnPalettes(
-    [
-      elasticPalette,
-      kibana7Palette,
-      kibana4Palette,
-      getNeutralPalette(darkMode),
-      complementaryPalette,
-      coolPalette,
-      grayPalette,
-      greenPalette,
-      redPalette,
-      statusPalette,
-      temperaturePalette,
-      warmPalette,
-      elasticClassicPalette,
-    ],
-    elasticPalette
-  );
+const darkKbnPalettes = new KbnPalettes(
+  [
+    elasticPalette,
+    kibana7Palette,
+    kibana4Palette,
+    getNeutralPalette(true),
+    complementaryPalette,
+    coolPalette,
+    grayPalette,
+    greenPalette,
+    redPalette,
+    statusPalette,
+    temperaturePalette,
+    warmPalette,
+    elasticClassicPalette,
+  ],
+  elasticPalette
+);
+
+const lightKbnPalettes = new KbnPalettes(
+  [
+    elasticPalette,
+    kibana7Palette,
+    kibana4Palette,
+    getNeutralPalette(true),
+    complementaryPalette,
+    coolPalette,
+    grayPalette,
+    greenPalette,
+    redPalette,
+    statusPalette,
+    temperaturePalette,
+    warmPalette,
+    elasticClassicPalette,
+  ],
+  elasticPalette
+);
+
+export const getPalettes = (darkMode: boolean) => (darkMode ? darkKbnPalettes : lightKbnPalettes);
 
 export { elasticPalette } from './categorical';
 export * from './get_kbn_palettes';

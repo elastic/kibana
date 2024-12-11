@@ -9,7 +9,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { getPalettes } from '../palettes';
-import { getLegacyPalettes } from '../palettes/legacy';
+import { getLegacyKbnPalettes } from '../palettes/legacy';
 
 export function useKbnPalettes() {
   const {
@@ -21,5 +21,5 @@ export function useKbnPalettes() {
     return getPalettes(colorMode === 'DARK');
   }
 
-  return getLegacyPalettes(colorMode === 'DARK');
+  return getLegacyKbnPalettes(colorMode === 'DARK');
 }

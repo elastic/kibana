@@ -27,22 +27,43 @@ import {
   warmPalette,
 } from './gradient';
 
-export const getLegacyPalettes = (darkMode: boolean) =>
-  new KbnPalettes(
-    [
-      kibana7Palette,
-      kibana4Palette,
-      kibana7BehindText,
-      getNeutralPalette(darkMode),
-      complementaryPalette,
-      coolPalette,
-      grayPalette,
-      greenPalette,
-      redPalette,
-      statusPalette,
-      temperaturePalette,
-      warmPalette,
-      elasticClassicPalette,
-    ],
-    kibana7Palette
-  );
+const darkLegacyKbnPalettes = new KbnPalettes(
+  [
+    kibana7Palette,
+    kibana4Palette,
+    kibana7BehindText,
+    getNeutralPalette(true),
+    complementaryPalette,
+    coolPalette,
+    grayPalette,
+    greenPalette,
+    redPalette,
+    statusPalette,
+    temperaturePalette,
+    warmPalette,
+    elasticClassicPalette,
+  ],
+  kibana7Palette
+);
+
+const lightLegacyKbnPalettes = new KbnPalettes(
+  [
+    kibana7Palette,
+    kibana4Palette,
+    kibana7BehindText,
+    getNeutralPalette(true),
+    complementaryPalette,
+    coolPalette,
+    grayPalette,
+    greenPalette,
+    redPalette,
+    statusPalette,
+    temperaturePalette,
+    warmPalette,
+    elasticClassicPalette,
+  ],
+  kibana7Palette
+);
+
+export const getLegacyKbnPalettes = (darkMode: boolean) =>
+  darkMode ? darkLegacyKbnPalettes : lightLegacyKbnPalettes;
