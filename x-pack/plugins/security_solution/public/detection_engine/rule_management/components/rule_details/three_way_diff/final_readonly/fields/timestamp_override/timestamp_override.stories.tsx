@@ -22,3 +22,9 @@ export const Default = () => (
     }}
   />
 );
+
+export const EmptyStringValue = () => (
+  <TimestampOverrideReadOnly timestampOverride={{ field_name: '', fallback_disabled: true }} />
+);
+
+export const NoValue = () => <TimestampOverrideReadOnly />;

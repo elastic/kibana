@@ -38,3 +38,5 @@ export const Threshold = () => (
     />
   </ThreeWayDiffStorybookProviders>
 );
+
+export const EmptyValue = () => <AlertSuppressionReadOnly ruleType="query" />;

@@ -19,6 +19,7 @@ import {
   SuppressAlertsByField,
   SuppressAlertsDuration,
 } from '../../../../rule_definition_section';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface AlertSuppressionReadOnlyProps {
   alertSuppression?: AlertSuppression | ThresholdAlertSuppression;
@@ -30,7 +31,16 @@ export function AlertSuppressionReadOnly({
   ruleType,
 }: AlertSuppressionReadOnlyProps) {
   if (!alertSuppression) {
-    return null;
+    return (
+      <EuiDescriptionList
+        listItems={[
+          {
+            title: ruleDetailsI18n.ALERT_SUPPRESSION_FIELD_LABEL,
+            description: <EmptyFieldValuePlaceholder />,
+          },
+        ]}
+      />
+    );
   }
 
   const listItems = [];

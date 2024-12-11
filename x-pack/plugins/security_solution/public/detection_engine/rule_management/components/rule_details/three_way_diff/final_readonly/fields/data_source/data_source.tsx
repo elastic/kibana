@@ -12,6 +12,7 @@ import type { RuleDataSource } from '../../../../../../../../../common/api/detec
 import { Index, DataViewId, DataViewIndexPattern } from '../../../../rule_definition_section';
 import * as ruleDetailsI18n from '../../../../translations';
 import { assertUnreachable } from '../../../../../../../../../common/utility_types';
+import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 
 interface DataSourceReadOnlyProps {
   dataSource?: RuleDataSource;
@@ -19,7 +20,16 @@ interface DataSourceReadOnlyProps {
 
 export function DataSourceReadOnly({ dataSource }: DataSourceReadOnlyProps) {
   if (!dataSource) {
-    return null;
+    return (
+      <EuiDescriptionList
+        listItems={[
+          {
+            title: ruleDetailsI18n.DATA_SOURCE_FIELD_LABEL,
+            description: <EmptyFieldValuePlaceholder />,
+          },
+        ]}
+      />
+    );
   }
 
   if (dataSource.type === DataSourceType.index_patterns) {

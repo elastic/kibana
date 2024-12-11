@@ -17,3 +17,9 @@ export default {
 export const Default = () => (
   <RuleNameOverrideReadOnly ruleNameOverride={{ field_name: 'event.action' }} />
 );
+
+export const EmptyStringValue = () => (
+  <RuleNameOverrideReadOnly ruleNameOverride={{ field_name: '' }} />
+);
+
+export const NoValue = () => <RuleNameOverrideReadOnly />;

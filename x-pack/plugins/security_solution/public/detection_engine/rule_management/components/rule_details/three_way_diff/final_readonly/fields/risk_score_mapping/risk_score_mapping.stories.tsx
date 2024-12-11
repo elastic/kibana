@@ -19,3 +19,5 @@ export const Default = () => (
     riskScoreMapping={[{ field: 'event.risk_score', operator: 'equals', value: '' }]}
   />
 );
+
+export const EmptyArrayValue = () => <RiskScoreMappingReadOnly riskScoreMapping={[]} />;

@@ -18,3 +18,5 @@ export const Default = () => (
     tags={['Elastic', 'Cloud', 'Google Workspace', 'Log Auditing', 'Threat Detection']}
   />
 );
+
+export const EmptyArrayValue = () => <TagsReadOnly tags={[]} />;

@@ -20,3 +20,5 @@ export const Default = () => (
     ]}
   />
 );
+
+export const EmptyArrayValue = () => <RequiredFieldsReadOnly requiredFields={[]} />;

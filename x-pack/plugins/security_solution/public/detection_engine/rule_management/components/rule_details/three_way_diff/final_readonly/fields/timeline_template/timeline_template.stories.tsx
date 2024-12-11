@@ -22,3 +22,5 @@ export const Default = () => (
     }}
   />
 );
+
+export const NoValue = () => <TimelineTemplateReadOnly />;

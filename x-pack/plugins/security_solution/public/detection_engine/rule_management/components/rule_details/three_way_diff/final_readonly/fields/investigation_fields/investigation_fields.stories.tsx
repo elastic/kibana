@@ -21,3 +21,5 @@ export const Default = () => (
     }}
   />
 );
+
+export const NoValue = () => <InvestigationFieldsReadOnly />;

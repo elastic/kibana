@@ -36,3 +36,5 @@ export const DataSourceWithDataView = () => (
     <DataSourceReadOnly dataSource={dataSourceWithDataView} />
   </ThreeWayDiffStorybookProviders>
 );
+
+export const NoValue = () => <DataSourceReadOnly />;

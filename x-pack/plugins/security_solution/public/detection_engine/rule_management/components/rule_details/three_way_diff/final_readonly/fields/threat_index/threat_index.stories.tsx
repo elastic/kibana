@@ -14,3 +14,5 @@ export default {
 };
 
 export const Default = () => <ThreatIndexReadOnly threatIndex={['logs-ti_*', 'logs-defend_*']} />;
+
+export const EmptyArrayValue = () => <ThreatIndexReadOnly threatIndex={[]} />;

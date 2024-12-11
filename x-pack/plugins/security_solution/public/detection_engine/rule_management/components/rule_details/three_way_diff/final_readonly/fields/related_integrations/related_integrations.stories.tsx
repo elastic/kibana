@@ -44,3 +44,5 @@ export const Default = () => (
     </MockRelatedIntegrationsData>
   </ThreeWayDiffStorybookProviders>
 );
+
+export const EmptyArrayValue = () => <RelatedIntegrationsReadOnly relatedIntegrations={[]} />;

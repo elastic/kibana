@@ -15,3 +15,5 @@ export default {
 };
 
 export const Default = () => <ThreatIndicatorPathReadOnly threatIndicatorPath="threat.indicator" />;
+
+export const NoValue = () => <ThreatIndicatorPathReadOnly />;

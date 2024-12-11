@@ -7,16 +7,11 @@
 
 import React from 'react';
 import { SetupReadOnly } from './setup';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 
 export default {
   component: SetupReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/setup',
 };
-
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
 
 export const Default = () => (
   <SetupReadOnly
@@ -25,3 +20,5 @@ export const Default = () => (
     }
   />
 );
+
+export const EmptyStringValue = () => <SetupReadOnly setup="" />;

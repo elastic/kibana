@@ -32,3 +32,5 @@ export const Default = () => (
     ]}
   />
 );
+
+export const EmptyArrayValue = () => <SeverityMappingReadOnly severityMapping={[]} />;
