@@ -259,7 +259,7 @@ function maybeAddAgentlessPermissions(
     return [packagePolicy.id, existing];
   }
   existing.indices!.push({
-    names: ['agentless-*'],
+    names: ['.agentless-*'],
     privileges: AGENTLESS_INDEX_PERMISSIONS,
   });
   return [packagePolicy.id, existing];
