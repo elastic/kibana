@@ -68,7 +68,7 @@ export interface NonPersistedDisplayOptions {
   enableFilters?: boolean;
 }
 
-type EditableSavedSearchAttributes = Partial<
+export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 

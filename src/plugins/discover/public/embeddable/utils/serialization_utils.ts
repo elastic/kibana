@@ -83,7 +83,6 @@ export const serializeState = ({
   serializeTitles,
   serializeTimeRange,
   savedObjectId,
-  discoverServices,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -91,7 +90,6 @@ export const serializeState = ({
   serializeTitles: () => SerializedTitles;
   serializeTimeRange: () => SerializedTimeRange;
   savedObjectId?: string;
-  discoverServices: DiscoverServices;
 }): SerializedPanelState<SearchEmbeddableSerializedState> => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
