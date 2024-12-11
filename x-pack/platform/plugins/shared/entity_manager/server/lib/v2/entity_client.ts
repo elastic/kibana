@@ -22,6 +22,7 @@ import {
   EntityTypeDefinition,
   SearchByType,
   SearchBySources,
+  CountByTypes,
 } from './types';
 import { UnknownEntityType } from './errors/unknown_entity_type';
 import { runESQLQuery } from './run_esql_query';
@@ -132,12 +133,7 @@ export class EntityClient {
     end,
     types = [],
     filters = [],
-  }: {
-    types?: string[];
-    filters?: string[];
-    start: string;
-    end: string;
-  }) {
+  }: CountByTypes) {
     if (types.length === 0) {
       types = (await this.readTypeDefinitions()).map((definition) => definition.id);
     }
