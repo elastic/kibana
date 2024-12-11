@@ -8,13 +8,19 @@
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
 import { isArray, keyBy } from 'lodash';
 import { SLODefinition } from '../domain/models';
+import { IllegalArgumentError } from '../errors';
 import { SLORepository } from './slo_repository';
-import { Pagination, Sort, SummaryResult, SummarySearchClient } from './summary_search_client';
+import {
+  Pagination,
+  Sort,
+  SummaryResult,
+  SummarySearchClient,
+} from './summary_search_client/summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
-const DEFAULT_SIZE = 1000;
-const MAX_PER_PAGE = 5000;
+const DEFAULT_SIZE = 100;
+const MAX_PER_PAGE_OR_SIZE = 5000;
 
 export class FindSLO {
   constructor(
@@ -84,6 +90,9 @@ function toPagination(params: FindSLOParams): Pagination {
 
   if (isCursorBased) {
     const size = Number(params.size);
+    if (!isNaN(size) && size > MAX_PER_PAGE_OR_SIZE) {
+      throw new IllegalArgumentError('perPage limit set to 5000');
+    }
 
     let parsedSearchAfter;
     try {
@@ -94,16 +103,19 @@ function toPagination(params: FindSLOParams): Pagination {
 
     return {
       searchAfter: parsedSearchAfter && isArray(parsedSearchAfter) ? parsedSearchAfter : undefined,
-      size: !isNaN(size) && size > 0 && size <= MAX_PER_PAGE ? size : DEFAULT_SIZE,
+      size: !isNaN(size) && size > 0 ? size : DEFAULT_SIZE,
     };
   }
 
   const page = Number(params.page);
   const perPage = Number(params.perPage);
+  if (!isNaN(perPage) && perPage > MAX_PER_PAGE_OR_SIZE) {
+    throw new IllegalArgumentError('size limit set to 5000');
+  }
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage > 0 && perPage <= MAX_PER_PAGE ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage > 0 ? perPage : DEFAULT_PER_PAGE,
   };
 }
 

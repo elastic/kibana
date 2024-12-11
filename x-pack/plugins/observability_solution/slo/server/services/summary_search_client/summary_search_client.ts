@@ -11,15 +11,15 @@ import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/co
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../domain/models';
-import { toHighPrecision } from '../utils/number';
-import { createEsParams, typedSearch } from '../utils/queries';
-import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
-import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
-import { getFlattenedGroupings } from './utils';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { Groupings, SLODefinition, SLOId, StoredSLOSettings, Summary } from '../../domain/models';
+import { toHighPrecision } from '../../utils/number';
+import { createEsParams, typedSearch } from '../../utils/queries';
+import { getListOfSummaryIndices, getSloSettings } from '../slo_settings';
+import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
+import { getElasticsearchQueryOrThrow, parseStringFilters } from '../transform_generators';
+import { fromRemoteSummaryDocumentToSloDefinition } from '../unsafe_federated/remote_summary_doc_to_slo';
+import { getFlattenedGroupings } from '../utils';
 
 export interface SummaryResult {
   sloId: SLOId;
@@ -79,16 +79,16 @@ function toPaginationQuery(
   };
 }
 
-export type Paginated<T> = CursorPaginated<T> | PagePaginated<T>;
+type Paginated<T> = CursorPaginated<T> | PagePaginated<T>;
 
-export interface CursorPaginated<T> {
+interface CursorPaginated<T> {
   total: number;
   searchAfter?: Array<string | number>;
   size: number;
   results: T[];
 }
 
-export interface PagePaginated<T> {
+interface PagePaginated<T> {
   total: number;
   page: number;
   perPage: number;
