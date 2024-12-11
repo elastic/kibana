@@ -85,6 +85,7 @@ export function initAPIAuthorization(
               operatorPrivilegeIndex !== -1
                 ? {
                     anyRequired: privilege.anyRequired,
+                    // @ts-ignore wrong types for `toSpliced`
                     allRequired: privilege.allRequired?.toSpliced(operatorPrivilegeIndex, 1),
                   }
                 : privilege
