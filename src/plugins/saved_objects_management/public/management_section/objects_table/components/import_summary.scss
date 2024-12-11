@@ -8,11 +8,15 @@
 }
 
 .savedObjectsManagementImportSummary__createdCount {
-  color: $euiColorSuccessText;
+  // color: $euiColorSuccessText;
+  // needed for Borealis
+  color: $euiColorTextSuccess;
 }
 
 .savedObjectsManagementImportSummary__errorCount {
-  color: $euiColorDangerText;
+  // color: $euiColorDangerText;
+  // needed for Borealis
+  color: $euiColorTextDanger;
 }
 
 .savedObjectsManagementImportSummary__icon {
