@@ -20,15 +20,7 @@ jest.mock('../../legacy_shims', () => ({
   },
 }));
 
-const sharePlugin = {
-  url: {
-    locators: {
-      get: () => {
-        return sharePluginMock.createLocator();
-      },
-    },
-  },
-};
+const sharePlugin = sharePluginMock.createStartContract();
 
 const logs = {
   enabled: true,

@@ -12,7 +12,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../../legacy_shims';
 import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 
-export const Reason = ({ reason }) => {
+export interface IReason {
+  indexPatternExists?: boolean;
+  indexPatternInTimeRangeExists?: boolean;
+  typeExists?: boolean;
+  typeExistsAtAnyTime?: boolean;
+  usingStructuredLogs?: boolean;
+  clusterExists?: boolean;
+  nodeExists?: boolean | null;
+  indexExists?: boolean;
+  correctIndexName?: boolean;
+}
+
+export const Reason = ({ reason }: { reason?: IReason }) => {
   const filebeatUrl = Legacy.shims.docLinks.links.filebeat.installation;
   const elasticsearchUrl = Legacy.shims.docLinks.links.filebeat.elasticsearchModule;
   const troubleshootUrl = Legacy.shims.docLinks.links.monitoring.troubleshootKibana;
@@ -36,7 +48,7 @@ export const Reason = ({ reason }) => {
     />
   );
 
-  if (false === reason.indexPatternExists) {
+  if (false === reason?.indexPatternExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noIndexPatternTitle', {
       defaultMessage: 'No log data found',
     });
@@ -56,8 +68,8 @@ export const Reason = ({ reason }) => {
       />
     );
   } else if (
-    false === reason.indexPatternInTimeRangeExists ||
-    (false === reason.typeExists && reason.typeExistsAtAnyTime)
+    false === reason?.indexPatternInTimeRangeExists ||
+    (false === reason?.typeExists && reason.typeExistsAtAnyTime)
   ) {
     title = i18n.translate('xpack.monitoring.logs.reason.noIndexPatternInTimePeriodTitle', {
       defaultMessage: 'No logs for the selected time',
@@ -68,7 +80,7 @@ export const Reason = ({ reason }) => {
         defaultMessage="Use the time filter to adjust your timeframe."
       />
     );
-  } else if (false === reason.typeExists) {
+  } else if (false === reason?.typeExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noTypeTitle', {
       defaultMessage: 'No logs for Elasticsearch',
     });
@@ -87,7 +99,7 @@ export const Reason = ({ reason }) => {
         }}
       />
     );
-  } else if (false === reason.usingStructuredLogs) {
+  } else if (false === reason?.usingStructuredLogs) {
     title = i18n.translate('xpack.monitoring.logs.reason.notUsingStructuredLogsTitle', {
       defaultMessage: 'No structured logs found',
     });
@@ -107,7 +119,7 @@ export const Reason = ({ reason }) => {
         }}
       />
     );
-  } else if (false === reason.clusterExists) {
+  } else if (false === reason?.clusterExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noClusterTitle', {
       defaultMessage: 'No logs for this cluster',
     });
@@ -126,7 +138,7 @@ export const Reason = ({ reason }) => {
         }}
       />
     );
-  } else if (false === reason.nodeExists) {
+  } else if (false === reason?.nodeExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noNodeTitle', {
       defaultMessage: 'No logs for this Elasticsearch node',
     });
@@ -145,7 +157,7 @@ export const Reason = ({ reason }) => {
         }}
       />
     );
-  } else if (false === reason.indexExists) {
+  } else if (false === reason?.indexExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noIndexTitle', {
       defaultMessage: 'No logs for this index',
     });
@@ -164,7 +176,7 @@ export const Reason = ({ reason }) => {
         }}
       />
     );
-  } else if (false === reason.correctIndexName) {
+  } else if (false === reason?.correctIndexName) {
     title = i18n.translate('xpack.monitoring.logs.reason.correctIndexNameTitle', {
       defaultMessage: 'Corrupted filebeat index',
     });
