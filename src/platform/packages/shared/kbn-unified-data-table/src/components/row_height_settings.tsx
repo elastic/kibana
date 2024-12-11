@@ -64,7 +64,8 @@ export function RowHeightSettings({
   ];
 
   useEffect(() => {
-    if (prevRowHeightRef.current === RowHeightMode.auto && rowHeight === RowHeightMode.custom) {
+    // apply the custom row height when switching from auto/single to custom (input stores number separately from an actual row height)
+    if (prevRowHeightRef.current !== RowHeightMode.custom && rowHeight === RowHeightMode.custom) {
       onChangeRowHeightLines(lineCountInput);
     }
     prevRowHeightRef.current = rowHeight;
