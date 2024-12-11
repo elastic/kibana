@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import type {
   AlertDetailsContextualInsight,
   AlertDetailsContextualInsightsHandler,
@@ -32,6 +32,7 @@ import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_r
 import { getApmErrors } from './get_apm_errors';
 
 export const getAlertDetailsContextHandler = (
+  coreStartPromise: Promise<CoreStart>,
   resourcePlugins: APMRouteHandlerResources['plugins'],
   logger: Logger
 ): AlertDetailsContextualInsightsHandler => {
@@ -64,6 +65,7 @@ export const getAlertDetailsContextHandler = (
       },
     };
 
+    const coreStart = await coreStartPromise;
     const [
       apmEventClient,
       annotationsClient,
@@ -81,7 +83,7 @@ export const getAlertDetailsContextHandler = (
       requestContext.core,
       getMlClient(resources),
       getRandomSampler({
-        security: resourcePlugins.security,
+        coreStart,
         probability: 1,
         request: requestContext.request,
       }),

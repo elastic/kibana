@@ -224,7 +224,7 @@ export class APMPlugin
     );
 
     plugins.observability.alertDetailsContextualInsightsService.registerHandler(
-      getAlertDetailsContextHandler(resourcePlugins, logger)
+      getAlertDetailsContextHandler(getCoreStart(), resourcePlugins, logger)
     );
 
     registerDeprecations({
