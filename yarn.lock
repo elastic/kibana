@@ -7108,7 +7108,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-storybook-config@link:x-pack/packages/security-solution/storybook/config":
+"@kbn/security-solution-storybook-config@link:x-pack/solutions/security/packages/storybook/config":
   version "0.0.0"
   uid ""
 
