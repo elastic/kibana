@@ -17,6 +17,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
   const variableType$ = new BehaviorSubject<string>(initialState.variableType ?? '');
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
+  const title$ = new BehaviorSubject<string | undefined>(initialState.title);
 
   const selectedOptionsComparatorFunction = (a: string[], b: string[]) =>
     deepEqual(a ?? [], b ?? []);
@@ -34,10 +35,16 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
       variableName: [variableName$, (next) => variableName$.next(next)],
       variableType: [variableType$, (next) => variableType$.next(next)],
       esqlQuery: [esqlQuery$, (next) => esqlQuery$.next(next)],
+      title: [title$, (next) => title$.next(next)],
     } as StateComparators<
       Pick<
         ESQLControlState,
-        'selectedOptions' | 'availableOptions' | 'variableName' | 'variableType' | 'esqlQuery'
+        | 'selectedOptions'
+        | 'availableOptions'
+        | 'variableName'
+        | 'variableType'
+        | 'esqlQuery'
+        | 'title'
       >
     >,
     hasInitialSelections: initialState.selectedOptions?.length,
@@ -46,6 +53,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     variableName$: variableName$ as PublishingSubject<string>,
     variableType$: variableType$ as PublishingSubject<string>,
     esqlQuery$: esqlQuery$ as PublishingSubject<string>,
+    title$: title$ as PublishingSubject<string | undefined>,
     setSelectedOptions,
   };
 }

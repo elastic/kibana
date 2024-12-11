@@ -53,7 +53,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const api = buildApi(
         {
           ...defaultControl.api,
-          defaultPanelTitle: new BehaviorSubject<string | undefined>(initialState.variableName),
+          defaultPanelTitle: new BehaviorSubject<string | undefined>(initialState.title),
           isEditingEnabled: () => true,
           getTypeDisplayName: () => displayName,
           onEdit: async () => {
@@ -80,6 +80,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 variableName: selections.variableName$.getValue(),
                 variableType: selections.variableType$.getValue(),
                 esqlQuery: selections.esqlQuery$.getValue(),
+                title: selections.title$.getValue(),
               },
               references: [],
             };

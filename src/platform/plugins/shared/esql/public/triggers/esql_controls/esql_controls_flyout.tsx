@@ -26,6 +26,9 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiTextArea,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { tracksOverlays } from '@kbn/presentation-containers';
@@ -182,6 +185,7 @@ export function ESQLControlsFlyout({
 
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
+  const [grow, setGrow] = useState(initialState?.grow ?? false);
 
   // fields control option
   const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
@@ -233,6 +237,10 @@ export function ESQLControlsFlyout({
     setMinimumWidth(optionId);
   }, []);
 
+  const onGrowChange = useCallback((e: EuiSwitchEvent) => {
+    setGrow(e.target.checked);
+  }, []);
+
   const addToESQLVariablesService = useCallback(
     (varName: string, variableValue: string, variableType: EsqlControlType, query: string) => {
       esqlVariablesService.addVariable({
@@ -259,7 +267,7 @@ export function ESQLControlsFlyout({
       variableName: varName,
       variableType: controlType,
       esqlQuery: valuesQuery || queryString,
-      grow: false,
+      grow,
     };
 
     if (panelId && cursorPosition && availableOptions.length && !isControlInEditMode) {
@@ -294,6 +302,7 @@ export function ESQLControlsFlyout({
     selectedFields,
     variableName,
     minimumWidth,
+    grow,
     label,
     panelId,
     cursorPosition,
@@ -652,6 +661,16 @@ export function ESQLControlsFlyout({
             isFullWidth
           />
         </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiSwitch
+          compressed
+          label={i18n.translate('esql.flyout.grow.label', {
+            defaultMessage: 'Expand width to fit available space',
+          })}
+          color="primary"
+          checked={grow ?? false}
+          onChange={(e) => onGrowChange(e)}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

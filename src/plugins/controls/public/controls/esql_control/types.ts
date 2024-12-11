@@ -15,9 +15,7 @@ interface PublishesSelectedOptions {
   selectedOptions$: PublishingSubject<string[]>;
 }
 
-export interface ESQLControlState
-  extends DefaultControlState,
-    Omit<ControlState, 'width' | 'title'> {}
+export interface ESQLControlState extends DefaultControlState, Omit<ControlState, 'width'> {}
 
 export type ESQLControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'defaultPanelTitle'> &
