@@ -36,7 +36,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     stream,
     retry,
   }: DefaultOutputOptions): OutputCompositeResponse<string, ToolSchema | undefined, boolean> {
-    if (stream && retry?.onValidationError) {
+    if (stream && retry !== undefined) {
       throw new Error(`Retry options are not supported in streaming mode`);
     }
 
@@ -104,6 +104,9 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
         },
         (error: Error) => {
           if (isToolValidationError(error) && retry?.onValidationError) {
+            const retriesLeft =
+              typeof retry.onValidationError === 'number' ? retry.onValidationError : 1;
+
             return callOutputApi({
               id,
               connectorId,
@@ -130,7 +133,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
               functionCalling,
               stream: false,
               retry: {
-                onValidationError: Number(retry.onValidationError) || false,
+                onValidationError: retriesLeft - 1,
               },
             }) as OutputCompositeResponse<string, ToolSchema | undefined, false>;
           }
