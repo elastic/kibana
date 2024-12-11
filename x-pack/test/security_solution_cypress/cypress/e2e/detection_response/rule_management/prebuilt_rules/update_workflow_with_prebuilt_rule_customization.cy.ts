@@ -199,60 +199,186 @@ describe(
         // Verify only rules with non-customized rule sources are displayed
         assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
         cy.get(patchedName).should('not.exist');
-        it('should upgrade prebuilt rules without conflicts one by one', () => {
-          cy.get(
-            getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_2['security-rule'].rule_id)
-          ).click();
-          // Wait for request to complete
-          assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
+      });
 
-          assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
-          assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
-        });
+      it('should upgrade prebuilt rules without conflicts one by one', () => {
+        cy.get(
+          getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_2['security-rule'].rule_id)
+        ).click();
+        // Wait for request to complete
+        assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
 
-        it('should disable individual upgrade button for prebuilt rules with conflicts one by one', () => {
-          // Button should be disabled because of conflicts
-          expect(
-            cy
-              .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id))
-              .should('be.disabled')
-          );
-        });
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
+      });
 
-        it('should warn about rules with conflicts not being updated when multiple rules are individually selected for update', () => {
-          selectRulesByName([patchedName, OUTDATED_RULE_2['security-rule'].name]);
-          cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
-          assertRuleUpgradeConflictsModalShown();
-          clickUpgradeRuleWithoutConflicts();
-          // Assert that only rules without conflicts are updated and the other remains in the table
-          assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
-          assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
-          assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
-          cy.get(RULES_UPDATES_TABLE).contains(patchedName);
-        });
+      it('should disable individual upgrade button for prebuilt rules with conflicts', () => {
+        // Button should be disabled because of conflicts
+        expect(
+          cy
+            .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id))
+            .should('be.disabled')
+        );
+      });
 
-        it('should warn about rules with conflicts not being updated when all rules in page are selected', () => {
-          cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
-          cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
-          assertRuleUpgradeConflictsModalShown();
-          clickUpgradeRuleWithoutConflicts();
-          // Assert that only rules without conflicts are updated and the other remains in the table
-          assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
-          assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
-          assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
-          cy.get(RULES_UPDATES_TABLE).contains(patchedName);
-        });
+      it('should warn about rules with conflicts not being updated when multiple rules are individually selected for update', () => {
+        selectRulesByName([patchedName, OUTDATED_RULE_2['security-rule'].name]);
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
+        assertRuleUpgradeConflictsModalShown();
+        clickUpgradeRuleWithoutConflicts();
+        // Assert that only rules without conflicts are updated and the other remains in the table
+        assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
+        cy.get(RULES_UPDATES_TABLE).contains(patchedName);
+      });
 
-        it('should warn about rules with conflicts not being updated when all rules with available upgrades are upgraded at once', () => {
-          cy.get(UPGRADE_ALL_RULES_BUTTON).click();
-          assertRuleUpgradeConflictsModalShown();
-          clickUpgradeRuleWithoutConflicts();
-          // Assert that only rules without conflicts are updated and the other remains in the table
-          assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
-          assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
-          assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
-          cy.get(RULES_UPDATES_TABLE).contains(patchedName);
-        });
+      it('should warn about rules with conflicts not being updated when all rules in page are selected', () => {
+        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
+        assertRuleUpgradeConflictsModalShown();
+        clickUpgradeRuleWithoutConflicts();
+        // Assert that only rules without conflicts are updated and the other remains in the table
+        assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
+        cy.get(RULES_UPDATES_TABLE).contains(patchedName);
+      });
+
+      it('should warn about rules with conflicts not being updated when all rules with available upgrades are upgraded at once', () => {
+        cy.get(UPGRADE_ALL_RULES_BUTTON).click();
+        assertRuleUpgradeConflictsModalShown();
+        clickUpgradeRuleWithoutConflicts();
+        // Assert that only rules without conflicts are updated and the other remains in the table
+        assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
+        cy.get(RULES_UPDATES_TABLE).contains(patchedName);
+      });
+    });
+
+    describe('Upgrade of mixed prebuilt rules with and without conflicts', () => {
+      const RULE_1_ID = 'rule_1';
+      const RULE_2_ID = 'rule_2';
+      const RULE_3_ID = 'rule_3';
+      const OUTDATED_RULE_1 = createRuleAssetSavedObject({
+        name: 'Outdated rule 1',
+        rule_id: RULE_1_ID,
+        version: 1,
+      });
+      const UPDATED_RULE_1 = createRuleAssetSavedObject({
+        name: 'Updated rule 1',
+        rule_id: RULE_1_ID,
+        version: 2,
+      });
+      const OUTDATED_RULE_2 = createRuleAssetSavedObject({
+        name: 'Outdated rule 2',
+        rule_id: RULE_2_ID,
+        version: 1,
+      });
+      const UPDATED_RULE_2 = createRuleAssetSavedObject({
+        name: 'Updated rule 2',
+        rule_id: RULE_2_ID,
+        version: 2,
+      });
+      const OUTDATED_RULE_3 = createRuleAssetSavedObject({
+        name: 'Outdated rule 3',
+        rule_id: RULE_3_ID,
+        version: 1,
+      });
+      const UPDATED_RULE_3 = createRuleAssetSavedObject({
+        name: 'Updated rule 3',
+        rule_id: RULE_3_ID,
+        version: 2,
+      });
+      const patchedName = 'Conflicting rule name';
+
+      beforeEach(() => {
+        login();
+        resetRulesTableState();
+        deleteAlertsAndRules();
+        cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform').as(
+          'updatePrebuiltRules'
+        );
+
+        // Create and install outdated rules
+        createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2, OUTDATED_RULE_3]);
+
+        // Modify one rule to create a conflict
+        patchRule(OUTDATED_RULE_1['security-rule'].rule_id, { name: patchedName });
+
+        // Install updated rule assets
+        installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2, UPDATED_RULE_3]);
+
+        visitRulesManagementTable();
+        clickRuleUpdatesTab();
+      });
+
+      it('should warn about rules with conflicts while upgrading a mix of selected rules', () => {
+        selectRulesByName([
+          patchedName, // Rule with conflict
+          OUTDATED_RULE_2['security-rule'].name, // Rule without conflict
+          OUTDATED_RULE_3['security-rule'].name, // Rule without conflict
+        ]);
+        cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
+        assertRuleUpgradeConflictsModalShown();
+        clickUpgradeRuleWithoutConflicts();
+
+        // Assert only rules without conflicts are upgraded
+        assertUpgradeRequestIsComplete([OUTDATED_RULE_2, OUTDATED_RULE_3]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2, OUTDATED_RULE_3]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2, OUTDATED_RULE_3]);
+
+        // Verify conflicting rule remains in the table
+        cy.get(RULES_UPDATES_TABLE).contains(patchedName);
+      });
+
+      it('should warn about rules with conflicts while upgrading all rules with available updates', () => {
+        cy.get(UPGRADE_ALL_RULES_BUTTON).click();
+        assertRuleUpgradeConflictsModalShown();
+        clickUpgradeRuleWithoutConflicts();
+
+        // Assert only rules without conflicts are upgraded
+        assertUpgradeRequestIsComplete([OUTDATED_RULE_2, OUTDATED_RULE_3]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2, OUTDATED_RULE_3]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2, OUTDATED_RULE_3]);
+
+        // Verify conflicting rule remains in the table
+        cy.get(RULES_UPDATES_TABLE).contains(patchedName);
+      });
+
+      it('should allow upgrading rules without conflicts one by one when mixed with conflicts', () => {
+        cy.get(
+          getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_2['security-rule'].rule_id)
+        ).click();
+        assertUpgradeRequestIsComplete([OUTDATED_RULE_2]);
+        assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_2]);
+        assertRulesNotPresentInRuleUpdatesTable([OUTDATED_RULE_2]);
+
+        // Verify conflicting rule and another un-upgraded rule remain
+        cy.get(RULES_UPDATES_TABLE).contains(patchedName);
+        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_3]);
+      });
+
+      it('should disable the upgrade button for conflicting rules while allowing upgrades of others', () => {
+        // Verify the conflicting rule's upgrade button is disabled
+        expect(
+          cy
+            .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_1['security-rule'].rule_id))
+            .should('be.disabled')
+        );
+
+        // Verify non-conflicting rules' upgrade buttons are enabled
+        expect(
+          cy
+            .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_2['security-rule'].rule_id))
+            .should('not.be.disabled')
+        );
+        expect(
+          cy
+            .get(getUpgradeSingleRuleButtonByRuleId(OUTDATED_RULE_3['security-rule'].rule_id))
+            .should('not.be.disabled')
+        );
       });
     });
   }
