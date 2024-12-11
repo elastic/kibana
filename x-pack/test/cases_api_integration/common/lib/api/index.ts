@@ -25,7 +25,6 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
-  INTERNAL_CASE_OBSERVABLES_PATCH_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
@@ -55,7 +54,11 @@ import {
   SimilarCasesSearchRequest,
   CasesSimilarResponse,
 } from '@kbn/cases-plugin/common/types/api';
-import { getCaseCreateObservableUrl } from '@kbn/cases-plugin/common/api';
+import {
+  getCaseCreateObservableUrl,
+  getCaseUpdateObservableUrl,
+  getCaseDeleteObservableUrl,
+} from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -903,10 +906,7 @@ export const updateObservable = async ({
   observableId: string;
 }): Promise<Case> => {
   const apiCall = supertest.patch(
-    `${getSpaceUrlPrefix(auth?.space)}${INTERNAL_CASE_OBSERVABLES_PATCH_URL.replace(
-      '{case_id}',
-      caseId
-    ).replace('{observable_id}', observableId)}`
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseUpdateObservableUrl(caseId, observableId)}`
   );
   void setupAuth({ apiCall, headers, auth });
 
@@ -936,10 +936,7 @@ export const deleteObservable = async ({
   observableId: string;
 }): Promise<void> => {
   const apiCall = supertest.delete(
-    `${getSpaceUrlPrefix(auth?.space)}${INTERNAL_CASE_OBSERVABLES_PATCH_URL.replace(
-      '{case_id}',
-      caseId
-    ).replace('{observable_id}', observableId)}`
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseDeleteObservableUrl(caseId, observableId)}`
   );
   void setupAuth({ apiCall, headers, auth });
 
