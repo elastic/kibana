@@ -32,39 +32,28 @@ exports[`MonitorBarSeries component renders if the data series is present 1`] = 
 `;
 
 exports[`MonitorBarSeries component shallow renders a series when there are down items 1`] = `
-<ContextProvider
-  value={
+<Router
+  history={
     Object {
-      "history": Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
           "hash": "",
           "key": "TestKeyForTesting",
           "pathname": "/",
           "search": "",
           "state": undefined,
         },
-        "push": [Function],
-        "replace": [Function],
-      },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
       "location": Object {
         "hash": "",
         "key": "TestKeyForTesting",
@@ -72,74 +61,32 @@ exports[`MonitorBarSeries component shallow renders a series when there are down
         "search": "",
         "state": undefined,
       },
-      "match": Object {
-        "isExact": true,
-        "params": Object {},
-        "path": "/",
-        "url": "/",
-      },
-      "staticContext": undefined,
+      "push": [Function],
+      "replace": [Function],
     }
   }
 >
-  <ContextProvider
-    value={
-      Object {
-        "action": "POP",
-        "block": [Function],
-        "canGo": [Function],
-        "createHref": [Function],
-        "entries": Array [
-          Object {
-            "hash": "",
-            "key": "TestKeyForTesting",
-            "pathname": "/",
-            "search": "",
-            "state": undefined,
-          },
-        ],
-        "go": [Function],
-        "goBack": [Function],
-        "goForward": [Function],
-        "index": 0,
-        "length": 1,
-        "listen": [Function],
-        "location": Object {
-          "hash": "",
-          "key": "TestKeyForTesting",
-          "pathname": "/",
-          "search": "",
-          "state": undefined,
+  <MonitorBarSeries
+    histogramSeries={
+      Array [
+        Object {
+          "down": 1,
+          "timestamp": 124,
+          "up": 0,
         },
-        "push": [Function],
-        "replace": [Function],
-      }
+        Object {
+          "down": 1,
+          "timestamp": 125,
+          "up": 0,
+        },
+        Object {
+          "down": 1,
+          "timestamp": 126,
+          "up": 0,
+        },
+      ]
     }
-  >
-    <CompatRouter>
-      <MonitorBarSeries
-        histogramSeries={
-          Array [
-            Object {
-              "down": 1,
-              "timestamp": 124,
-              "up": 0,
-            },
-            Object {
-              "down": 1,
-              "timestamp": 125,
-              "up": 0,
-            },
-            Object {
-              "down": 1,
-              "timestamp": 126,
-              "up": 0,
-            },
-          ]
-        }
-        minInterval={10}
-      />
-    </CompatRouter>
-  </ContextProvider>
-</ContextProvider>
+    minInterval={10}
+  />
+</Router>
 `;

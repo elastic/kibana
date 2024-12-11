@@ -13,7 +13,15 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ChartWrapper } from './chart_wrapper';
 import { SnapshotHeading } from '../../overview/snapshot/snapshot_heading';
 import { DonutChart } from './donut_chart';
+import { mockCore } from '../../../lib/helper/rtl_helpers';
 const SNAPSHOT_CHART_HEIGHT = 144;
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: jest.fn().mockImplementation(() => ({
+    services: mockCore(),
+  })),
+}));
+
 describe('ChartWrapper component', () => {
   it('renders the component with loading false', () => {
     const component = shallowWithIntl(
