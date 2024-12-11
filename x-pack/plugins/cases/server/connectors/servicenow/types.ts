@@ -31,7 +31,7 @@ export type AlertFieldMappingAndValues = Record<
 >;
 
 // ServiceNow ITSM
-export interface ServiceNowSIRFieldsTypeConnector extends CorrelationValues {
+export interface ServiceNowITSMFieldsTypeConnector extends CorrelationValues {
   impact: string | null;
   severity: string | null;
   urgency: string | null;
@@ -40,10 +40,10 @@ export interface ServiceNowSIRFieldsTypeConnector extends CorrelationValues {
   additional_fields: string | null;
 }
 
-export type ServiceNowITSMCasesConnector = ICasesConnector<ServiceNowSIRFieldsTypeConnector>;
-export type ServiceNowITSMFormat = ICasesConnector<ServiceNowSIRFieldsTypeConnector>['format'];
+export type ServiceNowITSMCasesConnector = ICasesConnector<ServiceNowITSMFieldsTypeConnector>;
+export type ServiceNowITSMFormat = ICasesConnector<ServiceNowITSMFieldsTypeConnector>['format'];
 export type ServiceNowITSMGetMapping =
-  ICasesConnector<ServiceNowSIRFieldsTypeConnector>['getMapping'];
+  ICasesConnector<ServiceNowITSMFieldsTypeConnector>['getMapping'];
 
 // ServiceNow SIR
 export type ServiceNowSIRCasesConnector = ICasesConnector<ServiceNowSIRFieldsType>;

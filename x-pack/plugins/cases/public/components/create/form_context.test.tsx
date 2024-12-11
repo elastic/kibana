@@ -78,14 +78,6 @@ jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../app/use_available_owners');
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/components', () => ({
-  ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/components'),
-  /*
-   * This component causes the tests to timeout.
-   * Since we are not explicitly testing it here we mock it.
-   */
-  JsonEditorField: () => <input value="Generic JsonEditorField" onChange={() => {}} />,
-}));
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;

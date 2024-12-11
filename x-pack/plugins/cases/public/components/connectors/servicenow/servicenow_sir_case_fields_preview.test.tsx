@@ -55,6 +55,7 @@ describe('ServiceNowITSM Fields: Preview', () => {
     expect(getByText('Priority: 2 - High')).toBeInTheDocument();
     expect(getByText('Category: Denial of Service')).toBeInTheDocument();
     expect(getByText('Subcategory: Inbound or outbound')).toBeInTheDocument();
-    expect(getByText('Additional Fields: {"foo": "bar"}')).toBeInTheDocument();
+    expect(getByText('Additional Fields:')).toBeInTheDocument();
+    expect(getByText('{"foo": "bar"}')).toBeInTheDocument();
   });
 });

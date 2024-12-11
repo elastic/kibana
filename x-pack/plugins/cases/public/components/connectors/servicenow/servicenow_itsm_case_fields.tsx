@@ -12,7 +12,8 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { JsonEditorField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { JsonFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
 import * as i18n from './translations';
 
@@ -210,7 +211,7 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
           <EuiFlexItem>
             <UseField
               path="fields.additionalFields"
-              component={JsonEditorField}
+              component={JsonFieldWrapper}
               config={{
                 label: i18n.ADDITIONAL_FIELDS_LABEL,
                 validations: [
@@ -220,11 +221,15 @@ const ServiceNowITSMFieldsComponent: React.FunctionComponent<ConnectorFieldsProp
                 ],
               }}
               componentProps={{
-                'data-test-subj': 'additionalFieldsEditor',
-                codeEditorProps: {
+                euiCodeEditorProps: {
                   fullWidth: true,
                   height: '200px',
+                  options: {
+                    fontSize: '12px',
+                    renderValidationDecorations: 'off',
+                  },
                 },
+                dataTestSubj: 'additionalFieldsEditor',
               }}
             />
           </EuiFlexItem>

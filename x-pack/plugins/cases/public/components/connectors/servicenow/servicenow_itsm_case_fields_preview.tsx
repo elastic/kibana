@@ -140,6 +140,7 @@ const ServiceNowITSMFieldsPreviewComponent: React.FunctionComponent<
             {
               title: i18n.ADDITIONAL_FIELDS_LABEL,
               description: additionalFields,
+              displayAsCodeBlock: true,
             },
           ]
         : []),

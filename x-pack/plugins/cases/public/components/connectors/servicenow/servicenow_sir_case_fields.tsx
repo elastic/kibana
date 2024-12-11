@@ -13,11 +13,8 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  CheckBoxField,
-  JsonEditorField,
-  SelectField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { CheckBoxField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { JsonFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ServiceNowSIRFieldsType } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
@@ -232,7 +229,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
           <EuiFlexItem>
             <UseField
               path="fields.additionalFields"
-              component={JsonEditorField}
+              component={JsonFieldWrapper}
               config={{
                 label: i18n.ADDITIONAL_FIELDS_LABEL,
                 validations: [
@@ -242,11 +239,15 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
                 ],
               }}
               componentProps={{
-                'data-test-subj': 'additionalFieldsEditor',
-                codeEditorProps: {
+                euiCodeEditorProps: {
                   fullWidth: true,
                   height: '200px',
+                  options: {
+                    fontSize: '12px',
+                    renderValidationDecorations: 'off',
+                  },
                 },
+                dataTestSubj: 'additionalFieldsEditor',
               }}
             />
           </EuiFlexItem>
