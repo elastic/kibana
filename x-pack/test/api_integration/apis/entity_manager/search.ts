@@ -545,6 +545,118 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
+    it('resolves entities with multiple identity fields across sources', async () => {
+      const now = moment();
+
+      cleanup = await Promise.all([
+        createIndexWithDocuments(esClient, {
+          index: 'index-1-with-cars',
+          properties: {
+            '@timestamp': { type: 'date' },
+            'car.brand': { type: 'keyword' },
+            'car.model': { type: 'keyword' },
+            'car.color': { type: 'keyword' },
+          },
+          documents: [
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              'car.brand': 'Fiat',
+              'car.model': 'Multipla',
+              'car.color': 'cyan',
+            },
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              'car.brand': 'Citroen',
+              'car.model': 'ZX break',
+              'car.color': 'white',
+            },
+          ],
+        }),
+
+        createIndexWithDocuments(esClient, {
+          index: 'index-2-with-cars',
+          properties: {
+            '@timestamp': { type: 'date' },
+            car_brand: { type: 'keyword' },
+            car_model: { type: 'keyword' },
+            'car.color': { type: 'keyword' },
+          },
+          documents: [
+            {
+              '@timestamp': moment(now).subtract(2, 'minute').toISOString(),
+              car_brand: 'Fiat',
+              car_model: 'Multipla',
+              'car.color': 'purple',
+            },
+            {
+              '@timestamp': moment(now).subtract(1, 'minute').toISOString(),
+              car_brand: 'Citroen',
+              car_model: 'ZX break',
+              'car.color': 'orange',
+            },
+          ],
+        }),
+      ]);
+
+      await Promise.all([
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'source-1-with-cars',
+            type_id: 'most-refined-cars',
+            index_patterns: ['index-1-with-cars'],
+            identity_fields: ['car.brand', 'car.model'],
+            metadata_fields: [],
+            filters: [],
+            timestamp_field: '@timestamp',
+          },
+        }),
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'source-2-with-cars',
+            type_id: 'most-refined-cars',
+            index_patterns: ['index-2-with-cars'],
+            identity_fields: ['car_brand', 'car_model'],
+            metadata_fields: [],
+            filters: [],
+            timestamp_field: '@timestamp',
+          },
+        }),
+      ]);
+
+      const { entities, errors } = await searchEntities(supertest, {
+        type: 'most-refined-cars',
+        start: moment(now).subtract(5, 'minute').toISOString(),
+        end: moment(now).toISOString(),
+        metadata_fields: ['car.color'],
+      });
+
+      expect(errors).toEqual([]);
+      expect(entities).toEqual([
+        {
+          'entity.last_seen_timestamp': moment(now).subtract(1, 'minute').toISOString(),
+          'entity.id': 'Citroen:ZX break',
+          'entity.display_name': 'Citroen:ZX break',
+          'entity.type': 'most-refined-cars',
+          'car.brand': 'Citroen',
+          'car.model': 'ZX break',
+          car_brand: 'Citroen',
+          car_model: 'ZX break',
+          'car.color': expect.arrayContaining(['white', 'orange']),
+        },
+        {
+          'entity.last_seen_timestamp': moment(now).subtract(2, 'minute').toISOString(),
+          'entity.id': 'Fiat:Multipla',
+          'entity.display_name': 'Fiat:Multipla',
+          'entity.type': 'most-refined-cars',
+          'car.brand': 'Fiat',
+          'car.model': 'Multipla',
+          car_brand: 'Fiat',
+          car_model: 'Multipla',
+          'car.color': expect.arrayContaining(['cyan', 'purple']),
+        },
+      ]);
+    });
+
     it('casts conflicting mappings to keywords', async () => {
       cleanup = await Promise.all([
         await createIndexWithDocuments(esClient, {
