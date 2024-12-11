@@ -102,11 +102,11 @@ describe('load from lib', () => {
     it('works with a non-hash route', () => {
       mockWindow.location = {
         ...mockWindow.location,
-        pathname: '/foo/app/enterprise_search/overview',
+        pathname: '/foo/app/elasticsearch/overview',
       };
       const codeSnippet = 'GET /_stats';
       const expectedUrl =
-        'https://my-kibana.elastic.co/foo/app/enterprise_search/overview?load_from=data%3Atext%2Fplain%2COIUQKgBA9A%2BgzgFwIYLkA';
+        'https://my-kibana.elastic.co/foo/app/elasticsearch/overview?load_from=data%3Atext%2Fplain%2COIUQKgBA9A%2BgzgFwIYLkA';
 
       setLoadFromParameter(codeSnippet);
       expect(mockWindow.history.pushState).toHaveBeenCalledTimes(1);
@@ -121,12 +121,12 @@ describe('load from lib', () => {
     it('works with a non-hash route and other params', () => {
       mockWindow.location = {
         ...mockWindow.location,
-        pathname: '/foo/app/enterprise_search/overview',
+        pathname: '/foo/app/elasticsearch/overview',
         search: '?foo=bar',
       };
       const codeSnippet = 'GET /_stats';
       const expectedUrl =
-        'https://my-kibana.elastic.co/foo/app/enterprise_search/overview?foo=bar&load_from=data%3Atext%2Fplain%2COIUQKgBA9A%2BgzgFwIYLkA';
+        'https://my-kibana.elastic.co/foo/app/elasticsearch/overview?foo=bar&load_from=data%3Atext%2Fplain%2COIUQKgBA9A%2BgzgFwIYLkA';
 
       setLoadFromParameter(codeSnippet);
       expect(mockWindow.history.pushState).toHaveBeenCalledTimes(1);

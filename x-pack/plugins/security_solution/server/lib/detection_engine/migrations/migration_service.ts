@@ -22,6 +22,7 @@ export interface CreateParams {
 export interface FinalizeParams {
   signalsAlias: string;
   migration: SignalsMigrationSO;
+  legacySiemSignalsAlias: string;
 }
 
 export interface DeleteParams {
@@ -59,13 +60,14 @@ export const signalsMigrationService = ({
         username,
       });
     },
-    finalize: ({ migration, signalsAlias }) =>
+    finalize: ({ migration, signalsAlias, legacySiemSignalsAlias }) =>
       finalizeMigration({
         esClient,
         migration,
         signalsAlias,
         soClient,
         username,
+        legacySiemSignalsAlias,
       }),
     delete: ({ migration, signalsAlias }) =>
       deleteMigration({
