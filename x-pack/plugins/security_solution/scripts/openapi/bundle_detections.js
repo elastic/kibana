@@ -20,7 +20,10 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['serverless'],
-      prototypeDocument: join(ROOT, 'scripts/openapi/bundle_detections_info/detections_serverless.info.yaml'),
+      prototypeDocument: join(
+        ROOT,
+        'scripts/openapi/bundle_detections_info/detections_serverless.info.yaml'
+      ),
     },
   });
 
@@ -32,7 +35,10 @@ const ROOT = resolve(__dirname, '../..');
     ),
     options: {
       includeLabels: ['ess'],
-      prototypeDocument: join(ROOT, 'scripts/openapi/bundle_detections_info/detections_ess.info.yaml'),
+      prototypeDocument: join(
+        ROOT,
+        'scripts/openapi/bundle_detections_info/detections_ess.info.yaml'
+      ),
     },
   });
 })();
