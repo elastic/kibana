@@ -3,7 +3,7 @@ info:
   title: Integration Assistatnt Categorization API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/categorization:
+  /internal/automatic_import/categorization:
     post:
       summary: Builds Categorization processors based on the samples
       operationId: Categorization

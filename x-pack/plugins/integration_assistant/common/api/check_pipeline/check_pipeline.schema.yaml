@@ -3,7 +3,7 @@ info:
   title: Integration Assistatnt Check Pipeline API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/pipeline:
+  /internal/automatic_import/pipeline:
     post:
       summary: Checks if the pipeline is valid for the given samples
       operationId: CheckPipeline

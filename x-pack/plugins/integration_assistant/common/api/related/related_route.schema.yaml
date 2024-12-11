@@ -3,7 +3,7 @@ info:
   title: Integration Assistatnt Related API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/related:
+  /internal/automatic_import/related:
     post:
       summary: Builds related.* fields for integration with the given input samples
       operationId: Related
