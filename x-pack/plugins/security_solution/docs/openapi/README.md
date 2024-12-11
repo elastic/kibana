@@ -32,8 +32,8 @@ Security Solution has multiple API domains scattered across Kibana. Currently th
 
 - Security Endpoint Exceptions
 
-  - Bundling script: `packages/kbn-securitysolution-endpoint-exceptions-common/scripts/openapi_bundle.js`
-  - Bundles location: `packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/{ess|serverless}`
+  - Bundling script: `x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common/scripts/openapi_bundle.js`
+  - Bundles location: `x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/{ess|serverless}`
 
 - Security Endpoint Management
 
