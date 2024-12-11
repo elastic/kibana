@@ -70,7 +70,7 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
     };
   });
 
-  createReadme(packageDir, integration.name, fieldsPerDatastream);
+  createReadme(packageDir, integration.name, integration.dataStreams, fieldsPerDatastream);
   const zipBuffer = await createZipArchive(integration, workingDir, packageDirectoryName);
 
   removeDirSync(workingDir);
