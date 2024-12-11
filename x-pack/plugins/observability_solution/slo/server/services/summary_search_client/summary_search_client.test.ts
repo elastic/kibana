@@ -14,7 +14,8 @@ import {
   aHitFromTempSummaryIndex,
   aSummaryDocument,
 } from '../fixtures/summary_search_document';
-import { DefaultSummarySearchClient, Sort, SummarySearchClient } from './summary_search_client';
+import { DefaultSummarySearchClient } from './summary_search_client';
+import type { Sort, SummarySearchClient } from './types';
 
 const defaultSort: Sort = {
   field: 'sli_value',
