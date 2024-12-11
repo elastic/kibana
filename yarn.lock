@@ -6568,7 +6568,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/painless-lab-plugin@link:x-pack/plugins/painless_lab":
+"@kbn/painless-lab-plugin@link:x-pack/platform/plugins/private/painless_lab":
   version "0.0.0"
   uid ""
 
