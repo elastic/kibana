@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListIndex
       x-codegen-enabled: true
-      summary: Get status of list data streams 
+      summary: Get status of list data streams
       description: Verify that `.lists` and `.items` data streams exist.
       responses:
         200:
@@ -29,29 +29,29 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
-                  - $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                  - $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
         404:
           description: List data stream(s) not found response
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
-                $ref: '../../../../../../kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+                $ref: '../../../../../../../packages/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
