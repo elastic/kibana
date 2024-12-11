@@ -257,6 +257,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Defend Insights feature
    */
   defendInsights: false,
+
+  /**
+   * Enables flyout history and new preview navigation
+   */
+  newExpandableFlyoutNavigationEnabled: false,
+
+  /**
+   * Enables CrowdStrike's RunScript RTR command
+   */
+
+  crowdstrikeRunScriptEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
