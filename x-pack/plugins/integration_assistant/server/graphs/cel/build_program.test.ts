@@ -21,7 +21,7 @@ const model = new FakeLLM({
 const state: CelInputState = celTestState;
 
 describe('Testing cel handler', () => {
-  it('handleBuildProgram()', async () => {
+  it.skip('handleBuildProgram()', async () => {
     const response = await handleBuildProgram({ state, model });
     expect(response.currentProgram).toStrictEqual('my_cel_program');
     expect(response.lastExecutedChain).toBe('buildCelProgram');

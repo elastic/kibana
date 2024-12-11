@@ -11,7 +11,7 @@ const _allowedExperimentalValues = {
   /**
    * Enables whether the user is able to utilize the LLM to generate the CEL input configuration.
    */
-  generateCel: false,
+  generateCel: true,
 };
 
 /**

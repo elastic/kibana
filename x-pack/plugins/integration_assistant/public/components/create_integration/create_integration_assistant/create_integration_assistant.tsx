@@ -66,13 +66,13 @@ export const CreateIntegrationAssistant = React.memo(() => {
       return isDataStreamStepReady(state);
     } else if (state.step === 4) {
       return isReviewStepReady(state);
-    } else if (isGenerateCelEnabled && state.step === 5) {
+    } else if (state.step === 5) {
       return isCelInputStepReady(state);
-    } else if (isGenerateCelEnabled && state.step === 6) {
+    } else if (state.step === 6) {
       return isCelReviewStepReady(state);
     }
     return false;
-  }, [state, isGenerateCelEnabled]);
+  }, [state]);
 
   return (
     <ActionsProvider value={actions}>
@@ -96,7 +96,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
             />
           )}
           {state.step === 5 &&
-            (isGenerateCelEnabled && state.hasCelInput ? (
+            (state.hasCelInput ? (
               <CelInputStep
                 integrationSettings={state.integrationSettings}
                 connector={state.connector}
@@ -110,13 +110,13 @@ export const CreateIntegrationAssistant = React.memo(() => {
               />
             ))}
 
-          {isGenerateCelEnabled && state.celInputResult && state.step === 6 && (
+          {state.celInputResult && state.step === 6 && (
             <ReviewCelStep
               isGenerating={state.isGenerating}
               celInputResult={state.celInputResult}
             />
           )}
-          {isGenerateCelEnabled && state.step === 7 && (
+          {state.step === 7 && (
             <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}
