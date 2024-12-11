@@ -110,6 +110,7 @@ describe('StatefulOpenTimeline', () => {
     });
     useUserPrivilegesMock.mockReturnValue({
       timelinePrivileges: { crud: true, read: true },
+      notesPrivileges: { crud: true, read: true },
     });
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
