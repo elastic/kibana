@@ -125,6 +125,23 @@ export const monitoringSchema = schema.object({
         total_alerts_detected: schema.maybe(schema.nullable(schema.number())),
         total_alerts_created: schema.maybe(schema.nullable(schema.number())),
         gap_duration_s: schema.maybe(schema.nullable(schema.number())),
+        gap_range: schema.maybe(
+          schema.nullable(
+            schema.object({
+              gte: schema.string(),
+              lte: schema.string(),
+            })
+          )
+        ),
+        unfilled_gaps_ms: schema.maybe(
+          schema.nullable(
+            schema.object({
+              last_1d: schema.number(),
+              last_3d: schema.number(),
+              last_7d: schema.number(),
+            })
+          )
+        ),
       }),
     }),
   }),

@@ -25,3 +25,17 @@ components:
           description: Duration in seconds of execution gap
           type: integer
           minimum: 0
+        gap_range:
+          description: Range of the execution gap
+          type: object
+          required:
+            - gte
+            - lte
+          properties:
+            gte:
+              description: Start date of the execution gap
+              type: string
+            lte:
+              description: End date of the execution gap
+              type: string
+
