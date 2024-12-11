@@ -36,7 +36,6 @@ import {
 interface TestExternalProvidersProps {
   children: React.ReactNode;
   navControls?: ChromeNavControls;
-  isServerless?: boolean;
 }
 
 window.scrollTo = jest.fn();
