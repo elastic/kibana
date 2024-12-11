@@ -14,7 +14,7 @@
  *
  * @public
  */
-export type Capabilities = {
+export interface Capabilities {
   /** Navigation link capabilities. */
   navLinks: Record<string, boolean>;
 
@@ -26,11 +26,15 @@ export type Capabilities = {
   /** Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. */
   catalogue: Record<string, boolean>;
 
+  // @ts-expect-error
+  discover?: {};
+  // @ts-expect-error
+  dashboard?: {};
+  // @ts-expect-error
+  maps?: {};
+  // @ts-expect-error
+  visualize?: {};
+
   /** Custom capabilities, registered by plugins. */
   [key: string]: Record<string, boolean | Record<string, boolean>>;
-} & {
-  discover?: never;
-  dashboard?: never;
-  maps?: never;
-  visualize?: never;
-};
+}
