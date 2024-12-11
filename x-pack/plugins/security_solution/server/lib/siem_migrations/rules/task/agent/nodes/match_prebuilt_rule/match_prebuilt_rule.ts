@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
@@ -14,6 +15,7 @@ import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
+  logger: Logger;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
@@ -21,9 +23,12 @@ interface GetMatchedRuleResponse {
   match: string;
 }
 
-export const getMatchPrebuiltRuleNode =
-  ({ model, ruleMigrationsRetriever }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
-  async (state) => {
+export const getMatchPrebuiltRuleNode = ({
+  model,
+  ruleMigrationsRetriever,
+  logger,
+}: GetMatchPrebuiltRuleNodeParams): GraphNode => {
+  return async (state) => {
     const query = state.semantic_query;
     const techniqueIds = state.original_rule.annotations?.mitre_attack || [];
     const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(
@@ -32,7 +37,7 @@ export const getMatchPrebuiltRuleNode =
     );
 
     const outputParser = new JsonOutputParser();
-    const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
+    const mostRelevantRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
     const elasticSecurityRules = prebuiltRules.map((rule) => {
       return {
@@ -41,7 +46,10 @@ export const getMatchPrebuiltRuleNode =
       };
     });
 
-    const response = (await matchPrebuiltRule.invoke({
+    /*
+     * Takes the most relevant rule from the array of rule(s) returned by the semantic query, returns either the most relevant or none.
+     */
+    const response = (await mostRelevantRule.invoke({
       rules: JSON.stringify(elasticSecurityRules, null, 2),
       ruleTitle: state.original_rule.title,
     })) as GetMatchedRuleResponse;
@@ -59,5 +67,12 @@ export const getMatchPrebuiltRuleNode =
         };
       }
     }
+    if (['inputlookup', 'outputlookup'].includes(state.original_rule?.query)) {
+      logger.debug(
+        `Rule: ${state.original_rule?.title} did not match any prebuilt rule, but contains inputlookup, dropping`
+      );
+      return { translation_result: SiemMigrationRuleTranslationResult.UNTRANSLATABLE };
+    }
     return {};
   };
+};

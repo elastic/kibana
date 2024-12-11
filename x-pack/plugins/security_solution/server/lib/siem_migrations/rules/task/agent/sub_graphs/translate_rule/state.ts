@@ -22,9 +22,9 @@ export const translateRuleState = Annotation.Root({
     default: () => [],
   }),
   original_rule: Annotation<OriginalRule>(),
-  integrations: Annotation<Integration[]>({
+  integration: Annotation<Integration>({
     reducer: (current, value) => value ?? current,
-    default: () => [],
+    default: () => ({} as Integration),
   }),
   inline_query: Annotation<string>({
     reducer: (current, value) => value ?? current,

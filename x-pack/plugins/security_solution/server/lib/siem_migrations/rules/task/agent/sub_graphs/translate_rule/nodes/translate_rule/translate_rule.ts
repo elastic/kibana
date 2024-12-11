@@ -26,12 +26,10 @@ export const getTranslateRuleNode = ({
 }: GetTranslateRuleNodeParams): GraphNode => {
   const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
-    const indexPatterns = state.integrations
-      .flatMap((integration) =>
-        integration.data_streams.map((dataStream) => dataStream.index_pattern)
-      )
-      .join(',');
-    const integrationIds = state.integrations.map((integration) => integration.id);
+    const indexPatterns =
+      state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
+      'logs-*';
+    const integrationId = state.integration?.id || '';
 
     const prompt = await ESQL_TRANSLATION_PROMPT.format({
       title: state.original_rule.title,
@@ -53,7 +51,7 @@ export const getTranslateRuleNode = ({
       translation_result: translationResult,
       elastic_rule: {
         title: state.original_rule.title,
-        integration_ids: integrationIds,
+        integration_id: integrationId,
         description: state.original_rule.description,
         severity: 'low',
         query: esqlQuery,

@@ -19,6 +19,7 @@ import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
 const MAX_VALIDATION_ITERATIONS = 3;
 
 export function getTranslateRuleGraph({
+  model,
   inferenceClient,
   connectorId,
   ruleMigrationsRetriever,
@@ -31,7 +32,7 @@ export function getTranslateRuleGraph({
   });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ inferenceClient, connectorId, logger });
-  const retrieveIntegrationsNode = getRetrieveIntegrationsNode({ ruleMigrationsRetriever });
+  const retrieveIntegrationsNode = getRetrieveIntegrationsNode({ model, ruleMigrationsRetriever });
 
   const translateRuleGraph = new StateGraph(translateRuleState)
     // Nodes

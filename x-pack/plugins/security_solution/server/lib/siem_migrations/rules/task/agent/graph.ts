@@ -6,6 +6,7 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { SiemMigrationRuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { getProcessQueryNode } from './nodes/process_query';
@@ -23,9 +24,11 @@ export function getRuleMigrationAgent({
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
+    logger,
     ruleMigrationsRetriever,
   });
   const translationSubGraph = getTranslateRuleGraph({
+    model,
     inferenceClient,
     ruleMigrationsRetriever,
     connectorId,
@@ -41,13 +44,10 @@ export function getRuleMigrationAgent({
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
-    .addEdge(START, 'processQuery')
-    .addEdge('processQuery', 'createSemanticQuery')
+    .addEdge(START, 'createSemanticQuery')
     .addEdge('createSemanticQuery', 'matchPrebuiltRule')
-    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional, [
-      'translationSubGraph',
-      END,
-    ])
+    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional, ['processQuery', END])
+    .addEdge('processQuery', 'translationSubGraph')
     .addEdge('translationSubGraph', END);
 
   const graph = siemMigrationAgentGraph.compile();
@@ -55,9 +55,15 @@ export function getRuleMigrationAgent({
   return graph;
 }
 
+/*
+ * If the original splunk rule has no prebuilt rule match, we will start processing the query, unless it is related to input/outputlookups.
+ */
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
-  return 'translationSubGraph';
+  if (state.translation_result === SiemMigrationRuleTranslationResult.UNTRANSLATABLE) {
+    return END;
+  }
+  return 'processQuery';
 };
