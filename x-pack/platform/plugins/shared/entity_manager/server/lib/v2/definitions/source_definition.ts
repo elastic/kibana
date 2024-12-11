@@ -66,7 +66,7 @@ export async function storeSourceDefinition({
     index: DEFINITIONS_ALIAS,
     id: `${source.type_id}:${definition.source.id}`,
     document: definition,
-    refresh: true,
+    refresh: 'wait_for',
   });
 
   return definition.source;
