@@ -36,3 +36,10 @@ export type ReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema
 >;
+
+export interface MicrosoftDefenderEndpointTokenResponse {
+  token_type: 'bearer';
+  /** 	The amount of time that an access token is valid (in seconds NOT milliseconds). */
+  expires_in: number;
+  access_token: string;
+}

@@ -25,6 +25,8 @@ export const MicrosoftDefenderEndpointSecretsSchema = schema.object({
 // ----------------------------------
 // Connector Methods
 // ----------------------------------
+export const MicrosoftDefenderEndpointDoNotValidateResponseSchema = schema.any();
+
 export const MicrosoftDefenderEndpointBaseApiResponseSchema = schema.maybe(
   schema.object({}, { unknowns: 'allow' })
 );

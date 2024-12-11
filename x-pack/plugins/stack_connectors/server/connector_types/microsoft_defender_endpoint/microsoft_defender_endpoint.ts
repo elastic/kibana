@@ -9,6 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { OAuthTokenManager } from './o_auth_token_manager';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsoft_defender_endpoint/constants';
 import {
   IsolateHostParamsSchema,
@@ -32,6 +33,8 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets
 > {
+  private readonly oAuthToken: OAuthTokenManager;
+
   private urls: {
     isolateHost: string;
     releaseHost: string;
@@ -41,6 +44,11 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     params: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>
   ) {
     super(params);
+
+    this.oAuthToken = new OAuthTokenManager({
+      ...params,
+      apiRequest: this.request,
+    });
 
     this.urls = {
       isolateHost: `${this.config.url}${API_PATH}/some/path/here`, // FIXME:PT implement once its known
