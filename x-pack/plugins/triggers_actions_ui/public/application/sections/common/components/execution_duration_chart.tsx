@@ -16,8 +16,8 @@ import {
   EuiTitle,
   EuiSelect,
   EuiLoadingChart,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiLightVars as lightEuiTheme } from '@kbn/ui-theme';
 import {
   Axis,
   BarSeries,
@@ -60,6 +60,8 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   onChangeDuration,
   isLoading,
 }: ComponentOpts) => {
+  const { euiTheme } = useEuiTheme();
+
   const paddedExecutionDurations = padOrTruncateDurations(
     executionDuration.valuesWithTimestamp,
     numberOfExecutions
@@ -117,7 +119,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
                 theme={{
                   lineSeriesStyle: {
                     point: { visible: 'never' },
-                    line: { stroke: lightEuiTheme.euiColorAccent },
+                    line: { stroke: euiTheme.colors.accent },
                   },
                 }}
                 // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md

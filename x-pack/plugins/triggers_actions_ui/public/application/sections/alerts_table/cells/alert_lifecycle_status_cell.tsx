@@ -10,15 +10,10 @@ import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
 import { CellComponentProps } from '../types';
 import { DefaultCell } from './default_cell';
 import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
-
-// const mutedBadgeStyle = css`
-//   padding-inline: ${euiThemeVars.euiSizeXS};
-// `;
 
 const AlertLifecycleStatusCellComponent: React.FC<CellComponentProps> = (props) => {
   const { euiTheme } = useEuiTheme();

@@ -10,7 +10,6 @@ import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 
 export interface LinkIconProps {
