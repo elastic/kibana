@@ -44,7 +44,7 @@ const waitForRender = async (
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
-  const { theme, i18n, analytics, notifications } = coreMock.createStart();
+  const { userProfile, theme, i18n, analytics, notifications } = coreMock.createStart();
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -93,6 +93,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -115,6 +116,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -139,6 +141,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     await waitForRender(wrapper, (updatedWrapper) => {
@@ -157,6 +160,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -201,6 +205,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -332,6 +337,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
       />
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
@@ -441,6 +447,7 @@ describe('<RolesGridPage />', () => {
         buildFlavor={'traditional'}
         analytics={analytics}
         theme={theme}
+        userProfile={userProfile}
         readOnly
       />
     );
