@@ -12,7 +12,6 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core-http-browser",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
@@ -22,8 +21,6 @@
     "@kbn/core-http-server",
     "@kbn/share-plugin",
     "@kbn/actions-plugin",
-    "@kbn/shared-ux-utility",
-    "@kbn/core-lifecycle-browser",
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
@@ -35,7 +32,10 @@
     "@kbn/deeplinks-search",
     "@kbn/deeplinks-management",
     "@kbn/serverless",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/search-navigation",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*",
