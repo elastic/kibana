@@ -43,3 +43,10 @@ export const FIND_THRESHOLD_BUCKETS_DESCRIPTION = (afterBucket?: string) =>
           defaultMessage: 'Find all terms that exceeds threshold value',
         }
       );
+
+export const ML_SEARCH_ANOMALIES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.esqlRuleType.mlSearchAnomaliesRequestDescription',
+  {
+    defaultMessage: 'Find all anomalies',
+  }
+);

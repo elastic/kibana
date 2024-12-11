@@ -20,7 +20,7 @@ export const logSearchRequest = (searchRequest: estypes.SearchRequest): string =
         return acc;
       }, [])
       .join('&');
-    return `POST /${index}/_search?${urlParams}\n${JSON.stringify(
+    return `POST /${index}/_search${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(
       { ...searchRequest.body },
       null,
       2

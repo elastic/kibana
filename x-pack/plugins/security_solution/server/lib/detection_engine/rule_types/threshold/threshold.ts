@@ -97,7 +97,6 @@ export const thresholdExecutor = async ({
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
   const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
-  // const loggedRequests: RulePreviewLoggedRequest[] = [];
 
   return withSecuritySpan('thresholdExecutor', async () => {
     const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
