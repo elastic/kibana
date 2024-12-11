@@ -14,7 +14,6 @@
     "@kbn/i18n",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-plugin",
-    "@kbn/saved-objects-finder-plugin",
     "@kbn/presentation-publishing",
   ],
   "exclude": [
