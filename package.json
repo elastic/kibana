@@ -1485,6 +1485,7 @@
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
     "@kbn/product-doc-artifact-builder": "link:x-pack/packages/ai-infra/product-doc-artifact-builder",
+    "@kbn/relocate": "link:packages/kbn-relocate",
     "@kbn/repo-file-maps": "link:packages/kbn-repo-file-maps",
     "@kbn/repo-linter": "link:packages/kbn-repo-linter",
     "@kbn/repo-path": "link:packages/kbn-repo-path",

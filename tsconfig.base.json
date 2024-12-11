@@ -1432,6 +1432,8 @@
       "@kbn/react-mute-legacy-root-warning/*": ["packages/kbn-react-mute-legacy-root-warning/*"],
       "@kbn/recently-accessed": ["packages/kbn-recently-accessed"],
       "@kbn/recently-accessed/*": ["packages/kbn-recently-accessed/*"],
+      "@kbn/relocate": ["packages/kbn-relocate"],
+      "@kbn/relocate/*": ["packages/kbn-relocate/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],
       "@kbn/remote-clusters-plugin/*": ["x-pack/plugins/remote_clusters/*"],
       "@kbn/rendering-plugin": ["test/plugin_functional/plugins/rendering_plugin"],
