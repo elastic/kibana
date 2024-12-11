@@ -116,8 +116,8 @@ describe('MaintenanceWindowClient - find', () => {
         function: 'is',
         type: 'function',
       },
-      sortField: 'status',
-      sortOrder: 'asc',
+      sortField: 'updatedAt',
+      sortOrder: 'desc',
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
     });
 
