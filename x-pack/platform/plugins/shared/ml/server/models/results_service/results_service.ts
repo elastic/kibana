@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { sortBy, slice, get, cloneDeep } from 'lodash';
+import { sortBy, slice, get, cloneDeep, omit } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -710,6 +710,11 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       datafeedQueryClone = { bool: { must: [datafeedQueryClone], filter: [rangeFilter] } };
     }
 
+    // remove ignore_throttled from indices_options to avoid deprecation warnings in the logs
+    const indicesOptions = datafeedConfig?.indices_options
+      ? omit(datafeedConfig.indices_options, 'ignore_throttled')
+      : {};
+
     const esSearchRequest = {
       index: datafeedConfig.indices.join(','),
       body: {
@@ -727,7 +732,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         },
         size: 0,
       },
-      ...(datafeedConfig?.indices_options ?? {}),
+      ...indicesOptions,
     };
 
     if (client) {
