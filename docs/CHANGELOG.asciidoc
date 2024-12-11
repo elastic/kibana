@@ -184,8 +184,6 @@ Machine Learning::
 Kibana platform::
 * When attempting to save an object with a name that already exists, the name is automatically appended with a suffix to make it unique ({kibana-pull}198777[#198777]).
 
-====
-
 [float]
 [[fixes-v8.17.0]]
 === Bug fixes
@@ -226,7 +224,7 @@ Kibana platform::
 
 [[release-notes-8.16.1]]
 == {kib} 8.16.1
-
+˝
 The 8.16.1 release includes the following bug fixes.
 
 [float]
