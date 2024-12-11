@@ -61,7 +61,7 @@ export const registerRiskScoreModulesDeprecation = ({ deprecationsService }: Dep
                 defaultMessage: 'In the left bar, under "Security", click on "Manage".',
               }),
               i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.manualStep2', {
-                defaultMessage: 'Select "Entity Risk Score"',
+                defaultMessage: 'Select Entity Risk Score.',
               }),
               i18n.translate('xpack.securitySolution.deprecations.riskScoreModules.manualStep3', {
                 defaultMessage:
