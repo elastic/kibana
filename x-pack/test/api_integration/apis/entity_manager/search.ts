@@ -59,7 +59,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'services-with-timestamp' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'services-with-timestamp', display_name: 'services-with-timestamp' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'source-1-with-services',
@@ -110,7 +112,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'home-appliances' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'home-appliances', display_name: 'home-appliances' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'appliances-no-timestamp',
@@ -209,7 +213,9 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'hosts-with-agents' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'hosts-with-agents', display_name: 'hosts-with-agents' },
+      });
       await Promise.all([
         createEntitySourceDefinition(supertest, {
           source: {
@@ -350,7 +356,9 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'services-with-hosts' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'services-with-hosts', display_name: 'services-with-hosts' },
+      });
       await Promise.all([
         createEntitySourceDefinition(supertest, {
           source: {
@@ -453,7 +461,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'services-one-type' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'service-one-type', display_name: 'service-one-type' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'source-1-with-services',
@@ -514,7 +524,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'most-refined-cars' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'most-refined-cars', display_name: 'most-refined-cars' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'source-1-with-cars',
@@ -608,7 +620,9 @@ export default function ({ getService }: FtrProviderContext) {
         }),
       ]);
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'most-refined-cars' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'most-refined-cars', display_name: 'most-refined-cars' },
+      });
       await Promise.all([
         createEntitySourceDefinition(supertest, {
           source: {
@@ -690,7 +704,10 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
 
       await createEntityTypeDefinition(supertest, {
-        type: { id: 'type-with-conflicting-mappings' },
+        type: {
+          id: 'type-with-conflicting-mappings',
+          display_name: 'type-with-conflicting-mappings',
+        },
       });
       await createEntitySourceDefinition(supertest, {
         source: {
@@ -732,7 +749,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('returns error if index does not exist', async () => {
       await createEntityTypeDefinition(supertest, {
-        type: { id: 'type-with-non-existing-index' },
+        type: { id: 'type-with-non-existing-index', display_name: 'type-with-non-existing-index' },
       });
       await createEntitySourceDefinition(supertest, {
         source: {
@@ -771,7 +788,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await createEntityTypeDefinition(supertest, {
-        type: { id: 'type-with-unmapped-id-fields' },
+        type: { id: 'type-with-unmapped-id-fields', display_name: 'type-with-unmapped-id-fields' },
       });
       await createEntitySourceDefinition(supertest, {
         source: {

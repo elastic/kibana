@@ -94,7 +94,10 @@ export const upgradeBuiltinDefinitions = async (
 export const createEntityTypeDefinition = (
   supertest: Agent,
   params: {
-    type: { id: string };
+    type: {
+      id: string;
+      display_name: string;
+    };
   }
 ) => {
   return supertest
