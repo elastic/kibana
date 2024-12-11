@@ -42,7 +42,7 @@ export const useTimeseriesExplorerStyles = () => {
             },
 
             text: {
-              fill: euiTheme.colors.text,
+              fill: euiTheme.colors.textParagraph,
             },
 
             '.tick line': {
@@ -183,7 +183,7 @@ export const useTimeseriesExplorerStyles = () => {
             },
             '.axis text': {
               fontSize: '10px',
-              fill: euiTheme.colors.text,
+              fill: euiTheme.colors.textParagraph,
             },
             '.values-line': {
               strokeWidth: 1,

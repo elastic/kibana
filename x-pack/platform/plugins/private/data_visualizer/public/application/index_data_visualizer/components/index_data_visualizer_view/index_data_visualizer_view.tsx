@@ -12,6 +12,7 @@ import type { Required } from 'utility-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import {
+  useEuiTheme,
   useEuiBreakpoint,
   useIsWithinMaxBreakpoint,
   EuiFlexGroup,
@@ -37,7 +38,6 @@ import { useStorage } from '@kbn/ml-local-storage';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
   DV_RANDOM_SAMPLER_PREFERENCE,
@@ -108,7 +108,7 @@ export interface IndexDataVisualizerViewProps {
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
-  const euiTheme = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const [savedRandomSamplerPreference, saveRandomSamplerPreference] = useStorage<
     DVKey,
@@ -520,7 +520,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             data-test-subj="dataViewTitleHeader"
             direction="row"
             alignItems="center"
-            css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
+            css={{ padding: `${euiTheme.size.s} 0`, marginRight: `${euiTheme.size.base}` }}
           >
             <EuiTitle size={'s'}>
               <h2>{currentDataView.getName()}</h2>
