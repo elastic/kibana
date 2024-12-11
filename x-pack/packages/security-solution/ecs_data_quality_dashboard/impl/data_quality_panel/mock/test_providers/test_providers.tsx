@@ -16,8 +16,7 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
 
-import { ChromeNavControls, UserProfileService } from '@kbn/core/public';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { UserProfileService } from '@kbn/core/public';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -32,18 +31,20 @@ import {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
+import { createKibanaContextProviderMock } from '@kbn/security-solution-plugin/public/common/lib/kibana/kibana_react.mock';
+import { useKibana } from '@kbn/security-solution-plugin/public/common/lib/kibana/kibana_react';
 
 interface TestExternalProvidersProps {
   children: React.ReactNode;
-  navControls?: ChromeNavControls;
 }
+
+const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run tests */
 const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
   children,
-  navControls = chromeServiceMock.createStartContract().navControls,
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
@@ -66,7 +67,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => {},
+      error: () => { },
     },
   });
 
@@ -74,25 +75,26 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({
     <I18nProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <QueryClientProvider client={queryClient}>
-          <AssistantProvider
-            actionTypeRegistry={actionTypeRegistry}
-            assistantAvailability={mockAssistantAvailability}
-            augmentMessageCodeBlocks={jest.fn()}
-            basePath={'https://localhost:5601/kbn'}
-            docLinks={{
-              ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-              DOC_LINK_VERSION: 'current',
-            }}
-            getComments={mockGetComments}
-            http={mockHttp}
-            baseConversations={{}}
-            navigateToApp={mockNavigateToApp}
-            currentAppId={'securitySolutionUI'}
-            userProfileService={jest.fn() as unknown as UserProfileService}
-            navControls={navControls}
-          >
-            {children}
-          </AssistantProvider>
+          <MockKibanaContextProvider>
+            <AssistantProvider
+              actionTypeRegistry={actionTypeRegistry}
+              assistantAvailability={mockAssistantAvailability}
+              augmentMessageCodeBlocks={jest.fn()}
+              basePath={'https://localhost:5601/kbn'}
+              docLinks={{
+                ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+                DOC_LINK_VERSION: 'current',
+              }}
+              getComments={mockGetComments}
+              http={mockHttp}
+              baseConversations={{}}
+              navigateToApp={mockNavigateToApp}
+              currentAppId={'securitySolutionUI'}
+              userProfileService={jest.fn() as unknown as UserProfileService}
+            >
+              {children}
+            </AssistantProvider>
+          </MockKibanaContextProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </I18nProvider>

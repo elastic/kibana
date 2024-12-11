@@ -26,6 +26,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
       services: {
         chrome: {
           getChromeStyle$: mockGetChromeStyle,
+          navControls: mockNavControls
         },
       },
     }),
@@ -43,7 +44,6 @@ describe('AssistantNavLink', () => {
       <AssistantNavLink
         hasAssistantPrivilege
         showAssistantOverlay={mockShowAssistantOverlay}
-        navControls={mockNavControls}
       />
     );
     expect(mockNavControls.registerRight).toHaveBeenCalledTimes(1);
@@ -66,7 +66,6 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
         />
       </>
     );
@@ -92,7 +91,6 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
         />
       </>
     );
@@ -114,7 +112,6 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
         />
       </>
     );
@@ -137,7 +134,6 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink
           hasAssistantPrivilege={false}
           showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
         />
       </>
     );
@@ -160,7 +156,6 @@ describe('AssistantNavLink', () => {
         <AssistantNavLink
           hasAssistantPrivilege
           showAssistantOverlay={mockShowAssistantOverlay}
-          navControls={mockNavControls}
         />
       </>
     );

@@ -10,13 +10,11 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import React from 'react';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
-import type { ChromeNavControls, UserProfileService } from '@kbn/core/public';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import type { UserProfileService } from '@kbn/core/public';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
-  navControls?: ChromeNavControls;
   children: React.ReactNode;
 }
 
@@ -26,7 +24,6 @@ window.HTMLElement.prototype.scrollIntoView = jest.fn();
 /** A utility for wrapping children in the providers required to run tests */
 export const MockAssistantProviderComponent: React.FC<Props> = ({
   assistantAvailability,
-  navControls = chromeServiceMock.createStartContract().navControls,
   children,
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -57,7 +54,6 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       baseConversations={BASE_SECURITY_CONVERSATIONS}
       currentAppId={'test'}
       userProfileService={jest.fn() as unknown as UserProfileService}
-      navControls={navControls}
     >
       {children}
     </AssistantProvider>
