@@ -255,6 +255,7 @@ export const UnifiedHistogramLayout = ({
     query: originalQuery,
     filters: originalFilters,
     timeRange: originalTimeRange,
+    relativeTimeRange,
   });
 
   const [lensVisService] = useState(() => new LensVisService({ services, lensSuggestionsApi }));
