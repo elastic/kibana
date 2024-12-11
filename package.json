@@ -442,7 +442,7 @@
     "@kbn/deeplinks-analytics": "link:packages/deeplinks/analytics",
     "@kbn/deeplinks-devtools": "link:src/platform/packages/shared/deeplinks/devtools",
     "@kbn/deeplinks-fleet": "link:packages/deeplinks/fleet",
-    "@kbn/deeplinks-management": "link:packages/deeplinks/management",
+    "@kbn/deeplinks-management": "link:src/platform/packages/shared/deeplinks/management",
     "@kbn/deeplinks-ml": "link:src/platform/packages/shared/deeplinks/ml",
     "@kbn/deeplinks-observability": "link:packages/deeplinks/observability",
     "@kbn/deeplinks-search": "link:packages/deeplinks/search",
