@@ -12,12 +12,12 @@ import { waitFor, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
-import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
 import {
-  customFieldsConfigurationMock,
   observableTypesMock,
+  customFieldsConfigurationMock,
   templatesConfigurationMock,
 } from '../../containers/mock';
+import { TestProviders, createAppMockRenderer, noCasesSettingsPermission } from '../../common/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
@@ -204,10 +204,10 @@ describe('ConfigureCases', () => {
       expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(false);
     });
 
-    test('it disables correctly when the user cannot update', () => {
+    test('it disables correctly when the user does not have settings privilege', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-        wrappingComponentProps: { permissions: noUpdateCasesPermissions() },
+        wrappingComponentProps: { permissions: noCasesSettingsPermission() },
       });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(

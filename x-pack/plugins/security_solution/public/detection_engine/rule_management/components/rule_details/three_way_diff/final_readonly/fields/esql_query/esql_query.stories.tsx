@@ -7,13 +7,13 @@
 
 import React from 'react';
 import type { Story } from '@storybook/react';
-import { FieldReadOnly } from '../../field_readonly';
+import { FieldFinalReadOnly } from '../../field_final_readonly';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { mockEsqlRule } from '../../storybook/mocks';
 import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
-  component: FieldReadOnly,
+  component: FieldFinalReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/esql_query',
 };
 
@@ -23,8 +23,11 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders finalDiffableRule={args.finalDiffableRule}>
-      <FieldReadOnly fieldName="esql_query" />
+    <ThreeWayDiffStorybookProviders
+      finalDiffableRule={args.finalDiffableRule}
+      fieldName="esql_query"
+    >
+      <FieldFinalReadOnly />
     </ThreeWayDiffStorybookProviders>
   );
 };
