@@ -45,13 +45,6 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     [data.total, pageIndex, pageSize]
   );
 
-  const tableRowProps = useCallback(
-    (theCase: CaseUI) => ({
-      'data-test-subj': `similar-cases-table-row-${theCase.id}`,
-    }),
-    []
-  );
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -61,7 +54,6 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
             <SimilarCasesTable
               isCasesLoading={isLoadingCases}
               cases={data.cases}
-              tableRowProps={tableRowProps}
               pagination={pagination}
               onChange={tableOnChangeCallback}
             />

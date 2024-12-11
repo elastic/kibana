@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
@@ -19,14 +19,12 @@ import { useSimilarCasesColumns } from './use_similar_cases_columns';
 interface SimilarCasesTableProps {
   cases: SimilarCaseUI[];
   isCasesLoading: boolean;
-  tableRowProps: EuiBasicTableProps<SimilarCaseUI>['rowProps'];
   onChange: EuiBasicTableProps<SimilarCaseUI>['onChange'];
   pagination: Pagination;
 }
 
 export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   cases,
-  tableRowProps,
   isCasesLoading,
   onChange,
   pagination,
@@ -34,6 +32,13 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const { columns } = useSimilarCasesColumns();
+
+  const tableRowProps = useCallback(
+    (theCase: SimilarCaseUI) => ({
+      'data-test-subj': `similar-cases-table-row-${theCase.id}`,
+    }),
+    []
+  );
 
   return isCasesLoading ? (
     <div
