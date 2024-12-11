@@ -104,6 +104,7 @@ export async function mountApp({
     }
     return (
       <DashboardApp
+        key={routeProps.match.params.id ?? 'newDashboard'}
         history={routeProps.history}
         embedSettings={globalEmbedSettings}
         savedDashboardId={routeProps.match.params.id}
