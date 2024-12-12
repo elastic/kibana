@@ -30,7 +30,6 @@ export default function ({ getService }: FtrProviderContext) {
     'sampleTaskWithLimitedConcurrency',
     'sampleTaskWithSingleConcurrency',
     'singleAttemptSampleTask',
-    'taskWhichExecutesOtherTasksEphemerally',
     'timedTask',
     'timedTaskWithLimitedConcurrency',
     'timedTaskWithSingleConcurrency',

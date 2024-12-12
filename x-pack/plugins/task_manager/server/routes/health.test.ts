@@ -299,7 +299,6 @@ describe('healthRoute', () => {
     const warnRuntimeStat = mockHealthStats();
     const warnConfigurationStat = mockHealthStats();
     const warnWorkloadStat = mockHealthStats();
-    const warnEphemeralStat = mockHealthStats();
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -334,15 +333,13 @@ describe('healthRoute', () => {
     stats$.next(warnConfigurationStat);
     await sleep(1001);
     stats$.next(warnWorkloadStat);
-    await sleep(1001);
-    stats$.next(warnEphemeralStat);
 
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.degraded,
       summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
-    expect(logHealthMetrics).toBeCalledTimes(4);
+    expect(logHealthMetrics).toBeCalledTimes(3);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -365,14 +362,6 @@ describe('healthRoute', () => {
       status: expect.any(String),
       ...ignoreCapacityEstimation(
         summarizeMonitoringStats(logger, warnWorkloadStat, getTaskManagerConfig({}))
-      ),
-    });
-    expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(logger, warnEphemeralStat, getTaskManagerConfig({}))
       ),
     });
   });
@@ -402,7 +391,6 @@ describe('healthRoute', () => {
     const errorRuntimeStat = mockHealthStats();
     const errorConfigurationStat = mockHealthStats();
     const errorWorkloadStat = mockHealthStats();
-    const errorEphemeralStat = mockHealthStats();
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -437,15 +425,13 @@ describe('healthRoute', () => {
     stats$.next(errorConfigurationStat);
     await sleep(1001);
     stats$.next(errorWorkloadStat);
-    await sleep(1001);
-    stats$.next(errorEphemeralStat);
 
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.degraded,
       summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
-    expect(logHealthMetrics).toBeCalledTimes(4);
+    expect(logHealthMetrics).toBeCalledTimes(3);
     expect(logHealthMetrics.mock.calls[0][0]).toMatchObject({
       id,
       timestamp: expect.any(String),
@@ -468,14 +454,6 @@ describe('healthRoute', () => {
       status: expect.any(String),
       ...ignoreCapacityEstimation(
         summarizeMonitoringStats(logger, errorWorkloadStat, getTaskManagerConfig({}))
-      ),
-    });
-    expect(logHealthMetrics.mock.calls[3][0]).toMatchObject({
-      id,
-      timestamp: expect.any(String),
-      status: expect.any(String),
-      ...ignoreCapacityEstimation(
-        summarizeMonitoringStats(logger, errorEphemeralStat, getTaskManagerConfig({}))
       ),
     });
   });
@@ -546,9 +524,6 @@ describe('healthRoute', () => {
                   timestamp: expect.any(String),
                 },
                 workload: {
-                  timestamp: expect.any(String),
-                },
-                ephemeral: {
                   timestamp: expect.any(String),
                 },
                 runtime: {
@@ -653,9 +628,6 @@ describe('healthRoute', () => {
                 workload: {
                   timestamp: expect.any(String),
                 },
-                ephemeral: {
-                  timestamp: expect.any(String),
-                },
                 runtime: {
                   timestamp: expect.any(String),
                   value: {
@@ -735,9 +707,6 @@ describe('healthRoute', () => {
                   timestamp: expect.any(String),
                 },
                 workload: {
-                  timestamp: expect.any(String),
-                },
-                ephemeral: {
                   timestamp: expect.any(String),
                 },
                 runtime: {
@@ -950,15 +919,6 @@ function mockHealthStats(overrides = {}) {
             ],
             persistence: [],
           },
-        },
-      },
-      ephemeral: {
-        timestamp: new Date().toISOString(),
-        value: {
-          load: [],
-          executionsPerCycle: [],
-          queuedTasks: [],
-          delay: [],
         },
       },
     },
