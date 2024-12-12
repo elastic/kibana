@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const logsPages = ['logs/stream', 'logs/anomalies', 'logs/log-categories', 'logs/settings'];
+const logsPages = ['logs/anomalies', 'logs/log-categories'];
 
 const metricsPages = [
   'metrics/inventory',
