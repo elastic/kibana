@@ -69,7 +69,7 @@ export function LensEmbeddableComponent({
 
   return (
     <div
-      style={{ width: '100%', height: '100%' }}
+      css={{ width: '100%', height: '100%', position: 'relative' }}
       data-rendering-count={renderCount + 1}
       data-render-complete={hasRendered}
       {...title}
