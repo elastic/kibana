@@ -32,7 +32,16 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
       if (!(column.id in idMap)) {
         return [];
       }
-      return idMap[column.id].map((originalColumn) => ({ ...column, id: originalColumn.id }));
+      return idMap[column.id].map((originalColumn) => ({
+        ...column,
+        id: originalColumn.id,
+        name: originalColumn.label,
+        meta: {
+          ...column.meta,
+          field: originalColumn.sourceField,
+          params: originalColumn.format,
+        },
+      }));
     }),
   };
 };

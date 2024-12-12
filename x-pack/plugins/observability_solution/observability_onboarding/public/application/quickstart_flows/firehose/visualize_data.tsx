@@ -13,11 +13,7 @@ import { unionBy } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ObservabilityOnboardingAppServices } from '../../..';
-import {
-  FIREHOSE_CLOUDFORMATION_STACK_NAME,
-  FIREHOSE_LOGS_STREAM_NAME,
-} from '../../../../common/aws_firehose';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { AccordionWithIcon } from '../shared/accordion_with_icon';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import {
@@ -28,34 +24,25 @@ import { AutoRefreshCallout } from './auto_refresh_callout';
 import { ProgressCallout } from './progress_callout';
 import { HAS_DATA_FETCH_INTERVAL } from './utils';
 import { CreateStackOption } from './types';
+import { usePopulatedAWSIndexList } from './use_populated_aws_index_list';
 
 const REQUEST_PENDING_STATUS_LIST = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
 
 interface Props {
   onboardingId: string;
   selectedCreateStackOption: CreateStackOption;
+  hasExistingData: boolean;
 }
 
-export function VisualizeData({ onboardingId, selectedCreateStackOption }: Props) {
+export function VisualizeData({ onboardingId, selectedCreateStackOption, hasExistingData }: Props) {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const [orderedVisibleAWSServiceList, setOrderedVisibleAWSServiceList] = useState<
     AWSServiceGetStartedConfig[]
   >([]);
-  const [shouldShowDataReceivedToast, setShouldShowDataReceivedToast] = useState<boolean>(true);
-  const {
-    data: populatedAWSIndexList,
-    status,
-    refetch,
-  } = useFetcher((callApi) => {
-    return callApi('GET /internal/observability_onboarding/firehose/has-data', {
-      params: {
-        query: {
-          logsStreamName: FIREHOSE_LOGS_STREAM_NAME,
-          stackName: FIREHOSE_CLOUDFORMATION_STACK_NAME,
-        },
-      },
-    });
-  }, []);
+  const [shouldShowDataReceivedToast, setShouldShowDataReceivedToast] = useState<boolean>(
+    !hasExistingData
+  );
+  const { data: populatedAWSIndexList, status, refetch } = usePopulatedAWSIndexList();
   const {
     services: {
       notifications,
