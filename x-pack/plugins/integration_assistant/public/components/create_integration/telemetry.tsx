@@ -15,20 +15,12 @@ import type {
   IntegrationSettings,
 } from './create_integration_assistant/types';
 
-const stepNames: Record<string, string> = {
-  '1': 'Connector Step',
-  '2': 'Integration Step',
-  '3': 'DataStream Step',
-  '4': 'Review Step',
-  '5': 'Deploy Step',
-};
-
 type ReportUploadZipIntegrationComplete = (params: {
   integrationName?: string;
   error?: string;
 }) => void;
 type ReportAssistantOpen = () => void;
-type ReportAssistantStepComplete = (params: { step: number }) => void;
+type ReportAssistantStepComplete = (params: { step: number; stepName: string }) => void;
 type ReportGenerationComplete = (params: {
   connector: AIConnector;
   integrationSettings: IntegrationSettings;
@@ -92,11 +84,11 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   }, [telemetry]);
 
   const reportAssistantStepComplete = useCallback<ReportAssistantStepComplete>(
-    ({ step }) => {
+    ({ step, stepName }) => {
       telemetry.reportEvent(TelemetryEventType.IntegrationAssistantStepComplete, {
         sessionId: sessionData.current.sessionId,
         step,
-        stepName: stepNames[step.toString()] ?? 'Unknown Step',
+        stepName,
         durationMs: Date.now() - stepsData.current.startedAt,
         sessionElapsedTime: Date.now() - sessionData.current.startedAt,
       });

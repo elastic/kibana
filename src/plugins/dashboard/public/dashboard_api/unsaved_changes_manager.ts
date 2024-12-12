@@ -23,7 +23,6 @@ import {
 import { initializeViewModeManager } from './view_mode_manager';
 
 export function initializeUnsavedChangesManager({
-  anyMigrationRun,
   creationOptions,
   controlGroupApi$,
   lastSavedState,
@@ -33,7 +32,6 @@ export function initializeUnsavedChangesManager({
   viewModeManager,
   unifiedSearchManager,
 }: {
-  anyMigrationRun: boolean;
   creationOptions?: DashboardCreationOptions;
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   lastSavedState: DashboardState;
@@ -43,7 +41,6 @@ export function initializeUnsavedChangesManager({
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }) {
-  const hasRunMigrations$ = new BehaviorSubject(anyMigrationRun);
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
   const saveNotification$ = new Subject<void>();
@@ -113,7 +110,6 @@ export function initializeUnsavedChangesManager({
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         await controlGroupApi$.value?.asyncResetUnsavedChanges();
       },
-      hasRunMigrations$,
       hasUnsavedChanges$,
       saveNotification$,
     },
@@ -125,11 +121,6 @@ export function initializeUnsavedChangesManager({
       getLastSavedState: () => lastSavedState$.value,
       onSave: (savedState: DashboardState) => {
         lastSavedState$.next(savedState);
-
-        // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
-        // been serialized into the SO.
-        hasRunMigrations$.next(false);
-
         saveNotification$.next();
       },
     },
