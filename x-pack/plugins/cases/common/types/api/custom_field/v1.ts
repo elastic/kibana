@@ -52,14 +52,6 @@ export const CaseCustomFieldListWithValidationValueRt = (fieldValue: string) =>
     },
     rt.identity
   );
-// rt.record(
-//   rt.string,
-//   limitedStringSchema({
-//     fieldName: fieldValue,
-//     min: 1,
-//     max: MAX_CUSTOM_FIELD_OPTION_LENGTH,
-//   })
-// );
 
 /**
  * Update custom_field
