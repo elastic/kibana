@@ -798,7 +798,6 @@ x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
-x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security/api_key_management @elastic/kibana-security
@@ -983,6 +982,7 @@ x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elasti
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/investigate_app @elastic/obs-ux-management-team
