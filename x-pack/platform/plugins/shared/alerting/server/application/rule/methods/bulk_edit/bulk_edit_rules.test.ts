@@ -1897,7 +1897,6 @@ describe('bulkEdit()', () => {
       };
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const getMockAttribute = (override: Record<string, any> = {}) => {
       return {
         saved_objects: [
@@ -2000,7 +1999,6 @@ describe('bulkEdit()', () => {
             attributes: {
               ...existingDecryptedRule.attributes,
               snoozeSchedule: existingSnooze,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
         ],
@@ -2045,7 +2043,6 @@ describe('bulkEdit()', () => {
               ...existingDecryptedRule.attributes,
               muteAll: true,
               snoozeSchedule: [],
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
         ],
@@ -2092,7 +2089,6 @@ describe('bulkEdit()', () => {
             attributes: {
               ...existingDecryptedRule.attributes,
               snoozeSchedule: existingSnooze,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
         ],
@@ -2136,7 +2132,6 @@ describe('bulkEdit()', () => {
             attributes: {
               ...existingDecryptedRule.attributes,
               snoozeSchedule: existingSnooze,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
         ],
@@ -2181,7 +2176,6 @@ describe('bulkEdit()', () => {
             attributes: {
               ...existingDecryptedRule.attributes,
               snoozeSchedule: existingSnooze,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
         ],
@@ -2232,7 +2226,6 @@ describe('bulkEdit()', () => {
             attributes: {
               ...existingDecryptedRule.attributes,
               snoozeSchedule: existingSnooze,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
           },
         ],
@@ -3254,7 +3247,6 @@ describe('bulkEdit()', () => {
                   uuid: '100',
                 },
               ],
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
             references: [
               {
@@ -3267,7 +3259,6 @@ describe('bulkEdit()', () => {
                 type: 'action',
                 id: '2',
               },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ] as any,
           },
         ],
@@ -3365,7 +3356,6 @@ describe('bulkEdit()', () => {
                   uuid: '111',
                 },
               ],
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any,
             references: [
               {
@@ -3373,7 +3363,6 @@ describe('bulkEdit()', () => {
                 type: 'action',
                 id: '1',
               },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ] as any,
           },
         ],

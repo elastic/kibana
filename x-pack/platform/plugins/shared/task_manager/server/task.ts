@@ -302,7 +302,7 @@ export interface TaskInstance {
    */
   // we allow any here as unknown will break current use in other plugins
   // this can be fixed by supporting generics in the future
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   params: Record<string, any>;
 
   /**
@@ -312,7 +312,7 @@ export interface TaskInstance {
    */
   // we allow any here as unknown will break current use in other plugins
   // this can be fixed by supporting generics in the future
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   state: Record<string, any>;
   stateVersion?: number;
 
@@ -442,7 +442,7 @@ export interface ConcreteTaskInstance extends TaskInstance {
    */
   // we allow any here as unknown will break current use in other plugins
   // this can be fixed by supporting generics in the future
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   state: Record<string, any>;
 
   /**

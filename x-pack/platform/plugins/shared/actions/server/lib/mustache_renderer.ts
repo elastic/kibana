@@ -113,7 +113,7 @@ function addToStringDeep(object: unknown): void {
   // walk arrays, but don't add a toString() as mustache already does something
   if (Array.isArray(object)) {
     // instead, add an asJSON()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     (object as any).asJSON = () => JSON.stringify(object);
     object.forEach((element) => addToStringDeep(element));
     return;
