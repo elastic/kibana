@@ -29,6 +29,7 @@ Go through the relevant title, description and data sources from the above query
 - Include keywords that are relevant to the use case.
 - Add related keywords you detected from the above query, like one or more vendor, product, cloud provider, OS platform etc.
 - Always reply with a JSON object with the key "semantic_query" and the value as the semantic search query inside three backticks as shown in the below example.
+- If the related query focuses on Endpoint datamodel, make sure that "endpoint", "security" keywords are included.
 </guidelines>
 
 <example_response>

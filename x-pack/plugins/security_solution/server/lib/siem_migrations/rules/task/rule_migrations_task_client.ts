@@ -27,7 +27,7 @@ import type {
 } from './types';
 import { ActionsClientChat } from './util/actions_client_chat';
 
-const ITERATION_BATCH_SIZE = 50 as const;
+const ITERATION_BATCH_SIZE = 15 as const;
 const ITERATION_SLEEP_SECONDS = 10 as const;
 
 type MigrationsRunning = Map<string, { user: string; abortController: AbortController }>;

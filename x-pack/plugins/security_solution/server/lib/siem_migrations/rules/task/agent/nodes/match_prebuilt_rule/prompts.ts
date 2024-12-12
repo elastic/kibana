@@ -23,21 +23,22 @@ Here are some context for you to reference for your task, read it carefully as y
   [
     'human',
     `See the below description of the relevant splunk rule and try to match it with any of the elastic detection rules with similar names.     
-<splunk_rule_name>
-{ruleTitle}
-</splunk_rule_name>
+<splunk_rule>
+{splunk_rule}
+</splunk_rule>
 
 <guidelines>
 - Always reply with a JSON object with the key "match" and the value being the most relevant matched elastic detection rule name. Do not reply with anything else.
 - Only reply with exact matches, if you are unsure or do not find a very confident match, always reply with an empty string value in the match key, do not guess or reply with anything else.
-- If there is one Elastic rule in the list that covers the same threat, set the name of the matching rule as a value of the match key. Do not reply with anything else.
-- If there are multiple rules in the list that cover the same threat, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
+- If there is one Elastic rule in the list that covers the same usecase, set the name of the matching rule as a value of the match key. Do not reply with anything else.
+- If there are multiple rules in the list that cover the same usecase, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
 </guidelines>
 
 <example_response>
-U: <splunk_rule_name>
-Linux Auditd Add User Account Type
-</splunk_rule_name>
+U: <splunk_rule>
+Title: Linux Auditd Add User Account Type
+Description: The following analytic detects the suspicious add user account type.
+</splunk_rule>
 A: Please find the match JSON object below:
 \`\`\`json
 {{"match": "Linux User Account Creation"}}

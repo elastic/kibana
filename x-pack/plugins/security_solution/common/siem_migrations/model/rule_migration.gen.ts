@@ -103,9 +103,9 @@ export const ElasticRule = z.object({
    */
   prebuilt_rule_id: NonEmptyString.optional(),
   /**
-   * The Elastic integration IDs related to the rule.
+   * The Elastic integration ID found to be most relevant to the splunk rule.
    */
-  integration_ids: z.array(z.string()).optional(),
+  integration_id: z.string().optional(),
   /**
    * The Elastic rule id installed as a result.
    */
