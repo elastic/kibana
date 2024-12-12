@@ -9,7 +9,6 @@ import { postEcsMapping } from '../../../../common/lib/api/ecs';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { User } from '../../../../common/lib/authentication/types';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
@@ -27,6 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           connectorId: 'bedrock-connector',
         },
+        expectedHttpCode: 404,
         auth: {
           user: { username: 'elastic', password: 'elastic' } as User,
         },
