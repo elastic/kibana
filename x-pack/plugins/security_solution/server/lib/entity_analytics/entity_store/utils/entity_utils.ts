@@ -14,13 +14,20 @@ import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../../../types';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import {
+  EntityTypeEnum,
+  type EntityType,
+} from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { entityEngineDescriptorTypeName } from '../saved_object';
 
-export const getIdentityFieldForEntityType = (entityType: EntityType) => {
-  if (entityType === 'host') return 'host.name';
+const identityFieldMap: Record<EntityType, string> = {
+  [EntityTypeEnum.host]: 'host.name',
+  [EntityTypeEnum.user]: 'user.name',
+  [EntityTypeEnum.service]: 'service.name',
+};
 
-  return 'user.name';
+export const getIdentityFieldForEntityType = (entityType: EntityType) => {
+  return identityFieldMap[entityType];
 };
 
 export const buildIndexPatterns = async (

@@ -8,6 +8,7 @@
 import type { ENDPOINT_PRIVILEGES, FleetAuthz } from '@kbn/fleet-plugin/common';
 
 import { omit } from 'lodash';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { ProductFeaturesService } from '../../../../server/lib/product_features_service';
 import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ } from '../response_actions/constants';
 import type { LicenseService } from '../../../license';
@@ -99,10 +100,19 @@ export const calculateEndpointAuthz = (
   const authz: EndpointAuthz = {
     canWriteSecuritySolution,
     canReadSecuritySolution,
+
+    // ---------------------------------------------------------
+    // Coming from Fleet authz
+    // ---------------------------------------------------------
     canAccessFleet: fleetAuthz?.fleet.all ?? false,
     canReadFleetAgentPolicies: fleetAuthz?.fleet.readAgentPolicies ?? false,
     canWriteFleetAgents: fleetAuthz?.fleet.allAgents ?? false,
     canReadFleetAgents: fleetAuthz?.fleet.readAgents ?? false,
+    canWriteIntegrationPolicies: fleetAuthz?.integrations.writeIntegrationPolicies ?? false,
+
+    // ---------------------------------------------------------
+    // Endpoint & policy management
+    // ---------------------------------------------------------
     canAccessEndpointManagement: hasEndpointManagementAccess, // TODO: is this one deprecated? it is the only place we need to check for superuser.
     canCreateArtifactsByPolicy: isPlatinumPlusLicense,
     canWriteEndpointList,
@@ -166,6 +176,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadFleetAgentPolicies: false,
     canReadFleetAgents: false,
     canWriteFleetAgents: false,
+    canWriteIntegrationPolicies: false,
     canAccessEndpointActionsLogManagement: false,
     canAccessEndpointManagement: false,
     canCreateArtifactsByPolicy: false,
@@ -197,4 +208,25 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
   };
+};
+
+/**
+ * Duplicate logic to calculate if user has privilege to fetch Agent Policies,
+ * working only with Capabilities, in order to be able to use it e.g. in middleware.
+ *
+ * The logic works with Fleet granular privileges (`subfeaturePrivileges`) both enabled and disabled.
+ *
+ * @param capabilities Capabilities from coreStart.application
+ */
+export const canFetchPackageAndAgentPolicies = (capabilities: Capabilities): boolean => {
+  const canReadPolicyManagement = Boolean(capabilities.siem?.readPolicyManagement);
+
+  const fleetv2 = capabilities.fleetv2;
+  const canReadFleetAgentPolicies = Boolean(
+    fleetv2?.read && (fleetv2?.agent_policies_read ?? true)
+  );
+
+  const canReadIntegrations = Boolean(capabilities.fleet?.read);
+
+  return canReadPolicyManagement || (canReadFleetAgentPolicies && canReadIntegrations);
 };

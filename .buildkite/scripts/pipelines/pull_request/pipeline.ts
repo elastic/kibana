@@ -154,9 +154,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/packages\/ai-infra/,
-        /^x-pack\/plugins\/ai_infra/,
-        /^x-pack\/plugins\/inference/,
+        /^x-pack\/platform\/packages\/shared\/ai-infra/,
+        /^x-pack\/platform\/plugins\/shared\/ai_infra/,
+        /^x-pack\/platform\/plugins\/shared\/inference/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
         /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,
@@ -267,6 +267,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
       );
       pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml')
+      );
+      pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml')
       );
       pipeline.push(
@@ -373,6 +376,16 @@ const getPipeline = (filename: string, removeSteps = true) => {
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
         )
       );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/discover_enhanced\/ui_tests/,
+        /^packages\/kbn-scout/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_ui_tests.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

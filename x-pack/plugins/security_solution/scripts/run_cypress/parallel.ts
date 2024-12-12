@@ -32,7 +32,7 @@ import { createKbnClient } from '../endpoint/common/stack_services';
 import type { StartedFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { startFleetServer } from '../endpoint/common/fleet_server/fleet_server_services';
 import { renderSummaryTable } from './print_run';
-import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import { parseTestFileConfig, retrieveIntegrations, setDefaultToolingLoggingLevel } from './utils';
 import { getFTRConfig } from './get_ftr_config';
 
 export const cli = () => {
@@ -70,9 +70,9 @@ ${JSON.stringify(argv, null, 2)}
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
-        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
-      }
+      // Adjust tooling log level based on the `TOOLING_LOG_LEVEL` property, which can be
+      // defined in the cypress config file or set in the `env`
+      setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
 
       const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
 

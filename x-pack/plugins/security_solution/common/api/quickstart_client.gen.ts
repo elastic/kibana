@@ -363,9 +363,13 @@ import type {
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationPrebuiltRulesRequestParamsInput,
+  GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
+  GetRuleMigrationResourcesMissingRequestParamsInput,
+  GetRuleMigrationResourcesMissingResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   GetRuleMigrationTranslationStatsRequestParamsInput,
@@ -1432,6 +1436,24 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves all available prebuilt rules (installed and installable)
+   */
+  async getRuleMigrationPrebuiltRules(props: GetRuleMigrationPrebuiltRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationPrebuiltRules`);
+    return this.kbnClient
+      .request<GetRuleMigrationPrebuiltRulesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves resources for an existing SIEM rules migration
    */
   async getRuleMigrationResources(props: GetRuleMigrationResourcesProps) {
@@ -1448,6 +1470,24 @@ finalize it.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies missing resources from all the rules of an existing SIEM rules migration
+   */
+  async getRuleMigrationResourcesMissing(props: GetRuleMigrationResourcesMissingProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationResourcesMissing`);
+    return this.kbnClient
+      .request<GetRuleMigrationResourcesMissingResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/resources/missing',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2396,9 +2436,15 @@ export interface GetRuleMigrationProps {
   query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
+export interface GetRuleMigrationPrebuiltRulesProps {
+  params: GetRuleMigrationPrebuiltRulesRequestParamsInput;
+}
 export interface GetRuleMigrationResourcesProps {
   query: GetRuleMigrationResourcesRequestQueryInput;
   params: GetRuleMigrationResourcesRequestParamsInput;
+}
+export interface GetRuleMigrationResourcesMissingProps {
+  params: GetRuleMigrationResourcesMissingRequestParamsInput;
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;

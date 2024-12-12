@@ -6,9 +6,8 @@
  */
 
 import React, { useEffect } from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
 import { Router, Route } from '@kbn/shared-ux-router';
-import { render } from '@testing-library/react';
+import { render, renderHook, act } from '@testing-library/react';
 import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';
 import { getHistoryFromUrl } from '../rtl_helpers';
 import type { AppDataType } from '../types';
@@ -135,7 +134,7 @@ describe('userSeriesStorage', function () {
   });
 
   it('ensures that only one series has a breakdown', () => {
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
@@ -145,7 +144,7 @@ describe('userSeriesStorage', function () {
             set: jest.fn(),
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, {}, children)}
         </UrlStorageContextProvider>
       );
     }
@@ -166,7 +165,7 @@ describe('userSeriesStorage', function () {
 
   it('sets reportType when calling applyChanges', () => {
     const setStorage = jest.fn();
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
@@ -178,7 +177,7 @@ describe('userSeriesStorage', function () {
             set: setStorage,
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, {}, children)}
         </UrlStorageContextProvider>
       );
     }
@@ -197,7 +196,7 @@ describe('userSeriesStorage', function () {
 
   it('returns reportType in state, not url storage, from hook', () => {
     const setStorage = jest.fn();
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
@@ -209,7 +208,7 @@ describe('userSeriesStorage', function () {
             set: setStorage,
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, {}, children)}
         </UrlStorageContextProvider>
       );
     }
@@ -225,7 +224,7 @@ describe('userSeriesStorage', function () {
   it('ensures that telemetry is called', () => {
     const trackEvent = jest.fn();
     jest.spyOn(useTrackMetric, 'useUiTracker').mockReturnValue(trackEvent);
-    function wrapper({ children }: { children: React.ReactElement }) {
+    function wrapper({ children }: React.PropsWithChildren) {
       return (
         <UrlStorageContextProvider
           storage={{
@@ -237,7 +236,7 @@ describe('userSeriesStorage', function () {
             set: jest.fn(),
           }}
         >
-          {children}
+          {React.createElement(React.Fragment, {}, children)}
         </UrlStorageContextProvider>
       );
     }

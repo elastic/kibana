@@ -49,10 +49,8 @@ import type {
   ToastsSetup,
 } from '@kbn/core/public';
 
-import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import { BfetchRequestError } from '@kbn/bfetch-error';
 import type {
   SanitizedConnectionRequestParams,
   IKibanaSearchRequest,
@@ -87,7 +85,6 @@ import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
 
 export interface SearchInterceptorDeps {
-  bfetch: BfetchPublicSetup;
   http: HttpSetup;
   executionContext: ExecutionContextSetup;
   uiSettings: IUiSettingsClient;
@@ -104,7 +101,6 @@ const MAX_CACHE_SIZE_MB = 10;
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
-  private bFetchDisabled: boolean;
   private readonly responseCache: SearchResponseCache = new SearchResponseCache(
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
@@ -121,10 +117,6 @@ export class SearchInterceptor {
    */
   private application!: ApplicationStart;
   private docLinks!: DocLinksStart;
-  private batchedFetch!: BatchedFunc<
-    { request: IKibanaSearchRequest; options: ISearchOptionsSerializable },
-    IKibanaSearchResponse
-  >;
   private inspector!: InspectorStart;
 
   /*
@@ -151,19 +143,11 @@ export class SearchInterceptor {
       this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
     });
 
-    this.batchedFetch = deps.bfetch.batchedFunction({
-      url: '/internal/bsearch',
-    });
-
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
-    this.bFetchDisabled = deps.uiSettings.get(DISABLE_BFETCH);
 
     this.uiSettingsSubs.push(
       deps.uiSettings.get$(UI_SETTINGS.SEARCH_TIMEOUT).subscribe((timeout: number) => {
         this.searchTimeout = timeout;
-      }),
-      deps.uiSettings.get$(DISABLE_BFETCH).subscribe((bFetchDisabled: boolean) => {
-        this.bFetchDisabled = bFetchDisabled;
       })
     );
   }
@@ -223,8 +207,8 @@ export class SearchInterceptor {
       return err;
     }
 
-    if (e instanceof AbortError || e instanceof BfetchRequestError) {
-      // In the case an application initiated abort, throw the existing AbortError, same with BfetchRequestErrors
+    if (e instanceof AbortError) {
+      // In the case an application initiated abort, throw the existing AbortError
       return e;
     }
 
@@ -450,99 +434,85 @@ export class SearchInterceptor {
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
-    if (this.bFetchDisabled) {
-      const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
-      return this.deps.http
-        .post<IKibanaSearchResponse | ErrorResponseBase>(
-          `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
-          {
-            version: '1',
-            signal: abortSignal,
-            context: executionContext,
-            body: JSON.stringify({
-              ...request,
-              ...searchOptions,
-              stream:
-                strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
-                strategy === ENHANCED_ES_SEARCH_STRATEGY ||
-                strategy === undefined, // undefined strategy is treated as enhanced ES
-            }),
-            asResponse: true,
-          }
-        )
-        .then((rawResponse) => {
-          const warning = rawResponse.response?.headers.get('warning');
-          const requestParams =
-            rawResponse.body && 'requestParams' in rawResponse.body
-              ? rawResponse.body.requestParams
-              : JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
-          const isRestored =
-            rawResponse.body && 'isRestored' in rawResponse.body
-              ? rawResponse.body.isRestored
-              : rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
-
-          if (rawResponse.body && 'error' in rawResponse.body) {
-            // eslint-disable-next-line no-throw-literal
-            throw {
-              attributes: {
-                error: rawResponse.body.error,
-                rawResponse: rawResponse.body,
-                requestParams,
-                isRestored,
-              },
-            };
-          }
-
-          switch (strategy) {
-            case ENHANCED_ES_SEARCH_STRATEGY:
-              if (rawResponse.body?.rawResponse) return rawResponse.body;
-              const typedResponse = rawResponse.body as unknown as AsyncSearchGetResponse;
-              const shimmedResponse = shimHitsTotal(typedResponse.response, {
-                legacyHitsTotal: searchOptions.legacyHitsTotal,
-              });
-              return {
-                id: typedResponse.id,
-                isPartial: typedResponse.is_partial,
-                isRunning: typedResponse.is_running,
-                rawResponse: shimmedResponse,
-                warning,
-                requestParams,
-                isRestored,
-                ...getTotalLoaded(shimmedResponse),
-              };
-            case ESQL_ASYNC_SEARCH_STRATEGY:
-              const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
-              return {
-                id: esqlResponse.id,
-                rawResponse: esqlResponse,
-                isPartial: esqlResponse.is_partial,
-                isRunning: esqlResponse.is_running,
-                warning,
-              };
-            default:
-              return rawResponse.body;
-          }
-        })
-        .catch((e: IHttpFetchError<KibanaServerError>) => {
-          if (e?.body) {
-            throw e.body;
-          } else {
-            throw e;
-          }
-        }) as Promise<IKibanaSearchResponse>;
-    } else {
-      const { executionContext, ...rest } = options || {};
-      return this.batchedFetch(
+    const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+    return this.deps.http
+      .post<IKibanaSearchResponse | ErrorResponseBase>(
+        `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
         {
-          request,
-          options: this.getSerializableOptions({
-            ...rest,
-            executionContext: this.deps.executionContext.withGlobalContext(executionContext),
+          version: '1',
+          signal: abortSignal,
+          context: executionContext,
+          body: JSON.stringify({
+            ...request,
+            ...searchOptions,
+            stream:
+              strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
+              strategy === ENHANCED_ES_SEARCH_STRATEGY ||
+              strategy === undefined, // undefined strategy is treated as enhanced ES
           }),
-        },
-        abortSignal
-      );
-    }
+          asResponse: true,
+        }
+      )
+      .then((rawResponse) => {
+        const warning = rawResponse.response?.headers.get('warning');
+        const requestParams =
+          rawResponse.body && 'requestParams' in rawResponse.body
+            ? rawResponse.body.requestParams
+            : JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
+        const isRestored =
+          rawResponse.body && 'isRestored' in rawResponse.body
+            ? rawResponse.body.isRestored
+            : rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
+
+        if (rawResponse.body && 'error' in rawResponse.body) {
+          // eslint-disable-next-line no-throw-literal
+          throw {
+            attributes: {
+              error: rawResponse.body.error,
+              rawResponse: rawResponse.body,
+              requestParams,
+              isRestored,
+            },
+          };
+        }
+
+        switch (strategy) {
+          case ENHANCED_ES_SEARCH_STRATEGY:
+            if (rawResponse.body?.rawResponse) return rawResponse.body;
+            const typedResponse = rawResponse.body as unknown as AsyncSearchGetResponse;
+            const shimmedResponse = shimHitsTotal(typedResponse.response, {
+              legacyHitsTotal: searchOptions.legacyHitsTotal,
+            });
+            return {
+              id: typedResponse.id,
+              isPartial: typedResponse.is_partial,
+              isRunning: typedResponse.is_running,
+              rawResponse: shimmedResponse,
+              warning,
+              requestParams,
+              isRestored,
+              ...getTotalLoaded(shimmedResponse),
+            };
+          case ESQL_ASYNC_SEARCH_STRATEGY:
+            const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+            return {
+              id: esqlResponse.id,
+              rawResponse: esqlResponse,
+              isPartial: esqlResponse.is_partial,
+              isRunning: esqlResponse.is_running,
+              warning,
+            };
+          default:
+            return rawResponse.body;
+        }
+      })
+      .catch((e: IHttpFetchError<KibanaServerError>) => {
+        if (e?.body) {
+          throw e.body;
+        } else {
+          throw e;
+        }
+      }) as Promise<IKibanaSearchResponse>;
   }
 
   /**

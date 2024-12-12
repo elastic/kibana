@@ -115,6 +115,7 @@ import {
   setDataViews,
   setInspector,
   getTypes,
+  setNotifications,
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
@@ -411,14 +412,13 @@ export class VisualizationsPlugin
       const getVisualizeEmbeddableFactory = await getVisualizeEmbeddableFactoryLazy();
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
-    embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
+    embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: (container, savedObject) => {
         container.addNewPanel<VisualizeSerializedState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
           initialState: { savedObjectId: savedObject.id },
         });
       },
-      embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
@@ -486,6 +486,7 @@ export class VisualizationsPlugin
     setSavedSearch(savedSearch);
     setDataViews(dataViews);
     setInspector(inspector);
+    setNotifications(core.notifications);
 
     if (spaces) {
       setSpaces(spaces);
