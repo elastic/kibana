@@ -2019,7 +2019,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
 /x-pack/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
+/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-core
 /x-pack/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
@@ -2042,7 +2042,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-core
 /x-pack/test/functional/apps/dev_tools @elastic/kibana-management
 /test/plugin_functional/test_suites/management @elastic/kibana-management
-/x-pack/test/upgrade_assistant_integration @elastic/kibana-management
+/x-pack/test/upgrade_assistant_integration @elastic/kibana-core
 /test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /test/functional/page_objects/management/*.ts @elastic/kibana-management
 /test/functional/page_objects/embedded_console.ts @elastic/kibana-management
@@ -3244,7 +3244,7 @@ x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/telemetry_collection_xpack @elastic/kibana-core
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
-x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
+x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-core
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
