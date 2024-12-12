@@ -448,7 +448,7 @@ src/plugins/event_annotation_listing @elastic/kibana-visualizations
 src/plugins/event_annotation @elastic/kibana-visualizations
 x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/plugins/event_log @elastic/response-ops
-packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/exploratory_view @elastic/obs-ux-management-team
@@ -960,8 +960,8 @@ x-pack/performance @elastic/appex-qa
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
-x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
-x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
 packages/kbn-timelion-grammar @elastic/kibana-visualizations
 packages/kbn-timerange @elastic/obs-ux-logs-team
 packages/kbn-tinymath @elastic/kibana-visualizations
