@@ -697,7 +697,7 @@
     "@kbn/observability-ai-assistant-plugin": "link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant",
     "@kbn/observability-ai-common": "link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common",
     "@kbn/observability-ai-server": "link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server",
-    "@kbn/observability-alert-details": "link:x-pack/packages/observability/alert_details",
+    "@kbn/observability-alert-details": "link:x-pack/solutions/observability/packages/alert_details",
     "@kbn/observability-alerting-rule-utils": "link:x-pack/packages/observability/alerting_rule_utils",
     "@kbn/observability-alerting-test-data": "link:x-pack/packages/observability/alerting_test_data",
     "@kbn/observability-fixtures-plugin": "link:x-pack/test/cases_api_integration/common/plugins/observability",
