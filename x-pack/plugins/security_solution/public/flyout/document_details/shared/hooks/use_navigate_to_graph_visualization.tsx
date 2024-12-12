@@ -10,18 +10,11 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useWhichFlyout } from './use_which_flyout';
-import { ANALYZE_GRAPH_ID, ANALYZER_PREVIEW_BANNER } from '../../left/components/analyze_graph';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-  DocumentDetailsAnalyzerPanelKey,
-} from '../constants/panel_keys';
-import { Flyouts } from '../constants/flyouts';
-import { isTimelineScope } from '../../../../helpers';
+import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { GRAPH_ID } from '../../left/components/graph_visualization';
 
-export interface UseNavigateToAnalyzerParams {
+export interface UseNavigateToGraphVisualizationParams {
   /**
    * When flyout is already open, call open left panel only
    * When flyout is not open, open a new flyout
@@ -41,29 +34,24 @@ export interface UseNavigateToAnalyzerParams {
   scopeId: string;
 }
 
-export interface UseNavigateToAnalyzerResult {
+export interface UseNavigateToGraphVisualizationResult {
   /**
    * Callback to open analyzer in visualize tab
    */
-  navigateToAnalyzer: () => void;
+  navigateToGraphVisualization: () => void;
 }
 
 /**
- * Hook that returns a callback to navigate to the analyzer in the flyout
+ * Hook that returns a callback to navigate to the graph visualization in the flyout
  */
-export const useNavigateToAnalyzer = ({
+export const useNavigateToGraphVisualization = ({
   isFlyoutOpen,
   eventId,
   indexName,
   scopeId,
-}: UseNavigateToAnalyzerParams): UseNavigateToAnalyzerResult => {
+}: UseNavigateToGraphVisualizationParams): UseNavigateToGraphVisualizationResult => {
   const { telemetry } = useKibana().services;
-  const { openLeftPanel, openPreviewPanel, openFlyout } = useExpandableFlyoutApi();
-  let key = useWhichFlyout() ?? 'memory';
-
-  if (!isFlyoutOpen) {
-    key = isTimelineScope(scopeId) ? Flyouts.timeline : Flyouts.securitySolution;
-  }
+  const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
 
   const right: FlyoutPanelProps = useMemo(
     () => ({
@@ -87,27 +75,15 @@ export const useNavigateToAnalyzer = ({
       },
       path: {
         tab: 'visualize',
-        subTab: ANALYZE_GRAPH_ID,
+        subTab: GRAPH_ID,
       },
     }),
     [eventId, indexName, scopeId]
   );
 
-  const preview: FlyoutPanelProps = useMemo(
-    () => ({
-      id: DocumentDetailsAnalyzerPanelKey,
-      params: {
-        resolverComponentInstanceID: `${key}-${scopeId}`,
-        banner: ANALYZER_PREVIEW_BANNER,
-      },
-    }),
-    [key, scopeId]
-  );
-
-  const navigateToAnalyzer = useCallback(() => {
+  const navigateToGraphVisualization = useCallback(() => {
     if (isFlyoutOpen) {
       openLeftPanel(left);
-      openPreviewPanel(preview);
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
@@ -117,24 +93,13 @@ export const useNavigateToAnalyzer = ({
       openFlyout({
         right,
         left,
-        preview,
       });
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: scopeId,
         panel: 'left',
       });
     }
-  }, [
-    openFlyout,
-    openLeftPanel,
-    openPreviewPanel,
-    right,
-    left,
-    preview,
-    scopeId,
-    telemetry,
-    isFlyoutOpen,
-  ]);
+  }, [openFlyout, openLeftPanel, right, left, scopeId, telemetry, isFlyoutOpen]);
 
-  return useMemo(() => ({ navigateToAnalyzer }), [navigateToAnalyzer]);
+  return useMemo(() => ({ navigateToGraphVisualization }), [navigateToGraphVisualization]);
 };
