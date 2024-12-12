@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import {
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_OPTION_LENGTH,
 } from '../../../constants';
 import { limitedStringSchema, limitedNumberAsIntegerSchema } from '../../../schema';
 
@@ -30,7 +30,7 @@ export const CaseCustomFieldListWithValidationValueRt = (fieldValue: string) =>
     limitedStringSchema({
       fieldName: fieldValue,
       min: 1,
-      max: MAX_CUSTOM_FIELD_LABEL_LENGTH,
+      max: MAX_CUSTOM_FIELD_OPTION_LENGTH,
     })
   );
 

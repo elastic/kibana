@@ -10,6 +10,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_OPTION_LENGTH,
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATES_LENGTH,
   MAX_TEMPLATE_DESCRIPTION_LENGTH,
@@ -73,7 +74,7 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
 ]);
 
 export const ListCustomFieldOptionRt = rt.strict({
-  label: rt.string,
+  label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CUSTOM_FIELD_OPTION_LENGTH }),
   key: rt.string,
 });
 
