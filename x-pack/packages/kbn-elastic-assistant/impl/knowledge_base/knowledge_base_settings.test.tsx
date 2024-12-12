@@ -30,12 +30,12 @@ const mockUseAssistantContext = {
   setConversations: jest.fn(),
   assistantAvailability: {
     isAssistantEnabled: true,
-    hasAssistantPrivilege: true
+    hasAssistantPrivilege: true,
   },
   chrome: {
-    getChromeStyle$: jest.fn(()=>of("classic")), 
-    navControls: chromeServiceMock.createStartContract().navControls
-  }
+    getChromeStyle$: jest.fn(() => of('classic')),
+    navControls: chromeServiceMock.createStartContract().navControls,
+  },
 };
 
 jest.mock('../assistant_context', () => {

@@ -80,7 +80,7 @@ const mockUseAssistantContext = {
   assistantAvailability: {
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
-    hasAssistantPrivilege: true
+    hasAssistantPrivilege: true,
   },
   baseAllow: ['@timestamp', 'event.category', 'user.name'],
   baseAllowReplacement: ['user.name', 'host.ip'],
@@ -90,9 +90,9 @@ const mockUseAssistantContext = {
   setDefaultAllow: jest.fn(),
   setDefaultAllowReplacement: jest.fn(),
   chrome: {
-    getChromeStyle$: jest.fn(()=>of("classic")), 
-    navControls: chromeServiceMock.createStartContract().navControls
-  }
+    getChromeStyle$: jest.fn(() => of('classic')),
+    navControls: chromeServiceMock.createStartContract().navControls,
+  },
 };
 jest.mock('../../../assistant_context', () => {
   const original = jest.requireActual('../../../assistant_context');

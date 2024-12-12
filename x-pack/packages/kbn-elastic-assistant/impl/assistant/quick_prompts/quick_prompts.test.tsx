@@ -29,11 +29,11 @@ const mockUseAssistantContext = {
   promptContexts: {},
   allQuickPrompts: MOCK_QUICK_PROMPTS,
   chrome: {
-    getChromeStyle$: jest.fn(()=>of("classic")), 
-    navControls: chromeServiceMock.createStartContract().navControls
+    getChromeStyle$: jest.fn(() => of('classic')),
+    navControls: chromeServiceMock.createStartContract().navControls,
   },
   assistantAvailability: {
-    hasAssistantPrivilege: true
+    hasAssistantPrivilege: true,
   },
 };
 
