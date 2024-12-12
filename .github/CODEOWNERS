@@ -521,7 +521,6 @@ packages/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security
 packages/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 packages/kbn-unified-field-list @elastic/kibana-data-discovery
 packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
-packages/kbn-unsaved-changes-prompt @elastic/kibana-management
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
 packages/kbn-user-profile-components @elastic/kibana-security
 packages/kbn-utility-types @elastic/kibana-core
@@ -628,6 +627,7 @@ src/platform/packages/shared/kbn-management/settings/field_definition @elastic/k
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/platform/plugins/shared/console @elastic/kibana-management
 src/platform/plugins/shared/dev_tools @elastic/kibana-management

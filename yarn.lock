@@ -7808,7 +7808,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unsaved-changes-prompt@link:packages/kbn-unsaved-changes-prompt":
+"@kbn/unsaved-changes-prompt@link:src/platform/packages/shared/kbn-unsaved-changes-prompt":
   version "0.0.0"
   uid ""
 
