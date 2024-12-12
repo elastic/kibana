@@ -342,6 +342,12 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async (resetQuery?: boolean) => {
+    if (resetQuery) {
+      refetch$.next('reset');
+    } else {
+      refetch$.next(undefined);
+    }
+
     const query = appStateContainer.getState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
@@ -350,12 +356,6 @@ export function getDataStateContainer({
       if (nextDataView !== currentDataView) {
         setDataView(nextDataView);
       }
-    }
-
-    if (resetQuery) {
-      refetch$.next('reset');
-    } else {
-      refetch$.next(undefined);
     }
 
     return refetch$;
