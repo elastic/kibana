@@ -73,11 +73,6 @@ export class AnomalyExplorerCommonStateService extends StateService {
     shareReplay(1)
   );
 
-  public readonly singleMetricJobs$: Observable<ExplorerJob[]> = this._selectedJobs$.pipe(
-    map((jobs) => jobs.filter((j) => j.isSingleMetricViewerJob)),
-    shareReplay(1)
-  );
-
   public readonly influencerFilterQuery$: Observable<InfluencersFilterQuery | undefined> =
     this._filterSettings$.pipe(
       map((v) => v?.influencersFilterQuery),
@@ -96,10 +91,6 @@ export class AnomalyExplorerCommonStateService extends StateService {
 
   public get selectedJobs(): ExplorerJob[] {
     return this._selectedJobs$.getValue();
-  }
-
-  public get singleMetricJobs(): ExplorerJob[] {
-    return this._selectedJobs$.getValue().filter((j) => j.isSingleMetricViewerJob);
   }
 
   public get filterSettings(): FilterSettings {
