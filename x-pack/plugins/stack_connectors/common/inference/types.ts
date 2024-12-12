@@ -40,14 +40,10 @@ export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
 
-export interface InferenceTaskType {
-  task_type: string;
-  configuration: FieldsConfiguration;
-}
-
 export interface InferenceProvider {
-  provider: string;
-  task_types: InferenceTaskType[];
+  service: string;
+  name: string;
+  task_types: string[];
   logo?: string;
-  configuration: FieldsConfiguration;
+  configurations: FieldsConfiguration;
 }
