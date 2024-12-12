@@ -3838,7 +3838,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
+"@kbn/ai-assistant-management-plugin@link:src/platform/plugins/shared/ai_assistant_management/selection":
   version "0.0.0"
   uid ""
 
@@ -5230,7 +5230,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-usage-plugin@link:x-pack/plugins/data_usage":
+"@kbn/data-usage-plugin@link:x-pack/platform/plugins/private/data_usage":
   version "0.0.0"
   uid ""
 
@@ -5394,7 +5394,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/security-solution/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
 
@@ -6430,15 +6430,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-app-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_app":
+"@kbn/observability-ai-assistant-app-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_app":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-management-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_management":
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
   version "0.0.0"
   uid ""
 
@@ -7030,7 +7038,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/packages/security-solution/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
   version "0.0.0"
   uid ""
 
@@ -7038,7 +7046,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-features@link:x-pack/packages/security-solution/features":
+"@kbn/security-solution-features@link:x-pack/solutions/security/packages/features":
   version "0.0.0"
   uid ""
 
@@ -7046,7 +7054,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-navigation@link:x-pack/packages/security-solution/navigation":
+"@kbn/security-solution-navigation@link:x-pack/solutions/security/packages/navigation":
   version "0.0.0"
   uid ""
 
@@ -7058,15 +7066,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/packages/security-solution/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side_nav":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-storybook-config@link:x-pack/packages/security-solution/storybook/config":
+"@kbn/security-solution-storybook-config@link:x-pack/solutions/security/packages/storybook/config":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-upselling@link:x-pack/packages/security-solution/upselling":
+"@kbn/security-solution-upselling@link:x-pack/solutions/security/packages/upselling":
   version "0.0.0"
   uid ""
 
@@ -7082,7 +7090,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/packages/security-solution/data_table":
+"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data_table":
   version "0.0.0"
   uid ""
 
@@ -11884,13 +11892,6 @@
   integrity sha512-NQrnFOX1PTvHY8OH1aLoZntAkc2ad/1Cdl31UWIEaqBpDJ/m5SwfFBtFaX7TBLavASeLxG8DL7rm3NHKCLduaA==
   dependencies:
     moment ">=2.14.0"
-
-"@types/multistream@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@types/multistream/-/multistream-4.1.0.tgz#517770a32e5715fdda87904a6da7d179142feba4"
-  integrity sha512-KiMkWve/Uu0qwCtNO6ZflMLjglkXsAdLdIwb31o5YQBbevdH2DF7inqebCli+F9am8McvEqCE4GXNOUZe8jOAg==
-  dependencies:
-    "@types/node" "*"
 
 "@types/mustache@^0.8.31":
   version "0.8.31"
@@ -19571,6 +19572,11 @@ functions-have-names@^1.2.3:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
+fuse.js@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-7.0.0.tgz#6573c9fcd4c8268e403b4fc7d7131ffcf99a9eb2"
+  integrity sha512-14F4hBIxqKvD4Zz/XjDc3y94mNZN6pRv3U13Udo0lNLCWRBUsrMv2xwcF/y/Z5sV6+FQW+/ow68cHpm4sunt8Q==
+
 gauge@^3.0.0:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/gauge/-/gauge-3.0.2.tgz#03bf4441c044383908bcfa0656ad91803259b395"
@@ -24733,14 +24739,6 @@ multipipe@^1.0.2:
   dependencies:
     duplexer2 "^0.1.2"
     object-assign "^4.1.0"
-
-multistream@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/multistream/-/multistream-4.1.0.tgz#7bf00dfd119556fbc153cff3de4c6d477909f5a8"
-  integrity sha512-J1XDiAmmNpRCBfIWJv+n0ymC4ABcf/Pl+5YvC5B/D2f/2+8PtHvCNxMPKiQcZyi922Hq69J2YOpb1pTywfifyw==
-  dependencies:
-    once "^1.4.0"
-    readable-stream "^3.6.0"
 
 murmurhash-js@^1.0.0:
   version "1.0.0"
