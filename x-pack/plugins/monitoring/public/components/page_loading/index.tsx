@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageTemplate, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { useTrackPageview } from '../../application/hooks/use_track_metric';
 
 function PageLoadingUI() {
   return (
@@ -29,8 +29,8 @@ const PageLoadingTracking: React.FunctionComponent<{ pageViewTitle: string }> = 
   pageViewTitle,
 }) => {
   const path = pageViewTitle.toLowerCase().replace(/-/g, '').replace(/\s+/g, '_');
-  useTrackPageview({ app: 'stack_monitoring', path });
-  useTrackPageview({ app: 'stack_monitoring', path, delay: 15000 });
+  useTrackPageview({ path });
+  useTrackPageview({ path, delay: 15000 });
   return <PageLoadingUI />;
 };
 
