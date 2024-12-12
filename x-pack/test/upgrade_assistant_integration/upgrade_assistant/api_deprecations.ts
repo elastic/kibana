@@ -17,9 +17,15 @@ import type {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
-  return allDeprecations.filter(
-    (deprecation) => deprecation.deprecationType === 'api'
-  ) as unknown as Array<DomainDeprecationDetails<ApiDeprecationDetails>>;
+  return (
+    allDeprecations
+      .filter(
+        (deprecation): deprecation is DomainDeprecationDetails<ApiDeprecationDetails> =>
+          deprecation.deprecationType === 'api'
+      )
+      // Ensure consistent sorting
+      .sort((a, b) => a.title.localeCompare(b.title))
+  );
 };
 
 export default function ({ getService }: FtrProviderContext) {
