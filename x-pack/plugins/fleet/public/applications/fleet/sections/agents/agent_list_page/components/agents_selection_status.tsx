@@ -14,6 +14,7 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { Agent } from '../../../../types';
 
 import type { SelectionMode } from './types';
+import { AgentExportCSVTour } from './agent_export_csv_tour';
 
 const Divider = styled.div`
   width: 0;
@@ -62,7 +63,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
     <>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" id="agentListSelectionText">
             {totalAgents > SO_SEARCH_LIMIT ? (
               <FormattedMessage
                 id="xpack.fleet.agentBulkActions.totalAgentsWithLimit"
@@ -97,6 +98,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
               </>
             )}
           </EuiText>
+          <AgentExportCSVTour />
         </EuiFlexItem>
         {showSelectionInfoAndOptions ? (
           <>

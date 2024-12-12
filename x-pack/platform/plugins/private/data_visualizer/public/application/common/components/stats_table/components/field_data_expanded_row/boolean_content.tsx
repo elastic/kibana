@@ -54,7 +54,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
       <TopValues
         stats={config.stats}
         fieldFormat={fieldFormat}
-        barColor="success"
+        barColor="accentSecondary"
         onAddFilter={onAddFilter}
       />
 

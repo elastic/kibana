@@ -25,7 +25,7 @@ describe('DeleteAnalyticsCollectionApiLogic', () => {
       const result = deleteAnalyticsCollection({ name });
       await nextTick();
       expect(http.delete).toHaveBeenCalledWith(
-        `/internal/enterprise_search/analytics/collections/${name}`
+        `/internal/elasticsearch/analytics/collections/${name}`
       );
       await expect(result).resolves.toEqual(undefined);
     });
