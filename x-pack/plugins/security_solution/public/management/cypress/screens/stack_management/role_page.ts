@@ -214,3 +214,7 @@ export const clickViewPrivilegeSummaryButton = (): Cypress.Chainable<JQuery<HTML
   ensureOnRolePage();
   return cy.getByTestSubj('viewPrivilegeSummaryButton').click();
 };
+
+export const getFeatureCategories = (): Cypress.Chainable<JQuery<HTMLDivElement>> => {
+  return cy.get('[data-test-subj^="featureCategory_"]');
+};
