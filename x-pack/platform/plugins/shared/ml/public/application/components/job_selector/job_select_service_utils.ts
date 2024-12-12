@@ -11,10 +11,10 @@ import d3 from 'd3';
 
 import type { Dictionary } from '../../../../common/types/common';
 import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import type { GroupWithTimerange } from './job_selector_flyout';
+import type { MlJobGroupWithTimeRange } from './job_selector_flyout';
 
 export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
-  const groups: Dictionary<GroupWithTimerange> = {};
+  const groups: Dictionary<MlJobGroupWithTimeRange> = {};
   const groupsMap: Dictionary<any> = {};
 
   jobs.forEach((job) => {

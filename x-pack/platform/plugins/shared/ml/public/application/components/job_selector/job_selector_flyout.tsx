@@ -21,7 +21,6 @@ import {
   EuiResizeObserver,
   EuiProgress,
 } from '@elastic/eui';
-import type { Moment } from 'moment';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 // @ts-ignore
 import { JobSelectorTable } from './job_selector_table';
@@ -30,7 +29,10 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type {
+  MlJobTimeRange,
+  MlJobWithTimeRange,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
 import type { JobSelectionMaps } from './job_selector';
 
@@ -57,19 +59,10 @@ export interface JobSelectorFlyoutProps {
   onTimeRangeConfigChange?: (v: boolean) => void;
 }
 
-export interface GroupWithTimerange {
+export interface MlJobGroupWithTimeRange {
   id: string;
   jobIds: string[];
-  timeRange: {
-    from: number;
-    to: number;
-    fromPx: number;
-    toPx: number;
-    fromMoment: Moment | null;
-    toMoment: Moment | null;
-    widthPx?: number | null;
-    label?: string;
-  };
+  timeRange: MlJobTimeRange;
 }
 
 export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
@@ -96,7 +89,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
-  const [groups, setGroups] = useState<GroupWithTimerange[]>([]);
+  const [groups, setGroups] = useState<MlJobGroupWithTimeRange[]>([]);
 
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
 
