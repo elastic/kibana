@@ -24,18 +24,17 @@ export const EntityActions = ({ entity, setShowActions }: Props) => {
     ? `inventoryEntityActionsButton-${entity.entityDisplayName}`
     : 'inventoryEntityActionsButton';
 
-  const { getDiscoverEntitiesRedirectUrl, isEntityDefinitionIndexPatternsLoading } =
-    useDiscoverRedirect(entity);
+  const { getDiscoverEntitiesRedirectUrl, isEntityDefinitionLoading } = useDiscoverRedirect(entity);
   const discoverUrl = getDiscoverEntitiesRedirectUrl();
 
   const actions: React.ReactElement[] = [];
 
-  if (!discoverUrl && !isEntityDefinitionIndexPatternsLoading) {
+  if (!discoverUrl && !isEntityDefinitionLoading) {
     setShowActions(false);
     return null;
   }
 
-  if (!isEntityDefinitionIndexPatternsLoading) {
+  if (!isEntityDefinitionLoading) {
     actions.push(
       <EuiContextMenuItem
         data-test-subj="inventoryEntityActionExploreInDiscover"
@@ -66,7 +65,7 @@ export const EntityActions = ({ entity, setShowActions }: Props) => {
           iconType="boxesHorizontal"
           color="text"
           onClick={togglePopover}
-          isLoading={isEntityDefinitionIndexPatternsLoading}
+          isLoading={isEntityDefinitionLoading}
         />
       }
       closePopover={closePopover}
