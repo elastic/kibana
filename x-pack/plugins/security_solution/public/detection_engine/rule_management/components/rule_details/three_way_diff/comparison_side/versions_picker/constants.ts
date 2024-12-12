@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { EuiSelectOption } from '@elastic/eui';
-import * as i18n from './translations';
+import { isEqual } from 'lodash';
+import type { ThreeWayDiff } from '../../../../../../../../common/api/detection_engine';
+import {
+  ThreeWayDiffConflict,
+  ThreeWayDiffOutcome,
+} from '../../../../../../../../common/api/detection_engine';
+import * as i18n from '../translations';
 
 export enum Version {
   Base = 'base',
@@ -24,35 +29,120 @@ export enum SelectedVersions {
   TargetFinal = 'target_final',
 }
 
-export const CURRENT_OPTIONS: EuiSelectOption[] = [
-  {
-    value: SelectedVersions.CurrentFinal,
-    text: i18n.VERSION1_VS_VERSION2(i18n.CURRENT_VERSION, i18n.FINAL_VERSION),
-  },
-  {
-    value: SelectedVersions.CurrentTarget,
-    text: i18n.VERSION1_VS_VERSION2(i18n.CURRENT_VERSION, i18n.TARGET_VERSION),
-  },
-];
+export const getOptionsForDiffOutcome = (
+  fieldDiff: ThreeWayDiff<unknown>,
+  resolvedValue: unknown
+): Array<{ value: SelectedVersions; text: string; title: string }> => {
+  switch (fieldDiff.diff_outcome) {
+    case ThreeWayDiffOutcome.StockValueCanUpdate: {
+      const hasUserChangedResolvedValue = !isEqual(fieldDiff.merged_version, resolvedValue);
 
-export const TARGET_OPTIONS: EuiSelectOption[] = [
-  {
-    value: SelectedVersions.TargetFinal,
-    text: i18n.VERSION1_VS_VERSION2(i18n.TARGET_VERSION, i18n.FINAL_VERSION),
-  },
-];
+      const options = [
+        {
+          value: SelectedVersions.CurrentTarget,
+          text: i18n.UPDATE_FROM_ELASTIC_TITLE,
+          title: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
+        },
+      ];
 
-export const BASE_OPTIONS: EuiSelectOption[] = [
-  {
-    value: SelectedVersions.BaseFinal,
-    text: i18n.VERSION1_VS_VERSION2(i18n.BASE_VERSION, i18n.FINAL_VERSION),
-  },
-  {
-    value: SelectedVersions.BaseTarget,
-    text: i18n.VERSION1_VS_VERSION2(i18n.BASE_VERSION, i18n.TARGET_VERSION),
-  },
-  {
-    value: SelectedVersions.BaseCurrent,
-    text: i18n.VERSION1_VS_VERSION2(i18n.BASE_VERSION, i18n.CURRENT_VERSION),
-  },
-];
+      if (hasUserChangedResolvedValue) {
+        options.push({
+          value: SelectedVersions.CurrentFinal,
+          text: i18n.MY_CHANGES_TITLE,
+          title: i18n.MY_CHANGES_FINAL_UPDATE_ONLY_EXPLANATION,
+        });
+      }
+
+      return options;
+    }
+    case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
+      return [
+        {
+          value: SelectedVersions.BaseFinal,
+          text: i18n.MY_CHANGES_TITLE,
+          title: i18n.MY_CHANGES_EXPLANATION,
+        },
+      ];
+    case ThreeWayDiffOutcome.CustomizedValueSameUpdate:
+      return [
+        {
+          value: SelectedVersions.BaseFinal,
+          text: i18n.MY_CHANGES_TITLE,
+          title: i18n.MY_CHANGES_EXPLANATION,
+        },
+        {
+          value: SelectedVersions.BaseTarget,
+          text: i18n.UPDATE_FROM_ELASTIC_TITLE,
+          title: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
+        },
+      ];
+    case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
+      const hasUserChangedResolvedValue = !isEqual(fieldDiff.merged_version, resolvedValue);
+
+      if (fieldDiff.conflict === ThreeWayDiffConflict.SOLVABLE) {
+        return [
+          {
+            value: SelectedVersions.BaseFinal,
+            text: hasUserChangedResolvedValue ? i18n.MY_CHANGES_TITLE : i18n.MERGED_CHANGES_TITLE,
+            title: hasUserChangedResolvedValue
+              ? i18n.MY_CHANGES_FINAL_UPDATE_ONLY_EXPLANATION
+              : i18n.MERGED_CHANGES_EXPLANATION,
+          },
+          {
+            value: SelectedVersions.BaseTarget,
+            text: i18n.UPDATE_FROM_ELASTIC_TITLE,
+            title: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
+          },
+          {
+            value: SelectedVersions.BaseCurrent,
+            text: i18n.MY_CUSTOMIZATION_TITLE,
+            title: i18n.MY_CUSTOMIZATION_EXPLANATION,
+          },
+        ];
+      }
+
+      if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+        return [
+          {
+            value: SelectedVersions.BaseFinal,
+            text: i18n.MY_CHANGES_TITLE,
+            title: i18n.MY_CHANGES_EXPLANATION,
+          },
+          {
+            value: SelectedVersions.BaseTarget,
+            text: i18n.UPDATE_FROM_ELASTIC_TITLE,
+            title: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
+          },
+          {
+            value: SelectedVersions.BaseCurrent,
+            text: i18n.MY_CUSTOMIZATION_TITLE,
+            title: i18n.MY_CUSTOMIZATION_EXPLANATION,
+          },
+        ];
+      }
+    }
+    case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
+      const hasUserChangedResolvedValue = !isEqual(fieldDiff.merged_version, resolvedValue);
+
+      const options = [
+        {
+          value: SelectedVersions.CurrentTarget,
+          text: i18n.UPDATE_FROM_ELASTIC_TITLE,
+          title: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
+        },
+      ];
+
+      if (hasUserChangedResolvedValue) {
+        options.push({
+          value: SelectedVersions.CurrentFinal,
+          text: i18n.MY_CHANGES_TITLE,
+          title: i18n.MY_CHANGES_FINAL_UPDATE_ONLY_EXPLANATION,
+        });
+      }
+
+      return options;
+    }
+    default:
+      return [];
+  }
+};

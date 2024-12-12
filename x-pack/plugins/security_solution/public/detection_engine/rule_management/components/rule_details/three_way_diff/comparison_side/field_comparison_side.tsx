@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { VersionsPicker } from './versions_picker/versions_picker';
-import type { Version } from './versions_picker/constants';
-import { SelectedVersions } from './versions_picker/constants';
+import type { Version, SelectedVersions } from './versions_picker/constants';
+import { getOptionsForDiffOutcome } from './versions_picker/constants';
 import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
 import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { pickFieldValueForVersion } from './utils';
@@ -22,9 +22,8 @@ export function FieldComparisonSide(): JSX.Element {
   const { fieldName, fieldDiff, finalDiffableRule } = useFieldUpgradeContext();
   const resolvedValue = finalDiffableRule[fieldName];
 
-  const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
-    SelectedVersions.CurrentFinal
-  );
+  const options = getOptionsForDiffOutcome(fieldDiff, resolvedValue);
+  const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(options[0].value);
 
   const [oldVersionType, newVersionType] = selectedVersions.split('_') as [Version, Version];
 
@@ -42,13 +41,13 @@ export function FieldComparisonSide(): JSX.Element {
             <EuiTitle size="xxs">
               <h3>
                 {i18n.TITLE}
-                <ComparisonSideHelpInfo />
+                <ComparisonSideHelpInfo options={options} />
               </h3>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <VersionsPicker
-              hasBaseVersion={fieldDiff.has_base_version}
+              options={options}
               selectedVersions={selectedVersions}
               onChange={setSelectedVersions}
             />
