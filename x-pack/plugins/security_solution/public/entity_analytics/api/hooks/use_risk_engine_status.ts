@@ -7,6 +7,8 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { RiskEngineStatusResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useEntityAnalyticsRoutes } from '../api';
@@ -36,6 +38,22 @@ export const useIsNewRiskScoreModuleInstalled = (): RiskScoreModuleStatus => {
   }
 
   return { isLoading: false, installed: !!riskEngineStatus?.isNewRiskScoreModuleInstalled };
+};
+
+export const useRiskEngineCountdownTime = (
+  riskEngineStatus: RiskEngineStatus | undefined
+): string => {
+  const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
+  const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
+
+  return isRunning
+    ? i18n.translate(
+        'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.riskEngine.nowRunningMessage',
+        {
+          defaultMessage: 'Now running',
+        }
+      )
+    : moment(runAt).fromNow(true);
 };
 
 export interface RiskEngineStatus extends RiskEngineStatusResponse {
