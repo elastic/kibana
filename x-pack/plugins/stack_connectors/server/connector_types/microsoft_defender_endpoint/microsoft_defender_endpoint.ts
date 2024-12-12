@@ -27,6 +27,7 @@ import {
   MicrosoftDefenderEndpointTestConnectorParams,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
+  MicrosoftDefenderEndpointTestConnector,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export const API_MAX_RESULTS = 1000;
@@ -111,7 +112,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       const responseBody = JSON.stringify(error.response?.data ?? {});
 
       if (responseBody) {
-        return `${message}\nResponse body: ${responseBody}`;
+        return `${message}\nURL called: ${error.response?.config?.url}\nResponse body: ${responseBody}`;
       }
 
       return message;
@@ -129,10 +130,37 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   }
 
   public async testConnector(
-    options: MicrosoftDefenderEndpointTestConnectorParams,
+    _: MicrosoftDefenderEndpointTestConnectorParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<void> {
-    await this.getAgentDetails({ id: 'foo' }, connectorUsageCollector);
+  ): Promise<MicrosoftDefenderEndpointTestConnector> {
+    const results: string[] = [];
+
+    const catchErrorAndIgnoreExpectedErrors = (err: Error) => {
+      if (err.message.includes('ResourceNotFound')) {
+        return '';
+      }
+      throw err;
+    };
+
+    await this.getAgentDetails({ id: 'foo' }, connectorUsageCollector)
+      .catch(catchErrorAndIgnoreExpectedErrors)
+      .then(() => {
+        results.push('API call to Machines API was successful');
+      });
+
+    await this.isolateHost({ id: 'foo', comment: 'connector test' }, connectorUsageCollector)
+      .catch(catchErrorAndIgnoreExpectedErrors)
+      .then(() => {
+        results.push('API call to Machine Isolate was successful');
+      });
+
+    await this.isolateHost({ id: 'foo', comment: 'connector test' }, connectorUsageCollector)
+      .catch(catchErrorAndIgnoreExpectedErrors)
+      .then(() => {
+        results.push('API call to Machine Release was successful');
+      });
+
+    return { results };
   }
 
   public async getAgentDetails(

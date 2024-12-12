@@ -28,6 +28,10 @@ export type MicrosoftDefenderEndpointBaseApiResponse = TypeOf<
   typeof MicrosoftDefenderEndpointBaseApiResponseSchema
 >;
 
+export interface MicrosoftDefenderEndpointTestConnector {
+  results: string[];
+}
+
 export type MicrosoftDefenderEndpointAgentDetailsParams = TypeOf<typeof AgentDetailsParamsSchema>;
 
 /**
