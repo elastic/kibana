@@ -228,28 +228,39 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                   {!!field.value && (
                     <>
                       <EuiSpacer />
-                      <EuiFormRow
-                        fullWidth
-                        label={
-                          field.value === FieldType.HTML
-                            ? i18n.translate(
-                                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.htmlLabel',
-                                {
-                                  defaultMessage: 'CSS selector or XPath expression',
-                                }
-                              )
-                            : i18n.translate(
-                                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.urlLabel',
-                                {
-                                  defaultMessage: 'URL pattern',
-                                }
-                              )
-                        }
-                      >
-                        <Controller
-                          control={control}
-                          name="selector"
-                          render={({ field: selectorField, fieldState: { error, isTouched } }) => (
+                      <Controller
+                        control={control}
+                        name="selector"
+                        rules={{
+                          validate: (rule) =>
+                            !!rule?.trim() ||
+                            i18n.translate(
+                              'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fieldInput.requiredError',
+                              {
+                                defaultMessage: 'A value is required.',
+                              }
+                            ),
+                        }}
+                        render={({ field: selectorField, fieldState: { error, isTouched } }) => (
+                          <EuiFormRow
+                            isInvalid={!!error && isTouched}
+                            error={error?.message}
+                            label={
+                              field.value === FieldType.HTML
+                                ? i18n.translate(
+                                    'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.htmlLabel',
+                                    {
+                                      defaultMessage: 'CSS selector or XPath expression',
+                                    }
+                                  )
+                                : i18n.translate(
+                                    'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.content.urlLabel',
+                                    {
+                                      defaultMessage: 'URL pattern',
+                                    }
+                                  )
+                            }
+                          >
                             <EuiFieldText
                               data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleSelector"
                               isInvalid={!!error && isTouched}
@@ -274,9 +285,9 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                               onChange={selectorField.onChange}
                               value={selectorField.value ?? ''}
                             />
-                          )}
-                        />
-                      </EuiFormRow>
+                          </EuiFormRow>
+                        )}
+                      />
                       <EuiSpacer />
                       {field.value === FieldType.HTML ? (
                         <EuiLink
@@ -446,8 +457,23 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                         <Controller
                           control={control}
                           name="content_from.value"
-                          render={({ field: valueField }) => (
+                          rules={{
+                            validate: (rule) =>
+                              !!rule?.trim() ||
+                              i18n.translate(
+                                'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.contentFixedValue.requiredError',
+                                {
+                                  defaultMessage: 'A value is required',
+                                }
+                              ),
+                          }}
+                          render={({
+                            field: valueField,
+                            fieldState: { error: fieldError, isTouched: fieldIsTouched },
+                          }) => (
                             <EuiFormRow
+                              isInvalid={!!fieldError && fieldIsTouched}
+                              error={fieldError?.message}
                               helpText={i18n.translate(
                                 'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fixedValue.helpText',
                                 {
@@ -464,6 +490,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                               <EuiFieldText
                                 data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleFixedValue"
                                 fullWidth
+                                isInvalid={!!fieldError && fieldIsTouched}
                                 placeholder={i18n.translate(
                                   'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.fixedValue.placeHolder',
                                   {
