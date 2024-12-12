@@ -7,7 +7,11 @@
 
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import {
+  ListCustomFieldConfigurationRt,
+  type CustomFieldsConfiguration,
+  CaseCustomFieldListRt,
+} from '../../../common/types/domain';
 import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';
@@ -27,6 +31,7 @@ export const validateCustomFields = (params: CustomFieldValidationParams) => {
   validateCustomFieldKeysAgainstConfiguration(params);
   validateRequiredCustomFields(params);
   validateCustomFieldTypesInRequest(params);
+  validateListCustomFieldValues(params);
 };
 
 /**
@@ -185,5 +190,56 @@ export const validateSearchCasesCustomFields = ({
     }
 
     customFieldsMapping?.validateFilteringValues(value);
+  });
+};
+
+/**
+ * Throws if this custom field is a list and the value is not in the list of options
+ * Validates both if the key exists, and if the passed label matches the key
+ */
+export const validateListCustomFieldValues = ({
+  requestCustomFields,
+  customFieldsConfiguration,
+}: CustomFieldValidationParams) => {
+  if (!Array.isArray(requestCustomFields) || !requestCustomFields.length) {
+    return;
+  }
+
+  if (customFieldsConfiguration === undefined || !customFieldsConfiguration.length) {
+    throw Boom.badRequest('No custom fields configured.');
+  }
+
+  requestCustomFields.forEach((customField) => {
+    const customFieldConfiguration = customFieldsConfiguration.find(
+      (config) => config.key === customField.key
+    );
+
+    if (!customFieldConfiguration) {
+      throw Boom.badRequest(`Invalid custom field key: ${customField.key}`);
+    }
+
+    if (!ListCustomFieldConfigurationRt.is(customFieldConfiguration)) {
+      return;
+    }
+
+    if (CaseCustomFieldListRt.is(customField) && customField.value) {
+      const selectedKey = Object.keys(customField.value)[0];
+      const selectedValue = customField.value[selectedKey];
+
+      for (const option of customFieldConfiguration.options) {
+        if (option.key === selectedKey && option.label === selectedValue) {
+          return;
+        }
+        if (option.key === selectedKey && option.label !== selectedValue) {
+          throw Boom.badRequest(
+            `Label "${selectedValue}" supplied for custom field "${customField.key}" does not match the configured label for "${selectedKey}". Expected "${option.label}".`
+          );
+        }
+      }
+
+      throw Boom.badRequest(
+        `Invalid option key "${selectedKey}" supplied for custom field "${customField.key}"`
+      );
+    }
   });
 };
