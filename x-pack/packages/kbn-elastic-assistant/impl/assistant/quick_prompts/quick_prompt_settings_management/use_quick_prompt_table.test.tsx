@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import { EuiTableActionsColumnType, EuiTableComputedColumnType } from '@elastic/eui';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';

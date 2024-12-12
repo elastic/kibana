@@ -87,7 +87,7 @@ const TotalIntegrationsCount = ({
   pageCount,
   totalCount,
 }: Record<'pageCount' | 'totalCount', number>) => (
-  <EuiText size="xs" style={{ marginLeft: 8 }}>
+  <EuiText size="xs" css={{ marginLeft: 8 }}>
     <EuiTextColor color="subdued">
       <FormattedMessage
         id="xpack.cloudDefend.policies.totalIntegrationsCountMessage"
@@ -108,7 +108,7 @@ const SearchField = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+      <EuiFlexItem grow={true} css={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
           fullWidth
           onSearch={setLocalValue}
