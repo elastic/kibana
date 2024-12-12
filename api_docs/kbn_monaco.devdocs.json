@@ -487,7 +487,7 @@
         "tags": [],
         "label": "ESQLCallbacks",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -503,7 +503,7 @@
               "ESQLSourceResult",
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -525,7 +525,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,7 +539,7 @@
             "signature": [
               "CallbackFn<{}, { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[]; }> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -553,7 +553,7 @@
             "signature": [
               "(() => Promise<{ histogramBarTarget: number; }>) | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -571,7 +571,7 @@
               "PartialFieldsMetadataClient",
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
