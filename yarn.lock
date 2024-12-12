@@ -6000,7 +6000,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/investigation-shared@link:packages/kbn-investigation-shared":
+"@kbn/investigation-shared@link:x-pack/solutions/observability/packages/kbn-investigation-shared":
   version "0.0.0"
   uid ""
 

@@ -592,7 +592,7 @@
     "@kbn/inventory-plugin": "link:x-pack/plugins/observability_solution/inventory",
     "@kbn/investigate-app-plugin": "link:x-pack/solutions/observability/plugins/investigate_app",
     "@kbn/investigate-plugin": "link:x-pack/solutions/observability/plugins/investigate",
-    "@kbn/investigation-shared": "link:packages/kbn-investigation-shared",
+    "@kbn/investigation-shared": "link:x-pack/solutions/observability/packages/kbn-investigation-shared",
     "@kbn/io-ts-utils": "link:packages/kbn-io-ts-utils",
     "@kbn/ipynb": "link:packages/kbn-ipynb",
     "@kbn/item-buffer": "link:packages/kbn-item-buffer",
