@@ -7,6 +7,7 @@
 
 import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import {
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
@@ -18,6 +19,12 @@ import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state
 
 jest.mock('../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled', () => ({
   useIsPrebuiltRulesCustomizationEnabled: jest.fn(() => true),
+}));
+
+jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: jest.fn().mockReturnValue({
+    addWarning: jest.fn(),
+  }),
 }));
 
 describe('usePrebuiltRulesUpgradeState', () => {
@@ -214,7 +221,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
   // - user edited a rule (revision change)
   // - a new prebuilt rules package got released (version change)
   describe('concurrency control', () => {
-    it('invalidates resolved conflicts upon revision change', () => {
+    describe('revision change', () => {
       const createMock = ({ revision }: { revision: number }) => [
         createRuleUpgradeInfoMock({
           rule_id: 'test-rule-id-1',
@@ -244,38 +251,63 @@ describe('usePrebuiltRulesUpgradeState', () => {
         }),
       ];
 
-      const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
-        initialProps: createMock({ revision: 1 }),
-      });
+      it('invalidates resolved conflicts', () => {
+        const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
+          initialProps: createMock({ revision: 1 }),
+        });
 
-      act(() => {
-        result.current.setRuleFieldResolvedValue({
-          ruleId: 'test-rule-id-1',
-          fieldName: 'name',
-          resolvedValue: 'resolved',
+        act(() => {
+          result.current.setRuleFieldResolvedValue({
+            ruleId: 'test-rule-id-1',
+            fieldName: 'name',
+            resolvedValue: 'resolved',
+          });
+        });
+
+        expect(result.current.rulesUpgradeState).toEqual({
+          'test-rule-id-1': expect.objectContaining({
+            fieldsUpgradeState: {
+              name: { state: FieldUpgradeStateEnum.Accepted, resolvedValue: 'resolved' },
+            },
+          }),
+        });
+
+        rerender(createMock({ revision: 2 }));
+
+        expect(result.current.rulesUpgradeState).toEqual({
+          'test-rule-id-1': expect.objectContaining({
+            fieldsUpgradeState: {
+              name: { state: FieldUpgradeStateEnum.NonSolvableConflict },
+            },
+          }),
         });
       });
 
-      expect(result.current.rulesUpgradeState).toEqual({
-        'test-rule-id-1': expect.objectContaining({
-          fieldsUpgradeState: {
-            name: { state: FieldUpgradeStateEnum.Accepted, resolvedValue: 'resolved' },
-          },
-        }),
-      });
+      it('shows a notification', () => {
+        const addWarningMock = jest.fn();
+        (useAppToasts as jest.Mock).mockImplementation(() => ({
+          addWarning: addWarningMock,
+        }));
 
-      rerender(createMock({ revision: 2 }));
+        const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
+          initialProps: createMock({ revision: 1 }),
+        });
 
-      expect(result.current.rulesUpgradeState).toEqual({
-        'test-rule-id-1': expect.objectContaining({
-          fieldsUpgradeState: {
-            name: { state: FieldUpgradeStateEnum.NonSolvableConflict },
-          },
-        }),
+        act(() => {
+          result.current.setRuleFieldResolvedValue({
+            ruleId: 'test-rule-id-1',
+            fieldName: 'name',
+            resolvedValue: 'resolved',
+          });
+        });
+
+        rerender(createMock({ revision: 2 }));
+
+        expect(addWarningMock).toHaveBeenCalled();
       });
     });
 
-    it('invalidates resolved conflicts upon version change', () => {
+    describe('version change', () => {
       const createMock = ({ version }: { version: number }) => [
         createRuleUpgradeInfoMock({
           rule_id: 'test-rule-id-1',
@@ -305,34 +337,72 @@ describe('usePrebuiltRulesUpgradeState', () => {
         }),
       ];
 
-      const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
-        initialProps: createMock({ version: 1 }),
-      });
+      it('invalidates resolved conflicts upon version change', () => {
+        const addWarningMock = jest.fn();
+        (useAppToasts as jest.Mock).mockImplementation(() => ({
+          addWarning: addWarningMock,
+        }));
 
-      act(() => {
-        result.current.setRuleFieldResolvedValue({
-          ruleId: 'test-rule-id-1',
-          fieldName: 'name',
-          resolvedValue: 'resolved',
+        const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
+          initialProps: createMock({ version: 1 }),
+        });
+
+        act(() => {
+          result.current.setRuleFieldResolvedValue({
+            ruleId: 'test-rule-id-1',
+            fieldName: 'name',
+            resolvedValue: 'resolved',
+          });
+        });
+
+        expect(result.current.rulesUpgradeState).toEqual({
+          'test-rule-id-1': expect.objectContaining({
+            fieldsUpgradeState: {
+              name: { state: FieldUpgradeStateEnum.Accepted, resolvedValue: 'resolved' },
+            },
+          }),
+        });
+
+        rerender(createMock({ version: 2 }));
+
+        expect(result.current.rulesUpgradeState).toEqual({
+          'test-rule-id-1': expect.objectContaining({
+            fieldsUpgradeState: {
+              name: { state: FieldUpgradeStateEnum.NonSolvableConflict },
+            },
+          }),
         });
       });
 
-      expect(result.current.rulesUpgradeState).toEqual({
-        'test-rule-id-1': expect.objectContaining({
-          fieldsUpgradeState: {
-            name: { state: FieldUpgradeStateEnum.Accepted, resolvedValue: 'resolved' },
-          },
-        }),
-      });
+      it('shows a notification', () => {
+        const addWarningMock = jest.fn();
+        (useAppToasts as jest.Mock).mockImplementation(() => ({
+          addWarning: addWarningMock,
+        }));
 
-      rerender(createMock({ version: 2 }));
+        const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
+          initialProps: createMock({ version: 1 }),
+        });
 
-      expect(result.current.rulesUpgradeState).toEqual({
-        'test-rule-id-1': expect.objectContaining({
-          fieldsUpgradeState: {
-            name: { state: FieldUpgradeStateEnum.NonSolvableConflict },
-          },
-        }),
+        act(() => {
+          result.current.setRuleFieldResolvedValue({
+            ruleId: 'test-rule-id-1',
+            fieldName: 'name',
+            resolvedValue: 'resolved',
+          });
+        });
+
+        expect(result.current.rulesUpgradeState).toEqual({
+          'test-rule-id-1': expect.objectContaining({
+            fieldsUpgradeState: {
+              name: { state: FieldUpgradeStateEnum.Accepted, resolvedValue: 'resolved' },
+            },
+          }),
+        });
+
+        rerender(createMock({ version: 2 }));
+
+        expect(addWarningMock).toHaveBeenCalled();
       });
     });
   });
