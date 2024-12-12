@@ -38,6 +38,8 @@
       "searchPlayground",
       "usageCollection"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }
