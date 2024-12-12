@@ -32,9 +32,13 @@ export type EntitySummary = z.infer<typeof EntitySummarySchema>;
 export function useEntitySummary({
   entityType,
   entityId,
+  from,
+  to,
 }: {
   entityType: string;
   entityId: string;
+  from: string;
+  to: string;
 }) {
   const { data, status } = useFetcher(
     async (callApi) => {
@@ -44,11 +48,15 @@ export function useEntitySummary({
 
       const response = await callApi(`/api/infra/entities/${entityType}/${entityId}/summary`, {
         method: 'GET',
+        query: {
+          to,
+          from,
+        },
       });
 
       return EntitySummarySchema.parse(response);
     },
-    [entityType, entityId]
+    [entityType, entityId, to, from]
   );
 
   return { dataStreams: data?.sourceDataStreams ?? [], status };

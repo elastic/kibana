@@ -35,17 +35,19 @@ describe('getDataStreamTypes', () => {
     jest.clearAllMocks();
   });
 
-  it('should return only metrics when entityCentriExperienceEnabled is false and hasMetricsData is true', async () => {
+  it('should return only metrics when entityCentricExperienceEnabled is false and hasMetricsData is true', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(true);
 
     const params = {
       entityId: 'entity123',
       entityType: 'host' as EntityType,
-      entityCentriExperienceEnabled: false,
+      entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
@@ -58,24 +60,26 @@ describe('getDataStreamTypes', () => {
     });
   });
 
-  it('should return an empty array when entityCentriExperienceEnabled is false and hasMetricsData is false', async () => {
+  it('should return an empty array when entityCentricExperienceEnabled is false and hasMetricsData is false', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(false);
 
     const params = {
       entityId: 'entity123',
       entityType: 'container' as EntityType,
-      entityCentriExperienceEnabled: false,
+      entityCentricExperienceEnabled: false,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
     expect(result).toEqual([]);
   });
 
-  it('should return metrics and entity source_data_stream types when entityCentriExperienceEnabled is true and has entity data', async () => {
+  it('should return metrics and entity source_data_stream types when entityCentricExperienceEnabled is true and has entity data', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(true);
     (getLatestEntity as jest.Mock).mockResolvedValue({
       sourceDataStreamType: ['logs', 'metrics'],
@@ -84,11 +88,13 @@ describe('getDataStreamTypes', () => {
     const params = {
       entityId: 'entity123',
       entityType: 'host' as EntityType,
-      entityCentriExperienceEnabled: true,
+      entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
@@ -96,26 +102,29 @@ describe('getDataStreamTypes', () => {
     expect(result).toEqual(['metrics', 'logs']);
     expect(getHasMetricsData).toHaveBeenCalled();
     expect(getLatestEntity).toHaveBeenCalledWith({
-      inventoryEsClient: obsEsClient,
       entityId: 'entity123',
       entityType: 'host',
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     });
   });
 
-  it('should return only metrics when entityCentriExperienceEnabled is true but entity data is undefined', async () => {
+  it('should return only metrics when entityCentricExperienceEnabled is true but entity data is undefined', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(true);
     (getLatestEntity as jest.Mock).mockResolvedValue(undefined);
 
     const params = {
       entityId: 'entity123',
       entityType: 'host' as EntityType,
-      entityCentriExperienceEnabled: true,
+      entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
@@ -131,11 +140,13 @@ describe('getDataStreamTypes', () => {
     const params = {
       entityId: 'entity123',
       entityType: 'host' as EntityType,
-      entityCentriExperienceEnabled: true,
+      entityCentricExperienceEnabled: true,
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
       logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
     };
 
     const result = await getDataStreamTypes(params);
