@@ -15,7 +15,12 @@ import {
 } from './definitions/source_definition';
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
 import { getEntityInstancesQuery, getEntityCountQuery } from './queries';
-import { mergeEntitiesList, sortEntitiesList } from './queries/utils';
+import {
+  isFulfilledResult,
+  isRejectedResult,
+  mergeEntitiesList,
+  sortEntitiesList,
+} from './queries/utils';
 import {
   EntitySourceDefinition,
   EntityTypeDefinition,
@@ -93,15 +98,10 @@ export class EntityClient {
       return rawEntities;
     });
 
-    const results = await Promise.allSettled(searches);
-    const entities = (
-      results.filter((result) => result.status === 'fulfilled') as Array<
-        PromiseFulfilledResult<EntityV2[]>
-      >
-    ).flatMap((result) => result.value);
-    const errors = (
-      results.filter((result) => result.status === 'rejected') as PromiseRejectedResult[]
-    ).map((result) => result.reason.message);
+    const { entities, errors } = await Promise.allSettled(searches).then((results) => ({
+      entities: results.filter(isFulfilledResult).flatMap((result) => result.value),
+      errors: results.filter(isRejectedResult).map((result) => result.reason.message as string),
+    }));
 
     if (sources.length === 1) {
       return { entities, errors };
@@ -128,10 +128,28 @@ export class EntityClient {
       types.map(async (type) => {
         const sources = await this.readSourceDefinitions({ type });
         if (sources.length === 0) {
-          return { type, value: 0 };
+          return { type, value: 0, errors: [] };
         }
 
-        const { query, filter } = getEntityCountQuery({ sources, filters, start, end });
+        const { sources: validSources, errors } = await Promise.allSettled(
+          sources.map((source) =>
+            validateFields({
+              source,
+              esClient: this.options.clusterClient.asCurrentUser,
+              logger: this.options.logger,
+            }).then(() => source)
+          )
+        ).then((results) => ({
+          sources: results.filter(isFulfilledResult).flatMap((result) => result.value),
+          errors: results.filter(isRejectedResult).map((result) => result.reason.message as string),
+        }));
+
+        const { query, filter } = getEntityCountQuery({
+          sources: validSources,
+          filters,
+          start,
+          end,
+        });
         this.options.logger.info(
           `Entity count query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
         );
@@ -143,7 +161,7 @@ export class EntityClient {
           logger: this.options.logger,
         });
 
-        return { type, value: count };
+        return { type, value: count, errors };
       })
     );
 
@@ -151,9 +169,10 @@ export class EntityClient {
       (result, count) => {
         result.types[count.type] = count.value;
         result.total += count.value;
+        result.errors.push(...count.errors);
         return result;
       },
-      { total: 0, types: {} as Record<string, number> }
+      { total: 0, types: {} as Record<string, number>, errors: [] as string[] }
     );
   }
 

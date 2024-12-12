@@ -14,5 +14,6 @@ export async function clearEntityDefinitions(esClient: ElasticsearchClient) {
     query: {
       match_all: {},
     },
+    refresh: true,
   });
 }

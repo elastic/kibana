@@ -21,13 +21,13 @@ import { EntitySourceDefinition } from './types';
 export async function validateFields({
   esClient,
   source,
-  metadataFields,
   logger,
+  metadataFields = [],
 }: {
   esClient: ElasticsearchClient;
   source: EntitySourceDefinition;
-  metadataFields: string[];
   logger: Logger;
+  metadataFields?: string[];
 }) {
   const mandatoryFields = [
     ...source.identity_fields,
@@ -44,8 +44,8 @@ export async function validateFields({
     .catch((err) => {
       if (err.meta?.statusCode === 404) {
         throw new Error(
-          `No index found for source [${
-            source.id
+          `No index found for source [source: ${source.id}, type: ${
+            source.type_id
           }] with index patterns [${source.index_patterns.join(', ')}]`
         );
       }
@@ -54,12 +54,11 @@ export async function validateFields({
 
   const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
   if (!sourceHasMandatoryFields) {
-    // TODO filters should likely behave similarly
     const missingFields = mandatoryFields.filter((field) => !fields[field]);
     throw new Error(
-      `Mandatory fields [${missingFields.join(', ')}] are not mapped for source [${
+      `Mandatory fields [${missingFields.join(', ')}] are not mapped for source [source: ${
         source.id
-      }] with index patterns [${source.index_patterns.join(', ')}]`
+      }, type: ${source.type_id}] with index patterns [${source.index_patterns.join(', ')}]`
     );
   }
 
@@ -69,7 +68,7 @@ export async function validateFields({
     logger.info(
       `Ignoring unmapped metadata fields [${without(metaFields, ...availableMetadataFields).join(
         ', '
-      )}] for source [${source.id}]`
+      )}] for source [source: ${source.id}, type: ${source.type_id}]`
     );
   }
   return availableMetadataFields;

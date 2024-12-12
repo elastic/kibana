@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const result = await countEntities(supertest, {}, 200);
 
-      expect(result).toEqual({ total: 20, types: { '20-services': 20 } });
+      expect(result).toEqual({ total: 20, types: { '20-services': 20 }, errors: [] });
     });
 
     it('aggregates total count across types', async () => {
@@ -127,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
           chumble: 20,
           shmuckle: 25,
         },
+        errors: [],
       });
 
       // only counts requested types
@@ -138,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
           shleem: 15,
           shmuckle: 25,
         },
+        errors: [],
       });
     });
 
@@ -201,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const result = await countEntities(supertest, { types: ['fleeb'] }, 200);
 
-      expect(result).toEqual({ total: 7, types: { fleeb: 7 } });
+      expect(result).toEqual({ total: 7, types: { fleeb: 7 }, errors: [] });
     });
 
     it('respects start and end parameters', async () => {
@@ -260,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
         200
       );
 
-      expect(result).toEqual({ total: 3, types: { grumbo: 3 } });
+      expect(result).toEqual({ total: 3, types: { grumbo: 3 }, errors: [] });
     });
 
     it('respects filters parameters', async () => {
@@ -353,6 +355,64 @@ export default function ({ getService }: FtrProviderContext) {
           shleem: 1,
           shmuckle: 0,
         },
+        errors: [],
+      });
+    });
+
+    it('is resilient to invalid sources', async () => {
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'chumble', display_name: 'chumble' },
+      });
+      await Promise.all([
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'source-with-chumbles',
+            type_id: 'chumble',
+            index_patterns: ['index-1-with-chumbles'],
+            identity_fields: ['service.name'],
+            metadata_fields: [],
+            filters: [],
+          },
+        }),
+        createEntitySourceDefinition(supertest, {
+          source: {
+            id: 'invalid-source-with-chumbles',
+            type_id: 'chumble',
+            index_patterns: ['index-2-with-chumbles'],
+            identity_fields: ['service.name'],
+            metadata_fields: [],
+            filters: [],
+          },
+        }),
+      ]);
+
+      cleanup = await Promise.all([
+        createIndexWithDocuments(esClient, {
+          index: 'index-1-with-chumbles',
+          properties: {
+            'service.name': { type: 'keyword' },
+          },
+          documents: [{ 'service.name': 'service-one' }],
+        }),
+        createIndexWithDocuments(esClient, {
+          index: 'index-2-with-chumbles',
+          properties: {
+            'service.environment': { type: 'keyword' },
+          },
+          documents: [{ 'service.name': 'service-two' }],
+        }),
+      ]);
+
+      const result = await countEntities(supertest, {}, 200);
+
+      expect(result).toEqual({
+        total: 1,
+        types: {
+          chumble: 1,
+        },
+        errors: [
+          'Mandatory fields [service.name] are not mapped for source [source: invalid-source-with-chumbles, type: chumble] with index patterns [index-2-with-chumbles]',
+        ],
       });
     });
   });
