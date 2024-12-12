@@ -22,7 +22,8 @@ interface ConnectorCardsProps {
   canCreateConnectors?: boolean;
   connectors?: AIConnector[]; // make connectors optional to handle loading state
   selectedConnectorId?: string;
-  setSelectedConnectorId: (connectorId: string) => void;
+  onConnectorSelected?: (connector: AIConnector) => void;
+  onConnectorIdSelected?: (connectorId: string) => void;
 }
 
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
@@ -31,7 +32,8 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
     onConnectorSaved,
     canCreateConnectors,
     selectedConnectorId,
-    setSelectedConnectorId,
+    onConnectorSelected,
+    onConnectorIdSelected,
   }) => {
     const queryClient = useQueryClient();
     const { spaceId } = useOnboardingContext();
@@ -46,6 +48,14 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
         onConnectorSaved();
       },
       [onConnectorSaved, queryClient, setStoredAssistantConnectorId]
+    );
+
+    const onConnectorSelectedHandler = useCallback(
+      (connector: AIConnector) => {
+        onConnectorSelected?.(connector);
+        onConnectorIdSelected?.(connector.id);
+      },
+      [onConnectorIdSelected, onConnectorSelected]
     );
 
     if (!connectors) {
@@ -70,9 +80,9 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
             <EuiFlexItem>
               <ConnectorActivePanel
                 selectedConnectorId={selectedConnectorId}
-                setSelectedConnectorId={setSelectedConnectorId}
                 onConnectorSaved={onConnectorSaved}
                 connectors={connectors}
+                onConnectorSelected={onConnectorSelectedHandler}
               />
             </EuiFlexItem>
           )}

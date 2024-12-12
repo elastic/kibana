@@ -13,6 +13,12 @@ export const CREATE_NEW_CONNECTOR_BUTTON = i18n.translate(
     defaultMessage: 'AI service provider',
   }
 );
+export const SELECTED_PROVIDER = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.selectedProvider',
+  {
+    defaultMessage: 'Selected provider',
+  }
+);
 
 export const PRIVILEGES_MISSING_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.missingPrivileges.title',

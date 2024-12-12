@@ -8,6 +8,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
+import { useCurrentConversation } from '@kbn/elastic-assistant/impl/assistant/use_current_conversation';
+import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_data_stream_apis';
+import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
+import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
+import type { AIConnector } from '@kbn/security-solution-connectors/src/connector_selector';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
@@ -19,6 +26,7 @@ import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
 import type { AssistantCardMetadata } from './types';
 import { MissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
+export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,
@@ -59,6 +67,83 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     [setStoredAssistantConnectorId]
   );
 
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+
+  const { setApiConfig } = useConversation();
+
+  const {
+    http,
+    assistantAvailability: { isAssistantEnabled },
+    baseConversations,
+    getLastConversationId,
+  } = useAssistantContext();
+  const {
+    allSystemPrompts,
+    conversations,
+    isFetchedCurrentUserConversations,
+    isFetchedPrompts,
+    refetchCurrentUserConversations,
+  } = useDataStreamApis({ http, baseConversations, isAssistantEnabled });
+
+  const { currentConversation, handleOnConversationSelected } = useCurrentConversation({
+    allSystemPrompts,
+    conversations,
+    defaultConnector,
+    refetchCurrentUserConversations,
+    conversationId: getLastConversationId(),
+    mayUpdateConversations:
+      isFetchedCurrentUserConversations &&
+      isFetchedPrompts &&
+      Object.keys(conversations).length > 0,
+  });
+
+  const onConversationChange = useCallback(
+    (updatedConversation: Conversation) => {
+      handleOnConversationSelected({
+        cId: updatedConversation.id,
+        cTitle: updatedConversation.title,
+      });
+    },
+    [handleOnConversationSelected]
+  );
+
+  const onConnectorSelected = useCallback(
+    async (connector: AIConnector) => {
+      const connectorId = connector.id;
+      if (connectorId === ADD_NEW_CONNECTOR) {
+        return;
+      }
+
+      const config = getGenAiConfig(connector);
+      const apiProvider = config?.apiProvider;
+      const model = config?.defaultModel;
+      // setIsOpen(false);
+
+      if (currentConversation != null) {
+        const conversation = await setApiConfig({
+          conversation: currentConversation,
+          apiConfig: {
+            ...currentConversation.apiConfig,
+            actionTypeId: connector.actionTypeId,
+            connectorId,
+            // With the inline component, prefer config args to handle 'new connector' case
+            provider: apiProvider,
+            model,
+          },
+        });
+
+        if (conversation && onConversationChange != null) {
+          onConversationChange(conversation);
+        }
+      }
+
+      if (onSelectConnectorId != null) {
+        onSelectConnectorId(connectorId);
+      }
+    },
+    [currentConversation, onSelectConnectorId, setApiConfig, onConversationChange]
+  );
+
   return (
     <OnboardingCardContentPanel>
       {canExecuteConnectors ? (
@@ -95,7 +180,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
                 connectors={connectors}
                 onConnectorSaved={checkComplete}
                 selectedConnectorId={selectedConnectorId}
-                setSelectedConnectorId={onSelectConnectorId}
+                onConnectorSelected={onConnectorSelected}
               />
             )}
           </EuiFlexItem>

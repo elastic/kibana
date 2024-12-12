@@ -52,7 +52,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
               connectors={connectors}
               onConnectorSaved={checkComplete}
               selectedConnectorId={storedConnectorId}
-              setSelectedConnectorId={setSelectedConnectorId}
+              onConnectorIdSelected={setSelectedConnectorId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

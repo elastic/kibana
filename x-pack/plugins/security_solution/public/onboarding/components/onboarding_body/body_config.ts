@@ -33,7 +33,7 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
       defaultMessage: 'Discover Elastic AI',
     }),
     // TODO: Add attackDiscoveryCardConfig when it is ready (https://github.com/elastic/kibana/issues/189487)
-    cards: [assistantCardConfig],
+    cards: [assistantCardConfig, aiConnectorCardConfig],
   },
 ];
 

@@ -13,25 +13,19 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import React, { useMemo, useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
-import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
-import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
-import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useFilteredActionTypes } from './hooks/use_load_action_types';
-export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
   isDisabled?: boolean;
   selectedConnectorId?: string;
-  selectedConversation?: Conversation;
-  onConnectorIdSelected?: (connectorId: string) => void;
-  onConnectorSelected?: (conversation: Conversation) => void;
   connectors: AIConnector[];
   onConnectorSaved?: () => void;
+  onConnectorSelected: (connector: AIConnector) => void;
 }
 
 const inputContainerClassName = css`
@@ -63,55 +57,15 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
   ({
     isDisabled = false,
     selectedConnectorId,
-    selectedConversation,
-    onConnectorIdSelected,
-    onConnectorSelected,
     connectors,
     onConnectorSaved,
+    onConnectorSelected,
   }) => {
     const { actionTypeRegistry, http, assistantAvailability, toasts } = useAssistantContext();
     const { euiTheme } = useEuiTheme();
 
     const actionTypes = useFilteredActionTypes(http, toasts);
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { setApiConfig } = useConversation();
-
-    const onChange = useCallback(
-      async (connector: AIConnector) => {
-        const connectorId = connector.id;
-        if (connectorId === ADD_NEW_CONNECTOR) {
-          return;
-        }
-
-        const config = getGenAiConfig(connector);
-        const apiProvider = config?.apiProvider;
-        const model = config?.defaultModel;
-        setIsOpen(false);
-
-        if (selectedConversation != null) {
-          const conversation = await setApiConfig({
-            conversation: selectedConversation,
-            apiConfig: {
-              ...selectedConversation.apiConfig,
-              actionTypeId: connector.actionTypeId,
-              connectorId,
-              // With the inline component, prefer config args to handle 'new connector' case
-              provider: apiProvider,
-              model,
-            },
-          });
-
-          if (conversation && onConnectorSelected != null) {
-            onConnectorSelected(conversation);
-          }
-        }
-
-        if (onConnectorIdSelected != null) {
-          onConnectorIdSelected(connectorId);
-        }
-      },
-      [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
-    );
+    const [isOpen, setIsOpen] = useState(false);
 
     const selectedConnector = useMemo(
       () => connectors.find((connector) => connector.id === selectedConnectorId),
@@ -120,9 +74,9 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
 
     useEffect(() => {
       if (connectors.length === 1) {
-        onChange(connectors[0]);
+        onConnectorSelected(connectors[0]);
       }
-    }, [connectors, onChange]);
+    }, [connectors, onConnectorSelected]);
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
@@ -161,7 +115,7 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
             isDisabled={localIsDisabled}
             selectedConnectorId={selectedConnectorId}
             setIsOpen={setIsOpen}
-            onConnectorSelectionChange={onChange}
+            onConnectorSelectionChange={onConnectorSelected}
             actionTypeRegistry={actionTypeRegistry}
             actionTypes={actionTypes}
             onConnectorSaved={onConnectorSaved}
