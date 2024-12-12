@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { last } from 'lodash';
+import { castArray, last } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { EntityColumnIds, InventoryEntity } from '../../../common/entities';
@@ -90,7 +90,9 @@ export function EntitiesGrid({
           return (
             <BadgeFilterWithPopover
               field={ENTITY_TYPE}
-              value={entityType}
+              // TODO:caue remove this later
+              // @ts-ignore
+              value={`${entityType}_${castArray(entity?.source_data_stream?.type || []).join()}`}
               onFilter={onFilterByType}
             />
           );
