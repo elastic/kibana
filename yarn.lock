@@ -3848,7 +3848,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-assistant-management-plugin@link:src/plugins/ai_assistant_management/selection":
+"@kbn/ai-assistant-management-plugin@link:src/platform/plugins/shared/ai_assistant_management/selection":
   version "0.0.0"
   uid ""
 
@@ -5240,7 +5240,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-usage-plugin@link:x-pack/plugins/data_usage":
+"@kbn/data-usage-plugin@link:x-pack/platform/plugins/private/data_usage":
   version "0.0.0"
   uid ""
 
@@ -6448,23 +6448,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-app-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_app":
+"@kbn/observability-ai-assistant-app-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_app":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-management-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant_management":
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/plugins/observability_solution/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-common@link:x-pack/packages/observability/observability_ai/observability_ai_common":
+"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-server@link:x-pack/packages/observability/observability_ai/observability_ai_server":
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
   version "0.0.0"
   uid ""
 
