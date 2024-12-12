@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/plugins/observability_solution/uptime'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/uptime'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/observability_solution/uptime',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/uptime',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/uptime/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/observability/plugins/uptime/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
