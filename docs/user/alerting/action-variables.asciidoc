@@ -329,6 +329,32 @@ If the context variable `context.value.condition0` has a value of `628.4`, it re
 ----
 
 [discrete]
+===== EncodeURI
+
+The `EncodeURI` lambda will evaluate the text passed by returning the value
+of the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI[`encodeURI()` function] applied to the text.
+
+For example, when the Mustache variable `context.url` is `https://example.com?query=foo bar` (note the embedded space), the following template will render as `https://example.com?query=foo%20bar`:
+
+[source,sh]
+----
+{{#EncodeURI}} {{{context.url}}} {{/EncodeURI}}
+----
+
+[discrete]
+===== EncodeURIComponent
+
+The `EncodeURIComponent` lambda will evaluate the text passed by returning the value
+of the https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent[`encodeURIComponent()` function] applied to the text.
+
+For example, when the Mustache variable `context.url` is `https://example.com?query=foo bar` (note the embedded space), the following template will render as `https%3A%2F%2Fwww.elastic.co%3Ffoo%3Dbar%26baz%3D%20qux`:
+
+[source,sh]
+----
+{{#EncodeURIComponent}} {{{context.url}}} {{/EncodeURIComponent}}
+----
+
+[discrete]
 [[mustache-examples]]
 === Mustache examples
 
