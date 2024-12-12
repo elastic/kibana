@@ -22,7 +22,8 @@ export const plugin = () => new ChartsPlugin();
 export type { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';
-export { lightenColor } from './services/palettes/lighten_color';
+export * from './services/palettes/lighten_color';
+export * from './services/palettes/decrease_opacity';
 export { useActiveCursor } from './services/active_cursor';
 
 export interface ClickTriggerEvent {

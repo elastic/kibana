@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -50,12 +50,23 @@ export interface RuleDetailsProps {
  * Rule details content on the right section of expandable flyout
  */
 export const PanelContent = memo(({ rule }: RuleDetailsProps) => {
-  const { ruleActionsData } =
-    rule != null ? getStepsData({ rule, detailsView: true }) : { ruleActionsData: null };
+  const { ruleActionsData } = useMemo(
+    () => (rule != null ? getStepsData({ rule, detailsView: true }) : { ruleActionsData: null }),
+    [rule]
+  );
 
-  const hasNotificationActions = Boolean(ruleActionsData?.actions?.length);
-  const hasResponseActions = Boolean(ruleActionsData?.responseActions?.length);
-  const hasActions = ruleActionsData != null && (hasNotificationActions || hasResponseActions);
+  const hasNotificationActions = useMemo(
+    () => Boolean(ruleActionsData?.actions?.length),
+    [ruleActionsData]
+  );
+  const hasResponseActions = useMemo(
+    () => Boolean(ruleActionsData?.responseActions?.length),
+    [ruleActionsData]
+  );
+  const hasActions = useMemo(
+    () => ruleActionsData != null && (hasNotificationActions || hasResponseActions),
+    [ruleActionsData, hasNotificationActions, hasResponseActions]
+  );
 
   return (
     <FlyoutBody>

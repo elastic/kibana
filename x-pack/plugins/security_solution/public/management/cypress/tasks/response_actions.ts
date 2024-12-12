@@ -16,6 +16,7 @@ import {
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
+  RUN_SCRIPT_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
@@ -272,6 +273,11 @@ export const ensureResponseActionAuthzAccess = (
     case 'scan':
       url = SCAN_ROUTE;
       Object.assign(apiPayload, { parameters: { path: 'scan/two' } });
+      break;
+
+    case 'runscript':
+      url = RUN_SCRIPT_ROUTE;
+      Object.assign(apiPayload, { parameters: { Raw: 'ls' } });
       break;
 
     default:
