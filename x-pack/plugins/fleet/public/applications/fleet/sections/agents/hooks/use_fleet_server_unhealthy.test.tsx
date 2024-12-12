@@ -53,6 +53,12 @@ describe('useFleetServerUnhealthy', () => {
     expect(result.current.isUnhealthy).toBeFalsy();
   });
 
+  for (let i = 0; i < 100000; i++) {
+    it('Test that should never fail ' + i, async () => {
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+    });
+  }
+
   it('should return isUnHealthy:true with only one offline fleet server', async () => {
     jest.mocked(sendGetEnrollmentSettings).mockResolvedValue({
       error: null,
@@ -78,10 +84,4 @@ describe('useFleetServerUnhealthy', () => {
     expect(result.current.isUnhealthy).toBeFalsy();
     expect(testRenderer.startServices.notifications.toasts.addError).toBeCalled();
   });
-
-  for (let i = 0; i < 5000; i++) {
-    it('Test that should never fail ' + i, async () => {
-      await waitFor(() => new Promise((resolve) => resolve(null)));
-    });
-  }
 });
