@@ -5992,7 +5992,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/investigate-app-plugin@link:x-pack/plugins/observability_solution/investigate_app":
+"@kbn/investigate-app-plugin@link:x-pack/solutions/observability/plugins/investigate_app":
   version "0.0.0"
   uid ""
 

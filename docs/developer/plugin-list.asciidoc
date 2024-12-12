@@ -669,7 +669,7 @@ the infrastructure monitoring use-case within Kibana.
 |undefined
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate_app/README.md[investigateApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
 |undefined
 
 
