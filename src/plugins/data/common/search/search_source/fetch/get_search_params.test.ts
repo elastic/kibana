@@ -9,7 +9,7 @@
 
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
-import { getSearchParams, getSearchParamsFromRequest } from './get_search_params';
+import { getSearchParamsFromRequest } from './get_search_params';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 function getConfigStub(config: any = {}): GetConfigFn {
@@ -18,11 +18,11 @@ function getConfigStub(config: any = {}): GetConfigFn {
 
 describe('getSearchParams', () => {
   test('includes custom preference', () => {
-    const config = getConfigStub({
+    const getConfig = getConfigStub({
       [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
       [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
     });
-    const searchParams = getSearchParams(config);
+    const searchParams = getSearchParamsFromRequest({ index: 'abc', body: {} }, { getConfig });
     expect(searchParams.preference).toBe('aaa');
   });
 

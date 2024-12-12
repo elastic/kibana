@@ -8,7 +8,8 @@
  */
 
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { isAbortResponse, isRunningResponse } from './utils';
+import { isAbortResponse, isRunningResponse, getEsPreference } from './utils';
+import { UI_SETTINGS } from '..';
 
 describe('utils', () => {
   describe('isAbortResponse', () => {
@@ -43,6 +44,41 @@ describe('utils', () => {
         rawResponse: {},
       });
       expect(isRunning).toBe(false);
+    });
+  });
+
+  describe('getEsPreference', () => {
+    const mockConfigGet = jest.fn();
+
+    beforeEach(() => {
+      mockConfigGet.mockClear();
+    });
+
+    test('returns the session ID if set to sessionId', () => {
+      mockConfigGet.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'sessionId';
+        if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+      });
+      const preference = getEsPreference(mockConfigGet, 'my_session_id');
+      expect(preference).toBe('my_session_id');
+    });
+
+    test('returns the custom preference if set to custom', () => {
+      mockConfigGet.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'custom';
+        if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+      });
+      const preference = getEsPreference(mockConfigGet);
+      expect(preference).toBe('foobar');
+    });
+
+    test('returns undefined if set to none', () => {
+      mockConfigGet.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE) return 'none';
+        if (key === UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE) return 'foobar';
+      });
+      const preference = getEsPreference(mockConfigGet);
+      expect(preference).toBe(undefined);
     });
   });
 });
