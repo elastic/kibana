@@ -7,6 +7,7 @@
 
 import type { StartServicesAccessor, Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import { getTriggerIndicesMetadataTaskRoute } from '../lib/telemetry/routes';
 
 import type { EndpointAppContext } from '../endpoint/types';
 import type { SecuritySolutionPluginRouter } from '../types';
@@ -160,4 +161,7 @@ export const initRoutes = (
   getFleetManagedIndexTemplatesRoute(router);
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
+
+  // TODO: just to test the PR, remove
+  getTriggerIndicesMetadataTaskRoute(router, logger, previewTelemetryReceiver, telemetrySender);
 };

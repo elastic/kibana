@@ -5,19 +5,29 @@
  * 2.0.
  */
 
-import { unset } from 'lodash';
-
 export const removeExtraFieldsFromTelemetryStats = (stats: any) => {
-  Object.entries(stats).forEach(([, value]: [unknown, any]) => {
-    value.forEach((entry: any, i: number) => {
-      entry.forEach((_e: any, j: number) => {
-        unset(value, `[${i}][${j}].time_executed_in_ms`);
-        unset(value, `[${i}][${j}].start_time`);
-        unset(value, `[${i}][${j}].end_time`);
-        unset(value, `[${i}][${j}].cluster_uuid`);
-        unset(value, `[${i}][${j}].cluster_name`);
-        unset(value, `[${i}][${j}].license`);
-      });
-    });
-  });
+  removeExtraFields(stats, [
+    'time_executed_in_ms',
+    'start_time',
+    'end_time',
+    'cluster_uuid',
+    'cluster_name',
+    'license',
+  ]);
 };
+
+function removeExtraFields(obj: any, fields: string[]): void {
+  function traverseAndRemove(o: any): void {
+    if (typeof o !== 'object' || o === null) return;
+
+    for (const key in o) {
+      if (fields.includes(key)) {
+        delete o[key];
+      } else if (typeof o[key] === 'object') {
+        traverseAndRemove(o[key]);
+      }
+    }
+  }
+
+  traverseAndRemove(obj);
+}
