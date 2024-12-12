@@ -5928,7 +5928,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-management-shared-types@link:x-pack/packages/index-management/index_management_shared_types":
+"@kbn/index-management-shared-types@link:x-pack/platform/packages/shared/index-management/index_management_shared_types":
   version "0.0.0"
   uid ""
 
