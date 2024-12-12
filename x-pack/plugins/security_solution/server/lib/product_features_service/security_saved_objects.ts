@@ -11,6 +11,7 @@ import {
   savedObjectTypesWithoutTimelineAndWithoutNotes,
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
+  savedObjectTypes,
 } from '../../saved_objects';
 
 // Same as the saved-object type for rules defined by Cloud Security Posture
@@ -28,6 +29,8 @@ export const securityDefaultSavedObjects = [
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
 ];
+
+export const securityV1SavedObjects = [...securityDefaultSavedObjects, ...savedObjectTypes];
 
 export const securityTimelineSavedObjects = timelineSavedObjectTypes;
 

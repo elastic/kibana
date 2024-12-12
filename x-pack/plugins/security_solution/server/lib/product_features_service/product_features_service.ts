@@ -34,6 +34,7 @@ import {
   securityDefaultSavedObjects,
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
+  securityV1SavedObjects,
 } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
@@ -56,7 +57,7 @@ export class ProductFeaturesService {
     private readonly experimentalFeatures: ExperimentalFeatures
   ) {
     const securityFeature = getSecurityFeature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV1SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityProductFeatures = new ProductFeatures(
