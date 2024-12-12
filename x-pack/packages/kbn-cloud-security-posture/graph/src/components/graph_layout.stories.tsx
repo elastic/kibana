@@ -503,3 +503,31 @@ GraphStackedEdgeCases.args = {
     },
   ]),
 };
+
+export const GraphLargeStackedEdgeCases = Template.bind({});
+
+GraphLargeStackedEdgeCases.args = {
+  ...extractEdges([
+    ...baseGraph,
+    ...Array(10)
+      .fill(0)
+      .map<EnhancedNodeViewModel>((_v, idx) => ({
+        id: 'a(oktauser)-b(hackeruser)',
+        source: 'oktauser',
+        target: 'hackeruser',
+        label: 'CreateUser' + idx,
+        color: 'primary',
+        shape: 'label',
+      })),
+    ...Array(10)
+      .fill(0)
+      .map<EnhancedNodeViewModel>((_v, idx) => ({
+        id: 'a(siem-windows)-b(user)',
+        source: 'siem-windows',
+        target: 'user',
+        label: 'User login to OKTA' + idx,
+        color: 'danger',
+        shape: 'label',
+      })),
+  ]),
+};
