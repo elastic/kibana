@@ -12,7 +12,6 @@ import {
   activateUserProfiles,
 } from '../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
   describe('Automatic Import enabled: basic', function () {
     before(async () => {
@@ -27,6 +26,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     });
 
     // Basic
-    loadTestFile(require.resolve('./graphs/ecs'));
+    loadTestFile(require.resolve('./ecs_mapping'));
+    loadTestFile(require.resolve('./categorization'));
+    loadTestFile(require.resolve('./related'));
   });
 };

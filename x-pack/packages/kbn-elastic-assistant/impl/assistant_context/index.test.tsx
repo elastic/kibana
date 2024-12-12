@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useAssistantContext } from '.';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -18,10 +18,8 @@ describe('AssistantContext', () => {
   beforeEach(() => jest.clearAllMocks());
 
   test('it throws an error when useAssistantContext hook is used without a SecurityAssistantContext', () => {
-    const { result } = renderHook(useAssistantContext);
-
-    expect(result.error).toEqual(
-      new Error('useAssistantContext must be used within a AssistantProvider')
+    expect(() => renderHook(useAssistantContext)).toThrow(
+      /useAssistantContext must be used within a AssistantProvider/
     );
   });
 
