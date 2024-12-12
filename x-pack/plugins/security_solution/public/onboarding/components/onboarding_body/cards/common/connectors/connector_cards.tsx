@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -16,6 +16,8 @@ import { MissingPrivilegesDescription } from './missing_privileges';
 import { ConnectorSetup } from './connector_setup';
 import type { ConnectorListProps } from './connector_panel';
 import { ConnectorPanel } from './connector_panel';
+import { useStoredAssistantConnectorId } from '../../../../hooks/use_stored_state';
+import { useOnboardingContext } from '../../../../onboarding_context';
 
 interface ConnectorCardsProps
   extends CreateConnectorPopoverProps,
@@ -24,21 +26,23 @@ interface ConnectorCardsProps
 }
 
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
-  ({
-    connectors,
-    onConnectorSaved,
-    canCreateConnectors,
-    selectedConnectorId,
-    setSelectedConnectorId,
-  }) => {
+  ({ connectors, onConnectorSaved, canCreateConnectors }) => {
     // QUERY_KEY
 
     const queryClient = useQueryClient();
+    const { spaceId } = useOnboardingContext();
+    const [, setStoredAssistantConnectorId] = useStoredAssistantConnectorId(spaceId);
 
-    const onConnectorSaveWithQuery = useCallback(() => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      onConnectorSaved();
-    }, [onConnectorSaved, queryClient]);
+    const onConnectorSaveWithQuery = useCallback(
+      (newConnector) => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+        console.log({ newConnector });
+        setStoredAssistantConnectorId(newConnector.id);
+
+        onConnectorSaved();
+      },
+      [onConnectorSaved, queryClient, setStoredAssistantConnectorId]
+    );
 
     if (!connectors) {
       return <EuiLoadingSpinner />;
@@ -60,12 +64,7 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
         <EuiFlexGroup style={{ height: '160px' }}>
           {hasConnectors && (
             <EuiFlexItem>
-              <ConnectorPanel
-                onConnectorSaved={onConnectorSaved}
-                connectors={connectors}
-                selectedConnectorId={selectedConnectorId}
-                setSelectedConnectorId={setSelectedConnectorId}
-              />
+              <ConnectorPanel onConnectorSaved={onConnectorSaved} connectors={connectors} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>

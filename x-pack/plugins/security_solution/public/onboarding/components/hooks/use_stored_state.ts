@@ -17,6 +17,7 @@ const LocalStorageKey = {
   urlDetails: 'securitySolution.onboarding.urlDetails',
   selectedIntegrationTabId: 'securitySolution.onboarding.selectedIntegrationTabId',
   integrationSearchTerm: 'securitySolution.onboarding.integrationSearchTerm',
+  assistantConnectorId: 'securitySolution.onboarding.assistantCard.connectorId',
 } as const;
 
 /**
@@ -65,3 +66,9 @@ export const useStoredIntegrationSearchTerm = (spaceId: string) =>
     `${LocalStorageKey.integrationSearchTerm}.${spaceId}`,
     null
   );
+
+/**
+ * Stores the integration search term per space
+ */
+export const useStoredAssistantConnectorId = (spaceId: string) =>
+  useDefinedLocalStorage<string | null>(`${LocalStorageKey.assistantConnectorId}.${spaceId}`, null);

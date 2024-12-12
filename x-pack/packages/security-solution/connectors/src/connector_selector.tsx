@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
-
 import type {
   ActionConnector,
   ActionType,
@@ -25,8 +24,9 @@ import {
   getGenAiConfig,
   getActionTypeTitle,
 } from '@kbn/elastic-assistant/impl/connectorland/helpers';
-import * as i18n from './translations';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { HttpSetup } from '@kbn/core-http-browser';
+import * as i18n from './translations';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -41,16 +41,14 @@ export interface ConnectorSelectorProps {
   isDisabled?: boolean;
   isOpen?: boolean;
   onConnectorSelectionChange: (connector: AIConnector) => void;
+  onConnectorSaved?: () => void;
   selectedConnectorId?: string;
   displayFancy?: (displayText: string) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
   stats?: AttackDiscoveryStats | null;
-  aiConnectors: AIConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
-  refetchConnectors?: () => void;
   actionTypes: ActionType[];
-  postSaveConnectorEventHandler?: (savedAction: ActionConnector) => void;
-  http: any;
+  http: HttpSetup;
 }
 
 export type AIConnector = ActionConnector & {
@@ -67,15 +65,11 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     onConnectorSelectionChange,
     setIsOpen,
     stats = null,
-    // aiConnectors,
-    // refetchConnectors,
     actionTypeRegistry,
     actionTypes,
-    postSaveConnectorEventHandler,
     http,
+    onConnectorSaved,
   }) => {
-    // Connector Modal State
-    // const { http } = useKibana().services;
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
 
     const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
@@ -196,17 +190,10 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
           ...connector,
         });
         refetchConnectors?.();
-        if (postSaveConnectorEventHandler) {
-          postSaveConnectorEventHandler(connector);
-        }
+        onConnectorSaved?.();
         cleanupAndCloseModal();
       },
-      [
-        cleanupAndCloseModal,
-        onConnectorSelectionChange,
-        refetchConnectors,
-        postSaveConnectorEventHandler,
-      ]
+      [cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors, onConnectorSaved]
     );
 
     return (

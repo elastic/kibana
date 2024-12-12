@@ -12,7 +12,6 @@ import { css } from '@emotion/css';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useLoadConnectors } from '../use_load_connectors';
 import { AIConnector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
@@ -70,7 +69,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     const { setApiConfig } = useConversation();
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
-    const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({ http });
     const { data: actionTypes } = useLoadActionTypes({ http });
 
     const onChange = useCallback(
@@ -120,8 +118,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         responsive={false}
       >
         <EuiFlexItem>
-          {aiConnectors && actionTypes && (
+          {actionTypes && (
             <ConnectorSelector
+              http={http}
+              isDisabled={localIsDisabled}
               displayFancy={(displayText) => (
                 <EuiText
                   className={inputDisplayClassName}
@@ -132,10 +132,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
                 </EuiText>
               )}
               isOpen={isOpen}
-              isDisabled={false}
-              aiConnectors={aiConnectors}
               selectedConnectorId={selectedConnectorId}
-              refetchConnectors={refetchConnectors}
               setIsOpen={setIsOpen}
               onConnectorSelectionChange={onChange}
               actionTypeRegistry={actionTypeRegistry}

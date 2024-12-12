@@ -13,7 +13,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
@@ -21,11 +21,9 @@ import { type ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/com
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
-import { type Conversation } from '@kbn/elastic-assistant';
+import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useFilteredActionTypes } from './hooks/use_load_action_types';
-import { useKibana } from '../../../../../../common/lib/kibana';
-
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
@@ -36,7 +34,7 @@ interface Props {
   onConnectorSelected?: (conversation: Conversation) => void;
   stats?: AttackDiscoveryStats | null;
   connectors: AIConnector[];
-  onConnectorSaved?: (savedAction: ActionConnector) => void;
+  onConnectorSaved?: () => void;
 }
 
 const inputContainerClassName = css`
@@ -75,11 +73,7 @@ export const ConnectorSelectorAIAssistant = React.memo<Props>(
     onConnectorSaved,
     stats = null,
   }) => {
-    const {
-      http,
-      triggersActionsUi: { actionTypeRegistry },
-      notifications: { toasts },
-    } = useKibana().services;
+    const { actionTypeRegistry, http, assistantAvailability, toasts } = useAssistantContext();
     const { euiTheme } = useEuiTheme();
 
     const { actionTypes } = useFilteredActionTypes(http, toasts);
@@ -128,6 +122,14 @@ export const ConnectorSelectorAIAssistant = React.memo<Props>(
       [connectors, selectedConnectorId]
     );
 
+    useEffect(() => {
+      if (connectors.length === 1) {
+        onChange(connectors[0]);
+      }
+    }, [connectors, onChange]);
+
+    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+
     if (!actionTypes) {
       return <EuiLoadingSpinner />;
     }
@@ -160,14 +162,13 @@ export const ConnectorSelectorAIAssistant = React.memo<Props>(
               </EuiText>
             )}
             isOpen={isOpen}
-            isDisabled={false}
-            aiConnectors={connectors}
+            isDisabled={localIsDisabled}
             selectedConnectorId={selectedConnectorId}
             setIsOpen={setIsOpen}
             onConnectorSelectionChange={onChange}
-            postSaveConnectorEventHandler={onConnectorSaved}
             actionTypeRegistry={actionTypeRegistry}
             actionTypes={actionTypes}
+            onConnectorSaved={onConnectorSaved}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -41,7 +41,6 @@ export const useLoadConnectors = ({
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
-      console.error('ERROR', queryResult);
       return queryResult.reduce(
         (acc: AIConnector[], connector) => [
           ...acc,
