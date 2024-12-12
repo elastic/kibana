@@ -37,7 +37,14 @@
             "section": "def-common.PathWithOwners",
             "text": "PathWithOwners"
           },
-          "[] | undefined) => string | undefined"
+          "[] | undefined) => ",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.CodeOwnership",
+            "text": "CodeOwnership"
+          }
         ],
         "path": "packages/kbn-code-owners/src/file_code_owner.ts",
         "deprecated": false,
@@ -188,7 +195,31 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.CodeOwnership",
+        "type": "Type",
+        "tags": [],
+        "label": "CodeOwnership",
+        "description": [],
+        "signature": [
+          "Partial<Pick<",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.PathWithOwners",
+            "text": "PathWithOwners"
+          },
+          ", \"path\" | \"teams\">> | undefined"
+        ],
+        "path": "packages/kbn-code-owners/src/file_code_owner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

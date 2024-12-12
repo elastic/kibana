@@ -12,10 +12,8 @@ import type { Commit, PullRequest } from './types';
 import { safeExec } from './utils.exec';
 
 export const findPr = async (number: string): Promise<PullRequest> => {
-  const commits = JSON.parse(
-    (await safeExec(`gh pr view ${number} --json commits`)).stdout
-  ).commits;
-  return { number, commits };
+  const res = await safeExec(`gh pr view ${number} --json commits,headRefName`);
+  return { ...JSON.parse(res.stdout), number };
 };
 
 export function hasManualCommits(commits: Commit[]) {
@@ -55,6 +53,20 @@ export async function localBranchExists(branchName: string): Promise<boolean> {
   return branches.includes(branchName);
 }
 
+async function deleteBranches(...branchNames: string[]) {
+  const res = await safeExec('git branch -l');
+  const branches = res.stdout
+    .split('\n')
+    .filter(Boolean)
+    .map((branchName) => branchName.trim());
+
+  await Promise.all(
+    branchNames
+      .filter((toDelete) => branches.includes(toDelete))
+      .map((toDelete) => safeExec(`git branch -D ${toDelete}`).catch(() => {}))
+  );
+}
+
 export const checkoutResetPr = async (baseBranch: string, prNumber: string): Promise<boolean> => {
   const pr = await findPr(prNumber);
 
@@ -69,10 +81,13 @@ export const checkoutResetPr = async (baseBranch: string, prNumber: string): Pro
     }
   }
 
-  // previous cleanup TODO REMOVE
+  // previous cleanup on current branch
   await safeExec(`git restore --staged .`);
   await safeExec(`git restore .`);
   await safeExec(`git clean -f -d`);
+
+  // delete existing branch
+  await deleteBranches(pr.headRefName);
 
   // checkout the PR branch
   await safeExec(`gh pr checkout ${prNumber}`);
