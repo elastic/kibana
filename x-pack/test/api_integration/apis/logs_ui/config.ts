@@ -13,5 +13,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
+    esTestCluster: {
+      ...baseIntegrationTestsConfig.get('esTestCluster'),
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('esTestCluster.serverArgs'),
+        // Enable LogsDB
+        'cluster.logsdb.enabled=true',
+      ],
+    },
   };
 }
