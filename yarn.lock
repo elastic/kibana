@@ -5948,7 +5948,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/infra-forge@link:x-pack/packages/kbn-infra-forge":
+"@kbn/infra-forge@link:x-pack/platform/packages/private/kbn-infra-forge":
   version "0.0.0"
   uid ""
 
