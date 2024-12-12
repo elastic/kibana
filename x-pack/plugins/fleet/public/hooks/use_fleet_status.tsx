@@ -25,7 +25,7 @@ export interface FleetStatusProviderProps {
   spaceId?: string;
 }
 
-interface FleetStatus extends FleetStatusProviderProps {
+export interface FleetStatus extends FleetStatusProviderProps {
   refetch: () => Promise<unknown>;
 
   // This flag allows us to opt into displaying the Fleet Server enrollment instructions even if
