@@ -14,8 +14,10 @@ export const getEntityDefinitionSourceIndexPatternsByType = createInventoryServe
       type: t.string,
     }),
   }),
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   async handler({ context, params, request, plugins }) {
     const [_coreContext, entityManagerStart] = await Promise.all([
