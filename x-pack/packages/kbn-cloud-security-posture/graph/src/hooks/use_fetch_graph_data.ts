@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   GraphRequest,
   GraphResponse,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { useMemo } from 'react';
-import { EVENT_GRAPH_VISUALIZATION_API } from '../../../../../common/constants';
-import { useHttp } from '../../../../common/lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EVENT_GRAPH_VISUALIZATION_API } from '../common/constants';
 
 /**
  * Interface for the input parameters of the useFetchGraphData hook.
@@ -36,6 +36,11 @@ export interface UseFetchGraphDataParams {
      * Defaults to true.
      */
     refetchOnWindowFocus?: boolean;
+    /**
+     * If true, the query will keep previous data till new data received.
+     * Defaults to false.
+     */
+    keepPreviousData?: boolean;
   };
 }
 
@@ -44,9 +49,13 @@ export interface UseFetchGraphDataParams {
  */
 export interface UseFetchGraphDataResult {
   /**
-   * Indicates if the query is currently loading.
+   * Indicates if the query is currently being fetched for the first time.
    */
   isLoading: boolean;
+  /**
+   * Indicates if the query is currently being fetched. Regardless of whether it is the initial fetch or a refetch.
+   */
+  isFetching: boolean;
   /**
    * Indicates if there was an error during the query.
    */
@@ -55,6 +64,10 @@ export interface UseFetchGraphDataResult {
    * The data returned from the query.
    */
   data?: GraphResponse;
+  /**
+   * Function to manually refresh the query.
+   */
+  refresh: () => void;
 }
 
 /**
@@ -67,16 +80,23 @@ export const useFetchGraphData = ({
   req,
   options,
 }: UseFetchGraphDataParams): UseFetchGraphDataResult => {
-  const { eventIds, start, end, esQuery } = req.query;
-  const http = useHttp();
+  const queryClient = useQueryClient();
+  const { esQuery, eventIds, start, end } = req.query;
+  const {
+    services: { http },
+  } = useKibana();
   const QUERY_KEY = useMemo(
     () => ['useFetchGraphData', eventIds, start, end, esQuery],
     [end, esQuery, eventIds, start]
   );
 
-  const { isLoading, isError, data } = useQuery<GraphResponse>(
+  const { isLoading, isError, data, isFetching } = useQuery<GraphResponse>(
     QUERY_KEY,
     () => {
+      if (!http) {
+        return Promise.reject(new Error('Http service is not available'));
+      }
+
       return http.post<GraphResponse>(EVENT_GRAPH_VISUALIZATION_API, {
         version: '1',
         body: JSON.stringify(req),
@@ -85,12 +105,17 @@ export const useFetchGraphData = ({
     {
       enabled: options?.enabled ?? true,
       refetchOnWindowFocus: options?.refetchOnWindowFocus ?? true,
+      keepPreviousData: options?.keepPreviousData ?? false,
     }
   );
 
   return {
     isLoading,
+    isFetching,
     isError,
     data,
+    refresh: () => {
+      queryClient.invalidateQueries(QUERY_KEY);
+    },
   };
 };

@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './src/components';
-export { useFetchGraphData } from './src/hooks';
+export interface StyleColorParams {
+  lineColor: string;
+  labelColor: string;
+  labelOutlineColor: string;
+}
