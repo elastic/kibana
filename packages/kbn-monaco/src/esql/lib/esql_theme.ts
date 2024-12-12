@@ -156,7 +156,7 @@ export const buildESQLTheme = ({
           'closing_metrics_line_comment',
           'closing_metrics_multiline_comment',
         ],
-        euiThemeVars.euiColorDisabled
+        euiThemeVars.euiTextSubduedColor
       ),
 
       // values
