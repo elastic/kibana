@@ -16,6 +16,10 @@ export async function plugin(ctx: PluginInitializerContext<SLOConfig>) {
   return new SLOPlugin(ctx);
 }
 
+export type { SloClient } from './client';
+
+export type { SLOServerSetup, SLOServerStart } from './types';
+
 export const config: PluginConfigDescriptor<SLOConfig> = {
   schema: configSchema,
   exposeToBrowser: {
