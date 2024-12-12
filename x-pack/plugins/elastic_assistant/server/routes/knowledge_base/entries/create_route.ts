@@ -26,8 +26,10 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(
@@ -61,6 +63,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
             knowledgeBaseEntry: request.body,
             global: request.body.users != null && request.body.users.length === 0,
+            auditLogger: ctx.elasticAssistant.auditLogger,
             telemetry: ctx.elasticAssistant.telemetry,
           });
 

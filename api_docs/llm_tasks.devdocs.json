@@ -24,7 +24,7 @@
       "description": [
         "\nDescribes public llmTasks plugin contract returned at the `setup` stage."
       ],
-      "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -40,7 +40,7 @@
       "description": [
         "\nDescribes public llmTasks plugin contract returned at the `start` stage."
       ],
-      "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -56,7 +56,7 @@
           "signature": [
             "() => Promise<boolean>"
           ],
-          "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -80,7 +80,7 @@
             "RetrieveDocumentationResult",
             ">"
           ],
-          "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -95,7 +95,7 @@
               "signature": [
                 "RetrieveDocumentationParams"
               ],
-              "path": "x-pack/plugins/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+              "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
               "deprecated": false,
               "trackAdoption": false
             }
