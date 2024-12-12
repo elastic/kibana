@@ -8189,24 +8189,7 @@
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "embeddable",
@@ -8219,99 +8202,6 @@
               "EmbeddablePanelProps"
             ],
             "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.EmbeddableRenderer",
-        "type": "Function",
-        "tags": [],
-        "label": "EmbeddableRenderer",
-        "description": [
-          "\nHelper react component to render an embeddable\nCan be used if you have an embeddable object or an embeddable factory\nSupports updating input by passing `input` prop\n"
-        ],
-        "signature": [
-          "<I extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ">(props: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableRendererProps",
-            "text": "EmbeddableRendererProps"
-          },
-          "<I>) => React.JSX.Element"
-        ],
-        "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableRenderer.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [
-              "- {@link EmbeddableRendererProps }"
-            ],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableRendererProps",
-                "text": "EmbeddableRendererProps"
-              },
-              "<I>"
-            ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.EmbeddableRoot",
-        "type": "Function",
-        "tags": [],
-        "label": "EmbeddableRoot",
-        "description": [],
-        "signature": [
-          "({ embeddable, loading, error, input }: Props) => React.JSX.Element"
-        ],
-        "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableRoot.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ embeddable, loading, error, input }",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -9163,7 +9053,7 @@
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
+          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
@@ -9277,7 +9167,7 @@
                     "section": "def-public.PresentationPanelProps",
                     "text": "PresentationPanelProps"
                   },
-                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\"> | undefined"
+                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -9562,63 +9452,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.useEmbeddableFactory",
-        "type": "Function",
-        "tags": [],
-        "label": "useEmbeddableFactory",
-        "description": [],
-        "signature": [
-          "({\n  input,\n  factory,\n  onInputUpdated,\n}: EmbeddableRendererWithFactory<I>) => readonly [",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ErrorEmbeddable",
-            "text": "ErrorEmbeddable"
-          },
-          " | ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<I, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any> | undefined, boolean, string | undefined]"
-        ],
-        "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.useEmbeddableFactory.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  input,\n  factory,\n  onInputUpdated,\n}",
-            "description": [],
-            "signature": [
-              "EmbeddableRendererWithFactory<I>"
-            ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -13650,23 +13483,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.EmbeddableRendererProps",
-        "type": "Type",
-        "tags": [],
-        "label": "EmbeddableRendererProps",
-        "description": [
-          "\nThis type is a publicly exposed props of {@link EmbeddableRenderer}\nUnion is used to validate that or factory or embeddable is passed in, but it can't be both simultaneously\nIn case when embeddable is passed in, input is optional, because there is already an input inside of embeddable object\nIn case when factory is used, then input is required, because it will be used as initial input to create an embeddable object"
-        ],
-        "signature": [
-          "EmbeddableRendererPropsWithEmbeddable<I> | EmbeddableRendererWithFactory<I>"
-        ],
-        "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.MULTI_VALUE_CLICK_TRIGGER",
         "type": "string",
         "tags": [],
@@ -14833,40 +14649,6 @@
       "children": [
         {
           "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableStart.reactEmbeddableRegistryHasKey",
-          "type": "Function",
-          "tags": [],
-          "label": "reactEmbeddableRegistryHasKey",
-          "description": [
-            "\nChecks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}"
-          ],
-          "signature": [
-            "(type: string) => boolean"
-          ],
-          "path": "src/plugins/embeddable/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableStart.reactEmbeddableRegistryHasKey.$1",
-              "type": "string",
-              "tags": [],
-              "label": "type",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/plugins/embeddable/public/plugin.tsx",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableStart.getEmbeddableFactory",
           "type": "Function",
           "tags": [
@@ -14944,56 +14726,7 @@
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-            },
-            {
-              "plugin": "investigateApp",
-              "path": "x-pack/plugins/observability_solution/investigate_app/public/items/embeddable_item/register_embeddable_item.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/embeddable/create/create_dashboard.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.test.ts"
-            }
-          ],
+          "references": [],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -15085,10 +14818,6 @@
           "deprecated": true,
           "trackAdoption": false,
           "references": [
-            {
-              "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx"
-            },
             {
               "plugin": "canvas",
               "path": "x-pack/plugins/canvas/public/components/workpad_header/editor_menu/editor_menu.tsx"

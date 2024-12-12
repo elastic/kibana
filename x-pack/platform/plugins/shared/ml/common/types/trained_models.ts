@@ -333,6 +333,7 @@ interface BaseNLPModelItem extends BaseModelItem {
   supported?: boolean;
   state: ModelState | undefined;
   downloadState?: ModelDownloadState;
+  techPreview?: boolean;
 }
 
 /** Model available for download */

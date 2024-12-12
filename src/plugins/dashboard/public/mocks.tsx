@@ -100,7 +100,6 @@ export function buildMockDashboardApi({
         viewMode: initialState.viewMode as ViewMode,
         id: savedObjectId ?? '123',
       } as SavedDashboardInput,
-      anyMigrationRun: false,
       references: [],
     },
   });
