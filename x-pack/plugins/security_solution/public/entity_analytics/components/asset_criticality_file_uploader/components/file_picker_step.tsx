@@ -96,7 +96,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Entity: Indicate whether the entity is a {host} or a {user}."
+                defaultMessage="Entity type: Indicate whether the entity is a {host} or a {user}."
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
                 values={{
                   host: <b>{'host'}</b>,
