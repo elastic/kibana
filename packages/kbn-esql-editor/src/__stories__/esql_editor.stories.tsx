@@ -51,7 +51,7 @@ export const ExpandedMode: StoryObj<typeof ESQLEditor> = {
   },
 };
 
-export const WithErrors = {
+export const WithErrors: StoryObj<typeof ESQLEditor> = {
   render: Template,
   name: 'with errors',
 
