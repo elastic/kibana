@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { type FC } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -26,10 +25,10 @@ export const PanelHeaderItems: FC<PanelHeaderItems> = ({ headerItems, compressed
             <div
               css={
                 i < headerItems?.length - 1
-                  ? css`
-                      border-right: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
-                      padding-right: ${compressed ? euiTheme.size.s : euiTheme.size.l};
-                    `
+                  ? {
+                      borderRight: euiTheme.border.thin,
+                      paddingRight: compressed ? euiTheme.size.s : euiTheme.size.l,
+                    }
                   : null
               }
             >
