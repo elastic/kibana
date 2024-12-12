@@ -7488,7 +7488,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/slo-schema@link:x-pack/packages/kbn-slo-schema":
+"@kbn/slo-schema@link:x-pack/platform/packages/shared/kbn-slo-schema":
   version "0.0.0"
   uid ""
 
