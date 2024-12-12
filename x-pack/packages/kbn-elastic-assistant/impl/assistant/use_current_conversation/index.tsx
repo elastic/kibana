@@ -271,8 +271,7 @@ export const useCurrentConversation = ({
       currentConversation?.apiConfig?.actionTypeId != null
         ? {
             apiConfig: {
-              connectorId: currentConversation.apiConfig.connectorId,
-              actionTypeId: currentConversation.apiConfig.actionTypeId,
+              ...currentConversation.apiConfig,
               ...(newSystemPrompt?.id != null ? { defaultSystemPromptId: newSystemPrompt.id } : {}),
             },
           }
