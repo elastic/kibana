@@ -86,6 +86,7 @@ export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categorie
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
 export const INTERNAL_PUT_CUSTOM_FIELDS_URL = `${CASES_INTERNAL_URL}/{case_id}/custom_fields/{custom_field_id}`;
+export const INTERNAL_CASE_FIND_USER_ACTIONS_URL = `${CASES_INTERNAL_URL}/{case_id}/_find` as const;
 /**
  * Action routes
  */

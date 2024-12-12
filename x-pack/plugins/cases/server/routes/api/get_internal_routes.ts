@@ -20,6 +20,7 @@ import { getCaseMetricRoute } from './internal/get_case_metrics';
 import { getCasesMetricRoute } from './internal/get_cases_metrics';
 import { searchCasesRoute } from './internal/search_cases';
 import { replaceCustomFieldRoute } from './internal/replace_custom_field';
+import { findUserActionsRoute } from './internal/find_user_actions';
 
 export const getInternalRoutes = (userProfileService: UserProfileService) =>
   [
@@ -36,4 +37,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     getCasesMetricRoute,
     searchCasesRoute,
     replaceCustomFieldRoute,
+    findUserActionsRoute,
   ] as CaseRoute[];
