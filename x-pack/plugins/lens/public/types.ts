@@ -431,7 +431,8 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
     nowInstant: Date,
-    searchSessionId?: string
+    searchSessionId?: string,
+    forceDSL?: boolean
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -960,6 +961,7 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
+  forceDSL?: boolean;
 }
 
 /**

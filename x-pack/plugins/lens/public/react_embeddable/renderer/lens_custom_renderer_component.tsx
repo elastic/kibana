@@ -60,6 +60,7 @@ export function LensRenderer({
   timeRange,
   disabledActions,
   searchSessionId,
+  forceDSL,
   hidePanelTitles,
   ...props
 }: LensRendererProps) {
@@ -151,6 +152,7 @@ export function LensRenderer({
           ...initialStateRef.current,
           attributes: props.attributes,
         }),
+        forceDSL,
         hidePanelTitle: hidePanelTitles$,
       })}
       onApiAvailable={setLensApi}
