@@ -13,7 +13,9 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { GridLayoutStateManager, PanelInteractionEvent } from '../types';
+import { InteractionStart } from './grid_panel';
+import { GridLayoutStateManager } from '../types';
+import { allKeyCodes } from '../keyboard/defaults';
 
 export interface DragHandleApi {
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
@@ -23,10 +25,7 @@ export const DragHandle = React.forwardRef<
   DragHandleApi,
   {
     gridLayoutStateManager: GridLayoutStateManager;
-    interactionStart: (
-      type: PanelInteractionEvent['type'] | 'drop',
-      e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => void;
+    interactionStart: InteractionStart;
   }
 >(({ gridLayoutStateManager, interactionStart }, ref) => {
   const { euiTheme } = useEuiTheme();
@@ -51,6 +50,15 @@ export const DragHandle = React.forwardRef<
     [interactionStart, gridLayoutStateManager.accessMode$]
   );
 
+  const onKeyDownCallback = useCallback(
+    (e: KeyboardEvent | React.KeyboardEvent<HTMLButtonElement>) => {
+      if (allKeyCodes.includes(e.code)) {
+        interactionStart('keyboardDrag', e);
+      }
+    },
+    [interactionStart]
+  );
+
   const setDragHandles = useCallback(
     (dragHandles: Array<HTMLElement | null>) => {
       setDragHandleCount(dragHandles.length);
@@ -59,16 +67,18 @@ export const DragHandle = React.forwardRef<
       for (const handle of dragHandles) {
         if (handle === null) return;
         handle.addEventListener('mousedown', onMouseDown, { passive: true });
+        handle.addEventListener('keydown', onKeyDownCallback);
       }
 
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
           handle.removeEventListener('mousedown', onMouseDown);
+          handle.removeEventListener('keydown', onKeyDownCallback);
         }
       };
     },
-    [onMouseDown]
+    [onMouseDown, onKeyDownCallback]
   );
 
   useEffect(() => {
@@ -131,6 +141,7 @@ export const DragHandle = React.forwardRef<
       onMouseUp={(e) => {
         interactionStart('drop', e);
       }}
+      onKeyDown={onKeyDownCallback}
     >
       <EuiIcon type="grabOmnidirectional" />
     </button>

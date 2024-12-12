@@ -75,7 +75,9 @@ export const useGridLayoutEvents = ({
     };
 
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value) {
+      // if it's not mouse event or no event at all
+      if (interactionEvent$.value?.type !== 'resize' && interactionEvent$.value?.type !== 'drag') {
+        // if (!interactionEvent$.value) {
         // if no interaction event, stop auto scroll (if necessary) and return early
         stopAutoScrollIfNecessary();
         return;

@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
-import { PanelInteractionEvent } from '../types';
+import { InteractionStart } from './grid_panel';
 
-export const ResizeHandle = ({
-  interactionStart,
-}: {
-  interactionStart: (
-    type: PanelInteractionEvent['type'] | 'drop',
-    e: MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => void;
-}) => {
+export const ResizeHandle = ({ interactionStart }: { interactionStart: InteractionStart }) => {
   return (
     <button
       className="kbnGridPanel__resizeHandle"
