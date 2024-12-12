@@ -16,7 +16,7 @@ plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
 ```
 
 ### Declaring Feature Capabilities
-Default feature capabilities are declared in `x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts`:
+Default feature capabilities are declared in `x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts`:
 
 ```ts
 export type AssistantFeatures = { [K in keyof typeof defaultAssistantFeatures]: boolean };
