@@ -1,0 +1,20 @@
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      machineType: n2-standard-2
+
+  - wait
+
+  - command: .buildkite/scripts/steps/renovate.sh
+    label: 'Renovate validation'
+    agents:
+      machineType: n2-highcpu-8
+      preemptible: true
+    key: renovate_validation
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
