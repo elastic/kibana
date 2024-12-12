@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { collectValuesWithLength, newestValue } from './field_utils';
-import type { UnitedDefinitionBuilder } from '../types';
+import type { EntityDescription } from '../types';
+import { collectValues as collect, newestValue } from './field_utils';
 
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
-export const getServiceUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLength: number) => {
-  const collect = collectValuesWithLength(fieldHistoryLength);
-  return {
-    entityType: 'service',
-    version: SERVICE_DEFINITION_VERSION,
-    fields: [
-      collect({ field: 'service.address' }),
-      collect({ field: 'service.environment' }),
-      collect({ field: 'service.ephemeral_id' }),
-      collect({ field: 'service.id' }),
-      collect({ field: 'service.node.name' }),
-      collect({ field: 'service.node.roles' }),
-      newestValue({ field: 'service.state' }),
-      collect({ field: 'service.type' }),
-      newestValue({ field: 'service.version' }),
-    ],
-  };
+export const SERVICE_IDENTITY_FIELD = 'service.name';
+
+export const serviceEntityEngineDescription: EntityDescription = {
+  entityType: 'service',
+  version: SERVICE_DEFINITION_VERSION,
+  identityFields: [SERVICE_IDENTITY_FIELD],
+  settings: {
+    timestampField: '@timestamp',
+  },
+  fields: [
+    collect({ source: 'service.address' }),
+    collect({ source: 'service.environment' }),
+    collect({ source: 'service.ephemeral_id' }),
+    collect({ source: 'service.id' }),
+    collect({ source: 'service.node.name' }),
+    collect({ source: 'service.node.roles' }),
+    newestValue({ source: 'service.state' }),
+    collect({ source: 'service.type' }),
+    newestValue({ source: 'service.version' }),
+  ],
 };
