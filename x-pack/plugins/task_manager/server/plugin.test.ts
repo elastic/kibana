@@ -149,6 +149,22 @@ describe('TaskManagerPlugin', () => {
         'Disabling authentication for background task utilization API'
       );
     });
+
+    test('it logs a warning when poll_interval is configured greater than the default when using mget claim_strategy', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...pluginInitializerContextParams,
+        claim_strategy: 'mget',
+        poll_interval: 5000,
+      });
+
+      const logger = pluginInitializerContext.logger.get();
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      expect((logger.warn as jest.Mock).mock.calls.length).toBe(1);
+      expect((logger.warn as jest.Mock).mock.calls[0][0]).toBe(
+        'By default, task manager polls occur every 500ms and increases to 3s when the demand is low. Setting xpack.task_manager.poll_interval to a value greater than the default (500 ms) can increase task latency and reduce overall throughput; it is not recommended.'
+      );
+    });
   });
 
   describe('start', () => {
