@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import {
   EuiTitle,
   EuiText,
@@ -43,7 +43,7 @@ export interface PanelHeaderProps {
 /**
  * Title component that shows basic information of a rule. This is displayed above rule overview body
  */
-export const PanelHeader: React.FC<PanelHeaderProps> = ({ rule, isSuppressed }) => {
+export const PanelHeader: React.FC<PanelHeaderProps> = memo(({ rule, isSuppressed }) => {
   const href = useRuleDetailsLink({ ruleId: rule.id });
 
   return (
@@ -86,6 +86,6 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({ rule, isSuppressed }) 
       </EuiFlexGroup>
     </FlyoutHeader>
   );
-};
+});
 
 PanelHeader.displayName = 'PanelHeader';

@@ -6,6 +6,9 @@
  */
 
 import { useEffect } from 'react';
+
+import { i18n } from '@kbn/i18n';
+
 import { useKibana } from './use_kibana';
 
 export const usePlaygroundBreadcrumbs = () => {
@@ -13,7 +16,18 @@ export const usePlaygroundBreadcrumbs = () => {
 
   useEffect(() => {
     searchNavigation?.breadcrumbs.setSearchBreadCrumbs(
-      [{ text: 'Build' }, { text: 'Playground' }],
+      [
+        {
+          text: i18n.translate('xpack.searchPlayground.breadcrumbs.build', {
+            defaultMessage: 'Build',
+          }),
+        },
+        {
+          text: i18n.translate('xpack.searchPlayground.breadcrumbs.playground', {
+            defaultMessage: 'Playground',
+          }),
+        },
+      ],
       { forClassicChromeStyle: true }
     );
 

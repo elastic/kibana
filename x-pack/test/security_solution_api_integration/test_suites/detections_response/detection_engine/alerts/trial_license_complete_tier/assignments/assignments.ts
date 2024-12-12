@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql({
           error: 'Bad Request',
           message:
-            '[request body]: ids.1: String must contain at least 1 character(s), ids.1: Invalid',
+            '[request body]: ids.1: String must contain at least 1 character(s), ids.1: No empty strings allowed',
           statusCode: 400,
         });
       });

@@ -15,6 +15,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import { type AllFieldsDiff } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { calculateFromValue } from '../../../rule_types/utils/utils';
 
 /**
  * Retrieves and transforms the value for a specific field from a DiffableRule group.
@@ -132,6 +133,9 @@ const SUBFIELD_MAPPING: Record<string, string> = {
   tiebreaker_field: 'tiebreaker_field',
   timestamp_field: 'timestamp_field',
   building_block_type: 'type',
+  threat_query: 'query',
+  threat_language: 'language',
+  threat_filters: 'filters',
   rule_name_override: 'field_name',
   timestamp_override: 'field_name',
   timestamp_override_fallback_disabled: 'fallback_disabled',
@@ -201,7 +205,8 @@ export const transformDiffableFieldValues = (
   diffableFieldValue: RuleSchedule | InlineKqlQuery | unknown
 ): TransformValuesReturnType => {
   if (fieldName === 'from' && isRuleSchedule(diffableFieldValue)) {
-    return { type: 'TRANSFORMED_FIELD', value: `now-${diffableFieldValue.lookback}` };
+    const from = calculateFromValue(diffableFieldValue.interval, diffableFieldValue.lookback);
+    return { type: 'TRANSFORMED_FIELD', value: from };
   } else if (fieldName === 'to') {
     return { type: 'TRANSFORMED_FIELD', value: `now` };
   } else if (fieldName === 'saved_id' && isInlineQuery(diffableFieldValue)) {

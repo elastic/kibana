@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
+import { withEuiTheme } from '@elastic/eui';
 import type { LayoutPropsWithTheme } from '../../types';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 import { ChartSectionVis } from '../chart_section_vis';
 
-export const NginxLayoutSection = withTheme(
+export const NginxLayoutSection = withEuiTheme(
   ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <React.Fragment>
       <Section
@@ -36,10 +36,10 @@ export const NginxLayoutSection = withTheme(
             type="bar"
             formatter="abbreviatedNumber"
             seriesOverrides={{
-              '200s': { color: theme.eui.euiColorVis1 },
-              '300s': { color: theme.eui.euiColorVis5 },
-              '400s': { color: theme.eui.euiColorVis2 },
-              '500s': { color: theme.eui.euiColorVis9 },
+              '200s': { color: theme.euiTheme.colors.vis.euiColorVis1 },
+              '300s': { color: theme.euiTheme.colors.vis.euiColorVis5 },
+              '400s': { color: theme.euiTheme.colors.vis.euiColorVis2 },
+              '500s': { color: theme.euiTheme.colors.vis.euiColorVis9 },
             }}
           />
         </SubSection>
@@ -57,7 +57,7 @@ export const NginxLayoutSection = withTheme(
             formatter="abbreviatedNumber"
             formatterTemplate="{{value}}/s"
             seriesOverrides={{
-              rate: { color: theme.eui.euiColorVis1 },
+              rate: { color: theme.euiTheme.colors.vis.euiColorVis1 },
             }}
           />
         </SubSection>
@@ -75,7 +75,7 @@ export const NginxLayoutSection = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               connections: {
-                color: theme.eui.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 type: 'bar',
               },
             }}
@@ -95,7 +95,7 @@ export const NginxLayoutSection = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               reqPerConns: {
-                color: theme.eui.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.nginxMetricsLayout.requestsPerConnectionsSection.reqsPerConnSeriesLabel',
                   {
