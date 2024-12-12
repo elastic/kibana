@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before, Page } from '@elastic/synthetics';
-import { recordVideo } from '../../../helpers/record_video';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { makeChecksWithStatus } from '../../../helpers/make_checks';
 import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';
 

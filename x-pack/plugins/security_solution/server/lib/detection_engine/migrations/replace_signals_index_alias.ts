@@ -26,11 +26,13 @@ export const replaceSignalsIndexAlias = async ({
   esClient,
   newIndex,
   oldIndex,
+  legacySiemSignalsAlias,
 }: {
   alias: string;
   esClient: ElasticsearchClient;
   newIndex: string;
   oldIndex: string;
+  legacySiemSignalsAlias: string;
 }): Promise<void> => {
   await esClient.indices.updateAliases({
     body: {
@@ -40,12 +42,11 @@ export const replaceSignalsIndexAlias = async ({
       ],
     },
   });
-  // TODO: space-aware?
   await esClient.indices.updateAliases({
     body: {
       actions: [
-        { remove: { index: oldIndex, alias: '.siem-signals-default' } },
-        { add: { index: newIndex, alias: '.siem-signals-default', is_write_index: false } },
+        { remove: { index: oldIndex, alias: legacySiemSignalsAlias } },
+        { add: { index: newIndex, alias: legacySiemSignalsAlias, is_write_index: false } },
       ],
     },
   });

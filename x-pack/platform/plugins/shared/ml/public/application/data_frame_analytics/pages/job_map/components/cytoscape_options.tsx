@@ -12,8 +12,6 @@ import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';
 
-const lineColor = '#C5CCD7';
-
 const MAP_SHAPES = {
   ELLIPSE: 'ellipse',
   RECTANGLE: 'rectangle',
@@ -23,7 +21,7 @@ const MAP_SHAPES = {
 } as const;
 type MapShapes = (typeof MAP_SHAPES)[keyof typeof MAP_SHAPES];
 
-function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
+function shapeForNode(el: cytoscape.NodeSingular): MapShapes {
   const type = el.data('type');
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
@@ -70,7 +68,7 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
     case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
       return theme.euiColorFullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
-      return theme.euiColorSuccess;
+      return theme.euiColorVis0;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return theme.euiColorVis1;
     case JOB_MAP_NODE_TYPES.INDEX:
@@ -85,55 +83,59 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
   }
 }
 
-export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOptions => ({
-  autoungrabify: true,
-  boxSelectionEnabled: false,
-  maxZoom: 3,
-  minZoom: 0.2,
-  style: [
-    {
-      selector: 'node',
-      style: {
-        'background-color': (el: cytoscape.NodeSingular) =>
-          el.data('isRoot') ? theme.euiColorWarning : theme.euiColorGhost,
-        'background-height': '60%',
-        'background-width': '60%',
-        'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el, theme),
-        'border-style': 'solid',
-        // @ts-ignore
-        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
-        'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 4 : 3),
-        color: theme.euiTextColor,
-        'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-        'font-size': theme.euiFontSizeXS,
-        'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
-        label: 'data(label)',
-        shape: (el: cytoscape.NodeSingular) => shapeForNode(el, theme),
-        'text-background-color': theme.euiColorLightestShade,
-        'text-background-opacity': 0,
-        'text-background-padding': theme.euiSizeXS,
-        'text-background-shape': 'roundrectangle',
-        'text-margin-y': parseInt(theme.euiSizeS, 10),
-        'text-max-width': '200px',
-        'text-valign': 'bottom',
-        'text-wrap': 'wrap',
+export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOptions => {
+  const lineColor = theme.euiColorLightShade;
+
+  return {
+    autoungrabify: true,
+    boxSelectionEnabled: false,
+    maxZoom: 3,
+    minZoom: 0.2,
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'background-color': (el: cytoscape.NodeSingular) =>
+            el.data('isRoot') ? theme.euiColorWarning : theme.euiColorGhost,
+          'background-height': '60%',
+          'background-width': '60%',
+          'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el, theme),
+          'border-style': 'solid',
+          // @ts-ignore
+          'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
+          'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 4 : 3),
+          color: theme.euiTextColor,
+          'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
+          'font-size': theme.euiFontSizeXS,
+          'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
+          label: 'data(label)',
+          shape: (el: cytoscape.NodeSingular) => shapeForNode(el),
+          'text-background-color': theme.euiColorLightestShade,
+          'text-background-opacity': 0,
+          'text-background-padding': theme.euiSizeXS,
+          'text-background-shape': 'roundrectangle',
+          'text-margin-y': parseInt(theme.euiSizeS, 10),
+          'text-max-width': '200px',
+          'text-valign': 'bottom',
+          'text-wrap': 'wrap',
+        },
       },
-    },
-    {
-      selector: 'edge',
-      style: {
-        'curve-style': 'taxi',
-        // @ts-ignore
-        'taxi-direction': 'rightward',
-        'line-color': lineColor,
-        'overlay-opacity': 0,
-        'target-arrow-color': lineColor,
-        'target-arrow-shape': 'triangle',
-        // @ts-ignore
-        'target-distance-from-node': theme.euiSizeXS,
-        width: 1,
-        'source-arrow-shape': 'none',
+      {
+        selector: 'edge',
+        style: {
+          'curve-style': 'taxi',
+          // @ts-ignore
+          'taxi-direction': 'rightward',
+          'line-color': lineColor,
+          'overlay-opacity': 0,
+          'target-arrow-color': lineColor,
+          'target-arrow-shape': 'triangle',
+          // @ts-ignore
+          'target-distance-from-node': theme.euiSizeXS,
+          width: 1,
+          'source-arrow-shape': 'none',
+        },
       },
-    },
-  ],
-});
+    ],
+  };
+};
