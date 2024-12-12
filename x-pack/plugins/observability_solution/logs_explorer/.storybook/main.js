@@ -9,7 +9,6 @@ const defaultConfig = require('@kbn/storybook').defaultConfig;
 
 module.exports = {
   ...defaultConfig,
-  stories: ['../**/*.stories.mdx', ...defaultConfig.stories],
   webpackFinal: async (config) => {
     const originalConfig = await defaultConfig.webpackFinal(config);
 
