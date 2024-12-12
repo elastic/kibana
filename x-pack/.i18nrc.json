@@ -166,7 +166,7 @@
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
     "xpack.uptime": [
-      "plugins/observability_solution/uptime"
+      "solutions/observability/plugins/uptime"
     ],
     "xpack.synthetics": [
       "solutions/observability/plugins/synthetics"
