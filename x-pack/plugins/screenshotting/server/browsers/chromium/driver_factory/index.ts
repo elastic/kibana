@@ -91,6 +91,7 @@ const DEFAULT_ARGS = [
 
 const DIAGNOSTIC_TIME = 5 * 1000;
 let sharedBrowser: Browser | undefined;
+let sharedBrowserInitializing = false;
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -125,8 +126,8 @@ export class HeadlessChromiumDriverFactory {
     pLogger = this.logger
   ): Rx.Observable<CreatePageResult> {
     return new Rx.Observable((observer) => {
-      console.timeEnd('*** pre-processing');
-      console.time('*** headless prep');
+      // console.timeEnd('*** pre-processing');
+      // console.time('*** headless prep');
 
       const logger = pLogger.get('browser-driver');
       logger.info(`Creating browser page driver`);
@@ -149,8 +150,14 @@ export class HeadlessChromiumDriverFactory {
 
       (async () => {
         try {
+          if (sharedBrowserInitializing) {
+            while (sharedBrowserInitializing) {
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+          }
           if (!sharedBrowser) {
-            console.time('puppeteer.launch(...)');
+            // console.time('puppeteer.launch(...)');
+            sharedBrowserInitializing = true;
             sharedBrowser = await puppeteer.launch({
               pipe: true,
               userDataDir: this.userDataDir,
@@ -161,10 +168,8 @@ export class HeadlessChromiumDriverFactory {
               headless: true,
               protocolTimeout: 0,
             });
-            console.timeEnd('puppeteer.launch(...)');
-            console.log('*** We do not have a shared browser');
-          } else {
-            console.log('*** Using browser from cache');
+            sharedBrowserInitializing = false;
+            // console.timeEnd('puppeteer.launch(...)');
           }
         } catch (err) {
           observer.error(
@@ -173,7 +178,8 @@ export class HeadlessChromiumDriverFactory {
           return;
         }
 
-        const page = await sharedBrowser.newPage();
+        const context = await sharedBrowser.createBrowserContext();
+        const page = await context.newPage();
         const devTools = await page.target().createCDPSession();
 
         await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });

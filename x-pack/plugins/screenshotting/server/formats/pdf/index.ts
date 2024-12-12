@@ -90,8 +90,8 @@ export async function toPdf(
   { logo, title }: PdfScreenshotOptions,
   { metrics, results }: CaptureResult
 ): Promise<PdfScreenshotResult> {
-  console.timeEnd('*** capturePng');
-  console.time('*** toPdf');
+  // console.timeEnd('*** capturePng');
+  // console.time('*** toPdf');
   let buffer: Buffer;
   const shouldConvertPngsToPdf = layout.id !== 'print';
   if (shouldConvertPngsToPdf) {
@@ -106,8 +106,8 @@ export async function toPdf(
         eventLogger,
       }));
 
-      console.timeEnd('*** toPdf');
-      console.time('*** post-processing');
+      // console.timeEnd('*** toPdf');
+      // console.time('*** post-processing');
       return {
         metrics: metrics ?? {},
         data: buffer,
@@ -123,8 +123,8 @@ export async function toPdf(
     buffer = results[0].screenshots[0].data; // This buffer is already the PDF
   }
 
-  console.timeEnd('*** toPdf');
-  console.time('*** post-processing');
+  // console.timeEnd('*** toPdf');
+  // console.time('*** post-processing');
   return {
     metrics: metrics ?? {},
     data: buffer,

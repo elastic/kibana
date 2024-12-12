@@ -28,8 +28,8 @@ export const openUrl = async (
   const waitForSelector = page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
 
   try {
-    console.timeEnd('*** headless prep');
-    console.time('*** pageLoad');
+    // console.timeEnd('*** headless prep');
+    // console.time('*** pageLoad');
     await browser.open(url, { context, headers, waitForSelector, timeout }, kbnLogger);
 
     // Debug logging for viewport size and resizing
