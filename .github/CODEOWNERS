@@ -393,7 +393,6 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
-packages/kbn-management/settings/components/form @elastic/kibana-management
 packages/kbn-management/settings/field_definition @elastic/kibana-management
 packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
 packages/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
@@ -617,6 +616,7 @@ src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-language-documentation @elastic/kibana-esql
 src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
+src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui

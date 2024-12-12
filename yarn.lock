@@ -6208,7 +6208,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-form@link:packages/kbn-management/settings/components/form":
+"@kbn/management-settings-components-form@link:src/platform/packages/private/kbn-management/settings/components/form":
   version "0.0.0"
   uid ""
 
