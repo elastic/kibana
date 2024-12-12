@@ -54,6 +54,7 @@ export const euiDarkVars: Theme = getThemeVars().dark;
 
 /**
  * EUI Theme vars that automatically adjust to light/dark theme
+ * @deprecated Use `useEuiTheme` from `@elastic/eui` instead (see more: https://github.com/elastic/kibana/issues/199715#json-tokens)
  */
 export const euiThemeVars: Theme = new Proxy(
   isDarkMode ? getThemeVars().dark : getThemeVars().light,
