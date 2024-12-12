@@ -15,6 +15,7 @@ import { HostDetailsLink } from '../../../../../common/components/links';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
+import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 
 interface Props {
   contextId: string;
@@ -43,7 +44,9 @@ const HostNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
+
+  const isInSecurityApp = useIsInSecurityApp();
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
@@ -58,23 +61,28 @@ const HostNameComponent: React.FC<Props> = ({
         onClick();
       }
 
+      /*
+       * if and only if renderer is running inside security solution app
+       * we check for event and timeline context
+       * */
       if (!eventContext || !isInTimelineContext) {
         return;
       }
 
       const { timelineID } = eventContext;
-
-      openRightPanel({
-        id: HostPanelKey,
-        params: {
-          hostName,
-          contextID: contextId,
-          scopeId: timelineID,
-          isDraggable,
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: contextId,
+            scopeId: timelineID,
+            isDraggable,
+          },
         },
       });
     },
-    [contextId, eventContext, hostName, isDraggable, isInTimelineContext, onClick, openRightPanel]
+    [contextId, eventContext, hostName, isDraggable, isInTimelineContext, onClick, openFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -85,13 +93,21 @@ const HostNameComponent: React.FC<Props> = ({
         Component={Component}
         hostName={hostName}
         isButton={isButton}
-        onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
+        onClick={isInTimelineContext || !isInSecurityApp ? openHostDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </HostDetailsLink>
     ),
-    [Component, hostName, isButton, isInTimelineContext, openHostDetailsSidePanel, title]
+    [
+      Component,
+      hostName,
+      isButton,
+      isInTimelineContext,
+      openHostDetailsSidePanel,
+      title,
+      isInSecurityApp,
+    ]
   );
 
   return isString(value) && hostName.length > 0 ? (

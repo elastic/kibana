@@ -15,7 +15,9 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/enablement.gen';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
+import { GetEntityStoreStatusRequestQuery } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
@@ -38,7 +40,11 @@ export const getEntityStoreStatusRoute = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: {},
+        validate: {
+          request: {
+            query: buildRouteValidationWithZod(GetEntityStoreStatusRequestQuery),
+          },
+        },
       },
 
       async (
@@ -54,7 +60,7 @@ export const getEntityStoreStatusRoute = (
         try {
           const body: GetEntityStoreStatusResponse = await secSol
             .getEntityStoreDataClient()
-            .status();
+            .status(request.query);
 
           return response.ok({ body });
         } catch (e) {

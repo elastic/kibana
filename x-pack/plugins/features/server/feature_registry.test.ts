@@ -57,7 +57,7 @@ describe('FeatureRegistry', () => {
             app: ['app1'],
             savedObject: {
               all: ['space', 'etc', 'telemetry'],
-              read: ['canvas', 'config', 'config-global', 'url'],
+              read: ['canvas', 'config', 'config-global', 'url', 'tag'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
             ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -65,7 +65,7 @@ describe('FeatureRegistry', () => {
           read: {
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'url', 'telemetry'],
+              read: ['config', 'config-global', 'url', 'telemetry', 'tag'],
             },
             ui: [],
           },
@@ -130,7 +130,7 @@ describe('FeatureRegistry', () => {
                 app: ['app1'],
                 savedObject: {
                   all: ['space', 'etc', 'telemetry'],
-                  read: ['canvas', 'config', 'config-global', 'url'],
+                  read: ['canvas', 'config', 'config-global', 'url', 'tag'],
                 },
                 api: ['someApiEndpointTag', 'anotherEndpointTag'],
                 ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -314,7 +314,7 @@ describe('FeatureRegistry', () => {
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
     });
 
-    it(`automatically grants access to config, config-global, url, and telemetry saved objects`, () => {
+    it(`automatically grants access to config, config-global, url, telemetry and tag saved objects`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -348,16 +348,17 @@ describe('FeatureRegistry', () => {
 
       const allPrivilege = result[0].privileges?.all;
       const readPrivilege = result[0].privileges?.read;
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
         'telemetry',
         'url',
+        'tag',
       ]);
     });
 
-    it(`automatically grants 'all' access to telemetry and 'read' to [config, config-global, url] saved objects for the reserved privilege`, () => {
+    it(`automatically grants 'all' access to telemetry and 'read' to [config, config-global, url, tag] saved objects for the reserved privilege`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -388,7 +389,7 @@ describe('FeatureRegistry', () => {
 
       const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
       expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
-      expect(reservedPrivilege.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(reservedPrivilege.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
     });
 
     it(`does not duplicate the automatic grants if specified on the incoming feature`, () => {
@@ -402,14 +403,14 @@ describe('FeatureRegistry', () => {
             ui: [],
             savedObject: {
               all: ['telemetry'],
-              read: ['config', 'config-global', 'url'],
+              read: ['config', 'config-global', 'url', 'tag'],
             },
           },
           read: {
             ui: [],
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'url'],
+              read: ['config', 'config-global', 'url', 'tag'],
             },
           },
         },
@@ -426,11 +427,12 @@ describe('FeatureRegistry', () => {
       const allPrivilege = result[0].privileges!.all;
       const readPrivilege = result[0].privileges!.read;
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url', 'tag']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
         'url',
+        'tag',
         'telemetry',
       ]);
     });
@@ -518,7 +520,7 @@ describe('FeatureRegistry', () => {
             name: 'Foo',
             app: ['app1', 'app2'],
             savedObject: {
-              all: ['config', 'config-global', 'space', 'etc'],
+              all: ['config', 'config-global', 'space', 'tag', 'etc'],
               read: ['canvas'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
@@ -868,404 +870,688 @@ describe('FeatureRegistry', () => {
       );
     });
 
-    it(`prevents privileges from specifying alerting/rule entries that don't exist at the root level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
-        privileges: {
-          all: {
-            alerting: {
-              rule: {
-                all: ['foo', 'bar'],
-                read: ['baz'],
+    describe('alerting', () => {
+      it(`prevents privileges from specifying rule types that don't exist at the root level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+          privileges: {
+            all: {
+              alerting: {
+                rule: {
+                  all: [
+                    { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                    { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                  ],
+                  read: [{ ruleTypeId: 'baz', consumers: ['test-feature'] }],
+                },
               },
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-            app: [],
-          },
-          read: {
-            alerting: {
-              rule: {
-                read: ['foo', 'bar', 'baz'],
+              savedObject: {
+                all: [],
+                read: [],
               },
+              ui: [],
+              app: [],
             },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-            app: [],
-          },
-        },
-      };
-
-      const featureRegistry = new FeatureRegistry();
-
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.all has unknown alerting entries: foo, baz"`
-      );
-    });
-
-    it(`prevents privileges from specifying alerting/alert entries that don't exist at the root level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
-        privileges: {
-          all: {
-            alerting: {
-              alert: {
-                all: ['foo', 'bar'],
-                read: ['baz'],
+            read: {
+              alerting: {
+                rule: {
+                  read: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+                },
               },
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-            app: [],
-          },
-          read: {
-            alerting: {
-              alert: {
-                read: ['foo', 'bar', 'baz'],
+              savedObject: {
+                all: [],
+                read: [],
               },
+              ui: [],
+              app: [],
             },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-            app: [],
           },
-        },
-      };
+        };
 
-      const featureRegistry = new FeatureRegistry();
+        const featureRegistry = new FeatureRegistry();
 
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.all has unknown alerting entries: foo, baz"`
-      );
-    });
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature privilege test-feature.all has unknown ruleTypeId: foo"`
+        );
+      });
 
-    it(`prevents features from specifying alerting/rule entries that don't exist at the privilege level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
-        privileges: {
-          all: {
-            alerting: {
-              rule: {
-                all: ['foo'],
+      it(`prevents privileges from specifying rule types entries that don't exist at the root level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+          privileges: {
+            all: {
+              alerting: {
+                alert: {
+                  all: [
+                    { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                    { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                  ],
+                  read: [{ ruleTypeId: 'baz', consumers: ['test-feature'] }],
+                },
               },
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-            app: [],
-          },
-          read: {
-            alerting: {
-              rule: {
-                all: ['foo'],
+              savedObject: {
+                all: [],
+                read: [],
               },
+              ui: [],
+              app: [],
             },
-            savedObject: {
-              all: [],
-              read: [],
+            read: {
+              alerting: {
+                alert: {
+                  read: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
             },
-            ui: [],
-            app: [],
           },
-        },
-        subFeatures: [
-          {
-            name: 'my sub feature',
-            privilegeGroups: [
-              {
-                groupType: 'independent',
-                privileges: [
-                  {
-                    id: 'cool-sub-feature-privilege',
-                    name: 'cool privilege',
-                    includeIn: 'none',
-                    savedObject: {
-                      all: [],
-                      read: [],
-                    },
-                    ui: [],
-                    alerting: {
-                      rule: {
-                        all: ['bar'],
+        };
+
+        const featureRegistry = new FeatureRegistry();
+
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature privilege test-feature.all has unknown ruleTypeId: foo"`
+        );
+      });
+
+      it(`prevents features from specifying rule types that don't exist at the privilege level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [
+            { ruleTypeId: 'foo', consumers: ['test-feature'] },
+            { ruleTypeId: 'bar', consumers: ['test-feature'] },
+            { ruleTypeId: 'baz', consumers: ['test-feature'] },
+          ],
+          privileges: {
+            all: {
+              alerting: {
+                rule: {
+                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+            read: {
+              alerting: {
+                rule: {
+                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'my sub feature',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'cool-sub-feature-privilege',
+                      name: 'cool privilege',
+                      includeIn: 'none',
+                      savedObject: {
+                        all: [],
+                        read: [],
+                      },
+                      ui: [],
+                      alerting: {
+                        rule: {
+                          all: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+                        },
                       },
                     },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        const featureRegistry = new FeatureRegistry();
+
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+        );
+      });
+
+      it(`prevents features from specifying rule types entries that don't exist at the privilege level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [
+            { ruleTypeId: 'foo', consumers: ['test-feature'] },
+            { ruleTypeId: 'bar', consumers: ['test-feature'] },
+            { ruleTypeId: 'baz', consumers: ['test-feature'] },
+          ],
+          privileges: {
+            all: {
+              alerting: {
+                alert: {
+                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+            read: {
+              alerting: {
+                alert: {
+                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'my sub feature',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'cool-sub-feature-privilege',
+                      name: 'cool privilege',
+                      includeIn: 'none',
+                      savedObject: {
+                        all: [],
+                        read: [],
+                      },
+                      ui: [],
+                      alerting: {
+                        alert: {
+                          all: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        const featureRegistry = new FeatureRegistry();
+
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+        );
+      });
+
+      it(`prevents reserved privileges from specifying rule types that don't exist at the root level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+          privileges: null,
+          reserved: {
+            description: 'something',
+            privileges: [
+              {
+                id: 'reserved',
+                privilege: {
+                  alerting: {
+                    rule: {
+                      all: [
+                        { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                        { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                        { ruleTypeId: 'baz', consumers: ['test-feature'] },
+                      ],
+                    },
                   },
-                ],
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  app: [],
+                },
               },
             ],
           },
-        ],
-      };
+        };
 
-      const featureRegistry = new FeatureRegistry();
+        const featureRegistry = new FeatureRegistry();
 
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
-      );
-    });
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature privilege test-feature.reserved has unknown ruleTypeId: foo"`
+        );
+      });
 
-    it(`prevents features from specifying alerting/alert entries that don't exist at the privilege level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
-        privileges: {
-          all: {
-            alerting: {
-              alert: {
-                all: ['foo'],
-              },
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-            app: [],
-          },
-          read: {
-            alerting: {
-              alert: {
-                all: ['foo'],
-              },
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-            app: [],
-          },
-        },
-        subFeatures: [
-          {
-            name: 'my sub feature',
-            privilegeGroups: [
+      it(`prevents reserved privileges from specifying rule types entries that don't exist at the root level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+          privileges: null,
+          reserved: {
+            description: 'something',
+            privileges: [
               {
-                groupType: 'independent',
-                privileges: [
-                  {
-                    id: 'cool-sub-feature-privilege',
-                    name: 'cool privilege',
-                    includeIn: 'none',
-                    savedObject: {
-                      all: [],
-                      read: [],
-                    },
-                    ui: [],
-                    alerting: {
-                      alert: {
-                        all: ['bar'],
-                      },
+                id: 'reserved',
+                privilege: {
+                  alerting: {
+                    alert: {
+                      all: [
+                        { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                        { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                        { ruleTypeId: 'baz', consumers: ['test-feature'] },
+                      ],
                     },
                   },
-                ],
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  app: [],
+                },
               },
             ],
           },
-        ],
-      };
+        };
 
-      const featureRegistry = new FeatureRegistry();
+        const featureRegistry = new FeatureRegistry();
 
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
-      );
-    });
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature privilege test-feature.reserved has unknown ruleTypeId: foo"`
+        );
+      });
 
-    it(`prevents reserved privileges from specifying alerting/rule entries that don't exist at the root level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
-        privileges: null,
-        reserved: {
-          description: 'something',
-          privileges: [
-            {
-              id: 'reserved',
-              privilege: {
-                alerting: {
-                  rule: {
-                    all: ['foo', 'bar', 'baz'],
+      it(`prevents features from specifying rule types that don't exist at the reserved privilege level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [
+            { ruleTypeId: 'foo', consumers: ['test-feature'] },
+            { ruleTypeId: 'bar', consumers: ['test-feature'] },
+            { ruleTypeId: 'baz', consumers: ['test-feature'] },
+          ],
+          privileges: null,
+          reserved: {
+            description: 'something',
+            privileges: [
+              {
+                id: 'reserved',
+                privilege: {
+                  alerting: {
+                    rule: {
+                      all: [
+                        { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                        { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                      ],
+                    },
                   },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  app: [],
                 },
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: [],
-                app: [],
               },
+            ],
+          },
+        };
+
+        const featureRegistry = new FeatureRegistry();
+
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+        );
+      });
+
+      it(`prevents features from specifying rule types entries that don't exist at the reserved privilege level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [
+            { ruleTypeId: 'foo', consumers: ['test-feature'] },
+            { ruleTypeId: 'bar', consumers: ['test-feature'] },
+            { ruleTypeId: 'baz', consumers: ['test-feature'] },
+          ],
+          privileges: null,
+          reserved: {
+            description: 'something',
+            privileges: [
+              {
+                id: 'reserved',
+                privilege: {
+                  alerting: {
+                    alert: {
+                      all: [
+                        { ruleTypeId: 'foo', consumers: ['test-feature'] },
+                        { ruleTypeId: 'bar', consumers: ['test-feature'] },
+                      ],
+                    },
+                  },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  app: [],
+                },
+              },
+            ],
+          },
+        };
+
+        const featureRegistry = new FeatureRegistry();
+
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature test-feature specifies alerting rule types which are not granted to any privileges: baz"`
+        );
+      });
+
+      it(`prevents privileges from specifying rule types without consumers`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'foo', consumers: [] }],
+          privileges: {
+            all: {
+              alerting: {
+                rule: {
+                  all: [{ ruleTypeId: 'foo', consumers: [] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+            read: {
+              alerting: {
+                rule: {
+                  read: [{ ruleTypeId: 'foo', consumers: [] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+        };
+
+        const featureRegistry = new FeatureRegistry();
+
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"[alerting.0.consumers]: array size is [0], but cannot be smaller than [1]"`
+        );
+      });
+
+      it(`prevents privileges from specifying consumers entries that don't exist at the root level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+          privileges: {
+            all: {
+              alerting: {
+                rule: {
+                  all: [{ ruleTypeId: 'bar', consumers: ['not-exist'] }],
+                  read: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+            read: {
+              alerting: {
+                rule: {
+                  read: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+        };
+
+        const featureRegistry = new FeatureRegistry();
+
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature privilege test-feature.all.bar has unknown consumer: not-exist"`
+        );
+      });
+
+      it(`prevents features from specifying consumers that don't exist at the privilege level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'foo', consumers: ['test-feature', 'should-exist', 'foo'] }],
+          privileges: {
+            all: {
+              alerting: {
+                alert: {
+                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+            read: {
+              alerting: {
+                alert: {
+                  all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'my sub feature',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'cool-sub-feature-privilege',
+                      name: 'cool privilege',
+                      includeIn: 'none',
+                      savedObject: {
+                        all: [],
+                        read: [],
+                      },
+                      ui: [],
+                      alerting: {
+                        alert: {
+                          all: [{ ruleTypeId: 'foo', consumers: ['foo'] }],
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
             },
           ],
-        },
-      };
+        };
 
-      const featureRegistry = new FeatureRegistry();
+        const featureRegistry = new FeatureRegistry();
 
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.reserved has unknown alerting entries: foo, baz"`
-      );
-    });
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature test-feature specifies alerting consumers which are not granted to any privileges: should-exist"`
+        );
+      });
 
-    it(`prevents reserved privileges from specifying alerting/alert entries that don't exist at the root level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['bar'],
-        privileges: null,
-        reserved: {
-          description: 'something',
-          privileges: [
-            {
-              id: 'reserved',
-              privilege: {
-                alerting: {
-                  alert: {
-                    all: ['foo', 'bar', 'baz'],
+      it(`prevents reserved privileges from specifying consumers that don't exist at the root level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'bar', consumers: ['test-feature'] }],
+          privileges: null,
+          reserved: {
+            description: 'something',
+            privileges: [
+              {
+                id: 'reserved',
+                privilege: {
+                  alerting: {
+                    rule: {
+                      all: [{ ruleTypeId: 'bar', consumers: ['not-exist'] }],
+                    },
                   },
-                },
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: [],
-                app: [],
-              },
-            },
-          ],
-        },
-      };
-
-      const featureRegistry = new FeatureRegistry();
-
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature privilege test-feature.reserved has unknown alerting entries: foo, baz"`
-      );
-    });
-
-    it(`prevents features from specifying alerting/rule entries that don't exist at the reserved privilege level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
-        privileges: null,
-        reserved: {
-          description: 'something',
-          privileges: [
-            {
-              id: 'reserved',
-              privilege: {
-                alerting: {
-                  rule: {
-                    all: ['foo', 'bar'],
+                  savedObject: {
+                    all: [],
+                    read: [],
                   },
+                  ui: [],
+                  app: [],
                 },
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: [],
-                app: [],
               },
-            },
-          ],
-        },
-      };
+            ],
+          },
+        };
 
-      const featureRegistry = new FeatureRegistry();
+        const featureRegistry = new FeatureRegistry();
 
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
-      );
-    });
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature privilege test-feature.reserved.bar has unknown consumer: not-exist"`
+        );
+      });
 
-    it(`prevents features from specifying alerting/alert entries that don't exist at the reserved privilege level`, () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        alerting: ['foo', 'bar', 'baz'],
-        privileges: null,
-        reserved: {
-          description: 'something',
-          privileges: [
-            {
-              id: 'reserved',
-              privilege: {
-                alerting: {
-                  alert: {
-                    all: ['foo', 'bar'],
+      it(`prevents features from specifying consumers that don't exist at the reserved privilege level`, () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          alerting: [{ ruleTypeId: 'foo', consumers: ['test-feature', 'should-exist'] }],
+          privileges: null,
+          reserved: {
+            description: 'something',
+            privileges: [
+              {
+                id: 'reserved',
+                privilege: {
+                  alerting: {
+                    rule: {
+                      all: [{ ruleTypeId: 'foo', consumers: ['test-feature'] }],
+                    },
                   },
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  app: [],
                 },
-                savedObject: {
-                  all: [],
-                  read: [],
-                },
-                ui: [],
-                app: [],
               },
-            },
-          ],
-        },
-      };
+            ],
+          },
+        };
 
-      const featureRegistry = new FeatureRegistry();
+        const featureRegistry = new FeatureRegistry();
 
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
-      );
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature test-feature specifies alerting consumers which are not granted to any privileges: should-exist"`
+        );
+      });
     });
 
     it(`prevents privileges from specifying cases entries that don't exist at the root level`, () => {
@@ -2068,11 +2354,15 @@ describe('FeatureRegistry', () => {
               all: {
                 ui: [],
                 savedObject: { all: [], read: [] },
-                alerting: { alert: { all: ['one'] } },
+                alerting: {
+                  alert: {
+                    all: [{ ruleTypeId: 'one', consumers: ['featureE'] }],
+                  },
+                },
               },
               read: { ui: [], savedObject: { all: [], read: [] } },
             },
-            alerting: ['one'],
+            alerting: [{ ruleTypeId: 'one', consumers: ['featureE'] }],
           },
         ];
         features.forEach((f) => registry.registerKibanaFeature(f));
@@ -2167,7 +2457,7 @@ describe('FeatureRegistry', () => {
         expect(featureA.privileges).toEqual({
           all: {
             ui: [],
-            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url'] },
+            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url', 'tag'] },
             composedOf: [
               { feature: 'featureC', privileges: ['subFeatureCOne'] },
               { feature: 'featureD', privileges: ['all'] },
@@ -2175,7 +2465,7 @@ describe('FeatureRegistry', () => {
           },
           read: {
             ui: [],
-            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
+            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url', 'tag'] },
             composedOf: [{ feature: 'featureD', privileges: ['read'] }],
           },
         });
@@ -2195,12 +2485,12 @@ describe('FeatureRegistry', () => {
         expect(featureA.privileges).toEqual({
           all: {
             ui: [],
-            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url'] },
+            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url', 'tag'] },
             composedOf: [{ feature: 'featureE', privileges: ['all'] }],
           },
           read: {
             ui: [],
-            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
+            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url', 'tag'] },
           },
         });
       });

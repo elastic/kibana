@@ -13,7 +13,6 @@ import type { DatasourceLayers, OperationDescriptor } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { GaugeVisualizationState } from './constants';
-import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): GaugeVisualizationState {
   return {
@@ -25,8 +24,9 @@ function exampleState(): GaugeVisualizationState {
   };
 }
 
-const paletteService = chartPluginMock.createPaletteRegistry();
-const theme = themeServiceMock.createStartContract();
+const deps = {
+  paletteService: chartPluginMock.createPaletteRegistry(),
+};
 
 describe('gauge', () => {
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -37,7 +37,7 @@ describe('gauge', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(getGaugeVisualization({ paletteService, theme }).initialize(() => 'l1')).toEqual({
+      expect(getGaugeVisualization(deps).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         layerType: LayerTypes.DATA,
         shape: 'horizontalBullet',
@@ -47,12 +47,9 @@ describe('gauge', () => {
     });
 
     test('returns persisted state', () => {
-      expect(
-        getGaugeVisualization({ paletteService, theme }).initialize(
-          () => 'test-layer',
-          exampleState()
-        )
-      ).toEqual(exampleState());
+      expect(getGaugeVisualization(deps).initialize(() => 'test-layer', exampleState())).toEqual(
+        exampleState()
+      );
     });
   });
 
@@ -89,10 +86,7 @@ describe('gauge', () => {
       };
 
       expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getConfiguration({ state, frame, layerId: 'first' })
+        getGaugeVisualization(deps).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
@@ -175,10 +169,7 @@ describe('gauge', () => {
         minAccessor: 'min-accessor',
       };
       expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getConfiguration({ state, frame, layerId: 'first' })
+        getGaugeVisualization(deps).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
@@ -267,10 +258,7 @@ describe('gauge', () => {
       frame.activeData = undefined;
 
       expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getConfiguration({ state, frame, layerId: 'first' })
+        getGaugeVisualization(deps).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
           {
@@ -355,10 +343,7 @@ describe('gauge', () => {
         maxAccessor: 'max-accessor',
       };
       expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).setDimension({
+        getGaugeVisualization(deps).setDimension({
           prevState,
           layerId: 'first',
           columnId: 'new-min-accessor',
@@ -383,10 +368,7 @@ describe('gauge', () => {
     };
     test('removes metric correctly', () => {
       expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).removeDimension({
+        getGaugeVisualization(deps).removeDimension({
           prevState,
           layerId: 'first',
           columnId: 'metric-accessor',
@@ -399,10 +381,7 @@ describe('gauge', () => {
     });
     test('removes min correctly', () => {
       expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).removeDimension({
+        getGaugeVisualization(deps).removeDimension({
           prevState,
           layerId: 'first',
           columnId: 'min-accessor',
@@ -419,12 +398,7 @@ describe('gauge', () => {
   });
   describe('#getSupportedLayers', () => {
     it('should return a single layer type', () => {
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getSupportedLayers()
-      ).toHaveLength(1);
+      expect(getGaugeVisualization(deps).getSupportedLayers()).toHaveLength(1);
     });
   });
   describe('#getLayerType', () => {
@@ -434,10 +408,7 @@ describe('gauge', () => {
         minAccessor: 'min-accessor',
         goalAccessor: 'value-accessor',
       };
-      const instance = getGaugeVisualization({
-        paletteService,
-        theme,
-      });
+      const instance = getGaugeVisualization(deps);
       expect(instance.getLayerType('test-layer', state)).toEqual(LayerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
     });
@@ -465,12 +436,7 @@ describe('gauge', () => {
         maxAccessor: 'max-accessor',
         labelMinor: 'Subtitle',
       };
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).toExpression(state, datasourceLayers)
-      ).toEqual({
+      expect(getGaugeVisualization(deps).toExpression(state, datasourceLayers)).toEqual({
         type: 'expression',
         chain: [
           {
@@ -497,12 +463,7 @@ describe('gauge', () => {
         layerId: 'first',
         minAccessor: 'min-accessor',
       };
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).toExpression(state, datasourceLayers)
-      ).toEqual(null);
+      expect(getGaugeVisualization(deps).toExpression(state, datasourceLayers)).toEqual(null);
     });
   });
 
@@ -543,12 +504,8 @@ describe('gauge', () => {
         },
       };
 
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getUserMessages!(localState, { frame })
-      ).toMatchInlineSnapshot(`
+      expect(getGaugeVisualization(deps).getUserMessages!(localState, { frame }))
+        .toMatchInlineSnapshot(`
         Array [
           Object {
             "displayLocations": Array [
@@ -587,12 +544,7 @@ describe('gauge', () => {
         },
       };
 
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getUserMessages!(state, { frame })
-      ).toHaveLength(0);
+      expect(getGaugeVisualization(deps).getUserMessages!(state, { frame })).toHaveLength(0);
     });
     it('should warn when minimum value is greater than metric value', () => {
       frame.activeData = {
@@ -610,12 +562,7 @@ describe('gauge', () => {
         },
       };
 
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getUserMessages!(state, { frame })
-      ).toHaveLength(1);
+      expect(getGaugeVisualization(deps).getUserMessages!(state, { frame })).toHaveLength(1);
     });
 
     it('should warn when metric value is greater than maximum value', () => {
@@ -633,12 +580,7 @@ describe('gauge', () => {
         },
       };
 
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getUserMessages!(state, { frame })
-      ).toHaveLength(1);
+      expect(getGaugeVisualization(deps).getUserMessages!(state, { frame })).toHaveLength(1);
     });
     it('should warn when goal value is greater than maximum value', () => {
       frame.activeData = {
@@ -656,12 +598,7 @@ describe('gauge', () => {
         },
       };
 
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getUserMessages!(state, { frame })
-      ).toHaveLength(1);
+      expect(getGaugeVisualization(deps).getUserMessages!(state, { frame })).toHaveLength(1);
     });
     it('should warn when minimum value is greater than goal value', () => {
       frame.activeData = {
@@ -679,12 +616,7 @@ describe('gauge', () => {
         },
       };
 
-      expect(
-        getGaugeVisualization({
-          paletteService,
-          theme,
-        }).getUserMessages!(state, { frame })
-      ).toHaveLength(1);
+      expect(getGaugeVisualization(deps).getUserMessages!(state, { frame })).toHaveLength(1);
     });
   });
 });

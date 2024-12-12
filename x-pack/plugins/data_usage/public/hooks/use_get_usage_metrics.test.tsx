@@ -7,7 +7,7 @@
 
 import React, { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider, useQuery as _useQuery } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetDataUsageMetrics } from './use_get_usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';

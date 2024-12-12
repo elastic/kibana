@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import type { TranslateRuleState } from '../../types';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
 
-export const getEsqlTranslationPrompt = (
-  state: TranslateRuleState,
-  indexPatterns: string
-): string => {
-  return `You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk to Elastic Security.
+export const ESQL_TRANSLATION_PROMPT =
+  ChatPromptTemplate.fromTemplate(`You are a helpful cybersecurity (SIEM) expert agent. Your task is to migrate "detection rules" from Splunk to Elastic Security.
 Your goal is to translate the SPL query into an equivalent Elastic Security Query Language (ES|QL) query.
+Below is the relevant context used when deciding which Elastic Common Schema field to use when translating from Splunk CIM fields:
+
+<context>
+<cim_to_ecs_map>
+{field_mapping}
+</cim_to_ecs_map>
+</context>
 
 ## Splunk rule Information provided:
 - Below you will find Splunk rule information: the title (<<TITLE>>), the description (<<DESCRIPTION>>), and the SPL (Search Processing Language) query (<<SPL_QUERY>>).
@@ -22,7 +26,7 @@ Your goal is to translate the SPL query into an equivalent Elastic Security Quer
 ## Guidelines:
 - Analyze the SPL query and identify the key components.
 - Translate the SPL query into an equivalent ES|QL query using ECS (Elastic Common Schema) field names.
-- Always start the generated ES|QL query by filtering FROM using these index patterns in the translated query: ${indexPatterns}.
+- Always start the generated ES|QL query by filtering FROM using these index patterns in the translated query: {indexPatterns}.
 - If, in the SPL query, you find a lookup list or macro call, mention it in the summary and add a placeholder in the query with the format [macro:<macro_name>(argumentCount)] or [lookup:<lookup_name>] including the [] keys, 
   - Examples: 
     - \`get_duration(firstDate,secondDate)\` -> [macro:get_duration(2)]
@@ -35,15 +39,14 @@ Your goal is to translate the SPL query into an equivalent Elastic Security Quer
 Find the Splunk rule information below:
 
 <<TITLE>>
-${state.original_rule.title}
+{title}
 <</TITLE>>
 
 <<DESCRIPTION>>
-${state.original_rule.description}
+{description}
 <</DESCRIPTION>>
 
 <<SPL_QUERY>>
-${state.inline_query}
+{inline_query}
 <</SPL_QUERY>>
-`;
-};
+`);

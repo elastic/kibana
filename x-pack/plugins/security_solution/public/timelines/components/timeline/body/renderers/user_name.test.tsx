@@ -12,29 +12,13 @@ import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { UserName } from './user_name';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 
-const mockedTelemetry = createTelemetryServiceMock();
-const mockOpenRightPanel = jest.fn();
+const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
-
-jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        application: {
-          getUrlForApp: jest.fn(),
-          navigateToApp: jest.fn(),
-        },
-        telemetry: mockedTelemetry,
-      },
-    }),
-  };
-});
 
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
@@ -44,7 +28,7 @@ describe('UserName', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
-      openRightPanel: mockOpenRightPanel,
+      openFlyout: mockOpenFlyout,
     });
   });
   afterEach(() => {
@@ -94,7 +78,7 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -116,7 +100,7 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -137,13 +121,15 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: 'user-panel',
-        params: {
-          userName: props.value,
-          contextID: props.contextId,
-          scopeId: TableId.alertsOnAlertsPage,
-          isDraggable: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: 'user-panel',
+          params: {
+            userName: props.value,
+            contextID: props.contextId,
+            scopeId: TableId.alertsOnAlertsPage,
+            isDraggable: false,
+          },
         },
       });
     });
@@ -166,13 +152,15 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: 'user-panel',
-        params: {
-          userName: props.value,
-          contextID: props.contextId,
-          scopeId: 'timeline-1',
-          isDraggable: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: 'user-panel',
+          params: {
+            userName: props.value,
+            contextID: props.contextId,
+            scopeId: 'timeline-1',
+            isDraggable: false,
+          },
         },
       });
     });

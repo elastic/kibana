@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:searchFieldsFromSource': false,
   };
 
   const createRuntimeField = async (fieldName: string) => {
@@ -234,17 +233,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // navigate to doc view
       const fieldName = '_runtimefield-doc-view';
       await createRuntimeField(fieldName);
-      const table = await discover.getDocTable();
-      const useLegacyTable = await discover.useLegacyTable();
-      await table.clickRowToggle();
+      await dataGrid.clickRowToggle();
 
       // click the open action
       await retry.try(async () => {
-        const rowActions = await table.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        const idxToClick = useLegacyTable ? 1 : 0;
+        const idxToClick = 0;
         await rowActions[idxToClick].click();
       });
 

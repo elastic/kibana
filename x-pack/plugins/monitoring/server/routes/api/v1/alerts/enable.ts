@@ -26,10 +26,10 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
     async (context, request, response) => {
       try {
         const alertingContext = await context.alerting;
-        const infraContext = await context.infra;
         const actionContext = await context.actions;
 
         const alerts = RulesFactory.getAll();
+
         if (alerts.length) {
           const { isSufficientlySecure, hasPermanentEncryptionKey } = npRoute.alerting
             ?.getSecurityHealth
@@ -38,7 +38,7 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
 
           if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
             server.log.info(
-              `Skipping rule creation for "${infraContext.spaceId}" space; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
+              `Skipping rule creation; Stack Monitoring rules require API keys to be enabled and an encryption key to be configured.`
             );
             return response.ok({
               body: {
@@ -49,9 +49,10 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
           }
         }
 
-        const rulesClient = alertingContext?.getRulesClient();
+        const rulesClient = await alertingContext?.getRulesClient();
         const actionsClient = actionContext?.getActionsClient();
         const types = actionContext?.listTypes();
+
         if (!rulesClient || !actionsClient || !types) {
           return response.ok({ body: undefined });
         }
@@ -88,9 +89,7 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
           alerts.map((alert) => alert.createIfDoesNotExist(rulesClient, actionsClient, actions))
         );
 
-        server.log.info(
-          `Created ${createdAlerts.length} alerts for "${infraContext.spaceId}" space`
-        );
+        server.log.info(`Created ${createdAlerts.length} alerts`);
 
         return response.ok({ body: { createdAlerts } });
       } catch (err) {
