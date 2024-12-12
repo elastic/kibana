@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, ReplaySubject, zip } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type {
+  EluMetrics,
   OpsMetrics,
   MetricsServiceSetup,
   MetricsServiceStart,
@@ -21,6 +22,11 @@ import { OpsMetricsCollector } from './ops_metrics_collector';
 import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 import { registerEluHistoryRoute } from './routes/elu_history';
+import { exponentialMovingAverage } from './exponential_moving_average';
+
+const ELU_SHORT = 15000;
+const ELU_MEDIUM = 30000;
+const ELU_LONG = 60000;
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -42,6 +48,11 @@ export class MetricsService
   private metricsCollector?: OpsMetricsCollector;
   private collectInterval?: NodeJS.Timeout;
   private metrics$ = new ReplaySubject<OpsMetrics>(1);
+  private elu$ = new BehaviorSubject<EluMetrics>({
+    long: 0,
+    medium: 0,
+    short: 0,
+  });
   private service?: InternalMetricsServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -56,6 +67,7 @@ export class MetricsService
     const config = await firstValueFrom(
       this.coreContext.configService.atPath<OpsConfigType>(OPS_CONFIG_PATH)
     );
+    const collectionInterval = config.interval.asMilliseconds();
 
     this.metricsCollector = new OpsMetricsCollector(
       http.server,
@@ -70,15 +82,25 @@ export class MetricsService
 
     this.collectInterval = setInterval(() => {
       this.refreshMetrics();
-    }, config.interval.asMilliseconds());
+    }, collectionInterval);
 
-    const metricsObservable = this.metrics$.asObservable();
-
-    registerEluHistoryRoute(http.createRouter(''), metricsObservable);
+    this.metrics$
+      .pipe(
+        map((metrics) => metrics.process.event_loop_utilization.utilization),
+        (elu$) =>
+          zip(
+            elu$.pipe(exponentialMovingAverage(ELU_SHORT, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(ELU_MEDIUM, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(ELU_LONG, collectionInterval))
+          ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
+      )
+      .subscribe(this.elu$);
+    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
 
     this.service = {
-      collectionInterval: config.interval.asMilliseconds(),
-      getOpsMetrics$: () => metricsObservable,
+      collectionInterval,
+      getOpsMetrics$: () => this.metrics$,
+      getEluMetrics$: () => this.elu$,
     };
 
     return this.service;

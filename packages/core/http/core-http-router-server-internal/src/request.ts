@@ -284,6 +284,7 @@ export class CoreKibanaRequest<
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       deprecated: ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
         ?.deprecated,
+      excludeFromRateLimiter: this.isExcludedFromRateLimiter(request),
       access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
       security: this.getSecurity(request),
@@ -358,6 +359,13 @@ export class CoreKibanaRequest<
       `unexpected authentication options: ${JSON.stringify(authOptions)} for route: ${
         this.url.pathname
       }${this.url.search}`
+    );
+  }
+
+  private isExcludedFromRateLimiter(request: RawRequest): boolean {
+    return (
+      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+        ?.excludeFromRateLimiter ?? false
     );
   }
 }

@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { MetricsServiceSetup, MetricsServiceStart } from './src/contracts';
-export type { MetricsCollector, IEventLoopDelaysMonitor } from './src/collectors';
-export type {
-  EluMetrics,
-  OpsMetrics,
-  IntervalHistogram,
-  OpsProcessMetrics,
-  OpsOsMetrics,
-  OpsServerMetrics,
-  ElasticsearchClientProtocol,
-  ElasticsearchClientsMetrics,
-} from './src/metrics';
+export { type RateLimiterConfig, rateLimiterConfigSchema } from './config';

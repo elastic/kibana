@@ -222,3 +222,20 @@ export interface OpsMetrics {
   /** number of current concurrent connections to the server */
   concurrent_connections: OpsServerMetrics['concurrent_connections'];
 }
+
+export interface EluMetrics {
+  /**
+   * The long-term event loop utilization history.
+   */
+  long: number;
+
+  /**
+   * The medium-term event loop utilization history.
+   */
+  medium: number;
+
+  /**
+   * The short-term event loop utilization history.
+   */
+  short: number;
+}

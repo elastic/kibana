@@ -8,10 +8,8 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import type { OpsMetrics } from '@kbn/core-metrics-server';
-import type { Observable } from 'rxjs';
 import apm from 'elastic-apm-node';
-import { HistoryWindow } from './history_window';
+import { EluMetrics } from '@kbn/core-metrics-server';
 
 interface ELUHistoryResponse {
   /**
@@ -20,40 +18,17 @@ interface ELUHistoryResponse {
    *         actual time range covered is determined by our collection interval (configured via `ops.interval`, default 5s)
    *         and the number of samples held in each window. So by default short: 15s, medium: 30s and long 60s.
    */
-  history: {
-    /** The history for the short window */
-    short: number;
-    /** The history for the medium window */
-    medium: number;
-    /** The history for the long window */
-    long: number;
-  };
+  history: EluMetrics;
 }
-
-const HISTORY_WINDOW_SIZE_SHORT = 3;
-const HISTORY_WINDOW_SIZE_MED = 6;
-const HISTORY_WINDOW_SIZE_LONG = 12;
 
 /**
  * Intended for exposing metrics over HTTP that we do not want to include in the /api/stats endpoint, yet.
  */
-export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<OpsMetrics>) {
-  const eluHistoryWindow = new HistoryWindow(HISTORY_WINDOW_SIZE_LONG);
-
-  metrics$.subscribe((metrics) => {
-    eluHistoryWindow.addObservation(metrics.process.event_loop_utilization.utilization);
-  });
-
+export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) {
   // Report the same metrics to APM
-  apm.registerMetric('elu.history.short', () =>
-    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT)
-  );
-  apm.registerMetric('elu.history.medium', () =>
-    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_MED)
-  );
-  apm.registerMetric('elu.history.long', () =>
-    eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_LONG)
-  );
+  apm.registerMetric('elu.history.short', () => elu().short);
+  apm.registerMetric('elu.history.medium', () => elu().medium);
+  apm.registerMetric('elu.history.long', () => elu().long);
 
   router.versioned
     .get({
@@ -62,6 +37,7 @@ export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<Op
       path: '/api/_elu_history',
       options: {
         authRequired: false,
+        excludeFromRateLimiter: true,
       },
     })
     .addVersion(
@@ -71,11 +47,7 @@ export function registerEluHistoryRoute(router: IRouter, metrics$: Observable<Op
       },
       async (ctx, req, res) => {
         const body: ELUHistoryResponse = {
-          history: {
-            short: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_SHORT),
-            medium: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_MED),
-            long: eluHistoryWindow.getAverage(HISTORY_WINDOW_SIZE_LONG),
-          },
+          history: elu(),
         };
         return res.ok({ body });
       }
