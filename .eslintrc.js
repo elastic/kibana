@@ -1361,14 +1361,20 @@ module.exports = {
     },
     {
       // typescript for /public and /common
-      files: ['x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}', 'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-for-in-array': 'error',
       },
     },
     {
       // typescript for /public and /common
-      files: ['x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}', 'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
+      ],
       plugins: ['react'],
       env: {
         jest: true,
