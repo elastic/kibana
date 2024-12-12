@@ -398,12 +398,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             renderAs: 'panelOpener',
             children: [
               {
-                link: 'logs:stream',
-                title: i18n.translate('xpack.observability.obltNav.otherTools.logsStream', {
-                  defaultMessage: 'Logs stream',
-                }),
-              },
-              {
                 link: 'logs:anomalies',
                 title: i18n.translate('xpack.observability.obltNav.otherTools.logsAnomalies', {
                   defaultMessage: 'Logs anomalies',
