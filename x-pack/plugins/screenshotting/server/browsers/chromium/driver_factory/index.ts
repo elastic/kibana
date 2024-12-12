@@ -90,6 +90,7 @@ const DEFAULT_ARGS = [
 ];
 
 const DIAGNOSTIC_TIME = 5 * 1000;
+let sharedBrowser: Browser | undefined;
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -147,22 +148,24 @@ export class HeadlessChromiumDriverFactory {
       );
 
       (async () => {
-        let browser: Browser | undefined;
         try {
-          browser = await puppeteer.launch({
-            pipe: true,
-            userDataDir: this.userDataDir,
-            executablePath: this.binaryPath,
-            acceptInsecureCerts: true,
-            handleSIGHUP: false,
-            args: chromiumArgs,
-            defaultViewport: viewport,
-            env: {
-              TZ: browserTimezone,
-            },
-            headless: true,
-            protocolTimeout: 0,
-          });
+          if (!sharedBrowser) {
+            console.time('puppeteer.launch(...)');
+            sharedBrowser = await puppeteer.launch({
+              pipe: true,
+              userDataDir: this.userDataDir,
+              executablePath: this.binaryPath,
+              acceptInsecureCerts: true,
+              handleSIGHUP: false,
+              args: chromiumArgs,
+              headless: true,
+              protocolTimeout: 0,
+            });
+            console.timeEnd('puppeteer.launch(...)');
+            console.log('*** We do not have a shared browser');
+          } else {
+            console.log('*** Using browser from cache');
+          }
         } catch (err) {
           observer.error(
             new errors.FailedToSpawnBrowserError(`Error spawning Chromium browser! ${err}`)
@@ -170,7 +173,7 @@ export class HeadlessChromiumDriverFactory {
           return;
         }
 
-        const page = await browser.newPage();
+        const page = await sharedBrowser.newPage();
         const devTools = await page.target().createCDPSession();
 
         await devTools.send('Performance.enable', { timeDomain: 'timeTicks' });
@@ -181,6 +184,7 @@ export class HeadlessChromiumDriverFactory {
         logger.debug(`Browser version: ${JSON.stringify(versionInfo)}`);
 
         await page.emulateTimezone(browserTimezone);
+        await page.setViewport(viewport);
 
         // Set the default timeout for all navigation methods to the openUrl timeout
         // All waitFor methods have their own timeout config passed in to them
@@ -210,14 +214,14 @@ export class HeadlessChromiumDriverFactory {
               logger.error(error);
             }
 
-            try {
-              logger.debug('Attempting to close browser...');
-              await browser?.close();
-              logger.debug('Browser closed.');
-            } catch (err) {
-              // do not throw
-              logger.error(err);
-            }
+            // try {
+            //   logger.debug('Attempting to close browser...');
+            //   await browser?.close();
+            //   logger.debug('Browser closed.');
+            // } catch (err) {
+            //   // do not throw
+            //   logger.error(err);
+            // }
 
             return { metrics };
           },
@@ -245,7 +249,7 @@ export class HeadlessChromiumDriverFactory {
 
         // taps the browser log streams and combine them to Kibana logs
         this.getBrowserLogger(page, logger).subscribe();
-        this.getProcessLogger(browser, logger).subscribe();
+        this.getProcessLogger(sharedBrowser, logger).subscribe();
 
         // HeadlessChromiumDriver: object to "drive" a browser page
         const driver = new HeadlessChromiumDriver(
@@ -255,9 +259,10 @@ export class HeadlessChromiumDriverFactory {
           page
         );
 
-        const error$ = Rx.concat(driver.screenshottingError$, this.getPageExit(browser, page)).pipe(
-          mergeMap((err) => Rx.throwError(err))
-        );
+        const error$ = Rx.concat(
+          driver.screenshottingError$,
+          this.getPageExit(sharedBrowser, page)
+        ).pipe(mergeMap((err) => Rx.throwError(err)));
 
         const close = () => Rx.from(childProcess.kill());
 
