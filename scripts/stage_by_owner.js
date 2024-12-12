@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/stage_by_codeowner');
+require('../src/dev/stage_by_owner');
