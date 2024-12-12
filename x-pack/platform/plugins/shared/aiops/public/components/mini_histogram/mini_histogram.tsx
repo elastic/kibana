@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, BarSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
-import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
+import { useEuiTheme, EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
 import { LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR } from '@kbn/aiops-log-rate-analysis';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,7 +19,6 @@ import type { SignificantItemHistogramItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 interface MiniHistogramProps {
   chartData?: SignificantItemHistogramItem[];
@@ -40,7 +39,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
 }) => {
   const { charts } = useAiopsAppContext();
 
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const miniHistogramChartTheme: PartialTheme = {
@@ -66,7 +65,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
 
   const cssChartSize = css({
     width: '80px',
-    height: euiTheme.euiSizeL,
+    height: euiTheme.size.l,
     margin: '0px',
   });
 

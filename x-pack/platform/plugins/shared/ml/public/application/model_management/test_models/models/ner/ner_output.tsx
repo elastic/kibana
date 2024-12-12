@@ -11,53 +11,62 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  useEuiFontSize,
+  useEuiTheme,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiToolTip,
+  type EuiThemeComputed,
 } from '@elastic/eui';
-import { useCurrentThemeVars } from '../../../../contexts/kibana';
-import type { EuiThemeType } from '../../../../components/color_range_legend/use_color_range';
 import type { NerInference, NerResponse } from './ner_inference';
 import { INPUT_TYPE } from '../inference_base';
+
+type EuiVisColor = keyof EuiThemeComputed['colors']['vis'];
 
 const ICON_PADDING = '2px';
 const PROBABILITY_SIG_FIGS = 3;
 
-const ENTITY_TYPES = {
+interface EntityType {
+  label: string;
+  icon: string;
+  color: EuiVisColor;
+}
+
+const ENTITY_TYPE_NAMES = ['PER', 'LOC', 'ORG', 'MISC'] as const;
+const isEntityTypeName = (name: string): name is EntityTypeName =>
+  ENTITY_TYPE_NAMES.includes(name as EntityTypeName);
+type EntityTypeName = (typeof ENTITY_TYPE_NAMES)[number];
+
+const ENTITY_TYPES: Record<EntityTypeName, EntityType> = {
   PER: {
     label: 'Person',
     icon: 'user',
-    color: 'euiColorVis5_behindText',
-    borderColor: 'euiColorVis5',
+    color: 'euiColorVis5',
   },
   LOC: {
     label: 'Location',
     icon: 'visMapCoordinate',
-    color: 'euiColorVis1_behindText',
-    borderColor: 'euiColorVis1',
+    color: 'euiColorVis1',
   },
   ORG: {
     label: 'Organization',
     icon: 'home',
-    color: 'euiColorVis0_behindText',
-    borderColor: 'euiColorVis0',
+    color: 'euiColorVis0',
   },
   MISC: {
     label: 'Miscellaneous',
     icon: 'questionInCircle',
-    color: 'euiColorVis7_behindText',
-    borderColor: 'euiColorVis7',
+    color: 'euiColorVis7',
   },
 };
 
-const UNKNOWN_ENTITY_TYPE = {
+const UNKNOWN_ENTITY_TYPE: EntityType = {
   label: '',
   icon: 'questionInCircle',
-  color: 'euiColorVis5_behindText',
-  borderColor: 'euiColorVis5',
+  color: 'euiColorVis5',
 };
 
 export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
@@ -86,7 +95,7 @@ const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
 };
 
 const Lines: FC<{ result: NerResponse }> = ({ result }) => {
-  const { euiTheme } = useCurrentThemeVars();
+  const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
   const lineSplit: JSX.Element[] = [];
   result.response.forEach(({ value, entity }) => {
     if (entity === null) {
@@ -110,7 +119,7 @@ const Lines: FC<{ result: NerResponse }> = ({ result }) => {
                 {value}
               </div>
               <EuiHorizontalRule margin="none" />
-              <div style={{ fontSize: euiTheme.euiFontSizeXS, marginTop: ICON_PADDING }}>
+              <div style={{ fontSize: euiFontSizeXS, marginTop: ICON_PADDING }}>
                 <div>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.testModelsFlyout.ner.output.typeTitle"
@@ -143,16 +152,16 @@ const EntityBadge = ({
 }: PropsWithChildren<{
   entity: estypes.MlTrainedModelEntities;
 }>) => {
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs').fontSize;
+  const color = getClassColor(euiTheme, entity.class_name);
   return (
     <EuiBadge
-      // @ts-expect-error colors are correct in ENTITY_TYPES
-      color={getClassColor(euiTheme, entity.class_name)}
+      color={color}
       style={{
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
-        border: `1px solid ${getClassColor(euiTheme, entity.class_name, true)}`,
-        fontSize: euiTheme.euiFontSizeXS,
+        fontSize: euiFontSizeXS,
         padding: '0px 6px',
         pointerEvents: 'none',
       }}
@@ -171,21 +180,19 @@ const EntityBadge = ({
   );
 };
 
-function getClassIcon(className: string) {
+export function getClassIcon(className: string) {
   const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
   return entity?.icon ?? UNKNOWN_ENTITY_TYPE.icon;
 }
 
-function getClassLabel(className: string) {
+export function getClassLabel(className: string) {
   const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
   return entity?.label ?? className;
 }
 
-function getClassColor(euiTheme: EuiThemeType, className: string, border: boolean = false) {
-  const entity = ENTITY_TYPES[className as keyof typeof ENTITY_TYPES];
-  let color = entity?.color ?? UNKNOWN_ENTITY_TYPE.color;
-  if (border) {
-    color = entity?.borderColor ?? UNKNOWN_ENTITY_TYPE.borderColor;
-  }
-  return euiTheme[color as keyof typeof euiTheme];
+export function getClassColor(euiTheme: EuiThemeComputed, className: string) {
+  const color = isEntityTypeName(className)
+    ? ENTITY_TYPES[className].color
+    : UNKNOWN_ENTITY_TYPE.color;
+  return euiTheme.colors.vis[color];
 }

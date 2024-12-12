@@ -7,7 +7,7 @@
 
 import type { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, type EuiThemeComputed } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import type {
@@ -116,14 +116,17 @@ export function getInitialAnomaliesLayers(jobId: string) {
   return initialLayers;
 }
 
-export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: SourceIndexGeoFields) {
+export function getInitialSourceIndexFieldLayers(
+  sourceIndexWithGeoFields: SourceIndexGeoFields,
+  euiTheme: EuiThemeComputed
+) {
   const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
   for (const index in sourceIndexWithGeoFields) {
     if (Object.hasOwn(sourceIndexWithGeoFields, index)) {
       const { dataViewId, geoFields } = sourceIndexWithGeoFields[index];
 
       geoFields.forEach((geoField) => {
-        const color = tabColor(geoField);
+        const color = tabColor(geoField, euiTheme);
 
         initialLayers.push({
           id: htmlIdGenerator()(),

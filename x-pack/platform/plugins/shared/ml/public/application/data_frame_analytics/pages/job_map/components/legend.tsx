@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  useEuiTheme,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import type { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (
   <>
@@ -33,21 +33,21 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType }> = ({
-  hasMissingJobNode,
-  theme,
-}) => {
+export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJobNode }) => {
+  const { euiTheme } = useEuiTheme();
+
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
-  const {
-    euiSizeM,
-    euiSizeS,
-    euiColorGhost,
-    euiColorWarning,
-    euiBorderThin,
-    euiBorderRadius,
-    euiBorderRadiusSmall,
-    euiBorderWidthThick,
-  } = theme;
+
+  const euiSizeM = euiTheme.size.m;
+  const euiSizeS = euiTheme.size.s;
+  const euiColorFullShade = euiTheme.colors.fullShade;
+  const euiColorGhost = euiTheme.colors.ghost;
+  const euiColorWarning = euiTheme.colors.warning;
+  const euiBorderThin = euiTheme.border.thin;
+  const euiBorderRadius = euiTheme.border.radius.medium;
+  const euiBorderRadiusSmall = euiTheme.border.radius.small;
+  const euiBorderWidthThick = euiTheme.border.thick;
+  const euiPageBackgroundColor = euiTheme.colors.backgroundBasePlain;
 
   const cssOverrideBase = useMemo(
     () => ({
@@ -91,7 +91,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
               data-test-subj="mlJobMapLegend__indexPattern"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${theme.euiColorVis2}`,
+                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis2}`,
                 transform: 'rotate(45deg)',
               }}
             />
@@ -113,7 +113,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
               data-test-subj="mlJobMapLegend__ingestPipeline"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${theme.euiColorVis7}`,
+                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis7}`,
                 borderRadius: euiBorderRadiusSmall,
               }}
             />
@@ -135,7 +135,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
               data-test-subj="mlJobMapLegend__transform"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${theme.euiColorVis1}`,
+                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis1}`,
               }}
             />
           </EuiFlexItem>
@@ -154,9 +154,9 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
                 display: 'inline-block',
                 width: '0px',
                 height: '0px',
-                borderLeft: `${euiSizeS} solid ${theme.euiPageBackgroundColor}`,
-                borderRight: `${euiSizeS} solid ${theme.euiPageBackgroundColor}`,
-                borderBottom: `${euiSizeM} solid ${theme.euiColorVis3}`,
+                borderLeft: `${euiSizeS} solid ${euiPageBackgroundColor}`,
+                borderRight: `${euiSizeS} solid ${euiPageBackgroundColor}`,
+                borderBottom: `${euiSizeM} solid ${euiTheme.colors.vis.euiColorVis3}`,
               }}
             />
           </EuiFlexItem>
@@ -178,7 +178,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
                 data-test-subj="mlJobMapLegend__analyticsMissing"
                 css={{
                   ...cssOverrideBase,
-                  border: `${euiBorderWidthThick} solid ${theme.euiColorFullShade}`,
+                  border: `${euiBorderWidthThick} solid ${euiColorFullShade}`,
                   borderRadius: '50%',
                 }}
               />
@@ -201,7 +201,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean; theme: EuiThemeType 
               data-test-subj="mlJobMapLegend__analytics"
               css={{
                 ...cssOverrideBase,
-                border: `${euiBorderWidthThick} solid ${theme.euiColorVis0}`,
+                border: `${euiBorderWidthThick} solid ${euiTheme.colors.vis.euiColorVis0}`,
                 borderRadius: '50%',
               }}
             />

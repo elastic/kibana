@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { type FC } from 'react';
-import { useCurrentThemeVars } from '../../contexts/kibana';
+import { useEuiTheme } from '@elastic/eui';
 
 export interface PanelHeaderItems {
   headerItems: React.ReactElement[];
@@ -16,7 +16,7 @@ export interface PanelHeaderItems {
 }
 
 export const PanelHeaderItems: FC<PanelHeaderItems> = ({ headerItems, compressed = false }) => {
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexGroup gutterSize={compressed ? 's' : 'l'} alignItems={'center'}>
@@ -27,10 +27,8 @@ export const PanelHeaderItems: FC<PanelHeaderItems> = ({ headerItems, compressed
               css={
                 i < headerItems?.length - 1
                   ? css`
-                      border-right: ${euiTheme.euiBorderWidthThin} solid ${euiTheme.euiBorderColor};
-                      padding-right: ${compressed
-                        ? euiTheme.euiPanelPaddingModifiers.paddingSmall
-                        : euiTheme.euiPanelPaddingModifiers.paddingLarge};
+                      border-right: ${euiTheme.border.width.thin} solid ${euiTheme.border.color};
+                      padding-right: ${compressed ? euiTheme.size.s : euiTheme.size.l};
                     `
                   : null
               }
