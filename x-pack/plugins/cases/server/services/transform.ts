@@ -122,7 +122,12 @@ export function transformCustomFieldsToExternalModel(
 ) {
   return customFields.map((customField) => {
     if (customField.type === CustomFieldTypes.LIST && customField.value) {
-      const [key, selectedKey] = customField.key.split('.');
+      // Derive the actual custom field key and the option key from customField.key
+      // Split the key by '.' and use the last part as the selectedKey. Everything else is the customField key.
+      // Don't simply do const [key, selectedKey] = customField.key.split('.') in case the `key` contains a '.'
+      const keyParts = customField.key.split('.');
+      const selectedKey = keyParts[keyParts.length - 1];
+      const key = keyParts.slice(-1).join('.');
       const label = customField.value;
       return {
         ...customField,
