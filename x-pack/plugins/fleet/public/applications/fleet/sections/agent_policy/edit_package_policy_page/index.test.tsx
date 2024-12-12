@@ -228,6 +228,14 @@ const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunc
 >;
 
 describe(`edit package policy page`, () => {
+  beforeAll(() => {
+    jest.spyOn(console, 'debug').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   let testRenderer: TestRenderer;
   const render = () => testRenderer.render(<EditPackagePolicyPage />);
 
@@ -540,11 +548,10 @@ describe(`edit package policy page`, () => {
       fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton'));
       fireEvent.click(renderResult.getByTestId('saveIntegration'));
 
-      const saveAndDeployButton = await (
-        await renderResult.findByText(/Save and deploy changes/, { selector: 'span' })
-      ).closest('button')!;
-
+      const saveAndDeployButton = await renderResult.findByTestId('confirmModalConfirmButton');
       fireEvent.click(saveAndDeployButton);
+
+      await waitForElementToBeRemoved(renderResult.getByRole('progressbar'));
 
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
         {
@@ -603,7 +610,11 @@ describe(`edit package policy page`, () => {
 
       fireEvent.click(renderResult.getByText('Fleet Server Policy'));
       fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
-      fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
+
+      const saveAndDeployButton = await renderResult.findByTestId('confirmModalConfirmButton');
+      fireEvent.click(saveAndDeployButton);
+
+      await waitForElementToBeRemoved(renderResult.getByRole('progressbar'));
 
       expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
         'nginx-1',
