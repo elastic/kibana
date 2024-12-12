@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, screen } from '@testing-library/react';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
@@ -415,7 +415,7 @@ describe('EditConnectorFlyout', () => {
 
   describe('Submitting', () => {
     it('updates the connector correctly', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      const { getByTestId, queryByTestId } = appMockRenderer.render(
         <EditConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -459,6 +459,7 @@ describe('EditConnectorFlyout', () => {
         name: 'My test',
         secrets: {},
       });
+      expect(queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
     });
 
     it('updates connector form field with latest value', async () => {
@@ -553,6 +554,39 @@ describe('EditConnectorFlyout', () => {
         name: 'My test',
         secrets: {},
       });
+    });
+
+    it('show error message in the form header', async () => {
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
+      await userEvent.clear(screen.getByTestId('nameInput'));
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+      expect(await screen.findByTestId('connector-form-header-error-label')).toBeInTheDocument();
+    });
+
+    it('removes error message from the form header', async () => {
+      appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+        />
+      );
+
+      await userEvent.clear(screen.getByTestId('nameInput'));
+      await userEvent.type(screen.getByTestId('nameInput'), 'My new name');
+      await userEvent.type(screen.getByTestId('test-connector-secret-text-field'), 'password');
+      await userEvent.click(screen.getByTestId('edit-connector-flyout-save-btn'));
+      expect(screen.queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
     });
 
     it('runs pre submit validator correctly', async () => {

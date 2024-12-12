@@ -9,6 +9,7 @@ import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,6 +19,7 @@ import {
 
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   ActionConnector,
   ActionType,
@@ -226,6 +228,23 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   data-test-subj="slackTypeChangeButton"
                 />
                 <EuiSpacer size="xs" />
+              </>
+            )}
+            {!!hasErrors && (
+              <>
+                <EuiCallOut
+                  size="s"
+                  color="danger"
+                  iconType="warning"
+                  data-test-subj="connector-form-header-error-label"
+                  title={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
+                    {
+                      defaultMessage: 'There are errors in the form',
+                    }
+                  )}
+                />
+                <EuiSpacer size="m" />
               </>
             )}
             <ConnectorForm

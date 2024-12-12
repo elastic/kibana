@@ -6,7 +6,14 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiButton, EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiButton,
+  EuiConfirmModal,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
@@ -218,6 +225,23 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         <>
           {isEdit && (
             <>
+              {!!hasErrors && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    color="danger"
+                    iconType="warning"
+                    data-test-subj="connector-form-header-error-label"
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.editConnectorForm.headerFormLabel',
+                      {
+                        defaultMessage: 'There are errors in the form',
+                      }
+                    )}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <ConnectorForm
                 actionTypeModel={actionTypeModel}
                 connector={getConnectorWithoutSecrets(connector)}
