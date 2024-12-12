@@ -93,6 +93,8 @@ describe('getOptimizerCacheKey()', () => {
           "themeTags": Array [
             "v8light",
             "v8dark",
+            "borealislight",
+            "borealisdark",
           ],
         },
       }
