@@ -126,9 +126,12 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         },
       };
 
-      const simulation = await scopedClusterClient.asCurrentUser.simulate.ingest({
+      // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
+      const simulation = (await scopedClusterClient.asCurrentUser.transport.request({
+        method: 'POST',
+        path: `_ingest/_simulate`,
         body: simulationBody,
-      });
+      })) as any;
 
       const hasErrors = simulation.docs.some((doc: any) => doc.doc.error !== undefined);
 
