@@ -113,5 +113,57 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(await browser.getCurrentUrl()).not.contain('/app/management/cases');
       await testSubjects.missingOrFail('cases-all-title');
     });
+
+    it('renders expected side navigation items', async () => {
+      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      // Verify all expected top-level links exist
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Data' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Analyze' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting Started' });
+
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained models' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Users and roles' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
+
+      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      await solutionNavigation.sidenav.expectOnlyDefinedLinks([
+        'search_project_nav',
+        'data',
+        'management:index_management',
+        'serverlessConnectors',
+        'serverlessWebCrawlers',
+        'build',
+        'dev_tools',
+        'searchPlayground',
+        'relevance',
+        'searchInferenceEndpoints',
+        'analyze',
+        'discover',
+        'dashboards',
+        'otherTools',
+        'maps',
+        'gettingStarted',
+        'project_settings_project_nav',
+        'ml:modelManagement',
+        'management',
+        'cloudLinkUserAndRoles',
+        'cloudLinkDeployment',
+        'cloudLinkBilling',
+      ]);
+    });
   });
 }

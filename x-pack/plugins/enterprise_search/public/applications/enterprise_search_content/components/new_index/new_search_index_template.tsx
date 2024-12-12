@@ -289,7 +289,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMoreCrawler.linkText',
                   {
-                    defaultMessage: 'Learn more about the Elastic web crawler',
+                    defaultMessage: 'Learn more about the Elastic Web Crawler',
                   }
                 )}
               </EuiLink>
