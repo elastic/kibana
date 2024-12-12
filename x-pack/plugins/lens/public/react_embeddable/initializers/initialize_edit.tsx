@@ -37,6 +37,7 @@ import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
+import { SearchContextConfig } from './initialize_search_context';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -61,6 +62,7 @@ export function initializeEditApi(
   internalApi: LensInternalApi,
   stateApi: StateManagementConfig['api'],
   inspectorApi: LensInspectorAdapters,
+  searchContextApi: SearchContextConfig['api'],
   isTextBasedLanguage: (currentState: LensRuntimeState) => boolean,
   startDependencies: LensEmbeddableStartServices,
   parentApi?: unknown
@@ -130,8 +132,12 @@ export function initializeEditApi(
   // are properly injected with the correct references to avoid issues when saving/navigating to the full editor
   const getStateWithInjectedFilters = () => {
     const currentState = getState();
+    // use the search context api here for filters for 2 reasons:
+    // * the filters here have the correct references already injected
+    // * the edit filters flow may change in the future and this is the right place to get the filters
+    const currentFilters = searchContextApi.filters$.getValue() ?? [];
     // if there are no filters, avoid to copy the attributes
-    if (!currentState.attributes.state.filters.length) {
+    if (!currentFilters.length) {
       return currentState;
     }
     // otherwise make sure to inject the references into filters
@@ -141,10 +147,7 @@ export function initializeEditApi(
         ...currentState.attributes,
         state: {
           ...currentState.attributes.state,
-          filters: startDependencies.data.query.filterManager.inject(
-            currentState.attributes.state.filters,
-            currentState.attributes.references
-          ),
+          filters: currentFilters,
         },
       },
     };

@@ -25,17 +25,19 @@ import {
   LensUnifiedSearchContext,
 } from '../types';
 
+export interface SearchContextConfig {
+  api: PublishesUnifiedSearch & PublishesSearchSession;
+  comparators: StateComparators<LensUnifiedSearchContext>;
+  serialize: () => LensUnifiedSearchContext;
+  cleanup: () => void;
+}
+
 export function initializeSearchContext(
   initialState: LensRuntimeState,
   internalApi: LensInternalApi,
   parentApi: unknown,
   { injectFilterReferences }: LensEmbeddableStartServices
-): {
-  api: PublishesUnifiedSearch & PublishesSearchSession;
-  comparators: StateComparators<LensUnifiedSearchContext>;
-  serialize: () => LensUnifiedSearchContext;
-  cleanup: () => void;
-} {
+): SearchContextConfig {
   const [searchSessionId$] = buildObservableVariable<string | undefined>(
     apiPublishesSearchSession(parentApi) ? parentApi.searchSessionId$ : undefined
   );
