@@ -8,22 +8,15 @@
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
-import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
   VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID,
 } from './test_ids';
-import {
-  ANALYZE_GRAPH_ID,
-  AnalyzeGraph,
-  ANALYZER_PREVIEW_BANNER,
-} from '../components/analyze_graph';
+import { ANALYZE_GRAPH_ID, AnalyzeGraph } from '../components/analyze_graph';
 import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -55,29 +48,19 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { scopeId } = useDocumentDetailsContext();
-  const { openPreviewPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
   );
-  const key = useWhichFlyout() ?? 'memory';
   const { startTransaction } = useStartTransaction();
   const onChangeCompressed = useCallback(
     (optionId: string) => {
       setActiveVisualizationId(optionId);
       if (optionId === ANALYZE_GRAPH_ID) {
         startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
-        openPreviewPanel({
-          id: DocumentDetailsAnalyzerPanelKey,
-          params: {
-            resolverComponentInstanceID: `${key}-${scopeId}`,
-            banner: ANALYZER_PREVIEW_BANNER,
-          },
-        });
       }
     },
-    [startTransaction, openPreviewPanel, key, scopeId]
+    [startTransaction]
   );
 
   useEffect(() => {
