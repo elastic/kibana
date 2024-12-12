@@ -181,7 +181,7 @@ export const ESQLEditor = memo(function ESQLEditor({
             startLineNumber: lineNumber,
             startColumn: 0,
             endLineNumber: lineNumber,
-            endColumn: (commentedLine?.length ?? 0) + 1,
+            endColumn: (lineContent?.length ?? 0) + 1,
           },
           text: commentedLine,
         });
