@@ -44,10 +44,10 @@ const suggestionItemContainerStyle = (isSelected?: boolean) => (theme: UseEuiThe
   css`
     display: flex;
     flex-direction: row;
-    font-size: ${theme.eui.euiFontSizeS};
-    height: ${theme.eui.euiSizeXL};
+    font-size: ${theme.euiTheme.font.scale.s};
+    height: ${theme.euiTheme.size.xl};
     white-space: nowrap;
-    background-color: ${isSelected ? theme.eui.euiColorLightestShade : 'transparent'};
+    background-color: ${isSelected ? theme.euiTheme.colors.lightestShade : 'transparent'};
   `;
 
 const suggestionItemFieldStyle = (theme: UseEuiTheme) => css`
@@ -55,8 +55,8 @@ const suggestionItemFieldStyle = (theme: UseEuiTheme) => css`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${theme.eui.euiSizeXL};
-  padding: ${theme.eui.euiSizeXS};
+  height: ${theme.euiTheme.size.xl};
+  padding: ${theme.euiTheme.size.xs};
 `;
 
 const suggestionItemIconFieldStyle =
@@ -67,13 +67,13 @@ const suggestionItemIconFieldStyle =
       color: ${getEuiIconColor(theme, suggestionType)};
       flex: 0 0 auto;
       justify-content: center;
-      width: ${theme.eui.euiSizeXL};
+      width: ${theme.euiTheme.size.xl};
     `;
 
 const suggestionItemTextFieldStyle = (theme: UseEuiTheme) => css`
   ${suggestionItemFieldStyle(theme)};
   flex: 2 0 0;
-  font-family: ${theme.eui.euiCodeFontFamily};
+  font-family: ${theme.euiTheme.font.familyCode};
 `;
 
 const suggestionItemDescriptionFieldStyle = (theme: UseEuiTheme) => css`
@@ -84,7 +84,7 @@ const suggestionItemDescriptionFieldStyle = (theme: UseEuiTheme) => css`
     display: inline;
 
     span {
-      font-family: ${theme.eui.euiCodeFontFamily};
+      font-family: ${theme.euiTheme.font.familyCode};
     }
   }
 `;
@@ -109,15 +109,15 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
 const getEuiIconColor = (theme: UseEuiTheme, suggestionType: QuerySuggestionTypes): string => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return theme?.eui.euiColorVis7;
+      return theme.euiTheme.colors.vis.euiColorVis7;
     case QuerySuggestionTypes.Value:
-      return theme?.eui.euiColorVis0;
+      return theme.euiTheme.colors.vis.euiColorVis0;
     case QuerySuggestionTypes.Operator:
-      return theme?.eui.euiColorVis1;
+      return theme.euiTheme.colors.vis.euiColorVis1;
     case QuerySuggestionTypes.Conjunction:
-      return theme?.eui.euiColorVis2;
+      return theme.euiTheme.colors.vis.euiColorVis2;
     case QuerySuggestionTypes.RecentSearch:
     default:
-      return theme?.eui.euiColorMediumShade;
+      return theme.euiTheme.colors.mediumShade;
   }
 };
