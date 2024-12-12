@@ -993,8 +993,8 @@ x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
-x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
