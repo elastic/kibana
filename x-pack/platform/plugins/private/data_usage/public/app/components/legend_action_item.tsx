@@ -9,9 +9,15 @@ import React, { memo } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 
 export const LegendActionItem = memo(
-  ({ label, onClick }: { label: string; onClick: () => Promise<void> | void }) => (
-    <EuiListGroupItem label={label} onClick={onClick} size="s" />
-  )
+  ({
+    label,
+    onClick,
+    dataTestSubj,
+  }: {
+    label: string;
+    onClick: () => Promise<void> | void;
+    dataTestSubj: string;
+  }) => <EuiListGroupItem label={label} onClick={onClick} data-test-subj={dataTestSubj} size="s" />
 );
 
 LegendActionItem.displayName = 'LegendActionItem';
