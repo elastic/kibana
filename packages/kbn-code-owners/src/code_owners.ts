@@ -12,8 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import ignore, { Ignore } from 'ignore';
-import { throwIfPathIsMissing } from './path';
-const CODE_OWNERS_FILE = path.join(REPO_ROOT, '.github', 'CODEOWNERS');
+import { CODE_OWNERS_FILE, throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
 
 export interface CodeOwnersEntry {
   pattern: string;
@@ -88,16 +87,18 @@ export function getCodeOwnersEntries(): CodeOwnersEntry[] {
  *   If you're making a lot of calls to this function, fetch the code owner paths once using
  *   `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries..
  *
- * @param searchPath The file to find code owners for
+ * @param searchPath The path to find code owners for
  * @param codeOwnersEntries Pre-defined list of code owner paths to search in
  *
  * @returns Code owners entry if a match is found.
+ * @throws Error if `searchPath` does not exist or is not part of this repository
  */
 export function findCodeOwnersEntryForPath(
   searchPath: string,
   codeOwnersEntries?: CodeOwnersEntry[]
 ): CodeOwnersEntry | undefined {
   throwIfPathIsMissing(CODE_OWNERS_FILE, 'Code owners file');
+  throwIfPathNotInRepo(searchPath);
   const searchPathRelativeToRepo = path.relative(REPO_ROOT, searchPath);
 
   return (codeOwnersEntries || getCodeOwnersEntries()).find(
@@ -112,10 +113,11 @@ export function findCodeOwnersEntryForPath(
  *   If you're making a lot of calls to this function, fetch the code owner paths once using
  *   `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries.
  *
- * @param searchPath The file to find code owners for
+ * @param searchPath The path to find code owners for
  * @param codeOwnersEntries Pre-defined list of code owner entries
  *
  * @returns List of code owners for the given path. Empty list if no matching entry is found.
+ * @throws Error if `searchPath` does not exist or is not part of this repository
  */
 export function getOwningTeamsForPath(
   searchPath: string,

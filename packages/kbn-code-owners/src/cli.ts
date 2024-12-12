@@ -9,7 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { findCodeOwnersEntryForPath } from './code_owners';
-import { throwIfPathIsMissing } from './path';
+import { throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
 
 /**
  * CLI entrypoint for finding code owners for a given path.
@@ -19,8 +19,9 @@ export async function findCodeOwnersForPath() {
     async ({ flagsReader, log }) => {
       const targetPath = flagsReader.requiredPath('path');
       throwIfPathIsMissing(targetPath, 'Target path', true);
+      throwIfPathNotInRepo(targetPath, true);
 
-      const codeOwnersEntry = await findCodeOwnersEntryForPath(targetPath);
+      const codeOwnersEntry = findCodeOwnersEntryForPath(targetPath);
 
       if (!codeOwnersEntry) {
         log.warning(`No matching code owners entry found for path ${targetPath}`);

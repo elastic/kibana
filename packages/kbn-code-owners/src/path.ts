@@ -8,7 +8,12 @@
  */
 
 import fs from 'node:fs';
+import path from 'node:path';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
+
+/** CODEOWNERS file path **/
+export const CODE_OWNERS_FILE = path.join(REPO_ROOT, '.github', 'CODEOWNERS');
 
 /**
  * Throw an error if the given path does not exist
@@ -25,4 +30,19 @@ export function throwIfPathIsMissing(
   if (fs.existsSync(targetPath)) return;
   const msg = `${description} ${targetPath} does not exist`;
   throw cli ? createFailError(msg) : new Error(msg);
+}
+
+/**
+ * Throw an error if the given path does not reside in this repo
+ *
+ * @param targetPath Path to check
+ * @param cli Whether this function is called from a CLI context
+ */
+export function throwIfPathNotInRepo(targetPath: fs.PathLike, cli: boolean = false) {
+  const relativePath = path.relative(REPO_ROOT, targetPath.toString());
+
+  if (relativePath.includes('../')) {
+    const msg = `Path ${targetPath} is not part of this repository.`;
+    throw cli ? createFailError(msg) : new Error(msg);
+  }
 }
