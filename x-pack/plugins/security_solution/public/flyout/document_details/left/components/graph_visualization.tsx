@@ -20,6 +20,8 @@ const GraphInvestigationLazy = React.lazy(() =>
   }))
 );
 
+export const GRAPH_ID = 'graph-visualization' as const;
+
 /**
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */

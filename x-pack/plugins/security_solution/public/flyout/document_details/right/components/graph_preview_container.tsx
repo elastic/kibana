@@ -11,7 +11,6 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
@@ -19,7 +18,6 @@ import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
 
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
@@ -38,10 +36,6 @@ export const GraphPreviewContainer: React.FC = () => {
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
-  const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(
-    GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
-  );
-
   const allowFlyoutExpansion = visualizationInFlyoutEnabled && !isPreviewMode && !isPreview;
 
   const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
@@ -60,9 +54,6 @@ export const GraphPreviewContainer: React.FC = () => {
     ecsData: dataAsNestedObject,
   });
 
-  const shouldShowGraphPreview =
-    visualizationInFlyoutEnabled && isGraphFeatureEnabled && isAuditLog;
-
   // TODO: default start and end might not capture the original event
   const { isLoading, isError, data } = useFetchGraphData({
     req: {
@@ -79,60 +70,58 @@ export const GraphPreviewContainer: React.FC = () => {
   });
 
   return (
-    shouldShowGraphPreview && (
-      <ExpandablePanel
-        header={{
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewTitle"
-              defaultMessage="Graph preview"
-            />
-          ),
-          headerContent: (
-            <EuiBetaBadge
-              alignment="middle"
-              iconType="beaker"
-              data-test-subj="graphPreviewBetaBadge"
-              label={i18n.translate(
-                'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel',
-                {
-                  defaultMessage: 'Technical Preview',
-                }
-              )}
-              tooltipContent={i18n.translate(
-                'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewTooltip',
-                {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                }
-              )}
-            />
-          ),
-          iconType: allowFlyoutExpansion ? 'arrowStart' : 'indexMapping',
-          ...(allowFlyoutExpansion && {
-            link: {
-              callback: navigateToGraphVisualization,
-              tooltip: (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
-                  defaultMessage="Expand graph"
-                />
-              ),
-            },
-          }),
-        }}
-        data-test-subj={GRAPH_PREVIEW_TEST_ID}
-        content={
-          !isLoading && !isError
-            ? {
-                paddingSize: 'none',
+    <ExpandablePanel
+      header={{
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewTitle"
+            defaultMessage="Graph preview"
+          />
+        ),
+        headerContent: (
+          <EuiBetaBadge
+            alignment="middle"
+            iconType="beaker"
+            data-test-subj="graphPreviewBetaBadge"
+            label={i18n.translate(
+              'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel',
+              {
+                defaultMessage: 'Technical Preview',
               }
-            : undefined
-        }
-      >
-        <GraphPreview isLoading={isLoading} isError={isError} data={data} />
-      </ExpandablePanel>
-    )
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewTooltip',
+              {
+                defaultMessage:
+                  'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+              }
+            )}
+          />
+        ),
+        iconType: allowFlyoutExpansion ? 'arrowStart' : 'indexMapping',
+        ...(allowFlyoutExpansion && {
+          link: {
+            callback: navigateToGraphVisualization,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.visualizations.graphPreview.graphPreviewOpenGraphTooltip"
+                defaultMessage="Expand graph"
+              />
+            ),
+          },
+        }),
+      }}
+      data-test-subj={GRAPH_PREVIEW_TEST_ID}
+      content={
+        !isLoading && !isError
+          ? {
+              paddingSize: 'none',
+            }
+          : undefined
+      }
+    >
+      <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+    </ExpandablePanel>
   );
 };
 

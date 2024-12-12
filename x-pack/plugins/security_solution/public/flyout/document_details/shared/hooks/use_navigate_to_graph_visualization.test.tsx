@@ -11,12 +11,9 @@ import { mockFlyoutApi } from '../mocks/mock_flyout_context';
 import { useWhichFlyout } from './use_which_flyout';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  DocumentDetailsRightPanelKey,
-  DocumentDetailsLeftPanelKey,
-  VisualizationTabGraphKey,
-} from '../constants/panel_keys';
+import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../constants/panel_keys';
 import { useNavigateToGraphVisualization } from './use_navigate_to_graph_visualization';
+import { GRAPH_ID } from '../../left/components/graph_visualization';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/lib/kibana');
@@ -51,7 +48,7 @@ describe('useNavigateToGraphVisualization', () => {
       id: DocumentDetailsLeftPanelKey,
       path: {
         tab: 'visualize',
-        subTab: VisualizationTabGraphKey,
+        subTab: GRAPH_ID,
       },
       params: {
         id: eventId,
@@ -84,7 +81,7 @@ describe('useNavigateToGraphVisualization', () => {
         id: DocumentDetailsLeftPanelKey,
         path: {
           tab: 'visualize',
-          subTab: VisualizationTabGraphKey,
+          subTab: GRAPH_ID,
         },
         params: {
           id: eventId,

@@ -59,17 +59,25 @@ const renderGraphPreview = (context = mockContextValue) =>
     </TestProviders>
   );
 
+const DEFAULT_NODES = [
+  {
+    id: '1',
+    color: 'primary',
+    shape: 'ellipse',
+  },
+];
+
 describe('<GraphPreviewContainer />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
   });
 
   it('should render component and link in header', async () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: { nodes: [], edges: [] },
+      data: { nodes: DEFAULT_NODES, edges: [] },
     });
 
     const timestamp = new Date().toISOString();
@@ -116,11 +124,10 @@ describe('<GraphPreviewContainer />', () => {
   });
 
   it('should render component and without link in header in preview panel', async () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: { nodes: [], edges: [] },
+      data: { nodes: DEFAULT_NODES, edges: [] },
     });
 
     const timestamp = new Date().toISOString();
@@ -170,11 +177,10 @@ describe('<GraphPreviewContainer />', () => {
   });
 
   it('should render component and without link in header in rule preview', async () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: { nodes: [], edges: [] },
+      data: { nodes: DEFAULT_NODES, edges: [] },
     });
 
     const timestamp = new Date().toISOString();
@@ -223,64 +229,106 @@ describe('<GraphPreviewContainer />', () => {
     });
   });
 
-  it('should not render when flyout feature is not enabled', () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+  it('should render component and without link in header when expanding flyout feature is disabled', async () => {
     mockUseUiSetting.mockReturnValue([false]);
-
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: undefined,
+      data: { nodes: DEFAULT_NODES, edges: [] },
     });
 
+    const timestamp = new Date().toISOString();
+
     (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp,
+      eventIds: [],
       isAuditLog: true,
     });
 
-    const { queryByTestId } = renderGraphPreview();
+    const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
 
+    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
+    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
     expect(
       queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(mockUseFetchGraphData).toHaveBeenCalled();
+    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
+      req: {
+        query: {
+          eventIds: [],
+          start: `${timestamp}||-30m`,
+          end: `${timestamp}||+30m`,
+        },
+      },
+      options: {
+        enabled: true,
+        refetchOnWindowFocus: false,
+      },
+    });
   });
 
-  it('should not render when experimental feature is not enabled', () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-    mockUseUiSetting.mockReturnValue([true]);
-
+  it('should not render when graph data is not available', async () => {
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
       data: undefined,
     });
 
-    (useGraphPreview as jest.Mock).mockReturnValue({
-      isAuditLog: true,
-    });
-
-    const { queryByTestId } = renderGraphPreview();
-
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-  });
-
-  it('should not render when graph data is not available', () => {
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-    mockUseFetchGraphData.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: undefined,
-    });
+    const timestamp = new Date().toISOString();
 
     (useGraphPreview as jest.Mock).mockReturnValue({
+      timestamp,
+      eventIds: [],
       isAuditLog: false,
     });
 
-    const { queryByTestId } = renderGraphPreview();
+    const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
 
+    // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
+    expect(
+      await findByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
     expect(
       queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(mockUseFetchGraphData).toHaveBeenCalled();
+    expect(mockUseFetchGraphData.mock.calls[0][0]).toEqual({
+      req: {
+        query: {
+          eventIds: [],
+          start: `${timestamp}||-30m`,
+          end: `${timestamp}||+30m`,
+        },
+      },
+      options: {
+        enabled: false,
+        refetchOnWindowFocus: false,
+      },
+    });
   });
 });

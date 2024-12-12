@@ -71,7 +71,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
 
     return isLoading ? (
       <LoadingComponent />
-    ) : isError ? (
+    ) : isError || memoizedNodes.length === 0 ? (
       <FormattedMessage
         id="xpack.securitySolution.flyout.right.visualizations.graphPreview.errorDescription"
         defaultMessage="An error is preventing this alert from being visualized."
