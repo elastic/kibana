@@ -440,7 +440,7 @@
     "@kbn/dataset-quality-plugin": "link:x-pack/plugins/observability_solution/dataset_quality",
     "@kbn/datemath": "link:packages/kbn-datemath",
     "@kbn/deeplinks-analytics": "link:packages/deeplinks/analytics",
-    "@kbn/deeplinks-devtools": "link:packages/deeplinks/devtools",
+    "@kbn/deeplinks-devtools": "link:src/platform/packages/shared/deeplinks/devtools",
     "@kbn/deeplinks-fleet": "link:packages/deeplinks/fleet",
     "@kbn/deeplinks-management": "link:packages/deeplinks/management",
     "@kbn/deeplinks-ml": "link:src/platform/packages/shared/deeplinks/ml",
