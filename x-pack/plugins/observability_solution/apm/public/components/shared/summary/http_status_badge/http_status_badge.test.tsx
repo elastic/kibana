@@ -18,7 +18,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={100} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.backgroundBaseSubdued
+          result.current.euiTheme.colors.vis.euiColorVisGrey0
         );
       });
     });
@@ -28,7 +28,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={200} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.backgroundBaseSuccess
+          result.current.euiTheme.colors.vis.euiColorVisSuccess0
         );
       });
     });
@@ -38,7 +38,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={301} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.backgroundBaseSubdued
+          result.current.euiTheme.colors.vis.euiColorVisGrey0
         );
       });
     });
@@ -48,7 +48,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={404} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.backgroundBaseWarning
+          result.current.euiTheme.colors.vis.euiColorVisWarning0
         );
       });
     });
@@ -58,7 +58,7 @@ describe('HttpStatusBadge', () => {
         const wrapper = mount(<HttpStatusBadge status={502} />);
         const { result } = renderHook(() => useEuiTheme());
         expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
-          result.current.euiTheme.colors.backgroundBaseDanger
+          result.current.euiTheme.colors.vis.euiColorVisDanger0
         );
       });
     });

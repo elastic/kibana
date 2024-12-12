@@ -15,6 +15,7 @@ import {
   EuiIconTip,
   RecursivePartial,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BoolQuery } from '@kbn/es-query';
@@ -153,7 +154,7 @@ function FailedTransactionChart({
         <AlertActiveTimeRangeAnnotation
           alertStart={alertStart}
           alertEnd={alertEnd}
-          color={euiTheme.colors.backgroundBaseAccent}
+          color={transparentize(euiTheme.colors.danger, 0.2)}
           id={'alertActiveRect'}
           key={'alertActiveRect'}
         />,
