@@ -24,7 +24,6 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
   ErrorEmbeddable,
-  IContainer,
 } from '@kbn/embeddable-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { AttributeService } from './attribute_service';
@@ -148,8 +147,7 @@ export class VisualizeEmbeddableFactory
 
   public async createFromSavedObject(
     savedObjectId: string,
-    input: Partial<VisualizeInput> & { id: string },
-    parent?: IContainer
+    input: Partial<VisualizeInput> & { id: string }
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable> {
     const startDeps = this.deps.start();
 
@@ -171,37 +169,26 @@ export class VisualizeEmbeddableFactory
             defaultMessage: `This visualization has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
             values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
           }),
-          input,
-          parent
+          input
         );
       }
       const visState = convertToSerializedVis(savedObject);
       const vis = await createVisAsync(savedObject.visState.type, visState);
 
-      return createVisEmbeddableFromObject(this.deps)(
-        vis,
-        input,
-        await this.getAttributeService(),
-        parent
-      );
+      return createVisEmbeddableFromObject(this.deps)(vis, input, await this.getAttributeService());
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
+      return new ErrorEmbeddable(e, input);
     }
   }
 
-  public async create(input: VisualizeInput & { savedVis?: SerializedVis }, parent?: IContainer) {
+  public async create(input: VisualizeInput & { savedVis?: SerializedVis }) {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (input.savedVis) {
       const visState = input.savedVis;
       const vis = await createVisAsync(visState.type, visState);
-      return createVisEmbeddableFromObject(this.deps)(
-        vis,
-        input,
-        await this.getAttributeService(),
-        parent
-      );
+      return createVisEmbeddableFromObject(this.deps)(vis, input, await this.getAttributeService());
     } else {
       showNewVisModal({
         originatingApp: await this.getCurrentAppId(),

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Vis } from '../../types';
 import type {
@@ -36,8 +36,7 @@ export const createVisEmbeddableFromObject =
       VisualizeSavedObjectAttributes,
       VisualizeByValueInput,
       VisualizeByReferenceInput
-    >,
-    parent?: IContainer
+    >
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable> => {
     try {
       const visId = vis.id as string;
@@ -75,11 +74,10 @@ export const createVisEmbeddableFromObject =
           capabilities,
         },
         input,
-        attributeService,
-        parent
+        attributeService
       );
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
+      return new ErrorEmbeddable(e, input);
     }
   };
