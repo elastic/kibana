@@ -17,7 +17,7 @@ const assetCriticalityMapping = {
 };
 
 export const assetCriticalityFieldMap: FieldMap = {
-  '@timestamp': {
+  'event.ingested': {
     type: 'date',
     array: false,
     required: false,
