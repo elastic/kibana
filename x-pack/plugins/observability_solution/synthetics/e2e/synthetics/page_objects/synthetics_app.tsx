@@ -7,7 +7,7 @@
 import { expect, Page } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { FormMonitorType } from '@kbn/synthetics-plugin/common/runtime_types/monitor_management';
-import { recordVideo } from '../../helpers/record_video';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { loginPageProvider } from '../../page_objects/login';
 import { utilsPageProvider } from '../../page_objects/utils';
 
