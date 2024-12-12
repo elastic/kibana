@@ -109,8 +109,8 @@ export const BuildPackages: Task = {
     await runBazel(
       [
         'build',
-        '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
-        '//packages/kbn-ui-shared-deps-src:shared_built_assets',
+        '//src/platform/packages/private/kbn-ui-shared-deps-npm:shared_built_assets',
+        '//src/platform/packages/private/kbn-ui-shared-deps-src:shared_built_assets',
         '//packages/kbn-monaco:target_workers',
         '--show_result=1',
         '--define=dist=true',
