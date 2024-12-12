@@ -270,7 +270,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
                     maxRetention: globalMaxRetention.size,
                     unitText: globalMaxRetention.unitText,
                     manageSettingsLink: (
-                      <EuiLink href={cloud?.deploymentUrl} external>
+                      <EuiLink href={cloud?.deploymentUrl} target="_blank">
                         {i18n.translate(
                           'xpack.idxMgmt.dataStreams.editDataRetentionModal.manageProjectSettingsLinkText',
                           {
