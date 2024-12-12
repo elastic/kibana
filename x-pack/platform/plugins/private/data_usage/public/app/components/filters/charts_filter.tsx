@@ -165,14 +165,25 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     );
 
     const onSelectAll = useCallback(() => {
-      const allItems: FilterItems = items.map((item) => {
-        return {
-          ...item,
-          checked: item.key && !item.isGroupLabel ? 'on' : undefined,
-        };
-      });
+      const allItems: FilterItems = items.reduce<FilterItems>((acc, item) => {
+        if (!item.isGroupLabel) {
+          acc.push({
+            ...item,
+            checked: 'on',
+          });
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+
       setItems(allItems);
-      const optionsToSelect = allItems.map((i) => i.label);
+      const optionsToSelect = allItems.reduce<string[]>((acc, i) => {
+        if (i.checked) {
+          acc.push(i.label);
+        }
+        return acc;
+      }, []);
       onChangeFilterOptions(optionsToSelect);
 
       if (isDataStreamsFilter) {
