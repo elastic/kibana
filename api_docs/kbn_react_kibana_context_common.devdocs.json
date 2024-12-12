@@ -225,6 +225,30 @@
             "path": "packages/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-common",
+            "id": "def-common.ThemeServiceStart.getTheme",
+            "type": "Function",
+            "tags": [],
+            "label": "getTheme",
+            "description": [],
+            "signature": [
+              "(() => ",
+              {
+                "pluginId": "@kbn/react-kibana-context-common",
+                "scope": "common",
+                "docId": "kibKbnReactKibanaContextCommonPluginApi",
+                "section": "def-common.KibanaTheme",
+                "text": "KibanaTheme"
+              },
+              ") | undefined"
+            ],
+            "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

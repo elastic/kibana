@@ -173,11 +173,6 @@ Techniques and Sub techniques represent how an adversary achieves a tactical goa
 
 ## Detection logic
 
-### Prevention
-
-- [Non-Native Dylib Extracted into Suspicious Directory](https://github.com/elastic/endpoint-rules/blob/1006a4d9a3d95e35149a3640fadf68a32c02afa9/rules/execution_dylib_extracted_to_new_directory.toml#L10)
-- [Potential Privilege Escalation via TCC bypass with fake TCC.db](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/privilege_escalation_potential_privilege_escalation_via_tcc_bypass_with_fake_tcc.db.toml)
-
 ### YARA
 
 Elastic Security has created YARA rules to identify this activity. Below are YARA rules to identify the JOKERSPY backdoor and SwiftBelt tool.

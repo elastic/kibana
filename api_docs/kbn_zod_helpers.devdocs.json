@@ -169,6 +169,54 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isNonEmptyString",
+        "type": "Function",
+        "tags": [],
+        "label": "isNonEmptyString",
+        "description": [],
+        "signature": [
+          "(input: string, ctx: Zod.RefinementCtx) => void"
+        ],
+        "path": "packages/kbn-zod-helpers/src/non_empty_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isNonEmptyString.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-zod-helpers/src/non_empty_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isNonEmptyString.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              "Zod.RefinementCtx"
+            ],
+            "path": "packages/kbn-zod-helpers/src/non_empty_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.isValidDateMath",
         "type": "Function",
         "tags": [],

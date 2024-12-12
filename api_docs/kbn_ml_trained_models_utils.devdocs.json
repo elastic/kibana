@@ -112,7 +112,7 @@
               "\nModel name, e.g. elser"
             ],
             "signature": [
-              "\"elser\" | \"e5\""
+              "\"rerank\" | \"elser\" | \"e5\""
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
@@ -300,6 +300,22 @@
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-trained-models-utils",
+            "id": "def-common.ModelDefinition.techPreview",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "techPreview",
+            "description": [
+              "Indicates if model is in tech preview"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -417,7 +433,7 @@
         "label": "ElasticCuratedModelName",
         "description": [],
         "signature": [
-          "\"elser\" | \"e5\""
+          "\"rerank\" | \"elser\" | \"e5\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

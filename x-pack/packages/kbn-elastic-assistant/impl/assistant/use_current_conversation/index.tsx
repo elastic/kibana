@@ -207,6 +207,11 @@ export const useCurrentConversation = ({
         // if no Welcome convo exists, create one
         getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE });
 
+      // on the off chance that the conversation is not found, return
+      if (!nextConversation) {
+        return;
+      }
+
       if (nextConversation && nextConversation.id === '') {
         // This is a default conversation that has not yet been initialized
         const conversation = await initializeDefaultConversationWithConnector(nextConversation);

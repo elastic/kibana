@@ -23,6 +23,15 @@ tags:
   - CVE-2024-47177
 ---
 
+## Update October 2, 2024
+
+The following packages introduced out-of-the-box (OOTB) rules to detect the exploitation of these vulnerabilities. Please check your "Prebuilt Security Detection Rules" integration versions or visit the [Downloadable rule updates](https://www.elastic.co/guide/en/security/current/prebuilt-rules-downloadable-updates.html) site.
+
+- Stack Version 8.15 - Package Version 8.15.6+
+- Stack Version 8.14 - Package Version 8.14.12+
+- Stack Version 8.13 - Package Version 8.13.18+
+- Stack Version 8.12 - Package Version 8.12.23+
+
 ## Key takeaways
 
 * On September 26, 2024, security researcher Simone Margaritelli (@evilsocket) disclosed multiple vulnerabilities affecting the `cups-browsed`, `libscupsfilters`, and `libppd` components of the CUPS printing system, impacting versions \<= 2.0.1.

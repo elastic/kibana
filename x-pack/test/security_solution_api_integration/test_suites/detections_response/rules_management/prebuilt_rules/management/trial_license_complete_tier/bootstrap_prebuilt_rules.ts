@@ -18,7 +18,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
 
-  describe('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/203632
+  describe.skip('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
     beforeEach(async () => {
       await deletePrebuiltRulesFleetPackage(supertest);
       await deleteEndpointFleetPackage(supertest);

@@ -24,7 +24,8 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/182458
+describe.skip(
   'Uninstall agent from host changing agent policy when agent tamper protection is disabled but then is switched to a policy with it enabled',
   { tags: ['@ess'] },
   () => {

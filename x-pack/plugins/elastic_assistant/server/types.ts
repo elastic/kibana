@@ -18,7 +18,7 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
-  SecurityServiceStart,
+  AuditLogger,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -116,7 +116,6 @@ export interface ElasticAssistantPluginStartDependencies {
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
-  security: SecurityServiceStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
 }
@@ -124,6 +123,7 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
+  auditLogger?: AuditLogger;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;

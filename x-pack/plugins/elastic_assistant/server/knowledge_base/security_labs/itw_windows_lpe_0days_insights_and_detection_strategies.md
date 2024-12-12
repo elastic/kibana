@@ -137,7 +137,7 @@ process.name :"dwm.exe" and user.id:S-1-5-90-0-* and
 ![DWM dropping reflective DLL to disk post exploit execution](/assets/images/itw-windows-lpe-0days-insights-and-detection-strategies/image5.png)
 
 
-Below is a [detection](https://github.com/elastic/endpoint-rules/blob/20833cbeaac4284ecf9818b44438bda4bc3cae18/rules/privilege_escalation_logonui_dcomp.toml) EQL query that looks for the LogonUI DLL load hijack: 
+Below is a [detection](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/windows/privilege_escalation_potential_privilege_escalation_via_logonui.toml) EQL query that looks for the LogonUI DLL load hijack: 
 
 ```
 library where process.executable : "?:\\Windows\\System32\\LogonUI.exe" and 
@@ -282,7 +282,7 @@ api where process.pid != 4 and process.Ext.api.name : "WriteProcessMemory"
    process.Ext.api.parameters.address > 281474976710655
 ```
   
-Here is an example of these [alerts](https://github.com/elastic/endpoint-rules/blob/20833cbeaac4284ecf9818b44438bda4bc3cae18/rules/privilege_escalation_api_kernel_address_space.toml) triggering on exploits leveraging this primitive: 
+Here is an example of these [alerts](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/windows/privilege_escalation_suspicious_kernel_mode_address_manipulation.tom) triggering on exploits leveraging this primitive: 
 
 ![Detection of PreviousMode abuse](/assets/images/itw-windows-lpe-0days-insights-and-detection-strategies/image7.png)
 

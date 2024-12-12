@@ -10,8 +10,7 @@ import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 import { useChatSend, UseChatSendProps } from './use_chat_send';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
 
@@ -64,10 +63,10 @@ describe('use chat send', () => {
   });
   it('handleOnChatCleared clears the conversation', async () => {
     (clearConversation as jest.Mock).mockReturnValueOnce(testProps.currentConversation);
-    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
+    const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.handleOnChatCleared();
     });
@@ -99,7 +98,7 @@ describe('use chat send', () => {
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useChatSend({ ...testProps, currentConversation: { ...welcomeConvo, id: 'welcome-id' } }),
       {
@@ -107,7 +106,7 @@ describe('use chat send', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.handleRegenerateResponse();
     });
@@ -121,10 +120,10 @@ describe('use chat send', () => {
   });
   it('sends telemetry events for both user and assistant', async () => {
     const promptText = 'prompt text';
-    const { result, waitForNextUpdate } = renderHook(() => useChatSend(testProps), {
+    const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     act(() => {
       result.current.handleChatSend(promptText);
     });

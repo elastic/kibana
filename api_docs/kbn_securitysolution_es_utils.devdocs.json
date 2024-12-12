@@ -613,9 +613,9 @@
           "\nRetrieves all index aliases for a given alias name\n"
         ],
         "signature": [
-          "({ esClient, alias, }: { esClient: ",
+          "({ esClient, alias, index, }: { esClient: ",
           "ElasticsearchClient",
-          "; alias: string; }) => Promise<IndexAlias[]>"
+          "; alias: string; index?: string | undefined; }) => Promise<IndexAlias[]>"
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
         "deprecated": false,
@@ -626,7 +626,7 @@
             "id": "def-common.getIndexAliases.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  alias,\n}",
+            "label": "{\n  esClient,\n  alias,\n  index,\n}",
             "description": [],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
             "deprecated": false,
@@ -1903,6 +1903,20 @@
                 "tags": [],
                 "label": "alias",
                 "description": [],
+                "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/securitysolution-es-utils",
+                "id": "def-common.getIndexAliases.$1.index",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
                 "deprecated": false,
                 "trackAdoption": false

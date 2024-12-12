@@ -181,7 +181,7 @@ To fully leverage detection capabilities listed below for these threats with Ela
 
  - [Connection to WebService by an Unsigned Binary](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/command_and_control_connection_to_webservice_by_an_unsigned_binary.toml)
  - [Connection to WebService by a Signed Binary Proxy](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/command_and_control_connection_to_webservice_by_a_signed_binary_proxy.toml)
- - [Suspicious DNS Query from Mounted Virtual Disk](https://github.com/elastic/endpoint-rules/blob/main/rules/command_and_control_execution_wevsvc_from_virtual_disk.toml)
+ - [Suspicious DNS Query from Mounted Virtual Disk](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/windows/command_and_control_suspicious_dns_query_from_mounted_virtual_disk.toml)
  - [Suspicious Access to Web Browser Credential Stores](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/credential_access_suspicious_access_to_web_browser_credential_stores.toml)
  - [Web Browser Credential Access via Unsigned Process](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/credential_access_web_browser_credential_access_via_unsigned_process.toml)
  - [Access to Browser Credentials from Suspicious Memory](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/credential_access_access_to_browser_credentials_from_suspicious_memory.toml)

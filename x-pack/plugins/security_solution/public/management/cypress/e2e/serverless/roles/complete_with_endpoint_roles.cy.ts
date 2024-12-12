@@ -30,7 +30,8 @@ import {
   visitPolicyList,
 } from '../../../screens';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170052
+describe.skip(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],

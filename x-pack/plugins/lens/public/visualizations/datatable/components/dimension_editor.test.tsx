@@ -20,6 +20,7 @@ import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { getKbnPalettes } from '@kbn/palettes';
 
 describe('data table dimension editor', () => {
   let user: UserEvent;
@@ -89,6 +90,7 @@ describe('data table dimension editor', () => {
       setState: jest.fn(),
       isDarkMode: false,
       paletteService: chartPluginMock.createPaletteRegistry(),
+      palettes: getKbnPalettes({ name: 'amsterdam', darkMode: false }),
       panelRef: React.createRef(),
       addLayer: jest.fn(),
       removeLayer: jest.fn(),

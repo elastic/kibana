@@ -1221,10 +1221,124 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "slo",
+        "id": "def-server.SloClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "SloClient",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/slo/server/client/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "slo",
+            "id": "def-server.SloClient.getSummaryIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getSummaryIndices",
+            "description": [],
+            "signature": [
+              "() => Promise<string[]>"
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/server/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "slo",
+      "id": "def-server.SLOServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SLOServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "slo",
+      "id": "def-server.SLOServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SLOServerStart",
+      "description": [],
+      "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "slo",
+          "id": "def-server.SLOServerStart.getSloClientWithRequest",
+          "type": "Function",
+          "tags": [],
+          "label": "getSloClientWithRequest",
+          "description": [],
+          "signature": [
+            "(request: ",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => ",
+            {
+              "pluginId": "slo",
+              "scope": "server",
+              "docId": "kibSloPluginApi",
+              "section": "def-server.SloClient",
+              "text": "SloClient"
+            }
+          ],
+          "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "slo",
+              "id": "def-server.SLOServerStart.getSloClientWithRequest.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/plugins/observability_solution/slo/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
