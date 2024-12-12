@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
 import {
+  // DataViewLazy,
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
@@ -60,6 +61,7 @@ import {
   fieldsSelector,
   indexedFieldTypeSelector,
   scriptedFieldLangsSelector,
+  scriptedFieldsSelector,
 } from '../../../management_app/data_view_mgmt_selectors';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
@@ -220,6 +222,7 @@ export const Tabs: React.FC<TabsProps> = ({
     dataViewMgmtService.state$,
     scriptedFieldLangsSelector
   );
+  const scriptedFields = useStateSelector(dataViewMgmtService.state$, scriptedFieldsSelector);
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
@@ -587,6 +590,7 @@ export const Tabs: React.FC<TabsProps> = ({
                   dataViewMgmtService.refreshFields();
                 }}
                 indexPattern={indexPattern}
+                fields={fields}
                 filterFilter={fieldFilter}
                 fieldWildcardMatcher={fieldWildcardMatcherDecorated}
               />
@@ -640,15 +644,27 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, relationships.length, dataViews.scriptedFieldsEnabled).map(
-        (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
-          return {
-            ...tab,
-            content: getContent(tab.id),
-          };
-        }
-      ),
-    [fieldFilter, getContent, indexPattern, relationships, dataViews.scriptedFieldsEnabled]
+      getTabs(
+        indexPattern,
+        [...fields, ...scriptedFields],
+        fieldFilter,
+        relationships.length,
+        dataViews.scriptedFieldsEnabled
+      ).map((tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
+        return {
+          ...tab,
+          content: getContent(tab.id),
+        };
+      }),
+    [
+      fieldFilter,
+      getContent,
+      indexPattern,
+      relationships,
+      dataViews.scriptedFieldsEnabled,
+      fields,
+      scriptedFields,
+    ]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);

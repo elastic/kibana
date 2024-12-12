@@ -26,7 +26,8 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
     dataViews
       .get(decodeURIComponent(props.match.params.id), undefined, true)
       .then((ip: DataView) => {
-        dataViewMgmtService.setDataView(ip);
+        dataViewMgmtService.setDataView(ip.id!);
+        // todo cleanup
         setIndexPattern(ip);
         setBreadcrumbs(getEditBreadcrumbs(ip));
       })

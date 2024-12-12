@@ -51,11 +51,17 @@ const DataViewFlyoutContentContainer = ({
     try {
       let saveResponse;
       if (editData) {
+        // this is necessary since data view mgmt uses data view lazy internally and uses it to create the field list
+        const dataViewLazy = await dataViews.getDataViewLazy(editData.id!);
         const { name = '', timeFieldName, title = '', allowHidden = false } = dataViewSpec;
         editData.setIndexPattern(title);
+        dataViewLazy.setIndexPattern(title);
         editData.name = name;
+        dataViewLazy.name = name;
         editData.timeFieldName = timeFieldName;
+        dataViewLazy.timeFieldName = timeFieldName;
         editData.setAllowHidden(allowHidden);
+        dataViewLazy.setAllowHidden(allowHidden);
         if (editData.isPersisted()) {
           await dataViews.updateSavedObject(editData);
         }
