@@ -57,6 +57,8 @@ import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { StaticAssets, type InternalStaticAssets } from './static_assets';
 
+const JS_AND_MAP_REGEX = /\.js(\.map)*$/;
+
 /**
  * Adds ELU timings for the executed function to the current's context transaction
  *
@@ -93,7 +95,8 @@ function startEluMeasurement<T>(
     if (
       eluMonitorOptions.logging.enabled &&
       active >= eluMonitorOptions.logging.threshold.ela &&
-      utilization >= eluMonitorOptions.logging.threshold.elu
+      utilization >= eluMonitorOptions.logging.threshold.elu &&
+      !JS_AND_MAP_REGEX.test(path)
     ) {
       log.warn(
         `Event loop utilization for ${path} exceeded threshold of ${elaThreshold}ms (${Math.round(
