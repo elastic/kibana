@@ -19,5 +19,6 @@
     "@kbn/config-schema",
     "@kbn/core-http-browser",
     "@kbn/search-connectors",
+    "@kbn/task-manager-plugin",
   ]
 }
