@@ -106,7 +106,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-rendering-browser",
     "@kbn/index-lifecycle-management-common-shared",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/apm-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }

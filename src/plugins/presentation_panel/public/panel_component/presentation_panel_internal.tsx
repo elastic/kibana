@@ -15,9 +15,9 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
-import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
+import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 
@@ -37,9 +37,13 @@ export const PresentationPanelInternal = <
 
   Component,
   componentProps,
+
+  setDragHandles,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
+
+  const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const viewModeSubject = (() => {
     if (apiPublishesViewMode(api)) return api.viewMode;
@@ -90,9 +94,26 @@ export const PresentationPanelInternal = <
     return attrs;
   }, [dataLoading, blockingError]);
 
+  const setDragHandle = useCallback(
+    (id: string, ref: HTMLElement | null) => {
+      dragHandles.current[id] = ref;
+      setDragHandles?.(Object.values(dragHandles.current));
+    },
+    [setDragHandles]
+  );
+
   return (
     <PresentationPanelHoverActions
-      {...{ index, api, getActions, actionPredicate, viewMode, showNotifications, showBorder }}
+      {...{
+        index,
+        api,
+        getActions,
+        actionPredicate,
+        viewMode,
+        showNotifications,
+        showBorder,
+      }}
+      setDragHandle={setDragHandle}
     >
       <EuiPanel
         role="figure"
@@ -108,6 +129,7 @@ export const PresentationPanelInternal = <
         {!hideHeader && api && (
           <PresentationPanelHeader
             api={api}
+            setDragHandle={setDragHandle}
             headerId={headerId}
             viewMode={viewMode}
             hideTitle={hideTitle}
