@@ -87,22 +87,21 @@ export type StreamChild = z.infer<typeof streamChildSchema>;
 export const streamWithoutIdDefinitonSchema = z.object({
   processing: z.array(processingDefinitionSchema).default([]),
   fields: z.array(fieldDefinitionSchema).default([]),
+  managed: z.boolean().default(true),
   children: z.array(streamChildSchema).default([]),
 });
 
 export type StreamWithoutIdDefinition = z.infer<typeof streamDefinitonSchema>;
 
+export const unmanagedElasticsearchAsset = z.object({
+  type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
+  id: z.string(),
+});
+export type UnmanagedElasticsearchAsset = z.infer<typeof unmanagedElasticsearchAsset>;
+
 export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
   id: z.string(),
-  managed: z.boolean().default(true),
-  unmanaged_elasticsearch_assets: z.optional(
-    z.array(
-      z.object({
-        type: z.enum(['ingest_pipeline', 'component_template', 'index_template', 'data_stream']),
-        id: z.string(),
-      })
-    )
-  ),
+  unmanaged_elasticsearch_assets: z.optional(z.array(unmanagedElasticsearchAsset)),
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;
