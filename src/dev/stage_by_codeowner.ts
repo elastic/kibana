@@ -35,22 +35,16 @@ run(async ({ flags, log }) => {
   const changedFiles = await getChangedFiles();
   const owners: Record<string, string[]> = {};
 
+  const codeOwnersEntries = getCodeOwnersEntries();
   const getOwner = (file: string) => {
-    const codeowners = fs
-      .readFileSync(CODEOWNERS_PATH, 'utf-8')
-      .split('\n')
-      .filter((line) => line && !line.trim().startsWith('#'));
-
-    for (const line of codeowners) {
-      const [pattern, fileOwner] = line.split(/\s+/);
-      if (file.startsWith(pattern)) {
-        return fileOwner;
-      }
+    const owners = getOwningTeamsForPath(file, codeOwnersEntries);
+  
+    if (owners.length === 0) {
+      log.warning(`No owner found for ${file}`);
+      return null;
     }
-
-    log.warning(`No owner found for ${file}`);
-
-    return null;
+  
+    return owners.join(',');
   };
 
   for (const file of changedFiles) {
