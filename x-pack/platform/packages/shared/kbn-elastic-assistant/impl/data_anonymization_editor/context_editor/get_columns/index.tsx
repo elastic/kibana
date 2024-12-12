@@ -7,7 +7,7 @@
 
 import { EuiBasicTableColumn, EuiButtonEmpty, EuiCode, EuiSwitch, EuiText } from '@elastic/eui';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import styled from 'styled-components';
 
 import { BulkActions } from '../bulk_actions';

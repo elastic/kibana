@@ -10,7 +10,7 @@ import { EuiFlyoutResizable } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import { createGlobalStyle } from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
