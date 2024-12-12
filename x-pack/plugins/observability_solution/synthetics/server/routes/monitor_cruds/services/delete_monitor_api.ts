@@ -139,7 +139,6 @@ export class DeleteMonitorAPI {
           ...normalizedMonitor.attributes,
           id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
         })) as SyntheticsMonitorWithId[],
-        savedObjectsClient,
         spaceId
       );
 
