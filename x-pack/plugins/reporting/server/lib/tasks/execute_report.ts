@@ -428,6 +428,7 @@ export class ExecuteReportTask implements ReportingTask {
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
+          console.time(`*** generate report ${taskInstance.id}`);
           // console.time('*** generate-report');
           // console.time('*** pre-processing');
           let report: SavedReport | undefined;
@@ -549,6 +550,8 @@ export class ExecuteReportTask implements ReportingTask {
             this.reporting.untrackReport(jobId);
             logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
           }
+
+          console.timeEnd(`*** generate report ${taskInstance.id}`);
 
           // console.timeEnd('*** post-processing');
           // console.timeEnd('*** generate-report');
