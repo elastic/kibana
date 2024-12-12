@@ -16,6 +16,7 @@ import type {
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
   EmailConnectorTypeId,
+  OpsgenieConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 
 import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
@@ -31,6 +32,7 @@ export type ActionTypeId =
   | typeof ServiceNowConnectorTypeId
   | typeof JiraConnectorTypeId
   | typeof WebhookConnectorTypeId
-  | typeof EmailConnectorTypeId;
+  | typeof EmailConnectorTypeId
+  | typeof OpsgenieConnectorTypeId;
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'> & { config?: SlackApiConfig };
