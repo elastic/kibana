@@ -64,6 +64,7 @@ export {
 /** @deprecated deprecated in 8.17. Please use casesFeatureIdV2 instead */
 export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
+export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't

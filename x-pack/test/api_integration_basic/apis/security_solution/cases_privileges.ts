@@ -37,7 +37,7 @@ const secAll: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['all'],
+          securitySolutionCasesV3: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -68,7 +68,7 @@ const secRead: Role = {
       {
         feature: {
           siem: ['read'],
-          securitySolutionCasesV2: ['read'],
+          securitySolutionCasesV3: ['read'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

@@ -10,7 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { BaseKibanaFeatureConfig } from '../../types';
-import { APP_ID, CASES_FEATURE_ID_V2, CASES_FEATURE_ID } from '../../constants';
+import {
+  APP_ID,
+  CASES_FEATURE_ID_V2,
+  CASES_FEATURE_ID,
+  CASES_FEATURE_ID_V3,
+} from '../../constants';
 import type { CasesFeatureParams } from '../types';
 
 export const getCasesBaseKibanaFeatureV2 = ({
@@ -19,6 +24,19 @@ export const getCasesBaseKibanaFeatureV2 = ({
   savedObjects,
 }: CasesFeatureParams): BaseKibanaFeatureConfig => {
   return {
+    deprecated: {
+      notice: i18n.translate(
+        'securitySolutionPackages.features.featureRegistry.casesFeature.deprecationMessage',
+        {
+          defaultMessage:
+            'The {currentId} permissions are deprecated, please see {casesFeatureIdV2}.',
+          values: {
+            currentId: CASES_FEATURE_ID_V2,
+            casesFeatureIdV2: CASES_FEATURE_ID_V3,
+          },
+        }
+      ),
+    },
     id: CASES_FEATURE_ID_V2,
     name: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle',
@@ -48,6 +66,15 @@ export const getCasesBaseKibanaFeatureV2 = ({
           read: [...savedObjects.files],
         },
         ui: uiCapabilities.all,
+        replacedBy: {
+          default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['all'] }],
+          minimal: [
+            {
+              feature: CASES_FEATURE_ID_V3,
+              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'case_assign'],
+            },
+          ],
+        },
       },
       read: {
         api: apiTags.read,
@@ -61,6 +88,10 @@ export const getCasesBaseKibanaFeatureV2 = ({
           read: [...savedObjects.files],
         },
         ui: uiCapabilities.read,
+        replacedBy: {
+          default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['read'] }],
+          minimal: [{ feature: CASES_FEATURE_ID_V3, privileges: ['minimal_read'] }],
+        },
       },
     },
   };
