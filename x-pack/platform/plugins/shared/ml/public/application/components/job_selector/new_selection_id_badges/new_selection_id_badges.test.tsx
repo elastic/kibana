@@ -23,6 +23,7 @@ const props: NewSelectionIdBadgesProps = {
         toPx: 0,
         fromMoment: null,
         toMoment: null,
+        widthPx: 0,
       },
     },
     {
@@ -35,6 +36,7 @@ const props: NewSelectionIdBadgesProps = {
         toPx: 0,
         fromMoment: null,
         toMoment: null,
+        widthPx: 0,
       },
     },
   ],
