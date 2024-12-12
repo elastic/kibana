@@ -18,6 +18,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable } from 'stream';
+import { createAxiosResponseMock } from '../lib/mocks';
 import { SENTINELONE_CONNECTOR_ID } from '../../../common/sentinelone/constants';
 import { SentinelOneConnector } from './sentinelone';
 import {
@@ -153,17 +154,6 @@ const createGetAgentsApiResponseMock = (): SentinelOneGetAgentsResponse => {
     },
     errors: null,
     data: [createAgentDetailsMock()],
-  };
-};
-
-const createAxiosResponseMock = <R>(data: R, status = 200, statusText = 'ok'): AxiosResponse<R> => {
-  return {
-    data,
-    status,
-    statusText,
-    headers: {},
-    // @ts-expect-error
-    config: {},
   };
 };
 
