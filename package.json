@@ -705,7 +705,7 @@
     "@kbn/observability-logs-explorer-plugin": "link:x-pack/plugins/observability_solution/observability_logs_explorer",
     "@kbn/observability-logs-overview": "link:x-pack/packages/observability/logs_overview",
     "@kbn/observability-onboarding-plugin": "link:x-pack/plugins/observability_solution/observability_onboarding",
-    "@kbn/observability-plugin": "link:x-pack/plugins/observability_solution/observability",
+    "@kbn/observability-plugin": "link:x-pack/solutions/observability/plugins/observability",
     "@kbn/observability-shared-plugin": "link:x-pack/plugins/observability_solution/observability_shared",
     "@kbn/observability-synthetics-test-data": "link:x-pack/packages/observability/synthetics_test_data",
     "@kbn/observability-utils-browser": "link:x-pack/packages/observability/observability_utils/observability_utils_browser",

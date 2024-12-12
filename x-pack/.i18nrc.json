@@ -100,7 +100,7 @@
     "xpack.monitoring": [
       "plugins/monitoring"
     ],
-    "xpack.observability": "plugins/observability_solution/observability",
+    "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_solution/observability_ai_assistant",
       "solutions/observability/plugins/observability_ai_assistant_app"
