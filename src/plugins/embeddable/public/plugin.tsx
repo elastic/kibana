@@ -27,7 +27,6 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   EmbeddableFactoryRegistry,
-  EmbeddableFactoryProvider,
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
@@ -108,10 +107,6 @@ export interface EmbeddableSetup {
    * @deprecated
    */
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
-  /**
-   * @deprecated
-   */
-  setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
 export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
@@ -137,7 +132,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
-  private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private isRegistryReady = false;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
@@ -154,25 +148,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
-      setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
-        if (this.customEmbeddableFactoryProvider) {
-          throw new Error(
-            'Custom embeddable factory provider is already set, and can only be set once'
-          );
-        }
-        this.customEmbeddableFactoryProvider = provider;
-      },
     };
   }
 
   public start(core: CoreStart, deps: EmbeddableStartDependencies): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
-      this.embeddableFactories.set(
-        def.type,
-        this.customEmbeddableFactoryProvider
-          ? this.customEmbeddableFactoryProvider(def)
-          : defaultEmbeddableFactoryProvider(def)
-      );
+      this.embeddableFactories.set(def.type, defaultEmbeddableFactoryProvider(def));
     });
 
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
@@ -311,12 +292,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     if (!this.embeddableFactories.get(type)) {
       const def = this.embeddableFactoryDefinitions.get(type);
       if (!def) return;
-      this.embeddableFactories.set(
-        type,
-        this.customEmbeddableFactoryProvider
-          ? this.customEmbeddableFactoryProvider(def)
-          : defaultEmbeddableFactoryProvider(def)
-      );
+      this.embeddableFactories.set(type, defaultEmbeddableFactoryProvider(def));
     }
   };
 }
