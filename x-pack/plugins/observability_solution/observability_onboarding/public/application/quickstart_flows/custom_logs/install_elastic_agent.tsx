@@ -220,7 +220,7 @@ export function InstallElasticAgent() {
       panelFooter={[
         <EuiButton
           data-test-subj="obltOnboardingExploreLogs"
-          color="success"
+          color="accentSecondary"
           fill
           iconType="magnifyWithPlus"
           onClick={onContinue}

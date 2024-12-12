@@ -83,7 +83,7 @@ export function ApiKeyBanner({
                 data-test-subj="observabilityOnboardingApiKeySuccessCalloutButton"
                 iconType="copyClipboard"
                 onClick={copy}
-                color="success"
+                color="accentSecondary"
                 css={{
                   '> svg.euiIcon': {
                     borderRadius: '0 !important',
