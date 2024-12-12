@@ -43,6 +43,7 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { DiscoverAppLocator } from '../common';
 import { DiscoverCustomizationContext } from './customizations';
 import { type DiscoverContainerProps } from './components/discover_container';
@@ -174,4 +175,5 @@ export interface DiscoverStartPlugins {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
+  console?: ConsolePluginStart;
 }

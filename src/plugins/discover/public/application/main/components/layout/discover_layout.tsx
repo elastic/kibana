@@ -76,6 +76,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataVisualizer: dataVisualizerService,
     ebtManager,
     fieldsMetadata,
+    console,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
@@ -501,6 +502,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           />
         </div>
       </EuiPageBody>
+      {console?.EmbeddableConsole ? <console.EmbeddableConsole /> : null}
     </EuiPage>
   );
 }
