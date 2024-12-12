@@ -17,6 +17,8 @@ export const CrowdstrikeSecretsSchema = schema.object({
   clientSecret: schema.string(),
 });
 
+export const CrowdstrikeApiDoNotValidateResponsesSchema = schema.any();
+
 export const RelaxedCrowdstrikeBaseApiResponseSchema = schema.maybe(
   schema.object({}, { unknowns: 'allow' })
 );
@@ -307,3 +309,46 @@ export const CrowdstrikeInitRTRResponseSchema = schema.object(
 export const CrowdstrikeInitRTRParamsSchema = schema.object({
   endpoint_ids: schema.arrayOf(schema.string()),
 });
+
+export const CrowdstrikeExecuteRTRResponseSchema = schema.object(
+  {
+    combined: schema.object(
+      {
+        resources: schema.recordOf(
+          schema.string(),
+          schema.object(
+            {
+              session_id: schema.maybe(schema.string()),
+              task_id: schema.maybe(schema.string()),
+              complete: schema.maybe(schema.boolean()),
+              stdout: schema.maybe(schema.string()),
+              stderr: schema.maybe(schema.string()),
+              base_command: schema.maybe(schema.string()),
+              aid: schema.maybe(schema.string()),
+              errors: schema.maybe(schema.arrayOf(schema.any())),
+              query_time: schema.maybe(schema.number()),
+              offline_queued: schema.maybe(schema.boolean()),
+            },
+            { unknowns: 'allow' }
+          )
+        ),
+      },
+      { unknowns: 'allow' }
+    ),
+    meta: schema.object(
+      {
+        query_time: schema.maybe(schema.number()),
+        powered_by: schema.maybe(schema.string()),
+        trace_id: schema.maybe(schema.string()),
+      },
+      { unknowns: 'allow' }
+    ),
+    errors: schema.nullable(schema.arrayOf(schema.any())),
+  },
+  { unknowns: 'allow' }
+);
+
+export type CrowdStrikeExecuteRTRResponse = typeof CrowdstrikeExecuteRTRResponseSchema;
+
+// TODO: will be part of a next PR
+export const CrowdstrikeGetScriptsParamsSchema = schema.any({});
