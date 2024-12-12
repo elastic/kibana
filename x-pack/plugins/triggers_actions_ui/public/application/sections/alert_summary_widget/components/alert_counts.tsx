@@ -41,7 +41,7 @@ export const AlertCounts = ({ activeAlertCount, recoveredAlertCount, handleClick
       <AlertItem
         label={ACTIVE_NOW_LABEL}
         count={activeAlertCount}
-        color={activeAlertCount > 0 ? euiTheme.colors.dangerText : euiTheme.colors.successText}
+        color={activeAlertCount > 0 ? euiTheme.colors.dangerText : euiTheme.colors.textSuccess}
         alertType={ALERT_STATUS_ACTIVE}
         handleClick={handleClick}
         showWarningIcon={true}
