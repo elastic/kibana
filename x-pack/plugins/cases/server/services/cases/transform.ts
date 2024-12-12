@@ -190,7 +190,6 @@ export function transformSavedObjectToExternalModel(
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
 
-  //
   const customFields = !caseSavedObjectAttributes.customFields
     ? []
     : (transformCustomFieldsToExternalModel(

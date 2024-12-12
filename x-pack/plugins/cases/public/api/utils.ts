@@ -7,6 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isArray, camelCase, isObject, omit, get } from 'lodash';
+import { validate as validateUUID } from 'uuid';
 import type {
   AttachmentRequest,
   CaseResolveResponse,
@@ -26,8 +27,6 @@ import type {
   ResolvedCase,
 } from '../containers/types';
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
     if (isArray(value)) {
@@ -44,7 +43,7 @@ export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
   Object.entries(obj as never).reduce((acc, [key, value]) => {
     let convertedKey = key;
     // Do NOT convert UUID keys to camelCase
-    if (!UUID_REGEX.test(key)) {
+    if (!validateUUID(key)) {
       convertedKey = camelCase(key);
     }
 
