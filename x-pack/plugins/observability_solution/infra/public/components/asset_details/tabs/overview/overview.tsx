@@ -26,9 +26,8 @@ import { MetricsContent } from './metrics/metrics';
 import { AddMetricsCallout } from '../../add_metrics_callout';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { useEntitySummary } from '../../hooks/use_entity_summary';
-import { isMetricsSignal } from '../../utils/get_data_stream_types';
-import { INTEGRATIONS } from '../../constants';
-import { useIntegrationCheck } from '../../hooks/use_integration_check';
+import { isMetricsSignal, isLogsSignal } from '../../utils/get_data_stream_types';
+import { LogsContent } from './logs';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
@@ -38,7 +37,7 @@ export const Overview = () => {
     loading: metadataLoading,
     error: fetchMetadataError,
   } = useMetadataStateContext();
-  const { metrics } = useDataViewsContext();
+  const { metrics, logs } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
   const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
     entityType: asset.type,
@@ -50,10 +49,6 @@ export const Overview = () => {
     `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
     false
   );
-  const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
-  const isKubernetesContainer = useIntegrationCheck({
-    dependsOn: INTEGRATIONS.kubernetesContainer,
-  });
 
   const metadataSummarySection = isFullPageView ? (
     <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
@@ -65,6 +60,10 @@ export const Overview = () => {
     />
   );
 
+  const isMetrics = isMetricsSignal(dataStreams);
+  const isLogs = isLogsSignal(dataStreams);
+  const isLogsOnly = !isMetrics && isLogs;
+
   const shouldShowCallout = () => {
     if (
       dataStreamsStatus !== 'success' ||
@@ -74,20 +73,14 @@ export const Overview = () => {
       return false;
     }
 
-    const { type } = asset;
-    const baseCondition = !isMetricsSignal(dataStreams);
-
-    const isRelevantContainer =
-      type === 'container' && (isDockerContainer || isKubernetesContainer);
-
-    return baseCondition && (type === 'host' || isRelevantContainer);
+    return !isMetrics;
   };
 
   const showAddMetricsCallout = shouldShowCallout();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {showAddMetricsCallout ? (
+      {showAddMetricsCallout && (
         <EuiFlexItem grow={false}>
           <AddMetricsCallout
             id={addMetricsCalloutId}
@@ -96,7 +89,18 @@ export const Overview = () => {
             }}
           />
         </EuiFlexItem>
-      ) : (
+      )}
+      {isLogsOnly ? (
+        <EuiFlexItem grow={false}>
+          <LogsContent
+            assetId={asset.id}
+            assetType={asset.type}
+            dateRange={dateRange}
+            dataView={logs.dataView}
+          />
+        </EuiFlexItem>
+      ) : null}
+      {!showAddMetricsCallout && isMetrics ? (
         <EuiFlexItem grow={false}>
           <KPIGrid
             assetId={asset.id}
@@ -106,7 +110,7 @@ export const Overview = () => {
           />
           {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
         </EuiFlexItem>
-      )}
+      ) : null}
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
@@ -123,14 +127,16 @@ export const Overview = () => {
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={false}>
-        <MetricsContent
-          assetId={asset.id}
-          assetType={asset.type}
-          dateRange={dateRange}
-          dataView={metrics.dataView}
-        />
-      </EuiFlexItem>
+      {isMetrics ? (
+        <EuiFlexItem grow={false}>
+          <MetricsContent
+            assetId={asset.id}
+            assetType={asset.type}
+            dateRange={dateRange}
+            dataView={metrics.dataView}
+          />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };
