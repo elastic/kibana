@@ -8,12 +8,22 @@
 import type { MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiResizeObserver,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
 import { InputDisplay } from './components/input_display';
-import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
+import type { ConsoleDataState, ExecuteCommandPayload } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
@@ -57,6 +67,7 @@ const CommandInputContainer = styled.div`
 
   &.hasFocus {
     // Cursor is defined in '<InputDisplay>' component
+
     .cursor {
       background-color: ${({ theme: { eui } }) => eui.euiTextColor};
       animation: cursor-blink-animation 1s steps(5, start) infinite;
@@ -83,14 +94,23 @@ export interface CommandInputProps extends CommonProps {
 }
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
-  useInputHints();
+  const isResponseConsoleExecuteEnabled = useIsExperimentalFeatureEnabled(
+    'responseConsoleExecuteEnabled'
+  );
+  const [isExecuteAsCliEnabled, setIsExecuteAsCliEnabled] = useState(false);
+  const onToggleExecuteShortcutButton = useCallback(() => {
+    setIsExecuteAsCliEnabled((prev) => !prev);
+  }, []);
+
+  useInputHints(isExecuteAsCliEnabled);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const { rightOfCursorText, leftOfCursorText, fullTextEntered, enteredCommand, parsedInput } =
     useWithInputTextEntered();
+
   const visibleState = useWithInputVisibleState();
   const isPopoverOpen = !!useWithInputShowPopover();
-
+  const commandList = useWithCommandList();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const [commandToExecute, setCommandToExecute] = useState<ExecuteCommandPayload | undefined>(
     undefined
@@ -122,12 +142,32 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   }, []);
 
   const handleSubmitButton = useCallback<MouseEventHandler>(() => {
-    setCommandToExecute({
-      input: userInput.getFullText(true),
-      enteredCommand,
-      parsedInput,
-    });
-  }, [enteredCommand, parsedInput, userInput]);
+    if (!enteredCommand && isExecuteAsCliEnabled) {
+      setCommandToExecute({
+        input: `execute --command "${userInput.getFullText(true)}"`,
+        enteredCommand: {
+          argState: {},
+          argsWithValueSelectors: undefined,
+          commandDefinition: commandList.filter((cmd) => cmd.name === 'execute')[0],
+        },
+        parsedInput: {
+          name: 'execute',
+          args: {
+            command: [userInput.getFullText(true)],
+          },
+          hasArgs: true,
+          hasArg: (argName: string) => argName === 'command',
+          input: `execute --command "${userInput.getFullText(true)}"`,
+        },
+      });
+    } else {
+      setCommandToExecute({
+        input: userInput.getFullText(true),
+        enteredCommand,
+        parsedInput,
+      });
+    }
+  }, [commandList, enteredCommand, isExecuteAsCliEnabled, parsedInput, userInput]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {
@@ -190,13 +230,33 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               inputText.deleteChar(selection);
               break;
 
-            // ENTER  = Execute command and blank out the input area
+            // ENTER = Execute command and blank out the input area
             case 13:
-              setCommandToExecute({
-                input: inputText.getFullText(true),
-                enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
-                parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
-              });
+              if (!enteredCommand && isExecuteAsCliEnabled) {
+                setCommandToExecute({
+                  input: `execute --command "${inputText.getFullText(true)}"`,
+                  enteredCommand: {
+                    argState: {},
+                    argsWithValueSelectors: undefined,
+                    commandDefinition: commandList.filter((cmd) => cmd.name === 'execute')[0],
+                  },
+                  parsedInput: {
+                    name: 'execute',
+                    args: {
+                      command: [inputText.getFullText(true)],
+                    },
+                    hasArgs: true,
+                    hasArg: (argName: string) => argName === 'command',
+                    input: `execute --command "${inputText.getFullText(true)}"`,
+                  },
+                });
+              } else {
+                setCommandToExecute({
+                  input: inputText.getFullText(true),
+                  enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
+                  parsedInput: prevParsedInput,
+                });
+              }
               inputText.clear();
               break;
 
@@ -229,7 +289,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         },
       });
     },
-    [dispatch]
+    [commandList, dispatch, enteredCommand, isExecuteAsCliEnabled]
   );
 
   // Execute the command if one was ENTER'd.
@@ -261,7 +321,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               ref={resizeRef}
               data-test-subj={getTestId('cmdInput-container')}
             >
-              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
                 {prompt && (
                   <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
                     <span className="eui-displayInlineBlock prompt">{prompt}</span>
@@ -290,6 +350,27 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                     onClick={handleSubmitButton}
                   />
                 </EuiFlexItem>
+                <EuiSpacer size="s" />
+                {isResponseConsoleExecuteEnabled && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate('console.input.executeShortcutButtonTooltip', {
+                        defaultMessage:
+                          'Enable to quickly send execute command without a comment. Inputs other than built-in commands will be interpreted as the --command parameter to the execute command. Type execute --help for more information.',
+                      })}
+                    >
+                      <EuiButtonIcon
+                        data-test-subj={getTestId('inputExecuteShortcutButton')}
+                        aria-label="execute-command-cli"
+                        iconType="sessionViewer"
+                        display="base"
+                        color={isExecuteAsCliEnabled ? 'primary' : 'text'}
+                        onClick={onToggleExecuteShortcutButton}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </CommandInputContainer>
           );

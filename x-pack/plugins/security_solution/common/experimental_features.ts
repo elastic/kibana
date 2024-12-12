@@ -174,12 +174,18 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables executing given text input in endpoint response console
+   */
+  responseConsoleExecuteEnabled: false,
+
+  /*
    * Enables Response actions telemetry collection
    * Should be enabled in 8.17.0
    */
   responseActionsTelemetryEnabled: false,
 
   /**
+
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: true,
