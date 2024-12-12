@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/index_lifecycle_management'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/private/index_lifecycle_management'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/index_lifecycle_management',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/index_lifecycle_management',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/index_lifecycle_management/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/private/index_lifecycle_management/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
