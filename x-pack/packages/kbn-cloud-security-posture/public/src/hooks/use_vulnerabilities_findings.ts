@@ -14,7 +14,10 @@ import {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import type {
+  CspVulnerabilityFinding,
+  Vulnerability,
+} from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
 import { showErrorToast } from '../..';
@@ -24,6 +27,17 @@ type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
   SearchResponse<CspVulnerabilityFinding, FindingsAggs>
 >;
+
+interface VulnerabilitiesPackage extends Vulnerability {
+  package: {
+    name: string;
+    version: string;
+  };
+}
+
+type VulnerabilitiesFindingDetailFields = Pick<Vulnerability, 'id' | 'severity' | 'score'> &
+  Pick<VulnerabilitiesPackage, 'package'> &
+  Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>;
 
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
@@ -56,7 +70,11 @@ export const useVulnerabilitiesFindings = (options: UseCspOptions) => {
         rows: hits.hits.map((finding) => ({
           vulnerability: finding._source?.vulnerability,
           resource: finding._source?.resource,
-        })) as Array<Pick<CspVulnerabilityFinding, 'vulnerability' | 'resource'>>,
+          id: finding._source?.vulnerability?.id,
+          score: finding._source?.vulnerability?.score,
+          severity: finding._source?.vulnerability?.severity,
+          package: finding._source?.package,
+        })) as VulnerabilitiesFindingDetailFields[],
       };
     },
     {
