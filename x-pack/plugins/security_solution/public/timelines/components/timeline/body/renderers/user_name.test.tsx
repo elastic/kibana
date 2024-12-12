@@ -16,7 +16,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 
-const mockOpenRightPanel = jest.fn();
+const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -28,7 +28,7 @@ describe('UserName', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       ...createExpandableFlyoutApiMock(),
-      openRightPanel: mockOpenRightPanel,
+      openFlyout: mockOpenFlyout,
     });
   });
   afterEach(() => {
@@ -78,7 +78,7 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -100,7 +100,7 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 
@@ -121,13 +121,15 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: 'user-panel',
-        params: {
-          userName: props.value,
-          contextID: props.contextId,
-          scopeId: TableId.alertsOnAlertsPage,
-          isDraggable: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: 'user-panel',
+          params: {
+            userName: props.value,
+            contextID: props.contextId,
+            scopeId: TableId.alertsOnAlertsPage,
+            isDraggable: false,
+          },
         },
       });
     });
@@ -150,13 +152,15 @@ describe('UserName', () => {
 
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
-      expect(mockOpenRightPanel).toHaveBeenCalledWith({
-        id: 'user-panel',
-        params: {
-          userName: props.value,
-          contextID: props.contextId,
-          scopeId: 'timeline-1',
-          isDraggable: false,
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: 'user-panel',
+          params: {
+            userName: props.value,
+            contextID: props.contextId,
+            scopeId: 'timeline-1',
+            isDraggable: false,
+          },
         },
       });
     });

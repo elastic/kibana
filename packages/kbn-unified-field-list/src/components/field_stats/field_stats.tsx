@@ -19,7 +19,14 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
-import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
@@ -120,7 +127,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   toDate,
   dataViewOrDataViewId,
   field,
-  color = getDefaultColor(),
+  color: originalColor,
   'data-test-subj': dataTestSubject = 'fieldStats',
   overrideMissingContent,
   overrideFooter,
@@ -128,6 +135,9 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideFieldTopValueBar,
   onStateChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const color = originalColor ?? getDefaultColor(euiTheme.themeName);
+
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<FieldStatsState>({
     isLoading: false,

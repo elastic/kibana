@@ -16,6 +16,7 @@ import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 import type { AlertsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../index/check_template_version');
 jest.mock('@kbn/securitysolution-es-utils', () => {
@@ -31,6 +32,7 @@ jest.mock('../../migrations/get_signal_versions_by_index');
 
 describe('creating signals migrations route', () => {
   let server: ReturnType<typeof serverMock.create>;
+  const docLinks = docLinksServiceMock.createSetupContract();
 
   beforeEach(() => {
     server = serverMock.create();
@@ -42,7 +44,7 @@ describe('creating signals migrations route', () => {
     (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
     (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
 
-    createSignalsMigrationRoute(server.router);
+    createSignalsMigrationRoute(server.router, docLinks);
   });
 
   it('passes options to the createMigration', async () => {

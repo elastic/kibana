@@ -25,8 +25,10 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     .get({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(

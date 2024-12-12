@@ -137,7 +137,7 @@ const clusterColumns = [
   },
 ];
 
-function getLogsUiLink(
+function getDiscoverLink(
   clusterUuid?: string,
   nodeId?: string,
   indexUuid?: string,
@@ -208,7 +208,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
   }
 
   renderCallout() {
-    const { capabilities: uiCapabilities, infra, kibanaServices } = Legacy.shims;
+    const { capabilities: uiCapabilities, kibanaServices } = Legacy.shims;
     const show = uiCapabilities.discover && uiCapabilities.discover.show;
 
     const {
@@ -223,8 +223,9 @@ export class LogsContent extends PureComponent<LogsContentProps> {
     if (!enabled || !show) {
       return null;
     }
+    const discoverLink = getDiscoverLink(clusterUuid, nodeId, indexUuid, sharePlugin, logsIndices);
 
-    return infra ? (
+    return discoverLink ? (
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
@@ -238,9 +239,7 @@ export class LogsContent extends PureComponent<LogsContentProps> {
             defaultMessage="Visit {link} to dive deeper."
             values={{
               link: (
-                <EuiLink
-                  href={getLogsUiLink(clusterUuid, nodeId, indexUuid, sharePlugin, logsIndices)}
-                >
+                <EuiLink href={discoverLink}>
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
                     defaultMessage: 'Discover',
                   })}

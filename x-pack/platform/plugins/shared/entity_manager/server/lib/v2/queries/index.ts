@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { asKeyword } from './utils';
+import { asKeyword, defaultSort } from './utils';
 import { EntitySourceDefinition, SortBy } from '../types';
 
 const sourceCommand = ({ source }: { source: EntitySourceDefinition }) => {
@@ -46,7 +46,7 @@ const dslFilter = ({
 const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const aggs = source.metadata_fields
     .filter((field) => !source.identity_fields.some((idField) => idField === field))
-    .map((field) => `${field} = VALUES(${asKeyword(field)})`);
+    .map((field) => `${field} = TOP(${asKeyword(field)}, 10, "asc")`);
 
   if (source.timestamp_field) {
     aggs.push(`entity.last_seen_timestamp = MAX(${source.timestamp_field})`);
@@ -84,15 +84,11 @@ const evalCommand = ({ source }: { source: EntitySourceDefinition }) => {
 };
 
 const sortCommand = ({ source, sort }: { source: EntitySourceDefinition; sort?: SortBy }) => {
-  if (sort) {
-    return `SORT ${sort.field} ${sort.direction}`;
+  if (!sort) {
+    sort = defaultSort([source]);
   }
 
-  if (source.timestamp_field) {
-    return `SORT entity.last_seen_timestamp DESC`;
-  }
-
-  return `SORT entity.id ASC`;
+  return `SORT ${sort.field} ${sort.direction}`;
 };
 
 export function getEntityInstancesQuery({
