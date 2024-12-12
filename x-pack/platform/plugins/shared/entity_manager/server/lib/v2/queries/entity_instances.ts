@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { asKeyword } from './utils';
 import { EntitySourceDefinition, SortBy } from '../types';
@@ -43,10 +44,22 @@ const dslFilter = ({
   return toElasticsearchQuery(fromKueryExpression(kuery));
 };
 
+const groupBy = ({ source }: { source: EntitySourceDefinition }) => {
+  const fields = [
+    ...source.identity_fields,
+    ...source.metadata_fields,
+    ...(source.display_name ? [source.display_name] : []),
+  ];
+
+  return `STATS${
+    source.timestamp_field ? ` ${source.timestamp_field} = MAX(${source.timestamp_field})` : ''
+  } BY ${fields.map(asKeyword).join(', ')}`;
+};
+
 const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   const aggs = source.metadata_fields
     .filter((field) => !source.identity_fields.some((idField) => idField === field))
-    .map((field) => `${field} = VALUES(${asKeyword(field)})`);
+    .map((field) => `${field} = TOP(${field}, 10, "ASC")`);
 
   if (source.timestamp_field) {
     aggs.push(`entity.last_seen_timestamp = MAX(${source.timestamp_field})`);
@@ -55,14 +68,19 @@ const statsCommand = ({ source }: { source: EntitySourceDefinition }) => {
   if (source.display_name) {
     // ideally we want the latest value but there's no command yet
     // so we use MAX for now
-    aggs.push(`${source.display_name} = MAX(${asKeyword(source.display_name)})`);
+    aggs.push(`${source.display_name} = MAX(${source.display_name})`);
   }
 
-  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.map(asKeyword).join(', ')}`;
+  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(', ')}`;
 };
 
 const renameCommand = ({ source }: { source: EntitySourceDefinition }) => {
-  const operations = source.identity_fields.map((field) => `\`${asKeyword(field)}\` AS ${field}`);
+  const operations = uniq([
+    ...source.identity_fields,
+    ...source.metadata_fields,
+    ...(source.display_name ? [source.display_name] : []),
+  ]).map((field) => `\`${asKeyword(field)}\` AS ${field}`);
+
   return `RENAME ${operations.join(', ')}`;
 };
 
@@ -110,8 +128,9 @@ export function getEntityInstancesQuery({
 }) {
   const commands = [
     fromCommand({ source }),
-    statsCommand({ source }),
+    groupBy({ source }),
     renameCommand({ source }),
+    statsCommand({ source }),
     evalCommand({ source }),
     sortCommand({ source, sort }),
     `LIMIT ${limit}`,
