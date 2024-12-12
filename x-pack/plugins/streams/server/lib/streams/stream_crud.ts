@@ -126,28 +126,44 @@ export interface ListStreamResponse {
 export async function listStreams({
   scopedClusterClient,
 }: ListStreamsParams): Promise<ListStreamResponse> {
-  const response = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
+  const [managedStreams, unmanagedStreams] = await Promise.all([
+    listManagedStreams({ scopedClusterClient }),
+    listDataStreamsAsStreams({ scopedClusterClient }),
+  ]);
+
+  return {
+    definitions: [...managedStreams, ...unmanagedStreams],
+  };
+}
+
+async function listManagedStreams({
+  scopedClusterClient,
+}: ListStreamsParams): Promise<StreamDefinition[]> {
+  const streamsSearchResponse = await scopedClusterClient.asInternalUser.search<StreamDefinition>({
     index: STREAMS_INDEX,
     size: 10000,
     sort: [{ id: 'asc' }],
   });
 
-  const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
-  let definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
-  const hasAccess = await Promise.all(
-    definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
-  );
-  definitions = definitions.filter((_, index) => hasAccess[index]);
+  const streams = streamsSearchResponse.hits.hits.map((hit) => ({
+    ...hit._source!,
+    managed: true,
+  }));
 
-  return {
-    definitions: [...definitions, ...dataStreams],
-  };
+  const privileges = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+    index: [{ names: streams.map((stream) => stream.id), privileges: ['read'] }],
+  });
+
+  return streams.filter((stream) => {
+    return privileges.index[stream.id]?.read === true;
+  });
 }
 
 export async function listDataStreamsAsStreams({
   scopedClusterClient,
 }: ListStreamsParams): Promise<StreamDefinition[]> {
-  const response = await scopedClusterClient.asInternalUser.indices.getDataStream();
+  const response = await scopedClusterClient.asCurrentUser.indices.getDataStream();
+
   return response.data_streams
     .filter((dataStream) => dataStream.template.endsWith('@stream') === false)
     .map((dataStream) => ({
@@ -180,7 +196,7 @@ export async function readStream({
     });
     const definition = response._source as StreamDefinition;
     if (!skipAccessCheck) {
-      const hasAccess = await checkReadAccess({ id, scopedClusterClient });
+      const hasAccess = await checkAccess({ id, scopedClusterClient });
       if (!hasAccess) {
         throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
       }
@@ -214,8 +230,8 @@ export async function readDataStreamAsStream({
       processing: [],
     };
     if (!skipAccessCheck) {
-      const hasAccess = await checkReadAccess({ id, scopedClusterClient });
-      if (!hasAccess) {
+      const { read } = await checkAccess({ id, scopedClusterClient });
+      if (!read) {
         throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
       }
     }
@@ -372,21 +388,40 @@ export async function checkStreamExists({ id, scopedClusterClient }: ReadStreamP
   }
 }
 
-interface CheckReadAccessParams extends BaseParams {
+interface CheckAccessParams extends BaseParams {
   id: string;
 }
 
-export async function checkReadAccess({
+export async function checkAccess({
   id,
   scopedClusterClient,
-}: CheckReadAccessParams): Promise<boolean> {
-  try {
-    return await scopedClusterClient.asCurrentUser.indices.exists({ index: id });
-  } catch (e) {
-    return false;
-  }
+}: CheckAccessParams): Promise<{ read: boolean; write: boolean }> {
+  return checkAccessBulk({
+    ids: [id],
+    scopedClusterClient,
+  }).then((privileges) => privileges[id]);
 }
 
+interface CheckAccessBulkParams extends BaseParams {
+  ids: string[];
+}
+
+export async function checkAccessBulk({
+  ids,
+  scopedClusterClient,
+}: CheckAccessBulkParams): Promise<Record<string, { read: boolean; write: boolean }>> {
+  const hasPrivilegesResponse = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
+    index: [{ names: ids, privileges: ['read', 'write'] }],
+  });
+
+  return Object.fromEntries(
+    ids.map((id) => {
+      const hasReadAccess = hasPrivilegesResponse.index[id].read === true;
+      const hasWriteAccess = hasPrivilegesResponse.index[id].write === true;
+      return [id, { read: hasReadAccess, write: hasWriteAccess }];
+    })
+  );
+}
 interface SyncStreamParams {
   scopedClusterClient: IScopedClusterClient;
   assetClient: AssetClient;

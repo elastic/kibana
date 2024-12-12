@@ -120,17 +120,17 @@ export class AssetClient {
 
     const existingAssetLinks = assetsResponse.hits.hits.map((hit) => hit._source);
 
-    const missingAssetIds = assetIds.filter(
+    const newAssetIds = assetIds.filter(
       (assetId) =>
         !existingAssetLinks.some((existingAssetLink) => existingAssetLink['asset.id'] === assetId)
     );
 
-    const tooMuchAssetIds = existingAssetLinks
+    const assetIdsToRemove = existingAssetLinks
       .map((existingAssetLink) => existingAssetLink['asset.id'])
       .filter((assetId) => !assetIds.includes(assetId));
 
     await Promise.all([
-      ...missingAssetIds.map((assetId) =>
+      ...newAssetIds.map((assetId) =>
         this.linkAsset({
           entityId,
           entityType,
@@ -138,7 +138,7 @@ export class AssetClient {
           assetType,
         })
       ),
-      ...tooMuchAssetIds.map((assetId) =>
+      ...assetIdsToRemove.map((assetId) =>
         this.unlinkAsset({
           entityId,
           entityType,
