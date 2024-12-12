@@ -151,26 +151,44 @@ describe('FindSLO', () => {
   });
 
   describe('validation', () => {
-    it("throws an error when 'perPage' > 5000", async () => {
+    beforeEach(() => {
       const slo = createSLO();
       mockSummarySearchClient.search.mockResolvedValueOnce(summarySearchResult(slo));
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+    });
 
+    it("throws an error when 'perPage' > 5000", async () => {
       await expect(findSLO.execute({ perPage: '5000' })).resolves.not.toThrow();
       await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrowError(
         'perPage limit set to 5000'
       );
     });
 
-    it("throws an error when 'size' > 5000", async () => {
-      const slo = createSLO();
-      mockSummarySearchClient.search.mockResolvedValueOnce(summarySearchResult(slo));
-      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+    describe('Cursor Pagination', () => {
+      it("throws an error when 'size' > 5000", async () => {
+        await expect(findSLO.execute({ size: '5000' })).resolves.not.toThrow();
+        await expect(findSLO.execute({ size: '5001' })).rejects.toThrowError(
+          'size limit set to 5000'
+        );
+      });
 
-      await expect(findSLO.execute({ size: '5000' })).resolves.not.toThrow();
-      await expect(findSLO.execute({ size: '5001' })).rejects.toThrowError(
-        'size limit set to 5000'
-      );
+      it("defaults searchAfter to 'undefined' when not a valid stringified JSON array", async () => {
+        await expect(
+          findSLO.execute({ searchAfter: 'not an array', size: '40' })
+        ).resolves.not.toThrow();
+        expect(mockSummarySearchClient.search.mock.calls[0][3]).toStrictEqual({
+          size: 40,
+          searchAfter: undefined,
+        });
+      });
+
+      it("defaults searchAfter to 'undefined' when empty array", async () => {
+        await expect(findSLO.execute({ searchAfter: '[]', size: '40' })).resolves.not.toThrow();
+        expect(mockSummarySearchClient.search.mock.calls[0][3]).toStrictEqual({
+          size: 40,
+          searchAfter: undefined,
+        });
+      });
     });
   });
 });
