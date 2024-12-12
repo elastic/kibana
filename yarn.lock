@@ -6484,7 +6484,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/packages/observability/get_padded_alert_time_range_util":
+"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/get_padded_alert_time_range_util":
   version "0.0.0"
   uid ""
 
