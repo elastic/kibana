@@ -265,17 +265,24 @@ export const useCurrentConversation = ({
     }
     const newSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
+    let conversation: Partial<Conversation> = {};
+    if (currentConversation?.apiConfig) {
+      const { defaultSystemPromptId, ...restApiConfig } = currentConversation?.apiConfig;
+      conversation =
+        restApiConfig.actionTypeId != null
+          ? {
+              apiConfig: {
+                ...restApiConfig,
+                ...(newSystemPrompt?.id != null
+                  ? { defaultSystemPromptId: newSystemPrompt.id }
+                  : {}),
+              },
+            }
+          : {};
+    }
     const newConversation = await createConversation({
       title: NEW_CHAT,
-      ...(currentConversation?.apiConfig != null &&
-      currentConversation?.apiConfig?.actionTypeId != null
-        ? {
-            apiConfig: {
-              ...currentConversation.apiConfig,
-              ...(newSystemPrompt?.id != null ? { defaultSystemPromptId: newSystemPrompt.id } : {}),
-            },
-          }
-        : {}),
+      ...conversation,
     });
 
     if (newConversation) {
