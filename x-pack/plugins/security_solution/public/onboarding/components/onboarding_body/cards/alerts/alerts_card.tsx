@@ -27,6 +27,7 @@ export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
   setExpandedCardId,
   setComplete,
+  isCardAvailable,
 }) => {
   const { spaceId } = useOnboardingContext();
   const [toggleIdSelected, setStoredSelectedAlertsCardItemId] = useStoredSelectedCardItemId(
@@ -42,6 +43,11 @@ export const AlertsCard: OnboardingCardComponent = ({
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
+  );
+
+  const isIntegrationsCardAvailable = useMemo(
+    () => isCardAvailable(OnboardingCardId.integrations),
+    [isCardAvailable]
   );
 
   const expandIntegrationsCard = useCallback(() => {
@@ -79,7 +85,7 @@ export const AlertsCard: OnboardingCardComponent = ({
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />
-          {!isIntegrationsCardComplete && (
+          {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
@@ -105,7 +111,7 @@ export const AlertsCard: OnboardingCardComponent = ({
             onClick={() => setComplete(true)}
             deepLinkId={SecurityPageName.alerts}
             fill
-            isDisabled={!isIntegrationsCardComplete}
+            isDisabled={isIntegrationsCardAvailable && !isIntegrationsCardComplete}
           >
             {i18n.ALERTS_CARD_VIEW_ALERTS_BUTTON}
           </SecuritySolutionLinkButton>

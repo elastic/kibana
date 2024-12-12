@@ -11,10 +11,12 @@ import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { configureApiV1 } from '../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const patchCaseConfigureRoute = createCasesRoute({
   method: 'patch',
   path: CASE_CONFIGURE_DETAILS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',
     summary: 'Update case settings',

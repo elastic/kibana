@@ -20,6 +20,7 @@ const props = {
   isCardComplete: mockIsCardComplete,
   setExpandedCardId: mockSetExpandedCardId,
   isExpanded: true,
+  isCardAvailable: jest.fn(),
 };
 
 describe('DashboardsCard', () => {
@@ -39,8 +40,9 @@ describe('DashboardsCard', () => {
     expect(getByTestId('dashboardsDescription')).toBeInTheDocument();
   });
 
-  it('renders card callout if integrations card is not complete', () => {
-    mockIsCardComplete.mockReturnValueOnce(false);
+  it('card callout should be rendered if integrations card is available but not complete', () => {
+    props.isCardAvailable.mockReturnValueOnce(true);
+    props.isCardComplete.mockReturnValueOnce(false);
 
     const { getByText } = render(
       <TestProviders>
@@ -53,8 +55,21 @@ describe('DashboardsCard', () => {
     expect(getByText('To view dashboards add integrations first.')).toBeInTheDocument();
   });
 
-  it('renders a disabled button if integrations card is not complete', () => {
-    mockIsCardComplete.mockReturnValueOnce(false);
+  it('card callout should not be rendered if integrations card is not available', () => {
+    props.isCardAvailable.mockReturnValueOnce(false);
+
+    const { queryByText } = render(
+      <TestProviders>
+        <DashboardsCard {...props} />
+      </TestProviders>
+    );
+
+    expect(queryByText('To view dashboards add integrations first.')).not.toBeInTheDocument();
+  });
+
+  it('card button should be disabled if integrations card is available but not complete', () => {
+    props.isCardAvailable.mockReturnValueOnce(true);
+    props.isCardComplete.mockReturnValueOnce(false);
 
     const { getByTestId } = render(
       <TestProviders>
@@ -67,8 +82,22 @@ describe('DashboardsCard', () => {
     expect(getByTestId('dashboardsCardButton').querySelector('button')).toBeDisabled();
   });
 
-  it('renders an enabled button if integrations card is complete', () => {
-    mockIsCardComplete.mockReturnValueOnce(true);
+  it('card button should be enabled if integrations card is complete', () => {
+    props.isCardAvailable.mockReturnValueOnce(true);
+    props.isCardComplete.mockReturnValueOnce(true);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DashboardsCard {...props} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('dashboardsCardButton').querySelector('button')).not.toBeDisabled();
+  });
+
+  it('should expand integrations card when callout link is clicked', () => {
+    props.isCardAvailable.mockReturnValueOnce(true);
+    props.isCardComplete.mockReturnValueOnce(false); // To show the callout
 
     const { getByTestId } = render(
       <TestProviders>

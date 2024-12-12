@@ -24,7 +24,11 @@ import { DEFAULT_RULES_CARD_ITEM_SELECTED } from './constants';
 import type { CardSelectorAssetListItem } from '../types';
 import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
 
-export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
+export const RulesCard: OnboardingCardComponent = ({
+  isCardComplete,
+  setExpandedCardId,
+  isCardAvailable,
+}) => {
   const { spaceId } = useOnboardingContext();
 
   const [toggleIdSelected, setStoredSelectedRulesCardItemId] = useStoredSelectedCardItemId(
@@ -35,9 +39,15 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
   const [selectedCardItem, setSelectedCardItem] = useState<CardSelectorAssetListItem>(
     RULES_CARD_ITEMS_BY_ID[toggleIdSelected]
   );
+
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
+  );
+
+  const isIntegrationsCardAvailable = useMemo(
+    () => isCardAvailable(OnboardingCardId.integrations),
+    [isCardAvailable]
   );
 
   const expandIntegrationsCard = useCallback(() => {
@@ -71,8 +81,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />
-
-          {!isIntegrationsCardComplete && (
+          {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
@@ -97,7 +106,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
           <SecuritySolutionLinkButton
             deepLinkId={SecurityPageName.rules}
             fill
-            isDisabled={!isIntegrationsCardComplete}
+            isDisabled={isIntegrationsCardAvailable && !isIntegrationsCardComplete}
           >
             {i18n.RULES_CARD_ADD_RULES_BUTTON}
           </SecuritySolutionLinkButton>

@@ -102,10 +102,33 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -370,10 +393,41 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -695,10 +749,49 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -939,10 +1032,49 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1188,10 +1320,49 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1432,10 +1603,49 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1482,6 +1692,16 @@ Array [
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1626,10 +1846,33 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1736,10 +1979,33 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1851,10 +2117,33 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >
@@ -1961,10 +2250,33 @@ Array [
       }
       theme={
         Object {
-          "getTheme": [MockFunction],
+          "getTheme": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "darkMode": false,
+                  "name": "amsterdam",
+                },
+              },
+            ],
+          },
           "theme$": Observable {
             "_subscribe": [Function],
           },
+        }
+      }
+      userProfile={
+        Object {
+          "bulkGet": [MockFunction],
+          "getCurrent": [MockFunction],
+          "getUserProfile$": [MockFunction],
+          "partialUpdate": [MockFunction],
+          "suggest": [MockFunction],
+          "update": [MockFunction],
         }
       }
     >

@@ -26,6 +26,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
   setComplete,
   setExpandedCardId,
+  isCardAvailable,
 }) => {
   const { spaceId } = useOnboardingContext();
   const [toggleIdSelected, setStoredSelectedDashboardsCardItemId] = useStoredSelectedCardItemId(
@@ -39,6 +40,11 @@ export const DashboardsCard: OnboardingCardComponent = ({
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
+  );
+
+  const isIntegrationsCardAvailable = useMemo(
+    () => isCardAvailable(OnboardingCardId.integrations),
+    [isCardAvailable]
   );
 
   const expandIntegrationsCard = useCallback(() => {
@@ -71,7 +77,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />
-          {!isIntegrationsCardComplete && (
+          {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
@@ -102,7 +108,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
             cardId={OnboardingCardId.dashboards}
             deepLinkId={SecurityPageName.dashboards}
             fill
-            isDisabled={!isIntegrationsCardComplete}
+            isDisabled={isIntegrationsCardAvailable && !isIntegrationsCardComplete}
           >
             {i18n.DASHBOARDS_CARD_GO_TO_DASHBOARDS_BUTTON}
           </CardLinkButton>

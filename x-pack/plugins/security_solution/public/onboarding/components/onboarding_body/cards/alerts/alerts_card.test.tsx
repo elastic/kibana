@@ -17,9 +17,9 @@ const mockIsCardComplete = jest.fn();
 const props = {
   setComplete: mockSetComplete,
   checkComplete: jest.fn(),
-  isCardComplete: mockIsCardComplete,
-  setExpandedCardId: mockSetExpandedCardId,
-  isExpanded: true,
+  isCardComplete: jest.fn(),
+  setExpandedCardId: jest.fn(),
+  isCardAvailable: jest.fn(),
 };
 
 describe('AlertsCard', () => {
@@ -39,8 +39,9 @@ describe('AlertsCard', () => {
     expect(getByTestId('alertsCardDescription')).toBeInTheDocument();
   });
 
-  it('renders card callout if integrations card is not complete', () => {
-    mockIsCardComplete.mockReturnValueOnce(false);
+  it('card callout should be rendered if integrations card is available but not complete', () => {
+    props.isCardAvailable.mockReturnValueOnce(true);
+    props.isCardComplete.mockReturnValueOnce(false);
 
     const { getByText } = render(
       <TestProviders>
@@ -53,8 +54,21 @@ describe('AlertsCard', () => {
     expect(getByText('To view alerts add integrations first.')).toBeInTheDocument();
   });
 
-  it('renders a disabled button if integrations card is not complete', () => {
-    mockIsCardComplete.mockReturnValueOnce(false);
+  it('card callout should not be rendered if integrations card is not available', () => {
+    props.isCardAvailable.mockReturnValueOnce(false);
+
+    const { queryByText } = render(
+      <TestProviders>
+        <AlertsCard {...props} />
+      </TestProviders>
+    );
+
+    expect(queryByText('To view alerts add integrations first.')).not.toBeInTheDocument();
+  });
+
+  it('card button should be disabled if integrations card is available but not complete', () => {
+    props.isCardAvailable.mockReturnValueOnce(true);
+    props.isCardComplete.mockReturnValueOnce(false);
 
     const { getByTestId } = render(
       <TestProviders>
@@ -67,34 +81,16 @@ describe('AlertsCard', () => {
     expect(getByTestId('alertsCardButton').querySelector('button')).toBeDisabled();
   });
 
-  it('renders an enabled button if integrations card is complete', () => {
-    mockIsCardComplete.mockReturnValueOnce(true);
+  it('card button should be enabled if integrations card is complete', () => {
+    props.isCardAvailable.mockReturnValueOnce(true);
+    props.isCardComplete.mockReturnValueOnce(true);
 
     const { getByTestId } = render(
       <TestProviders>
-        <OnboardingContextProvider spaceId="default">
-          <AlertsCard {...props} />
-        </OnboardingContextProvider>
+        <AlertsCard {...props} />
       </TestProviders>
     );
 
     expect(getByTestId('alertsCardButton').querySelector('button')).not.toBeDisabled();
-  });
-
-  it('calls setExpandedCardId when the callout link is clicked', () => {
-    mockIsCardComplete.mockReturnValueOnce(false);
-
-    const { getByText } = render(
-      <TestProviders>
-        <OnboardingContextProvider spaceId="default">
-          <AlertsCard {...props} />
-        </OnboardingContextProvider>
-      </TestProviders>
-    );
-
-    const calloutLink = getByText('Add integrations step');
-    fireEvent.click(calloutLink);
-
-    expect(mockSetExpandedCardId).toHaveBeenCalledWith('integrations', { scroll: true });
   });
 });

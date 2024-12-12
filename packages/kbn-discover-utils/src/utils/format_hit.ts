@@ -70,9 +70,14 @@ export function formatHit(
     const pairs = highlights[key] ? renderedPairs : otherPairs;
 
     // If the field is a mapped field, we first check if it should be shown,
-    // if not we always include it into the result.
+    // or if it's highlighted, but the parent is not.
+    // If not we always include it into the result.
     if (displayKey) {
-      if (shouldShowFieldHandler(key)) {
+      const multiParent = field.getSubtypeMulti?.()?.multi.parent;
+      const isHighlighted = Boolean(highlights[key]);
+      const isParentHighlighted = Boolean(multiParent && highlights[multiParent]);
+
+      if ((isHighlighted && !isParentHighlighted) || shouldShowFieldHandler(key)) {
         pairs.push([displayKey, undefined, key]);
       }
     } else {
