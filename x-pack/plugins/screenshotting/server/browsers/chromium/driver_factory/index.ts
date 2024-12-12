@@ -92,6 +92,7 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 let sharedBrowser: Browser | undefined;
 let sharedBrowserInitializing = false;
+const promisesWaitingForSharedBrowser: Array<(value: unknown) => void> = [];
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -151,9 +152,9 @@ export class HeadlessChromiumDriverFactory {
       (async () => {
         try {
           if (sharedBrowserInitializing) {
-            while (sharedBrowserInitializing) {
-              await new Promise((resolve) => setTimeout(resolve, 100));
-            }
+            await new Promise((resolve) => {
+              promisesWaitingForSharedBrowser.push(resolve);
+            });
           }
           if (!sharedBrowser) {
             // console.time('puppeteer.launch(...)');
@@ -170,6 +171,9 @@ export class HeadlessChromiumDriverFactory {
             });
             sharedBrowserInitializing = false;
             // console.timeEnd('puppeteer.launch(...)');
+            for (const resolve of promisesWaitingForSharedBrowser) {
+              resolve(sharedBrowser);
+            }
           }
         } catch (err) {
           observer.error(
