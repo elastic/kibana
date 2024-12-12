@@ -22,20 +22,7 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['serverless'],
-      prototypeDocument: {
-        info: {
-          title: 'Security Lists API (Elastic Cloud Serverless)',
-          description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
-        },
-        tags: [
-          {
-            name: 'Security Lists API',
-            'x-displayName': 'Security lists',
-            description:
-              'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
-          },
-        ],
-      },
+      prototypeDocument: join(ROOT, 'scripts/openapi_bundle_info/lists_serverless.info.yaml'),
     },
   });
 
@@ -47,20 +34,7 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['ess'],
-      prototypeDocument: {
-        info: {
-          title: 'Security Lists API (Elastic Cloud and self-hosted)',
-          description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
-        },
-        tags: [
-          {
-            name: 'Security Lists API',
-            'x-displayName': 'Security lists',
-            description:
-              'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
-          },
-        ],
-      },
+      prototypeDocument: join(ROOT, 'scripts/openapi_bundle_info/lists_ess.info.yaml'),
     },
   });
 })();
