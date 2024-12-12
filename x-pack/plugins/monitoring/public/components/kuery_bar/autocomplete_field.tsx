@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
+import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel, UseEuiTheme } from '@elastic/eui';
 
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { composeStateUpdaters } from '../../lib/typed_react';
 import { SuggestionItem } from './suggestion_item';
@@ -305,12 +304,12 @@ const autocompleteContainerCss = css`
   position: relative;
 `;
 
-const suggestionsPanelCss = css`
+const suggestionsPanelCss = (theme: UseEuiTheme) => css`
   position: absolute;
   width: 100%;
   margin-top: 2px;
   overflow-x: hidden;
   overflow-y: scroll;
-  z-index: ${euiThemeVars.euiZLevel1};
+  z-index: ${theme.euiTheme.levels.maskBelowHeader};
   max-height: 322px;
 `;
