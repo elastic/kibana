@@ -43,9 +43,10 @@ export class UpdateSLO {
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
-    let updatedSlo: SLODefinition = Object.assign({}, originalSlo, params, {
+    let updatedSlo: SLODefinition = Object.assign({}, originalSlo, {
+      ...params,
       groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
-      settings: mergePartialSettings(originalSlo.settings, params.settings),
+      settings: Object.assign({}, originalSlo.settings, params.settings),
     });
 
     if (isEqual(originalSlo, updatedSlo)) {
@@ -262,14 +263,4 @@ export class UpdateSLO {
   private toResponse(slo: SLODefinition): UpdateSLOResponse {
     return updateSLOResponseSchema.encode(slo);
   }
-}
-
-/**
- * Settings are merged by overwriting the original settings with the optional new partial settings.
- */
-function mergePartialSettings(
-  originalSettings: SLODefinition['settings'],
-  newPartialSettings: UpdateSLOParams['settings']
-) {
-  return Object.assign({}, originalSettings, newPartialSettings);
 }

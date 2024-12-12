@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformPartialUrlStateToFormState as transform } from './process_slo_form_values';
+import { transformPartialSLOStateToFormState as transform } from './process_slo_form_values';
 
 describe('Transform partial URL state into form state', () => {
   describe("with 'indicator' in URL state", () => {
@@ -120,5 +120,21 @@ describe('Transform partial URL state into form state', () => {
         },
       })
     ).toMatchSnapshot();
+  });
+
+  describe('settings', () => {
+    it("handles the 'settings' URL state", () => {
+      expect(
+        transform({ settings: { preventInitialBackfill: true, syncDelay: '3h' } })
+      ).toMatchSnapshot();
+    });
+
+    it("handles partial 'settings' URL state", () => {
+      expect(transform({ settings: { syncDelay: '12m' } })).toMatchSnapshot();
+    });
+
+    it("handles optional 'syncField' URL state", () => {
+      expect(transform({ settings: { syncField: 'override-field' } })).toMatchSnapshot();
+    });
   });
 });

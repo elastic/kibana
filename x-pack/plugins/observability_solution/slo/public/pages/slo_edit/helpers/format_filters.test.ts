@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupByCardinalityFilters } from '../components/synthetics_availability/synthetics_availability_indicator_type_form';
+import { getGroupByCardinalityFilters } from '../components/indicator_section/synthetics_availability/synthetics_availability_indicator_type_form';
 import { formatAllFilters } from './format_filters';
 
 describe('formatAllFilters', () => {

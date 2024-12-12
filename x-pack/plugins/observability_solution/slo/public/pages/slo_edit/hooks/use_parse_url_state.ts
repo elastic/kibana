@@ -10,7 +10,7 @@ import { CreateSLOInput } from '@kbn/slo-schema';
 import { RecursivePartial } from '@kbn/utility-types';
 import { useHistory } from 'react-router-dom';
 import { useMemo } from 'react';
-import { transformPartialUrlStateToFormState } from '../helpers/process_slo_form_values';
+import { transformPartialSLOStateToFormState } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';
 
 export function useParseUrlState(): CreateSLOForm | undefined {
@@ -25,6 +25,6 @@ export function useParseUrlState(): CreateSLOForm | undefined {
 
     const urlState = urlStateStorage.get<RecursivePartial<CreateSLOInput>>('_a');
 
-    return !!urlState ? transformPartialUrlStateToFormState(urlState) : undefined;
+    return !!urlState ? transformPartialSLOStateToFormState(urlState) : undefined;
   }, [history]);
 }

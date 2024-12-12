@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Duration, DurationUnit } from '../../domain/models';
 import { createAPMTransactionErrorRateIndicator, createSLO } from '../fixtures/slo';
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
@@ -43,6 +44,48 @@ describe('Transform Generator', () => {
     it('builds empty runtime mappings without data view', async () => {
       const runtimeMappings = generator.buildCommonRuntimeMappings();
       expect(runtimeMappings).toEqual({});
+    });
+  });
+
+  describe('settings', () => {
+    const defaultSettings = {
+      syncDelay: new Duration(10, DurationUnit.Minute),
+      frequency: new Duration(2, DurationUnit.Minute),
+      preventInitialBackfill: true,
+    };
+
+    it('builds the transform settings', async () => {
+      const slo = createSLO({
+        settings: {
+          ...defaultSettings,
+          syncField: 'my_timestamp_sync_field',
+        },
+      });
+      const settings = generator.buildSettings(slo);
+      expect(settings).toMatchSnapshot();
+    });
+
+    it('builds the transform settings using the provided settings.syncField', async () => {
+      const slo = createSLO({
+        settings: {
+          ...defaultSettings,
+          syncField: 'my_timestamp_sync_field',
+        },
+      });
+      const settings = generator.buildSettings(slo, '@timestamp');
+      expect(settings.sync_field).toEqual('my_timestamp_sync_field');
+    });
+
+    it('builds the transform settings using provided fallback when no settings.syncField is configured', async () => {
+      const slo = createSLO({ settings: defaultSettings });
+      const settings = generator.buildSettings(slo, '@timestamp2');
+      expect(settings.sync_field).toEqual('@timestamp2');
+    });
+
+    it("builds the transform settings using '@timestamp' default fallback when no settings.syncField is configured", async () => {
+      const slo = createSLO({ settings: defaultSettings });
+      const settings = generator.buildSettings(slo);
+      expect(settings.sync_field).toEqual('@timestamp');
     });
   });
 });
