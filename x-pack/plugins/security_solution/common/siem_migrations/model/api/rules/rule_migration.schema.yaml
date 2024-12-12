@@ -20,22 +20,7 @@ paths:
             schema:
               type: array
               items:
-                type: object
-                required:
-                  - id
-                properties:
-                  id:
-                    description: The rule migration id
-                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-                  elastic_rule:
-                    description: The migrated elastic rule attributes to update.
-                    $ref: '../../rule_migration.schema.yaml#/components/schemas/ElasticRulePartial'
-                  translation_result:
-                    description: The rule translation result.
-                    $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTranslationResult'
-                  comments:
-                    description: The comments for the migration including a summary from the LLM in markdown.
-                    $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationComments'
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/UpdateRuleMigrationData'
       responses:
         200:
           description: Indicates rules migrations have been updated correctly.
@@ -151,6 +136,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: ids
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              description: The rule migration id
+              $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
       responses:
         200:
