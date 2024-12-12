@@ -209,9 +209,10 @@ export const scheduleTransformNow = async ({
 };
 
 /**
- * Whenever we change the latest transform configuration, we must ensure we update the transform in environments where it has already been installed.
+ * This method updates the transform configuration if it is outdated.
+ * If the 'latest' property of the transform changes it will reinstall the transform.
  */
-const upgradeLatestTransformIfNeeded = async ({
+export const upgradeLatestTransformIfNeeded = async ({
   esClient,
   namespace,
   logger,

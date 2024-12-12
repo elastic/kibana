@@ -57,8 +57,8 @@ const buildAggregationResponseMock = (
   service: {
     after_key: { 'service.name': 'service_name' },
     buckets: [
-      buildRiskScoreBucketMock({ key: { 'host.name': 'hostname' } }),
-      buildRiskScoreBucketMock({ key: { 'host.name': 'hostname' } }),
+      buildRiskScoreBucketMock({ key: { 'service.name': 'serviceName' } }),
+      buildRiskScoreBucketMock({ key: { 'service.name': 'serviceName' } }),
     ],
   },
   ...overrides,
