@@ -13,6 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const solutionNavigation = getPageObject('solutionNavigation');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const header = getPageObject('header');
@@ -31,13 +32,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
 
       // check side nav links
-      await testSubjects.existOrFail(`svlSearchOverviewPage`);
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'serverlessElasticsearch',
+      await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'serverlessElasticsearch',
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Create your first index',
       });
+      await testSubjects.existOrFail(`elasticsearchStartPage`);
 
       // TODO: test something search project specific instead of generic discover
       // navigate to discover
@@ -51,16 +54,154 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'management:index_management',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Index Management` });
-      await testSubjects.existOrFail(`indicesTab`);
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
+
+      // > Connectors
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'serverlessConnectors',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'serverlessConnectors',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Connectors' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'serverlessConnectors',
+      });
+      // check Build
+      // > Dev Tools
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'dev_tools',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'dev_tools',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dev Tools' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'dev_tools',
+      });
+      // > Playground
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchPlayground',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'searchPlayground',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'searchPlayground',
+      });
+      // check Relevance
+      // > Inference Endpoints
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+
+      // check Analyze
+      // > Discover
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'discover',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'discover',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Analyze' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'discover',
+      });
+      // > Dashboards
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'dashboards',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'dashboards',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Analyze' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dashboards' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'dashboards',
+      });
+      // check Other tools
+      // > Maps
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'maps',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'maps',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Other tools' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Maps',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'maps',
+      });
+
+      // check Getting Started
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'serverlessElasticsearch',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'serverlessElasticsearch',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting Started' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Getting Started',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'serverlessElasticsearch',
+      });
+
+      // Open Project Settings
+      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+      // check Project Settings
+      // > Trained Models
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'ml:modelManagement',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'ml:modelManagement',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Model Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Trained Models' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'ml:modelManagement',
+      });
+      // > Management
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'management',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'management',
+      });
 
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'serverlessElasticsearch',
+        deepLinkId: 'management:index_management',
       });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Home` });
-      await testSubjects.existOrFail(`svlSearchOverviewPage`);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Indices` });
+      await testSubjects.existOrFail(`elasticsearchStartPage`);
 
       await expectNoPageReload();
     });
@@ -145,7 +286,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'data',
         'management:index_management',
         'serverlessConnectors',
-        'serverlessWebCrawlers',
         'build',
         'dev_tools',
         'searchPlayground',
