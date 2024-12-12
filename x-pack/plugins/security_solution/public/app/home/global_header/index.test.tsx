@@ -154,6 +154,6 @@ describe('global header', () => {
       </TestProviders>
     );
 
-    waitFor(() => expect(findByTestId('assistantHeaderLink')).toBeInTheDocument());
+    waitFor(() => expect(findByTestId('assistantNavLink')).toBeInTheDocument());
   });
 });
