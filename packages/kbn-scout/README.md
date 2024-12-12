@@ -76,8 +76,7 @@ for starting servers.
 
 #### Config
 
-`playwright` directory manages the default Playwright configuration. It exports the `createPlaywrightConfig` function, which is used by Kibana plugins to define Scout playwright configurations and serves as the entry
-point for tests:
+`playwright` directory manages the default Playwright configuration. It exports the `createPlaywrightConfig` function, which is used by Kibana plugins to define Scout playwright configurations and serves as the entry point to run tests.
 
 ```ts
 import { createPlaywrightConfig } from '@kbn/scout';
@@ -89,12 +88,14 @@ export default createPlaywrightConfig({
 });
 ```
 
+Scout relies on configuration to determine the test files and opt-in [parallel test execution](https://playwright.dev/docs/test-parallel) against the single Elastic cluster.
+
 The Playwright configuration should only be created this way to ensure compatibility with Scout functionality. For configuration
 verification, we use a marker `VALID_CONFIG_MARKER`, and Scout will throw an error if the configuration is invalid.
 
 #### Fixtures
 
-The `fixtures` directory contains core Scout capabilities required for testing the majority of Kibana plugins. Fixtures can be
+The `fixtures` directory contains core Scout capabilities required for testing the majority of Kibana plugins. [Fixtures](https://playwright.dev/docs/test-fixtures) can be
 scoped to either `test` or `worker`. Scope decides when to init a new fixture instance: once per worker or for every test function. It is important to choose the correct scope to keep test execution optimally fast: if **a new instance is not needed for every test**, the fixture should be scoped to **worker**. Otherwise, it should be scoped to **test**.
 
 **Core `worker` scoped fixtures:**
@@ -254,3 +255,4 @@ export const scoutTestFixtures = mergeTests(
 - **Reusable Code:** When creating Page Objects or Fixtures that apply to more than one plugin, ensure they are added to the kbn-scout package.
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
 - **Add Unit Tests:** Include tests for new logic where applicable, ensuring it works as expected.
+- **Playwright documentation** [Official best practices](https://playwright.dev/docs/best-practices)
