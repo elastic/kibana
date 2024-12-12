@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { recordVideo } from '../helpers/record_video';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
 import { byLensTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 
