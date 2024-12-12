@@ -32,8 +32,5 @@ export const getCommonFieldDescriptions = (entityType: EntityType): FieldDescrip
         type: 'float',
       },
     }),
-    // {
-    //   source: identityField,
-    // },
   ];
 };
