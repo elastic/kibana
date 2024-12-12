@@ -41,20 +41,12 @@ export const clearFlashMessages = () => {
   FlashMessagesLogic.actions.clearFlashMessages();
 };
 
-export const flashSuccessToast = (
-  message: string,
-  delay: number = 0,
-  toastOptions: ToastOptions = {}
-) => {
-  setTimeout(
-    () =>
-      FlashMessagesLogic.values.notifications.toasts.add({
-        ...FLASH_MESSAGE_TYPES.success,
-        ...toastOptions,
-        title: message,
-      }),
-    delay * 1000
-  );
+export const flashSuccessToast = (message: string, toastOptions: ToastOptions = {}) => {
+  FlashMessagesLogic.values.notifications.toasts.add({
+    ...FLASH_MESSAGE_TYPES.success,
+    ...toastOptions,
+    title: message,
+  });
 };
 
 export const flashErrorToast = (
