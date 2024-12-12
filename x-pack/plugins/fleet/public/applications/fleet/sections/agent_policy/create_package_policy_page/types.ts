@@ -13,7 +13,8 @@ export type EditPackagePolicyFrom =
   | 'edit'
   | 'upgrade-from-fleet-policy-list'
   | 'upgrade-from-integrations-policy-list'
-  | 'upgrade-from-extension';
+  | 'upgrade-from-extension'
+  | 'onboarding-integration';
 
 export type PackagePolicyFormState =
   | 'VALID'
@@ -35,5 +36,8 @@ export interface AddToPolicyParams {
 export type CreatePackagePolicyParams = React.FunctionComponent<{
   from: EditPackagePolicyFrom;
   queryParamsPolicyId?: string;
+  propPolicyId?: string;
+  integrationName?: string;
   prerelease: boolean;
+  onNext?: () => void;
 }>;
