@@ -882,7 +882,7 @@ This plugin is only enabled when the application is built for serverless project
 |
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/serverless_observability/README.mdx[serverlessObservability]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/serverless_observability/README.mdx[serverlessObservability]
 |This plugin contains configuration and code used to create a Serverless Observability project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
