@@ -6192,7 +6192,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-application@link:packages/kbn-management/settings/application":
+"@kbn/management-settings-application@link:src/platform/packages/private/kbn-management/settings/application":
   version "0.0.0"
   uid ""
 
