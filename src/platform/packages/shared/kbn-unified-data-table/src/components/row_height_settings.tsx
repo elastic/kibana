@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
@@ -30,6 +30,8 @@ export interface RowHeightSettingsProps {
   onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
   onChangeRowHeightLines: (newRowHeightLines: number) => void;
   'data-test-subj'?: string;
+  lineCountInput: number;
+  setLineCountInput: (value: number) => void;
 }
 
 const idPrefix = htmlIdGenerator()();
@@ -42,12 +44,9 @@ export function RowHeightSettings({
   onChangeRowHeightLines,
   maxRowHeight,
   ['data-test-subj']: dataTestSubj,
+  lineCountInput,
+  setLineCountInput,
 }: RowHeightSettingsProps) {
-  const prevRowHeightRef = useRef<RowHeightMode | undefined>();
-  // if rowHeightLines is -1 (auto mode) we can't populate input with -1
-  const initialRowHeightLines = rowHeightLines && rowHeightLines > 0 ? rowHeightLines : 3;
-  const [lineCountInput, setLineCountInput] = useState(initialRowHeightLines);
-
   const rowHeightModeOptions = [
     {
       id: `${idPrefix}${RowHeightMode.auto}`,
@@ -64,15 +63,6 @@ export function RowHeightSettings({
       'data-test-subj': `${dataTestSubj}_rowHeight_${RowHeightMode.custom}`,
     },
   ];
-
-  useEffect(() => {
-    // apply the custom row height when switching from auto to custom (input stores number separately from an actual row height)
-    if (prevRowHeightRef.current === RowHeightMode.auto && rowHeight === RowHeightMode.custom) {
-      onChangeRowHeightLines(lineCountInput);
-    }
-
-    prevRowHeightRef.current = rowHeight;
-  }, [rowHeight, onChangeRowHeightLines, lineCountInput, initialRowHeightLines]);
 
   return (
     <>
