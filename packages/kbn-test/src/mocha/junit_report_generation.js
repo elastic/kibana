@@ -8,7 +8,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '@kbn/code-owners';
+import { getOwningTeamsForPath, getCodeOwnersEntries } from '@kbn/code-owners';
 import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
@@ -94,10 +94,10 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       .filter((node) => node.pending || !results.find((result) => result.node === node))
       .map((node) => ({ skipped: true, node }));
 
-    // cache codeowners for quicker lookup
-    let reversedCodeowners = [];
+    // cache codeowner entries for quicker lookup
+    let codeOwnersEntries = [];
     try {
-      reversedCodeowners = getPathsWithOwnersReversed();
+      codeOwnersEntries = getCodeOwnersEntries();
     } catch {
       /* no-op */
     }
@@ -143,8 +143,8 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       if (failed) {
         const testCaseRelativePath = getPath(node);
 
-        const owners = getCodeOwnersForFile(testCaseRelativePath, reversedCodeowners);
-        attrs.owners = owners?.teams || ''; // empty string when no codeowners are defined
+        // Comma-separated list of owners. Empty string if no owners are found.
+        attrs.owners = getOwningTeamsForPath(testCaseRelativePath, codeOwnersEntries).join(',');
       }
 
       return testsuitesEl.ele('testcase', attrs);
