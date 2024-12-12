@@ -43,6 +43,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(params).toEqual({
         connector: '.azure',
         message: 'hello',
+        status: 'all',
         rule: { id: 'foo', name: 'bar', tags: [], ruleUrl: 'http://myrule.com' },
         alerts: {
           new: [{ _id: 'new_alert' }],

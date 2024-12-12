@@ -6885,6 +6885,20 @@ Object {
       },
       "type": "object",
     },
+    "status": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
   },
   "type": "object",
 }
