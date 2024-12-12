@@ -8,7 +8,6 @@
 import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexItem,
   EuiForm,
@@ -210,7 +209,7 @@ export const AttachmentsMenu = ({
         <EuiFlexItem>
           <EuiPopover
             button={
-              <EuiButtonIcon
+              <EuiButton
                 data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
                 aria-label={i18n.translate(
                   'xpack.aiops.logCategorization.attachmentsMenuAriaLabel',
@@ -218,10 +217,14 @@ export const AttachmentsMenu = ({
                     defaultMessage: 'Attachments',
                   }
                 )}
-                iconType="boxesHorizontal"
                 color="text"
+                iconSide="right"
+                isSelected={isActionMenuOpen}
+                iconType={isActionMenuOpen ? 'arrowUp' : 'arrowDown'}
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+              >
+                <FormattedMessage id="xpack.aiops.logCategorization.add" defaultMessage="Add to" />
+              </EuiButton>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}

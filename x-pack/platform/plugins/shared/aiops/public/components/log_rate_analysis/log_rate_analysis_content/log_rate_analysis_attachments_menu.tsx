@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexItem,
   EuiForm,
@@ -212,15 +211,22 @@ export const LogRateAnalysisAttachmentsMenu = ({
         <EuiFlexItem>
           <EuiPopover
             button={
-              <EuiButtonIcon
+              <EuiButton
                 data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
                 aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
-                iconType="boxesHorizontal"
                 color="text"
+                iconSide="right"
+                isSelected={isActionMenuOpen}
+                iconType={isActionMenuOpen ? 'arrowUp' : 'arrowDown'}
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+              >
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.attachmentsMenuButtonLabel"
+                  defaultMessage="Add to"
+                />
+              </EuiButton>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}
