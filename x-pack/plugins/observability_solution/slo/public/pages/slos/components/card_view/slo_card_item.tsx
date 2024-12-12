@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { Chart, isMetricElementEvent, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
@@ -22,12 +20,11 @@ import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_m
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
-import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
 import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
+import { SloCardChart } from './slo_card_chart';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
@@ -42,27 +39,6 @@ export interface Props {
   error: boolean;
   refetchRules: () => void;
 }
-
-export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
-  const colors = {
-    DEGRADING: useEuiBackgroundColor('warning'),
-    VIOLATED: useEuiBackgroundColor('danger'),
-    HEALTHY: useEuiBackgroundColor('success'),
-    NO_DATA: useEuiBackgroundColor('subdued'),
-  };
-
-  return { cardColor: colors[status ?? 'NO_DATA'], colors };
-};
-
-export const getSubTitle = (slo: SLOWithSummaryResponse) => {
-  return getFirstGroupBy(slo);
-};
-
-const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
-  const firstGroupBy = Object.entries(slo.groupings).map(([key, value]) => `${key}: ${value}`)[0];
-
-  return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
-};
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -206,84 +182,5 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
         />
       ) : null}
     </>
-  );
-}
-
-export function SloCardChart({
-  slo,
-  badges,
-  onClick,
-  historicalSliData,
-}: {
-  badges: React.ReactNode;
-  slo: SLOWithSummaryResponse;
-  historicalSliData?: Array<{ key?: number; value?: number }>;
-  onClick?: () => void;
-}) {
-  const {
-    application: { navigateToUrl },
-    charts,
-  } = useKibana().services;
-
-  const { cardColor } = useSloCardColor(slo.summary.status);
-  const subTitle = getSubTitle(slo);
-  const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
-
-  return (
-    <Chart>
-      <Settings
-        baseTheme={charts.theme.useChartsBaseTheme()}
-        theme={{
-          metric: {
-            iconAlign: 'right',
-          },
-        }}
-        onElementClick={([d]) => {
-          if (onClick) {
-            onClick();
-          } else {
-            if (isMetricElementEvent(d)) {
-              navigateToUrl(sloDetailsUrl);
-            }
-          }
-        }}
-        locale={i18n.getLocale()}
-      />
-      <Metric
-        id={`${slo.id}-${slo.instanceId}`}
-        data={[
-          [
-            {
-              title: slo.name,
-              subtitle: subTitle,
-              value: sliValue,
-              trendA11yTitle: i18n.translate('xpack.slo.slo.sLOGridItem.trendA11yLabel', {
-                defaultMessage: `The "{title}" trend`,
-                values: {
-                  title: slo.name,
-                },
-              }),
-              trendShape: MetricTrendShape.Area,
-              trend: historicalSliData?.map((d) => ({
-                x: d.key as number,
-                y: d.value as number,
-              })),
-              extra: (
-                <FormattedMessage
-                  id="xpack.slo.sLOGridItem.targetFlexItemLabel"
-                  defaultMessage="Target {target}"
-                  values={{
-                    target: sloTarget,
-                  }}
-                />
-              ),
-              icon: () => <EuiIcon type="visGauge" size="l" />,
-              color: cardColor,
-              body: badges,
-            },
-          ],
-        ]}
-      />
-    </Chart>
   );
 }

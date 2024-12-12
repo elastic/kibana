@@ -128,7 +128,7 @@ export function GroupListView({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={'success'}>
+                  <EuiBadge color="success">
                     {i18n.translate('xpack.slo.group.totalHealthy', {
                       defaultMessage: '{total} Healthy',
                       values: {

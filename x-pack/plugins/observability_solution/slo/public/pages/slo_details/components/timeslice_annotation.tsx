@@ -35,7 +35,7 @@ export function TimesliceAnnotation({ slo, maxValue, minValue }: Props) {
         style={{
           line: {
             strokeWidth: 2,
-            stroke: euiTheme.colors.warning || '#000',
+            stroke: euiTheme.colors.warning,
             opacity: 1,
           },
         }}
@@ -55,7 +55,7 @@ export function TimesliceAnnotation({ slo, maxValue, minValue }: Props) {
           },
         ]}
         id="thresholdShade"
-        style={{ fill: euiTheme.colors.warning || '#000', opacity: 0.1 }}
+        style={{ fill: euiTheme.colors.warning, opacity: 0.1 }}
       />
     </>
   ) : null;
