@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -32,7 +31,6 @@ import { DataViewsContract } from './data_views';
 import { NowProviderPublicContract } from './now_provider';
 
 export interface DataSetupDependencies {
-  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
   inspector: InspectorSetup;
