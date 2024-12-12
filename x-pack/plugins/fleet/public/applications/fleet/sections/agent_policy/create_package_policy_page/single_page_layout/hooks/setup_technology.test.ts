@@ -246,12 +246,12 @@ describe('useSetupTechnology', () => {
       })
     );
 
-    expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
-
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
+
     await waitFor(() => {
+      expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
       expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
@@ -290,12 +290,11 @@ describe('useSetupTechnology', () => {
       initialProps,
     });
 
-    expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
-
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
+    expect(generateNewAgentPolicyWithDefaults).toHaveBeenCalled();
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
     expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
@@ -386,18 +385,19 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
-    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
+    await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
+    });
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
 
-    expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: false });
-
     await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
       expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: false });
       expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.NEW);
     });
   });
