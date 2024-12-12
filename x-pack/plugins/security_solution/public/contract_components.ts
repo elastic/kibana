@@ -11,7 +11,7 @@ import type { Observable } from 'rxjs';
 export type ContractComponents = Partial<{
   GetStarted: React.ComponentType<{ indicesExist?: boolean }>;
   DashboardsLandingCallout: React.ComponentType<{}>;
-  EnablementModalCallout: React.ComponentType<{}>;
+  AdditionalChargesMessage: React.ComponentType<{}>;
 }>;
 
 export type SetComponents = (components: ContractComponents) => void;
