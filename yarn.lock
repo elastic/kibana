@@ -6112,7 +6112,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/license-management-plugin@link:x-pack/plugins/license_management":
+"@kbn/license-management-plugin@link:x-pack/platform/plugins/shared/license_management":
   version "0.0.0"
   uid ""
 
