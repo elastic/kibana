@@ -111,8 +111,9 @@ export function defaultSort(sources: EntitySourceDefinition[]): SortBy {
   return { field: 'entity.id', direction: 'ASC' };
 }
 
-export const isRejectedResult = (input: PromiseSettledResult<unknown>): input is PromiseRejectedResult =>
-  input.status === 'rejected';
+export const isRejectedResult = (
+  input: PromiseSettledResult<unknown>
+): input is PromiseRejectedResult => input.status === 'rejected';
 
 export const isFulfilledResult = <T>(
   input: PromiseSettledResult<T>
