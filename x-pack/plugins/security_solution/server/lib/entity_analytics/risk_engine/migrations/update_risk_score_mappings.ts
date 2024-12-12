@@ -23,7 +23,6 @@ export const updateRiskScoreMappings = async ({
   getStartServices,
   kibanaVersion,
 }: EntityAnalyticsMigrationsParams) => {
-  logger.info(`Risk Score ----------------------------------`);
   const [coreStart] = await getStartServices();
   const soClientKibanaUser = coreStart.savedObjects.createInternalRepository();
 
