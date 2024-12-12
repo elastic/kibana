@@ -5,185 +5,98 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../__mocks__/kea_logic';
+import { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import {
+  ClassicNavItem,
+  GenerateNavLinkFromDeepLinkParameters,
+  GenerateNavLinkParameters,
+} from '../types';
 
-import '../../__mocks__/react_router';
+import { generateNavLink } from './nav_link_helpers';
 
-jest.mock('../react_router_helpers/link_events', () => ({
-  letBrowserHandleEvent: jest.fn(),
-}));
+export const generateSideNavItems = (
+  navItems: ClassicNavItem[],
+  deepLinks: Record<string, ChromeNavLink | undefined>,
+  subItemsMap: Record<string, Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined> = {}
+): Array<EuiSideNavItemTypeEnhanced<unknown>> => {
+  const sideNavItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = [];
 
-import { ClassicNavItem } from '../types';
+  for (const navItem of navItems) {
+    let sideNavChildItems: Array<EuiSideNavItemTypeEnhanced<unknown>> | undefined;
 
-import { generateSideNavItems } from './classic_nav_helpers';
+    const { deepLink, items, ...rest } = navItem;
+    const subItems = subItemsMap?.[navItem.id];
 
-describe('generateSideNavItems', () => {
-  const deepLinksMap = {
-    enterpriseSearch: {
-      id: 'enterpriseSearch',
-      url: '/app/enterprise_search/overview',
-      title: 'Overview',
-    },
-    'enterpriseSearchContent:searchIndices': {
-      id: 'enterpriseSearchContent:searchIndices',
-      title: 'Indices',
-      url: '/app/enterprise_search/content/search_indices',
-    },
-    'enterpriseSearchContent:connectors': {
-      id: 'enterpriseSearchContent:connectors',
-      title: 'Connectors',
-      url: '/app/enterprise_search/content/connectors',
-    },
-    'enterpriseSearchContent:webCrawlers': {
-      id: 'enterpriseSearchContent:webCrawlers',
-      title: 'Web Crawlers',
-      url: '/app/enterprise_search/content/crawlers',
-    },
-  } as unknown as Record<string, ChromeNavLink | undefined>;
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockKibanaValues.history.location.pathname = '/';
-  });
+    if (items || subItems) {
+      sideNavChildItems = [];
+      if (items) {
+        sideNavChildItems.push(...generateSideNavItems(items, deepLinks, subItemsMap));
+      }
+      if (subItems) {
+        sideNavChildItems.push(...subItems);
+      }
+    }
 
-  it('renders top-level items', () => {
-    const classicNavItems: ClassicNavItem[] = [
-      {
-        id: 'unit-test',
-        deepLink: {
-          link: 'enterpriseSearch',
-        },
-      },
-    ];
+    let sideNavItem: EuiSideNavItemTypeEnhanced<unknown> | undefined;
+    if (deepLink) {
+      const navLinkParams = getNavLinkParameters(deepLink, deepLinks);
+      if (navLinkParams !== undefined) {
+        const name = navItem.name ?? getDeepLinkTitle(deepLink.link, deepLinks);
+        sideNavItem = {
+          ...rest,
+          name,
+          ...generateNavLink({
+            ...navLinkParams,
+            items: sideNavChildItems,
+          }),
+        };
+      }
+    } else {
+      sideNavItem = {
+        ...rest,
+        items: sideNavChildItems,
+        name: navItem.name,
+      };
+    }
 
-    expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
-      {
-        href: '/app/enterprise_search/overview',
-        id: 'unit-test',
-        isSelected: false,
-        name: 'Overview',
-        onClick: expect.any(Function),
-      },
-    ]);
-  });
+    if (isValidSideNavItem(sideNavItem)) {
+      sideNavItems.push(sideNavItem);
+    }
+  }
 
-  it('renders items with children', () => {
-    const classicNavItems: ClassicNavItem[] = [
-      {
-        id: 'parent',
-        name: 'Parent',
-        items: [
-          {
-            id: 'unit-test',
-            deepLink: {
-              link: 'enterpriseSearch',
-            },
-          },
-        ],
-      },
-    ];
+  return sideNavItems;
+};
 
-    expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
-      {
-        id: 'parent',
-        items: [
-          {
-            href: '/app/enterprise_search/overview',
-            id: 'unit-test',
-            isSelected: false,
-            name: 'Overview',
-            onClick: expect.any(Function),
-          },
-        ],
-        name: 'Parent',
-      },
-    ]);
-  });
+const getNavLinkParameters = (
+  navLink: GenerateNavLinkFromDeepLinkParameters,
+  deepLinks: Record<string, ChromeNavLink | undefined>
+): GenerateNavLinkParameters | undefined => {
+  const { link, ...navLinkProps } = navLink;
+  const deepLink = deepLinks[link];
+  if (!deepLink || !deepLink.url) return undefined;
+  return {
+    ...navLinkProps,
+    shouldNotCreateHref: true,
+    shouldNotPrepend: true,
+    to: deepLink.url,
+  };
+};
+const getDeepLinkTitle = (
+  link: string,
+  deepLinks: Record<string, ChromeNavLink | undefined>
+): string | undefined => {
+  const deepLink = deepLinks[link];
+  if (!deepLink || !deepLink.url) return undefined;
+  return deepLink.title;
+};
 
-  it('renders classic nav name over deep link title if provided', () => {
-    const classicNavItems: ClassicNavItem[] = [
-      {
-        deepLink: {
-          link: 'enterpriseSearch',
-        },
-        id: 'unit-test',
-        name: 'Home',
-      },
-    ];
+function isValidSideNavItem(
+  item: EuiSideNavItemTypeEnhanced<unknown> | undefined
+): item is EuiSideNavItemTypeEnhanced<unknown> {
+  if (item === undefined) return false;
+  if (item.href || item.onClick) return true;
+  if (item?.items?.length ?? 0 > 0) return true;
 
-    expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
-      {
-        href: '/app/enterprise_search/overview',
-        id: 'unit-test',
-        isSelected: false,
-        name: 'Home',
-        onClick: expect.any(Function),
-      },
-    ]);
-  });
-
-  it('removes item if deep link is not defined', () => {
-    const classicNavItems: ClassicNavItem[] = [
-      {
-        deepLink: {
-          link: 'enterpriseSearch',
-        },
-        id: 'unit-test',
-        name: 'Home',
-      },
-      {
-        deepLink: {
-          link: 'enterpriseSearchApplications:playground',
-        },
-        id: 'unit-test-missing',
-      },
-    ];
-
-    expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
-      {
-        href: '/app/enterprise_search/overview',
-        id: 'unit-test',
-        isSelected: false,
-        name: 'Home',
-        onClick: expect.any(Function),
-      },
-    ]);
-  });
-
-  it('adds pre-rendered child items provided', () => {
-    const classicNavItems: ClassicNavItem[] = [
-      {
-        id: 'unit-test',
-        name: 'Indices',
-      },
-    ];
-    const subItems = {
-      'unit-test': [
-        {
-          href: '/app/unit-test',
-          id: 'child',
-          isSelected: true,
-          name: 'Index',
-          onClick: jest.fn(),
-        },
-      ],
-    };
-
-    expect(generateSideNavItems(classicNavItems, deepLinksMap, subItems)).toEqual([
-      {
-        id: 'unit-test',
-        items: [
-          {
-            href: '/app/unit-test',
-            id: 'child',
-            isSelected: true,
-            name: 'Index',
-            onClick: expect.any(Function),
-          },
-        ],
-        name: 'Indices',
-      },
-    ]);
-  });
-});
+  return false;
+}
