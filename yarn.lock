@@ -11937,13 +11937,6 @@
   dependencies:
     moment ">=2.14.0"
 
-"@types/multistream@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@types/multistream/-/multistream-4.1.0.tgz#517770a32e5715fdda87904a6da7d179142feba4"
-  integrity sha512-KiMkWve/Uu0qwCtNO6ZflMLjglkXsAdLdIwb31o5YQBbevdH2DF7inqebCli+F9am8McvEqCE4GXNOUZe8jOAg==
-  dependencies:
-    "@types/node" "*"
-
 "@types/mustache@^0.8.31":
   version "0.8.31"
   resolved "https://registry.yarnpkg.com/@types/mustache/-/mustache-0.8.31.tgz#7c86cbf74f7733f9e3bdc28817623927eb386616"
@@ -24795,14 +24788,6 @@ multipipe@^1.0.2:
   dependencies:
     duplexer2 "^0.1.2"
     object-assign "^4.1.0"
-
-multistream@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/multistream/-/multistream-4.1.0.tgz#7bf00dfd119556fbc153cff3de4c6d477909f5a8"
-  integrity sha512-J1XDiAmmNpRCBfIWJv+n0ymC4ABcf/Pl+5YvC5B/D2f/2+8PtHvCNxMPKiQcZyi922Hq69J2YOpb1pTywfifyw==
-  dependencies:
-    once "^1.4.0"
-    readable-stream "^3.6.0"
 
 murmurhash-js@^1.0.0:
   version "1.0.0"
