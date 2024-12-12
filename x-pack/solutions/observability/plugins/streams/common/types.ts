@@ -99,9 +99,17 @@ export const unmanagedElasticsearchAsset = z.object({
 });
 export type UnmanagedElasticsearchAsset = z.infer<typeof unmanagedElasticsearchAsset>;
 
+export const lifecycleSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('dlm'), data_retention: z.optional(z.string()) }),
+  z.object({ type: z.literal('ilm'), policy: z.string() }),
+]);
+
+export type StreamLifecycle = z.infer<typeof lifecycleSchema>;
+
 export const streamDefinitonSchema = streamWithoutIdDefinitonSchema.extend({
   id: z.string(),
   unmanaged_elasticsearch_assets: z.optional(z.array(unmanagedElasticsearchAsset)),
+  lifecycle: lifecycleSchema,
 });
 
 export type StreamDefinition = z.infer<typeof streamDefinitonSchema>;

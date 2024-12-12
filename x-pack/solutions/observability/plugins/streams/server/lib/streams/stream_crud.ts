@@ -11,7 +11,7 @@ import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch
 import { set } from '@kbn/safer-lodash-set';
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_INDEX } from '../../../common/constants';
-import { FieldDefinition, StreamDefinition } from '../../../common/types';
+import { FieldDefinition, StreamDefinition, StreamLifecycle } from '../../../common/types';
 import { generateLayer } from './component_templates/generate_layer';
 import { deleteComponent, upsertComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
@@ -36,6 +36,7 @@ import {
   upsertIngestPipeline,
 } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
+import { logsSettings } from './component_templates/logs_layer';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -55,8 +56,9 @@ export async function deleteUnmanagedStreamObjects({
   scopedClusterClient,
   logger,
 }: DeleteStreamParams) {
+  const dataStream = await getDataStream({ name: id, scopedClusterClient });
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
-    name: id,
+    dataStream,
     scopedClusterClient,
   });
   const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
@@ -165,7 +167,10 @@ export async function listStreams({
   });
 
   const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
-  let definitions = response.hits.hits.map((hit) => ({ ...hit._source! }));
+  let definitions: StreamDefinition[] = response.hits.hits.map((hit) => ({
+    ...hit._source!,
+    lifecycle: { type: 'ilm' as const, policy: logsSettings.index!.lifecycle!.name! },
+  }));
   const hasAccess = await Promise.all(
     definitions.map((definition) => checkReadAccess({ id: definition.id, scopedClusterClient }))
   );
@@ -182,14 +187,33 @@ export async function listStreams({
   };
 }
 
+function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLifecycle {
+  if (
+    dataStream.ilm_policy &&
+    (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
+  ) {
+    return {
+      type: 'ilm',
+      policy: dataStream.ilm_policy,
+    };
+  }
+  return {
+    type: 'dlm',
+    data_retention: dataStream.lifecycle?.data_retention
+      ? String(dataStream.lifecycle.data_retention)
+      : undefined,
+  };
+}
+
 export async function listDataStreamsAsStreams({
   scopedClusterClient,
 }: ListStreamsParams): Promise<StreamDefinition[]> {
-  const response = await scopedClusterClient.asInternalUser.indices.getDataStream();
+  const response = await scopedClusterClient.asCurrentUser.indices.getDataStream();
   return response.data_streams
     .filter((dataStream) => dataStream.template.endsWith('@stream') === false)
     .map((dataStream) => ({
       id: dataStream.name,
+      lifecycle: getDataStreamLifecycle(dataStream),
       managed: false,
       children: [],
       fields: [],
@@ -223,9 +247,11 @@ export async function readStream({
         throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
       }
     }
+    const dataStream = await getDataStream({ name: id, scopedClusterClient });
     return {
       definition: {
         ...definition,
+        lifecycle: getDataStreamLifecycle(dataStream),
       },
     };
   } catch (e) {
@@ -237,16 +263,18 @@ export async function readStream({
 }
 
 export async function readDataStreamAsStream({ id, scopedClusterClient }: ReadStreamParams) {
+  const dataStream = await getDataStream({ name: id, scopedClusterClient });
   const definition: StreamDefinition = {
     id,
     managed: false,
+    lifecycle: getDataStreamLifecycle(dataStream),
     children: [],
     fields: [],
     processing: [],
   };
 
   definition.unmanaged_elasticsearch_assets = await getUnmanagedElasticsearchAssets({
-    name: id,
+    dataStream,
     scopedClusterClient,
   });
 
@@ -254,28 +282,35 @@ export async function readDataStreamAsStream({ id, scopedClusterClient }: ReadSt
 }
 
 interface ReadUnmanagedAssetsParams extends BaseParams {
-  name: string;
+  dataStream: IndicesDataStream;
 }
 
-async function getUnmanagedElasticsearchAssets({
+async function getDataStream({
   name,
   scopedClusterClient,
-}: ReadUnmanagedAssetsParams) {
-  let dataStream: IndicesDataStream;
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}) {
   try {
-    const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name });
-    dataStream = response.data_streams[0];
+    const response = await scopedClusterClient.asCurrentUser.indices.getDataStream({ name });
+    return response.data_streams[0];
   } catch (e) {
     if (e.meta?.statusCode === 404) {
       throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
     }
     throw e;
   }
+}
 
+async function getUnmanagedElasticsearchAssets({
+  dataStream,
+  scopedClusterClient,
+}: ReadUnmanagedAssetsParams) {
   // retrieve linked index template, component template and ingest pipeline
   const templateName = dataStream.template;
   const componentTemplates: string[] = [];
-  const template = await scopedClusterClient.asInternalUser.indices.getIndexTemplate({
+  const template = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
     name: templateName,
   });
   if (template.index_templates.length) {
@@ -284,7 +319,7 @@ async function getUnmanagedElasticsearchAssets({
     });
   }
   const writeIndexName = dataStream.indices.at(-1)?.index_name!;
-  const currentIndex = await scopedClusterClient.asInternalUser.indices.get({
+  const currentIndex = await scopedClusterClient.asCurrentUser.indices.get({
     index: writeIndexName,
   });
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
@@ -304,7 +339,7 @@ async function getUnmanagedElasticsearchAssets({
     },
     {
       type: 'data_stream' as const,
-      id: name,
+      id: dataStream.name,
     },
   ];
 }
@@ -526,8 +561,9 @@ async function syncUnmanagedStream({ scopedClusterClient, definition, logger }: 
   if (definition.children.length) {
     throw new Error('Unmanaged streams cannot have managed children, coming soon');
   }
+  const dataStream = await getDataStream({ name: definition.id, scopedClusterClient });
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
-    name: definition.id,
+    dataStream,
     scopedClusterClient,
   });
   const executionPlan: ExecutionPlanStep[] = [];
