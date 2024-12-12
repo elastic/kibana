@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -56,7 +56,7 @@ export function createLogThresholdRuleType(
     () => import('./components/alert_details_app_section')
   );
 
-  const { logsLocator } = getLogsLocatorsFromUrlService(urlService);
+  const logsLocator = getLogsLocatorFromUrlService(urlService)!;
 
   return {
     id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,

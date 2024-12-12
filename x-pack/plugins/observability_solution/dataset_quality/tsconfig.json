@@ -60,7 +60,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/rison",
     "@kbn/task-manager-plugin",
-    "@kbn/core-application-browser",
     "@kbn/field-utils",
     "@kbn/logging"
   ],
