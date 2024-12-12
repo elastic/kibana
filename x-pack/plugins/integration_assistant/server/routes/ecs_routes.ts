@@ -36,9 +36,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         version: '1',
         security: {
           authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because the privileges are not defined yet.',
+            requiredPrivileges: [`fleet-all`, `fleetv2-all`, `actions-all`],
           },
         },
         validate: {

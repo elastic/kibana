@@ -27,7 +27,7 @@ export function registerIntegrationBuilderRoutes(
         version: '1',
         security: {
           authz: {
-            requiredPrivileges: ['createIntegrations'],
+            requiredPrivileges: [`fleet-all`, `fleetv2-all`, `actions-all`],
           },
         },
         validate: {

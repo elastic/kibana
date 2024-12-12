@@ -90,10 +90,10 @@ export class IntegrationAssistantPlugin
         ),
         privileges: {
           all: {
-            api: [`createIntegrations`],
+            api: [`fleet-all`, `fleetv2-all`, `actions-all`],
             app: [PLUGIN_ID],
             catalogue: [PLUGIN_ID],
-            ui: [`fleet-all`, `fleetv2-all`, `actions-all`],
+            ui: [`read`, `all`],
             savedObject: {
               all: [],
               read: [],

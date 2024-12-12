@@ -124,14 +124,6 @@ describe('buildPackage', () => {
     expect(createSync).toHaveBeenCalledWith(`${integrationPath}/manifest.yml`, expect.any(String));
   });
 
-  it('Should create logo files if info is present in the integration', async () => {
-    testIntegration.logo = 'logo';
-
-    await buildPackage(testIntegration);
-
-    expect(ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/img`);
-  });
-
   it('Should not create logo files if info is not present in the integration', async () => {
     jest.clearAllMocks();
     testIntegration.logo = undefined;

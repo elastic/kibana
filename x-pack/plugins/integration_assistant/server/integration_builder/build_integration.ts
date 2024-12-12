@@ -126,8 +126,7 @@ async function createZipArchive(
   zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
 
   if (integration.logo) {
-    const logoDir = joinPath(tmpPackageDir, 'img');
-    ensureDirSync(logoDir);
+    const logoDir = joinPath(packageDirectoryName, 'img/logo.svg');
     const logoBuffer = Buffer.from(integration.logo, 'base64');
     zip.addFile(logoDir, logoBuffer);
   }
