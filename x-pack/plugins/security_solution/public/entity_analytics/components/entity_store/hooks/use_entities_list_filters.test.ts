@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useEntitiesListFilters } from './use_entities_list_filters';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';

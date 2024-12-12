@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { useScheduleNowRiskEngineMutation } from './use_schedule_now_risk_engine_mutation';
 import { renderMutation } from '../../../management/hooks/test_utils';
 import { RISK_ENGINE_SCHEDULE_NOW_URL } from '../../../../common/constants';

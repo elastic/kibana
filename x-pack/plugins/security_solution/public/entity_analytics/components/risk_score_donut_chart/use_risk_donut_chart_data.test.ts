@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 import type { SeverityCount } from '../severity/types';
