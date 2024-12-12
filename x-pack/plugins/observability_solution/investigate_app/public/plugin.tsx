@@ -27,6 +27,7 @@ import type {
   InvestigateAppSetupDependencies,
   InvestigateAppStartDependencies,
 } from './types';
+import { createInvestigateAppRepositoryClient, InvestigateAppRepositoryClient } from './api';
 
 const getCreateEsqlService = once(() => import('./services/esql').then((m) => m.createEsqlService));
 
@@ -41,6 +42,7 @@ export class InvestigateAppPlugin
 {
   logger: Logger;
   config: ConfigSchema;
+  repositoryClient!: InvestigateAppRepositoryClient;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -51,6 +53,8 @@ export class InvestigateAppPlugin
     coreSetup: CoreSetup<InvestigateAppStartDependencies, InvestigateAppPublicStart>,
     pluginsSetup: InvestigateAppSetupDependencies
   ): InvestigateAppPublicSetup {
+    this.repositoryClient = createInvestigateAppRepositoryClient(coreSetup);
+
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,
       title: i18n.translate('xpack.investigateApp.appTitle', {
@@ -93,6 +97,7 @@ export class InvestigateAppPlugin
             lens: pluginsStart.lens,
           }),
           charts: pluginsStart.charts,
+          investigateAppRepositoryClient: this.repositoryClient,
         };
 
         ReactDOM.render(
@@ -127,6 +132,7 @@ export class InvestigateAppPlugin
           start: pluginsStart,
         },
         services: {
+          investigateAppRepositoryClient: this.repositoryClient,
           esql: createEsqlService({
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
