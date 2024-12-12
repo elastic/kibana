@@ -98,7 +98,7 @@
       "platform/plugins/shared/ml"
     ],
     "xpack.monitoring": [
-      "plugins/monitoring"
+      "platform/plugins/private/monitoring"
     ],
     "xpack.observability": "plugins/observability_solution/observability",
     "xpack.observabilityAiAssistant": [

@@ -38,7 +38,7 @@ subgraph Kibana
   
   click Collectors "https://github.com/elastic/kibana/tree/main/src/core/server/metrics/collectors"
   click OpsMetricsObservable "https://github.com/elastic/kibana/blob/92a8636f0ff63ab072527574e96e6616327b2ea4/src/core/server/metrics/metrics_service.ts#L32"
-  click BulkUploader "https://github.com/elastic/kibana/blob/main/x-pack/plugins/monitoring/server/kibana_monitoring/bulk_uploader.ts"
+  click BulkUploader "https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/monitoring/server/kibana_monitoring/bulk_uploader.ts"
 end 
 
 BulkUploader-->|/_monitoring/bulk|ProdElasticsearch
