@@ -67,8 +67,8 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const dataStreamNames = dataStreams.map(({ name }: DataStream) => name as string);
   const globalMaxRetention = deserializeGlobalMaxRetention(lifecycle?.globalMaxRetention);
   const { size, unit } = isBulkEdit
-    ? splitSizeAndUnits(lifecycle?.data_retention as string)
-    : { size: undefined, unit: undefined };
+    ? { size: undefined, unit: undefined }
+    : splitSizeAndUnits(lifecycle?.data_retention as string);
 
   const {
     services: { notificationService },
@@ -79,11 +79,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
-      dataRetentionEnabled: isBulkEdit ? lifecycle?.enabled : true,
+      dataRetentionEnabled: isBulkEdit ? true : lifecycle?.enabled,
       // When data retention is not set and lifecycle is enabled, is the only scenario in
       // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
       // dont have inifinite data retention.
-      infiniteRetentionPeriod: isBulkEdit && lifecycle?.enabled && !lifecycle?.data_retention,
+      infiniteRetentionPeriod: !isBulkEdit && lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: editDataRetentionFormSchema,
     id: 'editDataRetentionForm',
@@ -128,42 +128,43 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           return onClose({ hasUpdatedDataRetention: true });
         }
 
-        const successMessage = isSingleDataStream
+        const successMessage = isBulkEdit
           ? i18n.translate(
-              'xpack.idxMgmt.dataStreams.editDataRetentionModal.successDataRetentionNotification',
-              {
-                defaultMessage:
-                  'Data retention {disabledDataRetention, plural, one { disabled } other { updated } }',
-                values: { disabledDataRetention: !data.dataRetentionEnabled ? 1 : 0 },
-              }
-            )
-          : i18n.translate(
               'xpack.idxMgmt.dataStreams.editDataRetentionModal.successBulkDataRetentionNotification',
               {
                 defaultMessage:
                   'Data retention has been updated for {dataStreamCount, plural, one {one data stream} other {{dataStreamCount} data streams}}.',
                 values: { dataStreamCount: dataStreams.length },
               }
+            )
+          : i18n.translate(
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.successDataRetentionNotification',
+              {
+                defaultMessage:
+                  'Data retention {disabledDataRetention, plural, one { disabled } other { updated } }',
+                values: { disabledDataRetention: !data.dataRetentionEnabled ? 1 : 0 },
+              }
             );
+
         notificationService.showSuccessToast(successMessage);
 
         return onClose({ hasUpdatedDataRetention: true });
       }
 
       if (error) {
-        const errorMessage = isSingleDataStream
+        const errorMessage = isBulkEdit
           ? i18n.translate(
-              'xpack.idxMgmt.dataStreams.editDataRetentionModal.errorDataRetentionNotification',
-              {
-                defaultMessage: "Error updating data retention: ''{error}''",
-                values: { error: error.message },
-              }
-            )
-          : i18n.translate(
               'xpack.idxMgmt.dataStreams.editDataRetentionModal.errorBulkDataRetentionNotification',
               {
                 defaultMessage:
                   'There was an error updating the retention period. Try again later.',
+              }
+            )
+          : i18n.translate(
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.errorDataRetentionNotification',
+              {
+                defaultMessage: "Error updating data retention: ''{error}''",
+                values: { error: error.message },
               }
             );
         notificationService.showDangerToast(errorMessage);
@@ -209,7 +210,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          {isBulkEdit && ilmPolicyLink && isDSLWithILMIndices(dataStreams[0]) && (
+          {!isBulkEdit && ilmPolicyLink && isDSLWithILMIndices(dataStreams[0]) && (
             <>
               <MixedIndicesCallout
                 history={history}
@@ -221,7 +222,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             </>
           )}
 
-          {enableProjectLevelRetentionChecks && isBulkEdit && lifecycle?.globalMaxRetention && (
+          {enableProjectLevelRetentionChecks && !isBulkEdit && lifecycle?.globalMaxRetention && (
             <>
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreams.editDataRetentionModal.modalTitleText"
@@ -263,7 +264,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               </EuiText>
             }
             helpText={
-              !isBulkEdit &&
+              isBulkEdit &&
               globalMaxRetention && (
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreams.editDataRetentionModal.learnMoreLinkText"
