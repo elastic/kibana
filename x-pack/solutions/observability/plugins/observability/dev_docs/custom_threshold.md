@@ -7,7 +7,7 @@ Custom threshold rule is GA since 8.13.
 ### With data forge
 
 > [!TIP]
-> The following commands uses [kbn-data-forge](../../../../platform/packages/shared/kbn-data-forge/README.md) to generate some data for testing Custom threshold rule.
+> The following commands uses [kbn-data-forge](../../../../../platform/packages/shared/kbn-data-forge/README.md) to generate some data for testing Custom threshold rule.
 
 Basic command to generate host data for 7 hosts:
 ```sh
@@ -33,7 +33,7 @@ Get help with the data forge tool: `node x-pack/scripts/data_forge.js --help`
 ### With synthtrace
 
 > [!TIP]
-> The following commands uses [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace) to generate some data for testing Custom threshold rule.
+> The following commands uses [kbn-apm-synthtrace](../../../../../packages/kbn-apm-synthtrace) to generate some data for testing Custom threshold rule.
 
 Basic command to generate APM data for 3 services:
 ```sh

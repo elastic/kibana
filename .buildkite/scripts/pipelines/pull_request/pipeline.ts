@@ -89,7 +89,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/observability_onboarding/,
+        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
         /^x-pack\/plugins\/fleet/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
