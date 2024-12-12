@@ -163,7 +163,7 @@ export function useOnSubmit({
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
-  const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
+  const [formState, setFormStatus] = useState<PackagePolicyFormState>('VALID');
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -183,6 +183,10 @@ export function useOnSubmit({
   const isCustomUIValid = customUIValidation();
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+
+  const setFormState = (state: PackagePolicyFormState) => {
+    setFormStatus(state);
+  };
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
