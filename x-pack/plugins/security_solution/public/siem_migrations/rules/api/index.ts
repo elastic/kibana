@@ -92,12 +92,12 @@ export const createRuleMigration = async ({
 };
 
 export interface GetRuleMigrationMissingResourcesParams {
-  /** `id` of the migration to start */
+  /** `id` of the migration to get missing resources for */
   migrationId: string;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
-/** Starts a new migration with the provided rules. */
+/** Retrieves all missing resources of a specific migration. */
 export const getMissingResources = async ({
   migrationId,
   signal,
@@ -109,14 +109,14 @@ export const getMissingResources = async ({
 };
 
 export interface UpsertResourcesParams {
-  /** Optional `id` of migration to add the rules to. */
+  /** Optional `id` of migration to add the resources to. */
   migrationId: string;
   /** The body containing the `connectorId` to use for the migration */
   body: UpsertRuleMigrationResourcesRequestBody;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
-/** Starts a new migration with the provided rules. */
+/** Updates or creates resources for a specific migration. */
 export const upsertMigrationResources = async ({
   migrationId,
   body,
