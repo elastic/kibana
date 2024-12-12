@@ -6,17 +6,38 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
+import { render } from '@testing-library/react';
+import type { NewSelectionIdBadgesProps } from './new_selection_id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 
-const props = {
+const props: NewSelectionIdBadgesProps = {
   limit: 2,
-  maps: {
-    groupsMap: {
-      group1: ['job1', 'job2'],
-      group2: ['job3'],
+  groups: [
+    {
+      id: 'group1',
+      jobIds: ['job1', 'job2'],
+      timeRange: {
+        from: 0,
+        to: 0,
+        fromPx: 0,
+        toPx: 0,
+        fromMoment: null,
+        toMoment: null,
+      },
     },
-  },
+    {
+      id: 'group2',
+      jobIds: ['job3', 'job4'],
+      timeRange: {
+        from: 0,
+        to: 0,
+        fromPx: 0,
+        toPx: 0,
+        fromMoment: null,
+        toMoment: null,
+      },
+    },
+  ],
   onLinkClick: jest.fn(),
   onDeleteClick: jest.fn(),
   newSelection: ['group1', 'job1', 'job3'],

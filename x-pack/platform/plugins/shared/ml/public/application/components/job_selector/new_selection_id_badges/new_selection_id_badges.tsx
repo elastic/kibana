@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { JobSelectorBadge } from '../job_selector_badge';
 import type { GroupWithTimerange } from '../job_selector_flyout';
 
-interface NewSelectionIdBadgesProps {
+export interface NewSelectionIdBadgesProps {
   limit: number;
   newSelection: string[];
   onDeleteClick?: Function;
