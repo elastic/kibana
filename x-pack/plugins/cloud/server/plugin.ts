@@ -21,7 +21,8 @@ import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
 import { CloudRequestHandlerContext } from './routes/types';
-import { setupSavedObjects } from './saved_objects';
+import { CLOUD_DATA_SAVED_OBJECT_TYPE, setupSavedObjects } from './saved_objects';
+import { persistTokenCloudData } from './cloud_data';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -199,6 +200,24 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       projectId,
       projectType,
       orchestratorTarget,
+    });
+
+    core.http.registerOnPreAuth((request, response, toolkit) => {
+      const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
+      if (queryOnboardingToken) {
+        core.getStartServices().then(([coreStart]) => {
+          const soClient = coreStart.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
+          });
+          const solutionType = this.config.onboarding?.default_solution;
+          persistTokenCloudData(soClient, {
+            logger: this.logger,
+            onboardingToken: queryOnboardingToken,
+            solutionType,
+          });
+        });
+      }
+      return toolkit.next();
     });
 
     let decodedId: DecodedCloudId | undefined;
