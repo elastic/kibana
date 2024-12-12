@@ -28,7 +28,7 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
   defaultMessage: 'AI Assistant',
 });
 
-export const AssistantNavLink: FC = ({}) => {
+export const AssistantNavLink: FC = () => {
   const {
     chrome: { getChromeStyle$, navControls },
     showAssistantOverlay,

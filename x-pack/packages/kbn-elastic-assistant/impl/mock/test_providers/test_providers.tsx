@@ -37,6 +37,7 @@ export const mockAssistantAvailability: AssistantAvailability = {
   isAssistantEnabled: true,
 };
 
+
 /** A utility for wrapping children in the providers required to run tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
@@ -62,9 +63,10 @@ export const TestProvidersComponent: React.FC<Props> = ({
     logger: {
       log: console.log,
       warn: console.warn,
-      error: () => {},
+      error: () => { },
     },
   });
+
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
