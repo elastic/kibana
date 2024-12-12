@@ -13,7 +13,9 @@ import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
 const euiTheme = {
   colors: {
-    mediumShade: '#d3dae6',
+    vis: {
+      euiColorVisGrey0: '#d3dae6',
+    },
   },
 };
 
