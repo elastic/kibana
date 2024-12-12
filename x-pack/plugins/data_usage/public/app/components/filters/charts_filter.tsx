@@ -168,7 +168,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       const allItems: FilterItems = items.map((item) => {
         return {
           ...item,
-          checked: 'on',
+          checked: item.key && !item.isGroupLabel ? 'on' : undefined,
         };
       });
       setItems(allItems);
