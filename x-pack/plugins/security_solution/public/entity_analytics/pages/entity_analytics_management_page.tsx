@@ -16,7 +16,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
-import { css } from '@emotion/react';
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -48,11 +47,6 @@ export const EntityAnalyticsManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
-  const verticalSeparator = css`
-    height: ${euiTheme.size.l};
-    border-left: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-    margin: 0 ${euiTheme.size.s};
-  `;
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);

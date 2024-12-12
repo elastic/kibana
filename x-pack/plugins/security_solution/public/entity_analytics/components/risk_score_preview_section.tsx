@@ -141,7 +141,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   from,
   to,
 }) => {
-  const [filters, setFilters] = useState<{ bool: BoolQuery }>({
+  const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
