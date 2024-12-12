@@ -25,7 +25,7 @@ interface TimeSeriesExplorerPageProps {
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;
-  handleJobSelectionChange?: ({
+  handleJobSelectionChange: ({
     jobIds,
     time,
   }: {

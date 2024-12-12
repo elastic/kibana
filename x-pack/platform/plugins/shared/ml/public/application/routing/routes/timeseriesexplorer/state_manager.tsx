@@ -287,7 +287,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   if (timeSeriesJobs.length === 0 || selectedJobId === undefined) {
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} noSingleMetricJobsFound>
+      <TimeSeriesExplorerPage
+        dateFormatTz={dateFormatTz}
+        noSingleMetricJobsFound
+        handleJobSelectionChange={handleJobSelectionChange}
+      >
         <TimeseriesexplorerNoJobsFound />
       </TimeSeriesExplorerPage>
     );
@@ -295,7 +299,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   if (!bounds) {
     return (
-      <TimeSeriesExplorerPage dateFormatTz={dateFormatTz}>
+      <TimeSeriesExplorerPage
+        dateFormatTz={dateFormatTz}
+        handleJobSelectionChange={handleJobSelectionChange}
+        selectedJobId={[selectedJobId]}
+      >
         <TimeseriesexplorerNoChartData />
       </TimeSeriesExplorerPage>
     );

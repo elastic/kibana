@@ -25,11 +25,9 @@ interface TimeSeriesExplorerProps {
   zoom?: { from?: string; to?: string };
   handleJobSelectionChange: ({
     jobIds,
-    groups,
     time,
   }: {
     jobIds: string[];
-    groups: string[];
     time?: { from: string; to: string };
   }) => void;
 }
