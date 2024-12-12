@@ -6,24 +6,20 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { type ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import {
   useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
   EuiIcon,
   EuiPanel,
   EuiLoadingSpinner,
-  EuiText,
   EuiLink,
-  EuiTextColor,
+  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import {
-  ConnectorAddModal,
-  type ActionConnector,
-} from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { ActionType } from '@kbn/actions-plugin/common';
+import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFilteredActionTypes } from './hooks/use_load_action_types';
 
@@ -46,6 +42,9 @@ interface ConnectorSetupProps {
 }
 export const ConnectorSetup = React.memo<ConnectorSetupProps>(
   ({ onConnectorSaved, onClose, compressed = false }) => {
+    const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+    const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
+    const [actions, setActions] = useState<ActionConnector[]>([]);
     const panelCss = usePanelCss();
     const {
       http,
@@ -56,10 +55,11 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
 
     const onModalClose = useCallback(() => {
       setSelectedActionType(null);
+      setAddFlyoutVisibility(false);
       onClose?.();
     }, [onClose]);
 
-    const actionTypes = useFilteredActionTypes(http, toasts);
+    const { actionTypes } = useFilteredActionTypes(http, toasts);
 
     if (!actionTypes) {
       return <EuiLoadingSpinner />;
@@ -67,77 +67,67 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
 
     return (
       <>
-        {compressed ? (
-          <EuiListGroup
-            flush
-            data-test-subj="connectorSetupCompressed"
-            listItems={actionTypes.map((actionType) => ({
-              key: actionType.id,
-              id: actionType.id,
-              label: actionType.name,
-              size: 's',
-              icon: (
-                <EuiIcon
-                  size="l"
-                  color="text"
-                  type={actionTypeRegistry.get(actionType.id).iconClass}
-                />
-              ),
-              isDisabled: !actionType.enabled,
-              onClick: () => setSelectedActionType(actionType),
-            }))}
-          />
-        ) : (
-          <EuiFlexGroup gutterSize="l">
-            {actionTypes.map((actionType: ActionType) => (
-              <EuiFlexItem key={actionType.id}>
-                <EuiLink
-                  color="text"
-                  onClick={() => setSelectedActionType(actionType)}
-                  data-test-subj={`actionType-${actionType.id}`}
-                  className={panelCss}
-                >
-                  <EuiPanel
-                    hasShadow={false}
-                    hasBorder
-                    paddingSize="m"
-                    className="connectorSelectorPanel"
-                  >
-                    <EuiFlexGroup
-                      direction="column"
-                      alignItems="center"
-                      justifyContent="center"
-                      gutterSize="s"
-                      className={css`
-                        height: 100%;
-                      `}
+        <EuiPanel hasShadow={false} hasBorder>
+          <EuiFlexGroup
+            style={{ height: '100%' }}
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+            gutterSize="m"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="row" justifyContent="center">
+                {actionTypes.map((actionType: ActionType) => (
+                  <EuiFlexItem grow={false} key={actionType.id}>
+                    <EuiLink
+                      color="text"
+                      onClick={() => setSelectedActionType(actionType)}
+                      data-test-subj={`actionType-${actionType.id}`}
+                      className={panelCss}
                     >
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          size="xxl"
-                          color="text"
-                          type={actionTypeRegistry.get(actionType.id).iconClass}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiTextColor color="default">
-                          <EuiText size="s">{actionType.name}</EuiText>
-                        </EuiTextColor>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                </EuiLink>
-              </EuiFlexItem>
-            ))}
+                      <EuiFlexGroup
+                        direction="column"
+                        alignItems="center"
+                        justifyContent="center"
+                        gutterSize="s"
+                        className={css`
+                          height: 100%;
+                        `}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon
+                            size="xxl"
+                            color="text"
+                            type={actionTypeRegistry.get(actionType.id).iconClass}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiLink>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="createConnectorButton"
+                iconType="plusInCircle"
+                iconSide="left"
+                onClick={() => setAddFlyoutVisibility(true)}
+                isLoading={false}
+              >
+                {'AI service provider'}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-
-        {selectedActionType && (
-          <ConnectorAddModal
+        </EuiPanel>
+        {addFlyoutVisible && onConnectorSaved && (
+          <AddConnectorModal
             actionTypeRegistry={actionTypeRegistry}
-            actionType={selectedActionType}
+            actionTypes={actionTypes}
             onClose={onModalClose}
-            postSaveEventHandler={onConnectorSaved}
+            onSaveConnector={onConnectorSaved}
+            onSelectActionType={setSelectedActionType}
+            selectedActionType={selectedActionType}
           />
         )}
       </>

@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
-import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+import { type ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { AIConnector } from '../connector_selector';
-import { Conversation } from '../../..';
-import { useAssistantContext } from '../../assistant_context';
-import { useConversation } from '../../assistant/use_conversation';
-import { getGenAiConfig } from '../helpers';
-import { useLoadActionTypes } from '../use_load_action_types';
-
+import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
+import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
+import { ConnectorSelector } from '@kbn/security-solution-connectors';
+import { useFilteredActionTypes } from './hooks/use_load_action_types';
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
 interface Props {
@@ -28,6 +33,8 @@ interface Props {
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
   stats?: AttackDiscoveryStats | null;
+  connectors: AIConnector[];
+  onConnectorSaved?: () => void;
 }
 
 const inputContainerClassName = css`
@@ -55,21 +62,23 @@ const inputDisplayClassName = css`
 /**
  * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
-export const ConnectorSelectorInline: React.FC<Props> = React.memo(
+export const ConnectorSelectorAIAssistant = React.memo<Props>(
   ({
     isDisabled = false,
     selectedConnectorId,
     selectedConversation,
     onConnectorIdSelected,
     onConnectorSelected,
+    connectors,
+    onConnectorSaved,
     stats = null,
   }) => {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
-    const { setApiConfig } = useConversation();
+    const { actionTypeRegistry, http, assistantAvailability, toasts } = useAssistantContext();
+    const { euiTheme } = useEuiTheme();
 
-    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
-    const { data: actionTypes } = useLoadActionTypes({ http });
+    const { actionTypes } = useFilteredActionTypes(http, toasts);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const { setApiConfig } = useConversation();
 
     const onChange = useCallback(
       async (connector: AIConnector) => {
@@ -108,46 +117,47 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
     );
 
+    const selectedConnector = useMemo(
+      () => connectors.find((connector) => connector.id === selectedConnectorId),
+      [connectors, selectedConnectorId]
+    );
+
+    useEffect(() => {
+      if (connectors.length === 1) {
+        onChange(connectors[0]);
+      }
+    }, [connectors, onChange]);
+
+    const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+
+    if (!actionTypes) {
+      return <EuiLoadingSpinner />;
+    }
+
     return (
       <EuiFlexGroup
         alignItems="center"
         className={inputContainerClassName}
-        direction="row"
-        gutterSize="xs"
-        justifyContent={'flexStart'}
+        direction="column"
+        justifyContent="center"
         responsive={false}
+        gutterSize="xs"
       >
-        <EuiFlexItem>
-          {actionTypes && (
-            <ConnectorSelector
-              http={http}
-              isDisabled={localIsDisabled}
-              displayFancy={(displayText) => (
-                <EuiText
-                  className={inputDisplayClassName}
-                  size="s"
-                  color={euiThemeVars.euiColorPrimaryText}
-                >
-                  {displayText}
-                </EuiText>
-              )}
-              isOpen={isOpen}
-              selectedConnectorId={selectedConnectorId}
-              setIsOpen={setIsOpen}
-              onConnectorSelectionChange={onChange}
-              actionTypeRegistry={actionTypeRegistry}
-              actionTypes={actionTypes}
-              stats={stats}
+        {selectedConnector && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              size="xxl"
+              color="text"
+              type={actionTypeRegistry.get(selectedConnector.actionTypeId).iconClass}
             />
-          )}
+          </EuiFlexItem>
+        )}
 
-          {/* <ConnectorSelector
+        <EuiFlexItem grow={false}>
+          <ConnectorSelector
+            http={http}
             displayFancy={(displayText) => (
-              <EuiText
-                className={inputDisplayClassName}
-                size="s"
-                color={euiThemeVars.euiColorPrimaryText}
-              >
+              <EuiText className={inputDisplayClassName} size="s" color={euiTheme.colors.primary}>
                 {displayText}
               </EuiText>
             )}
@@ -156,12 +166,14 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             selectedConnectorId={selectedConnectorId}
             setIsOpen={setIsOpen}
             onConnectorSelectionChange={onChange}
-            stats={stats}
-          /> */}
+            actionTypeRegistry={actionTypeRegistry}
+            actionTypes={actionTypes}
+            onConnectorSaved={onConnectorSaved}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 );
 
-ConnectorSelectorInline.displayName = 'ConnectorSelectorInline';
+ConnectorSelectorAIAssistant.displayName = 'ConnectorSelectorAIAssistant';
