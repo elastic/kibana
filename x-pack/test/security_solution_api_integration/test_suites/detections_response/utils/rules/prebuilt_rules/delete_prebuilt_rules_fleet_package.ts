@@ -7,6 +7,7 @@
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
 /**
@@ -14,7 +15,8 @@ import type SuperTest from 'supertest';
  *
  * @param supertest Supertest instance
  */
-export async function deletePrebuiltRulesFleetPackage(supertest: SuperTest.Agent) {
+export async function deletePrebuiltRulesFleetPackage(supertest: SuperTest.Agent, log: ToolingLog) {
+  log.debug('Checking if prebuilt rules package is installed');
   const resp = await supertest
     .get(epmRouteService.getInfoPath(PREBUILT_RULES_PACKAGE_NAME))
     .set('kbn-xsrf', 'true')
@@ -22,11 +24,15 @@ export async function deletePrebuiltRulesFleetPackage(supertest: SuperTest.Agent
     .send();
 
   if (resp.status === 200 && resp.body.response.status === 'installed') {
+    log.debug('Deleting prebuilt rules package');
     await supertest
       .delete(
         epmRouteService.getRemovePath(PREBUILT_RULES_PACKAGE_NAME, resp.body.response.version)
       )
       .set('kbn-xsrf', 'true')
+      .timeout(60000)
       .send({ force: true });
+
+    log.debug('Deleted prebuilt rules package');
   }
 }
