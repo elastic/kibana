@@ -370,7 +370,7 @@ function _generateMappings(
         return; // runtime fields should not be added as a property
       }
 
-      if (type === 'object' && field.object_type) {
+      function addObjectAsDynamicMapping(field : Field) {
         const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
         const pathMatch = path.includes('*') ? path : `${path}.*`;
 
@@ -488,6 +488,9 @@ function _generateMappings(
           // index templates not using `"dynamic": true`.
           addParentObjectAsStaticProperty(field);
         }
+      }
+      if (type === 'object' && field.object_type) {
+        addObjectAsDynamicMapping(field);
       } else {
         let fieldProps = getDefaultProperties(field);
 
@@ -503,6 +506,12 @@ function _generateMappings(
               },
               isIndexModeTimeSeries
             );
+            if (field.object_type) {
+              // A group can have an object_type if it has been merged with an object during deduplication,
+              // generate also the dynamic mapping for the object.
+              addObjectAsDynamicMapping(field);
+              mappings.hasDynamicTemplateMappings = true;
+            }
             if (mappings.hasNonDynamicTemplateMappings) {
               fieldProps = {
                 properties:
