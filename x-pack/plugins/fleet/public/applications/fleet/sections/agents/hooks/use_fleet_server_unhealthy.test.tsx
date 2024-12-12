@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-
 import { createFleetTestRendererMock } from '../../../../../mock';
 import { sendGetEnrollmentSettings } from '../../../../../hooks/use_request/settings';
 
