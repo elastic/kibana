@@ -553,7 +553,7 @@
     "@kbn/graph-plugin": "link:x-pack/plugins/graph",
     "@kbn/grid-example-plugin": "link:examples/grid_example",
     "@kbn/grid-layout": "link:packages/kbn-grid-layout",
-    "@kbn/grokdebugger-plugin": "link:x-pack/plugins/grokdebugger",
+    "@kbn/grokdebugger-plugin": "link:x-pack/platform/plugins/private/grokdebugger",
     "@kbn/grouping": "link:packages/kbn-grouping",
     "@kbn/guided-onboarding": "link:packages/kbn-guided-onboarding",
     "@kbn/guided-onboarding-example-plugin": "link:examples/guided_onboarding_example",
