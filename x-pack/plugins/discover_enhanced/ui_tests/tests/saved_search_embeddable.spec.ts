@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScoutWorkerFixtures, expect } from '@kbn/scout';
+import { ScoutWorkerFixtures, expect, tags } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 
 const createSavedSearch = async (
@@ -37,66 +37,62 @@ const createSavedSearch = async (
     ],
   });
 
-test.describe(
-  'Discover app - saved search embeddable',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
-  () => {
-    const SAVED_SEARCH_TITLE = 'TempSearch';
-    const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
-    test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
-      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
-      await uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
-        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
-      });
+test.describe('Discover app - saved search embeddable', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+  const SAVED_SEARCH_TITLE = 'TempSearch';
+  const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
+  test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
+    await uiSettings.set({
+      defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
+      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
     });
+  });
 
-    test.afterAll(async ({ kbnClient, uiSettings }) => {
-      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await kbnClient.savedObjects.cleanStandardList();
-    });
+  test.afterAll(async ({ kbnClient, uiSettings }) => {
+    await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+    await kbnClient.savedObjects.cleanStandardList();
+  });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.dashboard.goto();
-    });
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.dashboard.goto();
+  });
 
-    test('should allow removing the dashboard panel after the underlying saved search has been deleted', async ({
+  test('should allow removing the dashboard panel after the underlying saved search has been deleted', async ({
+    kbnClient,
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.dashboard.openNewDashboard();
+    await createSavedSearch(
       kbnClient,
-      page,
-      pageObjects,
-    }) => {
-      await pageObjects.dashboard.openNewDashboard();
-      await createSavedSearch(
-        kbnClient,
-        SAVED_SEARCH_ID,
-        SAVED_SEARCH_TITLE,
-        testData.DATA_VIEW_ID.LOGSTASH
-      );
-      await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
-      await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
-        state: 'visible',
-      });
-
-      await pageObjects.dashboard.saveDashboard('Dashboard with deleted saved search');
-      await kbnClient.savedObjects.delete({
-        type: 'search',
-        id: SAVED_SEARCH_ID,
-      });
-
-      await page.reload();
-      await page.waitForLoadingIndicatorHidden();
-      await expect(
-        page.testSubj.locator('embeddableError'),
-        'Embeddable error should be displayed'
-      ).toBeVisible();
-
-      await pageObjects.dashboard.removePanel('embeddableError');
-      await expect(
-        page.testSubj.locator('embeddableError'),
-        'Embeddable error should not be displayed'
-      ).toBeHidden();
+      SAVED_SEARCH_ID,
+      SAVED_SEARCH_TITLE,
+      testData.DATA_VIEW_ID.LOGSTASH
+    );
+    await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
+    await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
+      state: 'visible',
     });
-  }
-);
+
+    await pageObjects.dashboard.saveDashboard('Dashboard with deleted saved search');
+    await kbnClient.savedObjects.delete({
+      type: 'search',
+      id: SAVED_SEARCH_ID,
+    });
+
+    await page.reload();
+    await page.waitForLoadingIndicatorHidden();
+    await expect(
+      page.testSubj.locator('embeddableError'),
+      'Embeddable error should be displayed'
+    ).toBeVisible();
+
+    await pageObjects.dashboard.removePanel('embeddableError');
+    await expect(
+      page.testSubj.locator('embeddableError'),
+      'Embeddable error should not be displayed'
+    ).toBeHidden();
+  });
+});

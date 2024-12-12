@@ -48,6 +48,7 @@ import { updateInvestigation } from '../services/update_investigation';
 import { updateInvestigationItem } from '../services/update_investigation_item';
 import { updateInvestigationNote } from '../services/update_investigation_note';
 import { createInvestigateAppServerRoute } from './create_investigate_app_server_route';
+import { rootCauseAnalysisRoute } from './rca/route';
 
 const createInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations 2023-10-31',
@@ -405,6 +406,7 @@ export function getGlobalInvestigateAppServerRouteRepository() {
     ...getEntitiesRoute,
     ...getAllInvestigationStatsRoute,
     ...getAllInvestigationTagsRoute,
+    ...rootCauseAnalysisRoute,
   };
 }
 
