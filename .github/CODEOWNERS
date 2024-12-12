@@ -779,7 +779,6 @@ x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
-x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
@@ -850,6 +849,7 @@ x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
