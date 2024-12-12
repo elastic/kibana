@@ -26,6 +26,8 @@ import type {
   ResolvedCase,
 } from '../containers/types';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
     if (isArray(value)) {
@@ -40,12 +42,18 @@ export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
 
 export const convertToCamelCase = <T, U extends {}>(obj: T): U =>
   Object.entries(obj as never).reduce((acc, [key, value]) => {
+    let convertedKey = key;
+    // Do NOT convert UUID keys to camelCase
+    if (!UUID_REGEX.test(key)) {
+      convertedKey = camelCase(key);
+    }
+
     if (isArray(value)) {
-      set(acc, camelCase(key), convertArrayToCamelCase(value));
+      set(acc, convertedKey, convertArrayToCamelCase(value));
     } else if (isObject(value)) {
-      set(acc, camelCase(key), convertToCamelCase(value));
+      set(acc, convertedKey, convertToCamelCase(value));
     } else {
-      set(acc, camelCase(key), value);
+      set(acc, convertedKey, value);
     }
     return acc;
   }, {} as U);

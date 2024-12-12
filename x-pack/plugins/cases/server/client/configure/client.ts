@@ -51,6 +51,7 @@ import { updateMappings } from './update_mappings';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 import { validateDuplicatedKeysInRequest } from '../validators';
 import {
+  validateCustomFieldDefaultValuesInRequest,
   validateCustomFieldTypesInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
@@ -318,6 +319,10 @@ export async function update(
     validateCustomFieldTypesInRequest({
       requestCustomFields: request.customFields,
       originalCustomFields: configuration.attributes.customFields,
+    });
+
+    validateCustomFieldDefaultValuesInRequest({
+      requestCustomFields: request.customFields,
     });
 
     const updatedTemplates = transformTemplateCustomFields({

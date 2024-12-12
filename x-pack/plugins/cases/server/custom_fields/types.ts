@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import type { CustomFieldTypes } from '../../common/types/domain';
+import type { CustomFieldTypes, CustomFieldValue } from '../../common/types/domain';
+
+export enum CasesCustomFieldMappingType {
+  TEXT = 'text',
+  LONG = 'long',
+  BOOLEAN = 'boolean',
+  // This is a custom mapping type indicating that the query utils should process these values differently instead
+  // of passing the mapping type literally to the query
+  // List options are stored in saved objects as { key: value } pairs
+  LIST_OPTION = 'list-option',
+}
 
 export interface ICasesCustomField {
   isFilterable: boolean;
   isSortable: boolean;
-  savedObjectMappingType: string;
-  validateFilteringValues: (values: Array<string | number | boolean | null>) => void;
-  getDefaultValue?: () => boolean | string | null;
+  savedObjectMappingType: CasesCustomFieldMappingType;
+  validateFilteringValues: (values: CustomFieldValue[]) => void;
+  getDefaultValue?: () => CustomFieldValue;
 }
 
 export interface CasesCustomFieldsMap {

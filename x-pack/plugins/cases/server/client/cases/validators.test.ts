@@ -590,7 +590,7 @@ describe('validators', () => {
     };
 
     it('does not throw when custom fields are correct', () => {
-      const newConfig = [
+      const newConfig: CustomFieldsConfiguration = [
         ...customFieldsConfiguration,
         {
           key: 'third_key',

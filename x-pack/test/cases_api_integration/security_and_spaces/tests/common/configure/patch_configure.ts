@@ -205,7 +205,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
-        customFields: customFieldsConfiguration,
+        customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
         templates: mockTemplates as ConfigurationPatchRequest['templates'],
       });
 

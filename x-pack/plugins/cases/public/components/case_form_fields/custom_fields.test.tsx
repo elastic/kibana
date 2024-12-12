@@ -67,7 +67,7 @@ describe.skip('CustomFields', () => {
     expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
   });
 
-  it('should render as optional fields for text custom fields', async () => {
+  it('should render as optional fields for text and list custom fields', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields
@@ -134,6 +134,7 @@ describe.skip('CustomFields', () => {
 
     const textField = customFieldsConfigurationMock[2];
     const toggleField = customFieldsConfigurationMock[3];
+    const listField = customFieldsConfigurationMock[4];
     const numberField = customFieldsConfigurationMock[5];
 
     await userEvent.type(
@@ -159,6 +160,7 @@ describe.skip('CustomFields', () => {
             [customFieldsConfigurationMock[1].key]: customFieldsConfigurationMock[1].defaultValue,
             [textField.key]: 'hello',
             [toggleField.key]: true,
+            [listField.key]: 'option_1',
             [customFieldsConfigurationMock[4].key]: customFieldsConfigurationMock[4].defaultValue,
             [numberField.key]: '4',
           },
