@@ -89,3 +89,5 @@ export const AvailablePackagesHook = () => {
     './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
   );
 };
+
+export { useFleetCustomUI } from './applications/fleet/sections/agent_policy/create_package_policy_page/custom_ui_context';

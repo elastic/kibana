@@ -84,6 +84,7 @@ import { PostInstallAzureArmTemplateModal } from './components/cloud_security_po
 import { RootPrivilegesCallout } from './root_callout';
 import { useAgentless } from './hooks/setup_technology';
 import { SetupTechnologySelector } from './components/setup_technology_selector';
+import { useFleetCustomUI } from '../custom_ui_context';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -109,6 +110,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
+  const { validate } = useFleetCustomUI();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const { params } = useRouteMatch<AddToPolicyParams>();
   const fleetStatus = useFleetStatus();
@@ -260,14 +262,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   >(
     ({ isValid, updatedPolicy }) => {
       updatePackagePolicy(updatedPolicy);
+
       setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
+        if (prevState === 'INVALID' && validate()) {
+          return 'VALID';
         }
         return prevState;
       });
     },
-    [updatePackagePolicy, setFormState]
+    [updatePackagePolicy, setFormState, validate]
   );
 
   const { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest } = useDevToolsRequest({

@@ -49,6 +49,8 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
+import { useFleetCustomUI } from '../../custom_ui_context';
+
 import { useAgentless } from './setup_technology';
 
 export async function createAgentPolicy({
@@ -156,6 +158,7 @@ export function useOnSubmit({
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+  const { validate: customUIValidation } = useFleetCustomUI();
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
@@ -177,6 +180,7 @@ export function useOnSubmit({
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
+  const isCustomUIValid = customUIValidation();
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
 
@@ -237,13 +241,24 @@ export function useOnSubmit({
         selectedPolicyTab === SelectedPolicyTab.NEW;
       const isOrphaningPolicy =
         canUseMultipleAgentPolicies && newPackagePolicy.policy_ids.length === 0;
-      if (hasPackage && (hasAgentPolicy || isOrphaningPolicy) && !hasValidationErrors) {
+      if (
+        hasPackage &&
+        (hasAgentPolicy || isOrphaningPolicy) &&
+        !hasValidationErrors &&
+        isCustomUIValid
+      ) {
         setFormState('VALID');
       } else {
         setFormState('INVALID');
       }
     },
-    [packagePolicy, updatePackagePolicyValidation, selectedPolicyTab, canUseMultipleAgentPolicies]
+    [
+      packagePolicy,
+      updatePackagePolicyValidation,
+      selectedPolicyTab,
+      canUseMultipleAgentPolicies,
+      isCustomUIValid,
+    ]
   );
 
   // Initial loading of package info
@@ -307,7 +322,7 @@ export function useOnSubmit({
       force,
       overrideCreatedAgentPolicy,
     }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
-      if (formState === 'VALID' && hasErrors) {
+      if (formState === 'VALID' && (hasErrors || !isCustomUIValid)) {
         setFormState('INVALID');
         return;
       }
@@ -481,6 +496,7 @@ export function useOnSubmit({
       agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
+      isCustomUIValid,
     ]
   );
 

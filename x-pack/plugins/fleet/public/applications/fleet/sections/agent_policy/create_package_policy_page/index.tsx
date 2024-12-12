@@ -14,6 +14,7 @@ import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
 import { CreatePackagePolicySinglePage } from './single_page_layout';
 import { CreatePackagePolicyMultiPage } from './multi_page_layout';
+import { FleetCustomUIProvider } from './custom_ui_context';
 
 export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const { search } = useLocation();
@@ -59,5 +60,9 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     return <CreatePackagePolicyMultiPage {...pageParams} />;
   }
 
-  return <CreatePackagePolicySinglePage {...pageParams} />;
+  return (
+    <FleetCustomUIProvider>
+      <CreatePackagePolicySinglePage {...pageParams} />
+    </FleetCustomUIProvider>
+  );
 };

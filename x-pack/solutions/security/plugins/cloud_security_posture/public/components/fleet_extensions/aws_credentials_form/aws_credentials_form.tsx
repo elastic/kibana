@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { useFleetCustomUI } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -227,6 +228,10 @@ export const AwsCredentialsForm = ({
     setIsValid,
     updatePolicy,
   });
+  const { resetValidationRules } = useFleetCustomUI();
+  // we would likelessly reset the validation rules higher up in the Fleet chain
+  // when we switch between the setup formats
+  resetValidationRules();
 
   return (
     <>

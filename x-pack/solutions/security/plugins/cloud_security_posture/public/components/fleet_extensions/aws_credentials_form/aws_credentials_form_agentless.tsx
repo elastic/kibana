@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
-
+import { useFleetCustomUI } from '@kbn/fleet-plugin/public';
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
@@ -186,6 +186,12 @@ export const AwsCredentialsFormAgentless = ({
   const fields = getInputVarsFields(input, group.fields);
   const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+  const { addValidationRules } = useFleetCustomUI();
+
+  useEffect(() => {
+    const validationRules = fields.map((field) => ({ id: field.id, value: field.value }));
+    addValidationRules(validationRules);
+  }, [fields, addValidationRules]);
 
   const isValidSemantic = semverValid(packageInfo.version);
   const showCloudCredentialsButton = isValidSemantic
