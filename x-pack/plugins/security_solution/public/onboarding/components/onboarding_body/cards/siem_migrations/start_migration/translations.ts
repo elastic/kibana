@@ -88,12 +88,22 @@ export const START_MIGRATION_CARD_MIGRATION_TITLE = (number: number) =>
     values: { number },
   });
 
-export const START_MIGRATION_CARD_PROGRESS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.onboarding.startMigration.progress.description',
+export const START_MIGRATION_CARD_PROGRESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.startMigration.progress.description', {
+    defaultMessage: `Processing migration of {totalRules} rules.`,
+    values: { totalRules },
+  });
+export const START_MIGRATION_CARD_PREPARING_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.preparing.description',
   {
-    defaultMessage: `This may take a few minutes & the task will work in the background. Just stay logged in and we'll notify you when done.`,
+    defaultMessage: `Preparing environment for the AI powered migration.`,
   }
 );
+export const START_MIGRATION_CARD_PROCESSING = (rulesLeft: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.startMigration.processing', {
+    defaultMessage: `{rulesLeft} rules left...`,
+    values: { rulesLeft },
+  });
 
 export const START_MIGRATION_CARD_RESULT_TITLE = (number: number) =>
   i18n.translate('xpack.securitySolution.onboarding.startMigration.result.title', {

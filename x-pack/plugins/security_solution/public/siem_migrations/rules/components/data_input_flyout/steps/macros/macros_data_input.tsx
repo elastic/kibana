@@ -6,25 +6,17 @@
  */
 
 import type { EuiStepProps } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiStepNumber,
-  EuiSteps,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { SubStepsWrapper } from '../common/sub_step_wrapper';
-import type { OnResourcesCreated, OnMissingResourcesFetched, DataInputStep } from '../../types';
+import type { OnResourcesCreated, OnMissingResourcesFetched } from '../../types';
 import { getStatus } from '../common/get_status';
+import * as i18n from './translations';
+import { DataInputStep } from '../constants';
+import { SubSteps } from '../common/sub_step';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
-import * as i18n from './translations';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-
-const DataInputStepNumber: DataInputStep = 2;
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -47,7 +39,7 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
     onMissingResourcesFetched,
   }) => {
     const dataInputStatus = useMemo(
-      () => getStatus(DataInputStepNumber, dataInputStep),
+      () => getStatus(DataInputStep.Macros, dataInputStep),
       [dataInputStep]
     );
 
@@ -59,7 +51,7 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
                   titleSize="xs"
-                  number={DataInputStepNumber}
+                  number={DataInputStep.Macros}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
@@ -130,11 +122,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       [copyStep, uploadStep, resourcesStep]
     );
 
-    return (
-      <SubStepsWrapper>
-        <EuiSteps titleSize="xxs" steps={steps} />
-      </SubStepsWrapper>
-    );
+    return <SubSteps steps={steps} />;
   }
 );
 MacrosDataInputSubSteps.displayName = 'MacrosDataInputActive';

@@ -6,25 +6,20 @@
  */
 
 import React from 'react';
-import { euiLightVars } from '@kbn/ui-theme';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { RuleMigrationTranslationResult } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { convertTranslationResultIntoText } from '../../utils/helpers';
+import {
+  convertTranslationResultIntoText,
+  statusToColorMap,
+} from '../../utils/translation_results';
 import * as i18n from './translations';
 
 const statusTextWrapperClassName = css`
   width: 100%;
   display: inline-grid;
 `;
-
-const { euiColorVis0, euiColorVis7, euiColorVis9 } = euiLightVars;
-const statusToColorMap: Record<RuleMigrationTranslationResult, string> = {
-  full: euiColorVis0,
-  partial: euiColorVis7,
-  untranslatable: euiColorVis9,
-};
 
 interface StatusBadgeProps {
   value?: RuleMigrationTranslationResult;

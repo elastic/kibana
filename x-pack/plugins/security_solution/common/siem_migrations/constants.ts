@@ -44,7 +44,7 @@ export enum SiemMigrationStatus {
   FAILED = 'failed',
 }
 
-export enum SiemMigrationRuleTranslationResult {
+export enum RuleTranslationResult {
   FULL = 'full',
   PARTIAL = 'partial',
   UNTRANSLATABLE = 'untranslatable',

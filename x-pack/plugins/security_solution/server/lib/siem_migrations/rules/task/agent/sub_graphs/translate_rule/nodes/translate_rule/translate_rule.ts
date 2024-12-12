@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
 import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
@@ -63,9 +63,9 @@ export const getTranslateRuleNode = ({
   };
 };
 
-const getTranslationResult = (esqlQuery: string): SiemMigrationRuleTranslationResult => {
+const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
   if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
-    return SiemMigrationRuleTranslationResult.PARTIAL;
+    return RuleTranslationResult.PARTIAL;
   }
-  return SiemMigrationRuleTranslationResult.FULL;
+  return RuleTranslationResult.FULL;
 };

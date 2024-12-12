@@ -28,7 +28,7 @@ import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
-} from '../../../utils/helpers';
+} from '../../../utils/translation_results';
 
 interface TranslationTabProps {
   ruleMigration: RuleMigration;

@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import {
-  RuleMigrationTranslationResultEnum,
-  type RuleMigrationTranslationResult,
-} from '../../../../common/siem_migrations/model/rule_migration.gen';
+import { euiLightVars } from '@kbn/ui-theme';
+import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import type { RuleMigrationTranslationResult } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
+
+const { euiColorVis0, euiColorVis7, euiColorVis9 } = euiLightVars;
+export const statusToColorMap: Record<RuleTranslationResult, string> = {
+  [RuleTranslationResult.FULL]: euiColorVis0,
+  [RuleTranslationResult.PARTIAL]: euiColorVis7,
+  [RuleTranslationResult.UNTRANSLATABLE]: euiColorVis9,
+};
 
 export const convertTranslationResultIntoColor = (status?: RuleMigrationTranslationResult) => {
   switch (status) {
-    case RuleMigrationTranslationResultEnum.full:
+    case RuleTranslationResult.FULL:
       return 'primary';
 
-    case RuleMigrationTranslationResultEnum.partial:
+    case RuleTranslationResult.PARTIAL:
       return 'warning';
 
-    case RuleMigrationTranslationResultEnum.untranslatable:
+    case RuleTranslationResult.UNTRANSLATABLE:
       return 'danger';
 
     default:
@@ -29,13 +35,13 @@ export const convertTranslationResultIntoColor = (status?: RuleMigrationTranslat
 
 export const convertTranslationResultIntoText = (status?: RuleMigrationTranslationResult) => {
   switch (status) {
-    case RuleMigrationTranslationResultEnum.full:
+    case RuleTranslationResult.FULL:
       return i18n.SIEM_TRANSLATION_RESULT_FULL_LABEL;
 
-    case RuleMigrationTranslationResultEnum.partial:
+    case RuleTranslationResult.PARTIAL:
       return i18n.SIEM_TRANSLATION_RESULT_PARTIAL_LABEL;
 
-    case RuleMigrationTranslationResultEnum.untranslatable:
+    case RuleTranslationResult.UNTRANSLATABLE:
       return i18n.SIEM_TRANSLATION_RESULT_UNTRANSLATABLE_LABEL;
 
     default:

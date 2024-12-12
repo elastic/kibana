@@ -7,7 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getRetrieveIntegrationsNode } from './nodes/retrieve_integrations';
 import { getTranslateRuleNode } from './nodes/translate_rule';
@@ -54,7 +54,7 @@ export function getTranslateRuleGraph({
 const validationRouter = (state: TranslateRuleState) => {
   if (
     state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    state.translation_result === SiemMigrationRuleTranslationResult.FULL
+    state.translation_result === RuleTranslationResult.FULL
   ) {
     if (!isEmpty(state.validation_errors?.esql_errors)) {
       return 'fixQueryErrors';

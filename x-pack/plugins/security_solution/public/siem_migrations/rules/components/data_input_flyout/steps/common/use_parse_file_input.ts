@@ -26,7 +26,7 @@ export const useParseFileInput = (onFileParsed: OnFileParsed) => {
 
       setError(undefined);
 
-      const rulesFile = files[0];
+      const file = files[0];
       const reader = new FileReader();
 
       reader.onloadstart = () => setIsParsing(true);
@@ -68,7 +68,7 @@ export const useParseFileInput = (onFileParsed: OnFileParsed) => {
       reader.onerror = handleReaderError;
       reader.onabort = handleReaderError;
 
-      reader.readAsText(rulesFile);
+      reader.readAsText(file);
     },
     [onFileParsed]
   );

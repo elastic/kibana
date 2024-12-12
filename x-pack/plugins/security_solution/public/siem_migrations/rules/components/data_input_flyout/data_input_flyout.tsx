@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -23,8 +24,9 @@ import type {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
-import { DataInputStep } from './types';
+import { DataInputStep } from './steps/constants';
 import { MacrosDataInput } from './steps/macros/macros_data_input';
+import { LookupsDataInput } from './steps/lookups/lookups_data_input';
 
 interface MissingResourcesIndexed {
   macros: string[];
@@ -87,6 +89,9 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     const onMacrosCreated = useCallback(() => {
       setDataInputStep(DataInputStep.Lookups);
     }, []);
+    const onLookupsCreated = useCallback(() => {
+      setDataInputStep(DataInputStep.End);
+    }, []);
 
     return (
       <EuiFlyoutResizable
@@ -125,17 +130,25 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 onMissingResourcesFetched={onMissingResourcesFetched}
               />
             </EuiFlexItem>
+            <EuiFlexItem>
+              <LookupsDataInput
+                dataInputStep={dataInputStep}
+                missingLookups={missingResourcesIndexed?.lookups}
+                migrationStats={migrationStats}
+                onLookupsCreated={onLookupsCreated}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onClose}>
+              <EuiButtonEmpty onClick={onClose}>
                 <FormattedMessage
                   id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.closeButton"
                   defaultMessage="Close"
                 />
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
