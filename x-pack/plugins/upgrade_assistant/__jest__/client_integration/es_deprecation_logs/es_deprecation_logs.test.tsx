@@ -22,7 +22,6 @@ import {
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.
 // See: https://github.com/elastic/kibana/issues/104855
-const MOCKED_TIME = '2021-09-05T10:49:01.805Z';
 jest.mock('../../../public/application/lib/logs_checkpoint', () => {
   const originalModule = jest.requireActual('../../../public/application/lib/logs_checkpoint');
 
