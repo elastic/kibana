@@ -46875,6 +46875,20 @@ components:
               type: string
           required:
             - name
+        service:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
         user:
           type: object
           properties:
@@ -47172,6 +47186,7 @@ components:
       enum:
         - host.name
         - user.name
+        - service.name
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string

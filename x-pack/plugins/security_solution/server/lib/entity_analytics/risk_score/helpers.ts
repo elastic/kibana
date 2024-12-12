@@ -9,8 +9,14 @@ import type { RiskScoresCalculationResponse } from '../../../../common/api/entit
 import type { AfterKeys, EntityAfterKey } from '../../../../common/api/entity_analytics/common';
 import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 
+const identifierByEntityType = {
+  host: 'host.name',
+  user: 'user.name',
+  service: 'service.name',
+};
+
 export const getFieldForIdentifier = (identifierType: IdentifierType): string =>
-  identifierType === 'host' ? 'host.name' : 'user.name';
+  identifierByEntityType[identifierType];
 
 export const getAfterKeyForIdentifierType = ({
   afterKeys,
@@ -22,4 +28,5 @@ export const getAfterKeyForIdentifierType = ({
 
 export const isRiskScoreCalculationComplete = (result: RiskScoresCalculationResponse): boolean =>
   Object.keys(result.after_keys.host ?? {}).length === 0 &&
-  Object.keys(result.after_keys.user ?? {}).length === 0;
+  Object.keys(result.after_keys.user ?? {}).length === 0 &&
+  Object.keys(result.after_keys.service ?? {}).length === 0;

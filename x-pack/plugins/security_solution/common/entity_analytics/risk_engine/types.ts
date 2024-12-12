@@ -10,7 +10,10 @@ import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_ana
 export enum RiskScoreEntity {
   host = 'host',
   user = 'user',
+  // TODO Add service when FE is updated
 }
+// TODO: Remove this when FE is updated
+export const SERVICE_RISK_SCORE_ENTITY = 'service';
 
 export interface InitRiskEngineResult {
   legacyRiskEngineDisabled: boolean;

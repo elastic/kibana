@@ -81,6 +81,20 @@ describe('AssetCriticalityDataClient', () => {
                   },
                 },
               },
+              service: {
+                properties: {
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                },
+              },
               user: {
                 properties: {
                   asset: {

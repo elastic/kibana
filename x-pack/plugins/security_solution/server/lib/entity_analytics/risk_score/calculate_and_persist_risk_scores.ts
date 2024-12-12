@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
@@ -20,6 +21,7 @@ export const calculateAndPersistRiskScores = async (
     logger: Logger;
     spaceId: string;
     riskScoreDataClient: RiskScoreDataClient;
+    experimentalFeatures: ExperimentalFeatures;
   }
 ): Promise<RiskScoresCalculationResponse> => {
   const { riskScoreDataClient, spaceId, returnScores, refresh, ...rest } = params;
@@ -29,7 +31,7 @@ export const calculateAndPersistRiskScores = async (
   });
   const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);
 
-  if (!scores.host?.length && !scores.user?.length) {
+  if (!scores.host?.length && !scores.user?.length && !scores.service?.length) {
     return { after_keys: {}, errors: [], scores_written: 0 };
   }
 
