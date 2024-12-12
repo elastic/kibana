@@ -133,7 +133,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/ux/,
+        /^x-pack\/solutions\/observability\/plugins\/ux/,
         /^x-pack\/solutions\/observability\/plugins\/exploratory_view/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')

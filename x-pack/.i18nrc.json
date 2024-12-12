@@ -172,7 +172,7 @@
       "solutions/observability/plugins/synthetics"
     ],
     "xpack.ux": [
-      "plugins/observability_solution/ux"
+      "solutions/observability/plugins/ux"
     ],
     "xpack.urlDrilldown": "plugins/drilldowns/url_drilldown",
     "xpack.watcher": "plugins/watcher"

@@ -934,7 +934,6 @@ x-pack/plugins/observability_solution/observability_onboarding/e2e @elastic/obs-
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
-x-pack/plugins/observability_solution/ux @elastic/obs-ux-management-team
 x-pack/plugins/osquery @elastic/security-defend-workflows
 x-pack/plugins/painless_lab @elastic/kibana-management
 x-pack/plugins/remote_clusters @elastic/kibana-management
@@ -994,6 +993,8 @@ x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-tea
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
+ty/plugins/uptime @elastic/obs-ux-management-team
+x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
