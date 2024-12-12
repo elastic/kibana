@@ -65,7 +65,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<{ source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
+              "<any>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
               {
@@ -75,7 +75,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<{ types: { id: string; }[]; }>>; security?: ",
+              "<{ types: { id: string; display_name: string; }[]; }>>; security?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -91,7 +91,7 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; }; }, { type: { id: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; }; }; }, { body: { type: { id: string; }; }; }>, ",
+              "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; display_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; display_name: string; }, { id: string; display_name: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; display_name: string; }; }, { type: { id: string; display_name: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; display_name: string; }; }; }, { body: { type: { id: string; display_name: string; }; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
               {
@@ -485,7 +485,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<{ source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
+              "<any>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
               {
@@ -495,7 +495,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<{ types: { id: string; }[]; }>>; security?: ",
+              "<{ types: { id: string; display_name: string; }[]; }>>; security?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -511,7 +511,7 @@
                 "section": "def-common.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; }; }, { type: { id: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; }; }; }, { body: { type: { id: string; }; }; }>, ",
+              "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; display_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; display_name: string; }, { id: string; display_name: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; display_name: string; }; }, { type: { id: string; display_name: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; display_name: string; }; }; }, { body: { type: { id: string; display_name: string; }; }; }>, ",
               "EntityManagerRouteHandlerResources",
               ", ",
               {
@@ -1494,7 +1494,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<{ source: { id: string; filters: string[]; metadata_fields: string[]; type_id: string; index_patterns: string[]; identity_fields: string[]; timestamp_field?: string | undefined; display_name?: string | undefined; }; }>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
+          "<any>, undefined>; \"GET /internal/entities/v2/definitions/types\": { endpoint: \"GET /internal/entities/v2/definitions/types\"; handler: ServerRouteHandler<",
           "EntityManagerRouteHandlerResources",
           ", undefined, ",
           {
@@ -1504,7 +1504,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<{ types: { id: string; }[]; }>>; security?: ",
+          "<{ types: { id: string; display_name: string; }[]; }>>; security?: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -1520,7 +1520,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; }, { id: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; }; }, { type: { id: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; }; }; }, { body: { type: { id: string; }; }; }>, ",
+          "<\"POST /internal/entities/v2/definitions/types\", Zod.ZodObject<{ body: Zod.ZodObject<{ type: Zod.ZodObject<{ id: Zod.ZodString; display_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; display_name: string; }, { id: string; display_name: string; }>; }, \"strip\", Zod.ZodTypeAny, { type: { id: string; display_name: string; }; }, { type: { id: string; display_name: string; }; }>; }, \"strip\", Zod.ZodTypeAny, { body: { type: { id: string; display_name: string; }; }; }, { body: { type: { id: string; display_name: string; }; }; }>, ",
           "EntityManagerRouteHandlerResources",
           ", ",
           {
