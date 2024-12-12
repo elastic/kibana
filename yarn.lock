@@ -5176,7 +5176,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cross-cluster-replication-plugin@link:x-pack/plugins/cross_cluster_replication":
+"@kbn/cross-cluster-replication-plugin@link:x-pack/platform/plugins/private/cross_cluster_replication":
   version "0.0.0"
   uid ""
 

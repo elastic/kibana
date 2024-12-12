@@ -414,7 +414,7 @@
     "@kbn/core-user-settings-server": "link:packages/core/user-settings/core-user-settings-server",
     "@kbn/core-user-settings-server-internal": "link:packages/core/user-settings/core-user-settings-server-internal",
     "@kbn/core-user-settings-server-mocks": "link:packages/core/user-settings/core-user-settings-server-mocks",
-    "@kbn/cross-cluster-replication-plugin": "link:x-pack/plugins/cross_cluster_replication",
+    "@kbn/cross-cluster-replication-plugin": "link:x-pack/platform/plugins/private/cross_cluster_replication",
     "@kbn/crypto": "link:packages/kbn-crypto",
     "@kbn/crypto-browser": "link:packages/kbn-crypto-browser",
     "@kbn/custom-branding-plugin": "link:x-pack/plugins/custom_branding",
