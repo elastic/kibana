@@ -27,6 +27,7 @@ import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '..
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
+import { NextSteps } from './next_steps';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -193,6 +194,10 @@ export const AgentlessEnrollmentFlyout = ({
               status: confirmDataStatus,
             },
           ]}
+        />
+        <NextSteps
+          packagePolicy={packagePolicy}
+          policyTemplates={packageInfoData?.item.policy_templates}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
