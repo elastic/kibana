@@ -17,7 +17,6 @@
     "@kbn/cloud-plugin",
     "@kbn/utility-types",
     "@kbn/logging",
-    "@kbn/std",
     "@kbn/i18n",
     "@kbn/utils",
     "@kbn/core-logging-server-mocks",
