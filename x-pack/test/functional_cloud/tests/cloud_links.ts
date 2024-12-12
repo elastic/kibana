@@ -146,10 +146,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(cloudLink).to.not.be(null);
       });
 
-      it('Shows the theme darkMode toggle', async () => {
-        await PageObjects.common.clickAndValidate('userMenuButton', 'darkModeToggle');
-        const darkModeSwitch = await find.byCssSelector('[data-test-subj="darkModeToggleSwitch"]');
-        expect(darkModeSwitch).to.not.be(null);
+      it('Shows the appearance buton', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'appearanceSelector');
       });
     });
   });
