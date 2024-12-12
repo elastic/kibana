@@ -39,12 +39,16 @@ export function useUpdateInvestigationNote() {
     },
     {
       onSuccess: (response, { investigationId }) => {
+        queryClient.invalidateQueries({
+          queryKey: investigationKeys.detailNotes(investigationId),
+          exact: false,
+        });
+
         toasts.addSuccess(
           i18n.translate('xpack.investigateApp.useUpdateInvestigationNote.successMessage', {
             defaultMessage: 'Note updated',
           })
         );
-        queryClient.invalidateQueries({ queryKey: investigationKeys.detailNotes(investigationId) });
       },
       onError: (error, {}, context) => {
         toasts.addError(
