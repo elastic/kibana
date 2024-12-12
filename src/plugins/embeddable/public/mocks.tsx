@@ -99,7 +99,6 @@ const createSetupContract = (): Setup => {
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerEmbeddableFactory: jest.fn(),
     registerEnhancement: jest.fn(),
-    setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
 };
