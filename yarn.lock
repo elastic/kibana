@@ -5912,7 +5912,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/index-adapter@link:packages/kbn-index-adapter":
+"@kbn/index-adapter@link:x-pack/solutions/security/packages/kbn-index-adapter":
   version "0.0.0"
   uid ""
 
