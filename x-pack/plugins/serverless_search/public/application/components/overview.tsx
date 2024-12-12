@@ -96,9 +96,7 @@ export const ElasticsearchOverview = () => {
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
       <EuiPageTemplate.Section alignment="top" className="serverlessSearchHeaderSection">
-        <EuiText color="ghost">
-          <WelcomeBanner user={user} assetBasePath={assetBasePath} />
-        </EuiText>
+        <WelcomeBanner user={user} assetBasePath={assetBasePath} />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
         color="subdued"
@@ -201,16 +199,16 @@ export const ElasticsearchOverview = () => {
           links={[
             ...(selectedLanguage.basicConfig
               ? [
-                  {
-                    href: selectedLanguage.basicConfig,
-                    label: i18n.translate(
-                      'xpack.serverlessSearch.configureClient.basicConfigLabel',
-                      {
-                        defaultMessage: 'Basic configuration',
-                      }
-                    ),
-                  },
-                ]
+                {
+                  href: selectedLanguage.basicConfig,
+                  label: i18n.translate(
+                    'xpack.serverlessSearch.configureClient.basicConfigLabel',
+                    {
+                      defaultMessage: 'Basic configuration',
+                    }
+                  ),
+                },
+              ]
               : []),
           ]}
           title={i18n.translate('xpack.serverlessSearch.configureClient.title', {

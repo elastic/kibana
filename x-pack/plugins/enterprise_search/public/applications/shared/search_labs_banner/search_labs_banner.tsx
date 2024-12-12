@@ -36,10 +36,11 @@ export const SearchLabsBanner: React.FC = () => {
     <EuiPanel
       hasBorder
       hasShadow
-      color="success"
+      color="accentSecondary"
       css={css`
         background-image: url(${backgroundImagePath});
         background-repeat: no-repeat;
+        background-size: cover;
       `}
     >
       <SearchLabsLogo
@@ -72,7 +73,7 @@ export const SearchLabsBanner: React.FC = () => {
           <span>
             <EuiButton
               href="https://www.elastic.co/search-labs/tutorials"
-              color="success"
+              color="accentSecondary"
               fill
               target="_blank"
             >
@@ -86,7 +87,7 @@ export const SearchLabsBanner: React.FC = () => {
           <span>
             <EuiButton
               href="https://www.elastic.co/search-labs/tutorials/examples"
-              color="success"
+              color="accentSecondary"
               target="_blank"
             >
               {i18n.translate('xpack.enterpriseSearch.shared.searchLabsBanner.notebooksLabel', {

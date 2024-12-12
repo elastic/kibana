@@ -103,7 +103,7 @@ export const ApiKeyPanelContent: React.FC<ApiKeyPanelContent> = ({ apiKeys, open
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge
-                color={(apiKeys?.length || 0) > 0 ? 'success' : 'warning'}
+                color={(apiKeys?.length || 0) > 0 ? 'accentSecondary' : 'warning'}
                 data-test-subj="api-keys-count-badge"
               >
                 <FormattedMessage

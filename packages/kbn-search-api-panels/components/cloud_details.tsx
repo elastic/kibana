@@ -97,7 +97,7 @@ export const CloudDetailsPanel = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <span>
-                <EuiBadge color="success">
+                <EuiBadge color="accentSecondary">
                   <FormattedMessage
                     id="searchApiPanels.cloudIdDetails.elasticsearchEndpoint.recommendedBadge"
                     defaultMessage="Recommended"
