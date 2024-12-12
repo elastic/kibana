@@ -35,11 +35,11 @@ const rulesSchema = schema.object({
           return 'duration cannot exceed one day';
         }
       },
-      defaultValue: '1m',
+      defaultValue: '1s',
     }),
     enforce: schema.boolean({ defaultValue: false }), // if enforce is false, only warnings will be shown
   }),
-  maxScheduledPerMinute: schema.number({ defaultValue: 32000, min: 0 }),
+  maxScheduledPerMinute: schema.number({ defaultValue: 320000, min: 0 }),
   overwriteProducer: schema.maybe(
     schema.oneOf([
       schema.literal('observability'),
