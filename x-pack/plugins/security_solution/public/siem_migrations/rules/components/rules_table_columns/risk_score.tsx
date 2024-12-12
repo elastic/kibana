@@ -22,6 +22,6 @@ export const createRiskScoreColumn = (): TableColumn => {
     ),
     sortable: true,
     truncateText: true,
-    width: '75px',
+    width: '10%',
   };
 };

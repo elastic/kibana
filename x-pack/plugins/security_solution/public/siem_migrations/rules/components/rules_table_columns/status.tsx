@@ -15,11 +15,9 @@ export const createStatusColumn = (): TableColumn => {
   return {
     field: 'translation_result',
     name: i18n.COLUMN_STATUS,
-    render: (value: RuleMigration['translation_result'], rule: RuleMigration) => (
-      <StatusBadge value={value} installedRuleId={rule.elastic_rule?.id} />
-    ),
-    sortable: false,
+    render: (_, rule: RuleMigration) => <StatusBadge migrationRule={rule} />,
+    sortable: true,
     truncateText: true,
-    width: '12%',
+    width: '15%',
   };
 };

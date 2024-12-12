@@ -54,6 +54,7 @@ export async function initDiagnosticsBundle({
     headers: {
       'kbn-xsrf': 'true',
       'elastic-api-version': '2023-10-31',
+      'x-elastic-internal-origin': 'Kibana',
       ...apiKeyHeader,
     },
   };
@@ -104,8 +105,8 @@ async function getApmIndices(kbnClientOpts: AxiosRequestConfig) {
 async function getFleetPackageInfo(kbnClientOpts: AxiosRequestConfig) {
   const res = await axios.get('/api/fleet/epm/packages/apm', kbnClientOpts);
   return {
-    version: res.data.response.version,
-    isInstalled: res.data.response.status,
+    version: res.data.item.version,
+    isInstalled: res.data.item.status,
   };
 }
 

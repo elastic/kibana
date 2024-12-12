@@ -25,7 +25,7 @@ webpack_cli(
     "//packages/kbn-i18n",
     "//packages/kbn-i18n-react",
     "//packages/kbn-ebt-tools",
-    "//packages/kbn-esql-ast",
+    "//src/platform/packages/shared/kbn-esql-ast",
     "//packages/kbn-monaco",
     "//packages/kbn-datemath",
     "//packages/kbn-analytics",
@@ -57,6 +57,7 @@ webpack_cli(
     "//conditions:default": {
       "NODE_ENV": "development",
       "NODE_OPTIONS": "--openssl-legacy-provider",
+      "REACT_18": "$(REACT_18)",
     },
   }),
   visibility = ["//visibility:public"],

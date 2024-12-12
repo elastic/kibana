@@ -7,8 +7,7 @@
 
 import { darken } from 'polished';
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   InfraFormatter,
   InfraWaffleMapRuleOperator,
@@ -48,18 +47,18 @@ export const StepLegend: React.FC<Props> = ({ legend, formatter }) => {
   return <StepLegendContainer>{legend.rules.map(createStep(formatter))}</StepLegendContainer>;
 };
 
-const StepLegendContainer = euiStyled.div`
+const StepLegendContainer = styled.div`
   display: flex;
   padding: 10px 40px 10px 10px;
 `;
 
-const StepContainer = euiStyled.div`
+const StepContainer = styled.div`
   display: flex;
   margin-right: 20px
   align-items: center;
 `;
 
-const StepSquare = euiStyled.div`
+const StepSquare = styled.div`
   position: relative;
   width: 24px;
   height: 24px;
@@ -69,7 +68,7 @@ const StepSquare = euiStyled.div`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
-const StepSquareInner = euiStyled.div`
+const StepSquareInner = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -78,6 +77,6 @@ const StepSquareInner = euiStyled.div`
   border-radius: 3px;
 `;
 
-const StepLabel = euiStyled.div`
+const StepLabel = styled.div`
   font-size: 12px;
 `;
