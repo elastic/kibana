@@ -87,7 +87,6 @@ export const useMacrosFileUploadStep = ({
       <MacrosFileUpload
         createResources={upsertMigrationResources}
         isLoading={isLoading}
-        // isCreated={isCreated}
         apiError={error?.message}
       />
     ),
