@@ -53,3 +53,4 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
 };
 
 export { urlAllowListValidator } from './sub_action_framework/helpers';
+export { ActionExecutionSourceType } from './lib/action_execution_source';

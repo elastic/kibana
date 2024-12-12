@@ -6,21 +6,24 @@
  */
 
 import { ActionsClientContext } from '../actions_client';
+import { ActionExecutionSourceType } from './action_execution_source';
 import { ExecuteOptions } from './action_executor';
 
-export function getSystemActionKibanaPrivileges(
+export function getActionKibanaPrivileges(
   context: ActionsClientContext,
   connectorId: string,
-  params?: ExecuteOptions['params']
+  params?: ExecuteOptions['params'],
+  source?: ActionExecutionSourceType
 ) {
   const inMemoryConnector = context.inMemoryConnectors.find(
     (connector) => connector.id === connectorId
   );
 
-  const additionalPrivileges = inMemoryConnector?.isSystemAction
-    ? context.actionTypeRegistry.getSystemActionKibanaPrivileges(
+  const additionalPrivileges = inMemoryConnector
+    ? context.actionTypeRegistry.getActionKibanaPrivileges(
         inMemoryConnector.actionTypeId,
-        params
+        params,
+        source
       )
     : [];
 
