@@ -9,7 +9,6 @@ import { postCategorization } from '../../../../common/lib/api/categorization';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { User } from '../../../../common/lib/authentication/types';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
