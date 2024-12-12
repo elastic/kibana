@@ -536,6 +536,7 @@ export function getDiscoverStateContainer({
    * Function e.g. triggered when user changes data view in the sidebar
    */
   const onChangeDataView = async (id: string | DataView) => {
+    await dataStateContainer.reset();
     await changeDataView(id, {
       services,
       internalState: internalStateContainer,
