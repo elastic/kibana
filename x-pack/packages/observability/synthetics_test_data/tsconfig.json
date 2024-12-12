@@ -16,5 +16,8 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/apm-plugin",
+    "@kbn/es-archiver",
+    "@kbn/repo-info",
   ]
 }

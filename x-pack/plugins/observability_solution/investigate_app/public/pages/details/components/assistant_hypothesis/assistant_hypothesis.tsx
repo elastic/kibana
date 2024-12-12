@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
-import React, { useState, useRef, useEffect } from 'react';
-import { omit } from 'lodash';
 import {
   ALERT_FLAPPING_HISTORY,
   ALERT_RULE_EXECUTION_TIMESTAMP,
@@ -17,9 +16,11 @@ import {
   EVENT_KIND,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
+import { omit } from 'lodash';
+import React, { useEffect, useRef, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useInvestigation } from '../../contexts/investigation_context';
 import { useUpdateInvestigation } from '../../../../hooks/use_update_investigation';
+import { useInvestigation } from '../../contexts/investigation_context';
 
 export interface InvestigationContextualInsight {
   key: string;
@@ -27,7 +28,7 @@ export interface InvestigationContextualInsight {
   data: unknown;
 }
 
-export function AssistantHypothesis({ investigationId }: { investigationId: string }) {
+export function AssistantHypothesis() {
   const {
     alert,
     globalParams: { timeRange },
@@ -87,7 +88,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
       .stream('POST /internal/observability/investigation/root_cause_analysis', {
         params: {
           body: {
-            investigationId,
+            investigationId: investigation!.id,
             connectorId,
             context: `The user is investigating an alert for the ${serviceName} service,
             and wants to find the root cause. Here is the alert:
@@ -156,7 +157,7 @@ export function AssistantHypothesis({ investigationId }: { investigationId: stri
         setEvents([]);
         if (investigation?.rootCauseAnalysis) {
           updateInvestigation({
-            investigationId,
+            investigationId: investigation!.id,
             payload: {
               rootCauseAnalysis: {
                 events: [],
