@@ -5600,7 +5600,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expandable-flyout@link:x-pack/solutions/security/packages/kbn-expandable-flyout":
+"@kbn/expandable-flyout@link:x-pack/solutions/security/packages/expandable-flyout":
   version "0.0.0"
   uid ""
 
