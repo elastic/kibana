@@ -141,11 +141,13 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       path: `_inference/completion/${this.inferenceId}/_unified`,
       body: params.body,
     };
+    console.log('==> unified request', request);
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(request, {
-      headers: {
-        ['Content-Type']: 'dont-compress-this',
-      },
+      // headers: {
+      //   ['Content-Type']: 'dont-compress-this',
+      // },
     });
+    console.log('==> unified response', response);
 
     return response;
   }

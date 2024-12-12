@@ -46,7 +46,7 @@ export interface RunActionParamsSchema {
   timeout?: number;
 }
 export interface InferenceChatCompleteParamsSchema {
-  input: string;
+  body: InvokeAIActionParamsSchema;
 }
 
 export interface TraceOptions {

@@ -14,7 +14,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
+import { DEFAULT_OPEN_AI_MODEL } from './constants';
 import {
   InferenceChatCompleteParamsSchema,
   InvokeAIActionParamsSchema,
@@ -197,6 +197,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     signal?: AbortSignal;
   } {
+    const toolsKeyword = llmType === 'inference' ? 'tools' : 'functions';
     const body = {
       temperature: this.#temperature,
       // possible client model override
@@ -206,7 +207,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       // ensure we take the messages from the completion request, not the client request
       n: completionRequest.n,
       stop: completionRequest.stop,
-      functions: completionRequest.functions,
+      [toolsKeyword]: completionRequest.functions,
       messages: completionRequest.messages.map((message) => ({
         role: message.role,
         content: message.content ?? '',
@@ -227,10 +228,14 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         : 'run';
     // create a new connector request body with the assistant message:
     const subActionParams = {
-      ...(completionRequest.stream ? body : { body: JSON.stringify(body) }),
-      signal: this.#signal,
+      ...(completionRequest.stream
+        ? llmType === 'inference'
+          ? { body }
+          : body
+        : { body: JSON.stringify(body) }),
+      // signal: this.#signal,
       // This timeout is large because LangChain prompts can be complicated and take a long time
-      timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+      // timeout: this.#timeout ?? DEFAULT_TIMEOUT,
     };
     console.log('==> subAction', subAction);
     console.log('==> subActionParams', JSON.stringify(subActionParams, null, 2));
