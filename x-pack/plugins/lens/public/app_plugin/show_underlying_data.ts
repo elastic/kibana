@@ -101,7 +101,7 @@ export function getLayerMetaInfo(
     discover_v2?: Capabilities['discover_v2'];
   }>
 ): { meta: LayerMetaInfo | undefined; isVisible: boolean; error: string | undefined } {
-  const isVisible = Boolean(capabilities.navLinks?.discover_v2 && capabilities.discover_v2?.show);
+  const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover_v2?.show);
   // If Multiple tables, return
   // If there are time shifts, return
   // If dataViews have not loaded yet, return
