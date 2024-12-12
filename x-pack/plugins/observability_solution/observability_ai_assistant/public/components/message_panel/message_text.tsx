@@ -156,7 +156,14 @@ export function MessageText({ loading, content, onActionClick }: Props) {
       },
       table: (props) => (
         <>
-          <EuiTable {...props} />
+          <EuiTable
+            {...props}
+            className={css`
+              .euiTableCellContent__text {
+                white-space: normal;
+              }
+            `}
+          />
           <EuiSpacer size="m" />
         </>
       ),

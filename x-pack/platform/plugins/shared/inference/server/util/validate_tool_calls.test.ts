@@ -108,7 +108,7 @@ describe('validateToolCalls', () => {
       });
     }
     expect(() => validate()).toThrowErrorMatchingInlineSnapshot(
-      `"Tool call arguments for my_function were invalid"`
+      `"Tool call arguments for my_function (1) were invalid"`
     );
 
     try {
@@ -119,6 +119,15 @@ describe('validateToolCalls', () => {
           arguments: JSON.stringify({ foo: 'bar' }),
           errorsText: `data must have required property 'bar'`,
           name: 'my_function',
+          toolCalls: [
+            {
+              function: {
+                arguments: JSON.stringify({ foo: 'bar' }),
+                name: 'my_function',
+              },
+              toolCallId: '1',
+            },
+          ],
         });
       } else {
         fail('Expected toolValidationError');

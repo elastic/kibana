@@ -627,9 +627,11 @@ export class ObservabilityAIAssistantClient {
   recall = async ({
     queries,
     categories,
+    limit,
   }: {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
+    limit?: { size?: number; tokenCount?: number };
   }): Promise<RecalledEntry[]> => {
     return (
       this.dependencies.knowledgeBaseService?.recall({
@@ -639,6 +641,7 @@ export class ObservabilityAIAssistantClient {
         categories,
         esClient: this.dependencies.esClient,
         uiSettingsClient: this.dependencies.uiSettingsClient,
+        limit,
       }) || []
     );
   };
