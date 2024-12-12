@@ -33,6 +33,10 @@ export const MicrosoftDefenderEndpointBaseApiResponseSchema = schema.maybe(
 
 export const TestConnectorParamsSchema = schema.object({});
 
+export const AgentDetailsParamsSchema = schema.object({
+  id: schema.string({ minLength: 1 }),
+});
+
 export const IsolateHostParamsSchema = schema.object({
   // FIXME:PT define params once we know them
 });

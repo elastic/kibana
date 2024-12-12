@@ -14,20 +14,21 @@ import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '../../../common/microsof
 import {
   IsolateHostParamsSchema,
   ReleaseHostParamsSchema,
-  MicrosoftDefenderEndpointBaseApiResponseSchema,
   TestConnectorParamsSchema,
+  MicrosoftDefenderEndpointDoNotValidateResponseSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import {
-  IsolateHostParams,
+  MicrosoftDefenderEndpointAgentDetailsParams,
+  MicrosoftDefenderEndpointIsolateHostParams,
   MicrosoftDefenderEndpointBaseApiResponse,
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets,
-  ReleaseHostParams,
-  TestConnectorParams,
+  MicrosoftDefenderEndpointReleaseHostParams,
+  MicrosoftDefenderEndpointTestConnectorParams,
+  MicrosoftDefenderEndpointAgentDetails,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export const API_MAX_RESULTS = 1000;
-export const API_PATH = '/web/api/v2.1';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointConfig,
@@ -35,7 +36,8 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 > {
   private readonly oAuthToken: OAuthTokenManager;
 
-  private urls: {
+  private readonly urls: {
+    machines: string;
     isolateHost: string;
     releaseHost: string;
   };
@@ -45,20 +47,24 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   ) {
     super(params);
 
-    this.oAuthToken = new OAuthTokenManager({
-      ...params,
-      apiRequest: this.request,
-    });
+    this.oAuthToken = new OAuthTokenManager({ ...params, apiRequest: this.request.bind(this) });
 
     this.urls = {
-      isolateHost: `${this.config.url}${API_PATH}/some/path/here`, // FIXME:PT implement once its known
-      releaseHost: `${this.config.url}${API_PATH}/some/path/here`,
+      machines: `${this.config.apiUrl}/api/machines`,
+      isolateHost: `${this.config.apiUrl}/....`, // TODO:PT implememnt
+      releaseHost: `${this.config.apiUrl}/....`,
     };
 
     this.registerSubActions();
   }
 
   private registerSubActions() {
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.TEST_CONNECTOR,
+      method: 'getAgentDetails',
+      schema: TestConnectorParamsSchema,
+    });
+
     this.registerSubAction({
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.ISOLATE_HOST,
       method: 'isolateHost',
@@ -78,10 +84,11 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     });
   }
 
-  private async fetch<R extends MicrosoftDefenderEndpointBaseApiResponse>(
-    req: SubActionRequestParams<R>,
+  private async fetchFromMicrosoft<R extends MicrosoftDefenderEndpointBaseApiResponse>(
+    req: Omit<SubActionRequestParams<R>, 'responseSchema'>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<R> {
+    const bearerAccessToken = await this.oAuthToken.get(connectorUsageCollector);
     const response = await this.request<R>(
       {
         ...req,
@@ -89,11 +96,8 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
         // where the external system might add/remove/change values in the response that we have no
         // control over.
         responseSchema:
-          MicrosoftDefenderEndpointBaseApiResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
-        params: {
-          ...req.params,
-          // APIToken: this.secrets.token, // TODO: inject API token once we know where that goes
-        },
+          MicrosoftDefenderEndpointDoNotValidateResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
+        headers: { Authorization: `Bearer ${bearerAccessToken}` },
       },
       connectorUsageCollector
     );
@@ -124,21 +128,28 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   }
 
   public async testConnector(
-    options: TestConnectorParams,
+    options: MicrosoftDefenderEndpointTestConnectorParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<void> {
-    throw new Error('Not implemented (yet)');
+    await this.getAgentDetails({ id: 'foo' }, connectorUsageCollector);
+  }
+
+  public async getAgentDetails(
+    { id }: MicrosoftDefenderEndpointAgentDetailsParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointAgentDetails> {
+    return this.fetchFromMicrosoft({ url: `${this.urls.machines}/${id}` }, connectorUsageCollector);
   }
 
   public async isolateHost(
-    options: IsolateHostParams,
+    options: MicrosoftDefenderEndpointIsolateHostParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
     throw new Error('Not implemented (yet)');
   }
 
   public async releaseHost(
-    options: ReleaseHostParams,
+    options: MicrosoftDefenderEndpointReleaseHostParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
     throw new Error('Not implemented (yet)');

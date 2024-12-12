@@ -15,6 +15,7 @@ import {
   IsolateHostParamsSchema,
   ReleaseHostParamsSchema,
   TestConnectorParamsSchema,
+  AgentDetailsParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -27,17 +28,23 @@ export type MicrosoftDefenderEndpointBaseApiResponse = TypeOf<
   typeof MicrosoftDefenderEndpointBaseApiResponseSchema
 >;
 
-export type TestConnectorParams = TypeOf<typeof TestConnectorParamsSchema>;
+export type MicrosoftDefenderEndpointAgentDetailsParams = TypeOf<typeof AgentDetailsParamsSchema>;
 
-export type IsolateHostParams = TypeOf<typeof IsolateHostParamsSchema>;
+export interface MicrosoftDefenderEndpointAgentDetails {
+  foo: string; // TODO:PT define
+}
 
-export type ReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
+export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestConnectorParamsSchema>;
+
+export type MicrosoftDefenderEndpointIsolateHostParams = TypeOf<typeof IsolateHostParamsSchema>;
+
+export type MicrosoftDefenderEndpointReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
 
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema
 >;
 
-export interface MicrosoftDefenderEndpointTokenResponse {
+export interface MicrosoftDefenderEndpointApiTokenResponse {
   token_type: 'bearer';
   /** 	The amount of time that an access token is valid (in seconds NOT milliseconds). */
   expires_in: number;

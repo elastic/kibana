@@ -11,7 +11,7 @@ import { MicrosoftDefenderEndpointDoNotValidateResponseSchema } from '../../../c
 import {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets,
-  MicrosoftDefenderEndpointTokenResponse,
+  MicrosoftDefenderEndpointApiTokenResponse,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class OAuthTokenManager {
@@ -38,7 +38,7 @@ export class OAuthTokenManager {
     // FYI: API Docs: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow#get-a-token
     const { oAuthScope, clientId } = this.params.config;
 
-    const newToken = await this.params.apiRequest<MicrosoftDefenderEndpointTokenResponse>(
+    const newToken = await this.params.apiRequest<MicrosoftDefenderEndpointApiTokenResponse>(
       {
         url: this.oAuthTokenUrl,
         method: 'POST',
@@ -52,6 +52,14 @@ export class OAuthTokenManager {
         responseSchema: MicrosoftDefenderEndpointDoNotValidateResponseSchema,
       },
       connectorUsageCollector
+    );
+
+    this.params.logger.debug(
+      () =>
+        `Successfuly created an access token for Microsoft Defend for Endpoint:\n${JSON.stringify({
+          ...newToken.data,
+          access_token: '[RECDACTED]',
+        })}`
     );
 
     this.accessToken = newToken.data.access_token;
