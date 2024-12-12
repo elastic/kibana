@@ -55,7 +55,7 @@ export const CustomFieldValueRt = rt.union([
   rt.string,
   rt.number,
   rt.boolean,
-  rt.record(rt.string, rt.string),
+  customFieldListValueSchema,
   rt.null,
 ]);
 export type CustomFieldValue = rt.TypeOf<typeof CustomFieldValueRt>;

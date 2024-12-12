@@ -34,7 +34,7 @@ export const configureListCustomFieldFactory: CustomFieldFactory<
   convertNullToEmpty: (value) => (value == null ? '' : String(value)),
   getFilterOptions: ({ options }) => options.map((option) => ({ ...option, value: option.key })),
   convertValueToDisplayText: (
-    value: { [x: string]: string } | null,
+    value: CaseCustomFieldList['value'],
     configuration: ListCustomFieldConfiguration
   ) => {
     if (!value) return '';

@@ -210,7 +210,7 @@ export const mimeTypeString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 
-export const customFieldListValueSchema = new rt.Type(
+export const customFieldListValueSchema = new rt.Type<{ [x: string]: string }>(
   'CustomFieldListValue',
   rt.record(rt.string, rt.string).is,
   (input, context) => {
@@ -233,7 +233,7 @@ export const customFieldListValueSchema = new rt.Type(
         `The length of the label is too long. The maximum length is ${MAX_CUSTOM_FIELD_OPTION_LENGTH}.`
       );
     }
-    return rt.success(input);
+    return rt.success(input as { [x: string]: string });
   },
   rt.identity
 );
