@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBadge, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
@@ -38,8 +37,6 @@ export function HighlightField({
   children,
   ...props
 }: HighlightFieldProps) {
-  const { euiTheme } = useEuiTheme();
-
   const hasFieldDescription = !!fieldMetadata?.short;
 
   return formattedValue && value ? (
