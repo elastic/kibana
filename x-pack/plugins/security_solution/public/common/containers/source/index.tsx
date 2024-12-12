@@ -15,7 +15,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
-import { getDataViewStateFromIndexFields } from './use_data_view';
+import { getDataViewStateFromIndexFieldsAsync } from './use_data_view';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
@@ -112,7 +112,7 @@ export const useFetchIndex = (
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
           const dataView = dv.toSpec();
-          const { browserFields } = getDataViewStateFromIndexFields(
+          const { browserFields } = await getDataViewStateFromIndexFieldsAsync(
             iNames.join(','),
             dataView.fields
           );

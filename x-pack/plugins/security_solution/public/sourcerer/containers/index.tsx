@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { sourcererSelectors } from '../store';
 import type { SelectedDataView, SourcererDataView, RunTimeMappings } from '../store/model';
 import { SourcererScopeName } from '../store/model';
 import { checkIfIndicesExist } from '../store/helpers';
-import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
+import { getDataViewStateFromIndexFieldsAsync } from '../../common/containers/source/use_data_view';
 import { useFetchIndex } from '../../common/containers/source';
 import type { State } from '../../common/store/types';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
@@ -107,17 +107,23 @@ export const useSourcererDataView = (
     sourcererDataView.patternList,
   ]);
 
-  const browserFields = useCallback(() => {
-    const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
-      sourcererDataView.patternList.join(','),
-      sourcererDataView.fields
-    );
-    return dataViewBrowserFields;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [browserFields, setBrowserFields] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { browserFields: dataViewBrowserFields } = await getDataViewStateFromIndexFieldsAsync(
+        sourcererDataView.patternList.join(','),
+        sourcererDataView.fields
+      );
+
+      setBrowserFields(dataViewBrowserFields);
+    })();
   }, [sourcererDataView.fields, sourcererDataView.patternList]);
 
   return useMemo(
     () => ({
-      browserFields: browserFields(),
+      browserFields,
       dataViewId: sourcererDataView.id,
       indexPattern: {
         fields: Object.values(sourcererDataView.fields || {}),
