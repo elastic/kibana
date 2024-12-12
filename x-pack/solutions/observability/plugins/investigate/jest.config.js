@@ -7,16 +7,16 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
+  rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/public',
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/common',
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/server',
+    '<rootDir>/x-pack/solutions/observability/plugins/investigate/public',
+    '<rootDir>/x-pack/solutions/observability/plugins/investigate/common',
+    '<rootDir>/x-pack/solutions/observability/plugins/investigate/server',
   ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/observability_solution/investigate/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/solutions/observability/plugins/investigate/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

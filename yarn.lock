@@ -5996,7 +5996,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/investigate-plugin@link:x-pack/plugins/observability_solution/investigate":
+"@kbn/investigate-plugin@link:x-pack/solutions/observability/plugins/investigate":
   version "0.0.0"
   uid ""
 
