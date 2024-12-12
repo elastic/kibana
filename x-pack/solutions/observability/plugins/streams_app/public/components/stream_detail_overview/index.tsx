@@ -15,6 +15,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { getIndexPatterns } from '../../util/hierarchy_helpers';
 
 export function StreamDetailOverview({ definition }: { definition?: StreamDefinition }) {
   const {
@@ -35,18 +36,8 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
   } = useDateRange({ data });
 
   const indexPatterns = useMemo(() => {
-    if (!definition?.id) {
-      return undefined;
-    }
-
-    const isRoot = definition.id.indexOf('.') === -1;
-
-    const dataStreamOfDefinition = definition.id;
-
-    return isRoot
-      ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
-      : [`${dataStreamOfDefinition}*`];
-  }, [definition?.id]);
+    return getIndexPatterns(definition);
+  }, [definition]);
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
