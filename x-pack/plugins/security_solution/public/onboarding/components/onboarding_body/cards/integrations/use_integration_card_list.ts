@@ -16,7 +16,6 @@ import {
 import {
   CARD_DESCRIPTION_LINE_CLAMP,
   CARD_TITLE_LINE_CLAMP,
-  INTEGRATION_APP_ID,
   MAX_CARD_HEIGHT_IN_PX,
   ONBOARDING_APP_ID,
   ONBOARDING_LINK,
@@ -50,15 +49,23 @@ const getFilteredCards = ({
   installedIntegrationList,
   integrationsList,
   navigateTo,
+  onCardClicked,
 }: {
   featuredCardIds?: string[];
   getAppUrl: GetAppUrl;
   installedIntegrationList?: IntegrationCardItem[];
   integrationsList: IntegrationCardItem[];
   navigateTo: NavigateTo;
+  onCardClicked?: (integrationName: string) => void;
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
-    addSecuritySpecificProps({ navigateTo, getAppUrl, card, installedIntegrationList })
+    addSecuritySpecificProps({
+      navigateTo,
+      getAppUrl,
+      card,
+      installedIntegrationList,
+      onCardClicked,
+    })
   );
   if (!featuredCardIds) {
     return { featuredCards: [], integrationCards: securityIntegrationsList };
@@ -74,23 +81,33 @@ const addSecuritySpecificProps = ({
   navigateTo,
   getAppUrl,
   card,
+  onCardClicked,
 }: {
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
   installedIntegrationList?: IntegrationCardItem[];
+  onCardClicked?: (integrationName: string) => void;
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
-  const integrationRootUrl = getAppUrl({ appId: INTEGRATION_APP_ID });
-  const state = {
-    onCancelNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
-    onCancelUrl: onboardingLink,
-    onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
-  };
+
   const url =
     card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
       ? addPathParamToUrl(card.url, onboardingLink)
       : card.url;
+
+  const state = {
+    onCancelNavigateTo: [
+      APP_UI_ID,
+      { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey, onCancelUrl: onboardingLink } },
+    ],
+    onDoneNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey } }],
+    onCancelUrl: onboardingLink,
+    onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH, state: { pkgkey: card.pkgkey } }],
+    pkgkey: card.pkgkey,
+    panel: 'overview', // Default to the overview tab on modal opened
+  };
+
   return {
     ...card,
     titleLineClamp: CARD_TITLE_LINE_CLAMP,
@@ -101,10 +118,12 @@ const addSecuritySpecificProps = ({
     onCardClick: () => {
       const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
       trackOnboardingLinkClick(trackId);
+
       if (url.startsWith(APP_INTEGRATIONS_PATH)) {
+        onCardClicked?.(card.name); // fix me: type error
+
         navigateTo({
-          appId: INTEGRATION_APP_ID,
-          path: url.slice(integrationRootUrl.length),
+          path: `${addPathParamToUrl(ONBOARDING_PATH, onboardingLink)}#integrations`,
           state,
         });
       } else if (url.startsWith('http') || url.startsWith('https')) {
@@ -119,15 +138,24 @@ const addSecuritySpecificProps = ({
 export const useIntegrationCardList = ({
   integrationsList,
   featuredCardIds,
+  onCardClicked,
 }: {
   integrationsList: IntegrationCardItem[];
   featuredCardIds?: string[] | undefined;
+  onCardClicked?: (integrationName: string) => void;
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
 
   const { featuredCards, integrationCards } = useMemo(
-    () => getFilteredCards({ navigateTo, getAppUrl, integrationsList, featuredCardIds }),
-    [navigateTo, getAppUrl, integrationsList, featuredCardIds]
+    () =>
+      getFilteredCards({
+        navigateTo,
+        getAppUrl,
+        integrationsList,
+        featuredCardIds,
+        onCardClicked,
+      }),
+    [navigateTo, getAppUrl, integrationsList, featuredCardIds, onCardClicked]
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {
