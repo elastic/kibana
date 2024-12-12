@@ -329,8 +329,8 @@ describe('Observability AI Assistant client', () => {
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
             functionCalling: 'native',
-            toolChoice: 'auto',
-            tools: {},
+            toolChoice: undefined,
+            tools: undefined,
           },
         ]);
       });
@@ -1373,7 +1373,7 @@ describe('Observability AI Assistant client', () => {
 
       expect(Object.keys(firstBody.tools ?? {}).length).toEqual(1);
 
-      expect(body.tools).toEqual({});
+      expect(body.tools).toEqual(undefined);
     });
   });
 
