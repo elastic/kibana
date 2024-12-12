@@ -83,8 +83,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       // When data retention is not set and lifecycle is enabled, is the only scenario in
       // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
       // dont have inifinite data retention.
-      infiniteRetentionPeriod:
-        isBulkEdit && lifecycle?.enabled && !lifecycle?.data_retention,
+      infiniteRetentionPeriod: isBulkEdit && lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: editDataRetentionFormSchema,
     id: 'editDataRetentionForm',
@@ -179,12 +178,16 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       (ds: DataStream) =>
         formData.dataRetention &&
         formData.timeUnit &&
-        (!ds.lifecycle?.data_retention ||
-          ds.lifecycle?.data_retention === -1 ||
+        ((ds.lifecycle?.data_retention &&
           isRetentionBiggerThan(
             ds.lifecycle.data_retention,
             `${formData.dataRetention}${formData.timeUnit}`
-          ))
+          )) ||
+          (ds.lifecycle?.effective_retention &&
+            isRetentionBiggerThan(
+              ds.lifecycle.effective_retention,
+              `${formData.dataRetention}${formData.timeUnit}`
+            )))
     )
     .map(({ name }: DataStream) => name);
 
@@ -218,21 +221,19 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             </>
           )}
 
-          {enableProjectLevelRetentionChecks &&
-            isBulkEdit &&
-            lifecycle?.globalMaxRetention && (
-              <>
-                <FormattedMessage
-                  id="xpack.idxMgmt.dataStreams.editDataRetentionModal.modalTitleText"
-                  defaultMessage="Maximum data retention period is {maxRetention} {unitText}"
-                  values={{
-                    maxRetention: globalMaxRetention.size,
-                    unitText: globalMaxRetention.unitText,
-                  }}
-                />
-                <EuiSpacer />
-              </>
-            )}
+          {enableProjectLevelRetentionChecks && isBulkEdit && lifecycle?.globalMaxRetention && (
+            <>
+              <FormattedMessage
+                id="xpack.idxMgmt.dataStreams.editDataRetentionModal.modalTitleText"
+                defaultMessage="Maximum data retention period is {maxRetention} {unitText}"
+                values={{
+                  maxRetention: globalMaxRetention.size,
+                  unitText: globalMaxRetention.unitText,
+                }}
+              />
+              <EuiSpacer />
+            </>
+          )}
 
           {enableTogglingDataRetention && (
             <UseField
