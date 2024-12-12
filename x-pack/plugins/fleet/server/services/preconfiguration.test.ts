@@ -118,7 +118,17 @@ function getPutPreconfiguredPackagesMock() {
   });
 
   soClient.delete.mockResolvedValue({});
+  soClient.update.mockImplementation(async (type, id) => {
+    const attributes = mockConfiguredPolicies.get(id);
+    if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
 
+    return {
+      id,
+      attributes,
+      type: type as string,
+      references: [],
+    };
+  });
   return soClient;
 }
 
