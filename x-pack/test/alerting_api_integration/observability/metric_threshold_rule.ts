@@ -38,12 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('alert and action creation', () => {
       before(async () => {
-        // await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
-        //   anomalyThreshold: 50,
-        //   description: '',
-        //   metricAlias: 'kbn-data-forge-fake_hosts.fake_hosts-*',
-        //   name: 'Default',
-        // });
         dataForgeConfig = {
           schedule: [
             {
