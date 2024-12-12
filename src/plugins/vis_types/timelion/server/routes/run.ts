@@ -42,7 +42,8 @@ export function runRoute(
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because it executes some server side data processing and uses the data-plugin to query ES following the data-plugin authz rules.',
         },
       },
       validate: {

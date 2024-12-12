@@ -28,7 +28,8 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason:
+              'This route is opted out from authorization because uses the current user authorizations.',
           },
         },
         validate: {

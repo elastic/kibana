@@ -24,7 +24,8 @@ export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framew
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because it uses the data-plugin to query ES following the data-plugin authz rules.',
         },
       },
       validate: {
