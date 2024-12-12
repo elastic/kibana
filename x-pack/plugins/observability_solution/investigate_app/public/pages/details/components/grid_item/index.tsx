@@ -7,8 +7,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React from 'react';
-import { useTheme } from '../../../../hooks/use_theme';
 import { InvestigateTextButton } from '../../../../components/investigate_text_button';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export const GRID_ITEM_HEADER_HEIGHT = 40;
 
@@ -20,8 +20,6 @@ interface GridItemProps {
   onDelete: () => void;
   loading: boolean;
 }
-
-const editTitleButtonClassName = `investigateGridItemTitleEditButton`;
 
 const titleContainerClassName = css`
   overflow: hidden;
@@ -35,11 +33,6 @@ const titleItemClassName = css`
   }
 `;
 
-const panelContainerClassName = css`
-  overflow: clip;
-  overflow-clip-margin: 20px;
-`;
-
 const panelClassName = css`
   overflow-y: auto;
 `;
@@ -47,9 +40,6 @@ const panelClassName = css`
 const panelContentClassName = css`
   overflow-y: auto;
   height: 100%;
-  > [data-shared-item] {
-    height: 100%;
-  }
 `;
 
 export function GridItem({ id, title, children, onDelete, onCopy, loading }: GridItemProps) {
@@ -64,10 +54,6 @@ export function GridItem({ id, title, children, onDelete, onCopy, loading }: Gri
     max-width: 100%;
     transition: opacity ${theme.animation.normal} ${theme.animation.resistance};
     overflow: auto;
-
-    &:not(:hover) .${editTitleButtonClassName} {
-      opacity: 0;
-    }
   `;
 
   return (
@@ -119,9 +105,7 @@ export function GridItem({ id, title, children, onDelete, onCopy, loading }: Gri
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow className={panelContainerClassName}>
-          <div className={panelContentClassName}>{children}</div>
-        </EuiFlexItem>
+        <EuiFlexItem className={panelContentClassName}>{children}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

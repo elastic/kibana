@@ -51,8 +51,7 @@ export function useFetchAllInvestigationStats(): Response {
       };
     },
     retry: false,
-    cacheTime: 600 * 1000, // 10 minutes
-    staleTime: 0,
+    staleTime: 15 * 1000,
     onError: (error: Error) => {
       toasts.addError(error, {
         title: i18n.translate('xpack.investigateApp.useFetchAllInvestigationStats.errorTitle', {

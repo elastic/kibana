@@ -7,9 +7,11 @@
 
 import datemath from '@elastic/datemath';
 import {
+  AlertEventResponse,
+  AnnotationEventResponse,
   GetEventsParams,
-  GetEventsResponse,
-  getEventsResponseSchema,
+  alertEventSchema,
+  annotationEventSchema,
 } from '@kbn/investigation-shared';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import {
@@ -19,13 +21,13 @@ import {
   ALERT_STATUS,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { AlertsClient } from './get_alerts_client';
 import { rangeQuery } from '../lib/queries';
+import { AlertsClient } from './get_alerts_client';
 
 export async function getAnnotationEvents(
   params: GetEventsParams,
   annotationsClient: ScopedAnnotationsClient
-): Promise<GetEventsResponse> {
+): Promise<AnnotationEventResponse[]> {
   const response = await annotationsClient.find({
     start: params?.rangeFrom,
     end: params?.rangeTo,
@@ -60,13 +62,13 @@ export async function getAnnotationEvents(
       };
     });
 
-  return getEventsResponseSchema.parse(events);
+  return annotationEventSchema.array().parse(events);
 }
 
 export async function getAlertEvents(
   params: GetEventsParams,
   alertsClient: AlertsClient
-): Promise<GetEventsResponse> {
+): Promise<AlertEventResponse[]> {
   const startInMs = datemath.parse(params?.rangeFrom ?? 'now-15m')!.valueOf();
   const endInMs = datemath.parse(params?.rangeTo ?? 'now')!.valueOf();
   const filterJSON = params?.filter ? JSON.parse(params.filter) : {};
@@ -101,5 +103,5 @@ export async function getAlertEvents(
     };
   });
 
-  return getEventsResponseSchema.parse(events);
+  return alertEventSchema.array().parse(events);
 }

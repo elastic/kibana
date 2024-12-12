@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
-import moment from 'moment';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { EventSchema } from '@kbn/investigation-shared';
+import { AlertEventResponse } from '@kbn/investigation-shared';
+import moment from 'moment';
+import React from 'react';
 
-export function AnnotationEvent({ event }: { event: EventSchema }) {
-  const timestamp = event.timestamp;
-
+export const AlertEvent = ({ event }: { event: AlertEventResponse }) => {
   return (
     <LineAnnotation
       id={event.id}
       domainType={AnnotationDomainType.XDomain}
-      dataValues={[
-        {
-          dataValue: moment(timestamp).valueOf(),
-          details: event.description,
-          header: moment(event.timestamp).format('lll'),
-        },
-      ]}
       marker={
         <span>
-          <EuiIcon style={{ marginTop: -16 }} type="dot" size="l" />
+          <EuiIcon style={{ marginTop: -16 }} type="dot" size="l" color="danger" />
         </span>
       }
       markerPosition="bottom"
+      dataValues={[
+        {
+          dataValue: moment(event.timestamp).valueOf(),
+          header: moment(event.timestamp).format('lll'),
+          details: event.description,
+        },
+      ]}
     />
   );
-}
+};

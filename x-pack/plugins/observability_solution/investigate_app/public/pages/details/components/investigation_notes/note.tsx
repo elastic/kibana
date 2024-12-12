@@ -21,6 +21,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { EditNoteForm } from './edit_note_form';
+import { useDeleteInvestigationNote } from '../../../../hooks/use_delete_investigation_note';
 
 const textContainerClassName = css`
   padding-top: 2px;
@@ -36,7 +37,12 @@ interface Props {
 export function Note({ note, isOwner, userProfile, userProfileLoading }: Props) {
   const theme = useTheme();
   const [isEditing, setIsEditing] = useState(false);
-  const { deleteNote, isDeletingNote } = useInvestigation();
+  const { investigation } = useInvestigation();
+  const { mutate: deleteNote, isLoading: isDeletingNote } = useDeleteInvestigationNote();
+
+  const onDeleteNote = () => {
+    deleteNote({ investigationId: investigation!.id, noteId: note.id });
+  };
 
   const timelineContainerClassName = css`
     padding-bottom: 16px;
@@ -98,7 +104,7 @@ export function Note({ note, isOwner, userProfile, userProfileLoading }: Props) 
                 iconSize="s"
                 iconType="trash"
                 disabled={isDeletingNote}
-                onClick={async () => await deleteNote(note.id)}
+                onClick={onDeleteNote}
                 data-test-subj="deleteInvestigationNoteButton"
                 className={actionButtonClassname}
               />

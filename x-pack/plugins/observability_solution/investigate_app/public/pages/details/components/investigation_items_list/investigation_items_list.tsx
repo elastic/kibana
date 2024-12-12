@@ -18,7 +18,7 @@ export function InvestigationItemsList() {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="m" responsive>
       {renderableItems.map((item) => {
         return (
           <EuiFlexItem grow={false} key={`item-${item.id}`}>

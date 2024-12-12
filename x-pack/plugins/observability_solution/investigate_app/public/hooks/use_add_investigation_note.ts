@@ -11,8 +11,9 @@ import {
   CreateInvestigationNoteParams,
   CreateInvestigationNoteResponse,
 } from '@kbn/investigation-shared';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
+import { investigationKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -23,6 +24,7 @@ export function useAddInvestigationNote() {
       notifications: { toasts },
     },
   } = useKibana();
+  const queryClient = useQueryClient();
 
   return useMutation<
     CreateInvestigationNoteResponse,
@@ -39,7 +41,12 @@ export function useAddInvestigationNote() {
       );
     },
     {
-      onSuccess: (response, {}) => {
+      onSuccess: (_, { investigationId }) => {
+        queryClient.invalidateQueries({
+          queryKey: investigationKeys.detailNotes(investigationId),
+          exact: false,
+        });
+
         toasts.addSuccess(
           i18n.translate('xpack.investigateApp.addInvestigationNote.successMessage', {
             defaultMessage: 'Note saved',

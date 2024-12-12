@@ -7,19 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { type GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { GetInvestigationResponse, InvestigationItem, Item } from '@kbn/investigation-shared';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { isEqual } from 'lodash';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useAddInvestigationItem } from '../../../hooks/use_add_investigation_item';
-import { useAddInvestigationNote } from '../../../hooks/use_add_investigation_note';
 import { useDeleteInvestigationItem } from '../../../hooks/use_delete_investigation_item';
-import { useDeleteInvestigationNote } from '../../../hooks/use_delete_investigation_note';
-import { useFetchInvestigation } from '../../../hooks/use_fetch_investigation';
 import { useFetchAlert } from '../../../hooks/use_fetch_alert';
+import { useFetchInvestigation } from '../../../hooks/use_fetch_investigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUpdateInvestigation } from '../../../hooks/use_update_investigation';
-import { useUpdateInvestigationNote } from '../../../hooks/use_update_investigation_note';
 
 export type RenderedInvestigationItem = InvestigationItem & {
   loading: boolean;
@@ -36,13 +33,6 @@ interface InvestigationContextProps {
   deleteItem: (itemId: string) => Promise<void>;
   isAddingItem: boolean;
   isDeletingItem: boolean;
-  // note
-  addNote: (content: string) => Promise<void>;
-  updateNote: (noteId: string, content: string) => Promise<void>;
-  deleteNote: (noteId: string) => Promise<void>;
-  isAddingNote: boolean;
-  isUpdatingNote: boolean;
-  isDeletingNote: boolean;
 }
 
 export const InvestigationContext = createContext<InvestigationContextProps>({
@@ -54,13 +44,6 @@ export const InvestigationContext = createContext<InvestigationContextProps>({
   deleteItem: async () => {},
   isAddingItem: false,
   isDeletingItem: false,
-  // note
-  addNote: async () => {},
-  updateNote: async (noteId: string, content: string) => {},
-  deleteNote: async (noteId: string) => {},
-  isAddingNote: false,
-  isUpdatingNote: false,
-  isDeletingNote: false,
 });
 
 export function useInvestigation() {
@@ -89,32 +72,6 @@ export function InvestigationProvider({
   const cache = useRef<
     Record<string, { globalParams: GlobalWidgetParameters; item: RenderedInvestigationItem }>
   >({});
-
-  const { mutateAsync: addInvestigationNote, isLoading: isAddingNote } = useAddInvestigationNote();
-  const { mutateAsync: updateInvestigationNote, isLoading: isUpdatingNote } =
-    useUpdateInvestigationNote();
-  const { mutateAsync: deleteInvestigationNote, isLoading: isDeletingNote } =
-    useDeleteInvestigationNote();
-
-  const addNote = async (content: string) => {
-    await addInvestigationNote({ investigationId: initialInvestigation.id, note: { content } });
-    refetch();
-  };
-
-  const updateNote = async (noteId: string, content: string) => {
-    await updateInvestigationNote({
-      investigationId: initialInvestigation.id,
-      noteId,
-      note: { content: content.trim() },
-    });
-
-    refetch();
-  };
-
-  const deleteNote = async (noteId: string) => {
-    await deleteInvestigationNote({ investigationId: initialInvestigation.id, noteId });
-    refetch();
-  };
 
   const { mutateAsync: updateInvestigation } = useUpdateInvestigation();
   const { mutateAsync: addInvestigationItem, isLoading: isAddingItem } = useAddInvestigationItem();
@@ -221,12 +178,6 @@ export function InvestigationProvider({
         deleteItem,
         isAddingItem,
         isDeletingItem,
-        addNote,
-        updateNote,
-        deleteNote,
-        isAddingNote,
-        isUpdatingNote,
-        isDeletingNote,
       }}
     >
       {children}
