@@ -132,7 +132,7 @@ elastic-agent-*
 fleet-server-*
 elastic-agent.yml
 fleet-server.yml
-/packages/**/package-map.json
+src/platform/packages/**/package-map.json
 /packages/**/config-paths.json
 /packages/kbn-synthetic-package-map/
 **/.synthetics/
