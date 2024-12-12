@@ -75,7 +75,7 @@ const getDistinctColor = (
   isSplitChart: boolean,
   overwriteColors: { [key: string]: string } = {},
   visParams: PartitionVisParams,
-  palettes: PaletteRegistry | null,
+  paletteService: PaletteRegistry | null,
   syncColors: boolean,
   { parentSeries, allSeries }: DistinctSeries,
   formattedCategoricalKey: string
@@ -93,7 +93,7 @@ const getDistinctColor = (
 
   const index = allSeries.findIndex((d) => isEqual(d, categoricalKey));
   const isSplitParentLayer = isSplitChart && parentSeries.includes(categoricalKey);
-  return palettes?.get(visParams.palette.name).getCategoricalColor(
+  return paletteService?.get(visParams.palette.name).getCategoricalColor(
     [
       {
         name: categoricalKey,
@@ -207,7 +207,7 @@ export const getColor = (
   distinctSeries: DistinctSeries,
   { columnsLength, rowsLength }: { columnsLength: number; rowsLength: number },
   visParams: PartitionVisParams,
-  palettes: PaletteRegistry | null,
+  paletteService: PaletteRegistry | null,
   byDataPalette: ReturnType<typeof byDataColorPaletteMap> | undefined,
   syncColors: boolean,
   isDarkMode: boolean,
@@ -230,7 +230,7 @@ export const getColor = (
         isSplitChart,
         overwriteColors,
         visParams,
-        palettes,
+        paletteService,
         syncColors,
         distinctSeries,
         name
@@ -271,7 +271,7 @@ export const getColor = (
     }
   }
 
-  const outputColor = palettes?.get(visParams.palette.name).getCategoricalColor(
+  const outputColor = paletteService?.get(visParams.palette.name).getCategoricalColor(
     seriesLayers,
     {
       behindText: visParams.labels.show || isTreemapOrMosaicChart(chartType),
