@@ -33,5 +33,4 @@ export interface InventoryRouteCreateOptions {
   timeout?: {
     idleSocket?: number;
   };
-  tags: Array<'access:inventory'>;
 }
