@@ -93,6 +93,7 @@ export const resolveGridRow = (
   const panelRows = Object.values(nextRowData.panels).map(
     ({ row: panelRow, height: panelHeight }) => panelRow + panelHeight
   );
+  if (panelRows.length === 0) return nextRowData;
   const rowCount = Math.max(...panelRows);
 
   // build an empty 2D array representing the current grid
