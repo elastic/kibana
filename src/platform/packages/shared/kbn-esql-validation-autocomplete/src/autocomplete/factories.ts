@@ -31,6 +31,7 @@ import type { ESQLControlVariable } from '../shared/types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { EsqlControlType } from '../shared/types';
+import { getControlSuggestionLabel } from './helper';
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
@@ -610,16 +611,16 @@ export function getControlSuggestion(
   type: EsqlControlType,
   variables?: string[]
 ): SuggestionRawDefinition[] {
-  const typeWithCapital = type.charAt(0).toUpperCase() + type.slice(1);
+  const typeLabel = getControlSuggestionLabel(type);
   // need to get the variables from the service
   return [
     {
       label: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.createControlLabel',
         {
-          defaultMessage: '{typeWithCapital} control',
+          defaultMessage: '{typeLabel} control',
           values: {
-            typeWithCapital,
+            typeLabel,
           },
         }
       ),

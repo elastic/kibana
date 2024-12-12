@@ -15,6 +15,7 @@ import type {
   ESQLSource,
 } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   isParameterType,
   type FunctionDefinition,
@@ -671,3 +672,21 @@ export async function getSuggestionsToRightOfOperatorExpression({
     };
   });
 }
+
+export const getControlSuggestionLabel = (controlType: EsqlControlType): string => {
+  switch (controlType) {
+    case EsqlControlType.FIELDS:
+      return i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.intervalLabel', {
+        defaultMessage: 'Interval',
+      });
+    case EsqlControlType.VALUES:
+      return i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueLabel', {
+        defaultMessage: 'Value',
+      });
+    case EsqlControlType.FIELDS:
+    default:
+      return i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.fieldsLabel', {
+        defaultMessage: 'Field',
+      });
+  }
+};

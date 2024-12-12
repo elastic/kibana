@@ -8,6 +8,7 @@
  */
 import { monaco } from '@kbn/monaco';
 import { inKnownTimeInterval } from '@kbn/esql-validation-autocomplete';
+import { type ESQLColumn, parse, walk } from '@kbn/esql-ast';
 
 export const updateQueryStringWithVariable = (
   queryString: string,
@@ -44,4 +45,29 @@ export const areValuesIntervalsValid = (values: string | undefined) => {
     const unit = value.replace(/[0-9]/g, '').replace(/\s/g, '');
     return inKnownTimeInterval(unit);
   });
+};
+
+export const getRecurrentVariableName = (name: string, existingNames: string[]) => {
+  let newName = name;
+  let i = 1;
+  while (existingNames.includes(newName)) {
+    newName = `${name}${i}`;
+    i++;
+  }
+  return newName;
+};
+
+export const getValuesFromQueryField = (queryString: string) => {
+  const validQuery = `${queryString} ""`;
+  const { root } = parse(validQuery);
+  const lastCommand = root.commands[root.commands.length - 1];
+  const columns: ESQLColumn[] = [];
+
+  walk(lastCommand, {
+    visitColumn: (node) => columns.push(node),
+  });
+
+  if (columns.length) {
+    return `${columns[columns.length - 1].name}`;
+  }
 };
