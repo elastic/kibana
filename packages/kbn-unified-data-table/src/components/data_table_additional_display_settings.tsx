@@ -30,6 +30,10 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize?: (sampleSize: number) => void;
+  lineCountInput: number;
+  setLineCountInput: (value: number) => void;
+  headerLineCountInput: number;
+  setHeaderLineCountInput: (value: number) => void;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -48,6 +52,10 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
+  lineCountInput,
+  setLineCountInput,
+  headerLineCountInput,
+  setHeaderLineCountInput,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -99,12 +107,14 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         rowHeight={headerRowHeight}
         rowHeightLines={headerRowHeightLines}
         label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
-          defaultMessage: 'Header row height',
+          defaultMessage: 'Max header cell lines',
         })}
         onChangeRowHeight={onChangeHeaderRowHeight}
         onChangeRowHeightLines={onChangeHeaderRowHeightLines}
         data-test-subj="unifiedDataTableHeaderRowHeightSettings"
         maxRowHeight={5}
+        lineCountInput={headerLineCountInput}
+        setLineCountInput={setHeaderLineCountInput}
       />
     );
   }
@@ -115,11 +125,13 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         rowHeight={rowHeight}
         rowHeightLines={rowHeightLines}
         label={i18n.translate('unifiedDataTable.rowHeightLabel', {
-          defaultMessage: 'Cell row height',
+          defaultMessage: 'Max body cell lines',
         })}
         onChangeRowHeight={onChangeRowHeight}
         onChangeRowHeightLines={onChangeRowHeightLines}
         data-test-subj="unifiedDataTableRowHeightSettings"
+        lineCountInput={lineCountInput}
+        setLineCountInput={setLineCountInput}
       />
     );
   }
