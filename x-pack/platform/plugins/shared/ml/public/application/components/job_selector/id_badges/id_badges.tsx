@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { JobSelectorBadge } from '../job_selector_badge';
 import type { GroupObj } from '../job_selector';
 
-interface IdBadgesProps {
+export interface IdBadgesProps {
   limit: number;
   selectedGroups: GroupObj[];
   selectedJobIds: string[];
