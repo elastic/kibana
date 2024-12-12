@@ -57,22 +57,22 @@ packages/kbn-scout/
 
 ### Key Components
 
-1. src/cli/
+1. **src/cli/**
 
 Contains the logic to start servers, with or without running tests. It is accessed through the `scripts/scout` script.
 
-2. src/common/
+2. **src/common/**
 
 `services` directory includes test helpers used across UI and API integration tests, such as Kibana and Elasticsearch `clients`, `esArchiver`, and `samlSessionManager`. These services are used to initialize instances and expose them to tests via Playwright worker fixtures.
 
-3. src/config/
+3. **src/config/**
 
 `config` directory holds configurations for running servers locally. `serverless` and `stateful` directories contain deployment-specific configurations. Configuration attributes are defined in `schema` directory.
 The `Config` class in config.ts serves as the main entry point. It is instantiated using the config loader in
 the `loader` directory. This instance is compatible with the `kbn-test` input format and is passed to functions
 for starting servers.
 
-4. src/playwright/
+4. **src/playwright/**
 
 #### Config
 
@@ -151,7 +151,7 @@ test.beforeEach(async ({ pageObjects }) => {
 });
 ```
 
-5. src/servers/
+5. **src/servers/**
 
 Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` functionality in Scout flavor.
 The instance of the `Config` class is passed to start servers for the specific deployment type. The `loadServersConfig` function not only returns a `kbn-test` compatible config instance, but also converts it to `ScoutServiceConfig` format and saves it on disk to `./scout/servers/local.json` in the Kibana root directory. Scout `config` fixture reads it and expose to UI tests.
@@ -255,4 +255,4 @@ export const scoutTestFixtures = mergeTests(
 - **Reusable Code:** When creating Page Objects or Fixtures that apply to more than one plugin, ensure they are added to the kbn-scout package.
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
 - **Add Unit Tests:** Include tests for new logic where applicable, ensuring it works as expected.
-- **Playwright documentation** [Official best practices](https://playwright.dev/docs/best-practices)
+- **Playwright documentation:** [Official best practices](https://playwright.dev/docs/best-practices)
