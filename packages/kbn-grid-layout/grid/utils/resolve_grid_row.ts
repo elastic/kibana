@@ -41,13 +41,13 @@ export const getKeysInOrder = (panels: GridRowData['panels'], draggedId?: string
     const panelA = panels[panelKeyA];
     const panelB = panels[panelKeyB];
 
-    // if rows are the same. Is either panel being dragged?
-    if (panelA.id === draggedId) return -1;
-    if (panelB.id === draggedId) return 1;
-
     // sort by row first
     if (panelA.row > panelB.row) return 1;
     if (panelA.row < panelB.row) return -1;
+
+    // if rows are the same. Is either panel being dragged?
+    if (panelA.id === draggedId) return -1;
+    if (panelB.id === draggedId) return 1;
 
     // if rows are the same and neither panel is being dragged, sort by column
     if (panelA.column > panelB.column) return 1;

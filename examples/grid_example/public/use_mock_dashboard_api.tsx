@@ -62,8 +62,8 @@ export const useMockDashboardApi = ({
               row: 0,
               x: 0,
               y: 0,
-              w: 4,
-              h: 4,
+              w: DEFAULT_PANEL_WIDTH,
+              h: DEFAULT_PANEL_HEIGHT,
             },
           },
         });

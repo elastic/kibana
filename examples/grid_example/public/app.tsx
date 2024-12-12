@@ -250,8 +250,8 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             layout={currentLayout}
             gridSettings={{
               gutterSize: DASHBOARD_MARGIN_SIZE,
-              rowHeight: 100,
-              columnCount: 8,
+              rowHeight: DASHBOARD_GRID_HEIGHT,
+              columnCount: DASHBOARD_GRID_COLUMN_COUNT,
             }}
             renderPanelContents={renderBasicPanel}
             onLayoutChange={(newLayout) => {
