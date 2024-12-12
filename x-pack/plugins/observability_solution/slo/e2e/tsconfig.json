@@ -12,5 +12,6 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/data-forge",
     "@kbn/synthetics-e2e",
+    "@kbn/observability-synthetics-test-data",
   ]
 }
