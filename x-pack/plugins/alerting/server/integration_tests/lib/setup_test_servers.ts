@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import supertest from 'supertest';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 
 export async function setupTestServers(settings = {}) {
@@ -32,6 +33,7 @@ export async function setupTestServers(settings = {}) {
       coreSetup,
       coreStart,
       stop: async () => await root.shutdown(),
+      getSupertest: () => supertest(coreSetup.http.server.listener),
     },
   };
 }
