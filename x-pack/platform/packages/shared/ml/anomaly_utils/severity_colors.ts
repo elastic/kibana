@@ -28,12 +28,12 @@ export const ML_SEVERITY_COLORS = {
    * Color used in the UI to indicate a warning anomaly, with a score greater than or equal to 3 and less than 25.
    * Note in some parts of the UI, warning severity is used when the score is greater than or equal to 0.
    */
-  WARNING: '#FCD883',
+  WARNING: '#FFC9C2',
 
   /**
    * Color used in some parts of the UI to indicate a low severity anomaly, with a score greater than or equal to 0 and less than 3.
    */
-  LOW: '#FDE9B5',
+  LOW: '#CAD3E2',
 
   /**
    * Color used in the UI to indicate an anomaly for which the score is unknown.
