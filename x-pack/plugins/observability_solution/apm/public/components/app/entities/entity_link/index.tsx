@@ -54,8 +54,8 @@ export function EntityLink() {
   if (
     // When EEM is enabled and the service is not found on the EEM indices and there's no APM data, display a callout guiding on the limitations of EEM
     isEntityCentricExperienceEnabled === true &&
-    (serviceEntitySummary?.dataStreamTypes === undefined ||
-      serviceEntitySummary.dataStreamTypes.length === 0) &&
+    (serviceEntitySummary?.['data_stream.type'] === undefined ||
+      serviceEntitySummary['data_stream.type'].length === 0) &&
     hasApmData?.hasData !== true
   ) {
     return (

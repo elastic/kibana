@@ -28,7 +28,8 @@ export function Metrics() {
   const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+    serviceEntitySummary?.['data_stream.type'] &&
+    isLogsOnlySignal(serviceEntitySummary['data_stream.type']);
 
   if (hasLogsOnlySignal) {
     return <ServiceTabEmptyState id="metrics" />;

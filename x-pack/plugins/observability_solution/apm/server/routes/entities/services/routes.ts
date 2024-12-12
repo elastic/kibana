@@ -59,7 +59,7 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
       '### caue  handler  eemAPIServiceEntity:',
       JSON.stringify(eemAPIServiceEntity, null, 2)
     );
-    return serviceEntitySummary;
+    return eemAPIServiceEntity[0];
   },
 });
 
