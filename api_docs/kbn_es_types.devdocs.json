@@ -586,6 +586,21 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
+        "id": "def-common.ESSearchRequestWithoutBody",
+        "type": "Type",
+        "tags": [],
+        "label": "ESSearchRequestWithoutBody",
+        "description": [],
+        "signature": [
+          "SearchRequest"
+        ],
+        "path": "packages/kbn-es-types/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-types",
         "id": "def-common.ESSearchResponse",
         "type": "Type",
         "tags": [],

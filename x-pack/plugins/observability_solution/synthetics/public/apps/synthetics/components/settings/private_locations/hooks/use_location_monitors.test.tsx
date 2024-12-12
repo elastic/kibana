@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { createElement } from 'react';
 import * as reactRedux from 'react-redux';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 
 import { useLocationMonitors } from './use_location_monitors';
@@ -27,7 +28,9 @@ describe('useLocationMonitors', () => {
 
   it('returns expected results', () => {
     useSelectorSpy.mockReturnValue({ locationMonitors: [], loading: false });
-    const { result } = renderHook(() => useLocationMonitors(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useLocationMonitors(), {
+      wrapper: ({ children }) => createElement(WrappedHelper, null, children),
+    });
 
     expect(result.current).toStrictEqual({ locationMonitors: [], loading: false });
   });
@@ -46,7 +49,7 @@ describe('useLocationMonitors', () => {
 
   it('returns expected results after data', async () => {
     const { result } = renderHook(() => useLocationMonitors(), {
-      wrapper: WrappedHelper,
+      wrapper: ({ children }) => createElement(WrappedHelper, null, children),
     });
 
     expect(result.current).toStrictEqual({

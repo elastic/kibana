@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { Kpi } from './kpi';
@@ -31,11 +31,9 @@ export const HostKpiCharts = ({
   searchSessionId,
   loading = false,
 }: HostKpiChartsProps) => {
-  const { euiTheme } = useEuiTheme();
   const charts = useHostKpiCharts({
     dataViewId: dataView?.id,
     getSubtitle,
-    seriesColor: euiTheme.colors.lightestShade,
   });
 
   return (
