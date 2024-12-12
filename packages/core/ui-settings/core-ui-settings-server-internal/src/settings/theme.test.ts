@@ -82,9 +82,13 @@ describe('theme settings', () => {
         ).toBe('amsterdam');
       });
 
-      it('should default to `borealis` when `isServerless = false`', () => {
+      it('should default to `borealis` when `isServerless = false` and `isDist = false`', () => {
         expect(
-          getThemeSettings({ ...defaultOptions, isServerless: false })['theme:name'].value
+          getThemeSettings({
+            ...defaultOptions,
+            isServerless: false,
+            isDist: false,
+          })['theme:name'].value
         ).toBe('borealis');
       });
     });
