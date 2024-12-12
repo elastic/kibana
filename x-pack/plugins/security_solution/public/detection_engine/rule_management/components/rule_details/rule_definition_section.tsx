@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { cloneDeep } from 'lodash';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
@@ -99,10 +98,23 @@ export const Filters = ({
     if (!index || isDataView(index) || isEsql) {
       return filters;
     }
-    const updatedFilters = cloneDeep(filters);
-    updatedFilters.forEach((filter) => (filter.meta.index = index.join(',')));
-    return updatedFilters;
+    const filtersWithUpdatedMetaIndex = filters.map((filter) => {
+      return {
+        ...filter,
+        meta: {
+          ...filter.meta,
+          index: index.join(','),
+        },
+      };
+    });
+
+    return filtersWithUpdatedMetaIndex;
   }, [filters, index, isEsql]);
+
+  if (!dataView) {
+    return null;
+  }
+
   const flattenedFilters = mapAndFlattenFilters(searchBarFilters);
   const styles = filtersStyles;
 
@@ -114,7 +126,7 @@ export const Filters = ({
       responsive={false}
       gutterSize="xs"
     >
-      {dataView && <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />}
+      <FilterItems filters={flattenedFilters} indexPatterns={[dataView]} readOnly />
     </EuiFlexGroup>
   );
 };
