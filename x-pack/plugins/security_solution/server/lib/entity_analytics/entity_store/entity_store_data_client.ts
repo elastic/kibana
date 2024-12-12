@@ -214,9 +214,12 @@ export class EntityStoreDataClient {
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
     const { experimentalFeatures } = this.options;
-    const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
-      ? [EntityTypeEnum.host, EntityTypeEnum.user, EntityTypeEnum.service]
-      : [EntityTypeEnum.host, EntityTypeEnum.user];
+
+    const enginesTypes: EntityType[] = [EntityTypeEnum.host, EntityTypeEnum.user];
+    if (experimentalFeatures.serviceEntityStoreEnabled) {
+      enginesTypes.push(EntityTypeEnum.service);
+    }
+    // NOTE: Whilst the Universal Entity Store is also behind a feature flag, we do not want to enable it as part of this flow as of 8.18
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
@@ -281,6 +284,19 @@ export class EntityStoreDataClient {
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
+    const { experimentalFeatures } = this.options;
+
+    if (
+      entityType === EntityTypeEnum.universal &&
+      !experimentalFeatures.assetInventoryStoreEnabled
+    ) {
+      throw new Error('Universal entity store is not enabled');
+    }
+
+    if (entityType === EntityTypeEnum.service && !experimentalFeatures.serviceEntityStoreEnabled) {
+      throw new Error('Service entity store is not enabled');
+    }
+
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }

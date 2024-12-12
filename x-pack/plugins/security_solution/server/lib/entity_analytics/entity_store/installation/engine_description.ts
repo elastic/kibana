@@ -20,6 +20,7 @@ import {
   hostEntityEngineDescription,
   userEntityEngineDescription,
   universalEntityEngineDescription,
+  serviceEntityEngineDescription,
 } from '../entity_definitions/entity_descriptions';
 
 import type { EntityStoreConfig } from '../types';
@@ -31,7 +32,7 @@ const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   host: hostEntityEngineDescription,
   user: userEntityEngineDescription,
   universal: universalEntityEngineDescription,
-  service: getServiceUnitedDefinition,
+  service: serviceEntityEngineDescription,
 };
 export const getAvailableEntityTypes = () => Object.keys(engineDescriptionRegistry) as EntityType[];
 
