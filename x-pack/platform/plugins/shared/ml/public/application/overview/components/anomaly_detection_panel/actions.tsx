@@ -58,8 +58,8 @@ export function useGroupActions(): Array<Action<Group>> {
         const path = await locator?.getUrl({
           page: ML_PAGES.ANOMALY_EXPLORER,
           pageState: {
-            jobIds: item.jobIds,
             timeRange: timefilter.getTime(),
+            jobIds: isUngrouped(item) ? item.jobIds : [item.id],
           },
         });
         await navigateToPath(path);
@@ -67,3 +67,5 @@ export function useGroupActions(): Array<Action<Group>> {
     },
   ];
 }
+
+const isUngrouped = (item: Group) => item.id === 'ungrouped';
