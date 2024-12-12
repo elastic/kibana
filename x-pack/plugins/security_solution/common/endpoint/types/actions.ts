@@ -231,10 +231,12 @@ interface ActionsRunScriptParametersBase {
 }
 
 // Enforce at least one of the script parameters is required
-export type ResponseActionRunScriptParameters = AtLeastOne<
-  ActionsRunScriptParametersBase,
-  'Raw' | 'HostPath' | 'CloudFile'
->;
+// export type ResponseActionRunScriptParameters = AtLeastOne<
+//   ActionsRunScriptParametersBase,
+//   'Raw' | 'HostPath' | 'CloudFile'
+// >;
+
+export type ResponseActionRunScriptParameters = ActionsRunScriptParametersBase;
 
 export type EndpointActionDataParameterTypes =
   | undefined
