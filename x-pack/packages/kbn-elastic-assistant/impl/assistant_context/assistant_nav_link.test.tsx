@@ -34,7 +34,7 @@ const mockAssistantContext = {
 jest.mock('.', () => {
   return {
     ...jest.requireActual('.'),
-    useAssistantContext: jest.fn(() => mockAssistantContext),
+    useAssistantContext: jest.fn(),
   };
 });
 
