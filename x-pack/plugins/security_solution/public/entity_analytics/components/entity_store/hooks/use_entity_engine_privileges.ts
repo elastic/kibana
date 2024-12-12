@@ -8,6 +8,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { EntityAnalyticsPrivileges } from '../../../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
@@ -17,6 +18,9 @@ export const useEntityEnginePrivileges = (): UseQueryResult<
   EntityAnalyticsPrivileges,
   SecurityAppError
 > => {
+  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const { fetchEntityStorePrivileges } = useEntityAnalyticsRoutes();
-  return useQuery(GET_ENTITY_ENGINE_PRIVILEGES, fetchEntityStorePrivileges);
+  return useQuery(GET_ENTITY_ENGINE_PRIVILEGES, fetchEntityStorePrivileges, {
+    enabled: !isEntityStoreFeatureFlagDisabled,
+  });
 };

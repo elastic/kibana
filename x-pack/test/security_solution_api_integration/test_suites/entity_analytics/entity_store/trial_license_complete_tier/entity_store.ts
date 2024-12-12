@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+// import { useIsExperimentalFeatureEnabled } from '@kbn/security-solution-plugin/public/common/hooks/use_experimental_features';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
@@ -14,6 +15,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
+
+  // jest.mock('../hooks/useIsExperimentalFeatureEnabled');
+  // const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+
   describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
@@ -275,47 +280,54 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ resource: 'component_template' }),
           ]);
         });
-      });
-    });
 
-    describe('apply_dataview_indices', () => {
-      before(async () => {
-        await utils.initEntityEngineForEntityTypesAndWait(['host']);
-      });
-
-      after(async () => {
-        await utils.cleanEngines();
+        it('should return null when isEntityStoreFeatureFlagDisabled is true', async () => {
+          /* mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+          const result = await api.getEntityStoreStatus({ query: {} });
+          expect(result).toBeNull();*/
+          // TODO: implement the above test
+        });
       });
 
-      afterEach(async () => {
-        await dataView.delete('security-solution');
-        await dataView.create('security-solution');
-      });
+      describe('apply_dataview_indices', () => {
+        before(async () => {
+          await utils.initEntityEngineForEntityTypesAndWait(['host']);
+        });
 
-      it("should not update the index patten when it didn't change", async () => {
-        const response = await api.applyEntityEngineDataviewIndices();
+        after(async () => {
+          await utils.cleanEngines();
+        });
 
-        expect(response.body).toEqual({ success: true, result: [{ type: 'host', changes: {} }] });
-      });
+        afterEach(async () => {
+          await dataView.delete('security-solution');
+          await dataView.create('security-solution');
+        });
 
-      it('should update the index pattern when the data view changes', async () => {
-        await dataView.updateIndexPattern('security-solution', 'test-*');
-        const response = await api.applyEntityEngineDataviewIndices();
+        it("should not update the index patten when it didn't change", async () => {
+          const response = await api.applyEntityEngineDataviewIndices();
 
-        expect(response.body).toEqual({
-          success: true,
-          result: [
-            {
-              type: 'host',
-              changes: {
-                indexPatterns: [
-                  'test-*',
-                  '.asset-criticality.asset-criticality-default',
-                  'risk-score.risk-score-latest-default',
-                ],
+          expect(response.body).toEqual({ success: true, result: [{ type: 'host', changes: {} }] });
+        });
+
+        it('should update the index pattern when the data view changes', async () => {
+          await dataView.updateIndexPattern('security-solution', 'test-*');
+          const response = await api.applyEntityEngineDataviewIndices();
+
+          expect(response.body).toEqual({
+            success: true,
+            result: [
+              {
+                type: 'host',
+                changes: {
+                  indexPatterns: [
+                    'test-*',
+                    '.asset-criticality.asset-criticality-default',
+                    'risk-score.risk-score-latest-default',
+                  ],
+                },
               },
-            },
-          ],
+            ],
+          });
         });
       });
     });
