@@ -13,7 +13,7 @@ export default function alertingApiIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  describe('alerting api integration security and spaces enabled - group5', function () {
+  describe('Alerts - Group 5', function () {
     before(async () => {
       await setupSpacesAndUsers(getService);
     });
