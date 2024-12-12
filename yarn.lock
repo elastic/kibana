@@ -6196,7 +6196,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-category@link:packages/kbn-management/settings/components/field_category":
+"@kbn/management-settings-components-field-category@link:src/platform/packages/private/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
 
