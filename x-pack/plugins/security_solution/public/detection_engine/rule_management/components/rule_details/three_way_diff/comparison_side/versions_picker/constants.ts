@@ -92,8 +92,8 @@ export const getOptionsForDiffOutcome = (
           },
           {
             value: SelectedVersions.BaseCurrent,
-            text: i18n.MY_CUSTOMIZATION_TITLE,
-            title: i18n.MY_CUSTOMIZATION_EXPLANATION,
+            text: i18n.MY_ORIGINAL_CHANGES_TITLE,
+            title: i18n.MY_ORIGINAL_CHANGES_EXPLANATION,
           },
         ];
       }
@@ -112,8 +112,8 @@ export const getOptionsForDiffOutcome = (
           },
           {
             value: SelectedVersions.BaseCurrent,
-            text: i18n.MY_CUSTOMIZATION_TITLE,
-            title: i18n.MY_CUSTOMIZATION_EXPLANATION,
+            text: i18n.MY_ORIGINAL_CHANGES_TITLE,
+            title: i18n.MY_ORIGINAL_CHANGES_EXPLANATION,
           },
         ];
       }

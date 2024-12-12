@@ -77,14 +77,14 @@ export const MERGED_CHANGES_EXPLANATION = i18n.translate(
   }
 );
 
-export const MY_CUSTOMIZATION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myCustomizationTitle',
+export const MY_ORIGINAL_CHANGES_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myOriginalChangesTitle',
   {
-    defaultMessage: 'My customization',
+    defaultMessage: 'My original changes',
   }
 );
 
-export const MY_CUSTOMIZATION_EXPLANATION = i18n.translate(
+export const MY_ORIGINAL_CHANGES_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myCustomizationExplanation',
   {
     defaultMessage: `view what you have changed in your installed rule. Doesn’t include changes made in the {finalUpdateSectionLabel} section.`,
