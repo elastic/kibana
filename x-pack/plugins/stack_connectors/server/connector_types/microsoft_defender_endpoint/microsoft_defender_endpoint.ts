@@ -40,8 +40,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
   private readonly urls: {
     machines: string;
-    isolateHost: string;
-    releaseHost: string;
   };
 
   constructor(
@@ -53,8 +51,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     this.urls = {
       machines: `${this.config.apiUrl}/api/machines`,
-      isolateHost: `${this.config.apiUrl}/....`, // TODO:PT implememnt
-      releaseHost: `${this.config.apiUrl}/....`,
     };
 
     this.registerSubActions();
