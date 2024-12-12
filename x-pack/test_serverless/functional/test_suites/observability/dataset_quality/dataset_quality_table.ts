@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   datasetNames,
@@ -18,6 +19,7 @@ import {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
+    'discover',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
@@ -142,9 +144,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await (await actionsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click "Open"
 
       // Confirm dataset selector text in observability logs explorer
-      const datasetSelectorText =
-        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-      expect(datasetSelectorText).to.eql(datasetName);
+      const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+
+      originalExpect(datasetSelectorText).toMatch(datasetName);
 
       // Return to Dataset Quality Page
       await PageObjects.datasetQuality.navigateTo();

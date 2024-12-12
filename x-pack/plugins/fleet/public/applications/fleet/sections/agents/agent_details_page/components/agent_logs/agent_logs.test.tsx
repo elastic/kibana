@@ -133,7 +133,7 @@ describe('AgentLogsUI', () => {
     const result = renderComponent();
     expect(result.getByTestId('viewInLogsBtn')).toHaveAttribute(
       'href',
-      `https://logs-explorer-redirect-url`
+      `https://discover-redirect-url`
     );
   });
 

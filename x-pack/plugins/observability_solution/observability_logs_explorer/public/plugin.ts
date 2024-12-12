@@ -71,13 +71,7 @@ export class ObservabilityLogsExplorerPlugin
       },
     });
 
-    // ensure the tabs are shown when in the observability nav mode
-    discover.configureInlineTopNav('oblt', {
-      enabled: true,
-      showLogsExplorerTabs: true,
-    });
-
-    // App used solely to redirect from "/app/observability-log-explorer" to "/app/observability-logs-explorer"
+    // App used solely to redirect from "/app/observability-log-explorer" to "/app/discover"
     core.application.register({
       id: 'observability-log-explorer',
       title: logsExplorerAppTitle,
