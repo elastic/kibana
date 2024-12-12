@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+import { isEqual } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
 import type {
   DiffableRule,
@@ -37,6 +38,11 @@ interface FieldUpgradeContextType {
    * Whether rule has an unresolved conflict. This state is derived from `fieldUpgradeState`.
    */
   hasConflict: boolean;
+  /**
+   * Whether field value is different from Elastic's suggestion.
+   * It's true only if user has made changes to the suggested field value.
+   */
+  hasResolvedValueDifferentFromSuggested: boolean;
   /**
    * Field's three way diff
    */
@@ -91,6 +97,8 @@ export function FieldUpgradeContextProvider({
 
   invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 
+  const finalDiffableRule = calcFinalDiffableRule(ruleUpgradeState);
+
   const contextValue: FieldUpgradeContextType = useMemo(
     () => ({
       fieldName,
@@ -98,8 +106,12 @@ export function FieldUpgradeContextProvider({
       hasConflict:
         fieldUpgradeState === FieldUpgradeStateEnum.SolvableConflict ||
         fieldUpgradeState === FieldUpgradeStateEnum.NonSolvableConflict,
+      hasResolvedValueDifferentFromSuggested: !isEqual(
+        fieldDiff.merged_version,
+        finalDiffableRule[fieldName]
+      ),
       fieldDiff,
-      finalDiffableRule: calcFinalDiffableRule(ruleUpgradeState),
+      finalDiffableRule,
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
       setRuleFieldResolvedValue,
       setReadOnlyMode,
@@ -109,7 +121,7 @@ export function FieldUpgradeContextProvider({
       fieldName,
       fieldUpgradeState,
       fieldDiff,
-      ruleUpgradeState,
+      finalDiffableRule,
       editing,
       setRuleFieldResolvedValue,
       setReadOnlyMode,

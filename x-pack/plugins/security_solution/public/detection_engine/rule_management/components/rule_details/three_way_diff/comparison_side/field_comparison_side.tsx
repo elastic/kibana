@@ -19,10 +19,11 @@ import { ComparisonSideHelpInfo } from './comparison_side_help_info';
 import * as i18n from './translations';
 
 export function FieldComparisonSide(): JSX.Element {
-  const { fieldName, fieldDiff, finalDiffableRule } = useFieldUpgradeContext();
+  const { fieldName, fieldDiff, finalDiffableRule, hasResolvedValueDifferentFromSuggested } =
+    useFieldUpgradeContext();
   const resolvedValue = finalDiffableRule[fieldName];
 
-  const options = getOptionsForDiffOutcome(fieldDiff, resolvedValue);
+  const options = getOptionsForDiffOutcome(fieldDiff, hasResolvedValueDifferentFromSuggested);
   const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(options[0].value);
 
   const [oldVersionType, newVersionType] = selectedVersions.split('_') as [Version, Version];

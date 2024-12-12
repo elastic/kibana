@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import type { ThreeWayDiff } from '../../../../../../../../common/api/detection_engine';
 import {
   ThreeWayDiffConflict,
@@ -31,23 +30,21 @@ export enum SelectedVersions {
 
 export const getOptionsForDiffOutcome = (
   fieldDiff: ThreeWayDiff<unknown>,
-  resolvedValue: unknown
+  hasResolvedValueDifferentFromSuggested: boolean
 ): Array<{ value: SelectedVersions; text: string; title: string }> => {
   switch (fieldDiff.diff_outcome) {
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
-      const hasUserChangedResolvedValue = !isEqual(fieldDiff.merged_version, resolvedValue);
-
       const options = [
         {
-          value: SelectedVersions.CurrentTarget,
+          value: SelectedVersions.BaseTarget,
           text: i18n.UPDATE_FROM_ELASTIC_TITLE,
           title: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
         },
       ];
 
-      if (hasUserChangedResolvedValue) {
+      if (hasResolvedValueDifferentFromSuggested) {
         options.push({
-          value: SelectedVersions.CurrentFinal,
+          value: SelectedVersions.BaseFinal,
           text: i18n.MY_CHANGES_TITLE,
           title: i18n.MY_CHANGES_FINAL_UPDATE_ONLY_EXPLANATION,
         });
@@ -77,14 +74,14 @@ export const getOptionsForDiffOutcome = (
         },
       ];
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      const hasUserChangedResolvedValue = !isEqual(fieldDiff.merged_version, resolvedValue);
-
       if (fieldDiff.conflict === ThreeWayDiffConflict.SOLVABLE) {
         return [
           {
             value: SelectedVersions.BaseFinal,
-            text: hasUserChangedResolvedValue ? i18n.MY_CHANGES_TITLE : i18n.MERGED_CHANGES_TITLE,
-            title: hasUserChangedResolvedValue
+            text: hasResolvedValueDifferentFromSuggested
+              ? i18n.MY_CHANGES_TITLE
+              : i18n.MERGED_CHANGES_TITLE,
+            title: hasResolvedValueDifferentFromSuggested
               ? i18n.MY_CHANGES_FINAL_UPDATE_ONLY_EXPLANATION
               : i18n.MERGED_CHANGES_EXPLANATION,
           },
@@ -122,8 +119,6 @@ export const getOptionsForDiffOutcome = (
       }
     }
     case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
-      const hasUserChangedResolvedValue = !isEqual(fieldDiff.merged_version, resolvedValue);
-
       const options = [
         {
           value: SelectedVersions.CurrentTarget,
@@ -132,7 +127,7 @@ export const getOptionsForDiffOutcome = (
         },
       ];
 
-      if (hasUserChangedResolvedValue) {
+      if (hasResolvedValueDifferentFromSuggested) {
         options.push({
           value: SelectedVersions.CurrentFinal,
           text: i18n.MY_CHANGES_TITLE,
