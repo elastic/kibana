@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/kbn-management/cards_navigation'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-management/cards_navigation'],
 };
