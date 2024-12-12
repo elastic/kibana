@@ -43,6 +43,7 @@ export type {
   PrivilegeDeprecationsRolesByFeatureIdResponse,
 } from './deprecations';
 export type { AuthorizationMode } from './mode';
+export type { EsSecurityConfig } from './es_security_config';
 
 export { GLOBAL_RESOURCE } from './constants';
 export { elasticsearchRoleSchema, getKibanaRoleSchema } from './role_schema';
