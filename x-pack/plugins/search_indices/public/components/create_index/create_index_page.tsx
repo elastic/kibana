@@ -24,7 +24,7 @@ const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitl
 });
 
 export const CreateIndexPage = () => {
-  const { console: consolePlugin } = useKibana().services;
+  const { console: consolePlugin, history, searchNavigation } = useKibana().services;
   const {
     data: indicesData,
     isInitialLoading,
@@ -39,11 +39,12 @@ export const CreateIndexPage = () => {
   usePageChrome(CreateIndexLabel, [...IndexManagementBreadcrumbs, { text: CreateIndexLabel }]);
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
       data-test-subj="elasticsearchCreateIndexPage"
       grow={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
@@ -53,6 +54,6 @@ export const CreateIndexPage = () => {
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

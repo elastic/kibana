@@ -33,7 +33,7 @@ export const useIndexDocumentSearch = (indexName: string) => {
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
     queryFn: async ({ signal }) =>
-      http.post<IndexDocuments>(`/internal/serverless_search/indices/${indexName}/search`, {
+      http.post<IndexDocuments>(`/internal/search_indices/${indexName}/documents/search`, {
         body: JSON.stringify({
           searchQuery: '',
           trackTotalHits: true,

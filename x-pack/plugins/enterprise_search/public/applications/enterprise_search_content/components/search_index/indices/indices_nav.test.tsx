@@ -44,24 +44,24 @@ describe('useIndicesNav', () => {
         id: 'indexName',
         name: 'INDEX-NAME',
         'data-test-subj': 'IndexLabel',
-        href: '/search_indices/index-name',
+        href: '/app/management/data/index_management/indices/index-name',
         items: [
           {
             id: 'overview',
             name: 'Overview',
-            href: '/search_indices/index-name/overview',
+            href: '/app/management/data/index_management/indices/index-name/overview',
             'data-test-subj': 'IndexOverviewLink',
           },
           {
             id: 'documents',
             name: 'Documents',
-            href: '/search_indices/index-name/documents',
+            href: '/app/management/data/index_management/indices/index-name/documents',
             'data-test-subj': 'IndexDocumentsLink',
           },
           {
             id: 'index_mappings',
             name: 'Index mappings',
-            href: '/search_indices/index-name/index_mappings',
+            href: '/app/management/data/index_management/indices/index-name/index_mappings',
             'data-test-subj': 'IndexIndexMappingsLink',
           },
         ],

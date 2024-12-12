@@ -118,27 +118,21 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
+                      title: i18n.translate('xpack.enterpriseSearch.searchNav.kibana.indices', {
+                        defaultMessage: 'Indices',
+                      }),
+                      link: 'management:index_management',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
                       getIsActive: ({ pathNameSerialized, prepend }) => {
-                        const someSubItemSelected = indices?.some((index) =>
-                          index.items?.some((item) => item.isSelected)
-                        );
-
-                        if (someSubItemSelected) return false;
-
                         return (
-                          pathNameSerialized ===
-                          prepend(`/app/enterprise_search/content${SEARCH_INDICES_PATH}`)
+                          pathNameSerialized.startsWith(
+                            prepend('/app/management/data/index_management/')
+                          ) ||
+                          pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices')) ||
+                          pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                         );
                       },
-                      link: 'enterpriseSearchContent:searchIndices',
-                      renderAs: 'item',
-                      ...(indices
-                        ? {
-                            children: indices.map(euiItemTypeToNodeDefinition),
-                            isCollapsible: false,
-                            renderAs: 'accordion',
-                          }
-                        : {}),
                     },
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },

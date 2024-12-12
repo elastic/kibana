@@ -44,6 +44,7 @@ export interface AppPluginSetupDependencies {
   share: SharePluginSetup;
   serverless?: ServerlessPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  search;
 }
 
 export interface SearchIndicesAppPluginStartDependencies {
@@ -53,6 +54,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   usageCollection?: UsageCollectionStart;
   indexManagement: IndexManagementPluginStart;
+  searchNavigation?: SearchNavigationPluginStart;
 }
 
 export interface SearchIndicesServicesContextDeps {

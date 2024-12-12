@@ -61,7 +61,7 @@ import { ENGINES_PATH } from './applications/app_search/routes';
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import {
   CONNECTORS_PATH,
-  SEARCH_INDICES_PATH,
+  INDEX_MANAGEMENT_INDICES_PATH,
   CRAWLERS_PATH,
 } from './applications/enterprise_search_content/routes';
 
@@ -118,7 +118,7 @@ const contentLinks: AppDeepLink[] = [
   },
   {
     id: 'searchIndices',
-    path: `/${SEARCH_INDICES_PATH}`,
+    path: `/app/ml/trained_models`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentIndicesLinkLabel', {
       defaultMessage: 'Indices',
     }),
