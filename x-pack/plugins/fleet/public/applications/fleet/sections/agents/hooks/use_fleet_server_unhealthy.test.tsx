@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
+
 import { createFleetTestRendererMock } from '../../../../../mock';
 import { sendGetEnrollmentSettings } from '../../../../../hooks/use_request/settings';
 
@@ -76,4 +78,10 @@ describe('useFleetServerUnhealthy', () => {
     expect(result.current.isUnhealthy).toBeFalsy();
     expect(testRenderer.startServices.notifications.toasts.addError).toBeCalled();
   });
+
+  for (let i = 0; i < 5000; i++) {
+    it('Test that should never fail ' + i, async () => {
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+    });
+  }
 });
