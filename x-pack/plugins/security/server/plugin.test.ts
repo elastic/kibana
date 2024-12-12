@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { of } from 'rxjs';
 
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -49,9 +50,9 @@ describe('Security Plugin', () => {
 
     const core = coreMock.createRequestHandlerContext();
 
-    core.elasticsearch.client.asInternalUser.transport.request.mockImplementation((async () => ({
+    core.elasticsearch.client.asInternalUser.xpack.usage.mockResolvedValue({
       security: { operator_privileges: { enabled: false, available: false } },
-    })) as any);
+    } as Awaited<ReturnType<Client['xpack']['usage']>>);
 
     mockCoreSetup.http.getServerInfo.mockReturnValue({
       hostname: 'localhost',

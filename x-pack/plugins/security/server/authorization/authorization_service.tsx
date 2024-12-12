@@ -36,7 +36,6 @@ import type {
   CheckPrivilegesDynamicallyWithRequest,
   CheckSavedObjectsPrivilegesWithRequest,
   CheckUserProfilesPrivileges,
-  EsSecurityConfig,
 } from '@kbn/security-plugin-types-server';
 
 import { initAPIAuthorization } from './api_authorization';
@@ -126,9 +125,8 @@ export class AuthorizationService {
 
     const esSecurityConfig = getClusterClient()
       .then((client) =>
-        client.asInternalUser.transport.request<{ security: EsSecurityConfig }>({
-          method: 'GET',
-          path: '/_xpack/usage?filter_path=security.operator_privileges',
+        client.asInternalUser.xpack.usage({
+          filter_path: 'security.operator_privileges',
         })
       )
       .then(({ security }) => security);
