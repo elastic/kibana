@@ -17,5 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/licensing-plugin",
+    "@kbn/actions-plugin",
   ]
 }
