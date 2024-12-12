@@ -73,6 +73,12 @@ const manageDefaultIndexPatternRoutesFactory =
     router.versioned.get({ path, access: 'public', description: getDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Authorization provided by saved objects client',
+          },
+        },
         validate: {
           request: {},
           response: {
@@ -110,6 +116,11 @@ const manageDefaultIndexPatternRoutesFactory =
     router.versioned.post({ path, access: 'public', description: postDescription }).addVersion(
       {
         version: INITIAL_REST_VERSION,
+        security: {
+          authz: {
+            requiredPrivileges: ['indexPatterns:manage'],
+          },
+        },
         validate: {
           request: {
             body: schema.object({

@@ -19,7 +19,6 @@ import type {
   TypedLensByValueInput,
   XYState,
 } from '@kbn/lens-plugin/public';
-import type { LensBaseEmbeddableInput } from '@kbn/lens-plugin/public/embeddable';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -42,19 +41,6 @@ const LensComponentWrapper = styled.div<{
 }>`
   height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
-
-  .embPanel {
-    outline: none;
-  }
-
-  .embPanel__hoverActions.embPanel__hoverActionsRight {
-    border-radius: 6px !important;
-    border-bottom: 1px solid #d3dae6 !important;
-  }
-
-  .embPanel__hoverActionsAnchor .embPanel__hoverActionsWrapper {
-    top: -20px;
-  }
 
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
@@ -172,7 +158,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const onFilterCallback = useCallback<Required<LensBaseEmbeddableInput>['onFilter']>(
+  const onFilterCallback = useCallback<Required<TypedLensByValueInput>['onFilter']>(
     (event) => {
       if (disableOnClickFilter) {
         event.preventDefault();

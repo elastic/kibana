@@ -327,6 +327,9 @@ export class ApplicationService {
         takeUntil(this.stop$)
       ),
       history: this.history!,
+      isAppRegistered: (appId: string): boolean => {
+        return applications$.value.get(appId) !== undefined;
+      },
       getUrlForApp: (
         appId,
         {

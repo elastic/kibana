@@ -31,7 +31,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { useSummaryChartData } from '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';
@@ -59,8 +59,17 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock(
-  '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -102,7 +111,7 @@ describe('<UserEntityOverview />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
-    (useSummaryChartData as jest.Mock).mockReturnValue({ isLoading: false, items: [] });
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   describe('license is valid', () => {
@@ -245,9 +254,9 @@ describe('<UserEntityOverview />', () => {
     });
 
     it('should render alert count when data is available', () => {
-      (useSummaryChartData as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
         isLoading: false,
-        items: [{ key: 'high', value: 78, label: 'High' }],
+        items: mockAlertData,
       });
 
       const { getByTestId } = renderUserEntityOverview();

@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESLicense } from '@kbn/telemetry-collection-xpack-plugin/server';
+import type { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_PATTERN_ELASTICSEARCH, USAGE_FETCH_INTERVAL } from '../../common/constants';
 
 /**
@@ -18,7 +18,7 @@ export async function getLicenses(
   callCluster: ElasticsearchClient,
   timestamp: number,
   maxBucketSize: number
-): Promise<{ [clusterUuid: string]: ESLicense | undefined }> {
+): Promise<{ [clusterUuid: string]: LicenseGetLicenseInformation | undefined }> {
   const response = await fetchLicenses(callCluster, clusterUuids, timestamp, maxBucketSize);
   return handleLicenses(response);
 }
@@ -76,7 +76,7 @@ export async function fetchLicenses(
 export interface ESClusterStatsWithLicense {
   cluster_uuid: string;
   type: 'cluster_stats';
-  license?: ESLicense;
+  license?: LicenseGetLicenseInformation;
 }
 
 /**

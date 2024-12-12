@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getErrorRenderer } from '../error_renderer';
 
@@ -17,5 +18,8 @@ storiesOf('renderers/error', module).add('default', () => {
   const config = {
     error: thrownError,
   };
-  return <Render renderer={getErrorRenderer()} config={config} />;
+
+  return (
+    <Render renderer={getErrorRenderer(coreMock.createStart().theme.theme$)} config={config} />
+  );
 });

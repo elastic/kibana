@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { observabilityAppId } from '@kbn/observability-plugin/public';
 import React, { useEffect } from 'react';
-import styled from 'styled-components';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { useSloSummaryDataView } from '../hooks/use_summary_dataview';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
@@ -42,7 +42,13 @@ export function SloListSearchBar() {
   }, [onStateChange, query]);
 
   return (
-    <Container>
+    <div
+      css={css`
+        .uniSearchBar {
+          padding: 0;
+        }
+      `}
+    >
       <SearchBar
         appName={observabilityAppId}
         placeholder={PLACEHOLDER}
@@ -77,15 +83,9 @@ export function SloListSearchBar() {
           });
         }}
       />
-    </Container>
+    </div>
   );
 }
-
-const Container = styled.div`
-  .uniSearchBar {
-    padding: 0;
-  }
-`;
 
 const PLACEHOLDER = i18n.translate('xpack.slo.list.search', {
   defaultMessage: 'Search your SLOs ...',

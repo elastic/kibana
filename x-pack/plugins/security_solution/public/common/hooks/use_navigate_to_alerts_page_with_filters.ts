@@ -16,7 +16,7 @@ import { URL_PARAM_KEY } from './use_url_state';
 export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();
 
-  return (filterItems: FilterControlConfig | FilterControlConfig[]) => {
+  return (filterItems: FilterControlConfig | FilterControlConfig[], openInNewTab = false) => {
     const urlFilterParams = encode(
       formatPageFilterSearchParam(Array.isArray(filterItems) ? filterItems : [filterItems])
     );
@@ -24,6 +24,7 @@ export const useNavigateToAlertsPageWithFilters = () => {
     navigateTo({
       deepLinkId: SecurityPageName.alerts,
       path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}`,
+      openInNewTab,
     });
   };
 };

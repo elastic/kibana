@@ -26,8 +26,10 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 
-      options: {
-        tags: ['access:elasticAssistant'],
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
       },
     })
     .addVersion(
@@ -47,7 +49,6 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
             request,
             response,
@@ -56,15 +57,14 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse.response;
           }
 
-          // Check mappings and upgrade if necessary -- this route only supports v2 KB, so always `true`
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
-            v2KnowledgeBaseEnabled: true,
-          });
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
 
           logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
           const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
             knowledgeBaseEntry: request.body,
             global: request.body.users != null && request.body.users.length === 0,
+            auditLogger: ctx.elasticAssistant.auditLogger,
+            telemetry: ctx.elasticAssistant.telemetry,
           });
 
           if (createResponse == null) {

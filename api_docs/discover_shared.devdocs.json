@@ -6,6 +6,94 @@
     "interfaces": [
       {
         "parentPluginId": "discoverShared",
+        "id": "def-public.DiscoverFeaturesServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverFeaturesServiceSetup",
+        "description": [
+          "\nService types"
+        ],
+        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.DiscoverFeaturesServiceSetup.registry",
+            "type": "Object",
+            "tags": [],
+            "label": "registry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discoverShared",
+                "scope": "common",
+                "docId": "kibDiscoverSharedPluginApi",
+                "section": "def-common.FeaturesRegistry",
+                "text": "FeaturesRegistry"
+              },
+              "<",
+              {
+                "pluginId": "discoverShared",
+                "scope": "public",
+                "docId": "kibDiscoverSharedPluginApi",
+                "section": "def-public.DiscoverFeature",
+                "text": "DiscoverFeature"
+              },
+              ">"
+            ],
+            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverShared",
+        "id": "def-public.DiscoverFeaturesServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverFeaturesServiceStart",
+        "description": [],
+        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.DiscoverFeaturesServiceStart.registry",
+            "type": "Object",
+            "tags": [],
+            "label": "registry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discoverShared",
+                "scope": "common",
+                "docId": "kibDiscoverSharedPluginApi",
+                "section": "def-common.FeaturesRegistry",
+                "text": "FeaturesRegistry"
+              },
+              "<",
+              {
+                "pluginId": "discoverShared",
+                "scope": "public",
+                "docId": "kibDiscoverSharedPluginApi",
+                "section": "def-public.DiscoverFeature",
+                "text": "DiscoverFeature"
+              },
+              ">"
+            ],
+            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverShared",
         "id": "def-public.ObservabilityLogsAIAssistantFeature",
         "type": "Interface",
         "tags": [],
@@ -113,6 +201,104 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverShared",
+        "id": "def-public.SecuritySolutionAppWrapperFeature",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecuritySolutionAppWrapperFeature",
+        "description": [],
+        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.SecuritySolutionAppWrapperFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"security-solution-app-wrapper\""
+            ],
+            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.SecuritySolutionAppWrapperFeature.getWrapper",
+            "type": "Function",
+            "tags": [],
+            "label": "getWrapper",
+            "description": [],
+            "signature": [
+              "() => Promise<() => React.FunctionComponent<{ children?: React.ReactNode; }>>"
+            ],
+            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discoverShared",
+        "id": "def-public.SecuritySolutionCellRendererFeature",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecuritySolutionCellRendererFeature",
+        "description": [
+          "*************** Security Solution"
+        ],
+        "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.SecuritySolutionCellRendererFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"security-solution-cell-renderer\""
+            ],
+            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.SecuritySolutionCellRendererFeature.getRenderer",
+            "type": "Function",
+            "tags": [],
+            "label": "getRenderer",
+            "description": [],
+            "signature": [
+              "() => Promise<(fieldName: string) => React.FunctionComponent<",
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.DataGridCellValueElementProps",
+                "text": "DataGridCellValueElementProps"
+              },
+              "> | undefined>"
+            ],
+            "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -131,7 +317,11 @@
             "docId": "kibDiscoverSharedPluginApi",
             "section": "def-public.ObservabilityLogsAIAssistantFeature",
             "text": "ObservabilityLogsAIAssistantFeature"
-          }
+          },
+          " | ",
+          "ObservabilityCreateSLOFeature",
+          " | ",
+          "SecuritySolutionFeature"
         ],
         "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
@@ -159,7 +349,13 @@
           "label": "features",
           "description": [],
           "signature": [
-            "DiscoverFeaturesServiceSetup"
+            {
+              "pluginId": "discoverShared",
+              "scope": "public",
+              "docId": "kibDiscoverSharedPluginApi",
+              "section": "def-public.DiscoverFeaturesServiceSetup",
+              "text": "DiscoverFeaturesServiceSetup"
+            }
           ],
           "path": "src/plugins/discover_shared/public/types.ts",
           "deprecated": false,
@@ -188,7 +384,13 @@
           "label": "features",
           "description": [],
           "signature": [
-            "DiscoverFeaturesServiceStart"
+            {
+              "pluginId": "discoverShared",
+              "scope": "public",
+              "docId": "kibDiscoverSharedPluginApi",
+              "section": "def-public.DiscoverFeaturesServiceStart",
+              "text": "DiscoverFeaturesServiceStart"
+            }
           ],
           "path": "src/plugins/discover_shared/public/types.ts",
           "deprecated": false,

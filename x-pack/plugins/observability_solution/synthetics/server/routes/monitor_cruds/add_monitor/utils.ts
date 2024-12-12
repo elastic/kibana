@@ -25,7 +25,7 @@ export const getPrivateLocationsForMonitor = async (
 export const parseMonitorLocations = (
   monitorPayload: CreateMonitorPayLoad,
   prevLocations?: MonitorFields['locations'],
-  internal: boolean = false
+  internal = false
 ) => {
   const { locations, private_locations: privateLocations } = monitorPayload;
 
@@ -42,41 +42,33 @@ export const parseMonitorLocations = (
     pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);
   } else {
     if (prevLocations && !internal) {
+      const prevPublicLocs = prevLocations
+        .filter((loc) => loc.isServiceManaged)
+        .map((loc) => loc.id);
+      const prevPrivateLocs = prevLocations
+        .filter((loc) => !loc.isServiceManaged)
+        .map((loc) => loc.id);
+
       if (!locations && !privateLocations) {
-        locs = prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id);
-        pvtLocs = prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id);
+        locs = prevPublicLocs;
+        pvtLocs = prevPrivateLocs;
       } else {
         if (!privateLocations) {
-          pvtLocs = [
-            ...(pvtLocs ?? []),
-            ...prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
-          ];
+          pvtLocs = [...(pvtLocs ?? []), ...prevPrivateLocs];
           if (locations?.length === 0) {
             locs = [];
-          } else {
-            locs = [
-              ...(locs ?? []),
-              ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
-            ];
           }
         }
         if (!locations) {
-          locs = [
-            ...(locs ?? []),
-            ...prevLocations.filter((loc) => loc.isServiceManaged).map((loc) => loc.id),
-          ];
+          locs = [...(locs ?? []), ...prevPublicLocs];
           if (privateLocations?.length === 0) {
             pvtLocs = [];
-          } else {
-            pvtLocs = [
-              ...(pvtLocs ?? []),
-              ...prevLocations.filter((loc) => !loc.isServiceManaged).map((loc) => loc.id),
-            ];
           }
         }
       }
     }
   }
+
   return {
     locations: Array.from(new Set(locs)),
     privateLocations: Array.from(new Set(pvtLocs)),

@@ -27,7 +27,8 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/172326
+describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -59,6 +60,15 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
 
     if (createdHost) {
       deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
+    }
+  });
+
+  afterEach(function () {
+    if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+      cy.task('captureHostVmAgentDiagnostics', {
+        hostname: createdHost.hostname,
+        fileNamePrefix: this.currentTest?.fullTitle(),
+      });
     }
   });
 

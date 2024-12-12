@@ -28,7 +28,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
   return (
     <>
       <EuiFormRow
-        display="columnCompressedSwitch"
+        display="columnCompressed"
         label={i18n.ALERTS_LABEL}
         css={css`
           .euiFormRow__labelWrapper {

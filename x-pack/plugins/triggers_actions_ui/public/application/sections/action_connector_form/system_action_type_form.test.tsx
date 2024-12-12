@@ -209,4 +209,64 @@ describe('action_type_form', () => {
 
     expect(setActionParamsProperty).toHaveBeenCalledWith('my-key', 'my-value', 1);
   });
+
+  describe('licensing', () => {
+    const actionTypeIndexDefaultWithLicensing = {
+      ...actionTypeIndexDefault,
+      '.test-system-action': {
+        ...actionTypeIndexDefault['.test-system-action'],
+        enabledInLicense: false,
+        minimumLicenseRequired: 'platinum' as const,
+      },
+    };
+
+    beforeEach(() => {
+      const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+        id: '.test-system-action-with-license',
+        iconClass: 'test',
+        selectMessage: 'test',
+        validateParams: (): Promise<GenericValidationResult<unknown>> => {
+          const validationResult = { errors: {} };
+          return Promise.resolve(validationResult);
+        },
+        actionConnectorFields: null,
+        actionParamsFields: mockedActionParamsFields,
+        defaultActionParams: {
+          dedupKey: 'test',
+          eventAction: 'resolve',
+        },
+        isSystemActionType: true,
+      });
+
+      actionTypeRegistry.get.mockReturnValue(actionType);
+
+      jest.clearAllMocks();
+    });
+
+    it('should render the licensing message if the user does not have the sufficient license', async () => {
+      render(
+        <I18nProvider>
+          <SystemActionTypeForm
+            actionConnector={actionConnector}
+            actionItem={actionItem}
+            connectors={connectors}
+            onDeleteAction={jest.fn()}
+            setActionParamsProperty={jest.fn()}
+            index={1}
+            actionTypesIndex={actionTypeIndexDefaultWithLicensing}
+            actionTypeRegistry={actionTypeRegistry}
+            messageVariables={{ context: [], state: [], params: [] }}
+            summaryMessageVariables={{ context: [], state: [], params: [] }}
+            producerId={AlertConsumers.INFRASTRUCTURE}
+            featureId={AlertConsumers.INFRASTRUCTURE}
+            ruleTypeId={'test'}
+          />
+        </I18nProvider>
+      );
+
+      expect(
+        await screen.findByText('This feature requires a Platinum license.')
+      ).toBeInTheDocument();
+    });
+  });
 });

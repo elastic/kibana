@@ -12,12 +12,18 @@ export const ADD_VALUE_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Add value' }
 );
 
-export const DELETE_VALUE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel',
-  { defaultMessage: 'Remove value' }
-);
+export const DELETE_ROW_VALUE_BUTTON_LABEL = (index: number) =>
+  i18n.translate('xpack.enterpriseSearch.appSearch.multiInputRows.removeRowValueButtonLabel', {
+    defaultMessage: 'Remove value, row {index}',
+    values: { index },
+  });
 
 export const INPUT_ROW_PLACEHOLDER = i18n.translate(
   'xpack.enterpriseSearch.appSearch.multiInputRows.inputRowPlaceholder',
   { defaultMessage: 'Enter a value' }
+);
+
+export const INPUT_ROW_CONTAINER_ARIA_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.multiInputRows.inputRowContainerAriaLabel',
+  { defaultMessage: 'Multiple input rows' }
 );

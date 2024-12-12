@@ -39,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const svlCommonApi = getService('svlCommonApi');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const platformSecurityUtils = getService('platformSecurityUtils');
   const es = getService('es');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   let supertestAdminWithApiKey: SupertestWithRoleScopeType;
@@ -56,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     after(async function () {
+      await platformSecurityUtils.clearAllRoles();
       await supertestAdminWithApiKey.destroy();
     });
 

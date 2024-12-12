@@ -189,7 +189,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
-  'packages/kbn-esql-validation-autocomplete/scripts/**/*',
+  'src/platform/packages/shared/kbn-esql-validation-autocomplete/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -919,6 +919,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -938,6 +939,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
         'x-pack/plugins/observability_solution/slo/**/*.stories.*',
+        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'react/function-component-definition': [
@@ -952,6 +954,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
@@ -959,15 +962,16 @@ module.exports = {
           'error',
           {
             additionalHooks:
-              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
       },
     },
     {
       files: [
-        'x-pack/plugins/aiops/**/*.tsx',
+        'x-pack/platform/plugins/shared/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'src/plugins/ai_assistant_management/**/*.tsx',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
@@ -984,6 +988,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/{streams,streams_app}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -1026,7 +1031,9 @@ module.exports = {
      */
     {
       files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
       rules: {
+        'testing-library/await-async-utils': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
@@ -1068,11 +1075,12 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1094,7 +1102,7 @@ module.exports = {
         'x-pack/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
@@ -1132,7 +1140,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
@@ -1147,7 +1155,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1168,7 +1176,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
@@ -1202,7 +1210,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
@@ -1301,8 +1309,8 @@ module.exports = {
       overrides: [
         {
           files: [
-            'x-pack/packages/security-solution/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
@@ -1955,6 +1963,16 @@ module.exports = {
     },
 
     /**
+     * Cloud Security Team overrides
+     */
+    {
+      files: ['x-pack/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      plugins: ['testing-library'],
+      rules: {
+        'testing-library/await-async-utils': 'error',
+      },
+    },
+    /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
@@ -1980,43 +1998,20 @@ module.exports = {
     },
     {
       files: [
-        'packages/kbn-reporting/common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/pdf_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/pdf/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/png_common/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/export_types/png/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/public/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/kbn-reporting/server/**', // TODO @elastic/appex-sharedux - A package depending on a plugin: @kbn/screenshotting-plugin, can we move theser interfaces to a platform/shared package?
-        'packages/shared-ux/page/analytics_no_data/types/**',
-        'scripts/create_observability_rules.js', // TODO - is importing "@kbn/observability-alerting-test-data" (observability/private)
-        'src/cli_setup/**', // TODO @kibana/operations - is importing "@kbn/interactive-setup-plugin" (platform/private)
-        'src/dev/build/tasks/install_chromium.ts', // TODO @kibana/operations - is importing "@kbn/screenshotting-plugin" (platform/private)
-        'src/plugins/ai_assistant_management/selection/**',
-        'src/plugins/dashboard/**',
-        'src/plugins/discover/**',
-        'test/**',
-        'x-pack/examples/exploratory_view_example/**',
-        'x-pack/examples/screenshotting_example/**',
-        'x-pack/examples/ui_actions_enhanced_examples/**',
-        'x-pack/packages/security-solution/data_table/**',
-        'x-pack/plugins/aiops/**',
-        'x-pack/plugins/data_quality/**',
-        'x-pack/plugins/ingest_pipelines/**',
-        'x-pack/plugins/ml/**',
-        'x-pack/plugins/monitoring/**',
-        'x-pack/plugins/observability_solution/infra/**',
-        'x-pack/plugins/observability_solution/inventory/**',
-        'x-pack/plugins/observability_solution/investigate_app/**',
-        'x-pack/plugins/observability_solution/investigate/**',
+        // logsShared depends on o11y/private plugins, but platform plugins depend on it
         'x-pack/plugins/observability_solution/logs_shared/**',
-        'x-pack/plugins/observability_solution/metrics_data_access/**',
-        'x-pack/plugins/observability_solution/observability_ai_assistant_app/**',
-        'x-pack/plugins/observability_solution/observability_ai_assistant_management/**',
-        'x-pack/plugins/observability_solution/observability/**',
-        'x-pack/plugins/observability_solution/slo/**',
-        'x-pack/plugins/observability_solution/synthetics/e2e/**',
+
+        // TODO @kibana/operations
+        'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
+        'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
+        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
+
+        // @kbn/osquery-plugin could be categorised as Security, but @kbn/infra-plugin (observability) depends on it!
         'x-pack/plugins/osquery/**',
-        'x-pack/plugins/search_assistant/**',
+
+        // For now, we keep the exception to let tests depend on anythying.
+        // Ideally, we need to classify the solution specific ones to reduce CI times
+        'test/**',
         'x-pack/test_serverless/**',
         'x-pack/test/**',
         'x-pack/test/plugin_functional/plugins/resolver_test/**',
@@ -2024,6 +2019,22 @@ module.exports = {
       rules: {
         '@kbn/imports/no_group_crossing_manifests': 'warn',
         '@kbn/imports/no_group_crossing_imports': 'warn',
+      },
+    },
+    {
+      files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
+        // disabling it since package is marked as module and it requires extension for files written
+        '@kbn/imports/uniform_imports': 'off',
+      },
+    },
+    {
+      files: ['packages/kbn-dependency-ownership/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
       },
     },
   ],

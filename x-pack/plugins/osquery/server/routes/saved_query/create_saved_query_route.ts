@@ -23,7 +23,11 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
     .post({
       access: 'public',
       path: '/api/osquery/saved_queries',
-      options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writeSavedQueries`],
+        },
+      },
     })
     .addVersion(
       {

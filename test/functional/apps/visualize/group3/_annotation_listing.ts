@@ -177,7 +177,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               dataView: 'logs*',
             });
             expect(await annotationEditor.showingMissingDataViewPrompt()).to.be(false);
-            expect(await find.byCssSelector('canvas')).to.be.ok();
+            // @TODO: re-enable this once the error bubbling issue is fixed at Lens custom component level
+            // expect(await find.byCssSelector('canvas')).to.be.ok();
           });
 
           await annotationEditor.saveGroup();

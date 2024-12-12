@@ -6,7 +6,12 @@
  */
 
 import moment from 'moment';
-import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import {
+  AnalyticsServiceSetup,
+  AuditLogger,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -20,6 +25,12 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
+import {
+  AUDIT_OUTCOME,
+  KnowledgeBaseAuditAction,
+  knowledgeBaseAuditEvent,
+} from '../../../ai_assistant_data_clients/knowledge_base/audit_events';
+import { CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT } from '../../../lib/telemetry/event_based_telemetry';
 import { performChecks } from '../../helpers';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '../../../../common/constants';
 import {
@@ -52,8 +63,6 @@ export type BulkResponse = KnowledgeBaseEntryBulkCrudActionResults & {
   errors?: BulkOperationError[];
 };
 
-export type BulkActionError = BulkOperationError | unknown;
-
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
@@ -62,7 +71,9 @@ const buildBulkResponse = (
     created = [],
     deleted = [],
     skipped = [],
-  }: KnowledgeBaseEntryBulkCrudActionResults & { errors: BulkOperationError[] }
+  }: KnowledgeBaseEntryBulkCrudActionResults & { errors: BulkOperationError[] },
+  telemetry: AnalyticsServiceSetup,
+  auditLogger?: AuditLogger
 ): IKibanaResponse<KnowledgeBaseEntryBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
@@ -82,6 +93,49 @@ const buildBulkResponse = (
     skipped,
   };
 
+  if (created.length) {
+    created.forEach((entry) => {
+      telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, {
+        entryType: entry.type,
+        required: 'required' in entry ? entry.required ?? false : false,
+        sharing: entry.users.length ? 'private' : 'global',
+        ...(entry.type === 'document' ? { source: entry.source } : {}),
+      });
+      auditLogger?.log(
+        knowledgeBaseAuditEvent({
+          action: KnowledgeBaseAuditAction.CREATE,
+          id: entry.id,
+          name: entry.name,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        })
+      );
+    });
+  }
+
+  if (updated.length) {
+    updated.forEach((entry) => {
+      auditLogger?.log(
+        knowledgeBaseAuditEvent({
+          action: KnowledgeBaseAuditAction.UPDATE,
+          id: entry.id,
+          name: entry.name,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        })
+      );
+    });
+  }
+
+  if (deleted.length) {
+    deleted.forEach((deletedId) => {
+      auditLogger?.log(
+        knowledgeBaseAuditEvent({
+          action: KnowledgeBaseAuditAction.DELETE,
+          id: deletedId,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        })
+      );
+    });
+  }
   if (numFailed > 0) {
     return response.custom<KnowledgeBaseEntryBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
@@ -115,8 +169,12 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
     .post({
       access: 'internal',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },
@@ -143,7 +201,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
             request,
             response,
@@ -175,9 +232,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           // subscribing to completed$, because it handles both cases when request was completed and aborted.
           // when route is finished by timeout, aborted$ is not getting fired
           request.events.completed$.subscribe(() => abortController.abort());
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient({
-            v2KnowledgeBaseEnabled: true,
-          });
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
           const authenticatedUser = checkResponse.currentUser;
           const userFilter = getKBUserFilter(authenticatedUser);
@@ -242,7 +297,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
               throw new Error(`Could not find documents to ${operation}: ${nonAvailableIds}.`);
             }
           };
-
           await validateDocumentsModification(body.delete?.ids ?? [], 'delete');
           await validateDocumentsModification(
             body.update?.map((entry) => entry.id) ?? [],
@@ -276,8 +330,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 global: entry.users != null && entry.users.length === 0,
               })
             ),
-            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) =>
-              getUpdateScript({ entry, isPatch: true }),
+            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),
             authenticatedUser,
           });
           const created =
@@ -289,14 +342,19 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 })
               : undefined;
 
-          return buildBulkResponse(response, {
-            // @ts-ignore-next-line TS2322
-            updated: transformESToKnowledgeBase(docsUpdated),
-            created: created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [],
-            deleted: docsDeleted ?? [],
-            skipped: [],
-            errors,
-          });
+          return buildBulkResponse(
+            response,
+            {
+              // @ts-ignore-next-line TS2322
+              updated: transformESToKnowledgeBase(docsUpdated),
+              created: created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [],
+              deleted: docsDeleted ?? [],
+              skipped: [],
+              errors,
+            },
+            ctx.elasticAssistant.telemetry,
+            ctx.elasticAssistant.auditLogger
+          );
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

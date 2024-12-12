@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsGroupingProps } from '../types';
 
 export const mockGroupingId = 'test';
 
-export const mockFeatureIds = [AlertConsumers.STACK_ALERTS];
+export const mockRuleTypeIds = ['.es-query'];
+export const mockConsumers = ['stackAlerts'];
 
 export const mockDate = {
   from: '2020-07-07T08:20:18.966Z',
@@ -30,7 +30,8 @@ export const mockOptions = [
 export const mockGroupingProps: Omit<AlertsGroupingProps, 'children'> = {
   ...mockDate,
   groupingId: mockGroupingId,
-  featureIds: mockFeatureIds,
+  ruleTypeIds: mockRuleTypeIds,
+  consumers: mockConsumers,
   defaultGroupingOptions: mockOptions,
   getAggregationsByGroupingField: () => [],
   getGroupStats: () => [{ title: 'Stat', component: <span /> }],

@@ -10,6 +10,8 @@ import { CommonAlertParamDetail, ExpressionConfig } from './types/alerts';
 import { AlertParamType } from './enums';
 import { validateDuration } from './validate_duration';
 
+export const USAGE_COLLECTION_APP_NAME = 'stack_monitoring';
+
 /**
  * Helper string to add as a tag in every logging call
  */
@@ -150,11 +152,6 @@ export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
 // We use this for metricbeat migration to identify specific products that we do not have constants for
 export const ELASTICSEARCH_SYSTEM_ID = 'elasticsearch';
-
-/**
- * The id of the infra source owned by the monitoring plugin.
- */
-export const INFRA_SOURCE_ID = 'internal-stack-monitoring';
 
 /*
  * These constants represent code paths within `getClustersFromRequest`

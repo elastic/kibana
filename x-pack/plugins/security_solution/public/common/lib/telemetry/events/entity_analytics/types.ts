@@ -7,29 +7,52 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
-import type { TelemetryEventTypes } from '../../constants';
 
+export enum EntityEventTypes {
+  EntityDetailsClicked = 'Entity Details Clicked',
+  EntityAlertsClicked = 'Entity Alerts Clicked',
+  EntityRiskFiltered = 'Entity Risk Filtered',
+  EntityStoreEnablementToggleClicked = 'Entity Store Enablement Toggle Clicked',
+  EntityStoreDashboardInitButtonClicked = 'Entity Store Initialization Button Clicked',
+  ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
+  AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
+  RiskInputsExpandedFlyoutOpened = 'Risk Inputs Expanded Flyout Opened',
+  AssetCriticalityCsvPreviewGenerated = 'Asset Criticality Csv Preview Generated',
+  AssetCriticalityFileSelected = 'Asset Criticality File Selected',
+  AssetCriticalityCsvImported = 'Asset Criticality CSV Imported',
+  AnomaliesCountClicked = 'Anomalies Count Clicked',
+  MLJobUpdate = 'ML Job Update',
+}
+
+export enum ML_JOB_TELEMETRY_STATUS {
+  started = 'started',
+  startError = 'start_error',
+  stopped = 'stopped',
+  stopError = 'stop_error',
+  moduleInstalled = 'module_installed',
+  installationError = 'installationError',
+}
 interface EntityParam {
   entity: 'host' | 'user';
 }
 
-export type ReportEntityDetailsClickedParams = EntityParam;
-export type ReportEntityAlertsClickedParams = EntityParam;
-export interface ReportEntityRiskFilteredParams extends Partial<EntityParam> {
+type ReportEntityDetailsClickedParams = EntityParam;
+type ReportEntityAlertsClickedParams = EntityParam;
+interface ReportEntityRiskFilteredParams extends Partial<EntityParam> {
   selectedSeverity: RiskSeverity;
 }
 
-export interface ReportToggleRiskSummaryClickedParams extends EntityParam {
+interface ReportToggleRiskSummaryClickedParams extends EntityParam {
   action: 'show' | 'hide';
 }
 
-export type ReportRiskInputsExpandedFlyoutOpenedParams = EntityParam;
+type ReportRiskInputsExpandedFlyoutOpenedParams = EntityParam;
 
-export interface ReportAddRiskInputToTimelineClickedParams {
+interface ReportAddRiskInputToTimelineClickedParams {
   quantity: number;
 }
 
-export interface ReportAssetCriticalityFileSelectedParams {
+interface ReportAssetCriticalityFileSelectedParams {
   valid: boolean;
   errorCode?: string;
   file: {
@@ -37,7 +60,7 @@ export interface ReportAssetCriticalityFileSelectedParams {
   };
 }
 
-export interface ReportAssetCriticalityCsvPreviewGeneratedParams {
+interface ReportAssetCriticalityCsvPreviewGeneratedParams {
   file: {
     size: number;
   };
@@ -53,76 +76,51 @@ export interface ReportAssetCriticalityCsvPreviewGeneratedParams {
   };
 }
 
-export interface ReportAssetCriticalityCsvImportedParams {
+interface ReportAssetCriticalityCsvImportedParams {
   file: {
     size: number;
   };
 }
 
-export interface ReportEntityStoreEnablementParams {
+interface ReportAnomaliesCountClickedParams {
+  jobId: string;
+  count: number;
+}
+
+interface ReportEntityStoreEnablementParams {
   timestamp: string;
   action: 'start' | 'stop';
 }
 
-export interface ReportEntityStoreInitParams {
+interface ReportEntityStoreInitParams {
   timestamp: string;
 }
 
-export type ReportEntityAnalyticsTelemetryEventParams =
-  | ReportEntityDetailsClickedParams
-  | ReportEntityAlertsClickedParams
-  | ReportEntityRiskFilteredParams
-  | ReportToggleRiskSummaryClickedParams
-  | ReportRiskInputsExpandedFlyoutOpenedParams
-  | ReportAddRiskInputToTimelineClickedParams
-  | ReportAssetCriticalityCsvPreviewGeneratedParams
-  | ReportAssetCriticalityFileSelectedParams
-  | ReportAssetCriticalityCsvImportedParams
-  | ReportEntityStoreEnablementParams
-  | ReportEntityStoreInitParams;
+interface ReportMLJobUpdateParams {
+  jobId: string;
+  isElasticJob: boolean;
+  status: ML_JOB_TELEMETRY_STATUS;
+  moduleId?: string;
+  errorMessage?: string;
+}
 
-export type EntityAnalyticsTelemetryEvent =
-  | {
-      eventType: TelemetryEventTypes.EntityDetailsClicked;
-      schema: RootSchema<ReportEntityDetailsClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityAlertsClicked;
-      schema: RootSchema<ReportEntityAlertsClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityRiskFiltered;
-      schema: RootSchema<ReportEntityRiskFilteredParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AddRiskInputToTimelineClicked;
-      schema: RootSchema<ReportAddRiskInputToTimelineClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.ToggleRiskSummaryClicked;
-      schema: RootSchema<ReportToggleRiskSummaryClickedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.RiskInputsExpandedFlyoutOpened;
-      schema: RootSchema<ReportRiskInputsExpandedFlyoutOpenedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AssetCriticalityCsvPreviewGenerated;
-      schema: RootSchema<ReportAssetCriticalityCsvPreviewGeneratedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AssetCriticalityFileSelected;
-      schema: RootSchema<ReportAssetCriticalityFileSelectedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.AssetCriticalityCsvImported;
-      schema: RootSchema<ReportAssetCriticalityCsvImportedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityStoreEnablementToggleClicked;
-      schema: RootSchema<ReportEntityStoreEnablementParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.EntityStoreDashboardInitButtonClicked;
-      schema: RootSchema<ReportEntityStoreInitParams>;
-    };
+export interface EntityAnalyticsTelemetryEventsMap {
+  [EntityEventTypes.EntityDetailsClicked]: ReportEntityDetailsClickedParams;
+  [EntityEventTypes.EntityAlertsClicked]: ReportEntityAlertsClickedParams;
+  [EntityEventTypes.EntityRiskFiltered]: ReportEntityRiskFilteredParams;
+  [EntityEventTypes.EntityStoreEnablementToggleClicked]: ReportEntityStoreEnablementParams;
+  [EntityEventTypes.EntityStoreDashboardInitButtonClicked]: ReportEntityStoreInitParams;
+  [EntityEventTypes.ToggleRiskSummaryClicked]: ReportToggleRiskSummaryClickedParams;
+  [EntityEventTypes.AddRiskInputToTimelineClicked]: ReportAddRiskInputToTimelineClickedParams;
+  [EntityEventTypes.RiskInputsExpandedFlyoutOpened]: ReportRiskInputsExpandedFlyoutOpenedParams;
+  [EntityEventTypes.AssetCriticalityCsvPreviewGenerated]: ReportAssetCriticalityCsvPreviewGeneratedParams;
+  [EntityEventTypes.AssetCriticalityFileSelected]: ReportAssetCriticalityFileSelectedParams;
+  [EntityEventTypes.AssetCriticalityCsvImported]: ReportAssetCriticalityCsvImportedParams;
+  [EntityEventTypes.AnomaliesCountClicked]: ReportAnomaliesCountClickedParams;
+  [EntityEventTypes.MLJobUpdate]: ReportMLJobUpdateParams;
+}
+
+export interface EntityAnalyticsTelemetryEvent {
+  eventType: EntityEventTypes;
+  schema: RootSchema<EntityAnalyticsTelemetryEventsMap[EntityEventTypes]>;
+}

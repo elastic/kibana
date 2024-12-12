@@ -36,7 +36,7 @@ export async function getSpaceSettings(spaceId?: string) {
 
   return {
     allowed_namespace_prefixes: settings?.attributes?.allowed_namespace_prefixes ?? [],
-    managed_by: settings?.attributes?.managed_by,
+    managed_by: settings?.attributes?.managed_by ?? undefined,
   };
 }
 

@@ -161,7 +161,7 @@ const OsqueryEditor = React.memo(OsqueryEditorComponent);
 export const plugin = ({
   interactionsUpsellingMessage,
 }: {
-  interactionsUpsellingMessage: string | null;
+  interactionsUpsellingMessage?: string;
 }) => {
   return {
     name: 'osquery',

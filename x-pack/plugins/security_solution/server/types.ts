@@ -20,6 +20,8 @@ import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/s
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { InferenceClient } from '@kbn/inference-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
@@ -35,7 +37,7 @@ import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
-import type { SiemMigrationsClient } from './lib/siem_migrations/types';
+import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_rule_migrations_service';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -52,13 +54,15 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getAuditLogger: () => AuditLogger | undefined;
+  getDataViewsService: () => DataViewsService;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
-  getSiemMigrationsClient: () => SiemMigrationsClient;
+  getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
+  getInferenceClient: () => InferenceClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

@@ -28,9 +28,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               )
           ),
         '--elasticsearch.hosts=http://localhost:9220',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'assistantKnowledgeBaseByDefault',
-        ])}`,
       ],
     },
     testFiles: [require.resolve('..')],

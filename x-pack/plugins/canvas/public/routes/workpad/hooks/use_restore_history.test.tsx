@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useRestoreHistory } from './use_restore_history';
 import { encode } from '../route_state';
 

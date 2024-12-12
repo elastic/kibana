@@ -10,6 +10,7 @@ import { finished } from 'stream/promises';
 import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { Message } from '@aws-sdk/client-bedrock-runtime';
 import { StreamParser } from './types';
 
 export const parseBedrockStreamAsAsyncIterator = async function* (
@@ -24,7 +25,7 @@ export const parseBedrockStreamAsAsyncIterator = async function* (
   }
   try {
     for await (const chunk of responseStream) {
-      const bedrockChunk = handleBedrockChunk({ chunk, bedrockBuffer: new Uint8Array(0), logger });
+      const bedrockChunk = handleBedrockChunk({ chunk, bedrockBuffer: new Uint8Array(0) });
       yield bedrockChunk.decodedChunk;
     }
   } catch (err) {
@@ -46,7 +47,7 @@ export const parseBedrockStream: StreamParser = async (
   if (abortSignal) {
     abortSignal.addEventListener('abort', () => {
       responseStream.destroy(new Error('Aborted'));
-      return parseBedrockBuffer(responseBuffer, logger);
+      return parseBedrockBuffer(responseBuffer);
     });
   }
   responseStream.on('data', (chunk) => {
@@ -55,7 +56,7 @@ export const parseBedrockStream: StreamParser = async (
     if (tokenHandler) {
       // Initialize an empty Uint8Array to store the concatenated buffer.
       const bedrockBuffer: Uint8Array = new Uint8Array(0);
-      handleBedrockChunk({ chunk, bedrockBuffer, logger, chunkHandler: tokenHandler });
+      handleBedrockChunk({ chunk, bedrockBuffer, chunkHandler: tokenHandler });
     }
   });
 
@@ -67,7 +68,7 @@ export const parseBedrockStream: StreamParser = async (
     }
   });
 
-  return parseBedrockBuffer(responseBuffer, logger);
+  return parseBedrockBuffer(responseBuffer);
 };
 
 /**
@@ -76,14 +77,14 @@ export const parseBedrockStream: StreamParser = async (
  * @param {Uint8Array[]} chunks - Array of Uint8Array chunks to be parsed.
  * @returns {string} - Parsed string from the Bedrock buffer.
  */
-const parseBedrockBuffer = (chunks: Uint8Array[], logger: Logger): string => {
+const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
   // Initialize an empty Uint8Array to store the concatenated buffer.
   let bedrockBuffer: Uint8Array = new Uint8Array(0);
 
   // Map through each chunk to process the Bedrock buffer.
   return chunks
     .map((chunk) => {
-      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer, logger });
+      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer });
       bedrockBuffer = processedChunk.bedrockBuffer;
       return processedChunk.decodedChunk;
     })
@@ -101,12 +102,10 @@ export const handleBedrockChunk = ({
   chunk,
   bedrockBuffer,
   chunkHandler,
-  logger,
 }: {
   chunk: Uint8Array;
   bedrockBuffer: Uint8Array;
   chunkHandler?: (chunk: string) => void;
-  logger?: Logger;
 }): { decodedChunk: string; bedrockBuffer: Uint8Array } => {
   // Concatenate the current chunk to the existing buffer.
   let newBuffer = concatChunks(bedrockBuffer, chunk);
@@ -135,7 +134,7 @@ export const handleBedrockChunk = ({
       const body = JSON.parse(
         Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
       );
-      const decodedContent = prepareBedrockOutput(body, logger);
+      const decodedContent = prepareBedrockOutput(body);
       if (chunkHandler) {
         chunkHandler(decodedContent);
       }
@@ -193,7 +192,7 @@ interface CompletionChunk {
  * @param responseBody
  * @returns string
  */
-const prepareBedrockOutput = (responseBody: CompletionChunk, logger?: Logger): string => {
+const prepareBedrockOutput = (responseBody: CompletionChunk): string => {
   if (responseBody.type && responseBody.type.length) {
     if (responseBody.type === 'message_start' && responseBody.message) {
       return parseContent(responseBody.message.content);
@@ -224,3 +223,27 @@ function parseContent(content: Array<{ text?: string; type: string }>): string {
   }
   return parsedContent;
 }
+
+/**
+ * Prepare messages for the bedrock API by combining messages from the same role
+ * @param messages
+ */
+export const prepareMessages = (messages: Message[]) =>
+  messages.reduce((acc, { role, content }) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (!lastMessage || lastMessage.role !== role) {
+      acc.push({ role, content });
+      return acc;
+    }
+
+    if (lastMessage.role === role && lastMessage.content) {
+      acc[acc.length - 1].content = lastMessage.content.concat(content || []);
+      return acc;
+    }
+
+    return acc;
+  }, [] as Message[]);
+
+export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
+export const DEFAULT_BEDROCK_REGION = 'us-east-1';

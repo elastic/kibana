@@ -39,8 +39,8 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
-import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
-import { useSummaryChartData } from '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
+import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
@@ -115,8 +115,17 @@ jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 
 jest.mock(
-  '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
 
 const timestamp = '2022-07-25T08:20:18.966Z';
 
@@ -174,7 +183,7 @@ describe('<HostDetails />', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
-    (useSummaryChartData as jest.Mock).mockReturnValue({ isLoading: false, items: [] });
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   it('should render host details correctly', () => {
@@ -304,10 +313,11 @@ describe('<HostDetails />', () => {
 
       getAllByTestId(HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID)[0].click();
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: NetworkPanelKey,
+        id: NetworkPreviewPanelKey,
         params: {
           ip: '100.XXX.XXX',
           flowTarget: 'source',
+          scopeId: defaultProps.scopeId,
           banner: NETWORK_PREVIEW_BANNER,
         },
       });
@@ -323,9 +333,9 @@ describe('<HostDetails />', () => {
     });
 
     it('should render alert count when data is available', () => {
-      (useSummaryChartData as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
         isLoading: false,
-        items: [{ key: 'high', value: 78, label: 'High' }],
+        items: mockAlertData,
       });
 
       const { getByTestId } = renderHostDetails(mockContextValue);

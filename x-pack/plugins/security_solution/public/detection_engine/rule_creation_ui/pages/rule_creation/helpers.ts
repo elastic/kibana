@@ -19,6 +19,7 @@ import type {
   List,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type {
+  RiskScoreMappingItem,
   Threats,
   ThreatSubtechnique,
   ThreatTechnique,
@@ -51,15 +52,24 @@ import type {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
-  GroupByOptions,
+  AlertSuppressionDurationType,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import type {
   RuleCreateProps,
   AlertSuppression,
   RequiredFieldInput,
+  SeverityMapping,
+  RelatedIntegrationArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -375,7 +385,9 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
           return {
             ...technique,
             subtechnique:
-              technique.subtechnique != null ? trimThreatsWithNoName(technique.subtechnique) : [],
+              technique.subtechnique != null
+                ? trimThreatsWithNoName(technique.subtechnique)
+                : undefined,
           };
         }),
       };
@@ -407,8 +419,9 @@ export const getStepDataDataSource = (
 /**
  * Strips away form rows that were not filled out by the user
  */
-const removeEmptyRequiredFields = (requiredFields: RequiredFieldInput[]): RequiredFieldInput[] =>
-  requiredFields.filter((field) => field.name !== '' && field.type !== '');
+export const removeEmptyRequiredFields = (
+  requiredFields: RequiredFieldInput[]
+): RequiredFieldInput[] => requiredFields.filter((field) => field.name !== '' && field.type !== '');
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const stepData = getStepDataDataSource(defineStepData);
@@ -418,7 +431,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 
   const baseFields = {
     type: ruleType,
-    related_integrations: defineStepData.relatedIntegrations?.filter((ri) => !isEmpty(ri.package)),
+    related_integrations: defineStepData.relatedIntegrations
+      ? filterOutEmptyRelatedIntegrations(defineStepData.relatedIntegrations)
+      : undefined,
     ...(timeline.id != null &&
       timeline.title != null && {
         timeline_id: timeline.id,
@@ -426,16 +441,18 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }),
   };
 
+  // Threshold rule won't contain alert suppression fields
   const alertSuppressionFields =
-    ruleFields.groupByFields.length > 0
+    ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]?.length > 0
       ? {
           alert_suppression: {
-            group_by: ruleFields.groupByFields,
+            group_by: ruleFields[ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
             duration:
-              ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
-                ? ruleFields.groupByDuration
+              ruleFields[ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME] ===
+              AlertSuppressionDurationType.PerTimePeriod
+                ? ruleFields[ALERT_SUPPRESSION_DURATION_FIELD_NAME]
                 : undefined,
-            missing_fields_strategy: (ruleFields.suppressionMissingFields ||
+            missing_fields_strategy: (ruleFields[ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME] ||
               DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) as AlertSuppression['missing_fields_strategy'],
           },
         }
@@ -472,8 +489,8 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ]
                 : [],
           },
-          ...(ruleFields.enableThresholdSuppression && {
-            alert_suppression: { duration: ruleFields.groupByDuration },
+          ...(ruleFields[THRESHOLD_ALERT_SUPPRESSION_ENABLED] && {
+            alert_suppression: { duration: ruleFields[ALERT_SUPPRESSION_DURATION_FIELD_NAME] },
           }),
         }),
       }
@@ -624,12 +641,12 @@ export const formatAboutStepData = (
       : { field_names: investigationFields },
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.isMappingChecked
-      ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
+      ? filterOutEmptyRiskScoreMappingItems(riskScore.mapping)
       : [],
     rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
     severity_mapping: severity.isMappingChecked
-      ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
+      ? filterOutEmptySeverityMappingItems(severity.mapping)
       : [],
     threat: filterEmptyThreats(threat).map((singleThreat) => ({
       ...singleThreat,
@@ -644,6 +661,15 @@ export const formatAboutStepData = (
   };
   return resp;
 };
+
+export const filterOutEmptyRiskScoreMappingItems = (riskScoreMapping: RiskScoreMappingItem[]) =>
+  riskScoreMapping.filter((m) => m.field != null && m.field !== '');
+
+export const filterOutEmptySeverityMappingItems = (severityMapping: SeverityMapping) =>
+  severityMapping.filter((m) => m.field != null && m.field !== '' && m.value != null);
+
+export const filterOutEmptyRelatedIntegrations = (relatedIntegrations: RelatedIntegrationArray) =>
+  relatedIntegrations.filter((ri) => !isEmpty(ri.package));
 
 export const isRuleAction = (
   action: AlertingRuleAction | AlertingRuleSystemAction,

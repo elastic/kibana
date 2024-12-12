@@ -15,8 +15,15 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToastInput } from '@kbn/core-notifications-browser';
 import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 export const DATA_TEST_SUBJ_PAGE_RELOAD_BUTTON = 'pageReloadButton';
+
+interface StartDeps {
+  theme: ThemeServiceStart;
+  i18n: I18nStart;
+  userProfile: UserProfileService;
+}
 
 /**
  * Utility function for returning a {@link ToastInput} for displaying a prompt for reloading the page.
@@ -24,7 +31,7 @@ export const DATA_TEST_SUBJ_PAGE_RELOAD_BUTTON = 'pageReloadButton';
  * @param i18nStart The {@link I18nStart} contract.
  * @returns A toast.
  */
-export const reloadPageToast = (theme: ThemeServiceStart, i18nStart: I18nStart): ToastInput => {
+export const reloadPageToast = (startDeps: StartDeps): ToastInput => {
   return {
     title: i18n.translate('management.settings.form.requiresPageReloadToastDescription', {
       defaultMessage: 'One or more settings require you to reload the page to take effect.',
@@ -43,7 +50,7 @@ export const reloadPageToast = (theme: ThemeServiceStart, i18nStart: I18nStart):
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>,
-      { i18n: i18nStart, theme }
+      startDeps
     ),
     color: 'success',
     toastLifeTimeMs: 15000,

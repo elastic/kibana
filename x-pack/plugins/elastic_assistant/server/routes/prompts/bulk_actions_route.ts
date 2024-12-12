@@ -45,8 +45,6 @@ export interface BulkOperationError {
   };
 }
 
-export type BulkActionError = BulkOperationError | unknown;
-
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
@@ -114,8 +112,12 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     .post({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },

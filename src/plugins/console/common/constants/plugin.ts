@@ -8,3 +8,5 @@
  */
 
 export const MAJOR_VERSION = '8.0.0';
+
+export const WELCOME_TOUR_DELAY = 250;

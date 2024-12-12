@@ -15,9 +15,7 @@ import {
   GenerationInterval,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { Document } from '@langchain/core/documents';
-import { v4 as uuidv4 } from 'uuid';
 import { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment/moment';
@@ -28,21 +26,6 @@ import {
   ATTACK_DISCOVERY_SUCCESS_EVENT,
 } from '../../../lib/telemetry/event_based_telemetry';
 import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
-
-export const REQUIRED_FOR_ATTACK_DISCOVERY: AnonymizationFieldResponse[] = [
-  {
-    id: uuidv4(),
-    field: '_id',
-    allowed: true,
-    anonymized: true,
-  },
-  {
-    id: uuidv4(),
-    field: 'kibana.alert.original_time',
-    allowed: true,
-    anonymized: false,
-  },
-];
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {
   canceled: 'canceled',

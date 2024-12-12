@@ -8,7 +8,7 @@
  */
 
 import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import { useControlGroupSyncToLocalStorage } from './use_control_group_sync_to_local_storage';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -34,77 +34,97 @@ describe('Filters Sync to Local Storage', () => {
       writable: true,
     });
   });
+
   afterEach(() => {
     mockLocalStorage = {};
   });
-  it('should not be undefined if localStorage has initial value', () => {
+
+  it('should not be undefined if localStorage has initial value', async () => {
     global.localStorage.setItem(TEST_STORAGE_KEY, JSON.stringify(DEFAULT_STORED_VALUE));
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
         Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
     );
-    waitForNextUpdate();
-    expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE);
+    await waitFor(() =>
+      expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE)
+    );
   });
-  it('should be undefined if localstorage as NO initial value', () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+
+  it('should be undefined if localstorage as NO initial value', async () => {
+    const { result } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
         Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
     );
-    waitForNextUpdate();
-    expect(result.current.controlGroupState).toBeUndefined();
-    expect(result.current.setControlGroupState).toBeTruthy();
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          controlGroupState: undefined,
+          setControlGroupState: expect.any(Function),
+        })
+      )
+    );
   });
-  it('should be update values to local storage when sync is ON', () => {
-    const { result, waitFor } = renderHook(() =>
+  it('should be update values to local storage when sync is ON', async () => {
+    const { result } = renderHook(() =>
       useControlGroupSyncToLocalStorage({
         Storage,
         storageKey: TEST_STORAGE_KEY,
         shouldSync: true,
       })
     );
-    waitFor(() => {
+    await waitFor(() => {
       expect(result.current.controlGroupState).toBeUndefined();
       expect(result.current.setControlGroupState).toBeTruthy();
     });
-    result.current.setControlGroupState(DEFAULT_STORED_VALUE);
-    waitFor(() => {
+    act(() => {
+      result.current.setControlGroupState(DEFAULT_STORED_VALUE);
+    });
+    await waitFor(() => {
       expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE);
       expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(
         JSON.stringify(DEFAULT_STORED_VALUE)
       );
     });
   });
-  it('should not update values to local storage when sync is OFF', () => {
-    const { waitFor, result, rerender } = renderHook(() =>
-      useControlGroupSyncToLocalStorage({
-        Storage,
-        storageKey: TEST_STORAGE_KEY,
-        shouldSync: true,
-      })
-    );
+  it('should not update values to local storage when sync is OFF', async () => {
+    const initialProps = {
+      Storage,
+      storageKey: TEST_STORAGE_KEY,
+      shouldSync: true,
+    };
+
+    const { result, rerender } = renderHook(useControlGroupSyncToLocalStorage, {
+      initialProps,
+    });
 
     // Sync is ON
-    waitFor(() => {
+    await waitFor(() => {
       expect(result.current.controlGroupState).toBeUndefined();
       expect(result.current.setControlGroupState).toBeTruthy();
     });
 
-    result.current.setControlGroupState(DEFAULT_STORED_VALUE);
-    waitFor(() => {
+    act(() => {
+      result.current.setControlGroupState(DEFAULT_STORED_VALUE);
+    });
+
+    await waitFor(() => {
       expect(result.current.controlGroupState).toMatchObject(DEFAULT_STORED_VALUE);
     });
 
     // Sync is OFF
-    rerender({ storageKey: TEST_STORAGE_KEY, shouldSync: false });
-    result.current.setControlGroupState(ANOTHER_SAMPLE_VALUE);
-    waitFor(() => {
+    rerender({ ...initialProps, shouldSync: false });
+
+    act(() => {
+      result.current.setControlGroupState(ANOTHER_SAMPLE_VALUE);
+    });
+
+    await waitFor(() => {
       expect(result.current.controlGroupState).toMatchObject(ANOTHER_SAMPLE_VALUE);
       // old value
       expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(

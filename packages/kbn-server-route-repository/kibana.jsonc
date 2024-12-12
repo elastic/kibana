@@ -1,5 +1,9 @@
 {
   "type": "shared-server",
   "id": "@kbn/server-route-repository",
-  "owner": ["@elastic/obs-knowledge-team"]
+  "owner": [
+    "@elastic/obs-knowledge-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

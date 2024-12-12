@@ -7,8 +7,8 @@
 
 import { ALL_VALUE, FetchSLOHealthResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 export interface UseFetchSloHealth {
   data: FetchSLOHealthResponse | undefined;
@@ -21,7 +21,7 @@ export interface Params {
 }
 
 export function useFetchSloHealth({ list }: Params): UseFetchSloHealth {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const payload = list.map((slo) => ({
     sloId: slo.id,
     sloInstanceId: slo.instanceId ?? ALL_VALUE,
@@ -31,15 +31,10 @@ export function useFetchSloHealth({ list }: Params): UseFetchSloHealth {
     queryKey: sloKeys.health(payload),
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.post<FetchSLOHealthResponse>(
-          '/internal/observability/slos/_health',
-          {
-            body: JSON.stringify({ list: payload }),
-            signal,
-          }
-        );
-
-        return response;
+        return await sloClient.fetch('POST /internal/observability/slos/_health', {
+          params: { body: { list: payload } },
+          signal,
+        });
       } catch (error) {
         // ignore error
       }

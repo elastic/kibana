@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
-import { readKibanaConfig } from './tasks/read_kibana_config';
+import { readKibanaConfig } from '@kbn/observability-synthetics-test-data';
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
 const SERVICE_USERNAME = 'xpack.uptime.service.username';

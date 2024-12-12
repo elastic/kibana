@@ -53,6 +53,7 @@ export async function fetchTrends(
 
 export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
+  writeAccess: false,
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
     body: schema.arrayOf(

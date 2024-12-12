@@ -36,7 +36,6 @@ import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
-import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
   OnRowSelected,
@@ -44,7 +43,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../common/types';
-import type { RowRenderer } from '../../../../common/types/timeline';
+import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common/types/timeline';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';

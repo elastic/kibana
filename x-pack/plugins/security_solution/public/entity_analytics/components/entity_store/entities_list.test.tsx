@@ -109,7 +109,7 @@ describe('EntitiesList', () => {
     fireEvent.click(columnHeader);
     expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        sortField: 'entity.name.text',
+        sortField: 'entity.name',
         sortOrder: 'asc',
       })
     );

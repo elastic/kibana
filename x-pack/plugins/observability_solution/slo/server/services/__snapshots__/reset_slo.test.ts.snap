@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ResetSLO resets all associated resources 1`] = `
+exports[`ResetSLO happy path resets all associated resources 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -16,7 +16,7 @@ exports[`ResetSLO resets all associated resources 1`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 2`] = `
+exports[`ResetSLO happy path resets all associated resources 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -32,7 +32,7 @@ exports[`ResetSLO resets all associated resources 2`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 3`] = `
+exports[`ResetSLO happy path resets all associated resources 3`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -48,7 +48,7 @@ exports[`ResetSLO resets all associated resources 3`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 4`] = `
+exports[`ResetSLO happy path resets all associated resources 4`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -64,7 +64,7 @@ exports[`ResetSLO resets all associated resources 4`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 5`] = `
+exports[`ResetSLO happy path resets all associated resources 5`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -115,7 +115,7 @@ exports[`ResetSLO resets all associated resources 5`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 6`] = `
+exports[`ResetSLO happy path resets all associated resources 6`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -178,7 +178,7 @@ exports[`ResetSLO resets all associated resources 6`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 7`] = `
+exports[`ResetSLO happy path resets all associated resources 7`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -194,7 +194,7 @@ exports[`ResetSLO resets all associated resources 7`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 8`] = `
+exports[`ResetSLO happy path resets all associated resources 8`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -542,7 +542,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 9`] = `
+exports[`ResetSLO happy path resets all associated resources 9`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -605,7 +605,7 @@ exports[`ResetSLO resets all associated resources 9`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 10`] = `
+exports[`ResetSLO happy path resets all associated resources 10`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -621,7 +621,7 @@ exports[`ResetSLO resets all associated resources 10`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 11`] = `
+exports[`ResetSLO happy path resets all associated resources 11`] = `
 [MockFunction] {
   "calls": Array [
     Array [

@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const isEmptyString = (value: string) => value.trim() === '';
+export const isEmptyString = (value: string, trimString: boolean = true) =>
+  (trimString ? value.trim() : value) === '';

@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           gte: '2020-12-16T15:00:00.000Z',
           lte: '2020-12-16T16:00:00.000Z',
-          featureIds: ['logs'],
+          ruleTypeIds: ['logs.alert.document.count'],
           fixed_interval: '10m',
         })
         .expect(200);
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ],
-          featureIds: ['logs'],
+          ruleTypeIds: ['logs.alert.document.count'],
           fixed_interval: '10m',
         })
         .expect(200);
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ],
-          featureIds: ['logs'],
+          ruleTypeIds: ['logs.alert.document.count'],
           fixed_interval: '10m',
         })
         .expect(200);

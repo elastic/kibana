@@ -26,8 +26,10 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: TIMELINE_FAVORITE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -50,7 +52,7 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
           const { timelineId, templateTimelineId, templateTimelineVersion, timelineType } =
             request.body;
 
-          const timeline = await persistFavorite(
+          const persistFavoriteResponse = await persistFavorite(
             frameworkRequest,
             timelineId || null,
             templateTimelineId || null,
@@ -58,15 +60,16 @@ export const persistFavoriteRoute = (router: SecuritySolutionPluginRouter) => {
             timelineType || TimelineTypeEnum.default
           );
 
-          const body: PersistFavoriteRouteResponse = {
-            data: {
-              persistFavorite: timeline,
-            },
-          };
-
-          return response.ok({
-            body,
-          });
+          if (persistFavoriteResponse.code !== 200) {
+            return siemResponse.error({
+              body: persistFavoriteResponse.message,
+              statusCode: persistFavoriteResponse.code,
+            });
+          } else {
+            return response.ok({
+              body: persistFavoriteResponse.favoriteTimeline,
+            });
+          }
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

@@ -750,6 +750,12 @@ describe('actions_connectors_list', () => {
                 referencedByCount: 1,
                 config: {},
               },
+              {
+                id: '3',
+                actionTypeId: 'test3',
+                isPreconfigured: true,
+                isDeprecated: false,
+              },
             ] as ActionConnector[]
           }
           setActions={() => {}}
@@ -766,11 +772,18 @@ describe('actions_connectors_list', () => {
     it('renders table of connectors', async () => {
       await setup();
       expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-      expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+      expect(wrapper.find('EuiTableRow')).toHaveLength(3);
       expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual(
         'actConnectorsList__tableRowDisabled'
       );
       expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
+        'actConnectorsList__tableRowDisabled'
+      );
+    });
+
+    it('renders preconfigured connectors as enabled', async () => {
+      await setup();
+      expect(wrapper.find('EuiTableRow').at(2).prop('className')).not.toEqual(
         'actConnectorsList__tableRowDisabled'
       );
     });

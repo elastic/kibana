@@ -36,7 +36,7 @@ import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule
 import { usePermissions } from '../../../../hooks/use_permissions';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { useSpace } from '../../../../hooks/use_space';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import {
   createRemoteSloDeleteUrl,

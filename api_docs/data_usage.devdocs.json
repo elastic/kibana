@@ -88,7 +88,7 @@
         "signature": [
           "\"/api/data_usage/\""
         ],
-        "path": "x-pack/plugins/data_usage/common/index.ts",
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -100,7 +100,7 @@
         "tags": [],
         "label": "DATA_USAGE_DATA_STREAMS_API_ROUTE",
         "description": [],
-        "path": "x-pack/plugins/data_usage/common/index.ts",
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -112,7 +112,22 @@
         "tags": [],
         "label": "DATA_USAGE_METRICS_API_ROUTE",
         "description": [],
-        "path": "x-pack/plugins/data_usage/common/index.ts",
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataUsage",
+        "id": "def-common.DEFAULT_SELECTED_OPTIONS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_SELECTED_OPTIONS",
+        "description": [],
+        "signature": [
+          "50"
+        ],
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -127,19 +142,7 @@
         "signature": [
           "\"data_usage\""
         ],
-        "path": "x-pack/plugins/data_usage/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataUsage",
-        "id": "def-common.PLUGIN_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_NAME",
-        "description": [],
-        "path": "x-pack/plugins/data_usage/common/index.ts",
+        "path": "x-pack/plugins/data_usage/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

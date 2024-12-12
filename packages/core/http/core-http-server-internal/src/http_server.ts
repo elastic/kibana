@@ -35,7 +35,7 @@ import type {
   HttpServerInfo,
   HttpAuth,
   IAuthHeadersStorage,
-  RouterDeprecatedRouteDetails,
+  RouterDeprecatedApiDetails,
   RouteMethod,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
@@ -389,8 +389,8 @@ export class HttpServer {
     }
   }
 
-  private getDeprecatedRoutes(): RouterDeprecatedRouteDetails[] {
-    const deprecatedRoutes: RouterDeprecatedRouteDetails[] = [];
+  private getDeprecatedRoutes(): RouterDeprecatedApiDetails[] {
+    const deprecatedRoutes: RouterDeprecatedApiDetails[] = [];
 
     for (const router of this.registeredRouters) {
       const allRouterRoutes = [
@@ -404,22 +404,29 @@ export class HttpServer {
         ...allRouterRoutes
           .flat()
           .map((route) => {
+            const access = route.options.access;
             if (route.isVersioned === true) {
               return [...route.handlers.entries()].map(([_, { options }]) => {
                 const deprecated = options.options?.deprecated;
-                return { route, version: `${options.version}`, deprecated };
+                return { route, version: `${options.version}`, deprecated, access };
               });
             }
-            return { route, version: undefined, deprecated: route.options.deprecated };
+
+            return { route, version: undefined, deprecated: route.options.deprecated, access };
           })
           .flat()
-          .filter(({ deprecated }) => isObject(deprecated))
-          .flatMap(({ route, deprecated, version }) => {
+          .filter(({ deprecated, access }) => {
+            const isRouteDeprecation = isObject(deprecated);
+            const isAccessDeprecation = access === 'internal';
+            return isRouteDeprecation || isAccessDeprecation;
+          })
+          .flatMap(({ route, deprecated, version, access }) => {
             return {
               routeDeprecationOptions: deprecated!,
               routeMethod: route.method as RouteMethod,
               routePath: route.path,
               routeVersion: version,
+              routeAccess: access,
             };
           })
       );

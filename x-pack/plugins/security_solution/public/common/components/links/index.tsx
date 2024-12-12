@@ -8,11 +8,9 @@
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent, MouseEvent } from 'react';
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { useTourContext } from '../guided_onboarding_tour';
+import type { NavigateToAppOptions } from '@kbn/core-application-browser';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -43,6 +41,7 @@ import {
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
 import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
+import { EntityEventTypes } from '../../lib/telemetry';
 
 export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';
@@ -96,7 +95,7 @@ const UserDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEntityDetailsClicked({ entity: 'user' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'user' });
       const callback = onClickParam ?? goToUsersDetails;
       callback(e);
     },
@@ -173,7 +172,7 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEntityDetailsClicked({ entity: 'host' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'host' });
 
       const callback = onClickParam ?? goToHostDetails;
       callback(e);
@@ -306,27 +305,19 @@ export interface CaseDetailsLinkComponentProps {
    */
   title?: string;
   /**
-   * Link index
+   * If true, will open the app in new tab, will share session information via window.open if base
    */
-  index?: number;
+  openInNewTab?: NavigateToAppOptions['openInNewTab'];
 }
 
 const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
-  index,
   children,
   detailName,
   title,
+  openInNewTab = false,
 }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
-  const { activeStep, isTourShown } = useTourContext();
-  const isTourStepActive = useMemo(
-    () =>
-      activeStep === AlertsCasesTourSteps.viewCase &&
-      isTourShown(SecurityStepId.alertsCases) &&
-      index === 0,
-    [activeStep, index, isTourShown]
-  );
 
   const goToCaseDetails = useCallback(
     async (ev?: SyntheticEvent) => {
@@ -334,32 +325,21 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search }),
+        openInNewTab,
       });
     },
-    [detailName, navigateToApp, search]
+    [detailName, navigateToApp, openInNewTab, search]
   );
 
-  useEffect(() => {
-    if (isTourStepActive)
-      document.querySelector(`[tour-step="RelatedCases-accordion"]`)?.scrollIntoView();
-  }, [isTourStepActive]);
-
   return (
-    <GuidedOnboardingTourStep
+    <LinkAnchor
       onClick={goToCaseDetails}
-      isTourAnchor={isTourStepActive}
-      step={AlertsCasesTourSteps.viewCase}
-      tourId={SecurityStepId.alertsCases}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      data-test-subj="case-details-link"
+      aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
-      <LinkAnchor
-        onClick={goToCaseDetails}
-        href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
-        data-test-subj="case-details-link"
-        aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
-      >
-        {children ? children : detailName}
-      </LinkAnchor>
-    </GuidedOnboardingTourStep>
+      {children ? children : detailName}
+    </LinkAnchor>
   );
 };
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);

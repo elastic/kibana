@@ -43,6 +43,7 @@ describe('calculateRuleSource', () => {
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
       rule,
+      isRuleCustomizationEnabled: true,
     });
     expect(result).toEqual({
       type: 'internal',
@@ -59,6 +60,7 @@ describe('calculateRuleSource', () => {
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
       rule,
+      isRuleCustomizationEnabled: true,
     });
     expect(result).toEqual(
       expect.objectContaining({
@@ -79,6 +81,7 @@ describe('calculateRuleSource', () => {
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
       rule,
+      isRuleCustomizationEnabled: true,
     });
     expect(result).toEqual(
       expect.objectContaining({
@@ -101,6 +104,28 @@ describe('calculateRuleSource', () => {
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
       rule,
+      isRuleCustomizationEnabled: true,
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'external',
+        is_customized: false,
+      })
+    );
+  });
+
+  it('returns is_customized false when the rule is customized but customization is disabled', async () => {
+    const rule = getSampleRule();
+    rule.immutable = true;
+    rule.name = 'Updated name';
+
+    const baseRule = getSampleRuleAsset();
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+
+    const result = await calculateRuleSource({
+      prebuiltRuleAssetClient,
+      rule,
+      isRuleCustomizationEnabled: false,
     });
     expect(result).toEqual(
       expect.objectContaining({

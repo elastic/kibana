@@ -19,7 +19,7 @@ import {
   RECONNAISSANCE,
   replaceNewlineLiterals,
 } from './helpers';
-import { mockAttackDiscovery } from './mock/mock_attack_discovery';
+import { mockAttackDiscovery } from './pages/mock/mock_attack_discovery';
 import * as i18n from './translations';
 
 const expectedTactics = {

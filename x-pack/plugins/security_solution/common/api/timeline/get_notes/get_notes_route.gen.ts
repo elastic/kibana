@@ -60,4 +60,4 @@ export const GetNotesRequestQuery = z.object({
 export type GetNotesRequestQueryInput = z.input<typeof GetNotesRequestQuery>;
 
 export type GetNotesResponse = z.infer<typeof GetNotesResponse>;
-export const GetNotesResponse = z.union([GetNotesResult, z.object({})]);
+export const GetNotesResponse = GetNotesResult;

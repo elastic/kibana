@@ -51,7 +51,6 @@ interface OwnershipClaimingOpts {
   taskStore: TaskStore;
   events$: Subject<TaskClaim>;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
   excludedTaskTypes: string[];
   taskMaxAttempts: Record<string, number>;
 }
@@ -60,7 +59,7 @@ export async function claimAvailableTasksUpdateByQuery(
   opts: TaskClaimerOpts
 ): Promise<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore } = opts;
-  const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
+  const { definitions, excludedTaskTypes, taskMaxAttempts } = opts;
   const initialCapacity = getCapacity();
 
   let accumulatedResult = getEmptyClaimOwnershipResult();
@@ -83,7 +82,6 @@ export async function claimAvailableTasksUpdateByQuery(
       taskTypes: isLimited(batch) ? new Set([batch.tasksTypes]) : batch.tasksTypes,
       taskStore,
       definitions,
-      unusedTypes,
       excludedTaskTypes,
       taskMaxAttempts,
     });
@@ -137,7 +135,6 @@ async function markAvailableTasksAsClaimed({
   claimOwnershipUntil,
   size,
   taskTypes,
-  unusedTypes,
   taskMaxAttempts,
 }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
   const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
@@ -164,7 +161,6 @@ async function markAvailableTasksAsClaimed({
     },
     claimableTaskTypes: taskTypesToClaim,
     skippedTaskTypes: taskTypesToSkip,
-    unusedTaskTypes: unusedTypes,
     taskMaxAttempts: pick(taskMaxAttempts, taskTypesToClaim),
   });
 

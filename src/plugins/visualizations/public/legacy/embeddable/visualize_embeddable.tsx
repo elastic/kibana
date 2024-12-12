@@ -23,7 +23,6 @@ import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import {
   Adapters,
-  AttributeService,
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
@@ -53,6 +52,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../../utils/saved_visualize_utils';
 import { VisSavedObject } from '../../types';
 import { toExpressionAst } from '../../embeddable/to_ast';
+import { AttributeService } from './attribute_service';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -351,10 +351,6 @@ export class VisualizeEmbeddable
                   'Visualization uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
               })
             );
-            return true;
-          }
-          if (this.vis.type.suppressWarnings?.()) {
-            // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
             return true;
           }
         });

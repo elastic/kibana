@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { mockLayerList } from './__mocks__/regions_layer.mock';
 import { useLayerList } from './use_layer_list';
 

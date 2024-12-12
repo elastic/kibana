@@ -60,12 +60,13 @@ export const fetchDeleteMonitor = async ({
 }): Promise<void> => {
   const baseUrl = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS;
 
-  return await apiService.delete(
-    baseUrl,
-    { version: INITIAL_REST_VERSION, spaceId },
+  return await apiService.post(
+    baseUrl + '/_bulk_delete',
     {
       ids: configIds,
-    }
+    },
+    undefined,
+    { version: INITIAL_REST_VERSION, spaceId }
   );
 };
 

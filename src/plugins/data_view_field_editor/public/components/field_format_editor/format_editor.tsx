@@ -64,7 +64,7 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
             fallback={
               // We specify minHeight to avoid too mitigate layout shifts while loading an editor
               // ~430 corresponds to "4 lines" of EuiSkeletonText
-              <div style={{ minHeight: 430, marginTop: 8 }}>
+              <div css={{ minHeight: 430, marginTop: 8 }}>
                 <EuiDelayRender>
                   <EuiSkeletonText lines={4} />
                 </EuiDelayRender>

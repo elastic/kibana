@@ -42,6 +42,7 @@ const config = {
   headers: [{ key: 'content-type', value: 'text' }],
   viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+  getIncidentMethod: 'get',
   updateIncidentJson:
     '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: 'put',
@@ -94,6 +95,49 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(await screen.findByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
     expect(await screen.findByTestId('createCommentUrlInput')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
+  });
+
+  it('Add comment to case section is rendered only when the toggle button is on', async () => {
+    const incompleteActionConnector = {
+      ...actionConnector,
+      config: {
+        ...actionConnector.config,
+        createCommentUrl: undefined,
+        createCommentJson: undefined,
+      },
+    };
+    render(
+      <ConnectorFormTestProvider connector={incompleteActionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
+
+    expect(await screen.findByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('createCommentUrlInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
+  });
+
+  it('Toggle button is active when create comment section fields are populated', async () => {
+    render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(await screen.findByTestId('webhookAddCommentToggle')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
   });
 
   it('connector auth toggles work as expected', async () => {
@@ -536,5 +580,78 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         ).toBeInTheDocument();
       }
     );
+
+    it('validates get incident json required correctly', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          getIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
+          getIncidentMethod: 'post',
+          headers: [],
+        },
+      };
+
+      render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
+      expect(await screen.findByText(i18n.GET_INCIDENT_REQUIRED)).toBeInTheDocument();
+    });
+
+    it('validation succeeds get incident url with post correctly', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+          getIncidentMethod: 'post',
+          getIncidentJson: '{"id": {{{external.system.id}}} }',
+          headers: [],
+        },
+      };
+
+      const { isPreconfigured, ...rest } = actionConnector;
+      const { headers, ...rest2 } = actionConnector.config;
+
+      render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            __internal__: {
+              hasCA: false,
+              hasHeaders: true,
+            },
+            ...rest,
+            config: {
+              ...rest2,
+              getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+              getIncidentMethod: 'post',
+              getIncidentJson: '{"id": {{{external.system.id}}} }',
+            },
+          },
+          isValid: true,
+        })
+      );
+    });
   });
 });

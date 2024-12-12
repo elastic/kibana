@@ -77,9 +77,7 @@ export default function ({ getService }: APMFtrContextProvider) {
   const svlUserManager = getService('svlUserManager');
   const svlCommonApi = getService('svlCommonApi');
 
-  // https://github.com/elastic/kibana/pull/190690
-  // skipping since "rejects requests to list source maps" fails with 400
-  describe.skip('apm feature flags', () => {
+  describe('apm feature flags', () => {
     let roleAuthc: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
 

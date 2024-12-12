@@ -149,7 +149,7 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
             class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -369,7 +369,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -561,7 +561,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"
@@ -754,7 +754,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-baseline-row"

@@ -29,6 +29,12 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
+          },
+        },
         validate: {
           request: {
             query: schema.object({

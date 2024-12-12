@@ -25,6 +25,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('ElasticSearch query rule', () => {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
+    const RULE_ALERT_INDEX = '.alerts-stack.alerts-default';
     let actionId: string;
     let ruleId: string;
 
@@ -42,7 +43,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .delete(`/api/actions/connector/${actionId}`)
         .set(adminRoleAuthc.apiKeyHeader)
         .set(internalReqHeader);
-
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX,
+        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        conflicts: 'proceed',
+      });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },

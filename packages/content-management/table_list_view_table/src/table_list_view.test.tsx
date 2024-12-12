@@ -18,7 +18,7 @@ import type { LocationDescriptor, History } from 'history';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { WithServices } from './__jest__';
-import { getTagList } from './mocks';
+import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
 import type { Services } from './services';
@@ -335,6 +335,12 @@ describe('TableListView', () => {
     const totalItems = 30;
     const updatedAt = new Date().toISOString();
 
+    beforeEach(() => {
+      Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock(),
+      });
+    });
+
     const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
       id: `item${i}`,
       type: 'dashboard',
@@ -428,6 +434,54 @@ describe('TableListView', () => {
 
       expect(firstRowTitle).toBe('Item 20');
       expect(lastRowTitle).toBe('Item 29');
+    });
+
+    test('should persist the number of rows in the table', async () => {
+      let testBed: TestBed;
+
+      const tableId = 'myTable';
+
+      await act(async () => {
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          id: tableId,
+        });
+      });
+
+      {
+        const { component, table, find } = testBed!;
+        component.update();
+
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(20); // 20 by default
+
+        let storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).toBe(null);
+
+        find('tablePaginationPopoverButton').simulate('click');
+        find('tablePagination-10-rows').simulate('click');
+
+        storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).not.toBe(null);
+        expect(JSON.parse(storageValue!).pageSize).toBe(10);
+      }
+
+      // Mount a second table and verify that is shows only 10 rows
+      {
+        await act(async () => {
+          testBed = await setup({
+            initialPageSize,
+            findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+            id: tableId,
+          });
+        });
+
+        const { component, table } = testBed!;
+        component.update();
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(10); // 10 items this time
+      }
     });
   });
 

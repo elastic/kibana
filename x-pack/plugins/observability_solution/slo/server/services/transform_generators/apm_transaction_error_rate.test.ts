@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { oneMinute, twoMinute } from '../fixtures/duration';
 import {
@@ -13,10 +14,9 @@ import {
   createSLOWithTimeslicesBudgetingMethod,
 } from '../fixtures/slo';
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
-import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
-const generator = new ApmTransactionErrorRateTransformGenerator();
-const spaceId = 'custom-space';
+const SPACE_ID = 'custom-space';
+const generator = new ApmTransactionErrorRateTransformGenerator(SPACE_ID, dataViewsService);
 
 describe('APM Transaction Error Rate Transform Generator', () => {
   it('returns the expected transform params with every specified indicator params', async () => {
@@ -24,7 +24,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       id: 'irrelevant',
       indicator: createAPMTransactionErrorRateIndicator(),
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform).toMatchSnapshot();
   });
@@ -34,7 +34,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       id: 'irrelevant',
       indicator: createAPMTransactionErrorRateIndicator(),
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform).toMatchSnapshot();
   });
@@ -49,7 +49,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
         timesliceWindow: twoMinute(),
       },
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform).toMatchSnapshot();
   });
@@ -63,7 +63,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
         transactionType: ALL_VALUE,
       }),
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -75,7 +75,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
         index,
       }),
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.index).toEqual(index);
   });
@@ -87,7 +87,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
         filter,
       }),
     });
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -102,7 +102,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       }),
     });
 
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
@@ -118,7 +118,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       }),
     });
 
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
@@ -134,7 +134,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       }),
     });
 
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
@@ -150,7 +150,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       }),
     });
 
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     expect(transform.source.query).toMatchSnapshot();
     expect(transform.pivot?.group_by).toMatchSnapshot();
@@ -166,7 +166,7 @@ describe('APM Transaction Error Rate Transform Generator', () => {
       },
     });
 
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);

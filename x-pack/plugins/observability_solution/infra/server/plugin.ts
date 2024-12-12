@@ -6,13 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { schema, offeringBasedSchema } from '@kbn/config-schema';
-import {
-  CoreStart,
-  Plugin,
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
@@ -26,7 +20,6 @@ import {
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
-import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { registerRoutes } from './infra_server';
 import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
@@ -60,77 +53,6 @@ import {
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
 import { uiSettings } from '../common/ui_settings';
-
-export const config: PluginConfigDescriptor<InfraConfig> = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    alerting: schema.object({
-      inventory_threshold: schema.object({
-        group_by_page_size: schema.number({ defaultValue: 5_000 }),
-      }),
-      metric_threshold: schema.object({
-        group_by_page_size: schema.number({ defaultValue: 10_000 }),
-      }),
-    }),
-    inventory: schema.object({
-      compositeSize: schema.number({ defaultValue: 2000 }),
-    }),
-    sources: schema.maybe(
-      schema.object({
-        default: schema.maybe(
-          schema.object({
-            fields: schema.maybe(
-              schema.object({
-                message: schema.maybe(schema.arrayOf(schema.string())),
-              })
-            ),
-          })
-        ),
-      })
-    ),
-    featureFlags: schema.object({
-      customThresholdAlertsEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: false }),
-        serverless: schema.boolean({ defaultValue: false }),
-      }),
-      logsUIEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
-      }),
-      metricsExplorerEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
-      }),
-      osqueryEnabled: schema.boolean({ defaultValue: true }),
-      inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: true }),
-      }),
-      metricThresholdAlertRuleEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
-      }),
-      logThresholdAlertRuleEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: false }),
-      }),
-      alertsAndRulesDropdownEnabled: offeringBasedSchema({
-        traditional: schema.boolean({ defaultValue: true }),
-        serverless: schema.boolean({ defaultValue: true }),
-      }),
-      /**
-       * Depends on optional "profilingDataAccess" and "profiling"
-       * plugins. Enable both with `xpack.profiling.enabled: true` before
-       * enabling this feature flag.
-       */
-      profilingEnabled: schema.boolean({ defaultValue: false }),
-      ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
-    }),
-  }),
-  exposeToBrowser: publicConfigKeys,
-};
-
-export type { InfraConfig };
 
 export interface KbnServer extends Server {
   usage: any;

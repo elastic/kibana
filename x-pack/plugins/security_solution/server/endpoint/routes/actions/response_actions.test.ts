@@ -28,12 +28,10 @@ import {
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
-  ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
   SCAN_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  UNISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
@@ -243,28 +241,6 @@ describe('Response actions', () => {
       licenseService.stop();
       licenseEmitter.complete();
       getActionDetailsByIdSpy.mockClear();
-    });
-
-    it('correctly redirects legacy isolate to new route', async () => {
-      await callRoute(ISOLATE_HOST_ROUTE, {
-        body: { endpoint_ids: ['XYZ'] },
-        version: '2023-10-31',
-      });
-      expect(mockResponse.custom).toBeCalled();
-      const response = mockResponse.custom.mock.calls[0][0];
-      expect(response.statusCode).toEqual(308);
-      expect(response.headers?.location).toEqual(ISOLATE_HOST_ROUTE_V2);
-    });
-
-    it('correctly redirects legacy release to new route', async () => {
-      await callRoute(UNISOLATE_HOST_ROUTE, {
-        body: { endpoint_ids: ['XYZ'] },
-        version: '2023-10-31',
-      });
-      expect(mockResponse.custom).toBeCalled();
-      const response = mockResponse.custom.mock.calls[0][0];
-      expect(response.statusCode).toEqual(308);
-      expect(response.headers?.location).toEqual(UNISOLATE_HOST_ROUTE_V2);
     });
 
     it('succeeds when an endpoint ID is provided', async () => {

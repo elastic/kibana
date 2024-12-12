@@ -59,7 +59,7 @@ export type ControlApiRegistration<ControlApi extends DefaultControlApi = Defaul
 export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =
   Omit<
     ControlApiRegistration<ControlApi>,
-    'serializeState' | 'getTypeDisplayName' | 'clearSelections'
+    'serializeState' | 'getTypeDisplayName' | keyof CanClearSelections
   >;
 
 export interface ControlFactory<

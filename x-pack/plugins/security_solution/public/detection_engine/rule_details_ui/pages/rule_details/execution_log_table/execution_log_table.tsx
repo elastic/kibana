@@ -85,6 +85,7 @@ import {
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import { EventLogEventTypes } from '../../../../../common/lib/telemetry';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -470,7 +471,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     (e: EuiSwitchEvent) => {
       const isVisible = e.target.checked;
       onShowSourceEventTimeRange(isVisible);
-      telemetry.reportEventLogShowSourceEventDateRange({
+      telemetry.reportEvent(EventLogEventTypes.EventLogShowSourceEventDateRange, {
         isVisible,
       });
     },

@@ -6,7 +6,6 @@
  */
 
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import { render } from '../../../utils/test_helper';
 import { getRenderCellValue } from './render_cell_value';
 
@@ -19,7 +18,6 @@ describe('getRenderCellValue', () => {
     it('should return an active indicator when alert status is active', async () => {
       const cell = render(
         getRenderCellValue({
-          ...requiredProperties,
           columnId: ALERT_STATUS,
           data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_ACTIVE }),
         })
@@ -31,7 +29,6 @@ describe('getRenderCellValue', () => {
     it('should return a recovered indicator when alert status is recovered', async () => {
       const cell = render(
         getRenderCellValue({
-          ...requiredProperties,
           columnId: ALERT_STATUS,
           data: makeAlertsTableRow({ alertStatus: ALERT_STATUS_RECOVERED }),
         })
@@ -50,22 +47,3 @@ function makeAlertsTableRow({ alertStatus }: AlertsTableRow) {
     },
   ];
 }
-
-const requiredProperties: DeprecatedCellValueElementProps = {
-  rowIndex: 0,
-  colIndex: 0,
-  columnId: '',
-  setCellProps: jest.fn(),
-  isExpandable: false,
-  isExpanded: false,
-  isDetails: false,
-  data: [],
-  eventId: '',
-  header: {
-    id: '',
-    columnHeaderType: 'not-filtered',
-  },
-  isDraggable: false,
-  linkValues: [],
-  scopeId: '',
-};

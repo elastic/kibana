@@ -48,6 +48,7 @@ export const mockContextValue: AppDeps = {
   toasts: notificationServiceMock.createSetupContract().toasts,
   i18n: coreStart.i18n,
   theme: coreStart.theme,
+  userProfile: coreStart.userProfile,
   chartsTheme: {
     useChartsBaseTheme: jest.fn(),
   } as any,

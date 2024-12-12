@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { transformGeoProperty } from './model_version_1';
-import { privateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
+import { legacyPrivateLocationsSavedObjectName } from '../../../../common/saved_objects/private_locations';
 
 describe('model version 1 migration', () => {
   const testLocation = {
@@ -19,7 +19,7 @@ describe('model version 1 migration', () => {
     concurrentMonitors: 1,
   };
   const testObject = {
-    type: privateLocationsSavedObjectName,
+    type: legacyPrivateLocationsSavedObjectName,
     id: 'synthetics-privates-locations-singleton',
     attributes: {
       locations: [testLocation],

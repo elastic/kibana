@@ -29,7 +29,7 @@ import { useTimelineFullScreen } from '../../../common/containers/use_full_scree
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
-import { defaultUdtHeaders } from './unified_components/default_headers';
+import { defaultUdtHeaders } from './body/column_headers/default_headers';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -100,7 +100,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'sessionViewConfig',
         'initialized',
         'show',
-        'isLoading',
         'activeTab',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults

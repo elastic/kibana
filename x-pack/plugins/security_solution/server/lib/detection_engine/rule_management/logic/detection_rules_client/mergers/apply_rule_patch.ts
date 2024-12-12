@@ -51,6 +51,7 @@ interface ApplyRulePatchProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   existingRule: RuleResponse;
   rulePatch: PatchRuleRequestBody;
+  isRuleCustomizationEnabled: boolean;
 }
 
 // eslint-disable-next-line complexity
@@ -58,6 +59,7 @@ export const applyRulePatch = async ({
   rulePatch,
   existingRule,
   prebuiltRuleAssetClient,
+  isRuleCustomizationEnabled,
 }: ApplyRulePatchProps): Promise<RuleResponse> => {
   const typeSpecificParams = patchTypeSpecificParams(rulePatch, existingRule);
 
@@ -92,7 +94,9 @@ export const applyRulePatch = async ({
     meta: rulePatch.meta ?? existingRule.meta,
     max_signals: rulePatch.max_signals ?? existingRule.max_signals,
     related_integrations: rulePatch.related_integrations ?? existingRule.related_integrations,
-    required_fields: addEcsToRequiredFields(rulePatch.required_fields),
+    required_fields: rulePatch.required_fields
+      ? addEcsToRequiredFields(rulePatch.required_fields)
+      : existingRule.required_fields,
     risk_score: rulePatch.risk_score ?? existingRule.risk_score,
     risk_score_mapping: rulePatch.risk_score_mapping ?? existingRule.risk_score_mapping,
     rule_name_override: rulePatch.rule_name_override ?? existingRule.rule_name_override,
@@ -120,6 +124,7 @@ export const applyRulePatch = async ({
   nextRule.rule_source = await calculateRuleSource({
     rule: nextRule,
     prebuiltRuleAssetClient,
+    isRuleCustomizationEnabled,
   });
 
   return nextRule;

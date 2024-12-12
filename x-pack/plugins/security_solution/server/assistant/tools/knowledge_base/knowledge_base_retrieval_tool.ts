@@ -40,7 +40,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
       schema: z.object({
         query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
       }),
-      func: async (input, _, cbManager) => {
+      func: async (input) => {
         logger.debug(
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );

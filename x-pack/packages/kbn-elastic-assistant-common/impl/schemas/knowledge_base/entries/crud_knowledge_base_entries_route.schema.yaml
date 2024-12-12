@@ -6,7 +6,7 @@ paths:
   /internal/elastic_assistant/knowledge_base/entries:
     post:
       x-codegen-enabled: true
-      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      # Targeted to update to public by 8.18
       x-internal: true
       x-labels: [ess, serverless]
       operationId: CreateKnowledgeBaseEntry
@@ -37,7 +37,7 @@ paths:
   /internal/elastic_assistant/knowledge_base/entries/{id}:
     get:
       x-codegen-enabled: true
-      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      # Targeted to update to public by 8.18
       x-internal: true
       x-labels: [ess, serverless]
       operationId: ReadKnowledgeBaseEntry
@@ -67,7 +67,7 @@ paths:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     put:
       x-codegen-enabled: true
-      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      # Targeted to update to public by 8.18
       x-internal: true
       x-labels: [ess, serverless]
       operationId: UpdateKnowledgeBaseEntry
@@ -103,7 +103,7 @@ paths:
                 $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryErrorSchema'
     delete:
       x-codegen-enabled: true
-      # This API is still behind the `assistantKnowledgeBaseByDefault` feature flag
+      # Targeted to update to public by 8.18
       x-internal: true
       x-labels: [ess, serverless]
       operationId: DeleteKnowledgeBaseEntry

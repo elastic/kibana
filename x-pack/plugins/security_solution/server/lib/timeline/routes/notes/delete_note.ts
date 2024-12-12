@@ -15,15 +15,17 @@ import { NOTE_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { DeleteNoteRequestBody, type DeleteNoteResponse } from '../../../../../common/api/timeline';
+import { DeleteNoteRequestBody } from '../../../../../common/api/timeline';
 import { deleteNote } from '../../saved_object/notes';
 
 export const deleteNoteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .delete({
       path: NOTE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -34,7 +36,7 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter) => {
         },
         version: '2023-10-31',
       },
-      async (context, request, response): Promise<IKibanaResponse<DeleteNoteResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -54,9 +56,7 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter) => {
             noteIds,
           });
 
-          return response.ok({
-            body: { data: {} },
-          });
+          return response.ok();
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

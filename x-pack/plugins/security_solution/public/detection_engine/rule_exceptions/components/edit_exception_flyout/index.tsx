@@ -26,10 +26,16 @@ import {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { hasWrongOperatorWithWildcard } from '@kbn/securitysolution-list-utils';
+import {
+  hasWrongOperatorWithWildcard,
+  hasPartialCodeSignatureEntry,
+} from '@kbn/securitysolution-list-utils';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
-import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import {
+  WildCardWithWrongOperatorCallout,
+  PartialCodeSignatureCallout,
+} from '@kbn/securitysolution-exception-list-components';
 
 import type { Moment } from 'moment';
 import moment from 'moment';
@@ -116,6 +122,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       expireTime,
       expireErrorExists,
       wildcardWarningExists,
+      partialCodeSignatureWarningExists,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -130,6 +137,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
     wildcardWarningExists: false,
+    partialCodeSignatureWarningExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -169,6 +177,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setWildcardWithWrongOperator',
         warningExists: hasWrongOperatorWithWildcard(items),
+      });
+      dispatch({
+        type: 'setPartialCodeSignature',
+        warningExists: hasPartialCodeSignatureEntry(items),
       });
       dispatch({
         type: 'setExceptionItems',
@@ -417,6 +429,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           getExtendedFields={getExtendedFields}
         />
         {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />

@@ -94,7 +94,15 @@
                 "section": "def-common.DomainDeprecationDetails",
                 "text": "DomainDeprecationDetails"
               },
-              "[]>"
+              "<",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DeprecationsDetails",
+                "text": "DeprecationsDetails"
+              },
+              ">[]>"
             ],
             "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
             "deprecated": false,

@@ -257,6 +257,20 @@
                     "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace",
+                    "id": "def-server.ApmSynthtraceKibanaClient.Unnamed.$1.headers",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "headers",
+                    "description": [],
+                    "signature": [
+                      "Record<string, string> | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_kibana_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }

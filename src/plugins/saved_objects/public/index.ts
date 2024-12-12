@@ -11,7 +11,7 @@ import { SavedObjectsPublicPlugin } from './plugin';
 
 export type { OnSaveProps, OriginSaveModalProps, SaveModalState, SaveResult } from './save_modal';
 export { SavedObjectSaveModal, SavedObjectSaveModalOrigin, showSaveModal } from './save_modal';
-export { checkForDuplicateTitle, saveWithConfirmation, isErrorNonFatal } from './saved_object';
+export { isErrorNonFatal } from './saved_object';
 export type { SavedObjectSaveOpts, SavedObject, SavedObjectConfig } from './types';
 
 export const plugin = () => new SavedObjectsPublicPlugin();

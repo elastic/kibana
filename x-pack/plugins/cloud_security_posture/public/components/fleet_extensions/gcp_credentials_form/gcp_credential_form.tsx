@@ -500,7 +500,7 @@ export const GcpCredentialsForm = ({
       <EuiSpacer size="l" />
       <RadioGroup
         disabled={disabled}
-        size="s"
+        size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
         onChange={(idSelected: SetupFormatGCP) =>

@@ -7,24 +7,12 @@
 import { useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { useEsqlQueryColumns } from '../../../rule_creation/logic/esql_query_columns';
 
-import { useQuery } from '@tanstack/react-query';
+type FieldType = 'string';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-import { getEsqlQueryConfig } from '../../../rule_creation/logic/get_esql_query_config';
-import type { FieldType } from '../../../rule_creation/logic/esql_validator';
-
-export const esqlToOptions = (
-  columns: { error: unknown } | DatatableColumn[] | undefined | null,
-  fieldType?: FieldType
-) => {
-  if (columns && 'error' in columns) {
-    return [];
-  }
-
-  const options = (columns ?? []).reduce<Array<{ label: string }>>((acc, { id, meta }) => {
+export const esqlToOptions = (columns: DatatableColumn[], fieldType?: FieldType) => {
+  const options = columns.reduce<Array<{ label: string }>>((acc, { id, meta }) => {
     // if fieldType absent, we do not filter columns by type
     if (!fieldType || fieldType === meta.type) {
       acc.push({ label: id });
@@ -47,16 +35,11 @@ type UseEsqlFieldOptions = (
  * fetches ES|QL fields and convert them to Combobox options
  */
 export const useEsqlFieldOptions: UseEsqlFieldOptions = (esqlQuery, fieldType) => {
-  const kibana = useKibana<{ data: DataPublicPluginStart }>();
-
-  const { data: dataService } = kibana.services;
-
-  const queryConfig = getEsqlQueryConfig({ esqlQuery, search: dataService.search.search });
-  const { data, isLoading } = useQuery(queryConfig);
+  const { columns, isLoading } = useEsqlQueryColumns(esqlQuery ?? '');
 
   const options = useMemo(() => {
-    return esqlToOptions(data, fieldType);
-  }, [data, fieldType]);
+    return esqlToOptions(columns, fieldType);
+  }, [columns, fieldType]);
 
   return {
     options,

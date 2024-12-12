@@ -21,6 +21,8 @@ import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { saveArchiveEntriesFromAssetsMap, removeArchiveEntries } from '../../../archive/storage';
 
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
 import { stepSaveArchiveEntries, cleanupArchiveEntriesStep } from './step_save_archive_entries';
 
 jest.mock('../../../archive/storage', () => {
@@ -40,6 +42,30 @@ const mockedRemoveArchiveEntries = removeArchiveEntries as jest.MockedFunction<
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;
 
+const assetsMap = new Map([
+  [
+    'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
+    Buffer.from('{"content": "data"}'),
+  ],
+  ['security_detection_engine-8.16.1/LICENSE.txt', Buffer.from('{"content": "data"}')],
+  ['security_detection_engine-8.16.1/NOTICE.txt', Buffer.from('{"content": "data"}')],
+  ['security_detection_engine-8.16.1/changelog.yml', Buffer.from('{"content": "data"}')],
+  ['security_detection_engine-8.16.1/manifest.yml', Buffer.from('{"content": "data"}')],
+  ['security_detection_engine-8.16.1/docs/README.md', Buffer.from('{"content": "data"}')],
+  [
+    'security_detection_engine-8.16.1/img/security-logo-color-64px.svg',
+    Buffer.from('{"content": "data"}'),
+  ],
+  [
+    'security_detection_engine-8.16.1/kibana/security_rule/000047bb-b27a-47ec-8b62-ef1a5d2c9e19_208.json',
+    Buffer.from('{"content": "data"}'),
+  ],
+  [
+    'security_detection_engine-8.16.1/kibana/security_rule/000047bb-b27a-47ec-8b62-ef1a5d2c9e19_209.json',
+    Buffer.from('{"content": "data"}'),
+  ],
+]);
+
 const packageInstallContext = {
   packageInfo: {
     title: 'title',
@@ -54,12 +80,8 @@ const packageInstallContext = {
     owner: { github: 'elastic/fleet' },
   } as any,
   paths: ['some/path/1', 'some/path/2'],
-  assetsMap: new Map([
-    [
-      'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
-      Buffer.from('{"content": "data"}'),
-    ],
-  ]),
+  assetsMap,
+  archiveIterator: createArchiveIteratorFromMap(assetsMap),
 };
 const getMockInstalledPackageSo = (
   installedEs: EsAssetReference[] = []
@@ -192,6 +214,63 @@ describe('stepSaveArchiveEntries', () => {
         },
       ],
     });
+  });
+
+  it('should save package icons, readme, and changelog but not Kibana assets with useStreaming:true ', async () => {
+    jest.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'test',
+          attributes: {
+            package_name: 'test-package',
+            package_version: '1.0.0',
+            install_source: 'registry',
+            asset_path: 'some/path',
+            media_type: '',
+            data_utf8: '',
+            data_base64: '',
+          },
+          type: '',
+          references: [],
+        },
+      ],
+    });
+    await stepSaveArchiveEntries({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg,
+      installType: 'update',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      useStreaming: true,
+      esReferences: [
+        {
+          id: 'something',
+          type: ElasticsearchAssetType.ilmPolicy,
+        },
+      ],
+    });
+    expect(
+      [
+        ...(jest
+          .mocked(mockedSaveArchiveEntriesFromAssetsMap)
+          .mock.lastCall?.[0].assetsMap?.keys() ?? []),
+      ].sort()
+    ).toMatchInlineSnapshot(`
+      Array [
+        "endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json",
+        "security_detection_engine-8.16.1/LICENSE.txt",
+        "security_detection_engine-8.16.1/NOTICE.txt",
+        "security_detection_engine-8.16.1/changelog.yml",
+        "security_detection_engine-8.16.1/docs/README.md",
+        "security_detection_engine-8.16.1/img/security-logo-color-64px.svg",
+        "security_detection_engine-8.16.1/manifest.yml",
+      ]
+    `);
   });
 });
 

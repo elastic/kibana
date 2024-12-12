@@ -155,7 +155,7 @@ describe('Saved query management list component', () => {
 
   it('should render the saved queries on the selectable component', async () => {
     render(wrapSavedQueriesListComponentInContext(props));
-    expect(await screen.findAllByRole('option')).toHaveLength(1);
+    await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(1));
     expect(screen.getByRole('option', { name: 'Test' })).toBeInTheDocument();
   });
 

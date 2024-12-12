@@ -6,19 +6,24 @@
  */
 
 import React from 'react';
-import {
-  screen,
-  render,
-  act,
-  fireEvent,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { screen, render, act, fireEvent, waitFor } from '@testing-library/react';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { FIELD_TYPES, Form, useForm } from '../../../../shared_imports';
 import { createReactQueryWrapper } from '../../../../common/mock';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
 import { RelatedIntegrations } from './related_integrations';
+import {
+  clearEuiComboBoxSelection,
+  selectEuiComboBoxOption,
+  selectFirstEuiComboBoxOption,
+  showEuiComboBoxOptions,
+} from '../../../../common/test/eui/combobox';
+import {
+  addRelatedIntegrationRow,
+  removeLastRelatedIntegrationRow,
+  setVersion,
+  waitForIntegrationsToBeLoaded,
+} from './test_helpers';
 
 // must match to the import in rules/related_integrations/use_integrations.tsx
 jest.mock('../../../fleet_integrations/api');
@@ -41,7 +46,6 @@ const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const COMBO_BOX_SELECTION_TEST_ID = 'euiComboBoxPill';
 const COMBO_BOX_CLEAR_BUTTON_TEST_ID = 'comboBoxClearButton';
 const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
-const REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID = 'relatedIntegrationRemove';
 
 describe('RelatedIntegrations form part', () => {
   beforeEach(() => {
@@ -499,6 +503,9 @@ describe('RelatedIntegrations form part', () => {
         comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
         optionIndex: 0,
       });
+      await waitFor(() => {
+        expect(screen.getByTestId(VERSION_INPUT_TEST_ID)).toHaveValue('^1.2.0');
+      });
       await setVersion({ input: screen.getByTestId(VERSION_INPUT_TEST_ID), value: '1.0.0' });
       await submitForm();
       await waitFor(() => {
@@ -614,6 +621,9 @@ describe('RelatedIntegrations form part', () => {
       await selectFirstEuiComboBoxOption({
         comboBoxToggleButton: screen.getByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
       });
+      await waitFor(() => {
+        expect(screen.getByTestId(VERSION_INPUT_TEST_ID)).toHaveValue('^1.0.0');
+      });
       await setVersion({ input: screen.getByTestId(VERSION_INPUT_TEST_ID), value: '100' });
 
       expect(screen.getByTestId(RELATED_INTEGRATION_ROW)).toHaveTextContent(
@@ -700,72 +710,6 @@ function TestForm({ initialState, onSubmit }: TestFormProps): JSX.Element {
       </button>
     </Form>
   );
-}
-
-function waitForIntegrationsToBeLoaded(): Promise<void> {
-  return waitForElementToBeRemoved(screen.queryAllByRole('progressbar'));
-}
-
-function addRelatedIntegrationRow(): Promise<void> {
-  return act(async () => {
-    fireEvent.click(screen.getByText('Add integration'));
-  });
-}
-
-function removeLastRelatedIntegrationRow(): Promise<void> {
-  return act(async () => {
-    const lastRemoveButton = screen.getAllByTestId(REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID).at(-1);
-
-    if (!lastRemoveButton) {
-      throw new Error(`There are no "${REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID}" found`);
-    }
-
-    fireEvent.click(lastRemoveButton);
-  });
-}
-
-function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
-
-  return waitFor(() => {
-    expect(screen.getByRole('listbox')).toBeInTheDocument();
-  });
-}
-
-function selectEuiComboBoxOption({
-  comboBoxToggleButton,
-  optionIndex,
-}: {
-  comboBoxToggleButton: HTMLElement;
-  optionIndex: number;
-}): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
-
-    fireEvent.click(screen.getAllByRole('option')[optionIndex]);
-  });
-}
-
-function clearEuiComboBoxSelection({ clearButton }: { clearButton: HTMLElement }): Promise<void> {
-  return act(async () => {
-    fireEvent.click(clearButton);
-  });
-}
-
-function selectFirstEuiComboBoxOption({
-  comboBoxToggleButton,
-}: {
-  comboBoxToggleButton: HTMLElement;
-}): Promise<void> {
-  return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
-}
-
-function setVersion({ input, value }: { input: HTMLInputElement; value: string }): Promise<void> {
-  return act(async () => {
-    fireEvent.input(input, {
-      target: { value },
-    });
-  });
 }
 
 function submitForm(): Promise<void> {

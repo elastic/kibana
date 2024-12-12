@@ -26,7 +26,7 @@ import {
 describe(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {
-    // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main`
+    // TODO:PR Remove `'@skipInServerlessMKI` once PR merges to `main` and feature flag is enabled in prod.
     tags: ['@ess', '@serverless', '@serverlessMKI', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
@@ -43,11 +43,13 @@ describe(
     },
   },
   () => {
-    let spaceId: string = '';
+    // In Serverless MKI we use `admin` for the login user... other deployments use system indices superuser
+    const loginUser = Cypress.env('CLOUD_SERVERLESS') ? ROLE.admin : ROLE.system_indices_superuser;
     const roleName = `test_${Math.random().toString().substring(2, 6)}`;
+    let spaceId: string = '';
 
     before(() => {
-      login(ROLE.system_indices_superuser);
+      login(loginUser);
       createSpace(`foo_${Math.random().toString().substring(2, 6)}`).then((response) => {
         spaceId = response.body.id;
       });
@@ -61,16 +63,16 @@ describe(
     });
 
     beforeEach(() => {
-      login(ROLE.system_indices_superuser);
+      login(loginUser);
       navigateToRolePage();
       setRoleName(roleName);
       openKibanaFeaturePrivilegesFlyout();
+      setKibanaPrivilegeSpace(spaceId);
       expandSecuritySolutionCategoryKibanaPrivileges();
       expandEndpointSecurityFeaturePrivileges();
     });
 
     it('should allow configuration per-space', () => {
-      setKibanaPrivilegeSpace(spaceId);
       setSecuritySolutionEndpointGroupPrivilege('all');
       clickEndpointSubFeaturePrivilegesCustomization();
       setEndpointSubFeaturePrivilege('endpoint_list', 'all');

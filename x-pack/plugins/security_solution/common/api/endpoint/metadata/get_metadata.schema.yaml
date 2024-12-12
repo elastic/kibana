@@ -23,13 +23,13 @@ paths:
               schema:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
-  /api/endpoint/metadata/transforms:
+  /internal/api/endpoint/metadata/transforms:
     get:
-      deprecated: true
       summary: Get metadata transforms
       operationId: GetEndpointMetadataTransform
       x-codegen-enabled: false
       x-labels: [ess, serverless]
+      x-internal: true
       responses:
         '200':
           description: OK

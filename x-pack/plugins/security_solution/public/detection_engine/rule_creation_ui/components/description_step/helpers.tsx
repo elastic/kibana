@@ -27,12 +27,11 @@ import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   RequiredFieldArray,
-  Threshold,
   AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
@@ -45,11 +44,12 @@ import type {
   AboutStepSeverity,
   Duration,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionLabel } from './alert_suppression_label';
+import type { FieldValueThreshold } from '../threshold_input';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -147,7 +147,7 @@ export const buildQueryBarDescription = ({
   return items;
 };
 
-export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): ListItems[] => {
+export const buildEqlOptionsDescription = (eqlOptions: EqlOptions): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(eqlOptions.eventCategoryField)) {
     items = [
@@ -490,20 +490,29 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
   }
 };
 
-export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => [
-  {
-    title: label,
-    description: (
-      <>
-        {isEmpty(threshold.field[0])
-          ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
-              Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
-            } >= ${threshold.value}`}
-      </>
-    ),
-  },
-];
+export const buildThresholdDescription = (
+  label: string,
+  threshold: FieldValueThreshold
+): ListItems[] => {
+  let thresholdDescription = isEmpty(threshold.field[0])
+    ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+    : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field.join(',')} >= ${threshold.value}`;
+
+  if (threshold.cardinality?.value && threshold.cardinality?.field.length > 0) {
+    thresholdDescription = i18n.THRESHOLD_CARDINALITY(
+      thresholdDescription,
+      threshold.cardinality.field[0],
+      threshold.cardinality.value
+    );
+  }
+
+  return [
+    {
+      title: label,
+      description: <>{thresholdDescription}</>,
+    },
+  ];
+};
 
 export const buildThreatMappingDescription = (
   title: string,
@@ -582,7 +591,7 @@ export const buildRequiredFieldsDescription = (
 };
 
 export const buildAlertSuppressionDescription = (
-  label: string = i18n.GROUP_BY_LABEL,
+  label: string = i18n.ALERT_SUPPRESSION_LABEL,
   values: string[],
   ruleType: Type
 ): ListItems[] => {
@@ -615,11 +624,11 @@ export const buildAlertSuppressionDescription = (
 export const buildAlertSuppressionWindowDescription = (
   label: string,
   value: Duration,
-  groupByRadioSelection: GroupByOptions,
+  alertSuppressionDuration: AlertSuppressionDurationType,
   ruleType: Type
 ): ListItems[] => {
   const description =
-    groupByRadioSelection === GroupByOptions.PerTimePeriod
+    alertSuppressionDuration === AlertSuppressionDurationType.PerTimePeriod
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 

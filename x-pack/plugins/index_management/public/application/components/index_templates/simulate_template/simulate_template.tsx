@@ -23,22 +23,25 @@ export interface Filters {
 }
 
 interface Props {
-  template: { [key: string]: any };
+  template?: { [key: string]: any };
   filters?: Filters;
+  templateName?: string;
 }
 
-export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
+export const SimulateTemplate = React.memo(({ template, filters, templateName }: Props) => {
   const [templatePreview, setTemplatePreview] = useState('{}');
 
   const updatePreview = useCallback(async () => {
-    if (!template || Object.keys(template).length === 0) {
+    if (!templateName && (!template || Object.keys(template).length === 0)) {
       return;
     }
 
-    const indexTemplate = serializeTemplate(
-      stripEmptyFields(template, { types: ['string'] }) as TemplateDeserialized
-    );
-    const { data, error } = await simulateIndexTemplate(indexTemplate);
+    const indexTemplate = templateName
+      ? undefined
+      : serializeTemplate(
+          stripEmptyFields(template, { types: ['string'] }) as TemplateDeserialized
+        );
+    const { data, error } = await simulateIndexTemplate({ template: indexTemplate, templateName });
     let filteredTemplate = data;
 
     if (data) {
@@ -67,7 +70,7 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
     }
 
     setTemplatePreview(JSON.stringify(filteredTemplate ?? error, null, 2));
-  }, [template, filters]);
+  }, [template, filters, templateName]);
 
   useEffect(() => {
     updatePreview();

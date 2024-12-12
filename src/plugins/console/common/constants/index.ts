@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MAJOR_VERSION } from './plugin';
+export { MAJOR_VERSION, WELCOME_TOUR_DELAY } from './plugin';
 export { API_BASE_PATH, KIBANA_API_PREFIX } from './api';
 export { DEFAULT_VARIABLES } from './variables';
 export {

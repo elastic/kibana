@@ -52,6 +52,13 @@ export class ConsolePageObject extends FtrService {
     await textArea.clearValueWithKeyboard();
   }
 
+  public async focusInputEditor() {
+    const outputEditor = await this.testSubjects.find('consoleMonacoEditor');
+    // Simply clicking on the editor doesn't focus it, so we need to click
+    // on the margin view overlays
+    await (await outputEditor.findByClassName('margin-view-overlays')).click();
+  }
+
   public async focusOutputEditor() {
     const outputEditor = await this.testSubjects.find('consoleMonacoOutput');
     // Simply clicking on the output editor doesn't focus it, so we need to click
@@ -217,6 +224,10 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async isPlayButtonVisible() {
+    return await this.testSubjects.exists('sendRequestButton');
+  }
+
   public async clickCopyOutput() {
     await this.testSubjects.click('copyOutputButton');
   }
@@ -272,8 +283,12 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleSkipTourButton');
   }
 
-  public async clickNextTourStep() {
+  public async clickNextTourStep(andWaitFor: number = 0) {
     await this.testSubjects.click('consoleNextTourStepButton');
+
+    if (andWaitFor) {
+      await this.common.sleep(andWaitFor);
+    }
   }
 
   public async clickCompleteTour() {

@@ -22,7 +22,7 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getIndexModeLabel } from '../../../lib/index_mode_labels';
+import { indexModeLabels } from '../../../lib/index_mode_labels';
 import { allowAutoCreateRadioIds } from '../../../../../common/constants';
 import { serializers } from '../../../../shared_imports';
 
@@ -89,6 +89,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     const {
       name,
       indexPatterns,
+      indexMode,
       version,
       order,
       template: indexTemplate,
@@ -270,17 +271,19 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListDescription>
 
               {/* Index mode */}
-              <EuiDescriptionListTitle data-test-subj="indexModeTitle">
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexModeLabel"
-                  defaultMessage="Index mode"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="indexModeValue">
-                {getIndexModeLabel(
-                  serializedSettings?.['index.mode'] ?? serializedSettings?.index?.mode
-                )}
-              </EuiDescriptionListDescription>
+              {indexMode && (
+                <>
+                  <EuiDescriptionListTitle data-test-subj="indexModeTitle">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexModeLabel"
+                      defaultMessage="Index mode"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription data-test-subj="indexModeValue">
+                    {indexModeLabels[indexMode]}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
 
               {/* Mappings */}
               <EuiDescriptionListTitle>

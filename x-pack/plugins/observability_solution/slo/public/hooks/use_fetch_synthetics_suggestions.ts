@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 export interface Suggestion {
   label: string;

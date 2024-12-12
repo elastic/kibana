@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
@@ -100,13 +100,12 @@ const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id
         predecessorCount: 2,
         successorCount: 2,
       },
-      useNewFieldsApi: false,
     } as ContextAppFetchProps,
   };
 
   return {
     result: renderHook(() => useContextAppFetch(props.props), {
-      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+      wrapper: ({ children }: React.PropsWithChildren) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
       ),
     }).result,

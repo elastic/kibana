@@ -154,12 +154,21 @@ describe('SpacesGridPage', () => {
     wrapper.update();
 
     expect(wrapper.find('EuiInMemoryTable').prop('items')).toBe(spacesWithSolution);
-    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual({
-      field: 'solution',
-      name: 'Solution view',
-      sortable: true,
-      render: expect.any(Function),
-    });
+    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: '', field: 'initials' }),
+        expect.objectContaining({ name: 'Space', field: 'name' }),
+        expect.objectContaining({ name: 'Description', field: 'description' }),
+        expect.objectContaining({ name: 'Solution view', field: 'solution' }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({ name: 'Edit', icon: 'pencil' }),
+            expect.objectContaining({ name: 'Switch', icon: 'merge' }),
+            expect.objectContaining({ name: 'Delete', icon: 'trash' }),
+          ]),
+        }),
+      ])
+    );
   });
 
   it('renders a "current" badge for the current space', async () => {
@@ -411,44 +420,6 @@ describe('SpacesGridPage', () => {
     expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
       title: 'Error loading spaces',
     });
-  });
-
-  it(`renders the 'Features visible' column when not serverless`, async () => {
-    const httpStart = httpServiceMock.createStartContract();
-    httpStart.get.mockResolvedValue([]);
-
-    const error = new Error('something awful happened');
-
-    const notifications = notificationServiceMock.createStartContract();
-
-    const wrapper = shallowWithIntl(
-      <SpacesGridPage
-        spacesManager={spacesManager}
-        getFeatures={() => Promise.reject(error)}
-        notifications={notifications}
-        getUrlForApp={getUrlForApp}
-        history={history}
-        capabilities={{
-          navLinks: {},
-          management: {},
-          catalogue: {},
-          spaces: { manage: true },
-        }}
-        allowSolutionVisibility
-        {...spacesGridCommonProps}
-      />
-    );
-
-    // allow spacesManager to load spaces and lazy-load SpaceAvatar
-    await act(async () => {});
-    wrapper.update();
-
-    expect(wrapper.find('EuiInMemoryTable').prop('columns')).toContainEqual(
-      expect.objectContaining({
-        field: 'disabledFeatures',
-        name: 'Features visible',
-      })
-    );
   });
 
   it(`does not render the 'Features visible' column when serverless`, async () => {

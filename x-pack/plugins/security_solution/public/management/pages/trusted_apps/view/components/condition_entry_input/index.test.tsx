@@ -152,13 +152,13 @@ describe('Condition entry input', () => {
     expect(superSelectProps.options.length).toBe(2);
   });
 
-  it('should be able to select two options when MAC OS', () => {
+  it('should be able to select three options when MAC OS', () => {
     const element = mount(getElement('testCheckSignatureOption', { os: OperatingSystem.MAC }));
     const superSelectProps = element
       .find('[data-test-subj="testCheckSignatureOption-field"]')
       .first()
       .props() as EuiSuperSelectProps<string>;
-    expect(superSelectProps.options.length).toBe(2);
+    expect(superSelectProps.options.length).toBe(3);
   });
 
   it('should have operator value selected when field is HASH', () => {

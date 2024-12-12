@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useInvestigationTimeEnrichment } from './use_investigation_enrichment';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,

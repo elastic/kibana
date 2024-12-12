@@ -15,7 +15,6 @@ interface Props {
   children?: React.ReactNode;
   droppableId: string;
   height?: string;
-  isDropDisabled?: boolean;
   type?: string;
   render?: ({ isDraggingOver }: { isDraggingOver: boolean }) => React.ReactNode;
   renderClone?: DraggableChildrenFn;
@@ -90,15 +89,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
 ReactDndDropTarget.displayName = 'ReactDndDropTarget';
 
 export const DroppableWrapper = React.memo<Props>(
-  ({
-    children = null,
-    droppableId,
-    height = '100%',
-    isDropDisabled = false,
-    type,
-    render = null,
-    renderClone,
-  }) => {
+  ({ children = null, droppableId, height = '100%', type, render = null, renderClone }) => {
     const DroppableContent = useCallback<DroppableProps['children']>(
       (provided, snapshot) => (
         <ReactDndDropTarget
@@ -116,7 +107,6 @@ export const DroppableWrapper = React.memo<Props>(
 
     return (
       <Droppable
-        isDropDisabled={isDropDisabled}
         droppableId={droppableId}
         direction={'horizontal'}
         type={type}

@@ -37,7 +37,8 @@ export const aggregateRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const body: AggregateRulesRequestBodyV1 = req.body;
         const options = transformAggregateQueryRequestV1({
           ...body,

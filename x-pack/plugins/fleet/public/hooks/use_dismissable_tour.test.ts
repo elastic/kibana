@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { TOUR_STORAGE_KEYS } from '../constants';
 import { createStartServices } from '../mock';

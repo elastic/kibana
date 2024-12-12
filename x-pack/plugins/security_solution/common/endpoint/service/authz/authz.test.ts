@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { calculateEndpointAuthz, getEndpointAuthzInitialState } from './authz';
+import {
+  calculateEndpointAuthz,
+  canFetchPackageAndAgentPolicies,
+  getEndpointAuthzInitialState,
+} from './authz';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
@@ -15,6 +19,7 @@ import {
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
   type ResponseConsoleRbacControls,
 } from '../response_actions/constants';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 describe('Endpoint Authz service', () => {
   let licenseService: ReturnType<typeof createLicenseServiceMock>;
@@ -91,46 +96,51 @@ describe('Endpoint Authz service', () => {
       );
     });
 
-    it('should not give canAccessFleet if `fleet.all` is false', () => {
-      fleetAuthz.fleet.all = false;
-      expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
-        false
-      );
+    describe('Fleet', () => {
+      [true, false].forEach((value) => {
+        it(`should set canAccessFleet to ${value} if \`fleet.all\` is ${value}`, () => {
+          fleetAuthz.fleet.all = value;
+          expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
+            value
+          );
+        });
+
+        it(`should set canReadFleetAgents to ${value} if \`fleet.readAgents\` is ${value}`, () => {
+          fleetAuthz.fleet.readAgents = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgents
+          ).toBe(value);
+        });
+
+        it(`should set canWriteFleetAgents to ${value} if \`fleet.allAgents\` is ${value}`, () => {
+          fleetAuthz.fleet.allAgents = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canWriteFleetAgents
+          ).toBe(value);
+        });
+
+        it(`should set canReadFleetAgentPolicies to ${value} if \`fleet.readAgentPolicies\` is ${value}`, () => {
+          fleetAuthz.fleet.readAgentPolicies = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgentPolicies
+          ).toBe(value);
+        });
+
+        it(`should set canWriteIntegrationPolicies to ${value} if \`integrations.writeIntegrationPolicies\` is ${value}`, () => {
+          fleetAuthz.integrations.writeIntegrationPolicies = value;
+          expect(
+            calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
+              .canWriteIntegrationPolicies
+          ).toBe(value);
+        });
+      });
     });
 
-    it('should not give canReadFleetAgents if `fleet.readAgents` is false', () => {
-      fleetAuthz.fleet.readAgents = false;
-      expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgents).toBe(
-        false
-      );
-    });
-
-    it('should not give canWriteFleetAgents if `fleet.allAgents` is false', () => {
-      fleetAuthz.fleet.allAgents = false;
-      expect(
-        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canWriteFleetAgents
-      ).toBe(false);
-    });
-
-    it('should not give canReadFleetAgentPolicies if `fleet.readAgentPolicies` is false', () => {
-      fleetAuthz.fleet.readAgentPolicies = false;
-      expect(
-        calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canReadFleetAgentPolicies
-      ).toBe(false);
-    });
-
-    it('should not give canAccessEndpointManagement if not superuser', () => {
+    it('should set canAccessEndpointManagement if not superuser', () => {
       userRoles = [];
       expect(
         calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessEndpointManagement
       ).toBe(false);
-    });
-
-    it('should give canAccessFleet if `fleet.all` is true', () => {
-      fleetAuthz.fleet.all = true;
-      expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canAccessFleet).toBe(
-        true
-      );
     });
 
     it('should give canAccessEndpointManagement if superuser', () => {
@@ -303,6 +313,7 @@ describe('Endpoint Authz service', () => {
         canReadFleetAgentPolicies: false,
         canReadFleetAgents: false,
         canWriteFleetAgents: false,
+        canWriteIntegrationPolicies: false,
         canAccessEndpointActionsLogManagement: false,
         canAccessEndpointManagement: false,
         canCreateArtifactsByPolicy: false,
@@ -334,6 +345,66 @@ describe('Endpoint Authz service', () => {
         canReadEndpointExceptions: false,
         canWriteEndpointExceptions: false,
       });
+    });
+  });
+
+  describe('canFetchPackageAndAgentPolicies()', () => {
+    describe('without granular Fleet permissions', () => {
+      it.each`
+        readFleet | readIntegrations | readPolicyManagement | result
+        ${false}  | ${false}         | ${false}             | ${false}
+        ${true}   | ${false}         | ${false}             | ${false}
+        ${false}  | ${true}          | ${false}             | ${false}
+        ${true}   | ${true}          | ${false}             | ${true}
+        ${false}  | ${false}         | ${true}              | ${true}
+        ${true}   | ${false}         | ${true}              | ${true}
+        ${false}  | ${true}          | ${true}              | ${true}
+        ${true}   | ${true}          | ${true}              | ${true}
+      `(
+        'should return $result when readFleet is $readFleet, readIntegrations is $readIntegrations and readPolicyManagement is $readPolicyManagement',
+        ({ readFleet, readIntegrations, readPolicyManagement, result }) => {
+          const capabilities: Partial<Capabilities> = {
+            siem: { readPolicyManagement },
+            fleetv2: { read: readFleet },
+            fleet: { read: readIntegrations },
+          };
+
+          expect(canFetchPackageAndAgentPolicies(capabilities as Capabilities)).toBe(result);
+        }
+      );
+    });
+
+    describe('with granular Fleet permissions', () => {
+      it.each`
+        readFleet | readAgentPolicies | readIntegrations | readPolicyManagement | result
+        ${false}  | ${false}          | ${false}         | ${false}             | ${false}
+        ${false}  | ${false}          | ${true}          | ${false}             | ${false}
+        ${false}  | ${false}          | ${false}         | ${true}              | ${true}
+        ${false}  | ${false}          | ${true}          | ${true}              | ${true}
+        ${false}  | ${true}           | ${false}         | ${false}             | ${false}
+        ${false}  | ${true}           | ${true}          | ${false}             | ${false}
+        ${false}  | ${true}           | ${false}         | ${true}              | ${true}
+        ${false}  | ${true}           | ${true}          | ${true}              | ${true}
+        ${true}   | ${false}          | ${false}         | ${false}             | ${false}
+        ${true}   | ${false}          | ${true}          | ${false}             | ${false}
+        ${true}   | ${false}          | ${false}         | ${true}              | ${true}
+        ${true}   | ${false}          | ${true}          | ${true}              | ${true}
+        ${true}   | ${true}           | ${false}         | ${false}             | ${false}
+        ${true}   | ${true}           | ${true}          | ${false}             | ${true}
+        ${true}   | ${true}           | ${false}         | ${true}              | ${true}
+        ${true}   | ${true}           | ${true}          | ${true}              | ${true}
+      `(
+        'should return $result when readAgentPolicies is $readAgentPolicies, readFleet is $readFleet, readIntegrations is $readIntegrations and readPolicyManagement is $readPolicyManagement',
+        ({ readAgentPolicies, readFleet, readIntegrations, readPolicyManagement, result }) => {
+          const capabilities: Partial<Capabilities> = {
+            siem: { readPolicyManagement },
+            fleetv2: { read: readFleet, agent_policies_read: readAgentPolicies },
+            fleet: { read: readIntegrations },
+          };
+
+          expect(canFetchPackageAndAgentPolicies(capabilities as Capabilities)).toBe(result);
+        }
+      );
     });
   });
 });

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { BurnRateRuleParams } from '../../../../typings';
 
 export function EditBurnRateRuleFlyout({

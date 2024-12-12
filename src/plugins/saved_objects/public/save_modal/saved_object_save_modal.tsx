@@ -276,7 +276,28 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     });
   };
 
+  private handleTitleDuplication = () => {
+    const regex = /\s*\[(\d+)\]$/;
+    const match = this.state.title.match(regex);
+
+    if (match) {
+      const newNumber = Number(match[1]) + 1;
+
+      this.setState({
+        title: this.state.title.replace(regex, ` [${newNumber}]`),
+      });
+    } else {
+      this.setState({
+        title: this.state.title + ' [1]',
+      });
+    }
+  };
+
   private onCopyOnSaveChange = (event: EuiSwitchEvent) => {
+    if (this.props.title === this.state.title && event.target.checked) {
+      this.handleTitleDuplication();
+    }
+
     this.setState({
       copyOnSave: event.target.checked,
     });

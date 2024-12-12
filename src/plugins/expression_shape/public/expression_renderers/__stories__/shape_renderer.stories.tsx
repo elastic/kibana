@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getShapeRenderer } from '..';
 import { Shape } from '../../../common/types';
@@ -23,5 +24,7 @@ storiesOf('renderers/shape', module).add('default', () => {
     maintainAspect: true,
   };
 
-  return <Render renderer={getShapeRenderer()} config={config} />;
+  return (
+    <Render renderer={getShapeRenderer(coreMock.createStart().theme.theme$)} config={config} />
+  );
 });

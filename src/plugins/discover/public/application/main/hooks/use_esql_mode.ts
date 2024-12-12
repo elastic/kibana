@@ -74,6 +74,36 @@ export function useEsqlMode({
             return;
           }
 
+          // We need to reset the default profile state on index pattern changes
+          // when loading starts to ensure the correct pre fetch state is available
+          // before data fetching is triggered
+          if (next.fetchStatus === FetchStatus.LOADING) {
+            // We have to grab the current query from appState
+            // here since nextQuery has not been updated yet
+            const appStateQuery = stateContainer.appState.getState().query;
+
+            if (isOfAggregateQueryType(appStateQuery)) {
+              if (prev.current.initialFetch) {
+                prev.current.query = appStateQuery.esql;
+              }
+
+              const indexPatternChanged =
+                getIndexPatternFromESQLQuery(appStateQuery.esql) !==
+                getIndexPatternFromESQLQuery(prev.current.query);
+
+              // Reset all default profile state when index pattern changes
+              if (indexPatternChanged) {
+                stateContainer.internalState.transitions.setResetDefaultProfileState({
+                  columns: true,
+                  rowHeight: true,
+                  breakdownField: true,
+                });
+              }
+            }
+
+            return;
+          }
+
           if (next.fetchStatus !== FetchStatus.PARTIAL) {
             return;
           }
@@ -110,15 +140,13 @@ export function useEsqlMode({
           const { viewMode } = stateContainer.appState.getState();
           const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
-          if (indexPatternChanged) {
-            stateContainer.internalState.transitions.setResetDefaultProfileState({
-              columns: true,
-              rowHeight: true,
-            });
-          } else if (allColumnsChanged) {
+          // If the index pattern hasn't changed, but the available columns have changed
+          // due to transformational commands, reset the associated default profile state
+          if (!indexPatternChanged && allColumnsChanged) {
             stateContainer.internalState.transitions.setResetDefaultProfileState({
               columns: true,
               rowHeight: false,
+              breakdownField: false,
             });
           }
 

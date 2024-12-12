@@ -309,8 +309,6 @@ export type FavoriteTimelineResponse = z.infer<typeof FavoriteTimelineResponse>;
 export const FavoriteTimelineResponse = z.object({
   savedObjectId: z.string(),
   version: z.string(),
-  code: z.number().nullable().optional(),
-  message: z.string().nullable().optional(),
   templateTimelineId: z.string().nullable().optional(),
   templateTimelineVersion: z.number().nullable().optional(),
   timelineType: TimelineType.optional(),
@@ -318,13 +316,7 @@ export const FavoriteTimelineResponse = z.object({
 });
 
 export type PersistTimelineResponse = z.infer<typeof PersistTimelineResponse>;
-export const PersistTimelineResponse = z.object({
-  data: z.object({
-    persistTimeline: z.object({
-      timeline: TimelineResponse,
-    }),
-  }),
-});
+export const PersistTimelineResponse = TimelineResponse;
 
 export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternalRefs>;
 export const BareNoteWithoutExternalRefs = z.object({

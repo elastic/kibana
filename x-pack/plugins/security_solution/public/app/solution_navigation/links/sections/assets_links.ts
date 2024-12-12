@@ -34,7 +34,7 @@ const assetsCloudDefendAppLink: LinkItem = {
   landingIcon: IconEcctlLazy,
   isBeta: true,
   hideTimeline: true,
-  links: [], // cloudDefendPolicies link is added in createAssetsLinkFromManage
+  links: [],
 };
 
 export const createAssetsLinkFromManage = (manageLink: LinkItem): LinkItem => {
@@ -54,13 +54,7 @@ export const createAssetsLinkFromManage = (manageLink: LinkItem): LinkItem => {
     assetsSubLinks.push({ ...endpointsLink, links: endpointsSubLinks });
   }
 
-  const cloudPoliciesLink = manageLink.links?.find(
-    ({ id }) => id === SecurityPageName.cloudDefendPolicies
-  );
-  if (cloudPoliciesLink) {
-    // Add cloud defend policies link as cloud defend sub link
-    assetsSubLinks.push({ ...assetsCloudDefendAppLink, links: [cloudPoliciesLink] });
-  }
+  assetsSubLinks.push(assetsCloudDefendAppLink);
 
   return {
     ...assetsAppLink,

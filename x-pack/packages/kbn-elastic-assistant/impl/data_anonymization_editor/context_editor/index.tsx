@@ -45,7 +45,6 @@ export interface Props {
   compressed?: boolean;
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
   rawData: Record<string, string[]> | null;
-  pageSize?: number;
 }
 
 const search: EuiSearchBarProps = {
@@ -71,7 +70,6 @@ const ContextEditorComponent: React.FC<Props> = ({
   compressed = true,
   onListUpdated,
   rawData,
-  pageSize = DEFAULT_PAGE_SIZE,
 }) => {
   const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
   const {

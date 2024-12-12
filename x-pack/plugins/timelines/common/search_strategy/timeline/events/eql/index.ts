@@ -22,13 +22,13 @@ export interface TimelineEqlResponse extends EqlSearchStrategyResponse<EqlSearch
   inspect: Maybe<Inspect>;
 }
 
-export interface EqlOptionsData {
+export interface EqlFieldsComboBoxOptions {
   keywordFields: EuiComboBoxOptionOption[];
   dateFields: EuiComboBoxOptionOption[];
   nonDateFields: EuiComboBoxOptionOption[];
 }
 
-export interface EqlOptionsSelected {
+export interface EqlOptions {
   eventCategoryField?: string;
   tiebreakerField?: string;
   timestampField?: string;
@@ -36,4 +36,4 @@ export interface EqlOptionsSelected {
   size?: number;
 }
 
-export type FieldsEqlOptions = keyof EqlOptionsSelected;
+export type FieldsEqlOptions = keyof EqlOptions;

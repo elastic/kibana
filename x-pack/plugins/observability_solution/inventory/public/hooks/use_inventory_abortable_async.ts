@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useAbortableAsync } from '@kbn/observability-utils/hooks/use_abortable_async';
+import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from './use_kibana';

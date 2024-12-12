@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type {
   EntityNodeDataModel,
   GroupNodeDataModel,
@@ -24,11 +25,20 @@ interface BaseNodeDataViewModel {
   interactive?: boolean;
 }
 
+export type NodeClickCallback = (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
+
+export type ExpandButtonClickCallback = (
+  e: React.MouseEvent<HTMLElement>,
+  node: NodeProps,
+  unToggleCallback: () => void
+) => void;
+
 export interface EntityNodeViewModel
   extends Record<string, unknown>,
     EntityNodeDataModel,
     BaseNodeDataViewModel {
-  expandButtonClick?: (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
+  expandButtonClick?: ExpandButtonClickCallback;
+  nodeClick?: NodeClickCallback;
 }
 
 export interface GroupNodeViewModel
@@ -40,7 +50,7 @@ export interface LabelNodeViewModel
   extends Record<string, unknown>,
     LabelNodeDataModel,
     BaseNodeDataViewModel {
-  expandButtonClick?: (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
+  expandButtonClick?: ExpandButtonClickCallback;
 }
 
 export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;

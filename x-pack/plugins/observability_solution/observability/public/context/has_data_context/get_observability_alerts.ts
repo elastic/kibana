@@ -13,7 +13,7 @@ const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts'];
 export async function getObservabilityAlerts({ http }: { http: HttpSetup }) {
   try {
     const { data = [] }: { data: Rule[] } =
-      (await http.get('/api/alerts/_find', {
+      (await http.get('/api/alerting/rules/_find', {
         query: {
           page: 1,
           per_page: 20,

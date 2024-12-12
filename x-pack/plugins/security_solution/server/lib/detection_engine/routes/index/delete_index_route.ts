@@ -35,8 +35,10 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
     .delete({
       path: DETECTION_ENGINE_INDEX_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

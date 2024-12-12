@@ -16,7 +16,6 @@ import * as i18n from './translations';
 import { useAnonymizationListUpdate } from './use_anonymization_list_update';
 
 export interface Props {
-  defaultPageSize?: number;
   anonymizationFields: FindAnonymizationFieldsResponse;
   anonymizationFieldsBulkActions: PerformAnonymizationFieldsBulkActionRequestBody;
   setAnonymizationFieldsBulkActions: React.Dispatch<
@@ -28,7 +27,6 @@ export interface Props {
 }
 
 const AnonymizationSettingsComponent: React.FC<Props> = ({
-  defaultPageSize,
   anonymizationFields,
   anonymizationFieldsBulkActions,
   setAnonymizationFieldsBulkActions,
@@ -60,7 +58,6 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({
         anonymizationFields={anonymizationFields}
         onListUpdated={onListUpdated}
         rawData={null}
-        pageSize={defaultPageSize}
         compressed={true}
       />
     </>

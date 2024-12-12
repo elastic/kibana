@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useCurrentUser } from '../../../common/lib/kibana/hooks';
+import { OnboardingHeaderTopicSelector } from './onboarding_header_topic_selector';
 import { useOnboardingHeaderStyles } from './onboarding_header.styles';
 import rocketImage from './images/header_rocket.png';
 import rocketDarkImage from './images/header_rocket_dark.png';
@@ -42,23 +43,25 @@ export const OnboardingHeader = React.memo(() => {
           <EuiImage
             src={isDarkMode ? rocketDarkImage : rocketImage}
             size={128}
-            alt={i18n.GET_STARTED_DATA_INGESTION_HUB_SUBTITLE}
+            alt={i18n.ONBOARDING_PAGE_SUBTITLE}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="onboardingHeaderTitleWrapper">
           {currentUserName && (
             <EuiTitle size="xs" className="onboardingHeaderGreetings">
-              <span>{i18n.GET_STARTED_PAGE_TITLE(currentUserName)}</span>
+              <span>{i18n.ONBOARDING_PAGE_TITLE(currentUserName)}</span>
             </EuiTitle>
           )}
           <EuiSpacer size="s" />
           <EuiTitle size="l">
-            <h1>{i18n.GET_STARTED_DATA_INGESTION_HUB_SUBTITLE}</h1>
+            <h1>{i18n.ONBOARDING_PAGE_SUBTITLE}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="m" color="subdued">
-            <span>{i18n.GET_STARTED_DATA_INGESTION_HUB_DESCRIPTION}</span>
+            <span>{i18n.ONBOARDING_PAGE_DESCRIPTION}</span>
           </EuiText>
+          <EuiSpacer size="m" />
+          <OnboardingHeaderTopicSelector />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />

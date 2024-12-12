@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { getSpaceId } from './get_space_id';
 
 describe('get_space_id', () => {
-  let request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+  let request = kibanaRequestFactory(httpServerMock.createRawRequest({}));
   beforeEach(() => {
-    request = CoreKibanaRequest.from(httpServerMock.createRawRequest({}));
+    request = kibanaRequestFactory(httpServerMock.createRawRequest({}));
     jest.clearAllMocks();
   });
 

@@ -59,6 +59,7 @@ export const renderApp = ({
     observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
     share: pluginsSetup.share,
     kibanaEnvironment,
+    licensing: pluginsStart.licensing,
   };
 
   // render APM feedback link in global help menu

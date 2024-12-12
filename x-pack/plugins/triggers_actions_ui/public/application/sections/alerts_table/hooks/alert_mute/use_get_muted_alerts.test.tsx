@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import * as api from '../apis/get_rules_muted_alerts';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
 import { useGetMutedAlerts } from './use_get_muted_alerts';
@@ -31,16 +30,14 @@ describe('useGetMutedAlerts', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'getMutedAlerts');
 
-    const { waitForNextUpdate } = renderHook(() => useGetMutedAlerts(ruleIds), {
+    renderHook(() => useGetMutedAlerts(ruleIds), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(muteAlertInstanceSpy).toHaveBeenCalledWith(
         expect.anything(),
-        { ids: ruleIds },
+        { ruleIds },
         expect.any(AbortSignal)
       );
     });
@@ -53,17 +50,15 @@ describe('useGetMutedAlerts', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api returns an error', async () => {
     const spy = jest.spyOn(api, 'getMutedAlerts').mockRejectedValue(new Error('An error'));
 
-    const { waitForNextUpdate } = renderHook(() => useGetMutedAlerts(ruleIds), {
+    renderHook(() => useGetMutedAlerts(ruleIds), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalled();

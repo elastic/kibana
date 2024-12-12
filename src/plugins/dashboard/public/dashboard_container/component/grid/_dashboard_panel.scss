@@ -1,44 +1,11 @@
-/**
-  * EDITING MODE
-  * Use .dshLayout--editing to target editing state because
-  * .embPanel--editing doesn't get updating without a hard refresh
-  */
-
-.dshLayout--editing {
-  // change the style of the hover actions border to a dashed line in edit mode
-  .embPanel__hoverActionsAnchor {
-    .embPanel__hoverActionsWrapper {
-      .embPanel__hoverActions {
-        border-color: $euiColorMediumShade;
-        border-style: dashed;
-      }
-    }
-  }
-}
-
 // LAYOUT MODES
 // Adjust borders/etc... for non-spaced out and expanded panels
 .dshLayout-withoutMargins {
-  .embPanel,
-  .embPanel__hoverActionsAnchor {
-    box-shadow: none;
-    outline: none;
-    border-radius: 0;
-  }
-
-  &.dshLayout--editing {
-    .embPanel__hoverActionsAnchor:hover {
-      outline: 1px dashed $euiColorMediumShade;
-    }
-  }
-
-  .embPanel__hoverActionsAnchor:hover {
-    outline: $euiBorderThin;
-    z-index: $euiZLevel2;
-  }
+  margin-top: $euiSizeS;
 
   .embPanel__content,
-  .dshDashboardGrid__item--highlighted,
+  .embPanel,
+  .embPanel__hoverActionsAnchor,
   .lnsExpressionRenderer {
     border-radius: 0;
   }

@@ -12,6 +12,7 @@ import { useDeleteBackfill } from '../../api/hooks/use_delete_backfill';
 import * as i18n from '../../translations';
 import type { BackfillRow } from '../../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 export const StopBackfill = ({ backfill }: { backfill: BackfillRow }) => {
   const { telemetry } = useKibana().services;
@@ -19,7 +20,7 @@ export const StopBackfill = ({ backfill }: { backfill: BackfillRow }) => {
   const deleteBackfillMutation = useDeleteBackfill({
     onSuccess: () => {
       closeModal();
-      telemetry.reportManualRuleRunCancelJob({
+      telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunCancelJob, {
         totalTasks: backfill.total,
         completedTasks: backfill.complete,
         errorTasks: backfill.error,

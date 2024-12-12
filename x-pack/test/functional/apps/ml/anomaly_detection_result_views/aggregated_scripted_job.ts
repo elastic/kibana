@@ -59,7 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
           expand_wildcards: ['open'],
           ignore_unavailable: false,
           allow_no_indices: true,
-          ignore_throttled: true,
         },
         query: {
           match_all: {},
@@ -140,7 +139,6 @@ export default function ({ getService }: FtrProviderContext) {
           expand_wildcards: ['open'],
           ignore_unavailable: false,
           allow_no_indices: true,
-          ignore_throttled: true,
         },
         query: {
           bool: {
@@ -217,7 +215,6 @@ export default function ({ getService }: FtrProviderContext) {
           expand_wildcards: ['open'],
           ignore_unavailable: false,
           allow_no_indices: true,
-          ignore_throttled: true,
         },
         query: {
           match_all: {},
@@ -317,7 +314,6 @@ export default function ({ getService }: FtrProviderContext) {
           expand_wildcards: ['open'],
           ignore_unavailable: false,
           allow_no_indices: true,
-          ignore_throttled: true,
         },
         query: {
           bool: {

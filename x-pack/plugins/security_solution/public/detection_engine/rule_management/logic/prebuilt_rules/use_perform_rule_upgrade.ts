@@ -5,23 +5,9 @@
  * 2.0.
  */
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { usePerformAllRulesUpgradeMutation } from '../../api/hooks/prebuilt_rules/use_perform_all_rules_upgrade_mutation';
 import { usePerformSpecificRulesUpgradeMutation } from '../../api/hooks/prebuilt_rules/use_perform_specific_rules_upgrade_mutation';
 
 import * as i18n from './translations';
-
-export const usePerformUpgradeAllRules = () => {
-  const { addError, addSuccess } = useAppToasts();
-
-  return usePerformAllRulesUpgradeMutation({
-    onError: (err) => {
-      addError(err, { title: i18n.RULE_UPGRADE_FAILED });
-    },
-    onSuccess: (result) => {
-      addSuccess(getSuccessToastMessage(result));
-    },
-  });
-};
 
 export const usePerformUpgradeSpecificRules = () => {
   const { addError, addSuccess } = useAppToasts();

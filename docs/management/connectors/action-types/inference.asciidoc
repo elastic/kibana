@@ -1,13 +1,14 @@
 [[inference-action-type]]
-== {infer-cap} connector and action
+== AI connector and action
 ++++
-<titleabbrev>{infer-cap}</titleabbrev>
+<titleabbrev>AI</titleabbrev>
 ++++
 :frontmatter-description: Add a connector that can send requests to {inference}.
 :frontmatter-tags-products: [kibana] 
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
 
+coming::[]
 
 The {infer} connector uses the {es} client to send requests to an {infer} service.
 The connector uses the <<execute-connector-api,run connector API>> to send the request.
@@ -16,6 +17,7 @@ The connector uses the <<execute-connector-api,run connector API>> to send the r
 [[define-inference-ui]]
 === Create connectors in {kib}
 
+// TBD After you set the `xpack.stack_connectors.enableExperimental` to include `inferenceConnectorOn`,
 You can create connectors in *{stack-manage-app} > {connectors-ui}*. For example:
 
 [role="screenshot"]

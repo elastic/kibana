@@ -13,10 +13,11 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 import { login } from '../../tasks/login';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/203918
+describe.skip(
   'Policy List',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@serverlessQA'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

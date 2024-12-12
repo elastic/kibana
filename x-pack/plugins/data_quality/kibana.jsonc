@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/data-quality-plugin",
   "owner": "@elastic/obs-ux-logs-team",
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "dataQuality",
     "server": true,

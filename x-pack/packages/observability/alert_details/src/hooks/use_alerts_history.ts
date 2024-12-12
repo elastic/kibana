@@ -14,14 +14,14 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
-  ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 
 export interface Props {
   http: HttpSetup | undefined;
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   ruleId: string;
   dateRange: {
     from: string;
@@ -49,12 +49,15 @@ export const EMPTY_ALERTS_HISTORY = {
 };
 
 export function useAlertsHistory({
-  featureIds,
+  ruleTypeIds,
+  consumers,
   ruleId,
   dateRange,
   http,
   instanceId,
 }: Props): UseAlertsHistory {
+  const enabled = !!ruleTypeIds.length;
+
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -62,7 +65,8 @@ export function useAlertsHistory({
         throw new Error('Http client is missing');
       }
       return fetchTriggeredAlertsHistory({
-        featureIds,
+        ruleTypeIds,
+        consumers,
         http,
         ruleId,
         dateRange,
@@ -71,10 +75,12 @@ export function useAlertsHistory({
       });
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
+
   return {
     data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    isLoading: enabled && (isInitialLoading || isLoading || isRefetching),
     isSuccess,
     isError,
   };
@@ -99,14 +105,16 @@ interface AggsESResponse {
 }
 
 export async function fetchTriggeredAlertsHistory({
-  featureIds,
+  ruleTypeIds,
+  consumers,
   http,
   ruleId,
   dateRange,
   signal,
   instanceId,
 }: {
-  featureIds: ValidFeatureId[];
+  ruleTypeIds: string[];
+  consumers?: string[];
   http: HttpSetup;
   ruleId: string;
   dateRange: {
@@ -121,7 +129,8 @@ export async function fetchTriggeredAlertsHistory({
       signal,
       body: JSON.stringify({
         size: 0,
-        feature_ids: featureIds,
+        rule_type_ids: ruleTypeIds,
+        consumers,
         query: {
           bool: {
             must: [

@@ -695,7 +695,7 @@
             "section": "def-common.TopNFunctions",
             "text": "TopNFunctions"
           },
-          "; hostNames: string[]; } | undefined, ",
+          "; hostNames: string[]; containerIds: string[]; } | undefined, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph\": ",
           {
@@ -829,7 +829,7 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
-          "; hostNames: string[]; } | undefined, ",
+          "; hostNames: string[]; containerIds: string[]; } | undefined, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/profiling/functions\": ",
           {

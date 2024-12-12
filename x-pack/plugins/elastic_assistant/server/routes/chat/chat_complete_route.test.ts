@@ -61,6 +61,7 @@ const mockContext = {
       getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
       logger: loggingSystemMock.createLogger(),
       telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+      llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
       getCurrentUser: () => ({
         username: 'user',
         email: 'email',
@@ -86,7 +87,7 @@ const mockContext = {
         indexTemplateAndPattern: {
           alias: 'knowledge-base-alias',
         },
-        isModelDeployed: jest.fn().mockResolvedValue(true),
+        isInferenceEndpointExists: jest.fn().mockResolvedValue(true),
       }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),

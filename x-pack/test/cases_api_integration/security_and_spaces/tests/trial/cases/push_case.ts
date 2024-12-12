@@ -488,7 +488,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path = 409s when case is closed', async () => {
+      it('should push a closed case', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
           serviceNowSimulatorURL,
@@ -511,7 +511,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           connectorId: connector.id,
-          expectedHttpCode: 409,
+          expectedHttpCode: 200,
         });
       });
 

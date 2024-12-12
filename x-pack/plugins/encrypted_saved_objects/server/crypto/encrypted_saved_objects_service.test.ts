@@ -2405,3 +2405,24 @@ describe('#decryptAttributesSync', () => {
     });
   });
 });
+
+describe('#shouldEnforceRandomId', () => {
+  it('defaults to true if enforceRandomId is undefined', () => {
+    service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) });
+    expect(service.shouldEnforceRandomId('known-type-1')).toBe(true);
+  });
+  it('should return the value of enforceRandomId if it is defined', () => {
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['attr']),
+      enforceRandomId: false,
+    });
+    service.registerType({
+      type: 'known-type-2',
+      attributesToEncrypt: new Set(['attr']),
+      enforceRandomId: true,
+    });
+    expect(service.shouldEnforceRandomId('known-type-1')).toBe(false);
+    expect(service.shouldEnforceRandomId('known-type-2')).toBe(true);
+  });
+});

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
@@ -19,14 +20,17 @@ import { getMigrationSavedObjectsById } from '../../migrations/get_migration_sav
 
 export const finalizeSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataService: RuleDataPluginService
+  ruleDataService: RuleDataPluginService,
+  docLinks: DocLinksServiceSetup
 ) => {
   router.versioned
     .post({
       path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -34,6 +38,13 @@ export const finalizeSignalsMigrationRoute = (
         version: '2023-10-31',
         validate: {
           request: { body: buildRouteValidationWithZod(FinalizeAlertsMigrationRequestBody) },
+        },
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.signalsMigrationApi,
+            severity: 'warning',
+            reason: { type: 'remove' },
+          },
         },
       },
       async (context, request, response) => {
@@ -63,6 +74,7 @@ export const finalizeSignalsMigrationRoute = (
           });
 
           const spaceId = securitySolution.getSpaceId();
+          const legacySiemSignalsAlias = appClient.getSignalsIndex();
           const signalsAlias = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
           const finalizeResults = await Promise.all(
             migrations.map(async (migration) => {
@@ -70,6 +82,7 @@ export const finalizeSignalsMigrationRoute = (
                 const finalizedMigration = await migrationService.finalize({
                   migration,
                   signalsAlias,
+                  legacySiemSignalsAlias,
                 });
 
                 if (isMigrationFailed(finalizedMigration)) {

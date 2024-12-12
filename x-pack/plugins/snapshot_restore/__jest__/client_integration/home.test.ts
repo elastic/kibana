@@ -512,6 +512,7 @@ describe('<SnapshotRestoreHome />', () => {
           expect(row).toEqual([
             '', // Checkbox
             snapshot.snapshot, // Snapshot
+            'Complete', // The displayed message when stats is success
             REPOSITORY_NAME, // Repository
             snapshot.indices.length.toString(), // Indices
             snapshot.shards.total.toString(), // Shards
@@ -738,7 +739,7 @@ describe('<SnapshotRestoreHome />', () => {
 
                 expect(find('snapshotDetail.version.value').text()).toBe(version);
                 expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
-                expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
+                expect(find('snapshotDetail.state.value').text()).toBe('Complete');
                 expect(find('snapshotDetail.includeGlobalState.value').text()).toEqual('Yes');
                 expect(
                   find('snapshotDetail.snapshotFeatureStatesSummary.featureStatesList').text()
@@ -788,10 +789,10 @@ describe('<SnapshotRestoreHome />', () => {
                 };
 
                 const mapStateToMessage = {
-                  [SNAPSHOT_STATE.IN_PROGRESS]: 'Taking snapshot…',
-                  [SNAPSHOT_STATE.FAILED]: 'Snapshot failed',
-                  [SNAPSHOT_STATE.PARTIAL]: 'Partial failure ',
-                  [SNAPSHOT_STATE.INCOMPATIBLE]: 'Incompatible version ',
+                  [SNAPSHOT_STATE.IN_PROGRESS]: 'In progress',
+                  [SNAPSHOT_STATE.FAILED]: 'Failed',
+                  [SNAPSHOT_STATE.PARTIAL]: 'Partial',
+                  [SNAPSHOT_STATE.SUCCESS]: 'Complete',
                 };
 
                 // Call sequentially each state and verify that the message is ok

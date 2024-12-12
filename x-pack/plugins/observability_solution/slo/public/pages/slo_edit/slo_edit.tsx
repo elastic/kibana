@@ -12,10 +12,10 @@ import { useParams } from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
 import { SloEditForm } from './components/slo_edit_form';
 
 export function SloEditPage() {

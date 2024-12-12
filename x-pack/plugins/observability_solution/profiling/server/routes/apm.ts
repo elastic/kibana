@@ -34,8 +34,12 @@ export function registerTopNFunctionsAPMTransactionsRoute({
   router.get(
     {
       path: paths.APMTransactions,
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling', 'apm'],
+        },
+      },
       options: {
-        tags: ['access:profiling', 'access:apm'],
         timeout: { idleSocket: IDLE_SOCKET_TIMEOUT },
       },
       validate: { query: querySchema },

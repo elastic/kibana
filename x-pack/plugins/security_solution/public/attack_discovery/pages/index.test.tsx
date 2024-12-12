@@ -21,13 +21,13 @@ import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
 import { UpsellingProvider } from '../../common/components/upselling_provider';
-import { mockFindAnonymizationFieldsResponse } from '../mock/mock_find_anonymization_fields_response';
+import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymization_fields_response';
 import {
   getMockUseAttackDiscoveriesWithCachedAttackDiscoveries,
   getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading,
-} from '../mock/mock_use_attack_discovery';
+} from './mock/mock_use_attack_discovery';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
-import { useAttackDiscovery } from '../use_attack_discovery';
+import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
 const mockConnectors: unknown[] = [
@@ -75,7 +75,7 @@ jest.mock('../../common/links', () => ({
   }),
 }));
 
-jest.mock('../use_attack_discovery', () => ({
+jest.mock('./use_attack_discovery', () => ({
   useAttackDiscovery: jest.fn().mockReturnValue({
     approximateFutureTime: null,
     attackDiscoveries: [],

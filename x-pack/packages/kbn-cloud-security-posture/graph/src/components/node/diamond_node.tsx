@@ -19,12 +19,13 @@ import {
   HandleStyleOverride,
 } from './styles';
 import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
+import { NodeExpandButton } from './node_expand_button';
 
 const NODE_WIDTH = 99;
 const NODE_HEIGHT = 98;
 
 export const DiamondNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -55,11 +56,14 @@ export const DiamondNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           {icon && <NodeIcon x="14.5" y="14.5" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (
-          <NodeButton
-            onClick={(e) => expandButtonClick?.(e, props)}
-            x={`${NODE_WIDTH - NodeButton.ExpandButtonSize}px`}
-            y={`${(NODE_HEIGHT - NodeButton.ExpandButtonSize) / 2 - 4}px`}
-          />
+          <>
+            <NodeButton onClick={(e) => nodeClick?.(e, props)} />
+            <NodeExpandButton
+              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2 - 4}px`}
+            />
+          </>
         )}
         <Handle
           type="target"

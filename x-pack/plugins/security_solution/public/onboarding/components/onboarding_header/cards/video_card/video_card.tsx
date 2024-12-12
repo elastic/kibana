@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { OnboardingHeaderCardId } from '../../../constants';
+import { OnboardingHeaderCardId } from '../../constants';
 import { OnboardingHeaderVideoModal } from './video_modal';
 import * as i18n from './translations';
 import videoImage from './images/video_card.png';

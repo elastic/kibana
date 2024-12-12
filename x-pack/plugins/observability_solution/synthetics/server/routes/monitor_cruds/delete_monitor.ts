@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { DeleteMonitorAPI } from './services/delete_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
@@ -41,30 +42,39 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
 
     if (ids && queryId) {
       return response.badRequest({
-        body: { message: 'id must be provided either via param or body.' },
+        body: {
+          message: i18n.translate('xpack.synthetics.deleteMonitor.errorMultipleIdsProvided', {
+            defaultMessage: 'id must be provided either via param or body.',
+          }),
+        },
       });
     }
 
     const idsToDelete = [...(ids ?? []), ...(queryId ? [queryId] : [])];
     if (idsToDelete.length === 0) {
       return response.badRequest({
-        body: { message: 'id must be provided via param or body.' },
+        body: {
+          message: i18n.translate('xpack.synthetics.deleteMonitor.errorMultipleIdsProvided', {
+            defaultMessage: 'id must be provided either via param or body.',
+          }),
+        },
       });
     }
 
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
-    try {
-      const { errors } = await deleteMonitorAPI.execute({
-        monitorIds: idsToDelete,
-      });
+    const { errors } = await deleteMonitorAPI.execute({
+      monitorIds: idsToDelete,
+    });
 
-      if (errors && errors.length > 0) {
-        return response.ok({
-          body: { message: 'error pushing monitor to the service', attributes: { errors } },
-        });
-      }
-    } catch (getErr) {
-      throw getErr;
+    if (errors && errors.length > 0) {
+      return response.ok({
+        body: {
+          message: i18n.translate('xpack.synthetics.deleteMonitor.errorPushingMonitorToService', {
+            defaultMessage: 'Error pushing monitor to the service',
+          }),
+          attributes: { errors },
+        },
+      });
     }
 
     return deleteMonitorAPI.result;

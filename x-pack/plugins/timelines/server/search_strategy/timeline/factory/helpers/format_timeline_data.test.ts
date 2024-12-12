@@ -7,12 +7,12 @@
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
 import { EventHit } from '../../../../../common/search_strategy';
-import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { formatTimelineData } from './format_timeline_data';
 
 describe('formatTimelineData', () => {
   it('should properly format the timeline data', async () => {
     const res = await formatTimelineData(
+      [eventHit],
       [
         '@timestamp',
         'host.name',
@@ -21,187 +21,188 @@ describe('formatTimelineData', () => {
         'source.geo.location',
         'threat.enrichments.matched.field',
       ],
-      TIMELINE_EVENTS_FIELDS,
-      eventHit
+      false
     );
-    expect(res).toEqual({
-      cursor: {
-        tiebreaker: 'beats-ci-immutable-ubuntu-1804-1605624279743236239',
-        value: '1605624488922',
-      },
-      node: {
-        _id: 'tkCt1nUBaEgqnrVSZ8R_',
-        _index: 'auditbeat-7.8.0-2020.11.05-000003',
-        data: [
-          {
-            field: '@timestamp',
-            value: ['2020-11-17T14:48:08.922Z'],
-          },
-          {
-            field: 'host.name',
-            value: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
-          },
-          {
-            field: 'threat.enrichments.matched.field',
-            value: [
-              'matched_field',
-              'other_matched_field',
-              'matched_field_2',
-              'host.name',
-              'host.hostname',
-              'host.architecture',
-            ],
-          },
-          {
-            field: 'source.geo.location',
-            value: [`{"lon":118.7778,"lat":32.0617}`],
-          },
-        ],
-        ecs: {
-          '@timestamp': ['2020-11-17T14:48:08.922Z'],
+    expect(res).toEqual([
+      {
+        cursor: {
+          tiebreaker: 'beats-ci-immutable-ubuntu-1804-1605624279743236239',
+          value: '1605624488922',
+        },
+        node: {
           _id: 'tkCt1nUBaEgqnrVSZ8R_',
           _index: 'auditbeat-7.8.0-2020.11.05-000003',
-          agent: {
-            type: ['auditbeat'],
-          },
-          event: {
-            action: ['process_started'],
-            category: ['process'],
-            dataset: ['process'],
-            kind: ['event'],
-            module: ['system'],
-            type: ['start'],
-          },
-          host: {
-            id: ['e59991e835905c65ed3e455b33e13bd6'],
-            ip: ['10.224.1.237', 'fe80::4001:aff:fee0:1ed', '172.17.0.1'],
-            name: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
-            os: {
-              family: ['debian'],
+          data: [
+            {
+              field: '@timestamp',
+              value: ['2020-11-17T14:48:08.922Z'],
             },
-          },
-          message: ['Process go (PID: 4313) by user jenkins STARTED'],
-          process: {
-            args: ['go', 'vet', './...'],
-            entity_id: ['Z59cIkAAIw8ZoK0H'],
-            executable: [
-              '/var/lib/jenkins/workspace/Beats_beats_PR-22624/.gvm/versions/go1.14.7.linux.amd64/bin/go',
-            ],
-            hash: {
-              sha1: ['1eac22336a41e0660fb302add9d97daa2bcc7040'],
+            {
+              field: 'host.name',
+              value: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
             },
-            name: ['go'],
-            pid: ['4313'],
-            ppid: ['3977'],
-            working_directory: [
-              '/var/lib/jenkins/workspace/Beats_beats_PR-22624/src/github.com/elastic/beats/libbeat',
-            ],
-          },
-          timestamp: '2020-11-17T14:48:08.922Z',
-          user: {
-            name: ['jenkins'],
-          },
-          threat: {
-            enrichments: [
-              {
-                feed: { name: [] },
-                indicator: {
-                  provider: ['yourself'],
-                  reference: [],
-                },
-                matched: {
-                  atomic: ['matched_atomic'],
-                  field: ['matched_field', 'other_matched_field'],
-                  type: [],
-                },
+            {
+              field: 'threat.enrichments.matched.field',
+              value: [
+                'matched_field',
+                'other_matched_field',
+                'matched_field_2',
+                'host.name',
+                'host.hostname',
+                'host.architecture',
+              ],
+            },
+            {
+              field: 'source.geo.location',
+              value: [`{"lon":118.7778,"lat":32.0617}`],
+            },
+          ],
+          ecs: {
+            '@timestamp': ['2020-11-17T14:48:08.922Z'],
+            _id: 'tkCt1nUBaEgqnrVSZ8R_',
+            _index: 'auditbeat-7.8.0-2020.11.05-000003',
+            agent: {
+              type: ['auditbeat'],
+            },
+            event: {
+              action: ['process_started'],
+              category: ['process'],
+              dataset: ['process'],
+              kind: ['event'],
+              module: ['system'],
+              type: ['start'],
+            },
+            host: {
+              id: ['e59991e835905c65ed3e455b33e13bd6'],
+              ip: ['10.224.1.237', 'fe80::4001:aff:fee0:1ed', '172.17.0.1'],
+              name: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
+              os: {
+                family: ['debian'],
               },
-              {
-                feed: { name: [] },
-                indicator: {
-                  provider: ['other_you'],
-                  reference: [],
-                },
-                matched: {
-                  atomic: ['matched_atomic_2'],
-                  field: ['matched_field_2'],
-                  type: [],
-                },
+            },
+            message: ['Process go (PID: 4313) by user jenkins STARTED'],
+            process: {
+              args: ['go', 'vet', './...'],
+              entity_id: ['Z59cIkAAIw8ZoK0H'],
+              executable: [
+                '/var/lib/jenkins/workspace/Beats_beats_PR-22624/.gvm/versions/go1.14.7.linux.amd64/bin/go',
+              ],
+              hash: {
+                sha1: ['1eac22336a41e0660fb302add9d97daa2bcc7040'],
               },
-              {
-                feed: {
-                  name: [],
+              name: ['go'],
+              pid: ['4313'],
+              ppid: ['3977'],
+              working_directory: [
+                '/var/lib/jenkins/workspace/Beats_beats_PR-22624/src/github.com/elastic/beats/libbeat',
+              ],
+            },
+            timestamp: '2020-11-17T14:48:08.922Z',
+            user: {
+              name: ['jenkins'],
+            },
+            threat: {
+              enrichments: [
+                {
+                  feed: { name: [] },
+                  indicator: {
+                    provider: ['yourself'],
+                    reference: [],
+                  },
+                  matched: {
+                    atomic: ['matched_atomic'],
+                    field: ['matched_field', 'other_matched_field'],
+                    type: [],
+                  },
                 },
-                indicator: {
-                  provider: [],
-                  reference: [],
+                {
+                  feed: { name: [] },
+                  indicator: {
+                    provider: ['other_you'],
+                    reference: [],
+                  },
+                  matched: {
+                    atomic: ['matched_atomic_2'],
+                    field: ['matched_field_2'],
+                    type: [],
+                  },
                 },
-                matched: {
-                  atomic: ['MacBook-Pro-de-Gloria.local'],
-                  field: ['host.name'],
-                  type: ['indicator_match_rule'],
+                {
+                  feed: {
+                    name: [],
+                  },
+                  indicator: {
+                    provider: [],
+                    reference: [],
+                  },
+                  matched: {
+                    atomic: ['MacBook-Pro-de-Gloria.local'],
+                    field: ['host.name'],
+                    type: ['indicator_match_rule'],
+                  },
                 },
-              },
-              {
-                feed: {
-                  name: [],
+                {
+                  feed: {
+                    name: [],
+                  },
+                  indicator: {
+                    provider: [],
+                    reference: [],
+                  },
+                  matched: {
+                    atomic: ['MacBook-Pro-de-Gloria.local'],
+                    field: ['host.hostname'],
+                    type: ['indicator_match_rule'],
+                  },
                 },
-                indicator: {
-                  provider: [],
-                  reference: [],
+                {
+                  feed: {
+                    name: [],
+                  },
+                  indicator: {
+                    provider: [],
+                    reference: [],
+                  },
+                  matched: {
+                    atomic: ['x86_64'],
+                    field: ['host.architecture'],
+                    type: ['indicator_match_rule'],
+                  },
                 },
-                matched: {
-                  atomic: ['MacBook-Pro-de-Gloria.local'],
-                  field: ['host.hostname'],
-                  type: ['indicator_match_rule'],
+                {
+                  feed: {
+                    name: [],
+                  },
+                  indicator: {
+                    provider: [],
+                    reference: [],
+                  },
+                  matched: {
+                    atomic: ['MacBook-Pro-de-Gloria.local'],
+                    field: ['host.name'],
+                    type: ['indicator_match_rule'],
+                  },
                 },
-              },
-              {
-                feed: {
-                  name: [],
+                {
+                  feed: {
+                    name: [],
+                  },
+                  indicator: {
+                    provider: [],
+                    reference: [],
+                  },
+                  matched: {
+                    atomic: ['MacBook-Pro-de-Gloria.local'],
+                    field: ['host.hostname'],
+                    type: ['indicator_match_rule'],
+                  },
                 },
-                indicator: {
-                  provider: [],
-                  reference: [],
-                },
-                matched: {
-                  atomic: ['x86_64'],
-                  field: ['host.architecture'],
-                  type: ['indicator_match_rule'],
-                },
-              },
-              {
-                feed: {
-                  name: [],
-                },
-                indicator: {
-                  provider: [],
-                  reference: [],
-                },
-                matched: {
-                  atomic: ['MacBook-Pro-de-Gloria.local'],
-                  field: ['host.name'],
-                  type: ['indicator_match_rule'],
-                },
-              },
-              {
-                feed: {
-                  name: [],
-                },
-                indicator: {
-                  provider: [],
-                  reference: [],
-                },
-                matched: {
-                  atomic: ['MacBook-Pro-de-Gloria.local'],
-                  field: ['host.hostname'],
-                  type: ['indicator_match_rule'],
-                },
-              },
-            ],
+              ],
+            },
           },
         },
       },
-    });
+    ]);
   });
 
   it('should properly format the rule signal results', async () => {
@@ -240,57 +241,61 @@ describe('formatTimelineData', () => {
 
     expect(
       await formatTimelineData(
+        [response],
         ['@timestamp', 'host.name', 'destination.ip', 'source.ip'],
-        TIMELINE_EVENTS_FIELDS,
-        response
+        false
       )
-    ).toEqual({
-      cursor: {
-        tiebreaker: null,
-        value: '',
-      },
-      node: {
-        _id: 'a77040f198355793c35bf22b900902371309be615381f0a2ec92c208b6132562',
-        _index: '.siem-signals-patrykkopycinski-default-000007',
-        data: [
-          {
-            field: '@timestamp',
-            value: ['2021-01-09T13:41:40.517Z'],
-          },
-        ],
-        ecs: {
-          '@timestamp': ['2021-01-09T13:41:40.517Z'],
-          timestamp: '2021-01-09T13:41:40.517Z',
+    ).toEqual([
+      {
+        cursor: {
+          tiebreaker: null,
+          value: '',
+        },
+        node: {
           _id: 'a77040f198355793c35bf22b900902371309be615381f0a2ec92c208b6132562',
           _index: '.siem-signals-patrykkopycinski-default-000007',
-          event: {
-            kind: ['signal'],
-          },
-          kibana: {
-            alert: {
-              original_time: ['2021-01-09T13:39:32.595Z'],
-              workflow_status: ['open'],
-              threshold_result: ['{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}'],
-              severity: ['low'],
-              risk_score: ['21'],
-              rule: {
-                building_block_type: [],
-                exceptions_list: [],
-                from: ['now-360s'],
-                uuid: ['696c24e0-526d-11eb-836c-e1620268b945'],
-                name: ['Threshold test'],
-                to: ['now'],
-                type: ['threshold'],
-                version: ['1'],
-                timeline_id: [],
-                timeline_title: [],
-                note: [],
+          data: [
+            {
+              field: '@timestamp',
+              value: ['2021-01-09T13:41:40.517Z'],
+            },
+          ],
+          ecs: {
+            '@timestamp': ['2021-01-09T13:41:40.517Z'],
+            timestamp: '2021-01-09T13:41:40.517Z',
+            _id: 'a77040f198355793c35bf22b900902371309be615381f0a2ec92c208b6132562',
+            _index: '.siem-signals-patrykkopycinski-default-000007',
+            event: {
+              kind: ['signal'],
+            },
+            kibana: {
+              alert: {
+                original_time: ['2021-01-09T13:39:32.595Z'],
+                workflow_status: ['open'],
+                threshold_result: [
+                  '{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}',
+                ],
+                severity: ['low'],
+                risk_score: ['21'],
+                rule: {
+                  building_block_type: [],
+                  exceptions_list: [],
+                  from: ['now-360s'],
+                  uuid: ['696c24e0-526d-11eb-836c-e1620268b945'],
+                  name: ['Threshold test'],
+                  to: ['now'],
+                  type: ['threshold'],
+                  version: ['1'],
+                  timeline_id: [],
+                  timeline_title: [],
+                  note: [],
+                },
               },
             },
           },
         },
       },
-    });
+    ]);
   });
 
   it('should properly format the inventory rule signal results', async () => {
@@ -347,6 +352,7 @@ describe('formatTimelineData', () => {
 
     expect(
       await formatTimelineData(
+        [response],
         [
           'kibana.alert.status',
           '@timestamp',
@@ -376,168 +382,169 @@ describe('formatTimelineData', () => {
           'event.kind',
           'kibana.alert.rule.parameters',
         ],
-        TIMELINE_EVENTS_FIELDS,
-        response
+        false
       )
-    ).toEqual({
-      cursor: {
-        tiebreaker: null,
-        value: '',
-      },
-      node: {
-        _id: '3fef4a4c-3d96-4e79-b4e5-158a0461d577',
-        _index: '.internal.alerts-observability.metrics.alerts-default-000001',
-        data: [
-          {
-            field: 'kibana.alert.rule.consumer',
-            value: ['infrastructure'],
-          },
-          {
-            field: '@timestamp',
-            value: ['2022-07-21T22:38:57.888Z'],
-          },
-          {
-            field: 'kibana.alert.workflow_status',
-            value: ['open'],
-          },
-          {
-            field: 'kibana.alert.reason',
-            value: [
-              'CPU usage is 37.8% in the last 1 day for gke-edge-oblt-pool-1-9a60016d-7dvq. Alert when > 10%.',
-            ],
-          },
-          {
-            field: 'kibana.alert.rule.name',
-            value: ['test 1212'],
-          },
-          {
-            field: 'kibana.alert.rule.uuid',
-            value: ['15d82f10-0926-11ed-bece-6b0c033d0075'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.sourceId',
-            value: ['default'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.nodeType',
-            value: ['host'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.comparator',
-            value: ['>'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.timeSize',
-            value: ['1'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.metric',
-            value: ['cpu'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.threshold',
-            value: ['10'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.aggregation',
-            value: ['avg'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.id',
-            value: ['alert-custom-metric'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.field',
-            value: [''],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.customMetric.type',
-            value: ['custom'],
-          },
-          {
-            field: 'kibana.alert.rule.parameters.criteria.timeUnit',
-            value: ['d'],
-          },
-          {
-            field: 'event.action',
-            value: ['active'],
-          },
-          {
-            field: 'event.kind',
-            value: ['signal'],
-          },
-          {
-            field: 'kibana.alert.status',
-            value: ['active'],
-          },
-          {
-            field: 'kibana.alert.duration.us',
-            value: ['9502040000'],
-          },
-          {
-            field: 'kibana.alert.rule.category',
-            value: ['Inventory'],
-          },
-          {
-            field: 'kibana.alert.uuid',
-            value: ['3fef4a4c-3d96-4e79-b4e5-158a0461d577'],
-          },
-          {
-            field: 'kibana.alert.start',
-            value: ['2022-07-21T20:00:35.848Z'],
-          },
-          {
-            field: 'kibana.alert.rule.producer',
-            value: ['infrastructure'],
-          },
-          {
-            field: 'kibana.alert.rule.rule_type_id',
-            value: ['metrics.alert.inventory.threshold'],
-          },
-          {
-            field: 'kibana.alert.instance.id',
-            value: ['gke-edge-oblt-pool-1-9a60016d-7dvq'],
-          },
-          {
-            field: 'kibana.alert.rule.execution.uuid',
-            value: ['37498c42-0190-4a83-adfa-c7e5f817f977'],
-          },
-          {
-            field: 'kibana.space_ids',
-            value: ['default'],
-          },
-          {
-            field: 'kibana.version',
-            value: ['8.4.0'],
-          },
-        ],
-        ecs: {
-          '@timestamp': ['2022-07-21T22:38:57.888Z'],
+    ).toEqual([
+      {
+        cursor: {
+          tiebreaker: null,
+          value: '',
+        },
+        node: {
           _id: '3fef4a4c-3d96-4e79-b4e5-158a0461d577',
           _index: '.internal.alerts-observability.metrics.alerts-default-000001',
-          event: {
-            action: ['active'],
-            kind: ['signal'],
-          },
-          kibana: {
-            alert: {
-              reason: [
+          data: [
+            {
+              field: 'kibana.alert.rule.consumer',
+              value: ['infrastructure'],
+            },
+            {
+              field: '@timestamp',
+              value: ['2022-07-21T22:38:57.888Z'],
+            },
+            {
+              field: 'kibana.alert.workflow_status',
+              value: ['open'],
+            },
+            {
+              field: 'kibana.alert.reason',
+              value: [
                 'CPU usage is 37.8% in the last 1 day for gke-edge-oblt-pool-1-9a60016d-7dvq. Alert when > 10%.',
               ],
-              rule: {
-                consumer: ['infrastructure'],
-                name: ['test 1212'],
-                uuid: ['15d82f10-0926-11ed-bece-6b0c033d0075'],
-                parameters: [
-                  '{"sourceId":"default","nodeType":"host","criteria":[{"comparator":">","timeSize":1,"metric":"cpu","threshold":[10],"customMetric":{"aggregation":"avg","id":"alert-custom-metric","field":"","type":"custom"},"timeUnit":"d"}]}',
-                ],
-              },
-              workflow_status: ['open'],
             },
+            {
+              field: 'kibana.alert.rule.name',
+              value: ['test 1212'],
+            },
+            {
+              field: 'kibana.alert.rule.uuid',
+              value: ['15d82f10-0926-11ed-bece-6b0c033d0075'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.sourceId',
+              value: ['default'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.nodeType',
+              value: ['host'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.comparator',
+              value: ['>'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.timeSize',
+              value: ['1'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.metric',
+              value: ['cpu'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.threshold',
+              value: ['10'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.customMetric.aggregation',
+              value: ['avg'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.customMetric.id',
+              value: ['alert-custom-metric'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.customMetric.field',
+              value: [''],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.customMetric.type',
+              value: ['custom'],
+            },
+            {
+              field: 'kibana.alert.rule.parameters.criteria.timeUnit',
+              value: ['d'],
+            },
+            {
+              field: 'event.action',
+              value: ['active'],
+            },
+            {
+              field: 'event.kind',
+              value: ['signal'],
+            },
+            {
+              field: 'kibana.alert.status',
+              value: ['active'],
+            },
+            {
+              field: 'kibana.alert.duration.us',
+              value: ['9502040000'],
+            },
+            {
+              field: 'kibana.alert.rule.category',
+              value: ['Inventory'],
+            },
+            {
+              field: 'kibana.alert.uuid',
+              value: ['3fef4a4c-3d96-4e79-b4e5-158a0461d577'],
+            },
+            {
+              field: 'kibana.alert.start',
+              value: ['2022-07-21T20:00:35.848Z'],
+            },
+            {
+              field: 'kibana.alert.rule.producer',
+              value: ['infrastructure'],
+            },
+            {
+              field: 'kibana.alert.rule.rule_type_id',
+              value: ['metrics.alert.inventory.threshold'],
+            },
+            {
+              field: 'kibana.alert.instance.id',
+              value: ['gke-edge-oblt-pool-1-9a60016d-7dvq'],
+            },
+            {
+              field: 'kibana.alert.rule.execution.uuid',
+              value: ['37498c42-0190-4a83-adfa-c7e5f817f977'],
+            },
+            {
+              field: 'kibana.space_ids',
+              value: ['default'],
+            },
+            {
+              field: 'kibana.version',
+              value: ['8.4.0'],
+            },
+          ],
+          ecs: {
+            '@timestamp': ['2022-07-21T22:38:57.888Z'],
+            _id: '3fef4a4c-3d96-4e79-b4e5-158a0461d577',
+            _index: '.internal.alerts-observability.metrics.alerts-default-000001',
+            event: {
+              action: ['active'],
+              kind: ['signal'],
+            },
+            kibana: {
+              alert: {
+                reason: [
+                  'CPU usage is 37.8% in the last 1 day for gke-edge-oblt-pool-1-9a60016d-7dvq. Alert when > 10%.',
+                ],
+                rule: {
+                  consumer: ['infrastructure'],
+                  name: ['test 1212'],
+                  uuid: ['15d82f10-0926-11ed-bece-6b0c033d0075'],
+                  parameters: [
+                    '{"sourceId":"default","nodeType":"host","criteria":[{"comparator":">","timeSize":1,"metric":"cpu","threshold":[10],"customMetric":{"aggregation":"avg","id":"alert-custom-metric","field":"","type":"custom"},"timeUnit":"d"}]}',
+                  ],
+                },
+                workflow_status: ['open'],
+              },
+            },
+            timestamp: '2022-07-21T22:38:57.888Z',
           },
-          timestamp: '2022-07-21T22:38:57.888Z',
         },
       },
-    });
+    ]);
   });
 });

@@ -24,6 +24,7 @@ import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -31,7 +32,6 @@ const mockContext = {
   http: {
     get: jest.fn(),
   },
-  assistantFeatures: { assistantKnowledgeBaseByDefault: true },
   selectedSettingsTab: null,
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -44,13 +44,13 @@ jest.mock('../../assistant/api/knowledge_base/entries/use_update_knowledge_base_
 jest.mock('../../assistant/api/knowledge_base/entries/use_delete_knowledge_base_entries');
 
 jest.mock('../../assistant/settings/use_settings_updater/use_settings_updater');
+jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
 jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_status');
 jest.mock('../../assistant/api/knowledge_base/entries/use_knowledge_base_entries');
 jest.mock(
   '../../assistant/common/components/assistant_settings_management/flyout/use_flyout_modal_visibility'
 );
 const mockDataViews = {
-  getIndices: jest.fn().mockResolvedValue([{ name: 'index-1' }, { name: 'index-2' }]),
   getFieldsForWildcard: jest.fn().mockResolvedValue([
     { name: 'field-1', esTypes: ['semantic_text'] },
     { name: 'field-2', esTypes: ['text'] },
@@ -148,6 +148,9 @@ describe('KnowledgeBaseSettingsManagement', () => {
       },
       isFetched: true,
     });
+    (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
+      data: { indices: ['index-1', 'index-2'] },
+    });
     (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
       data: { data: mockData },
       isFetching: false,
@@ -170,17 +173,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       mutateAsync: mockDeleteEntry,
       isLoading: false,
     });
-  });
-  it('renders old kb settings when enableKnowledgeBaseByDefault is not enabled', () => {
-    (useAssistantContext as jest.Mock).mockImplementation(() => ({
-      ...mockContext,
-      assistantFeatures: {
-        assistantKnowledgeBaseByDefault: false,
-      },
-    }));
-    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, { wrapper });
-
-    expect(screen.getByTestId('knowledge-base-settings')).toBeInTheDocument();
   });
   it('renders loading spinner when data is not fetched', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockReturnValue({ data: {}, isFetched: false });
@@ -419,6 +411,63 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
     expect(mockUpdateEntry).toHaveBeenCalledTimes(0);
     expect(mockCreateEntry).toHaveBeenCalledWith({ ...mockData[3], users: undefined });
+  });
+
+  it('does not show duplicate entry modal on new document entry creation', async () => {
+    // Covers the BUG: https://github.com/elastic/kibana/issues/198892
+    const closeFlyoutMock = jest.fn();
+    (useFlyoutModalVisibility as jest.Mock).mockReturnValue({
+      isFlyoutOpen: true,
+      openFlyout: jest.fn(),
+      closeFlyout: closeFlyoutMock,
+    });
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper,
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getAllByTestId('edit-button')[3]);
+    });
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await waitFor(() => {
+      expect(screen.getByText('Edit document entry')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('sharing-select'));
+      fireEvent.click(screen.getByTestId('sharing-private-option'));
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    expect(screen.getByTestId('create-duplicate-entry-modal')).toBeInTheDocument();
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    });
+    expect(screen.queryByTestId('create-duplicate-entry-modal')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockCreateEntry).toHaveBeenCalledTimes(1);
+    });
+
+    // Create a new document entry
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('addEntry'));
+    });
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('addDocument'));
+    });
+
+    expect(screen.getByTestId('flyout')).toBeVisible();
+
+    await userEvent.type(screen.getByTestId('entryNameInput'), 'hi');
+    await userEvent.type(screen.getByTestId('entryMarkdownInput'), 'hi');
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByTestId('save-button'));
+    });
+
+    expect(screen.queryByTestId('create-duplicate-entry-modal')).not.toBeInTheDocument();
+    expect(closeFlyoutMock).toHaveBeenCalled();
   });
 
   it('shows warning icon for index entries with missing indices', async () => {

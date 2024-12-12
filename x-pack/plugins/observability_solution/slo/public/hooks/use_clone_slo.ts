@@ -9,7 +9,7 @@ import { encode } from '@kbn/rison';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCallback } from 'react';
 import { paths } from '../../common/locators/paths';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import { createRemoteSloCloneUrl } from '../utils/slo/remote_slo_urls';
 import { useSpace } from './use_space';
 

@@ -6,35 +6,35 @@
  */
 
 import * as rt from 'io-ts';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ALERT_GROUP, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import {
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type {
   RuleTypeParams,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { Group } from '../../../common/typings';
 import {
   aggType,
-  CustomThresholdSearchSourceFields,
-  BaseMetricExpressionParams,
-  CustomMetricExpressionParams,
-  MetricExpressionParams,
-  ThresholdParams,
+  type CustomThresholdSearchSourceFields,
+  type BaseMetricExpressionParams,
+  type CustomMetricExpressionParams,
+  type MetricExpressionParams,
+  type ThresholdParams,
 } from '../../../common/custom_threshold_rule/types';
-import { ObservabilityPublicStart } from '../../plugin';
+import type { ObservabilityPublicStart } from '../../plugin';
 
 export type CustomThresholdPrefillOptions = Partial<
   Omit<ThresholdParams, 'criteria'> & { criteria: Array<Partial<MetricExpressionParams>> }
@@ -71,7 +71,6 @@ export interface InfraClientStartDeps {
   lens: LensPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  osquery?: OsqueryPluginStart;
   share: SharePluginStart;
   spaces: SpacesPluginStart;
   storage: IStorageWrapper;
@@ -90,8 +89,9 @@ export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   searchConfiguration: CustomThresholdSearchSourceFields;
   groupBy?: string | string[];
 }
+
 export interface CustomThresholdAlertFields {
-  [ALERT_GROUP]?: Array<{ field: string; value: string }>;
+  [ALERT_GROUP]?: Group[];
   [ALERT_RULE_PARAMETERS]: CustomThresholdRuleTypeParams;
 }
 

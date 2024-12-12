@@ -33,15 +33,21 @@ export const FleetPermissionsCallout = () => {
 export const NoPermissionsTooltip = ({
   canEditSynthetics = true,
   canUsePublicLocations = true,
+  canManagePrivateLocations = true,
   children,
 }: {
   canEditSynthetics?: boolean;
   canUsePublicLocations?: boolean;
+  canManagePrivateLocations?: boolean;
   children: ReactNode;
 }) => {
   const { isServiceAllowed } = useEnablement();
 
-  const disabledMessage = getRestrictionReasonLabel(canEditSynthetics, canUsePublicLocations);
+  const disabledMessage = getRestrictionReasonLabel(
+    canEditSynthetics,
+    canUsePublicLocations,
+    canManagePrivateLocations
+  );
 
   if (!isServiceAllowed) {
     return (
@@ -64,11 +70,16 @@ export const NoPermissionsTooltip = ({
 
 function getRestrictionReasonLabel(
   canEditSynthetics = true,
-  canUsePublicLocations = true
+  canUsePublicLocations = true,
+  canManagePrivateLocations = true
 ): string | undefined {
   const message = !canEditSynthetics ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined;
   if (message) {
     return message;
+  }
+
+  if (!canManagePrivateLocations) {
+    return NEED_PERMISSIONS_PRIVATE_LOCATIONS;
   }
 
   return !canUsePublicLocations ? CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS : undefined;

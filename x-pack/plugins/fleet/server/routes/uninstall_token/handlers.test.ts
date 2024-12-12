@@ -10,7 +10,10 @@ import type { KibanaRequest, VersionedRouter } from '@kbn/core-http-server';
 import { httpServerMock, coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 
-import { makeRouterWithFleetAuthz } from '../../services/security/fleet_router';
+import {
+  makeRouterWithFleetAuthz,
+  withDefaultErrorHandler,
+} from '../../services/security/fleet_router';
 import type { FleetAuthzRouter } from '../../services/security/types';
 
 import type {
@@ -40,6 +43,11 @@ import { createAgentPolicyMock } from '../../../common/mocks';
 import { registerRoutes } from '.';
 
 import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
+
+const getUninstallTokenHandlerWithErrorHandler = withDefaultErrorHandler(getUninstallTokenHandler);
+const getUninstallTokensMetadataHandlerWithErrorHandler = withDefaultErrorHandler(
+  getUninstallTokensMetadataHandler
+);
 
 jest.mock('../../services/agent_policy');
 
@@ -113,7 +121,7 @@ describe('uninstall token handlers', () => {
     it('should return uninstall tokens for all policies', async () => {
       getTokenMetadataMock.mockResolvedValue(uninstallTokensResponseFixture);
 
-      await getUninstallTokensMetadataHandler(context, request, response);
+      await getUninstallTokensMetadataHandlerWithErrorHandler(context, request, response);
 
       expect(response.ok).toHaveBeenCalledWith({
         body: uninstallTokensResponseFixture,
@@ -127,7 +135,7 @@ describe('uninstall token handlers', () => {
     it('should return internal error when uninstallTokenService throws error', async () => {
       getTokenMetadataMock.mockRejectedValue(Error('something happened'));
 
-      await getUninstallTokensMetadataHandler(context, request, response);
+      await getUninstallTokensMetadataHandlerWithErrorHandler(context, request, response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -164,7 +172,7 @@ describe('uninstall token handlers', () => {
     it('should return requested uninstall token', async () => {
       getTokenMock.mockResolvedValue(uninstallTokenFixture);
 
-      await getUninstallTokenHandler(context, request, response);
+      await getUninstallTokenHandlerWithErrorHandler(context, request, response);
 
       expect(getTokenMock).toHaveBeenCalledWith(uninstallTokenFixture.id);
       expect(response.ok).toHaveBeenCalledWith({
@@ -181,7 +189,7 @@ describe('uninstall token handlers', () => {
     it('should return internal error when uninstallTokenService throws error', async () => {
       getTokenMock.mockRejectedValue(Error('something happened'));
 
-      await getUninstallTokenHandler(context, request, response);
+      await getUninstallTokenHandlerWithErrorHandler(context, request, response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,

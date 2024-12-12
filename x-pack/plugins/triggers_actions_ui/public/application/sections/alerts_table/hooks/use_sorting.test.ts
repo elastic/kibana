@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { useSorting } from './use_sorting';
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 
 describe('useSorting', () => {
   const onSortChange = jest.fn();

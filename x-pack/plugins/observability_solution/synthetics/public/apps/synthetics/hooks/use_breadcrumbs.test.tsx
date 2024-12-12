@@ -63,6 +63,7 @@ describe('useBreadcrumbs', () => {
               setBreadcrumbs: core.chrome.setBreadcrumbs,
               isInfraAvailable: false,
               isLogsAvailable: false,
+              canManagePrivateLocations: false,
             }}
           >
             <Component />

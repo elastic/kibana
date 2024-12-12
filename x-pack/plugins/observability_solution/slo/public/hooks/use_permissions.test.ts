@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import { useFetchSloGlobalDiagnosis } from './use_fetch_global_diagnosis';
 import { usePermissions } from './use_permissions';
 
-jest.mock('../utils/kibana_react');
+jest.mock('./use_kibana');
 jest.mock('./use_fetch_global_diagnosis');
 
 const useKibanaMock = useKibana as jest.Mock;

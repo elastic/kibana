@@ -7,11 +7,11 @@
 
 import { groupBy, isObject } from 'lodash';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getDataFromFieldsHits } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { ThreatDetailsRow } from '../../left/components/threat_details_view_enrichment_accordion';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
 import { isValidEventField } from '../../../../../common/search_strategy';
-import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   ENRICHMENT_DESTINATION_PATH,

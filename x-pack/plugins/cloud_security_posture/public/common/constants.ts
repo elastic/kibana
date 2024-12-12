@@ -16,15 +16,11 @@ import {
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
   VULN_MGMT_POLICY_TEMPLATE,
-  CLOUDBEAT_VULN_MGMT_GCP,
-  CLOUDBEAT_VULN_MGMT_AZURE,
   CLOUDBEAT_AKS,
   CLOUDBEAT_GKE,
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
-import aksLogo from '../assets/icons/cis_aks_logo.svg';
-import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
@@ -145,34 +141,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         }),
         testId: 'cisEksTestId',
       },
-      {
-        type: CLOUDBEAT_AKS,
-        name: i18n.translate('xpack.csp.kspmIntegration.aksOption.nameTitle', {
-          defaultMessage: 'AKS',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.aksOption.benchmarkTitle', {
-          defaultMessage: 'CIS AKS',
-        }),
-        disabled: true,
-        icon: aksLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.aksOption.tooltipContent', {
-          defaultMessage: 'Azure Kubernetes Service - Coming soon',
-        }),
-      },
-      {
-        type: CLOUDBEAT_GKE,
-        name: i18n.translate('xpack.csp.kspmIntegration.gkeOption.nameTitle', {
-          defaultMessage: 'GKE',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.gkeOption.benchmarkTitle', {
-          defaultMessage: 'CIS GKE',
-        }),
-        disabled: true,
-        icon: gkeLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.gkeOption.tooltipContent', {
-          defaultMessage: 'Google Kubernetes Engine - Coming soon',
-        }),
-      },
     ],
   },
   vuln_mgmt: {
@@ -186,30 +154,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'Amazon Web Services',
         }),
         icon: 'logoAWS',
-        benchmark: 'N/A', // TODO: change benchmark to be optional
-      },
-      {
-        type: CLOUDBEAT_VULN_MGMT_GCP,
-        name: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.nameTitle', {
-          defaultMessage: 'GCP',
-        }),
-        disabled: true,
-        icon: googleCloudLogo,
-        tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.gcpOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
-        benchmark: 'N/A', // TODO: change benchmark to be optional
-      },
-      {
-        type: CLOUDBEAT_VULN_MGMT_AZURE,
-        name: i18n.translate('xpack.csp.vulnMgmtIntegration.azureOption.nameTitle', {
-          defaultMessage: 'Azure',
-        }),
-        disabled: true,
-        icon: 'logoAzure',
-        tooltip: i18n.translate('xpack.csp.vulnMgmtIntegration.azureOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
         benchmark: 'N/A', // TODO: change benchmark to be optional
       },
     ],

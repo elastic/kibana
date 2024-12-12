@@ -65,7 +65,7 @@ const fleetAgentsRoute = createApmServerRoute({
 
 const saveApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write'], access: 'public' },
+  options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({
       schema: t.record(t.string, t.unknown),

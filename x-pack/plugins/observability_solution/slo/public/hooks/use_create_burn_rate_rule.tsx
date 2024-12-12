@@ -16,7 +16,7 @@ import type {
 } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 export function useCreateRule<Params extends RuleTypeParams = never>() {
   const {

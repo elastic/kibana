@@ -39,7 +39,10 @@ import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
-import type { CustomPackageDatasetConfiguration, EnsurePackageResult } from './packages/install';
+import {
+  type CustomPackageDatasetConfiguration,
+  type EnsurePackageResult,
+} from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
@@ -53,9 +56,11 @@ import {
   getPackages,
   installPackage,
   getTemplateInputs,
+  getPackageInfo,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
+import { createArchiveIteratorFromMap } from './archive/archive_iterator';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -108,6 +113,11 @@ export interface PackageClient {
     params: Parameters<typeof getPackageFieldsMetadata>['0'],
     options?: Parameters<typeof getPackageFieldsMetadata>['1']
   ): ReturnType<typeof getPackageFieldsMetadata>;
+
+  getLatestPackageInfo(
+    packageName: string,
+    prerelease?: boolean
+  ): ReturnType<typeof getPackageInfo>;
 
   getPackages(params?: {
     excludeInstallStatus?: false;
@@ -324,6 +334,16 @@ class PackageClientImpl implements PackageClient {
     return getPackageFieldsMetadata(params, options);
   }
 
+  public async getLatestPackageInfo(packageName: string, prerelease?: boolean) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+    return getPackageInfo({
+      savedObjectsClient: this.internalSoClient,
+      pkgName: packageName,
+      pkgVersion: '',
+      prerelease,
+    });
+  }
+
   public async getPackages(params?: {
     excludeInstallStatus?: false;
     category?: CategoryId;
@@ -381,12 +401,14 @@ class PackageClientImpl implements PackageClient {
     }
 
     const { assetsMap } = esPackage;
+    const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
     const { installedTransforms } = await installTransforms({
       packageInstallContext: {
         assetsMap,
         packageInfo,
         paths,
+        archiveIterator,
       },
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,

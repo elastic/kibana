@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/alerts-ui-shared",
-  "owner": "@elastic/response-ops"
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

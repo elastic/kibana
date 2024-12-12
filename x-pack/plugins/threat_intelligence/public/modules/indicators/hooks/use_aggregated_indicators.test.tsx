@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useAggregatedIndicators, UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
 import { mockedTimefilterService, TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
@@ -47,7 +47,7 @@ describe('useAggregatedIndicators()', () => {
   it('should create and call the aggregatedIndicatorsQuery correctly', async () => {
     aggregatedIndicatorsQuery.mockResolvedValue([]);
 
-    const { result, rerender, waitFor } = renderUseAggregatedIndicators();
+    const { result, rerender } = renderUseAggregatedIndicators();
 
     // indicators service and the query should be called just once
     expect(
@@ -81,7 +81,7 @@ describe('useAggregatedIndicators()', () => {
       expect.any(AbortSignal)
     );
 
-    await waitFor(() => !result.current.isLoading);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current).toMatchInlineSnapshot(`
       Object {

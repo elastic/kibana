@@ -112,7 +112,6 @@ export const getDataTableFactory = (
                       dataView={dataView}
                       sampleSizeState={100}
                       columns={fields ?? []}
-                      useNewFieldsApi={true}
                       services={allServices}
                       onSetColumns={() => {}}
                       ariaLabelledBy="dataTableReactEmbeddableAria"

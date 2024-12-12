@@ -1,6 +1,10 @@
 {
   "type": "shared-browser",
   "id": "@kbn/core-chrome-browser-mocks",
-  "devOnly": true,
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
 }

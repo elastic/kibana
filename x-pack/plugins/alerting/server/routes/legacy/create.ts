@@ -49,6 +49,7 @@ export const createAlertRoute = ({
   licenseState,
   usageCounter,
   isServerless,
+  docLinks,
 }: RouteOptions) => {
   router.post(
     {
@@ -65,8 +66,15 @@ export const createAlertRoute = ({
         access: isServerless ? 'internal' : 'public',
         summary: 'Create an alert',
         tags: ['oas-tag:alerting'],
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: '/api/alerting/rule/{id?}',
+          },
+        },
       },
     },
     handleDisabledApiKeysError(
@@ -76,7 +84,9 @@ export const createAlertRoute = ({
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const rulesClient = (await context.alerting).getRulesClient();
+
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;
