@@ -9,14 +9,18 @@ import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import type { CasesClient } from './client';
 
 export const getAvailableObservableTypesSet = async (casesClient: CasesClient, owner: string) => {
-  const configurations = await casesClient.configure.get({
-    owner,
-  });
-  const observableTypes = configurations?.[0]?.observableTypes ?? [];
+  try {
+    const configurations = await casesClient.configure.get({
+      owner,
+    });
+    const observableTypes = configurations?.[0]?.observableTypes ?? [];
 
-  const availableObservableTypesSet = new Set(
-    [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN].map(({ key }) => key)
-  );
+    const availableObservableTypesSet = new Set(
+      [...observableTypes, ...OBSERVABLE_TYPES_BUILTIN].map(({ key }) => key)
+    );
 
-  return availableObservableTypesSet;
+    return availableObservableTypesSet;
+  } catch (error) {
+    return new Set<string>();
+  }
 };

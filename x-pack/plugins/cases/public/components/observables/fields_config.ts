@@ -114,6 +114,11 @@ export const urlValidator = (...args: Parameters<ValidationFunc>) => {
 
 export const emailValidator = (...args: Parameters<ValidationFunc>) => {
   const [{ value, path }] = args;
+
+  if (typeof value !== 'string') {
+    return notStringError(path);
+  }
+
   const emailAddresses = parseAddressList(value as string);
 
   if (emailAddresses == null) {

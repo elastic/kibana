@@ -66,12 +66,10 @@ describe('usePostObservables', () => {
 
     await waitForNextUpdate();
 
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
   });
 
-  it('does not show a success toaster', async () => {
+  it('does shows a success toaster', async () => {
     const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
@@ -82,7 +80,7 @@ describe('usePostObservables', () => {
 
     await waitForNextUpdate();
 
-    expect(addSuccess).not.toHaveBeenCalled();
+    expect(addSuccess).toHaveBeenCalled();
   });
 
   it('shows a toast error when the api return an error', async () => {

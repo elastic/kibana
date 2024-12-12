@@ -29,7 +29,7 @@ describe('emailValidator', () => {
     } as Parameters<ValidationFunc>[0]);
     expect(result).toEqual({
       code: 'ERR_NOT_EMAIL',
-      message: 'Value should be an email',
+      message: 'Value should be a valid email',
       path: 'email',
     });
   });

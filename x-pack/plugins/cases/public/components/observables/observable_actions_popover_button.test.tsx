@@ -129,9 +129,9 @@ describe('ObservableActionsPopoverButton', () => {
       });
     });
 
-    it('delete button is not rendered if user has no delete permission', async () => {
+    it('delete button is not rendered if user has no update permission', async () => {
       appMockRender = createAppMockRenderer({
-        permissions: buildCasesPermissions({ delete: false }),
+        permissions: buildCasesPermissions({ update: false }),
       });
 
       appMockRender.render(
