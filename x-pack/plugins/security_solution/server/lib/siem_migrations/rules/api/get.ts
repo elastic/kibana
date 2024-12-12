@@ -45,13 +45,14 @@ export const registerSiemRuleMigrationsGetRoute = (
           sort_field: sortField,
           sort_direction: sortDirection,
           search_term: searchTerm,
+          ids,
         } = req.query;
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
           const options: RuleMigrationGetOptions = {
-            filters: { searchTerm },
+            filters: { searchTerm, ids },
             sort: { sortField, sortDirection },
             size: perPage,
             from: page && perPage ? page * perPage : 0,

@@ -13,3 +13,10 @@ export const RULE_STATUS_INSTALLED = i18n.translate(
     defaultMessage: 'Installed',
   }
 );
+
+export const RULE_STATUS_FAILED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.status.failedLabel',
+  {
+    defaultMessage: 'Error',
+  }
+);

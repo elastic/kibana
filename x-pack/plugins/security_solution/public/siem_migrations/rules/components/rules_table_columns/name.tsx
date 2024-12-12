@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
@@ -17,6 +17,13 @@ interface NameProps {
 }
 
 const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
+  if (!rule.elastic_rule) {
+    return (
+      <EuiText color="danger" size="s">
+        {rule.original_rule.title}
+      </EuiText>
+    );
+  }
   return (
     <EuiLink
       onClick={() => {
@@ -24,7 +31,7 @@ const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
       }}
       data-test-subj="ruleName"
     >
-      {rule.elastic_rule?.title}
+      {rule.elastic_rule.title}
     </EuiLink>
   );
 };

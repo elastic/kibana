@@ -7,13 +7,13 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { UpdateRuleMigrationData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { performTimelinesInstallation } from '../../../../detection_engine/prebuilt_rules/logic/perform_timelines_installation';
 import { createPrebuiltRules } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules';
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import type { UpdateRuleMigrationInput } from '../../data/rule_migrations_data_rules_client';
 import type { StoredRuleMigration } from '../../types';
 import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
 import {
@@ -32,7 +32,7 @@ const installPrebuiltRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   detectionRulesClient: IDetectionRulesClient
-): Promise<UpdateRuleMigrationInput[]> => {
+): Promise<UpdateRuleMigrationData[]> => {
   // Get required prebuilt rules
   const prebuiltRulesIds = getUniquePrebuiltRuleIds(rulesToInstall);
   const prebuiltRules = await getPrebuiltRules(rulesClient, savedObjectsClient, prebuiltRulesIds);
@@ -66,7 +66,7 @@ const installPrebuiltRules = async (
   ];
 
   // Create migration rules updates templates
-  const rulesToUpdate: UpdateRuleMigrationInput[] = [];
+  const rulesToUpdate: UpdateRuleMigrationData[] = [];
   installedRules.forEach((installedRule) => {
     const filteredRules = rulesToInstall.filter(
       (rule) => rule.elastic_rule?.prebuilt_rule_id === installedRule.rule_id
@@ -89,8 +89,8 @@ export const installCustomRules = async (
   enabled: boolean,
   detectionRulesClient: IDetectionRulesClient,
   logger: Logger
-): Promise<UpdateRuleMigrationInput[]> => {
-  const rulesToUpdate: UpdateRuleMigrationInput[] = [];
+): Promise<UpdateRuleMigrationData[]> => {
+  const rulesToUpdate: UpdateRuleMigrationData[] = [];
   const createCustomRulesOutcome = await initPromisePool({
     concurrency: MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL,
     items: rulesToInstall,
@@ -211,10 +211,7 @@ export const installTranslated = async ({
     logger
   );
 
-  const rulesToUpdate: UpdateRuleMigrationInput[] = [
-    ...updatedPrebuiltRules,
-    ...updatedCustomRules,
-  ];
+  const rulesToUpdate: UpdateRuleMigrationData[] = [...updatedPrebuiltRules, ...updatedCustomRules];
 
   if (rulesToUpdate.length) {
     await ruleMigrationsClient.data.rules.update(rulesToUpdate);

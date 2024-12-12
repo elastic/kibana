@@ -8,7 +8,6 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
 import type {
   PrebuiltRuleVersion,
   RuleMigration,
@@ -16,7 +15,9 @@ import type {
 import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
 
 interface UseMigrationRuleDetailsFlyoutParams {
+  isLoading?: boolean;
   prebuiltRules: Record<string, PrebuiltRuleVersion>;
+  getMigrationRule: (ruleId: string) => RuleMigration | undefined;
   ruleActionsFactory: (ruleMigration: RuleMigration, closeRulePreview: () => void) => ReactNode;
   extraTabsFactory?: (ruleMigration: RuleMigration) => EuiTabbedContentTab[];
 }
@@ -28,13 +29,34 @@ interface UseMigrationRuleDetailsFlyoutResult {
 }
 
 export function useMigrationRuleDetailsFlyout({
+  isLoading,
   prebuiltRules,
+  getMigrationRule,
   extraTabsFactory,
   ruleActionsFactory,
 }: UseMigrationRuleDetailsFlyoutParams): UseMigrationRuleDetailsFlyoutResult {
-  const [ruleMigration, setMigrationRuleForPreview] = useState<RuleMigration | undefined>();
-  const [matchedPrebuiltRule, setMatchedPrebuiltRule] = useState<RuleResponse | undefined>();
-  const closeMigrationRuleDetails = useCallback(() => setMigrationRuleForPreview(undefined), []);
+  const [migrationRuleId, setMigrationRuleId] = useState<string | undefined>();
+
+  const ruleMigration = useMemo(() => {
+    if (migrationRuleId) {
+      return getMigrationRule(migrationRuleId);
+    }
+  }, [getMigrationRule, migrationRuleId]);
+  const matchedPrebuiltRule = useMemo(() => {
+    if (ruleMigration) {
+      // Find matched prebuilt rule if any and prioritize its installed version
+      const matchedPrebuiltRuleVersion = ruleMigration.elastic_rule?.prebuilt_rule_id
+        ? prebuiltRules[ruleMigration.elastic_rule.prebuilt_rule_id]
+        : undefined;
+      return matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
+    }
+  }, [prebuiltRules, ruleMigration]);
+
+  const openMigrationRuleDetails = useCallback((rule: RuleMigration) => {
+    setMigrationRuleId(rule.id);
+  }, []);
+  const closeMigrationRuleDetails = useCallback(() => setMigrationRuleId(undefined), []);
+
   const ruleActions = useMemo(
     () => ruleMigration && ruleActionsFactory(ruleMigration, closeMigrationRuleDetails),
     [ruleMigration, ruleActionsFactory, closeMigrationRuleDetails]
@@ -42,21 +64,6 @@ export function useMigrationRuleDetailsFlyout({
   const extraTabs = useMemo(
     () => (ruleMigration && extraTabsFactory ? extraTabsFactory(ruleMigration) : []),
     [ruleMigration, extraTabsFactory]
-  );
-
-  const openMigrationRuleDetails = useCallback(
-    (rule: RuleMigration) => {
-      setMigrationRuleForPreview(rule);
-
-      // Find matched prebuilt rule if any and prioritize its installed version
-      const matchedPrebuiltRuleVersion = rule.elastic_rule?.prebuilt_rule_id
-        ? prebuiltRules[rule.elastic_rule.prebuilt_rule_id]
-        : undefined;
-      const prebuiltRule =
-        matchedPrebuiltRuleVersion?.current ?? matchedPrebuiltRuleVersion?.target;
-      setMatchedPrebuiltRule(prebuiltRule);
-    },
-    [prebuiltRules]
   );
 
   return {
@@ -68,6 +75,7 @@ export function useMigrationRuleDetailsFlyout({
         closeFlyout={closeMigrationRuleDetails}
         ruleActions={ruleActions}
         extraTabs={extraTabs}
+        isDataLoading={isLoading}
       />
     ),
     openMigrationRuleDetails,

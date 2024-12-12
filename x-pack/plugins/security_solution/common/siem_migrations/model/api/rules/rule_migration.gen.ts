@@ -17,11 +17,8 @@
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
-import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
-  ElasticRulePartial,
-  RuleMigrationTranslationResult,
-  RuleMigrationComments,
+  UpdateRuleMigrationData,
   RuleMigrationTaskStats,
   OriginalRule,
   RuleMigration,
@@ -31,6 +28,7 @@ import {
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
+import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
 export type CreateRuleMigrationRequestParams = z.infer<typeof CreateRuleMigrationRequestParams>;
@@ -62,6 +60,7 @@ export const GetRuleMigrationRequestQuery = z.object({
   sort_field: NonEmptyString.optional(),
   sort_direction: z.enum(['asc', 'desc']).optional(),
   search_term: z.string().optional(),
+  ids: ArrayFromString(NonEmptyString).optional(),
 });
 export type GetRuleMigrationRequestQueryInput = z.input<typeof GetRuleMigrationRequestQuery>;
 
@@ -251,26 +250,7 @@ export const StopRuleMigrationResponse = z.object({
 });
 
 export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
-export const UpdateRuleMigrationRequestBody = z.array(
-  z.object({
-    /**
-     * The rule migration id
-     */
-    id: NonEmptyString,
-    /**
-     * The migrated elastic rule attributes to update.
-     */
-    elastic_rule: ElasticRulePartial.optional(),
-    /**
-     * The rule translation result.
-     */
-    translation_result: RuleMigrationTranslationResult.optional(),
-    /**
-     * The comments for the migration including a summary from the LLM in markdown.
-     */
-    comments: RuleMigrationComments.optional(),
-  })
-);
+export const UpdateRuleMigrationRequestBody = z.array(UpdateRuleMigrationData);
 export type UpdateRuleMigrationRequestBodyInput = z.input<typeof UpdateRuleMigrationRequestBody>;
 
 export type UpdateRuleMigrationResponse = z.infer<typeof UpdateRuleMigrationResponse>;

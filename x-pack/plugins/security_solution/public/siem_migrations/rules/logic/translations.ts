@@ -34,3 +34,10 @@ export const INSTALL_MIGRATION_RULES_FAILURE = i18n.translate(
     defaultMessage: 'Failed to install migration rules',
   }
 );
+
+export const UPDATE_MIGRATION_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.updateMigrationRulesFailDescription',
+  {
+    defaultMessage: 'Failed to update migration rules',
+  }
+);
