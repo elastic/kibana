@@ -449,7 +449,7 @@
     "@kbn/deeplinks-security": "link:packages/deeplinks/security",
     "@kbn/deeplinks-shared": "link:packages/deeplinks/shared",
     "@kbn/default-nav-analytics": "link:packages/default-nav/analytics",
-    "@kbn/default-nav-devtools": "link:packages/default-nav/devtools",
+    "@kbn/default-nav-devtools": "link:src/platform/packages/private/default-nav/devtools",
     "@kbn/default-nav-management": "link:packages/default-nav/management",
     "@kbn/default-nav-ml": "link:src/platform/packages/private/default-nav/ml",
     "@kbn/dev-tools-plugin": "link:src/plugins/dev_tools",

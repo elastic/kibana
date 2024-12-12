@@ -60,7 +60,7 @@ export enum ExternalPageName {
   mlLogPatternAnalysis = 'ml:logPatternAnalysis',
   mlChangePointDetections = 'ml:changePointDetections',
   // Dev Tools
-  // Ref: packages/default-nav/devtools/default_navigation.ts
+  // Ref: src/platform/packages/private/default-nav/devtools/default_navigation.ts
   devTools = 'dev_tools:',
   // Fleet
   // Ref: x-pack/plugins/fleet/public/deep_links.ts
