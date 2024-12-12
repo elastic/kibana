@@ -6,7 +6,7 @@
  */
 
 import { PropsOf } from '@elastic/eui';
-import { Meta, StoryFn } from '@storybook/react/types-6-0';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
 import { DataSearchErrorCallout } from './data_search_error_callout';
