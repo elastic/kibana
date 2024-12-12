@@ -10,7 +10,9 @@
 import simpleGit from 'simple-git';
 import fs from 'fs';
 import path from 'path';
+
 import { run } from '@kbn/dev-cli-runner';
+import { getOwningTeamsForPath, getCodeOwnersEntries } from '@kbn/code-owners';
 
 const git = simpleGit();
 
@@ -36,15 +38,16 @@ run(async ({ flags, log }) => {
   const owners: Record<string, string[]> = {};
 
   const codeOwnersEntries = getCodeOwnersEntries();
+
   const getOwner = (file: string) => {
-    const owners = getOwningTeamsForPath(file, codeOwnersEntries);
-  
-    if (owners.length === 0) {
+    const teams = getOwningTeamsForPath(file, codeOwnersEntries);
+
+    if (teams.length === 0) {
       log.warning(`No owner found for ${file}`);
       return null;
     }
-  
-    return owners.join(',');
+
+    return teams.join(',');
   };
 
   for (const file of changedFiles) {
@@ -54,7 +57,7 @@ run(async ({ flags, log }) => {
       owners[fileOwner] = [...(owners[fileOwner] || []), file];
     }
 
-    if (owner && fileOwner === owner) {
+    if (owner && fileOwner.contains(owner)) {
       await git.add(file);
       log.info(`Staged ${file}`);
     }
