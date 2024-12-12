@@ -127,6 +127,48 @@ describe('registerDataStreamsRoute', () => {
     });
   });
 
+  it('should not include `dot` indices/data streams that start with a `.`', async () => {
+    mockGetMeteringStats.mockResolvedValue({
+      datastreams: [
+        {
+          name: 'ds-1',
+          size_in_bytes: 100,
+        },
+        {
+          name: '.ds-2',
+          size_in_bytes: 200,
+        },
+        {
+          name: 'ds-3',
+          size_in_bytes: 500,
+        },
+        {
+          name: '.ds-4',
+          size_in_bytes: 0,
+        },
+      ],
+    });
+    const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRouter = mockCore.http.createRouter.mock.results[0].value;
+    const [[, handler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
+    await handler(context, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    expect(mockResponse.ok.mock.calls[0][0]).toEqual({
+      body: [
+        {
+          name: 'ds-3',
+          storageSizeBytes: 500,
+        },
+        {
+          name: 'ds-1',
+          storageSizeBytes: 100,
+        },
+      ],
+    });
+  });
+
   it('should return correct error if metering stats request fails with an unknown error', async () => {
     // using custom error for test here to avoid having to import the actual error class
     mockGetMeteringStats.mockRejectedValue(
@@ -178,9 +220,9 @@ describe('registerDataStreamsRoute', () => {
   });
 
   it.each([
-    ['no datastreams', {}, []],
-    ['empty array', { datastreams: [] }, []],
-    ['an empty element', { datastreams: [{}] }, []],
+    ['no datastreams key in response', { indices: [] }, []],
+    ['empty datastreams array', { indices: [], datastreams: [] }, []],
+    ['an empty element', { indices: [], datastreams: [{}] }, []],
   ])('should return empty array when no stats data with %s', async (_, stats, res) => {
     mockGetMeteringStats.mockResolvedValue(stats);
     const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
@@ -189,9 +231,18 @@ describe('registerDataStreamsRoute', () => {
     const [[, handler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
     await handler(context, mockRequest, mockResponse);
 
-    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
-    expect(mockResponse.ok.mock.calls[0][0]).toEqual({
-      body: res,
-    });
+    // @ts-expect-error
+    if (stats && stats.datastreams && stats.datastreams.length) {
+      expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+      expect(mockResponse.ok.mock.calls[0][0]).toEqual({
+        body: res,
+      });
+    } else {
+      expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        body: new CustomHttpRequestError('No user defined data streams found', 404),
+        statusCode: 404,
+      });
+    }
   });
 });
