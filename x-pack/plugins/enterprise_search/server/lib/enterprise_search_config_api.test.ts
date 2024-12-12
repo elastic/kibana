@@ -33,6 +33,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     accessCheckTimeoutWarning: 100,
     hasNativeConnectors: true,
     hasWebCrawler: true,
+    appsDisabled: false,
   };
   const mockRequest = {
     headers: { authorization: '==someAuth' },
@@ -276,6 +277,45 @@ describe('callEnterpriseSearchConfigAPI', () => {
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
       "Exceeded 200ms timeout while checking http://localhost:3002. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses."
     );
+  });
+
+  it('handles config.appsDisabled', async () => {
+    const mockedResponse = {
+      ...mockResponse,
+      current_user: {
+        ...mockResponse.current_user,
+        access: {
+          app_search: true,
+          workplace_search: true,
+        },
+      },
+    };
+    (fetch as unknown as jest.Mock).mockImplementationOnce((url: string) => {
+      expect(url).toEqual('http://localhost:3002/api/ent/v2/internal/client_config');
+      return Promise.resolve(new Response(JSON.stringify(mockedResponse)));
+    });
+
+    const dependencies = {
+      ...mockDependencies,
+      config: {
+        ...mockDependencies.config,
+        appsDisabled: true,
+      },
+    };
+
+    expect(await callEnterpriseSearchConfigAPI(dependencies)).toEqual({
+      ...DEFAULT_INITIAL_APP_DATA,
+      kibanaVersion: '1.0.0',
+      access: {
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: true,
+        hasWebCrawler: true,
+      },
+      publicUrl: 'http://some.vanity.url',
+    });
   });
 
   describe('warnMismatchedVersions', () => {
