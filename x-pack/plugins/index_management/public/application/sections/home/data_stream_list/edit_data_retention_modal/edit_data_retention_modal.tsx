@@ -179,7 +179,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       (ds: DataStream) =>
         formData.dataRetention &&
         formData.timeUnit &&
-        ((ds.lifecycle?.data_retention &&
+        ((typeof ds.lifecycle?.data_retention === 'string' &&
           isRetentionBiggerThan(
             ds.lifecycle.data_retention,
             `${formData.dataRetention}${formData.timeUnit}`
