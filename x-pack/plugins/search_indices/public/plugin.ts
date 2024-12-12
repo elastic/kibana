@@ -23,7 +23,6 @@ import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
   START_APP_BASE,
-  SearchIndexDetailsTabValues,
 } from './routes';
 import { registerLocators } from './locators';
 
@@ -94,22 +93,12 @@ export class SearchIndicesPlugin
   }
 
   public start(
-    core: CoreStart,
-    deps: SearchIndicesAppPluginStartDependencies
+    core: CoreStart
   ): SearchIndicesPluginStart {
-    const { indexManagement } = deps;
     docLinks.setDocLinks(core.docLinks.links);
-    if (this.pluginEnabled) {
-      indexManagement?.extensionsService.setIndexDetailsPageRoute({
-        renderRoute: (indexName, detailsTabId) => {
-          const route = `/app/elasticsearch/indices/index_details/${indexName}`;
-          if (detailsTabId && SearchIndexDetailsTabValues.includes(detailsTabId)) {
-            return `${route}/${detailsTabId}`;
-          }
-          return route;
-        },
-      });
-    }
+    // if (this.pluginEnabled) {
+
+    // }
     return {
       enabled: this.pluginEnabled,
       startAppId: START_APP_ID,

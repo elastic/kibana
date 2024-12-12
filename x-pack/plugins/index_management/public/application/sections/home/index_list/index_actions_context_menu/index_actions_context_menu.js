@@ -50,7 +50,8 @@ export class IndexActionsContextMenu extends Component {
   panels() {
     const {
       services: { extensionsService },
-      core: { getUrlForApp, application, http },
+      core: { getUrlForApp, application, http, chrome },
+      plugins : { share },
       history,
       config: { enableIndexActions },
     } = this.context;
@@ -86,9 +87,10 @@ export class IndexActionsContextMenu extends Component {
           navigateToIndexDetailsPage(
             indexNames[0],
             indicesListURLParams,
-            extensionsService,
             application,
             http,
+            share,
+            chrome,
             IndexDetailsSection.Overview
           );
         },
@@ -102,9 +104,10 @@ export class IndexActionsContextMenu extends Component {
           navigateToIndexDetailsPage(
             indexNames[0],
             indicesListURLParams,
-            extensionsService,
             application,
             http,
+            share,
+            chrome,
             IndexDetailsSection.Settings
           );
         },
@@ -118,9 +121,10 @@ export class IndexActionsContextMenu extends Component {
           navigateToIndexDetailsPage(
             indexNames[0],
             indicesListURLParams,
-            extensionsService,
             application,
             http,
+            share,
+            chrome,
             IndexDetailsSection.Mappings
           );
         },

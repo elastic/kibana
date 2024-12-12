@@ -59,7 +59,10 @@ const getColumnConfigs = ({
   location,
   application,
   http,
+  share,
+  chrome
 }) => {
+
   const columns = [
     {
       fieldName: 'name',
@@ -76,9 +79,10 @@ const getColumnConfigs = ({
                 navigateToIndexDetailsPage(
                   index.name,
                   location.search || '',
-                  extensionsService,
                   application,
-                  http
+                  http,
+                  share,
+                  chrome
                 );
               }}
             >
@@ -570,7 +574,7 @@ export class IndexTable extends Component {
       <AppContextConsumer>
         {({ services, config, core, plugins }) => {
           const { extensionsService } = services;
-          const { application, http } = core;
+          const { application, http, chrome } = core;
           const { share } = plugins;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
@@ -581,6 +585,8 @@ export class IndexTable extends Component {
             location,
             application,
             http,
+            share,
+            chrome
           });
           const columnsCount = columnConfigs.length + 1;
           return (
