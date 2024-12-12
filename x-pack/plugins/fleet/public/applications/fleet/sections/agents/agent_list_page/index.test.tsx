@@ -69,6 +69,12 @@ jest.mock('../../../hooks', () => ({
     cloud: {},
     data: { dataViews: { getFieldsForWildcard: jest.fn() } },
     docLinks: { links: { kibana: { secureSavedObject: 'my-link' } } },
+    uiSettings: {
+      get: jest.fn(),
+    },
+    storage: {
+      get: jest.fn(),
+    },
   }),
   useBreadcrumbs: jest.fn(),
   useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
