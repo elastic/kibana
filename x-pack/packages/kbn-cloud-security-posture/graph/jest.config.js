@@ -9,6 +9,10 @@ module.exports = {
   preset: '@kbn/test',
   roots: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture/graph'],
   rootDir: '../../../..',
+  transform: {
+    '^.+\\.(js|tsx?)$':
+      '<rootDir>/x-pack/packages/kbn-cloud-security-posture/storybook/config/babel_with_emotion.ts',
+  },
   setupFiles: ['jest-canvas-mock'],
   setupFilesAfterEnv: ['<rootDir>/x-pack/packages/kbn-cloud-security-posture/graph/setup_tests.ts'],
 };

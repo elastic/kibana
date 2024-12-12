@@ -50,6 +50,10 @@ export const layoutGraph = (
       nodesById[node.id] = node;
     }
 
+    if (node.parentId) {
+      return;
+    }
+
     g.setNode(node.id, {
       ...node,
       ...size,
@@ -59,6 +63,14 @@ export const layoutGraph = (
   Dagre.layout(g);
 
   const layoutedNodes = nodes.map((node) => {
+    // For grouped nodes, we want to keep the original position relative to the parent
+    if (node.data.shape === 'label' && node.data.parentId) {
+      return {
+        ...node,
+        position: nodesById[node.data.id].position,
+      };
+    }
+
     const dagreNode = g.node(node.data.id);
 
     // We are shifting the dagre node position (anchor=center center) to the top left
@@ -66,13 +78,7 @@ export const layoutGraph = (
     const x = dagreNode.x - (dagreNode.width ?? 0) / 2;
     const y = dagreNode.y - (dagreNode.height ?? 0) / 2;
 
-    // For grouped nodes, we want to keep the original position relative to the parent
-    if (node.data.shape === 'label' && node.data.parentId) {
-      return {
-        ...node,
-        position: nodesById[node.data.id].position,
-      };
-    } else if (node.data.shape === 'group') {
+    if (node.data.shape === 'group') {
       return {
         ...node,
         position: { x, y },
@@ -130,7 +136,7 @@ const layoutGroupChildren = (
     const childSize = calcLabelSize(child.data.label);
     child.position = {
       x: groupNodeWidth / 2 - childSize.width / 2,
-      y: index * (childSize.height * 2 + space),
+      y: index * (childSize.height + space),
     };
   });
 
