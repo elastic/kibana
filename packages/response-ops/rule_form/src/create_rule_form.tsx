@@ -64,7 +64,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     onSubmit,
   } = props;
 
-  const { http, docLinks, notifications, ruleTypeRegistry, i18n, theme } = plugins;
+  const { http, docLinks, notifications, ruleTypeRegistry, ...deps } = plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useCreateRule({
@@ -82,7 +82,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         ...(message.details && {
           text: toMountPoint(
             <RuleFormCircuitBreakerError>{message.details}</RuleFormCircuitBreakerError>,
-            { i18n, theme }
+            deps
           ),
         }),
       });

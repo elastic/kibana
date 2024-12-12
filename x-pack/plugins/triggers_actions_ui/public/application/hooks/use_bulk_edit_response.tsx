@@ -65,6 +65,7 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
   const {
     i18n: i18nStart,
     theme,
+    userProfile,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -124,7 +125,11 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
       if (numberOfErrors === total) {
         toasts.addDanger({
           title: failureMessage(numberOfErrors, translationMap[property]),
-          text: toMountPoint(renderToastErrorBody(response), { i18n: i18nStart, theme }),
+          text: toMountPoint(renderToastErrorBody(response), {
+            i18n: i18nStart,
+            theme,
+            userProfile,
+          }),
         });
         return;
       }
@@ -132,10 +137,10 @@ export function useBulkEditResponse(props: UseBulkEditResponseProps) {
       // Some failure
       toasts.addWarning({
         title: someSuccessMessage(numberOfSuccess, numberOfErrors, translationMap[property]),
-        text: toMountPoint(renderToastErrorBody(response), { i18n: i18nStart, theme }),
+        text: toMountPoint(renderToastErrorBody(response), { i18n: i18nStart, theme, userProfile }),
       });
     },
-    [i18nStart, theme, toasts, renderToastErrorBody]
+    [i18nStart, theme, userProfile, toasts, renderToastErrorBody]
   );
 
   return useMemo(() => {

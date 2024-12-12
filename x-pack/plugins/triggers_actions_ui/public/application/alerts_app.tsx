@@ -27,11 +27,11 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, i18n, theme } = deps;
+  const { dataViews } = deps;
 
   setDataViewsService(dataViews);
   return (
-    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+    <KibanaRenderContextProvider {...deps}>
       <KibanaContextProvider services={{ ...deps }}>
         <Router history={deps.history}>
           <Routes>

@@ -99,7 +99,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   };
 
   return (
-    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+    <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
           <CasesProvider value={casesProviderValue} queryClient={queryClient}>
@@ -178,7 +178,7 @@ export const createAppMockRenderer = ({
     getFilesClient,
   };
   const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+    <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={services}>
         <MemoryRouter>
           <CasesProvider value={casesProviderValue} queryClient={queryClient}>
