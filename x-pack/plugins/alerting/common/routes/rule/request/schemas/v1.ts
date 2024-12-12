@@ -11,7 +11,17 @@ import { validateSnoozeScheduleV1 } from '../../validation';
 
 export const ruleSnoozeScheduleSchema = schema.object(
   {
-    id: schema.maybe(schema.string()),
+    id: schema.maybe(
+      schema.string({
+        validate: (id: string) => {
+          const regex = new RegExp('^[a-z0-9_-]+$', 'g');
+
+          if (!regex.test(id)) {
+            return `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`;
+          }
+        },
+      })
+    ),
     duration: schema.number(),
     rRule: rRuleRequestSchemaV1,
   },
