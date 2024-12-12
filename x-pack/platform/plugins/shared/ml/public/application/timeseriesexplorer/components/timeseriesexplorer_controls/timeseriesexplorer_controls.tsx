@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
-  EuiButton,
+  EuiButtonIcon,
   EuiCheckbox,
   EuiContextMenu,
   EuiFlexGroup,
@@ -204,91 +204,55 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
   return (
     <>
       <EuiFlexGroup style={{ float: 'right' }} alignItems="center" justifyContent="flexEnd">
-        {showControls && (
-          <>
-            {showModelBoundsCheckbox && (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiCheckbox
-                    id="toggleModelBoundsCheckbox"
-                    label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                      defaultMessage: 'show model bounds',
-                    })}
-                    checked={showModelBounds}
-                    onChange={onShowModelBoundsChange}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            )}
-
-            {showAnnotationsCheckbox && (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiCheckbox
-                    id="toggleAnnotationsCheckbox"
-                    label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                      defaultMessage: 'annotations',
-                    })}
-                    checked={showAnnotations}
-                    onChange={onShowAnnotationsChange}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            )}
-
-            {showForecastCheckbox && (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiCheckbox
-                    id="toggleShowForecastCheckbox"
-                    label={
-                      <span data-test-subj={'mlForecastCheckbox'}>
-                        {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
-                      </span>
-                    }
-                    checked={showForecast}
-                    onChange={onShowForecastChange}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            )}
-
-            {canEditDashboards ? (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiPopover
-                    button={
-                      <EuiButton
-                        aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
-                          defaultMessage: 'Actions',
-                        })}
-                        color="text"
-                        iconSide="right"
-                        isSelected={isMenuOpen}
-                        iconType={isMenuOpen ? 'arrowUp' : 'arrowDown'}
-                        onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                        data-test-subj="mlAnomalyTimelinePanelMenu"
-                      >
-                        <FormattedMessage
-                          id="xpack.ml.explorer.addToLabel"
-                          defaultMessage="Add to"
-                        />
-                      </EuiButton>
-                    }
-                    isOpen={isMenuOpen}
-                    closePopover={setIsMenuOpen.bind(null, false)}
-                    panelPaddingSize="none"
-                    anchorPosition="downLeft"
-                  >
-                    <EuiContextMenu initialPanelId={0} panels={menuPanels} />
-                  </EuiPopover>
-                </EuiFormRow>
-              </EuiFlexItem>
-            ) : null}
-          </>
+        {showModelBoundsCheckbox && showControls && (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiCheckbox
+                id="toggleModelBoundsCheckbox"
+                label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
+                  defaultMessage: 'show model bounds',
+                })}
+                checked={showModelBounds}
+                onChange={onShowModelBoundsChange}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
         )}
+
+        {showAnnotationsCheckbox && showControls && (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiCheckbox
+                id="toggleAnnotationsCheckbox"
+                label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
+                  defaultMessage: 'annotations',
+                })}
+                checked={showAnnotations}
+                onChange={onShowAnnotationsChange}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
+
+        {showForecastCheckbox && showControls && (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiCheckbox
+                id="toggleShowForecastCheckbox"
+                label={
+                  <span data-test-subj={'mlForecastCheckbox'}>
+                    {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                      defaultMessage: 'show forecast',
+                    })}
+                  </span>
+                }
+                checked={showForecast}
+                onChange={onShowForecastChange}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        )}
+
         <EuiFormRow hasEmptyLabelSpace>
           <ForecastingModal
             job={selectedJob}
@@ -302,6 +266,35 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
             selectedForecastId={forecastId}
           />
         </EuiFormRow>
+
+        {canEditDashboards && showControls ? (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiPopover
+                button={
+                  <EuiButtonIcon
+                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                      defaultMessage: 'Actions',
+                    })}
+                    color="text"
+                    display="base"
+                    isSelected={isMenuOpen}
+                    iconType="boxesHorizontal"
+                    onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                    data-test-subj="mlAnomalyTimelinePanelMenu"
+                    size="m"
+                  />
+                }
+                isOpen={isMenuOpen}
+                closePopover={setIsMenuOpen.bind(null, false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu initialPanelId={0} panels={menuPanels} />
+              </EuiPopover>
+            </EuiFormRow>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       {createInDashboard ? (
         <SavedObjectSaveModalDashboard

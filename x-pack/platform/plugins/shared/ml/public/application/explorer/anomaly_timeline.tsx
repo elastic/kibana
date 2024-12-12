@@ -13,8 +13,8 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -418,20 +418,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               >
                 <EuiPopover
                   button={
-                    <EuiButton
+                    <EuiButtonIcon
                       size="s"
                       aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
                         defaultMessage: 'Actions',
                       })}
                       color="text"
-                      iconSide="right"
+                      display="base"
                       isSelected={isMenuOpen}
-                      iconType={isMenuOpen ? 'arrowUp' : 'arrowDown'}
+                      iconType="boxesHorizontal"
                       onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                       data-test-subj="mlAnomalyTimelinePanelMenu"
-                    >
-                      <FormattedMessage id="xpack.ml.explorer.addToLabel" defaultMessage="Add to" />
-                    </EuiButton>
+                    />
                   }
                   isOpen={isMenuOpen}
                   closePopover={setIsMenuOpen.bind(null, false)}
