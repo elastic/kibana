@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import * as i18n from './translations';
+import { useStoredAssistantConnectorId } from '../../../hooks/use_stored_state';
+import { useOnboardingContext } from '../../../onboarding_context';
 import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { ConnectorCards } from '../common/connectors/connector_cards';
 import { CardCallOut } from '../common/card_callout';
@@ -25,6 +27,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   checkComplete,
   isCardAvailable,
 }) => {
+  const { spaceId } = useOnboardingContext();
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
@@ -42,6 +45,19 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const connectors = checkCompleteMetadata?.connectors;
   const canExecuteConnectors = checkCompleteMetadata?.canExecuteConnectors;
   const canCreateConnectors = checkCompleteMetadata?.canCreateConnectors;
+
+  const [storedAssistantConnectorId, setStoredAssistantConnectorId] =
+    useStoredAssistantConnectorId(spaceId);
+
+  const [selectedConnectorId, setSelectedConnectorId] = useState(storedAssistantConnectorId || '');
+
+  const onSelectConnectorId = useCallback(
+    (connectorId: string) => {
+      setSelectedConnectorId(connectorId);
+      setStoredAssistantConnectorId(connectorId);
+    },
+    [setStoredAssistantConnectorId]
+  );
 
   return (
     <OnboardingCardContentPanel>
@@ -78,6 +94,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
                 canCreateConnectors={canCreateConnectors}
                 connectors={connectors}
                 onConnectorSaved={checkComplete}
+                selectedConnectorId={selectedConnectorId}
+                setSelectedConnectorId={onSelectConnectorId}
               />
             )}
           </EuiFlexItem>

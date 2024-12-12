@@ -17,8 +17,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
-import { type ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
@@ -32,7 +30,6 @@ interface Props {
   selectedConversation?: Conversation;
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
-  stats?: AttackDiscoveryStats | null;
   connectors: AIConnector[];
   onConnectorSaved?: () => void;
 }
@@ -62,7 +59,7 @@ const inputDisplayClassName = css`
 /**
  * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
-export const ConnectorSelectorAIAssistant = React.memo<Props>(
+export const ConnectorSelectorWithIcon = React.memo<Props>(
   ({
     isDisabled = false,
     selectedConnectorId,
@@ -71,7 +68,6 @@ export const ConnectorSelectorAIAssistant = React.memo<Props>(
     onConnectorSelected,
     connectors,
     onConnectorSaved,
-    stats = null,
   }) => {
     const { actionTypeRegistry, http, assistantAvailability, toasts } = useAssistantContext();
     const { euiTheme } = useEuiTheme();
@@ -176,4 +172,4 @@ export const ConnectorSelectorAIAssistant = React.memo<Props>(
   }
 );
 
-ConnectorSelectorAIAssistant.displayName = 'ConnectorSelectorAIAssistant';
+ConnectorSelectorWithIcon.displayName = 'ConnectorSelectorWithIcon';
