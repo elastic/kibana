@@ -8,7 +8,6 @@
 import type { AppDeepLinkId, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
-import type { ProductAccess } from '../../../common/types';
 
 import { ADD, UPDATE } from './constants/operations';
 
@@ -80,8 +79,4 @@ export type GenerateNavLinkParameters = {
 export interface GenerateNavLinkFromDeepLinkParameters {
   link: AppDeepLinkId;
   shouldShowActiveForSubroutes?: boolean;
-}
-
-export interface BuildClassicNavParameters {
-  productAccess: ProductAccess;
 }
