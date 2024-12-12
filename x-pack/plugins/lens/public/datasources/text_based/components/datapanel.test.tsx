@@ -144,6 +144,7 @@ describe('TextBased Query Languages Data Panel', () => {
       hasRestrictions: false,
       fields: fieldsOne,
       getFieldByName: jest.fn(),
+      getFormatterForField: jest.fn(),
       isPersisted: true,
       spec: {},
     },
