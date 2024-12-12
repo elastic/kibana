@@ -118,7 +118,7 @@ const mockedServices = {
   },
   application: {
     capabilities: {
-      discover_v2: { save: true, saveQuery: true, show: true },
+      discover_v2: { save: true, show: true },
     },
   },
   core: corePluginMock,
@@ -393,7 +393,7 @@ describe('Lens Field Item', () => {
       ...mockedServices,
       application: {
         capabilities: {
-          discover_v2: { save: false, saveQuery: false, show: false },
+          discover_v2: { save: false, show: false },
         },
       },
     };

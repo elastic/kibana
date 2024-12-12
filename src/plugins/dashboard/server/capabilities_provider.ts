@@ -16,6 +16,5 @@ export const capabilitiesProvider = (): {
     createNew: true,
     show: true,
     showWriteControls: true,
-    saveQuery: true,
   },
 });

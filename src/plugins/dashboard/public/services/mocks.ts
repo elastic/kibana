@@ -40,7 +40,6 @@ import { SearchDashboardsResponse } from './dashboard_content_management_service
 const defaultDashboardCapabilities: DashboardCapabilities = {
   show: true,
   createNew: true,
-  saveQuery: true,
   createShortUrl: true,
   showWriteControls: true,
   storeSearchSession: true,

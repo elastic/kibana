@@ -49,7 +49,6 @@ interface VisualizeCapabilities {
   createShortUrl: boolean;
   delete: boolean;
   save: boolean;
-  saveQuery: boolean;
   show: boolean;
 }
 

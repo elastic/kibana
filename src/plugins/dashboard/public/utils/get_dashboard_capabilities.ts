@@ -19,7 +19,6 @@ export const getDashboardCapabilities = (): DashboardCapabilities => {
 
   return {
     show: Boolean(dashboard.show),
-    saveQuery: Boolean(dashboard.saveQuery),
     createNew: Boolean(dashboard.createNew),
     createShortUrl: Boolean(dashboard.createShortUrl),
     showWriteControls: Boolean(dashboard.showWriteControls),

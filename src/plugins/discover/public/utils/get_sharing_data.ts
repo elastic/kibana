@@ -137,7 +137,6 @@ export async function getSharingData(
 export interface DiscoverCapabilities {
   createShortUrl?: boolean;
   save?: boolean;
-  saveQuery?: boolean;
   show?: boolean;
   storeSearchSession?: boolean;
 }
