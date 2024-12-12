@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { SessionViewDetailPanelDeps } from './components/session_view_detail_panel';
 import {
   SessionViewPluginStart,
   SessionViewPluginStartDeps,
@@ -13,7 +14,7 @@ import {
   SessionViewPluginSetupDeps,
   SessionViewDeps,
 } from './types';
-import { getSessionViewLazy } from './methods';
+import { getSessionViewLazy, getSessionViewDetailPanelLazy } from './methods';
 
 export class SessionViewPlugin implements Plugin<SessionViewPluginStart, SessionViewPluginSetup> {
   public setup(core: CoreSetup<SessionViewPluginSetupDeps, SessionViewPluginSetup>) {
@@ -24,6 +25,8 @@ export class SessionViewPlugin implements Plugin<SessionViewPluginStart, Session
     return {
       getSessionView: (sessionViewDeps: SessionViewDeps) =>
         getSessionViewLazy({ ...sessionViewDeps, usageCollection: plugins?.usageCollection }),
+      getSessionViewDetailPanel: (sessionViewDetailPanelDeps: SessionViewDetailPanelDeps) =>
+        getSessionViewDetailPanelLazy(sessionViewDetailPanelDeps),
     };
   }
 

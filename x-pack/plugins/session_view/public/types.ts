@@ -9,6 +9,8 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import type { Process } from '../common';
+import { SessionViewDetailPanelDeps } from './components/session_view_detail_panel';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewPluginSetup {}
@@ -84,6 +86,19 @@ export interface SessionViewDeps {
     handleOnAlertDetailsClosed: () => void
   ) => void;
   canReadPolicyManagement?: boolean;
+  /**
+   * Function used when SessionView is used within the expandable flyout, where the tree and the detailed panel are
+   * separated and need to communicate with each other.
+   */
+  openDetails?: (selectedProcess: Process | null) => void;
+  /**
+   *
+   */
+  resetJumpToEntityId?: string;
+  /**
+   *
+   */
+  resetJumpToCursor?: string;
 }
 
 export interface EuiTabProps {
@@ -196,4 +211,5 @@ export interface DetailPanelCloud {
 
 export interface SessionViewStart {
   getSessionView: (props: SessionViewDeps) => JSX.Element;
+  getSessionViewDetailPanel: (props: SessionViewDetailPanelDeps) => JSX.Element;
 }

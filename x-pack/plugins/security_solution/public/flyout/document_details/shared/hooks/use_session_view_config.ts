@@ -7,11 +7,11 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { SessionViewConfig } from '@kbn/securitysolution-data-table/common/types';
-import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
-import { getField } from '../../shared/utils';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import type { GetFieldsData } from './use_get_fields_data';
+import { getField } from '../utils';
+import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
 
-export interface UseSessionPreviewParams {
+export interface UseSessionViewConfigParams {
   /**
    * Retrieves searchHit values for the provided field
    */
@@ -25,10 +25,10 @@ export interface UseSessionPreviewParams {
 /**
  * Hook that returns the session view configuration if the session view is available for the alert
  */
-export const useSessionPreview = ({
+export const useSessionViewConfig = ({
   getFieldsData,
   dataFormattedForFieldBrowser,
-}: UseSessionPreviewParams): SessionViewConfig | null => {
+}: UseSessionViewConfigParams): SessionViewConfig | null => {
   const { indexName: _index, alertId: _id } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );

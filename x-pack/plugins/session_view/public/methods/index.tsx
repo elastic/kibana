@@ -10,6 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { SessionViewDetailPanelDeps } from '../components/session_view_detail_panel';
 import type { SessionViewIndex } from '../../common/types/v1';
 import { SessionViewDeps, SessionViewTelemetryKey } from '../types';
 import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
@@ -18,6 +19,7 @@ import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
 const queryClient = new QueryClient();
 
 const SessionViewLazy = lazy(() => import('../components/session_view'));
+const SessionViewDetailPanelLazy = lazy(() => import('../components/session_view_detail_panel'));
 
 export const ELASTIC_DEFEND_DATA_SOURCE = 'endpoint';
 export const CLOUD_DEFEND_DATA_SOURCE = 'cloud_defend';
@@ -75,6 +77,19 @@ export const getSessionViewLazy = (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
         <SessionViewLazy {...props} index={index} trackEvent={trackEvent} />
+      </Suspense>
+    </QueryClientProvider>
+  );
+};
+
+export const getSessionViewDetailPanelLazy = (props: SessionViewDetailPanelDeps) => {
+  console.log('getSessionViewDetailPanelLazy');
+  const index = getIndexPattern(props.index);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <SessionViewDetailPanelLazy {...props} index={index} />
       </Suspense>
     </QueryClientProvider>
   );
