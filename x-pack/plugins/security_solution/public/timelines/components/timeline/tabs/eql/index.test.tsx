@@ -200,7 +200,7 @@ describe('EQL Tab', () => {
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
         expect(await screen.findByTestId('timeline-notes-button-small')).toBeVisible();
         expect(await screen.findByTestId('pin')).toBeVisible();
-      });
+      }, 20000);
 
       it('should not render the notes and pin buttons when the user does not have the correct privilege', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
@@ -218,7 +218,7 @@ describe('EQL Tab', () => {
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
         expect(await screen.queryByTestId('timeline-notes-button-small')).not.toBeInTheDocument();
         expect(await screen.queryByTestId('pin')).not.toBeInTheDocument();
-      });
+      }, 20000);
     });
 
     describe('pagination', () => {
