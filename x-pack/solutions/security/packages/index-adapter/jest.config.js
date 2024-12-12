@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-data-stream-adapter'],
+  roots: ['<rootDir>/x-pack/solutions/security/packages/index-adapter'],
 };
