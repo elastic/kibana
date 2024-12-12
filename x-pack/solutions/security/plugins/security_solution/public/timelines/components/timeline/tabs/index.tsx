@@ -168,17 +168,19 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             <EsqlTab timelineId={timelineId} />
           </HideShowContainer>
         )}
-        <HideShowContainer
-          $isVisible={TimelineTabs.pinned === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
-        >
-          <PinnedTab
-            renderCellValue={renderCellValue}
-            rowRenderers={rowRenderers}
-            timelineId={timelineId}
-          />
-        </HideShowContainer>
-        {timelineType === TimelineTypeEnum.default && (
+        {false && (
+          <HideShowContainer
+            $isVisible={TimelineTabs.pinned === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
+          >
+            <PinnedTab
+              renderCellValue={renderCellValue}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+            />
+          </HideShowContainer>
+        )}
+        {false && timelineType === TimelineTypeEnum.default && (
           <HideShowContainer
             $isVisible={TimelineTabs.eql === activeTimelineTab}
             data-test-subj={`timeline-tab-content-${TimelineTabs.eql}`}

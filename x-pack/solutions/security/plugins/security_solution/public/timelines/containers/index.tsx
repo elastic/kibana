@@ -544,7 +544,11 @@ export const useTimelineEvents = ({
     timelineSearchHandler();
   }, [timelineSearchHandler]);
 
-  const combinedEvents = useMemo(() => eventsPerPage.flat(), [eventsPerPage]);
+  const combinedEvents = useMemo(
+    // exclude undefined values / empty slots
+    () => eventsPerPage.filter((i) => !!i).flat(),
+    [eventsPerPage]
+  );
 
   const combinedResponse = useMemo(
     () => ({

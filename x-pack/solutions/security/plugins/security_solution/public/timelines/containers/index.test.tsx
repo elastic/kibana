@@ -114,6 +114,20 @@ const mockSearchSubscription = jest.fn().mockImplementation((args) => {
   };
 });
 
+const loadNextBatch = async (result: { current: [DataLoadingState, TimelineArgs] }) => {
+  act(() => {
+    result.current[1].loadNextBatch();
+  });
+
+  await waitFor(() => {
+    expect(result.current[0]).toBe(DataLoadingState.loadingMore);
+  });
+
+  await waitFor(() => {
+    expect(result.current[0]).toBe(DataLoadingState.loaded);
+  });
+};
+
 describe('useTimelineEventsHandler', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
@@ -337,7 +351,16 @@ describe('useTimelineEventsHandler', () => {
         expect(result.current[0]).toBe(DataLoadingState.loaded);
       });
     });
-    test('should should not fire any request when indexName is empty', async () => {});
+    test('should should not fire any request when indexName is empty', async () => {
+      const { result } = renderHook((args) => useTimelineEvents(args), {
+        initialProps: { ...props, indexNames: [] },
+      });
+
+      await waitFor(() => {
+        expect(mockSearch).not.toHaveBeenCalled();
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
+      });
+    });
   });
 
   describe('fields', () => {
@@ -436,12 +459,9 @@ describe('useTimelineEventsHandler', () => {
 
       mockSearch.mockClear();
 
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
+      await loadNextBatch(result);
 
       await waitFor(() => {
-        expect(result.current[0]).toBe(DataLoadingState.loaded);
         expect(mockSearch).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({ pagination: { activePage: 1, querySize: 25 } })
@@ -449,12 +469,10 @@ describe('useTimelineEventsHandler', () => {
       });
 
       mockSearch.mockClear();
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
+
+      await loadNextBatch(result);
 
       await waitFor(() => {
-        expect(result.current[0]).toBe(DataLoadingState.loaded);
         expect(mockSearch).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({ pagination: { activePage: 2, querySize: 25 } })
@@ -472,23 +490,11 @@ describe('useTimelineEventsHandler', () => {
       });
 
       ////////
-      // fetch 3 batches before requesting new column
+      // fetch 2 more batches before requesting new column
       ////////
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
+      await loadNextBatch(result);
 
-      await waitFor(() => {
-        expect(result.current[0]).toBe(DataLoadingState.loaded);
-      });
-
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
-
-      await waitFor(() => {
-        expect(result.current[0]).toBe(DataLoadingState.loaded);
-      });
+      await loadNextBatch(result);
       ///////
 
       rerender({ ...props, fields: [...props.fields, 'new_column'] });
@@ -517,9 +523,7 @@ describe('useTimelineEventsHandler', () => {
 
       mockSearch.mockClear();
 
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
+      await loadNextBatch(result);
 
       await waitFor(() => {
         expect(mockSearch).toHaveBeenCalledWith(
@@ -554,9 +558,7 @@ describe('useTimelineEventsHandler', () => {
       });
       mockSearch.mockClear();
 
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
+      await loadNextBatch(result);
 
       await waitFor(() => {
         expect(mockSearch).toHaveBeenCalledWith(
@@ -575,9 +577,7 @@ describe('useTimelineEventsHandler', () => {
       });
       mockSearch.mockClear();
 
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
+      await loadNextBatch(result);
 
       await waitFor(() => {
         expect(mockSearch).toHaveBeenCalledWith(
@@ -595,34 +595,68 @@ describe('useTimelineEventsHandler', () => {
         expect(result.current[1].events.length).toBe(5);
       });
 
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
-
+      //////////////////////
+      // Batch 2
+      await loadNextBatch(result);
       await waitFor(() => {
         expect(result.current[1].events.length).toBe(10);
       });
+      //////////////////////
 
+      //////////////////////
+      // Batch 3
+      await loadNextBatch(result);
+      await waitFor(() => {
+        expect(result.current[1].events.length).toBe(15);
+      });
+      //////////////////////
+
+      ///////////////////////////////////////////
       // add new column
+      // Fetch all 3 batches together
       rerender({ ...props, limit: 5, fields: [...props.fields, 'new_column'] });
+
+      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loadingMore);
+      });
 
       // should fetch all the records together
       await waitFor(() => {
-        expect(result.current[1].events.length).toBe(10);
-      });
-
-      // subsequent batch should be fetched incrementally
-      act(() => {
-        result.current[1].loadNextBatch();
-      });
-
-      await waitFor(() => {
+        expect(result.current[0]).toBe(DataLoadingState.loaded);
         expect(result.current[1].events.length).toBe(15);
         expect(result.current[1].pageInfo).toMatchObject({
-          activePage: 2,
+          activePage: 0,
+          querySize: 15,
+        });
+      });
+      ///////////////////////////////////////////
+
+      //////////////////////
+      // subsequent batch should be fetched incrementally
+      // Batch 4
+      await loadNextBatch(result);
+
+      await waitFor(() => {
+        expect(result.current[1].events.length).toBe(20);
+        expect(result.current[1].pageInfo).toMatchObject({
+          activePage: 3,
           querySize: 5,
         });
       });
+      //////////////////////
+
+      //////////////////////
+      // Batch 5
+      await loadNextBatch(result);
+
+      await waitFor(() => {
+        expect(result.current[1].events.length).toBe(25);
+        expect(result.current[1].pageInfo).toMatchObject({
+          activePage: 4,
+          querySize: 5,
+        });
+      });
+      //////////////////////
     });
   });
 });
