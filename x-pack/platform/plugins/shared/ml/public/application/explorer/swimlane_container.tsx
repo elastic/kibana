@@ -79,7 +79,7 @@ declare global {
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
-const BORDER_WIDTH = 1;
+const BORDER_WIDTH = 2;
 export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
@@ -302,13 +302,13 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     const theme: PartialTheme = {
       background: {
-        color: euiTheme.colors.backgroundBasePlain,
+        color: euiTheme.colors.lightestShade,
       },
       heatmap: {
         grid: {
           stroke: {
             width: BORDER_WIDTH,
-            color: euiTheme.border.color,
+            color: euiTheme.colors.emptyShade,
           },
         },
         cell: {
@@ -318,7 +318,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             visible: false,
           },
           border: {
-            stroke: euiTheme.colors.borderBasePlain,
+            stroke: euiTheme.colors.emptyShade,
             strokeWidth: 0,
           },
         },
