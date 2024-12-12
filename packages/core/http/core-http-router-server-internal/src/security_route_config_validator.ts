@@ -68,12 +68,13 @@ const requiredPrivilegesSchema = schema.arrayOf(
         return 'Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege.';
       }
 
+      // Operator privilege requires at least one additional non-operator privilege to be defined, that's why it's not allowed in anyRequired.
       if (anyRequired.includes(ReservedPrivilegesSet.operator)) {
         return 'Using operator privileges in anyRequired is not allowed';
       }
 
       if (hasOperatorInAllRequired && allRequired.length === 1) {
-        return 'Operator privileges cannot be used standalone';
+        return 'Operator privilege requires at least one additional non-operator privilege to be defined';
       }
 
       if (anyRequired.length && allRequired.length) {
@@ -85,10 +86,18 @@ const requiredPrivilegesSchema = schema.arrayOf(
       }
 
       if (anyRequired.length) {
-        const uniquePrivileges = new Set([...anyRequired]);
+        const uniqueAnyPrivileges = new Set([...anyRequired]);
 
-        if (anyRequired.length !== uniquePrivileges.size) {
+        if (anyRequired.length !== uniqueAnyPrivileges.size) {
           return 'anyRequired privileges must contain unique values';
+        }
+      }
+
+      if (allRequired.length) {
+        const uniqueAllPrivileges = new Set([...allRequired]);
+
+        if (allRequired.length !== uniqueAllPrivileges.size) {
+          return 'allRequired privileges must contain unique values';
         }
       }
     },

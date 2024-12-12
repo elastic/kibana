@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type {
   AuthzDisabled,
   AuthzEnabled,
   HttpServiceSetup,
+  KibanaRequest,
   Logger,
   Privilege,
   PrivilegeSet,
   RouteAuthz,
 } from '@kbn/core/server';
-import { ReservedPrivilegesSet } from '@kbn/core/server';
-import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type {
+  AuthorizationServiceSetup,
+  EsSecurityConfig,
+} from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 
 import { API_OPERATION_PREFIX, SUPERUSER_PRIVILEGES } from '../../common/constants';
@@ -28,6 +33,11 @@ const isReservedPrivilegeSet = (privilege: string): privilege is ReservedPrivile
   return Object.hasOwn(ReservedPrivilegesSet, privilege);
 };
 
+interface InitApiAuthorization extends AuthorizationServiceSetup {
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  getSecurityConfig: () => Promise<EsSecurityConfig>;
+}
+
 export function initAPIAuthorization(
   http: HttpServiceSetup,
   {
@@ -37,7 +47,7 @@ export function initAPIAuthorization(
     mode,
     getCurrentUser,
     getSecurityConfig,
-  }: AuthorizationServiceSetup,
+  }: InitApiAuthorization,
   logger: Logger
 ) {
   http.registerOnPostAuth(async (request, response, toolkit) => {
@@ -84,15 +94,13 @@ export function initAPIAuthorization(
             acc.push(
               operatorPrivilegeIndex !== -1
                 ? {
-                    anyRequired: privilege.anyRequired,
+                    ...privilege,
                     // @ts-ignore wrong types for `toSpliced`
                     allRequired: privilege.allRequired?.toSpliced(operatorPrivilegeIndex, 1),
                   }
                 : privilege
             );
-          }
-
-          if (privilege !== ReservedPrivilegesSet.operator) {
+          } else if (privilege !== ReservedPrivilegesSet.operator) {
             acc.push(privilege);
           }
 
@@ -100,6 +108,8 @@ export function initAPIAuthorization(
         }, []);
       };
 
+      // We need to normalize privileges to drop unintended privilege checks.
+      // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
       const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
 
       const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
@@ -152,13 +162,8 @@ export function initAPIAuthorization(
 
         if (reservedPrivilege === ReservedPrivilegesSet.operator) {
           const currentUser = getCurrentUser(request);
-          const securityConfig = await getSecurityConfig();
-          const isOperator = currentUser?.operator ?? false;
 
-          kibanaPrivileges[ReservedPrivilegesSet.operator] = securityConfig.operator_privileges
-            .enabled
-            ? isOperator
-            : false;
+          kibanaPrivileges[ReservedPrivilegesSet.operator] = currentUser?.operator ?? false;
         }
       }
 

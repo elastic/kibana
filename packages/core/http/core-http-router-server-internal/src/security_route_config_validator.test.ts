@@ -273,6 +273,20 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail validation when allRequired has duplicate entries', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege4', 'privilege5'], allRequired: ['privilege1', 'privilege1'] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: allRequired privileges must contain unique values"`
+    );
+  });
+
   it('should fail validation when anyRequired has duplicates in multiple privilege entries', () => {
     const invalidRouteSecurity = {
       authz: {
@@ -338,7 +352,7 @@ describe('RouteSecurity validation', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Operator privileges cannot be used standalone"`
+      `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
     );
 
     expect(() =>
@@ -348,7 +362,7 @@ describe('RouteSecurity validation', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Operator privileges cannot be used standalone"`
+      `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
     );
   });
 });
