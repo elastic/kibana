@@ -180,13 +180,17 @@ export const useGridLayoutEvents = ({
 
         // resolve destination grid
         const destinationGrid = nextLayout[targetRowIndex];
-        const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedGridData);
+        const resolvedDestinationGrid = resolveGridRow(
+          destinationGrid,
+          columnCount,
+          requestedGridData
+        );
         nextLayout[targetRowIndex] = resolvedDestinationGrid;
 
         // resolve origin grid
         if (hasChangedGridRow) {
           const originGrid = nextLayout[lastRowIndex];
-          const resolvedOriginGrid = resolveGridRow(originGrid);
+          const resolvedOriginGrid = resolveGridRow(originGrid, columnCount);
           nextLayout[lastRowIndex] = resolvedOriginGrid;
         }
         if (!deepEqual(currentLayout, nextLayout)) {

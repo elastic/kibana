@@ -60,8 +60,9 @@ export const GridLayout = ({
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
        * so, we need to loop through each row and ensure it is compacted
        */
+      const { columnCount } = gridLayoutStateManager.runtimeSettings$.getValue();
       newLayout.forEach((row, rowIndex) => {
-        newLayout[rowIndex] = resolveGridRow(row);
+        newLayout[rowIndex] = resolveGridRow(row, columnCount);
       });
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
