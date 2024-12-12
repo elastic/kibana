@@ -95,3 +95,27 @@ From the `~/x-pack` directory:
 Start the server: `node scripts/functional_tests_server --config test/accessibility/config.ts`
 
 Run the uptime `a11y` tests: `node scripts/functional_test_runner.js --config test/accessibility/config.ts --grep=uptime`
+
+
+## Deployment agnostic API Integration Tests
+The Synthetics tests are located under `x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SyntheticsAPITests`) on stateful or serverless.
+
+### Stateful
+
+```
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts --grep=SyntheticsAPITests
+```
+
+### Serverless
+
+```
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts --grep=SyntheticsAPITests
+```
