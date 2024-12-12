@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
 module.exports = {
-  ...defaultConfig,
-  stories: ['../../**/*.stories.+(tsx|mdx)'],
-  reactOptions: {
-    strictMode: true,
-  },
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/features'],
 };
