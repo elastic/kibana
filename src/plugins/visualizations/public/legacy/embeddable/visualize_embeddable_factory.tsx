@@ -25,9 +25,9 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
-  AttributeService,
 } from '@kbn/embeddable-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { AttributeService } from './attribute_service';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import type {
   VisualizeByReferenceInput,
@@ -138,16 +138,10 @@ export class VisualizeEmbeddableFactory
 
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = this.deps
-        .start()
-        .plugins.embeddable.getAttributeService<
-          VisualizeSavedObjectAttributes,
-          VisualizeByValueInput,
-          VisualizeByReferenceInput
-        >(this.type, {
-          saveMethod: this.saveMethod.bind(this),
-          checkForDuplicateTitle: this.checkTitle.bind(this),
-        });
+      this.attributeService = new AttributeService(this.type, {
+        saveMethod: this.saveMethod.bind(this),
+        checkForDuplicateTitle: this.checkTitle.bind(this),
+      });
     }
     return this.attributeService!;
   }
