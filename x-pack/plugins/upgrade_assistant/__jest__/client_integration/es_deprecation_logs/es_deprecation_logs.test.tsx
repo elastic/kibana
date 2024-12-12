@@ -174,7 +174,7 @@ describe('ES deprecation logs', () => {
 
       expect(exists('viewObserveLogs')).toBe(true);
       const locatorParams = stringifySearchParams({
-        id: DEPRECATION_LOGS_INDEX,
+        dataViewId: DEPRECATION_LOGS_INDEX,
         timeRange: {
           from: MOCKED_TIME,
           to: 'now',
@@ -187,7 +187,7 @@ describe('ES deprecation logs', () => {
         },
       });
       const href = find('viewObserveLogs').props().href;
-      expect(href).toContain('logsExplorerUrl');
+      expect(href).toContain('discoverUrl');
       expect(href).toContain(locatorParams);
     });
 
