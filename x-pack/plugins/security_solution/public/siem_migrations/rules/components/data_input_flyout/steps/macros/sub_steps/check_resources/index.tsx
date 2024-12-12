@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiText, type EuiStepProps, type EuiStepStatus } from '@elastic/eui';
+// import { useGetMissingResources } from '../../../../../../logic/use_get_migration_missing_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMissingResources } from '../../../../../../service/hooks/use_get_missing_resources';
 import type { OnMissingResourcesFetched } from '../../../../types';

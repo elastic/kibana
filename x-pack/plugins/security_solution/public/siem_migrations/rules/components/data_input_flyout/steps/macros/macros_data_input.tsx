@@ -17,25 +17,35 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SubStepsWrapper } from '../common/sub_step_wrapper';
-import type { OnMigrationCreated, OnMissingResourcesFetched, DataInputStep } from '../../types';
+import type { OnResourcesCreated, OnMissingResourcesFetched, DataInputStep } from '../../types';
+import { getStatus } from '../common/get_status';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
-import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
+import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import * as i18n from './translations';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
-import { getStatus } from '../common/get_status';
 
-const DataInputStepNumber: DataInputStep = 1;
+const DataInputStepNumber: DataInputStep = 2;
 
-interface RulesDataInputSubStepsProps {
-  migrationStats?: RuleMigrationTaskStats;
-  onMigrationCreated: OnMigrationCreated;
+interface MacrosDataInputSubStepsProps {
+  migrationStats: RuleMigrationTaskStats;
+  missingMacros: string[];
+  onMacrosCreated: OnResourcesCreated;
   onMissingResourcesFetched: OnMissingResourcesFetched;
 }
-interface RulesDataInputProps extends RulesDataInputSubStepsProps {
+interface MacrosDataInputProps
+  extends Omit<MacrosDataInputSubStepsProps, 'migrationStats' | 'missingMacros'> {
   dataInputStep: DataInputStep;
+  migrationStats?: RuleMigrationTaskStats;
+  missingMacros?: string[];
 }
-export const RulesDataInput = React.memo<RulesDataInputProps>(
-  ({ dataInputStep, migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
+export const MacrosDataInput = React.memo<MacrosDataInputProps>(
+  ({
+    dataInputStep,
+    migrationStats,
+    missingMacros,
+    onMacrosCreated,
+    onMissingResourcesFetched,
+  }) => {
     const dataInputStatus = useMemo(
       () => getStatus(DataInputStepNumber, dataInputStep),
       [dataInputStep]
@@ -55,16 +65,17 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs">
-                  <b>{i18n.RULES_DATA_INPUT_TITLE}</b>
+                  <b>{i18n.MACROS_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {dataInputStatus === 'current' && (
+          {dataInputStatus === 'current' && migrationStats && missingMacros && (
             <EuiFlexItem>
-              <RulesDataInputSubSteps
+              <MacrosDataInputSubSteps
                 migrationStats={migrationStats}
-                onMigrationCreated={onMigrationCreated}
+                missingMacros={missingMacros}
+                onMacrosCreated={onMacrosCreated}
                 onMissingResourcesFetched={onMissingResourcesFetched}
               />
             </EuiFlexItem>
@@ -74,13 +85,13 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
     );
   }
 );
-RulesDataInput.displayName = 'RulesDataInput';
+MacrosDataInput.displayName = 'MacrosDataInput';
 
 const END = 10 as const;
 type SubStep = 1 | 2 | 3 | typeof END;
-export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
-  ({ migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
-    const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 3 : 1);
+export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
+  ({ migrationStats, missingMacros, onMacrosCreated, onMissingResourcesFetched }) => {
+    const [subStep, setSubStep] = useState<SubStep>(missingMacros.length ? 1 : 3);
 
     // Copy query step
     const onCopied = useCallback(() => {
@@ -88,24 +99,22 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
     }, []);
     const copyStep = useCopyExportQueryStep({ status: getStatus(1, subStep), onCopied });
 
-    // Upload rules step
-    const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
-      (stats) => {
-        onMigrationCreated(stats);
-        setSubStep(3);
-      },
-      [onMigrationCreated]
-    );
-    const uploadStep = useRulesFileUploadStep({
+    // Upload macros step
+    const onMacrosCreatedStep = useCallback<OnResourcesCreated>(() => {
+      onMacrosCreated();
+      setSubStep(3);
+    }, [onMacrosCreated]);
+    const uploadStep = useMacrosFileUploadStep({
       status: getStatus(2, subStep),
       migrationStats,
-      onMigrationCreated: onMigrationCreatedStep,
+      missingMacros,
+      onMacrosCreated: onMacrosCreatedStep,
     });
 
     // Check missing resources step
     const onMissingResourcesFetchedStep = useCallback<OnMissingResourcesFetched>(
-      (missingResources) => {
-        onMissingResourcesFetched(missingResources);
+      (newMissingResources) => {
+        onMissingResourcesFetched(newMissingResources);
         setSubStep(END);
       },
       [onMissingResourcesFetched]
@@ -128,4 +137,4 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
     );
   }
 );
-RulesDataInputSubSteps.displayName = 'RulesDataInputActive';
+MacrosDataInputSubSteps.displayName = 'MacrosDataInputActive';

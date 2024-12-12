@@ -11,6 +11,10 @@ import type { RuleMigrationsDataRulesClient } from '../rule_migrations_data_rule
 export const mockRuleMigrationsDataRulesClient = {
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue([]),
+  searchBatches: jest.fn().mockReturnValue({
+    next: jest.fn().mockResolvedValue([]),
+    all: jest.fn().mockResolvedValue([]),
+  }),
   takePending: jest.fn().mockResolvedValue([]),
   saveCompleted: jest.fn().mockResolvedValue(undefined),
   saveError: jest.fn().mockResolvedValue(undefined),
@@ -27,6 +31,10 @@ export const MockRuleMigrationsDataRulesClient = jest
 export const mockRuleMigrationsDataResourcesClient = {
   upsert: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue(undefined),
+  searchBatches: jest.fn().mockReturnValue({
+    next: jest.fn().mockResolvedValue([]),
+    all: jest.fn().mockResolvedValue([]),
+  }),
 };
 export const MockRuleMigrationsDataResourcesClient = jest
   .fn()

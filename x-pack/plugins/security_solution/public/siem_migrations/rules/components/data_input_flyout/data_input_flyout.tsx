@@ -17,10 +17,19 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { DataInputStep } from './constants';
+import type {
+  RuleMigrationResourceData,
+  RuleMigrationTaskStats,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
+import { DataInputStep } from './types';
+import { MacrosDataInput } from './steps/macros/macros_data_input';
+
+interface MissingResourcesIndexed {
+  macros: string[];
+  lookups: string[];
+}
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
@@ -31,6 +40,9 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     const [migrationStats, setMigrationStats] = useState<RuleMigrationTaskStats | undefined>(
       initialMigrationSats
     );
+    const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
+      MissingResourcesIndexed | undefined
+    >();
 
     const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigration = useCallback(() => {
@@ -39,22 +51,42 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       }
     }, [migrationStats, startMigration]);
 
-    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(() => {
-      if (migrationStats) {
-        return DataInputStep.macros;
-      }
-      return DataInputStep.rules;
-    });
+    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Rules);
 
-    const onMigrationCreated = useCallback(
-      (createdMigrationStats: RuleMigrationTaskStats) => {
-        if (createdMigrationStats) {
-          setMigrationStats(createdMigrationStats);
-          setDataInputStep(DataInputStep.macros);
+    const onMigrationCreated = useCallback((createdMigrationStats: RuleMigrationTaskStats) => {
+      setMigrationStats(createdMigrationStats);
+    }, []);
+
+    const onMissingResourcesFetched = useCallback(
+      (missingResources: RuleMigrationResourceData[]) => {
+        const newMissingResourcesIndexed = missingResources.reduce<MissingResourcesIndexed>(
+          (acc, { type, name }) => {
+            if (type === 'macro') {
+              acc.macros.push(name);
+            } else if (type === 'list') {
+              acc.lookups.push(name);
+            }
+            return acc;
+          },
+          { macros: [], lookups: [] }
+        );
+        setMissingResourcesIndexed(newMissingResourcesIndexed);
+        if (newMissingResourcesIndexed.macros.length) {
+          setDataInputStep(DataInputStep.Macros);
+          return;
         }
+        if (newMissingResourcesIndexed.lookups.length) {
+          setDataInputStep(DataInputStep.Lookups);
+          return;
+        }
+        setDataInputStep(DataInputStep.End);
       },
-      [setDataInputStep]
+      []
     );
+
+    const onMacrosCreated = useCallback(() => {
+      setDataInputStep(DataInputStep.Lookups);
+    }, []);
 
     return (
       <EuiFlyoutResizable
@@ -75,10 +107,25 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <RulesDataInput
-            selected={dataInputStep === DataInputStep.rules}
-            onMigrationCreated={onMigrationCreated}
-          />
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <RulesDataInput
+                dataInputStep={dataInputStep}
+                migrationStats={migrationStats}
+                onMigrationCreated={onMigrationCreated}
+                onMissingResourcesFetched={onMissingResourcesFetched}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <MacrosDataInput
+                dataInputStep={dataInputStep}
+                missingMacros={missingResourcesIndexed?.macros}
+                migrationStats={migrationStats}
+                onMacrosCreated={onMacrosCreated}
+                onMissingResourcesFetched={onMissingResourcesFetched}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

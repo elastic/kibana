@@ -12,10 +12,15 @@ import type { CreateRuleMigrationRequestBody } from '../../../../../common/siem_
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { reducer, initialState } from './common/api_request_reducer';
 
-export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess',
-  { defaultMessage: 'Rules uploaded successfully' }
+export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title',
+  { defaultMessage: 'Rule migration created successfully' }
 );
+export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_DESCRIPTION = (rules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.description',
+    { defaultMessage: '{rules} rules uploaded', values: { rules } }
+  );
 export const RULES_DATA_INPUT_CREATE_MIGRATION_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.createRuleError',
   { defaultMessage: 'Failed to upload rules file' }
@@ -36,7 +41,10 @@ export const useCreateMigration = (onSuccess: OnSuccess) => {
           const migrationId = await siemMigrations.rules.createRuleMigration(data);
           const stats = await siemMigrations.rules.getRuleMigrationStats(migrationId);
 
-          notifications.toasts.addSuccess(RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS);
+          notifications.toasts.addSuccess({
+            title: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE,
+            text: RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_DESCRIPTION(data.length),
+          });
           onSuccess(stats);
           dispatch({ type: 'success' });
         } catch (err) {

@@ -5,176 +5,124 @@
  * 2.0.
  */
 
-import { MAX_RECURSION_DEPTH, RuleResourceRetriever } from './rule_resource_retriever'; // Adjust path as needed
+import { RuleResourceRetriever } from './rule_resource_retriever'; // Adjust path as needed
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-import { MockRuleMigrationsDataClient } from '../../data/__mocks__/mocks';
-
-const mockRuleResourceIdentifier = jest.fn();
-const mockGetRuleResourceIdentifier = jest.fn((_: unknown) => mockRuleResourceIdentifier);
-jest.mock('../../../../../../common/siem_migrations/rules/resources', () => ({
-  getRuleResourceIdentifier: (params: unknown) => mockGetRuleResourceIdentifier(params),
-}));
+import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
 jest.mock('../../data/rule_migrations_data_service');
+jest.mock('../../../../../../common/siem_migrations/rules/resources');
+
+const MockResourceIdentifier = ResourceIdentifier as jest.Mock;
 
 describe('RuleResourceRetriever', () => {
   let retriever: RuleResourceRetriever;
-  const mockRuleMigrationsDataClient = new MockRuleMigrationsDataClient();
-  const migrationId = 'test-migration-id';
-  const ruleQuery = 'rule-query';
-  const originalRule = { query: ruleQuery } as OriginalRule;
+  let mockDataClient: jest.Mocked<RuleMigrationsDataClient>;
+  let mockResourceIdentifier: jest.Mocked<ResourceIdentifier>;
 
   beforeEach(() => {
-    retriever = new RuleResourceRetriever(migrationId, mockRuleMigrationsDataClient);
-    mockRuleResourceIdentifier.mockReturnValue({ list: [], macro: [] });
+    mockDataClient = {
+      resources: { searchBatches: jest.fn().mockReturnValue({ next: jest.fn(() => []) }) },
+    } as unknown as RuleMigrationsDataClient;
 
-    mockRuleMigrationsDataClient.resources.get.mockImplementation(
-      async (_: string, type: string, names: string[]) =>
-        names.map((name) => ({ type, name, content: `${name}-content` }))
-    );
+    retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient);
 
-    mockRuleResourceIdentifier.mockImplementation((query) => {
-      if (query === ruleQuery) {
-        return { list: ['list1', 'list2'], macro: ['macro1'] };
-      }
-      return { list: [], macro: [] };
-    });
-
-    jest.clearAllMocks();
+    MockResourceIdentifier.mockImplementation(() => ({
+      fromOriginalRule: jest.fn().mockReturnValue([]),
+      fromResources: jest.fn().mockReturnValue([]),
+    }));
+    mockResourceIdentifier = new MockResourceIdentifier(
+      'splunk'
+    ) as jest.Mocked<ResourceIdentifier>;
   });
 
-  describe('getResources', () => {
-    it('should call resource identification', async () => {
-      await retriever.getResources(originalRule);
+  it('throws an error if initialize is not called before getResources', async () => {
+    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
 
-      expect(mockGetRuleResourceIdentifier).toHaveBeenCalledWith(originalRule);
-      expect(mockRuleResourceIdentifier).toHaveBeenCalledWith(ruleQuery);
-      expect(mockRuleResourceIdentifier).toHaveBeenCalledWith('macro1-content');
+    await expect(retriever.getResources(originalRule)).rejects.toThrow(
+      'initialize must be called before calling getResources'
+    );
+  });
+
+  it('returns an empty object if no matching resources are found', async () => {
+    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
+
+    // Mock the resource identifier to return no resources
+    mockResourceIdentifier.fromOriginalRule.mockReturnValue([]);
+    await retriever.initialize(); // Pretend initialize has been called
+
+    const result = await retriever.getResources(originalRule);
+    expect(result).toEqual({});
+  });
+
+  it('returns matching macro and list resources', async () => {
+    const mockExistingResources = {
+      macro: { macro1: { name: 'macro1', type: 'macro' } },
+      list: { list1: { name: 'list1', type: 'list' } },
+    };
+    // Inject existing resources manually
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (retriever as any).existingResources = mockExistingResources;
+
+    const mockResourcesIdentified = [
+      { name: 'macro1', type: 'macro' as const },
+      { name: 'list1', type: 'list' as const },
+    ];
+    MockResourceIdentifier.mockImplementation(() => ({
+      fromOriginalRule: jest.fn().mockReturnValue(mockResourcesIdentified),
+      fromResources: jest.fn().mockReturnValue([]),
+    }));
+
+    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
+
+    const result = await retriever.getResources(originalRule);
+    expect(result).toEqual({
+      macro: [{ name: 'macro1', type: 'macro' }],
+      list: [{ name: 'list1', type: 'list' }],
     });
+  });
 
-    it('should retrieve resources', async () => {
-      const resources = await retriever.getResources(originalRule);
+  it('handles nested resources properly', async () => {
+    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
 
-      expect(mockRuleMigrationsDataClient.resources.get).toHaveBeenCalledWith(migrationId, 'list', [
-        'list1',
-        'list2',
-      ]);
-      expect(mockRuleMigrationsDataClient.resources.get).toHaveBeenCalledWith(
-        migrationId,
-        'macro',
-        ['macro1']
-      );
+    const mockExistingResources = {
+      macro: {
+        macro1: { name: 'macro1', type: 'macro' },
+        macro2: { name: 'macro2', type: 'macro' },
+      },
+      list: {
+        list1: { name: 'list1', type: 'list' },
+        list2: { name: 'list2', type: 'list' },
+      },
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (retriever as any).existingResources = mockExistingResources;
 
-      expect(resources).toEqual({
-        list: [
-          { type: 'list', name: 'list1', content: 'list1-content' },
-          { type: 'list', name: 'list2', content: 'list2-content' },
-        ],
-        macro: [{ type: 'macro', name: 'macro1', content: 'macro1-content' }],
-      });
-    });
+    const mockResourcesIdentifiedFromRule = [
+      { name: 'macro1', type: 'macro' as const },
+      { name: 'list1', type: 'list' as const },
+    ];
 
-    it('should retrieve nested resources', async () => {
-      mockRuleResourceIdentifier.mockImplementation((query) => {
-        if (query === ruleQuery) {
-          return { list: ['list1', 'list2'], macro: ['macro1'] };
-        }
-        if (query === 'macro1-content') {
-          return { list: ['list3'], macro: [] };
-        }
-        return { list: [], macro: [] };
-      });
+    const mockNestedResources = [
+      { name: 'macro2', type: 'macro' as const },
+      { name: 'list2', type: 'list' as const },
+    ];
 
-      const resources = await retriever.getResources(originalRule);
+    MockResourceIdentifier.mockImplementation(() => ({
+      fromOriginalRule: jest.fn().mockReturnValue(mockResourcesIdentifiedFromRule),
+      fromResources: jest.fn().mockReturnValue([]).mockReturnValueOnce(mockNestedResources),
+    }));
 
-      expect(mockRuleMigrationsDataClient.resources.get).toHaveBeenCalledWith(migrationId, 'list', [
-        'list1',
-        'list2',
-      ]);
-      expect(mockRuleMigrationsDataClient.resources.get).toHaveBeenCalledWith(
-        migrationId,
-        'macro',
-        ['macro1']
-      );
-      expect(mockRuleMigrationsDataClient.resources.get).toHaveBeenCalledWith(migrationId, 'list', [
-        'list3',
-      ]);
-
-      expect(resources).toEqual({
-        list: [
-          { type: 'list', name: 'list1', content: 'list1-content' },
-          { type: 'list', name: 'list2', content: 'list2-content' },
-          { type: 'list', name: 'list3', content: 'list3-content' },
-        ],
-        macro: [{ type: 'macro', name: 'macro1', content: 'macro1-content' }],
-      });
-    });
-
-    it('should handle missing macros', async () => {
-      mockRuleMigrationsDataClient.resources.get.mockImplementation(
-        async (_: string, type: string, names: string[]) => {
-          if (type === 'macro') {
-            return [];
-          }
-          return names.map((name) => ({ type, name, content: `${name}-content` }));
-        }
-      );
-
-      const resources = await retriever.getResources(originalRule);
-
-      expect(resources).toEqual({
-        list: [
-          { type: 'list', name: 'list1', content: 'list1-content' },
-          { type: 'list', name: 'list2', content: 'list2-content' },
-        ],
-      });
-    });
-
-    it('should handle missing lists', async () => {
-      mockRuleMigrationsDataClient.resources.get.mockImplementation(
-        async (_: string, type: string, names: string[]) => {
-          if (type === 'list') {
-            return [];
-          }
-          return names.map((name) => ({ type, name, content: `${name}-content` }));
-        }
-      );
-
-      const resources = await retriever.getResources(originalRule);
-
-      expect(resources).toEqual({
-        macro: [{ type: 'macro', name: 'macro1', content: 'macro1-content' }],
-      });
-    });
-
-    it('should not include resources with missing content', async () => {
-      mockRuleMigrationsDataClient.resources.get.mockImplementation(
-        async (_: string, type: string, names: string[]) => {
-          return names.map((name) => {
-            if (name === 'list1') {
-              return { type, name, content: '' };
-            }
-            return { type, name, content: `${name}-content` };
-          });
-        }
-      );
-
-      const resources = await retriever.getResources(originalRule);
-
-      expect(resources).toEqual({
-        list: [{ type: 'list', name: 'list2', content: 'list2-content' }],
-        macro: [{ type: 'macro', name: 'macro1', content: 'macro1-content' }],
-      });
-    });
-
-    it('should stop recursion after reaching MAX_RECURSION_DEPTH', async () => {
-      mockRuleResourceIdentifier.mockImplementation(() => {
-        return { list: [], macro: ['infinite-macro'] };
-      });
-
-      const resources = await retriever.getResources(originalRule);
-
-      expect(resources.macro?.length).toEqual(MAX_RECURSION_DEPTH);
+    const result = await retriever.getResources(originalRule);
+    expect(result).toEqual({
+      macro: [
+        { name: 'macro1', type: 'macro' },
+        { name: 'macro2', type: 'macro' },
+      ],
+      list: [
+        { name: 'list1', type: 'list' },
+        { name: 'list2', type: 'list' },
+      ],
     });
   });
 });

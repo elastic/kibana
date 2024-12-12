@@ -28,7 +28,7 @@ export const UploadRulesPanels = React.memo<UploadRulesPanelsProps>(({ migration
         <UploadRulesPanel isUploadMore />
       </EuiFlexItem>
       {migrationsStats.map((migrationStats) => (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} key={migrationStats.id}>
           {migrationStats.status === SiemMigrationTaskStatus.READY && (
             <MigrationReadyPanel migrationStats={migrationStats} />
           )}

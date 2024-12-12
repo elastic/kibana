@@ -16,11 +16,11 @@ const style = css`
   }
 `;
 
-export const SubStepWrapper = React.memo<PropsWithChildren<{}>>(({ children }) => {
+export const SubStepsWrapper = React.memo<PropsWithChildren<{}>>(({ children }) => {
   return (
     <EuiPanel hasShadow={false} paddingSize="xs" className={style}>
       {children}
     </EuiPanel>
   );
 });
-SubStepWrapper.displayName = 'SubStepWrapper';
+SubStepsWrapper.displayName = 'SubStepsWrapper';

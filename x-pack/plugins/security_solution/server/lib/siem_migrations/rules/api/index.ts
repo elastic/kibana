@@ -20,6 +20,7 @@ import { registerSiemRuleMigrationsResourceGetRoute } from './resources/get';
 import { registerSiemRuleMigrationsRetryRoute } from './retry';
 import { registerSiemRuleMigrationsInstallRoute } from './install';
 import { registerSiemRuleMigrationsInstallTranslatedRoute } from './install_translated';
+import { registerSiemRuleMigrationsResourceGetMissingRoute } from './resources/missing';
 import { registerSiemRuleMigrationsPrebuiltRulesRoute } from './get_prebuilt_rules';
 
 export const registerSiemRuleMigrationsRoutes = (
@@ -41,4 +42,5 @@ export const registerSiemRuleMigrationsRoutes = (
 
   registerSiemRuleMigrationsResourceUpsertRoute(router, logger);
   registerSiemRuleMigrationsResourceGetRoute(router, logger);
+  registerSiemRuleMigrationsResourceGetMissingRoute(router, logger);
 };

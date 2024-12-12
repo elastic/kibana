@@ -324,7 +324,7 @@ export const RuleMigrationResourceData = z.object({
   /**
    * The resource content value.
    */
-  content: z.string(),
+  content: z.string().optional(),
   /**
    * The resource arbitrary metadata.
    */

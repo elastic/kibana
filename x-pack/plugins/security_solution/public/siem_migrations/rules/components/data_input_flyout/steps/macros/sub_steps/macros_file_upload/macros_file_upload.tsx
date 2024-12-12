@@ -8,29 +8,27 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiText } from '@elastic/eui';
 import { isPlainObject } from 'lodash';
-import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import * as i18n from './translations';
+import type { RuleMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { FILE_UPLOAD_ERROR } from '../../../../translations';
+import type { SPLUNK_MACROS_COLUMNS } from '../../../../constants';
 import { useParseFileInput, type SplunkRow } from '../../../common/use_parse_file_input';
-import type { SPLUNK_RULES_COLUMNS } from '../../../../constants';
+import * as i18n from './translations';
 
-type SplunkRulesResult = Partial<Record<(typeof SPLUNK_RULES_COLUMNS)[number], string>>;
+type SplunkMacroResult = Partial<Record<(typeof SPLUNK_MACROS_COLUMNS)[number], string>>;
 
-export interface RulesFileUploadProps {
-  createMigration: CreateMigration;
+export interface MacrosFileUploadProps {
+  createResources: (resources: RuleMigrationResourceData[]) => void;
   apiError?: string;
   isLoading?: boolean;
-  isCreated?: boolean;
 }
-export const RulesFileUpload = React.memo<RulesFileUploadProps>(
-  ({ createMigration, apiError, isLoading, isCreated }) => {
+export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
+  ({ createResources, apiError, isLoading }) => {
     const onFileParsed = useCallback(
-      (content: Array<SplunkRow<SplunkRulesResult>>) => {
-        const rules = content.map(formatRuleRow);
-        createMigration(rules);
+      (content: Array<SplunkRow<SplunkMacroResult>>) => {
+        const rules = content.map(formatMacroRow);
+        createResources(rules);
       },
-      [createMigration]
+      [createResources]
     );
 
     const { parseFile, isParsing, error: fileError } = useParseFileInput(onFileParsed);
@@ -53,7 +51,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
         fullWidth
       >
         <EuiFilePicker
-          id="rulesFilePicker"
+          id="macrosFilePicker"
           fullWidth
           initialPromptText={
             <>
@@ -65,38 +63,27 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
           accept="application/json, application/x-ndjson"
           onChange={parseFile}
           display="large"
-          aria-label="Upload rules file"
+          aria-label="Upload logs sample file"
           isLoading={isParsing || isLoading}
-          disabled={isLoading || isCreated}
-          data-test-subj="rulesFilePicker"
+          disabled={isParsing || isLoading}
+          data-test-subj="macrosFilePicker"
           data-loading={isParsing}
         />
       </EuiFormRow>
     );
   }
 );
-RulesFileUpload.displayName = 'RulesFileUpload';
+MacrosFileUpload.displayName = 'MacrosFileUpload';
 
-const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
+const formatMacroRow = (row: SplunkRow<SplunkMacroResult>): RuleMigrationResourceData => {
   if (!isPlainObject(row.result)) {
     throw new Error(FILE_UPLOAD_ERROR.NOT_OBJECT);
   }
-  const originalRule: Partial<OriginalRule> = {
-    id: row.result.id,
-    vendor: 'splunk',
-    title: row.result.title,
-    query: row.result.search,
-    query_language: 'spl',
-    description: row.result['action.escu.eli5']?.trim() || row.result.description,
+  const macroResource: Partial<RuleMigrationResourceData> = {
+    type: 'macro',
+    name: row.result.title,
+    content: row.result.definition,
   };
-
-  if (row.result['action.correlationsearch.annotations']) {
-    try {
-      originalRule.annotations = JSON.parse(row.result['action.correlationsearch.annotations']);
-    } catch (error) {
-      delete originalRule.annotations;
-    }
-  }
-  // rule document format validation delegated to API
-  return originalRule as OriginalRule;
+  // resource document format validation delegated to API
+  return macroResource as RuleMigrationResourceData;
 };
