@@ -10,54 +10,49 @@ import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
-import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
+import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
+import { ESQL_TRANSLATE_ECS_MAPPING_PROMPT } from './prompts';
 
-interface GetTranslateRuleNodeParams {
+interface GetEcsMappingNodeParams {
   inferenceClient: InferenceClient;
   connectorId: string;
   logger: Logger;
 }
 
-export const getTranslateRuleNode = ({
+export const getEcsMappingNode = ({
   inferenceClient,
   connectorId,
   logger,
-}: GetTranslateRuleNodeParams): GraphNode => {
+}: GetEcsMappingNodeParams): GraphNode => {
   const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
-    const indexPatterns =
-      state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
-      'logs-*';
-    const integrationId = state.integration?.id || '';
-
-    const splunkRule = {
-      title: state.original_rule.title,
-      description: state.original_rule.description,
-      inline_query: state.inline_query,
+    const elasticRule = {
+      title: state.elastic_rule.title,
+      description: state.elastic_rule.description,
+      query: state.elastic_rule.query,
     };
 
-    const prompt = await ESQL_SYNTAX_TRANSLATION_PROMPT.format({
-      splunk_rule: JSON.stringify(splunkRule, null, 2),
-      indexPatterns,
+    const prompt = await ESQL_TRANSLATE_ECS_MAPPING_PROMPT.format({
+      field_mapping: SIEM_RULE_MIGRATION_CIM_ECS_MAP,
+      splunk_query: state.inline_query,
+      elastic_rule: JSON.stringify(elasticRule, null, 2),
     });
+
     const response = await esqlKnowledgeBaseCaller(prompt);
 
-    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
-    const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
+    const updatedQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
+    const ecsSummary = response.match(/## Field Mapping Summary[\s\S]*$/)?.[0] ?? '';
 
-    const translationResult = getTranslationResult(esqlQuery);
+    const translationResult = getTranslationResult(updatedQuery);
 
     return {
       response,
-      comments: [translationSummary],
+      comments: [ecsSummary],
+      translation_finalized: true,
       translation_result: translationResult,
       elastic_rule: {
-        title: state.original_rule.title,
-        integration_id: integrationId,
-        description: state.original_rule.description,
-        severity: 'low',
-        query: esqlQuery,
-        query_language: 'esql',
+        ...state.elastic_rule,
+        query: updatedQuery,
       },
     };
   };
