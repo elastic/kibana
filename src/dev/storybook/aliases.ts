@@ -12,7 +12,7 @@
 // If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
-  apm: 'x-pack/plugins/observability_solution/apm/.storybook',
+  apm: 'x-pack/solutions/observability/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'packages/kbn-cell-actions/.storybook',
@@ -45,7 +45,7 @@ export const storybookAliases = {
   grouping: 'packages/kbn-grouping/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/observability_solution/infra/.storybook',
-  inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
+  inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
   investigate: 'x-pack/plugins/observability_solution/investigate_app/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
@@ -56,7 +56,7 @@ export const storybookAliases = {
     'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
     'x-pack/plugins/observability_solution/observability_ai_assistant_app/.storybook',
-  observability_inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
+  observability_inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
   observability_shared: 'x-pack/plugins/observability_solution/observability_shared/.storybook',
   observability_slo: 'x-pack/plugins/observability_solution/slo/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
@@ -71,5 +71,5 @@ export const storybookAliases = {
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
-  profiling: 'x-pack/plugins/observability_solution/profiling/.storybook',
+  profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
 };

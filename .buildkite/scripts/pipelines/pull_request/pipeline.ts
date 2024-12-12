@@ -69,7 +69,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/apm/,
+        /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^packages\/kbn-apm-synthtrace/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -79,7 +79,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/inventory/,
+        /^x-pack\/solutions\/observability\/plugins\/inventory/,
         /^packages\/kbn-apm-synthtrace/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -100,7 +100,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/profiling/])) ||
+      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/profiling/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
@@ -133,7 +133,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/ux/,
+        /^x-pack\/solutions\/observability\/plugins\/ux/,
         /^x-pack\/plugins\/observability_solution\/exploratory_view/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')

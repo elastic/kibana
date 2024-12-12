@@ -153,7 +153,7 @@ usage looks like this
 ```
 
 there is an example in kibana example which you can view using
-`yarn start --run-examples` and view the code at [Exploratory view embeddable](../../../../../../examples/exploratory_view_example)
+`yarn start --run-examples` and view the code at [Exploratory view embeddable](../../../../../../solutions/observability/plugins/Users/gsoldevila/Work/kibana-quaternary/x-pack/examples/exploratory_view_example)
 
 #### Example
 A simple usage of lens embeddable example and playground options, run kibana with
