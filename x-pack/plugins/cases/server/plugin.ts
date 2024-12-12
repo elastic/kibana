@@ -42,6 +42,10 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
+import {
+  registerCaseAnalyticsIndexSyncTask,
+  scheduleCaseAnalyticsIndexSyncTask,
+} from './cases_analytics_index';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 
@@ -74,7 +78,10 @@ export class CasePlugin
     this.userProfileService = new UserProfileService(this.logger);
   }
 
-  public setup(core: CoreSetup, plugins: CasesServerSetupDependencies): CasesServerSetup {
+  public setup(
+    core: CoreSetup<CasesServerStartDependencies>,
+    plugins: CasesServerSetupDependencies
+  ): CasesServerSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -166,6 +173,14 @@ export class CasePlugin
       isServerlessSecurity,
     });
 
+    /**
+     * Cases analytics index sync
+     */
+    registerCaseAnalyticsIndexSyncTask({
+      core,
+      taskManager: plugins.taskManager,
+    });
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -181,9 +196,7 @@ export class CasePlugin
   public start(core: CoreStart, plugins: CasesServerStartDependencies): CasesServerStart {
     this.logger.debug(`Starting Case Workflow`);
 
-    if (plugins.taskManager) {
-      scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
-    }
+    scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
 
     this.userProfileService.initialize({
       spaces: plugins.spaces,
@@ -216,7 +229,14 @@ export class CasePlugin
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
       filesPluginStart: plugins.files,
+      taskManager: plugins.taskManager,
     });
+
+    scheduleCaseAnalyticsIndexSyncTask(plugins.taskManager)
+      .then(() => {
+        this.logger.info('Cases analytics index synching initialized');
+      })
+      .catch(() => {});
 
     return {
       getCasesClientWithRequest: this.getCasesClientWithRequest(core),

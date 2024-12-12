@@ -31,12 +31,12 @@
       "ruleRegistry",
       "files",
       "contentManagement",
-      "uiActions"
+      "uiActions",
+      "taskManager",
     ],
     "optionalPlugins": [
       "cloud",
       "home",
-      "taskManager",
       "usageCollection",
       "spaces",
       "serverless"
