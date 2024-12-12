@@ -99,7 +99,12 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const searchContextConfig = initializeSearchContext(initialState, internalApi, parentApi);
+      const searchContextConfig = initializeSearchContext(
+        initialState,
+        internalApi,
+        parentApi,
+        services
+      );
       const integrationsConfig = initializeIntegrations(getState, services);
       const actionsConfig = initializeActionApi(
         uuid,

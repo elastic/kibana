@@ -18,12 +18,18 @@ import {
   apiPublishesSearchSession,
 } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { buildObservableVariable } from '../helper';
-import { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '../types';
+import {
+  LensEmbeddableStartServices,
+  LensInternalApi,
+  LensRuntimeState,
+  LensUnifiedSearchContext,
+} from '../types';
 
 export function initializeSearchContext(
   initialState: LensRuntimeState,
   internalApi: LensInternalApi,
-  parentApi: unknown
+  parentApi: unknown,
+  { injectFilterReferences }: LensEmbeddableStartServices
 ): {
   api: PublishesUnifiedSearch & PublishesSearchSession;
   comparators: StateComparators<LensUnifiedSearchContext>;
@@ -38,7 +44,10 @@ export function initializeSearchContext(
 
   const [lastReloadRequestTime] = buildObservableVariable<number | undefined>(undefined);
 
-  const [filters$] = buildObservableVariable<Filter[] | undefined>(attributes.state.filters);
+  // Make sure the panel access the filters with the correct references
+  const [filters$] = buildObservableVariable<Filter[] | undefined>(
+    injectFilterReferences(attributes.state.filters, attributes.references)
+  );
 
   const [query$] = buildObservableVariable<Query | AggregateQuery | undefined>(
     attributes.state.query

@@ -126,9 +126,33 @@ export function initializeEditApi(
     stateApi.updateSavedObjectId(newState.savedObjectId);
   };
 
+  // Wrap the getState() when inline editing and make sure that the filters in the attributes
+  // are properly injected with the correct references to avoid issues when saving/navigating to the full editor
+  const getStateWithInjectedFilters = () => {
+    const currentState = getState();
+    // if there are no filters, avoid to copy the attributes
+    if (!currentState.attributes.state.filters.length) {
+      return currentState;
+    }
+    // otherwise make sure to inject the references into filters
+    return {
+      ...currentState,
+      attributes: {
+        ...currentState.attributes,
+        state: {
+          ...currentState.attributes.state,
+          filters: startDependencies.data.query.filterManager.inject(
+            currentState.attributes.state.filters,
+            currentState.attributes.references
+          ),
+        },
+      },
+    };
+  };
+
   const openInlineEditor = prepareInlineEditPanel(
     initialState,
-    getState,
+    getStateWithInjectedFilters,
     updateState,
     internalApi,
     panelManagementApi,
@@ -205,6 +229,9 @@ export function initializeEditApi(
         const rootEmbeddable = parentApi;
         const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
         const ConfigPanel = await openInlineEditor({
+          // the getState() here contains the wrong filters references
+          // but the input attributes are correct as openInlineEditor() handler is using
+          // the getStateWithInjectedFilters() function
           onApply: (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
           // restore the first state found when the panel opened
