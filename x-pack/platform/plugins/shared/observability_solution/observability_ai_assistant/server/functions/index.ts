@@ -15,7 +15,7 @@ import { registerKibanaFunction } from './kibana';
 import { registerExecuteConnectorFunction } from './execute_connector';
 import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../service/chat_function_client';
 
-// cannot be imported from x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/query/index.ts due to circular dependency
+// cannot be imported from x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/query/index.ts due to circular dependency
 export const QUERY_FUNCTION_NAME = 'query';
 
 export type FunctionRegistrationParameters = Omit<

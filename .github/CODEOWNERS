@@ -12,7 +12,7 @@ packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
-src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
+src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/platform/packages/private/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_components @elastic/ml-ui
@@ -359,7 +359,7 @@ x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-data-stream-adapter @elastic/security-threat-hunting
-x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
@@ -659,11 +659,11 @@ src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 packages/kbn-object-versioning-utils @elastic/appex-sharedux
-x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-ai-assistant
-x-pack/plugins/observability_solution/observability_ai_assistant_management @elastic/obs-ai-assistant
-x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
-x-pack/packages/observability/observability_ai/observability_ai_common @elastic/obs-ai-assistant
-x-pack/packages/observability/observability_ai/observability_ai_server @elastic/obs-ai-assistant
+x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
+x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
+x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
