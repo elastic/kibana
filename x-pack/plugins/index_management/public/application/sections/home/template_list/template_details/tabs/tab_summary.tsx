@@ -54,17 +54,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
     composedOf,
     order,
     indexPatterns = [],
-    indexMode,
     ilmPolicy,
     _meta,
     _kbnMeta: { isLegacy, hasDatastream },
     allowAutoCreate,
+    template,
   } = templateDetails;
 
   const numIndexPatterns = indexPatterns.length;
 
   const { history, core } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
+
+  const indexMode = template?.settings?.index?.mode;
 
   return (
     <>

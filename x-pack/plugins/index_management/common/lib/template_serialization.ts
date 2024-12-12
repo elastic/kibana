@@ -91,10 +91,12 @@ export function deserializeTemplate(
 
   const ilmPolicyName = settings?.index?.lifecycle?.name;
 
-  const indexMode = (settings?.index?.mode ??
-    (indexPatterns.some((pattern) => pattern === 'logs-*-*')
-      ? LOGSDB_INDEX_MODE
-      : STANDARD_INDEX_MODE)) as IndexMode;
+  const indexMode =
+    settings?.index?.mode ??
+    (dataStream &&
+      (indexPatterns.some((pattern) => pattern === 'logs-*-*')
+        ? LOGSDB_INDEX_MODE
+        : STANDARD_INDEX_MODE));
 
   const deserializedTemplate: TemplateDeserialized = {
     name,
