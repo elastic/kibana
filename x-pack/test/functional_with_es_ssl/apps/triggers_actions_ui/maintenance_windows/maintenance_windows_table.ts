@@ -227,7 +227,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         getService,
       });
       objectRemover.add(upcoming.id, 'rules/maintenance_window', 'alerting', true);
-      
+
       const archived = await createMaintenanceWindow({
         name: 'archived-maintenance-window',
         getService,
