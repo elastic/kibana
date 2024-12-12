@@ -25,14 +25,41 @@ export const CaseCustomFieldNumberWithValidationValueRt = ({ fieldName }: { fiel
   });
 
 export const CaseCustomFieldListWithValidationValueRt = (fieldValue: string) =>
-  rt.record(
-    rt.string,
-    limitedStringSchema({
-      fieldName: fieldValue,
-      min: 1,
-      max: MAX_CUSTOM_FIELD_OPTION_LENGTH,
-    })
+  new rt.Type(
+    'CaseCustomFieldListWithValidationValueRt',
+    rt.record(rt.string, rt.string).is,
+    (input, context) => {
+      if (typeof input !== 'object' || input === null) {
+        return rt.failure(input, context, 'Value must be an object.');
+      }
+
+      if (Object.keys(input).length === 0) {
+        return rt.failure(input, context, 'Value cannot be an empty object.');
+      }
+
+      if (Object.keys(input).length > 1) {
+        return rt.failure(input, context, 'Value must be a single key/value pair.');
+      }
+
+      if (Object.values(input)[0].length > MAX_CUSTOM_FIELD_OPTION_LENGTH) {
+        return rt.failure(
+          input,
+          context,
+          `The length of the label is too long. The maximum length is ${MAX_CUSTOM_FIELD_OPTION_LENGTH}.`
+        );
+      }
+      return rt.success(input);
+    },
+    rt.identity
   );
+// rt.record(
+//   rt.string,
+//   limitedStringSchema({
+//     fieldName: fieldValue,
+//     min: 1,
+//     max: MAX_CUSTOM_FIELD_OPTION_LENGTH,
+//   })
+// );
 
 /**
  * Update custom_field
