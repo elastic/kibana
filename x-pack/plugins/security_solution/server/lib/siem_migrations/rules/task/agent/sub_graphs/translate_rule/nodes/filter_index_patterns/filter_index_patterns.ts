@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { GraphNode } from '../../types';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import type { GraphNode } from '../../types';
 
 interface GetFilterIndexPatternsNodeParams {
   logger: Logger;
@@ -21,11 +21,11 @@ export const getFilterIndexPatternsNode = ({
   logger,
 }: GetFilterIndexPatternsNodeParams): GraphNode => {
   return async (state) => {
-    const query = state.elastic_rule.query;
+    const query = state.elastic_rule?.query;
 
-    if (query.includes('logs-*')) {
+    if (query && query.includes('logs-*')) {
       logger.debug('Replacing logs-* with a placeholder value');
-      newQuery = query.replace('logs-*', '[indexPattern:logs-*]');
+      const newQuery = query.replace('logs-*', '[indexPattern:logs-*]');
       return {
         elastic_rule: {
           ...state.elastic_rule,
@@ -35,6 +35,6 @@ export const getFilterIndexPatternsNode = ({
       };
     }
 
-    return { validation_errors: { iterations: currentIteration, esql_errors: esqlErrors } };
+    return {};
   };
 };
