@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -8,12 +8,14 @@
       "react",
       "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
-      "@testing-library/react",
+      "@testing-library/react"
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "kbn_references": [
-    "@kbn/ui-theme",
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/deeplinks-security"
   ],
   "exclude": ["target/**/*"]
 }
