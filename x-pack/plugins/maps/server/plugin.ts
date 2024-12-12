@@ -202,10 +202,16 @@ export class MapsPlugin implements Plugin {
             },
             ui: uiAllPrivileges,
             ...(version === 'v1' && {
-              replacedBy: [
-                { feature: 'maps_v2', privileges: ['all'] },
-                { feature: 'savedQueryManagement', privileges: ['all'] },
-              ],
+              replacedBy: {
+                default: [
+                  { feature: 'maps_v2', privileges: ['all'] },
+                  { feature: 'savedQueryManagement', privileges: ['all'] },
+                ],
+                minimal: [
+                  { feature: 'maps_v2', privileges: ['minimal_all'] },
+                  { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
+                ],
+              },
             }),
           },
           read: {
@@ -218,10 +224,16 @@ export class MapsPlugin implements Plugin {
             },
             ui: ['show'],
             ...(version === 'v1' && {
-              replacedBy: [
-                { feature: 'maps_v2', privileges: ['read'] },
-                { feature: 'savedQueryManagement', privileges: ['read'] },
-              ],
+              replacedBy: {
+                default: [
+                  { feature: 'maps_v2', privileges: ['read'] },
+                  { feature: 'savedQueryManagement', privileges: ['read'] },
+                ],
+                minimal: [
+                  { feature: 'maps_v2', privileges: ['minimal_read'] },
+                  { feature: 'savedQueryManagement', privileges: ['minimal_read'] },
+                ],
+              },
             }),
           },
         },

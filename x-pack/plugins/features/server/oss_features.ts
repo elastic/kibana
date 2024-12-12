@@ -401,10 +401,16 @@ const getBaseDiscoverFeature = ({
         },
         ui: uiAllPrivileges,
         ...(version === 'v1' && {
-          replacedBy: [
-            { feature: 'discover_v2', privileges: ['all'] },
-            { feature: 'savedQueryManagement', privileges: ['all'] },
-          ],
+          replacedBy: {
+            default: [
+              { feature: 'discover_v2', privileges: ['all'] },
+              { feature: 'savedQueryManagement', privileges: ['all'] },
+            ],
+            minimal: [
+              { feature: 'discover_v2', privileges: ['minimal_all'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
+            ],
+          },
         }),
       },
       read: {
@@ -417,10 +423,16 @@ const getBaseDiscoverFeature = ({
         },
         ui: ['show'],
         ...(version === 'v1' && {
-          replacedBy: [
-            { feature: 'discover_v2', privileges: ['read'] },
-            { feature: 'savedQueryManagement', privileges: ['read'] },
-          ],
+          replacedBy: {
+            default: [
+              { feature: 'discover_v2', privileges: ['read'] },
+              { feature: 'savedQueryManagement', privileges: ['read'] },
+            ],
+            minimal: [
+              { feature: 'discover_v2', privileges: ['minimal_read'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_read'] },
+            ],
+          },
         }),
       },
     },
@@ -534,10 +546,16 @@ const getBaseVisualizeFeature = ({
         },
         ui: uiAllPrivileges,
         ...(version === 'v1' && {
-          replacedBy: [
-            { feature: 'visualize_v2', privileges: ['all'] },
-            { feature: 'savedQueryManagement', privileges: ['all'] },
-          ],
+          replacedBy: {
+            default: [
+              { feature: 'visualize_v2', privileges: ['all'] },
+              { feature: 'savedQueryManagement', privileges: ['all'] },
+            ],
+            minimal: [
+              { feature: 'visualize_v2', privileges: ['minimal_all'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
+            ],
+          },
         }),
       },
       read: {
@@ -550,10 +568,16 @@ const getBaseVisualizeFeature = ({
         },
         ui: ['show'],
         ...(version === 'v1' && {
-          replacedBy: [
-            { feature: 'visualize_v2', privileges: ['read'] },
-            { feature: 'savedQueryManagement', privileges: ['read'] },
-          ],
+          replacedBy: {
+            default: [
+              { feature: 'visualize_v2', privileges: ['read'] },
+              { feature: 'savedQueryManagement', privileges: ['read'] },
+            ],
+            minimal: [
+              { feature: 'visualize_v2', privileges: ['minimal_read'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_read'] },
+            ],
+          },
         }),
       },
     },
@@ -653,10 +677,16 @@ const getBaseDashboardFeature = ({
         ui: uiAllPrivileges,
         api: apiAllPrivileges,
         ...(version === 'v1' && {
-          replacedBy: [
-            { feature: 'dashboard_v2', privileges: ['all'] },
-            { feature: 'savedQueryManagement', privileges: ['all'] },
-          ],
+          replacedBy: {
+            default: [
+              { feature: 'dashboard_v2', privileges: ['all'] },
+              { feature: 'savedQueryManagement', privileges: ['all'] },
+            ],
+            minimal: [
+              { feature: 'dashboard_v2', privileges: ['minimal_all'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
+            ],
+          },
         }),
       },
       read: {
@@ -669,10 +699,16 @@ const getBaseDashboardFeature = ({
         ui: ['show'],
         api: apiReadPrivileges,
         ...(version === 'v1' && {
-          replacedBy: [
-            { feature: 'dashboard_v2', privileges: ['read'] },
-            { feature: 'savedQueryManagement', privileges: ['read'] },
-          ],
+          replacedBy: {
+            default: [
+              { feature: 'dashboard_v2', privileges: ['read'] },
+              { feature: 'savedQueryManagement', privileges: ['read'] },
+            ],
+            minimal: [
+              { feature: 'dashboard_v2', privileges: ['minimal_read'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_read'] },
+            ],
+          },
         }),
       },
     },
