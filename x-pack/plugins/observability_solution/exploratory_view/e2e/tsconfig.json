@@ -6,5 +6,9 @@
     "outDir": "target/types",
     "types": ["node"]
   },
-  "kbn_references": ["@kbn/test", "@kbn/apm-plugin", "@kbn/es-archiver"]
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/repo-info",
+    "@kbn/observability-synthetics-test-data",
+  ]
 }
