@@ -153,7 +153,7 @@ const ClassicTopNav = () => {
 };
 
 const VerticalRule = styled.span`
-  width: 1px;
+  width: ${(props) => props.theme.euiTheme.border.width.thin};
   height: 20px;
   background-color: ${(props) => props.theme.euiTheme.colors.borderBaseSubdued};
 `;

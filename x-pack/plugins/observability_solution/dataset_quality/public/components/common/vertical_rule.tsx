@@ -15,7 +15,7 @@ export const VerticalRule = (props: React.ComponentProps<'span'>) => {
   return (
     <span
       css={css`
-        width: 1px;
+        width: ${euiTheme.border.width.thin};
         height: 63px;
         background-color: ${euiTheme.colors.borderBaseSubdued};
       `}

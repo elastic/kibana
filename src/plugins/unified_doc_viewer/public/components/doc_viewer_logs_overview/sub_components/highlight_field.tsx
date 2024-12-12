@@ -45,12 +45,7 @@ export function HighlightField({
   return formattedValue && value ? (
     <div {...props}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-        <EuiTitle
-          css={css`
-            color: ${euiTheme.colors.textHeading};
-          `}
-          size="xxxs"
-        >
+        <EuiTitle size="xxxs">
           <span>{label}</span>
         </EuiTitle>
         {hasFieldDescription ? <HighlightFieldDescription fieldMetadata={fieldMetadata} /> : null}

@@ -12,13 +12,15 @@ import styled from '@emotion/styled';
 export const ActiveHighlightMarker = styled.mark`
   color: ${({ theme }) => theme.euiTheme.colors.textParagraph};
   background-color: ${({ theme }) => theme.euiTheme.colors.backgroundFilledAccent};
-  outline: 1px solid ${({ theme }) => theme.euiTheme.colors.backgroundFilledAccent};
+  outline: ${({ theme }) =>
+    `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.backgroundFilledAccent}`};
 `;
 
 export const HighlightMarker = styled.mark`
   color: ${({ theme }) => theme.euiTheme.colors.textParagraph};
   background-color: ${({ theme }) => theme.euiTheme.colors.backgroundLightAccent};
-  outline: 1px solid ${({ theme }) => theme.euiTheme.colors.backgroundLightAccent};
+  outline: ${({ theme }) =>
+    `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.backgroundLightAccent}`};
 `;
 
 export const highlightFieldValue = (
