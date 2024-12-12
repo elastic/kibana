@@ -4874,26 +4874,6 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
               },
               {
-                "plugin": "entityManager",
-                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/enable.ts"
-              },
-              {
-                "plugin": "entityManager",
-                "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
-              },
-              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/observability_solution/apm/server/lib/helpers/get_random_sampler/index.ts"
               },
@@ -4920,6 +4900,26 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/lib/auth/api_key/api_key.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/enable.ts"
+              },
+              {
+                "plugin": "entityManager",
+                "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "synthetics",
