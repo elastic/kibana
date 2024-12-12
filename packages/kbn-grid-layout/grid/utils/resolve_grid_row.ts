@@ -78,6 +78,21 @@ const compactGridRow = (originalLayout: GridRowData) => {
   return nextRowData;
 };
 
+/**
+ * Our collision resolution algorithm works as follows:
+ * - Start by creating a 2D grid that contains arrays of panel IDs (i.e. a 3D array)
+ *      - If a panel occupies a cell, then its panel ID is pushed into the cell array
+ * - Once you have this representation, row by row, resolve the collisions; i.e.
+ *      - for each row,
+ *           - while there are collisions
+ *                - for each colliding panel, in reverse order,
+ *                     - move the panel down by a single row
+ *                     - if no collisions, break; otherwise, proceed to next panel
+ *  Notes:
+ *      - We know there is a collision if the panel ID array of a cell contains more than one ID
+ *      - Pushing panels down is done in reverse order in order to maintain the original order of panels
+ *           - i.e. the bottom-right-most panel is pushed down **first**
+ */
 export const resolveGridRow = (
   originalRowData: GridRowData,
   columnCount: number,
@@ -89,14 +104,12 @@ export const resolveGridRow = (
     nextRowData.panels[dragRequest.id] = dragRequest;
   }
 
-  // calculate the total height of the grid
+  // build an empty 2D array representing the current grid
   const panelRows = Object.values(nextRowData.panels).map(
     ({ row: panelRow, height: panelHeight }) => panelRow + panelHeight
   );
   if (panelRows.length === 0) return nextRowData;
   const rowCount = Math.max(...panelRows);
-
-  // build an empty 2D array representing the current grid
   const collisionGrid: string[][][] = new Array(rowCount)
     .fill(null)
     .map(() => new Array(columnCount).fill(null).map(() => new Array(0)));
