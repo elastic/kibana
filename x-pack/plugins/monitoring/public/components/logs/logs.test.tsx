@@ -19,7 +19,17 @@ jest.mock('../../legacy_shims', () => ({
   },
 }));
 
-const sharePlugin = sharePluginMock.createStartContract();
+const sharePlugin = {
+  url: {
+    locators: {
+      get: () => {
+        const locatorMock = sharePluginMock.createLocator();
+        locatorMock.getRedirectUrl.mockReturnValue('http://localhost:5601/app/discover');
+        return locatorMock;
+      },
+    },
+  },
+} as unknown as ReturnType<typeof sharePluginMock.createStartContract>;
 
 const logs = {
   enabled: true,
