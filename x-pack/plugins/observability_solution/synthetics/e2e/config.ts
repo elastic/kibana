@@ -10,8 +10,8 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { get } from 'lodash';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
+import { readKibanaConfig } from '@kbn/observability-synthetics-test-data';
 
-import { readKibanaConfig } from './tasks/read_kibana_config';
 const MANIFEST_KEY = 'xpack.uptime.service.manifestUrl';
 const SERVICE_PASSWORD = 'xpack.uptime.service.password';
 const SERVICE_USERNAME = 'xpack.uptime.service.username';
