@@ -116,6 +116,7 @@ import {
   setDataViews,
   setInspector,
   getTypes,
+  setNotifications,
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
@@ -487,6 +488,7 @@ export class VisualizationsPlugin
     setSavedSearch(savedSearch);
     setDataViews(dataViews);
     setInspector(inspector);
+    setNotifications(core.notifications);
 
     if (spaces) {
       setSpaces(spaces);
