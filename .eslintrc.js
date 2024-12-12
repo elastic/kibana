@@ -915,9 +915,9 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
@@ -936,8 +936,8 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
-        'x-pack/plugins/observability_solution/observability/**/*.stories.*',
-        'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
         'x-pack/plugins/observability_solution/slo/**/*.stories.*',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1013,7 +1013,7 @@ module.exports = {
     {
       // disable imports from legacy uptime plugin
       files: [
-        'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-restricted-imports': [
@@ -1102,7 +1102,7 @@ module.exports = {
         'x-pack/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
@@ -1140,7 +1140,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
@@ -1155,7 +1155,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1176,7 +1176,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
@@ -1210,7 +1210,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
@@ -1309,8 +1309,8 @@ module.exports = {
       overrides: [
         {
           files: [
-            'x-pack/packages/security-solution/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
