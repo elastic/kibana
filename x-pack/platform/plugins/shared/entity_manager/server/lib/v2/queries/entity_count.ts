@@ -8,6 +8,7 @@
 import { compact, last } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { EntitySourceDefinition } from '../types';
+import { asKeyword } from './utils';
 
 const fromCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {
   let command = `FROM ${sources.flatMap((source) => source.index_patterns).join(', ')}`;
@@ -62,7 +63,7 @@ const dslFilter = ({
 const statsCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {
   const commands = [
     sources.length === 1
-      ? `STATS BY ${sources[0].identity_fields.join(', ')}`
+      ? `STATS BY ${sources[0].identity_fields.map(asKeyword).join(', ')}`
       : `STATS BY entity.id`,
     'STATS count = COUNT()',
   ];
@@ -96,8 +97,8 @@ const idEvalCommand = ({ sources }: { sources: EntitySourceDefinition[] }) => {
     return [
       `is_source_${index}`,
       source.identity_fields.length === 1
-        ? source.identity_fields[0]
-        : `CONCAT(${source.identity_fields.join(', ":", ')})`,
+        ? asKeyword(source.identity_fields[0])
+        : `CONCAT(${source.identity_fields.map(asKeyword).join(', ":", ')})`,
     ];
   });
   return `EVAL entity.id = CASE(${conditions.join(', ')})`;

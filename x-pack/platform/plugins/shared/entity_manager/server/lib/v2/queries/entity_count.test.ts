@@ -26,7 +26,7 @@ describe('getEntityCountQuery', () => {
       end: '2024-11-20T20:00:00.000Z',
     });
 
-    expect(query).toEqual('FROM logs-* | STATS BY service.name | STATS count = COUNT()');
+    expect(query).toEqual('FROM logs-* | STATS BY service.name::keyword | STATS count = COUNT()');
 
     expect(filter).toEqual({
       bool: {
@@ -144,7 +144,7 @@ describe('getEntityCountQuery', () => {
       'FROM metrics-*, logs-* METADATA _index | ' +
         'EVAL is_source_0 = _index LIKE "metrics-**" OR _index LIKE ".ds-metrics-**" | ' +
         'EVAL is_source_1 = _index LIKE "logs-**" OR _index LIKE ".ds-logs-**" | ' +
-        'EVAL entity.id = CASE(is_source_0, service_name, is_source_1, service.name) | ' +
+        'EVAL entity.id = CASE(is_source_0, service_name::keyword, is_source_1, service.name::keyword) | ' +
         'WHERE entity.id IS NOT NULL | ' +
         'STATS BY entity.id | ' +
         'STATS count = COUNT()'
