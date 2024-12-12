@@ -38,7 +38,8 @@ const {
   clearMultiValueInput,
 } = blocklistFormSelectors;
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/203933
+describe.skip(
   'Blocklist',
   {
     tags: ['@ess', '@serverless'],

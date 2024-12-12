@@ -17,9 +17,15 @@ import type {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
-  return allDeprecations.filter(
-    (deprecation) => deprecation.deprecationType === 'api'
-  ) as unknown as Array<DomainDeprecationDetails<ApiDeprecationDetails>>;
+  return (
+    allDeprecations
+      .filter(
+        (deprecation): deprecation is DomainDeprecationDetails<ApiDeprecationDetails> =>
+          deprecation.deprecationType === 'api'
+      )
+      // Ensure consistent sorting
+      .sort((a, b) => a.title.localeCompare(b.title))
+  );
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -28,8 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/199782
-  describe.skip('Kibana API Deprecations', function () {
+  describe('Kibana API Deprecations', function () {
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
