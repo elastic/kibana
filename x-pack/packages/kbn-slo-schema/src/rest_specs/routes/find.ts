@@ -23,7 +23,7 @@ const findSLOParamsSchema = t.partial({
   query: t.partial({
     filters: t.string,
     kqlQuery: t.string,
-    // Used for page pagination (until we migrate to cursor pagination)
+    // Used for page pagination
     page: t.string,
     perPage: t.string,
     sortBy: sortBySchema,
