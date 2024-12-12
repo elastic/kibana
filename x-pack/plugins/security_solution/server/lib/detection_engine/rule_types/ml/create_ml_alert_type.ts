@@ -18,7 +18,12 @@ import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<MachineLearningRuleParams, {}, {}, 'default'> => {
+): SecurityAlertType<
+  MachineLearningRuleParams,
+  { isLoggedRequestsEnabled?: boolean },
+  {},
+  'default'
+> => {
   const { experimentalFeatures, ml, licensing, scheduleNotificationResponseActionsService } =
     createOptions;
   return {
@@ -76,6 +81,7 @@ export const createMlAlertType = (
         alertSuppression: completeRule.ruleParams.alertSuppression,
         licensing,
       });
+      const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
 
       const wrapSuppressedHits: WrapSuppressedHits = (events, buildReasonMessage) =>
         wrapSuppressedAlerts({
@@ -93,7 +99,7 @@ export const createMlAlertType = (
           intendedTimestamp,
         });
 
-      const result = await mlExecutor({
+      const { result, loggedRequests } = await mlExecutor({
         completeRule,
         tuple,
         ml,
@@ -110,8 +116,9 @@ export const createMlAlertType = (
         isAlertSuppressionActive,
         experimentalFeatures,
         scheduleNotificationResponseActionsService,
+        isLoggedRequestsEnabled,
       });
-      return { ...result, state };
+      return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     },
   };
 };

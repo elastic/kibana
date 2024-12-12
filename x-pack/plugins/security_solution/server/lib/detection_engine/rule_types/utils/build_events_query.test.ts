@@ -23,9 +23,9 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
@@ -79,9 +79,9 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
@@ -176,9 +176,9 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
@@ -233,9 +233,9 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
@@ -290,9 +290,9 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
@@ -346,9 +346,9 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
@@ -409,9 +409,9 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
@@ -470,7 +470,7 @@ describe('create_signals', () => {
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
-    expect(query.track_total_hits).toEqual(false);
+    expect(query.body?.track_total_hits).toEqual(false);
   });
 
   test('if sortOrder is provided it should be included', () => {
@@ -487,12 +487,14 @@ describe('create_signals', () => {
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
-    expect(query.body.sort[0]).toEqual({
-      '@timestamp': {
-        order: 'desc',
-        unmapped_type: 'date',
+    expect(query?.body?.sort).toEqual([
+      {
+        '@timestamp': {
+          order: 'desc',
+          unmapped_type: 'date',
+        },
       },
-    });
+    ]);
   });
 
   test('it respects sort order for timestampOverride', () => {
@@ -508,18 +510,20 @@ describe('create_signals', () => {
       sortOrder: 'desc',
       runtimeMappings: undefined,
     });
-    expect(query.body.sort[0]).toEqual({
-      'event.ingested': {
-        order: 'desc',
-        unmapped_type: 'date',
+    expect(query?.body?.sort).toEqual([
+      {
+        'event.ingested': {
+          order: 'desc',
+          unmapped_type: 'date',
+        },
       },
-    });
-    expect(query.body.sort[1]).toEqual({
-      '@timestamp': {
-        order: 'desc',
-        unmapped_type: 'date',
+      {
+        '@timestamp': {
+          order: 'desc',
+          unmapped_type: 'date',
+        },
       },
-    });
+    ]);
   });
 
   test('it respects overriderBody params', () => {
@@ -541,11 +545,11 @@ describe('create_signals', () => {
     expect(query).toEqual({
       allow_no_indices: true,
       index: ['auditbeat-*'],
-      size: 100,
       runtime_mappings: undefined,
       track_total_hits: undefined,
       ignore_unavailable: true,
       body: {
+        size: 100,
         query: {
           bool: {
             filter: [
