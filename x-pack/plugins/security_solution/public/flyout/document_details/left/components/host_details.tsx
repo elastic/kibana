@@ -25,14 +25,12 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { NetworkDetailsLink } from '../../../../common/components/links';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
@@ -110,7 +108,6 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
   const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
@@ -176,16 +173,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         render: (user: string) => (
           <EuiText grow={false} size="xs">
             <CellActions field={USER_NAME_FIELD_NAME} value={user}>
-              {isPreviewEnabled ? (
-                <PreviewLink
-                  field={USER_NAME_FIELD_NAME}
-                  value={user}
-                  scopeId={scopeId}
-                  data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
-                />
-              ) : (
-                <>{user}</>
-              )}
+              <PreviewLink
+                field={USER_NAME_FIELD_NAME}
+                value={user}
+                scopeId={scopeId}
+                data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
+              />
             </CellActions>
           </EuiText>
         ),
@@ -208,15 +201,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               render={(ip) =>
                 ip == null ? (
                   getEmptyTagValue()
-                ) : isPreviewEnabled ? (
+                ) : (
                   <PreviewLink
                     field={HOST_IP_FIELD_NAME}
                     value={ip}
                     scopeId={scopeId}
                     data-test-subj={HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID}
                   />
-                ) : (
-                  <NetworkDetailsLink ip={ip} />
                 )
               }
               scopeId={scopeId}
@@ -242,7 +233,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId, isPreviewEnabled]
+    [isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedUsersCount = useMemo(
@@ -273,19 +264,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   };
 
   const hostLink = useMemo(
-    () =>
-      isPreviewEnabled
-        ? {
-            callback: openHostPreview,
-            tooltip: i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.entities.host.hostPreviewTitle',
-              {
-                defaultMessage: 'Preview host',
-              }
-            ),
-          }
-        : undefined,
-    [isPreviewEnabled, openHostPreview]
+    () => ({
+      callback: openHostPreview,
+      tooltip: i18n.translate(
+        'xpack.securitySolution.flyout.left.insights.entities.host.hostPreviewTitle',
+        { defaultMessage: 'Preview host' }
+      ),
+    }),
+    [openHostPreview]
   );
 
   return (

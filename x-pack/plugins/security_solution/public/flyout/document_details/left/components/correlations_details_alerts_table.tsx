@@ -14,7 +14,6 @@ import { isRight } from 'fp-ts/lib/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import type { DataProvider } from '../../../../../common/types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
@@ -82,8 +81,6 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
-
   const { isPreview } = useDocumentDetailsContext();
 
   const onTableChange = useCallback(
@@ -129,21 +126,17 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
 
   const columns = useMemo(
     () => [
-      ...(isPreviewEnabled
-        ? [
-            {
-              render: (row: Record<string, unknown>) => (
-                <AlertPreviewButton
-                  id={row.id as string}
-                  indexName={row.index as string}
-                  data-test-subj={`${dataTestSubj}AlertPreviewButton`}
-                  scopeId={scopeId}
-                />
-              ),
-              width: '5%',
-            },
-          ]
-        : []),
+      {
+        render: (row: Record<string, unknown>) => (
+          <AlertPreviewButton
+            id={row.id as string}
+            indexName={row.index as string}
+            data-test-subj={`${dataTestSubj}AlertPreviewButton`}
+            scopeId={scopeId}
+          />
+        ),
+        width: '5%',
+      },
       {
         field: '@timestamp',
         name: (
@@ -176,20 +169,16 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
           const ruleId = row['kibana.alert.rule.uuid'] as string;
           return (
             <CellTooltipWrapper tooltip={ruleName}>
-              {isPreviewEnabled ? (
-                <PreviewLink
-                  field={ALERT_RULE_NAME}
-                  value={ruleName}
-                  scopeId={scopeId}
-                  ruleId={ruleId}
-                  isPreview={isPreview}
-                  data-test-subj={`${dataTestSubj}RulePreview`}
-                >
-                  <span>{ruleName}</span>
-                </PreviewLink>
-              ) : (
+              <PreviewLink
+                field={ALERT_RULE_NAME}
+                value={ruleName}
+                scopeId={scopeId}
+                ruleId={ruleId}
+                isPreview={isPreview}
+                data-test-subj={`${dataTestSubj}RulePreview`}
+              >
                 <span>{ruleName}</span>
-              )}
+              </PreviewLink>
             </CellTooltipWrapper>
           );
         },
@@ -229,7 +218,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [isPreviewEnabled, scopeId, dataTestSubj, isPreview]
+    [scopeId, dataTestSubj, isPreview]
   );
 
   return (

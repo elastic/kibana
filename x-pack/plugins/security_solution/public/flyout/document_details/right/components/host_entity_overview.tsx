@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   EuiIcon,
   useEuiTheme,
@@ -19,8 +18,6 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -44,7 +41,6 @@ import {
   LAST_SEEN,
   HOST_RISK_LEVEL,
 } from '../../../../overview/components/host_overview/translations';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
@@ -56,8 +52,6 @@ import {
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
@@ -85,21 +79,7 @@ export const HOST_PREVIEW_BANNER = {
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
-  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
-
-  const goToEntitiesTab = useCallback(() => {
-    openLeftPanel({
-      id: DocumentDetailsLeftPanelKey,
-      path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-      },
-    });
-  }, [eventId, openLeftPanel, indexName, scopeId]);
+  const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
 
@@ -212,34 +192,21 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
             <EuiIcon type={HOST_ICON} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isPreviewEnabled ? (
-              <PreviewLink
-                field={HOST_NAME_FIELD_NAME}
-                value={hostName}
-                scopeId={scopeId}
-                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-              >
-                <EuiText
-                  css={css`
-                    font-size: ${xsFontSize};
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  {hostName}
-                </EuiText>
-              </PreviewLink>
-            ) : (
-              <EuiLink
-                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+            <PreviewLink
+              field={HOST_NAME_FIELD_NAME}
+              value={hostName}
+              scopeId={scopeId}
+              data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
+            >
+              <EuiText
                 css={css`
                   font-size: ${xsFontSize};
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
-                onClick={goToEntitiesTab}
               >
                 {hostName}
-              </EuiLink>
-            )}
+              </EuiText>
+            </PreviewLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
