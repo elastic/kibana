@@ -10,7 +10,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import { NotificationsStart } from '@kbn/core/public';
 import {
   SavedObjectSaveModal,
   OnSaveProps,
@@ -21,8 +20,8 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  EmbeddableFactory,
-} from '..';
+} from '@kbn/embeddable-plugin/public';
+import { getNotifications } from '../../services';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -64,20 +63,10 @@ export class AttributeService<
   RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
   MetaInfo extends unknown = unknown
 > {
-  private embeddableFactory;
-
   constructor(
     private type: string,
-    private toasts: NotificationsStart['toasts'],
-    private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>,
-    getEmbeddableFactory?: (embeddableFactoryId: string) => EmbeddableFactory
-  ) {
-    if (getEmbeddableFactory) {
-      const factory = getEmbeddableFactory(this.type);
-
-      this.embeddableFactory = factory;
-    }
-  }
+    private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>
+  ) {}
 
   private async defaultUnwrapMethod(
     input: RefType
@@ -116,8 +105,8 @@ export class AttributeService<
       }
       return { ...originalInput } as RefType;
     } catch (error) {
-      this.toasts.addDanger({
-        title: i18n.translate('embeddableApi.attributeService.saveToLibraryError', {
+      getNotifications().toasts.addDanger({
+        title: i18n.translate('visualizations.attributeService.saveToLibraryError', {
           defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
           values: {
             errorMessage: error.message,
@@ -187,9 +176,7 @@ export class AttributeService<
               (input as ValType)[ATTRIBUTE_SERVICE_KEY].title
             )}
             showCopyOnSave={false}
-            objectType={
-              this.embeddableFactory ? this.embeddableFactory.getDisplayName() : this.type
-            }
+            objectType={this.type}
             showDescription={false}
           />
         );

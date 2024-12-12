@@ -26,7 +26,10 @@ import {
 import { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import { take } from 'rxjs';
-import { apiHasVisualizeConfig, HasVisualizeConfig } from '../legacy/embeddable';
+import {
+  apiHasVisualizeConfig,
+  type HasVisualizeConfig,
+} from '../embeddable/interfaces/has_visualize_config';
 import {
   apiHasExpressionVariables,
   HasExpressionVariables,
