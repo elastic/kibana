@@ -10,10 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const deleteCaseRoute = createCasesRoute({
   method: 'delete',
   path: CASES_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',
     summary: `Delete cases`,
