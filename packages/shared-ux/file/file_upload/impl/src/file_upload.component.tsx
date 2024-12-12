@@ -7,27 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+
 import {
-  EuiText,
-  EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
+  mathWithUnits,
 } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { euiThemeVars } from '@kbn/ui-theme';
+
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
-import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
-import { i18nTexts } from './i18n_texts';
-import { ControlButton, ClearButton } from './components';
+
+import { ClearButton, ControlButton } from './components';
 import { useUploadState } from './context';
+import { i18nTexts } from './i18n_texts';
 
 export interface Props {
   meta?: unknown;
@@ -40,8 +43,6 @@ export interface Props {
   initialFilePromptText?: string;
   className?: string;
 }
-
-const { euiFormMaxWidth, euiButtonHeightSmall } = euiThemeVars;
 
 const styles = {
   horizontalContainer: css`
@@ -79,12 +80,15 @@ export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
     const id = useGeneratedHtmlId({ prefix: 'filesFileUpload' });
     const errorId = `${id}_error`;
 
+    // FIXME: add a token for this on euiTheme.components. https://github.com/elastic/eui/issues/8217
+    const formMaxWidth = mathWithUnits(euiTheme.size.base, (x) => x * 25);
+
     return (
       <div
         data-test-subj="filesFileUpload"
         css={[
           css`
-            max-width: ${fullWidth ? '100%' : euiFormMaxWidth};
+            max-width: ${fullWidth ? '100%' : formMaxWidth};
           `,
           fullWidth ? styles.fullWidth : undefined,
           compressed ? styles.horizontalContainer : undefined,
@@ -143,7 +147,7 @@ export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
                 css={css`
                   display: flex;
                   align-items: center;
-                  min-height: ${euiButtonHeightSmall};
+                  min-height: ${euiTheme.size.xl};
                 `}
                 size="s"
                 color="danger"
