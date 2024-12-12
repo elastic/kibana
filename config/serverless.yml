@@ -11,21 +11,21 @@ xpack.fleet.internal.useMeteringApi: true
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
-  dashboard:
+  dashboard_v2:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
       all.composedOf:
-        - feature: "maps"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
+        - feature: 'maps_v2'
+          privileges: ['all']
+        - feature: 'visualize_v2'
+          privileges: ['all']
       ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
       ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
       read.composedOf:
-        - feature: "maps"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
+        - feature: 'maps_v2'
+          privileges: ['read']
+        - feature: 'visualize_v2'
+          privileges: ['read']
     ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
@@ -34,8 +34,17 @@ xpack.features.overrides:
       store_search_session.disabled: true
       url_create:
         disabled: true
-        includeIn: "read"
-  discover:
+        includeIn: 'read'
+  ### We need to disable the deprecated feature's sub-feature privileges too, or Kibana will fail to start with this error:
+  ### Error: Cannot replace privilege "{privilege}" of deprecated feature "{feature}" with disabled privilege "{privilege_v2}" of feature "{feature_v2}".
+  dashboard.subFeatures.privileges:
+    download_csv_report.disabled: true
+    generate_report.disabled: true
+    store_search_session.disabled: true
+    url_create:
+      disabled: true
+      includeIn: 'read'
+  discover_v2:
     ### All Discover sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
@@ -43,24 +52,32 @@ xpack.features.overrides:
       store_search_session.disabled: true
       url_create:
         disabled: true
-        includeIn: "read"
+        includeIn: 'read'
   ### Shared images feature is hidden in Role management since it's not needed.
   filesSharedImage.hidden: true
   ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps.hidden: true
+  maps_v2.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
   reporting:
     privileges:
       all.composedOf:
-        - feature: "dashboard"
-          privileges: [ "download_csv_report" ]
-        - feature: "discover"
-          privileges: [ "generate_report" ]
+        - feature: 'dashboard_v2'
+          privileges: ['download_csv_report']
+        - feature: 'discover_v2'
+          privileges: ['generate_report']
+  ### We need to disable the deprecated feature's sub-feature privileges too, or Kibana will fail to start with this error:
+  ### Error: Cannot replace privilege "{privilege}" of deprecated feature "{feature}" with disabled privilege "{privilege_v2}" of feature "{feature_v2}".
+  discover.subFeatures.privileges:
+    generate_report.disabled: true
+    store_search_session.disabled: true
+    url_create:
+      disabled: true
+      includeIn: 'read'
   ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  visualize:
+  visualize_v2:
     hidden: true
     ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
+    subFeatures.privileges.url_create.includeIn: 'read'
 
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
@@ -72,7 +89,7 @@ core.lifecycle.disablePreboot: true
 migrations.algorithm: zdt
 
 # Enable elasticsearch response size circuit breaker
-elasticsearch.maxResponseSize: "100mb"
+elasticsearch.maxResponseSize: '100mb'
 
 # Limit batch size to reduce possibility of failures.
 # A longer migration time is acceptable due to the ZDT algorithm.

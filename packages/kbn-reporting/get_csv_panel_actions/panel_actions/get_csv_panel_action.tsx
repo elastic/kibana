@@ -137,7 +137,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     const licenseHasCsvReporting = checkLicense(license.check('reporting', 'basic')).showLinks;
 
     // NOTE: For historical reasons capability identifier is called `downloadCsv. It can not be renamed.
-    const capabilityHasCsvReporting = application.capabilities.dashboard?.downloadCsv === true;
+    const capabilityHasCsvReporting = application.capabilities.dashboard_v2?.downloadCsv === true;
     if (!licenseHasCsvReporting || !capabilityHasCsvReporting) {
       return false;
     }

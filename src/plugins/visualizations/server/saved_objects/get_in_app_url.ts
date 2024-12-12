@@ -25,6 +25,6 @@ export function getInAppUrl(obj: VisualizationSavedObject) {
     ? undefined
     : {
         path: `/app/visualize#/edit/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'visualize.show',
+        uiCapabilitiesPath: 'visualize_v2.show',
       };
 }

@@ -138,8 +138,8 @@ export function makeDefaultServices(
       ...core.application,
       capabilities: {
         ...core.application.capabilities,
-        visualize: { save: true, saveQuery: true, show: true, createShortUrl: true },
-        dashboard: {
+        visualize_v2: { save: true, show: true, createShortUrl: true },
+        dashboard_v2: {
           showWriteControls: true,
         },
       },

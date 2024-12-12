@@ -16,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 
 const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 const discoverServiceMock = createDiscoverServicesMock();
-discoverServiceMock.capabilities.discover.save = true;
+discoverServiceMock.capabilities.discover_v2.save = true;
 
 describe('getTopNavBadges()', function () {
   test('should not return the unsaved changes badge if no changes', () => {
@@ -58,7 +58,7 @@ describe('getTopNavBadges()', function () {
 
   test('should not show save in unsaved changed badge for read-only user', async () => {
     const discoverServiceMockReadOnly = createDiscoverServicesMock();
-    discoverServiceMockReadOnly.capabilities.discover.save = false;
+    discoverServiceMockReadOnly.capabilities.discover_v2.save = false;
     const topNavBadges = getTopNavBadges({
       hasUnsavedChanges: true,
       services: discoverServiceMockReadOnly,

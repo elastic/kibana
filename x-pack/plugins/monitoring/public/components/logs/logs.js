@@ -180,7 +180,7 @@ export class LogsContent extends PureComponent {
 
   renderCallout() {
     const { capabilities: uiCapabilities, kibanaServices } = Legacy.shims;
-    const show = uiCapabilities.discover && uiCapabilities.discover.show;
+    const show = uiCapabilities.discover_v2 && uiCapabilities.discover_v2.show;
 
     const {
       logs: { enabled },

@@ -99,7 +99,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
   const openCasesModal = useCasesModal(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE);
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
   const casesPrivileges = cases?.helpers.canUseCases();
 
   const { anomalyExplorerCommonStateService, chartsStateService } = useAnomalyExplorerContext();

@@ -169,7 +169,7 @@ export async function mountApp(
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
-  if (!lensServices.application.capabilities.visualize.save) {
+  if (!lensServices.application.capabilities.visualize_v2.save) {
     coreStart.chrome.setBadge({
       text: i18n.translate('xpack.lens.badge.readOnly.text', {
         defaultMessage: 'Read only',
