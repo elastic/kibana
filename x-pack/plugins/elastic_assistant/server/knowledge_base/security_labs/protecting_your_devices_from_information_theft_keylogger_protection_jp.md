@@ -1,7 +1,7 @@
 ---
 title: "情報窃取から端末を守る"
 slug: "protecting-your-devices-from-information-theft-keylogger-protection-jp"
-date: "2020-05-30"
+date: "2024-05-30"
 subtitle: "Windows APIの挙動を用いたキーロガー検知"
 description: "本記事ではElastic Securityにおいて、エンドポイント保護を担っているElastic Defendに今年(バージョン8.12より)新たに追加された、キーロガーおよびキーロギング検出機能について紹介します。"
 author:
