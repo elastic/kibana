@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ai-assistant-icon",
+  "owner": "@elastic/appex-sharedux"
+}
