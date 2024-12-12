@@ -5292,7 +5292,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/deeplinks-management@link:packages/deeplinks/management":
+"@kbn/deeplinks-management@link:src/platform/packages/shared/deeplinks/management":
   version "0.0.0"
   uid ""
 
