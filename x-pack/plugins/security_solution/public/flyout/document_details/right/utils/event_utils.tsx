@@ -48,25 +48,3 @@ export const getEcsAllowedValueDescription = (fieldName: FieldName, value: strin
     })
   );
 };
-
-// mapping of event category to the field displayed as title
-export const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
-  authentication: 'user.name',
-  configuration: '',
-  database: '',
-  driver: '',
-  email: '',
-  file: 'file.name',
-  host: 'host.name',
-  iam: '',
-  intrusion_detection: '',
-  malware: '',
-  network: '',
-  package: '',
-  process: 'process.name',
-  registry: '',
-  session: '',
-  threat: '',
-  vulnerability: '',
-  web: '',
-};

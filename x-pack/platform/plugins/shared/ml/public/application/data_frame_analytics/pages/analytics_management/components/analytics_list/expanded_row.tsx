@@ -140,7 +140,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
               valueText={true}
               value={s.progress_percent}
               max={100}
-              color="success"
+              color="primary"
               size="s"
             />
           ),
