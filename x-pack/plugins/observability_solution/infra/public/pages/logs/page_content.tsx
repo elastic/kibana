@@ -19,7 +19,6 @@ import {
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { isDevMode } from '@kbn/xstate-utils';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -35,12 +34,6 @@ const LogEntryRatePage = dynamic(() =>
   import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
 );
 
-const StateMachinePlayground = dynamic(() =>
-  import('../../observability_logs/xstate_helpers').then((mod) => ({
-    default: mod.StateMachinePlayground,
-  }))
-);
-
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
 
@@ -49,8 +42,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
-
-  const enableDeveloperRoutes = isDevMode();
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
@@ -99,9 +90,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
         />
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
-        {enableDeveloperRoutes && (
-          <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
-        )}
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
