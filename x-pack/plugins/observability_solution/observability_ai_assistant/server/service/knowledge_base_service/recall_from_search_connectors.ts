@@ -155,12 +155,11 @@ async function recallFromLegacyConnectors({
         bool: {
           should: [
             {
-              text_expansion: {
-                [vectorField]: {
-                  model_text: text,
-                  model_id: modelId,
-                  boost,
-                },
+              sparse_vector: {
+                field: vectorField,
+                query: text,
+                inference_id: modelId, // TODO: use preconfigured ELSER endpoint `.elser-2-elasticsearch` when we can set `min_number_of_allocations:1`
+                boost,
               },
             },
           ],
