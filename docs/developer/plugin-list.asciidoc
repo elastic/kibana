@@ -775,7 +775,7 @@ Elastic.
 |This plugin adds extended support to Security Solution Fleet Osquery integration
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/painless_lab/README.md[painlessLab]
 |This plugin helps users learn how to use the Painless scripting language.
 
 

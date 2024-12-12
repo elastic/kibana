@@ -115,7 +115,7 @@
     "xpack.osquery": [
       "plugins/osquery"
     ],
-    "xpack.painlessLab": "plugins/painless_lab",
+    "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": [
       "plugins/observability_solution/profiling"
     ],
