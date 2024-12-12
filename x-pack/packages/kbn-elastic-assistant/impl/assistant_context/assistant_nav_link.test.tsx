@@ -23,13 +23,13 @@ const mockGetChromeStyle = jest.fn();
 const mockAssistantContext = {
   chrome: {
     getChromeStyle$: mockGetChromeStyle,
-    navControls: mockNavControls
+    navControls: mockNavControls,
   },
   showAssistantOverlay: mockShowAssistantOverlay,
   assistantAvailability: {
-    hasAssistantPrivilege: true
-  }
-}
+    hasAssistantPrivilege: true,
+  },
+};
 
 jest.mock('.', () => {
   return {
@@ -43,15 +43,12 @@ describe('AssistantNavLink', () => {
     jest.clearAllMocks();
     mockGetChromeStyle.mockReturnValue(of('classic'));
     (useAssistantContext as jest.Mock).mockReturnValue({
-      ...mockAssistantContext
-    })
+      ...mockAssistantContext,
+    });
   });
 
   it('should register link in nav bar', () => {
-    render(
-      <AssistantNavLink
-      />
-    );
+    render(<AssistantNavLink />);
     expect(mockNavControls.registerRight).toHaveBeenCalledTimes(1);
   });
 
@@ -128,9 +125,9 @@ describe('AssistantNavLink', () => {
     (useAssistantContext as jest.Mock).mockReturnValue({
       ...mockAssistantContext,
       assistantAvailability: {
-        hasAssistantPrivilege: false
-      }
-    })
+        hasAssistantPrivilege: false,
+      },
+    });
 
     const { queryByText, queryByTestId } = render(
       <>
