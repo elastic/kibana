@@ -6,8 +6,9 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { Stream } from 'openai/streaming';
 
-import { PassThrough, Stream } from 'stream';
+import { PassThrough } from 'stream';
 import { IncomingMessage } from 'http';
 
 import { AxiosError } from 'axios';
@@ -16,26 +17,33 @@ import {
   InferenceInferenceResponse,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { TransportRequestParams } from '@elastic/elasticsearch';
 import {
   ChatCompleteParamsSchema,
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
+  UnifiedChatCompleteParamsSchema,
 } from '../../../common/inference/schema';
 import {
   Config,
   Secrets,
   ChatCompleteParams,
   ChatCompleteResponse,
-  StreamingResponse,
   RerankParams,
   RerankResponse,
   SparseEmbeddingParams,
   SparseEmbeddingResponse,
   TextEmbeddingParams,
   TextEmbeddingResponse,
+  UnifiedChatCompleteParams,
+  UnifiedChatCompleteResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
 } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios
@@ -67,6 +75,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     });
 
     this.registerSubAction({
+      name: SUB_ACTION.UNIFIED_COMPLETION,
+      method: 'performApiUnifiedCompletionStream',
+      schema: UnifiedChatCompleteParamsSchema,
+    });
+
+    this.registerSubAction({
       name: SUB_ACTION.RERANK,
       method: 'performApiRerank',
       schema: RerankParamsSchema,
@@ -89,6 +103,12 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       method: 'performApiCompletionStream',
       schema: ChatCompleteParamsSchema,
     });
+
+    this.registerSubAction({
+      name: SUB_ACTION.COMPLETION_ASYNC_ITERATOR,
+      method: 'performApiUnifiedCompletionAsyncIterator',
+      schema: UnifiedChatCompleteParamsSchema,
+    });
   }
 
   /**
@@ -106,6 +126,28 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       signal
     );
     return response.completion!;
+  }
+
+  /**
+   * responsible for making a esClient inference method to perform chat completetion task endpoint and returning the service response data
+   * @param input the text on which you want to perform the inference task.
+   * @signal abort signal
+   */
+  public async performApiUnifiedCompletionStream(
+    params: UnifiedChatCompleteParams & { signal?: AbortSignal }
+  ): Promise<UnifiedChatCompleteResponse> {
+    const request: TransportRequestParams = {
+      method: 'POST',
+      path: `_inference/completion/${this.inferenceId}/_unified`,
+      body: params.body,
+    };
+    const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(request, {
+      headers: {
+        'content-type': 'dont-compress-this',
+      },
+    });
+
+    return response;
   }
 
   /**
@@ -198,17 +240,37 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     }
   }
 
-  private async streamAPI({
-    input,
-    signal,
-  }: ChatCompleteParams & { signal?: AbortSignal }): Promise<StreamingResponse> {
-    const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
-      true,
-      signal
-    );
-
-    return (response as unknown as Stream).pipe(new PassThrough());
+  /**
+   * Streamed requests (langchain)
+   * Uses the official OpenAI Node library, which handles Server-sent events for you.
+   * @param params - the request body
+   * @returns {
+   *  consumerStream: Stream<UnifiedChatCompleteResponse>; the result to be read/transformed on the server and sent to the client via Server Sent Events
+   *  tokenCountStream: Stream<UnifiedChatCompleteResponse>; the result for token counting stream
+   * }
+   */
+  public async performApiUnifiedCompletionAsyncIterator(
+    params: UnifiedChatCompleteParams & { signal?: AbortSignal },
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<{
+    consumerStream: Stream<UnifiedChatCompleteResponse>;
+    tokenCountStream: Stream<UnifiedChatCompleteResponse>;
+  }> {
+    try {
+      connectorUsageCollector.addRequestBodyBytes(undefined, params.body);
+      const stream = await this.esClient.transport.request<Stream<UnifiedChatCompleteResponse>>({
+        method: 'POST',
+        path: `_inference/completion/${this.inferenceId}/_unified`,
+        body: params.body,
+      });
+      // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
+      const teed = stream.tee();
+      return { consumerStream: teed[0], tokenCountStream: teed[1] };
+      // since we do not use the sub action connector request method, we need to do our own error handling
+    } catch (e) {
+      const errorMessage = this.getResponseErrorMessage(e);
+      throw new Error(errorMessage);
+    }
   }
 
   /**
@@ -222,11 +284,48 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   public async performApiCompletionStream({
     input,
     signal,
-  }: ChatCompleteParams & { signal?: AbortSignal }): Promise<IncomingMessage> {
-    const res = (await this.streamAPI({
-      input,
-      signal,
-    })) as unknown as IncomingMessage;
-    return res;
+  }: ChatCompleteParams & { signal?: AbortSignal }): Promise<PassThrough> {
+    const response = await this.performInferenceApi(
+      { inference_id: this.inferenceId, input, task_type: this.taskType as InferenceTaskType },
+      true,
+      signal
+    );
+    return (response as unknown as IncomingMessage).pipe(new PassThrough());
+  }
+
+  /**
+   *  retrieves a dashboard from the Kibana server and checks if the
+   *  user has the necessary privileges to access it.
+   * @param dashboardId The ID of the dashboard to retrieve.
+   */
+  public async getDashboard({
+    dashboardId,
+  }: DashboardActionParams): Promise<DashboardActionResponse> {
+    const privilege = (await this.esClient.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: ['.kibana-event-log-*'],
+            allow_restricted_indices: true,
+            privileges: ['read'],
+          },
+        ],
+      },
+    })) as { has_all_requested: boolean };
+
+    if (!privilege?.has_all_requested) {
+      return { available: false };
+    }
+
+    const response = await initDashboard({
+      logger: this.logger,
+      savedObjectsClient: this.savedObjectsClient,
+      dashboardId,
+      genAIProvider: 'OpenAI',
+    });
+
+    return { available: response.success };
   }
 }

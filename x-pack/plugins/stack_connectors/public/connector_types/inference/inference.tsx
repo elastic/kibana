@@ -19,6 +19,7 @@ import { InferenceActionParams, InferenceConnector } from './types';
 interface ValidationErrors {
   subAction: string[];
   input: string[];
+  body: string[];
   // rerank only
   query: string[];
   // text_embedding only
@@ -40,10 +41,17 @@ export function getConnectorType(): InferenceConnector {
       const translations = await import('./translations');
       const errors: ValidationErrors = {
         input: [],
+        body: [],
         subAction: [],
         inputType: [],
         query: [],
       };
+
+      if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
+        if (!subActionParams.body.messages.length) {
+          errors.body.push(translations.getRequiredMessage('Messages'));
+        }
+      }
 
       if (
         subAction === SUB_ACTION.RERANK ||

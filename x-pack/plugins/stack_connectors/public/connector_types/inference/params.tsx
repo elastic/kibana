@@ -17,6 +17,7 @@ import {
   RerankParams,
   SparseEmbeddingParams,
   TextEmbeddingParams,
+  UnifiedChatCompleteParams,
 } from '../../../common/inference/types';
 import { DEFAULTS_BY_TASK_TYPE } from './constants';
 import * as i18n from './translations';
@@ -28,25 +29,35 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 > = ({ actionParams, editAction, index, errors, actionConnector }) => {
   const { subAction, subActionParams } = actionParams;
 
-  const { taskType } = (actionConnector as unknown as InferenceActionConnector).config;
+  const { taskType, provider } = (actionConnector as unknown as InferenceActionConnector).config;
 
   useEffect(() => {
     if (!subAction) {
-      editAction('subAction', taskType, index);
+      editAction(
+        'subAction',
+        provider === 'openai' && taskType === SUB_ACTION.COMPLETION
+          ? SUB_ACTION.UNIFIED_COMPLETION
+          : taskType,
+        index
+      );
     }
-  }, [editAction, index, subAction, taskType]);
+  }, [editAction, index, provider, subAction, taskType]);
 
   useEffect(() => {
     if (!subActionParams) {
       editAction(
         'subActionParams',
         {
-          ...(DEFAULTS_BY_TASK_TYPE[taskType] ?? {}),
+          ...(DEFAULTS_BY_TASK_TYPE[
+            provider === 'openai' && taskType === SUB_ACTION.COMPLETION
+              ? SUB_ACTION.UNIFIED_COMPLETION
+              : taskType
+          ] ?? {}),
         },
         index
       );
     }
-  }, [editAction, index, subActionParams, taskType]);
+  }, [editAction, index, provider, subActionParams, taskType]);
 
   const editSubActionParams = useCallback(
     (params: Partial<InferenceActionParams['subActionParams']>) => {
@@ -61,6 +72,16 @@ const InferenceServiceParamsFields: React.FunctionComponent<
         errors={errors}
         editSubActionParams={editSubActionParams}
         subActionParams={subActionParams as ChatCompleteParams}
+      />
+    );
+  }
+
+  if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
+    return (
+      <UnifiedCompletionParamsFields
+        errors={errors}
+        editSubActionParams={editSubActionParams}
+        subActionParams={subActionParams as UnifiedChatCompleteParams}
       />
     );
   }
@@ -116,6 +137,32 @@ const InferenceInput: React.FunctionComponent<{
         fullWidth={true}
       />
     </EuiFormRow>
+  );
+};
+
+const UnifiedCompletionParamsFields: React.FunctionComponent<{
+  subActionParams: UnifiedChatCompleteParams;
+  errors: RuleFormParamsErrors;
+  editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
+}> = ({ subActionParams, editSubActionParams, errors }) => {
+  return (
+    <>
+      <JsonEditorWithMessageVariables
+        paramsProperty={'body'}
+        inputTargetValue={JSON.stringify(subActionParams.body)}
+        label={i18n.BODY}
+        errors={errors.body as string[]}
+        onDocumentsChange={(json: string) => {
+          editSubActionParams({ body: { ...JSON.parse(json) } });
+        }}
+        onBlur={() => {
+          if (!subActionParams.body) {
+            editSubActionParams({ body: { messages: [] } });
+          }
+        }}
+        dataTestSubj="inference-bodyJsonEditor"
+      />
+    </>
   );
 };
 
