@@ -2128,6 +2128,7 @@ x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elasti
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
+/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/security-solution @elastic/obs-ai-assistant
 /x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
 
 /x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution

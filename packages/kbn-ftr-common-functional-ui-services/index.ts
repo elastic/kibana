@@ -15,7 +15,7 @@ export type {
   CustomCheerioStatic,
 } from './services/web_element_wrapper/custom_cheerio_api';
 export { Browsers } from './services/remote/browsers';
-export { type Browser } from './services/browser';
+export { type Browser, type InterceptResponseFactory } from './services/browser';
 export {
   NETWORK_PROFILES,
   type NetworkOptions,
