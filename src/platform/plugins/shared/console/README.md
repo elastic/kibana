@@ -45,23 +45,23 @@ POST /_some_endpoint
 
 ## Architecture
 Console uses Monaco editor that is wrapped with [`kbn-monaco`](https://github.com/elastic/kibana/blob/main/packages/kbn-monaco/index.ts), so that if needed it can easily be replaced with another editor.
-The autocomplete logic is located in [`autocomplete`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/autocomplete) folder. Autocomplete rules are computed by classes in `components` sub-folder.
+The autocomplete logic is located in [`autocomplete`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/autocomplete) folder. Autocomplete rules are computed by classes in `components` sub-folder.
 
 ## Autocomplete definitions
 Kibana users benefit greatly from autocomplete suggestions since not all Elasticsearch APIs can be provided with a corresponding UI. Autocomplete suggestions improve usability of Console for any Elasticsearch API endpoint.
 Autocomplete definitions are all created in the form of javascript objects loaded from `json` and `js` files. 
 
 ### Creating definitions
-The [`generated`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/kibana-management) regularly runs the script to update the definitions and is planning to automate this process. 
+The [`generated`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/kibana-management) regularly runs the script to update the definitions and is planning to automate this process. 
 
-Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
+Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
 are not created by the script. Any other fixes such as documentation links, request methods and patterns and url parameters 
 should be addressed at the source. That means this should be fixed in Elasticsearch specifications and then 
 autocomplete definitions can be re-generated with the script. 
 
 If there are any endpoints missing completely from the `generated` folder, this should also be addressed at the source, i.e. 
 Elasticsearch specifications. If for some reason, that is not possible, then additional definitions files 
-can be placed in the folder [`manual`]((https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/manual)).
+can be placed in the folder [`manual`]((https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/manual)).
 
 ### Top level keys
 Use following top level keys in the definitions objects.
@@ -270,7 +270,7 @@ Use this type to copy a configuration object specified in a different endpoint d
 }
 ```
 #### Global scope (`GLOBAL`)
-Use `GLOBAL` keyword with `__scope_link` to refer to a reusable set of definitions created in the [`globals`](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/js/globals.ts) file.
+Use `GLOBAL` keyword with `__scope_link` to refer to a reusable set of definitions created in the [`globals`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/js/globals.ts) file.
 For example: 
 ```json
 {
@@ -282,12 +282,12 @@ For example:
 }
 ```
 #### Conditional definition (`__condition: { lines_regex: ... }`)
-To provide a different set of autocomplete suggestions based on the value configured in the request. For example, when creating a snapshot repository of different types (`fs`, `url` etc) different properties are displayed in the suggestions list based on the type. See [snapshot.create_repository.json](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides/snapshot.create_repository.json) for an example.
+To provide a different set of autocomplete suggestions based on the value configured in the request. For example, when creating a snapshot repository of different types (`fs`, `url` etc) different properties are displayed in the suggestions list based on the type. See [snapshot.create_repository.json](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides/snapshot.create_repository.json) for an example.
 
 
 ### Dynamic parameters
 Some autocomplete definitions need to be configured with dynamic values that can't be hard coded into a json or js file, for example a list of indices in the cluster. 
-A list of dynamic parameters is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/plugins/console/public/lib/kb/kb.js) file. The values of these parameters are assigned dynamically for every cluster. 
+A list of dynamic parameters is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/kb/kb.js) file. The values of these parameters are assigned dynamically for every cluster. 
 Use these dynamic parameters with curly braces, for example `{index}`, `{fields}`, `{template}` etc.
 
 Dynamic parameters can be used in url patterns, for example `{index}/_search`. Url patterns can also contain unknown parameters just to indicate that any value can be used in the url, for example in the url `/_ilm/policy/{policy}` the value for `{policy}` can be any accepted policy name and the dynamic parameter `{policy}` is not defined in the autocomplete engine. 
@@ -305,14 +305,14 @@ For request body parameters, only known dynamic properties are allowed. For exam
 If an unknown dynamic parameter (for example, `{my_param}`) is used in request body parameters, a warning will be logged in the browser: `[Console] no factory found for 'my_param'`.
 
 ### Architecture changes in 8.3 release (timeline: 07-04-2022 - 19-06-2022)
-One of the main changes in architecture is refactoring the retrieval of autocomplete suggestions. Console used to send a separate request to ES for each autocomplete entity (mappings, aliases, templates, data-streams etc) to retrieve the autocomplete suggestions via the original [hand-rolled ES proxy](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/routes/api/console/proxy/create_handler.ts). This had a few drawbacks:
+One of the main changes in architecture is refactoring the retrieval of autocomplete suggestions. Console used to send a separate request to ES for each autocomplete entity (mappings, aliases, templates, data-streams etc) to retrieve the autocomplete suggestions via the original [hand-rolled ES proxy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/routes/api/console/proxy/create_handler.ts). This had a few drawbacks:
 - The number of requests was dependent on the number of autocomplete entities, which was not scalable and could cause performance issues
 - It added unnecessary dependencies on the ES proxy
 - We risked fetching an enormous response payload for users who have a large number of mappings.
 
-To address these issues, we created a specific [route](https://github.com/elastic/kibana/blob/main/src/plugins/console/server/routes/api/console/autocomplete_entities/index.ts) in the Kibana server to retrieve all autocomplete entities in one request and send it to the client. The response for mappings capped to 10MB to avoid sending a huge payload. The client-side code was refactored to use the new response format. For more details, see [#130633](https://github.com/elastic/kibana/pull/130633).
+To address these issues, we created a specific [route](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts) in the Kibana server to retrieve all autocomplete entities in one request and send it to the client. The response for mappings capped to 10MB to avoid sending a huge payload. The client-side code was refactored to use the new response format. For more details, see [#130633](https://github.com/elastic/kibana/pull/130633).
 
-Another change is replacing jQuery with the core http client to communicate with the Kibana server. Console used a custom jQuery ajax [function](https://github.com/elastic/kibana/blob/8.0/src/plugins/console/public/lib/es/es.ts) to send requests to the Kibana server to have lower-level control over the requests, specifically controls like `crossDomain: true`. This is no longer needed since we are using the core http client. For more details, see [#127867](https://github.com/elastic/kibana/pull/127867).
+Another change is replacing jQuery with the core http client to communicate with the Kibana server. Console used a custom jQuery ajax [function](https://github.com/elastic/kibana/blob/8.0/src/platform/plugins/shared/console/public/lib/es/es.ts) to send requests to the Kibana server to have lower-level control over the requests, specifically controls like `crossDomain: true`. This is no longer needed since we are using the core http client. For more details, see [#127867](https://github.com/elastic/kibana/pull/127867).
 
 ### Outstanding issues
 #### Autocomplete suggestions for Kibana API endpoints

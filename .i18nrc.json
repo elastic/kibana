@@ -13,7 +13,7 @@
     "cases": ["packages/kbn-cases-components"],
     "cellActions": "packages/kbn-cell-actions",
     "charts": "src/plugins/charts",
-    "console": "src/plugins/console",
+    "console": "src/platform/plugins/shared/console",
     "contentManagement": "packages/content-management",
     "core": ["src/core", "packages/core"],
     "customIntegrations": "src/plugins/custom_integrations",

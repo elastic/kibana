@@ -20,7 +20,7 @@ const getDefaultElasticsearchConfig = () => {
   };
 };
 
-describe('plugins/console', function () {
+describe('platform/plugins/shared/console', function () {
   describe('#getElasticsearchProxyConfig', function () {
     it('sets timeout', function () {
       const value = 1000;
