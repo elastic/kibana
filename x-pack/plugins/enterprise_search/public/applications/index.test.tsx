@@ -26,6 +26,7 @@ import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { AppSearch } from './app_search';
 import { EnterpriseSearchOverview } from './enterprise_search_overview';
@@ -52,6 +53,7 @@ describe('renderApp', () => {
       security: securityMock.createStart(),
       share: sharePluginMock.createStartContract(),
       ml: mlPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
       user: {},
     },
     updateSideNavDefinition: jest.fn(),

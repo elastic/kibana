@@ -14,8 +14,11 @@ import { Store } from 'redux';
 
 import { of } from 'rxjs';
 
+import { CellActionsProvider } from '@kbn/cell-actions';
+
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -146,34 +149,41 @@ export const renderApp = (
     http,
     readOnlyMode,
   });
+
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <KibanaContextProvider
-          services={{
-            ...core,
-            ...plugins,
-          }}
-        >
-          <CloudContext>
-            <Provider store={store}>
-              <Router history={params.history}>
-                <App
-                  access={productAccess}
-                  appSearch={appSearch}
-                  configuredLimits={configuredLimits}
-                  enterpriseSearchVersion={enterpriseSearchVersion}
-                  features={features}
-                  kibanaVersion={kibanaVersion}
-                  readOnlyMode={readOnlyMode}
-                  searchOAuth={searchOAuth}
-                  workplaceSearch={workplaceSearch}
-                />
-              </Router>
-            </Provider>
-          </CloudContext>
-        </KibanaContextProvider>
+        <EuiThemeProvider darkMode={core.theme.getTheme().darkMode}>
+          <KibanaContextProvider
+            services={{
+              ...core,
+              ...plugins,
+            }}
+          >
+            <CellActionsProvider
+              getTriggerCompatibleActions={plugins.uiActions.getTriggerCompatibleActions}
+            >
+              <CloudContext>
+                <Provider store={store}>
+                  <Router history={params.history}>
+                    <App
+                      access={productAccess}
+                      appSearch={appSearch}
+                      configuredLimits={configuredLimits}
+                      enterpriseSearchVersion={enterpriseSearchVersion}
+                      features={features}
+                      kibanaVersion={kibanaVersion}
+                      readOnlyMode={readOnlyMode}
+                      searchOAuth={searchOAuth}
+                      workplaceSearch={workplaceSearch}
+                    />
+                  </Router>
+                </Provider>
+              </CloudContext>
+            </CellActionsProvider>
+          </KibanaContextProvider>
+        </EuiThemeProvider>
       </KibanaThemeProvider>
     </I18nProvider>,
     params.element
