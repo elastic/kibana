@@ -14,11 +14,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
 });
 
-/**
- * Skipping until the CI infrastructure is ready to
- * run k8s tests.
- */
-test.skip('Kubernetes EA', async ({
+test('Kubernetes EA', async ({
   page,
   onboardingHomePage,
   kubernetesEAFlowPage,
