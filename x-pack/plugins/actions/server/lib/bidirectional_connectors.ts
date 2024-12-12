@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-const BIDIRECTIONAL_CONNECTOR_TYPES = ['.sentinelone', '.crowdstrike'];
+const BIDIRECTIONAL_CONNECTOR_TYPES: readonly string[] = [
+  '.sentinelone',
+  '.crowdstrike',
+  '.microsoft_defender_endpoint',
+];
 export const isBidirectionalConnectorType = (type: string | undefined) => {
   if (!type) {
     return false;
