@@ -11087,6 +11087,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/finalize_migration:
     post:
+      deprecated: true
       description: |
         Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
         The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
@@ -11141,6 +11142,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration:
     delete:
+      deprecated: true
       description: |
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
         the migration process. A successful migration will result in both the old and new indices being present.
@@ -11198,6 +11200,7 @@ paths:
       tags:
         - Security Detections API
     post:
+      deprecated: true
       description: |
         Initiate a migration of detection alerts.
         Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
@@ -11261,6 +11264,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration_status:
     post:
+      deprecated: true
       description: Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
@@ -47876,9 +47880,9 @@ components:
         - assistant
       type: string
     Security_AI_Assistant_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_AI_Assistant_API_NormalizedAnonymizationFieldError:
       type: object
@@ -50822,9 +50826,9 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_NewTermsRuleCreateFields'
     Security_Detections_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Detections_API_NormalizedRuleAction:
       additionalProperties: false
@@ -54033,9 +54037,9 @@ components:
         - text
       type: string
     Security_Endpoint_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -54336,9 +54340,9 @@ components:
       required:
         - hostStatuses
     Security_Endpoint_Management_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Endpoint_Management_API_NoParametersRequestSchema:
       type: object
@@ -55541,9 +55545,9 @@ components:
         - text
       type: string
     Security_Exceptions_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Exceptions_API_PlatformErrorResponse:
       type: object
@@ -55787,9 +55791,9 @@ components:
         - text
       type: string
     Security_Lists_API_NonEmptyString:
-      description: A string that is not empty and does not contain only whitespace
+      description: A string that does not contain only whitespace characters
+      format: nonempty
       minLength: 1
-      pattern: ^(?! *$).+$
       type: string
     Security_Lists_API_PlatformErrorResponse:
       type: object

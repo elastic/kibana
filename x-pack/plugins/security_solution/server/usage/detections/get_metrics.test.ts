@@ -57,6 +57,7 @@ describe('Detections Usage and Metrics', () => {
         savedObjectsClient,
         logger,
         mlClient,
+        legacySignalsIndex: '',
       });
       expect(result).toEqual<DetectionMetrics>(getInitialDetectionMetrics());
     });
@@ -79,6 +80,7 @@ describe('Detections Usage and Metrics', () => {
         savedObjectsClient,
         logger,
         mlClient,
+        legacySignalsIndex: '',
       });
 
       expect(result).toEqual<DetectionMetrics>({
@@ -154,6 +156,7 @@ describe('Detections Usage and Metrics', () => {
         savedObjectsClient,
         logger,
         mlClient,
+        legacySignalsIndex: '',
       });
 
       expect(result).toEqual<DetectionMetrics>({
@@ -210,6 +213,7 @@ describe('Detections Usage and Metrics', () => {
         savedObjectsClient,
         logger,
         mlClient,
+        legacySignalsIndex: '',
       });
 
       expect(result).toEqual<DetectionMetrics>({
@@ -290,6 +294,7 @@ describe('Detections Usage and Metrics', () => {
         savedObjectsClient,
         logger,
         mlClient,
+        legacySignalsIndex: '',
       });
       expect(result).toEqual<DetectionMetrics>(getInitialDetectionMetrics());
     });
@@ -329,6 +334,7 @@ describe('Detections Usage and Metrics', () => {
         savedObjectsClient,
         logger,
         mlClient,
+        legacySignalsIndex: '',
       });
 
       expect(result).toEqual(
