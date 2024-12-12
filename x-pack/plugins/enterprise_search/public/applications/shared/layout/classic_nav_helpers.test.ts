@@ -22,23 +22,23 @@ describe('generateSideNavItems', () => {
   const deepLinksMap = {
     enterpriseSearch: {
       id: 'enterpriseSearch',
-      url: '/app/enterprise_search/overview',
+      url: '/app/elasticsearch/overview',
       title: 'Overview',
     },
     'enterpriseSearchContent:searchIndices': {
       id: 'enterpriseSearchContent:searchIndices',
       title: 'Indices',
-      url: '/app/enterprise_search/content/search_indices',
+      url: '/app/elasticsearch/content/search_indices',
     },
     'enterpriseSearchContent:connectors': {
       id: 'enterpriseSearchContent:connectors',
       title: 'Connectors',
-      url: '/app/enterprise_search/content/connectors',
+      url: '/app/elasticsearch/content/connectors',
     },
     'enterpriseSearchContent:webCrawlers': {
       id: 'enterpriseSearchContent:webCrawlers',
       title: 'Web Crawlers',
-      url: '/app/enterprise_search/content/crawlers',
+      url: '/app/elasticsearch/content/crawlers',
     },
   } as unknown as Record<string, ChromeNavLink | undefined>;
   beforeEach(() => {
@@ -58,7 +58,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
         name: 'Overview',
@@ -88,7 +88,7 @@ describe('generateSideNavItems', () => {
         id: 'parent',
         items: [
           {
-            href: '/app/enterprise_search/overview',
+            href: '/app/elasticsearch/overview',
             id: 'unit-test',
             isSelected: false,
             name: 'Overview',
@@ -113,7 +113,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
         name: 'Home',
@@ -141,7 +141,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/enterprise_search/overview',
+        href: '/app/elasticsearch/overview',
         id: 'unit-test',
         isSelected: false,
         name: 'Home',

@@ -334,6 +334,10 @@ export const useActionsLogFilter = ({
             return false;
           }
 
+          if (commandName === 'runscript' && !featureFlags.crowdstrikeRunScriptEnabled) {
+            return false;
+          }
+
           return true;
         }).map((commandName) => ({
           key: commandName,
