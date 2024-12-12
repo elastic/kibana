@@ -78,11 +78,11 @@ describe('ProfilesManager', () => {
 
     expect(mocks.ebtManagerMock.trackContextualProfileResolvedEvent).toHaveBeenNthCalledWith(1, {
       profileId: 'root-profile',
-      profileLevel: 'rootLevel',
+      contextLevel: 'rootLevel',
     });
     expect(mocks.ebtManagerMock.trackContextualProfileResolvedEvent).toHaveBeenNthCalledWith(2, {
       profileId: 'data-source-profile',
-      profileLevel: 'dataSourceLevel',
+      contextLevel: 'dataSourceLevel',
     });
   });
 
@@ -215,7 +215,7 @@ describe('ProfilesManager', () => {
     expect(profiles).toEqual([{}, {}, {}]);
     expect(mocks.ebtManagerMock.trackContextualProfileResolvedEvent).toHaveBeenCalledWith({
       profileId: 'document-profile',
-      profileLevel: 'documentLevel',
+      contextLevel: 'documentLevel',
     });
   });
 

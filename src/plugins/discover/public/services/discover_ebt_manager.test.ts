@@ -251,7 +251,7 @@ describe('DiscoverEBTManager', () => {
       });
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.rootLevel,
+        contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test',
       });
 
@@ -259,13 +259,13 @@ describe('DiscoverEBTManager', () => {
         1,
         'discover_profile_resolved',
         {
-          profileLevel: 'rootLevel',
+          contextLevel: 'rootLevel',
           profileId: 'test',
         }
       );
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.dataSourceLevel,
+        contextLevel: ContextualProfileLevel.dataSourceLevel,
         profileId: 'data-source-test',
       });
 
@@ -273,13 +273,13 @@ describe('DiscoverEBTManager', () => {
         2,
         'discover_profile_resolved',
         {
-          profileLevel: 'dataSourceLevel',
+          contextLevel: 'dataSourceLevel',
           profileId: 'data-source-test',
         }
       );
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.documentLevel,
+        contextLevel: ContextualProfileLevel.documentLevel,
         profileId: 'document-test',
       });
 
@@ -287,7 +287,7 @@ describe('DiscoverEBTManager', () => {
         3,
         'discover_profile_resolved',
         {
-          profileLevel: 'documentLevel',
+          contextLevel: 'documentLevel',
           profileId: 'document-test',
         }
       );
@@ -301,21 +301,21 @@ describe('DiscoverEBTManager', () => {
       });
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.rootLevel,
+        contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test1',
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.rootLevel,
+        contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test1',
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.rootLevel,
+        contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test2',
       });
 
@@ -330,14 +330,14 @@ describe('DiscoverEBTManager', () => {
       });
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.rootLevel,
+        contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test1',
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.rootLevel,
+        contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test1',
       });
 
@@ -347,7 +347,7 @@ describe('DiscoverEBTManager', () => {
       discoverEBTContextManager.onDiscoverAppMounted();
 
       discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        profileLevel: ContextualProfileLevel.rootLevel,
+        contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test1',
       });
 

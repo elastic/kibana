@@ -149,17 +149,17 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         });
 
         expect(events[0].properties).to.eql({
-          profileLevel: 'rootLevel',
+          contextLevel: 'rootLevel',
           profileId: 'observability-root-profile',
         });
 
         expect(events[1].properties).to.eql({
-          profileLevel: 'dataSourceLevel',
+          contextLevel: 'dataSourceLevel',
           profileId: 'default-data-source-profile',
         });
 
         expect(events[2].properties).to.eql({
-          profileLevel: 'dataSourceLevel',
+          contextLevel: 'dataSourceLevel',
           profileId: 'observability-logs-data-source-profile',
         });
 
@@ -187,7 +187,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         });
 
         expect(events[3].properties).to.eql({
-          profileLevel: 'dataSourceLevel',
+          contextLevel: 'dataSourceLevel',
           profileId: 'default-data-source-profile',
         });
 
@@ -222,7 +222,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         expect(events.length).to.be(4);
 
         expect(events[events.length - 1].properties).to.eql({
-          profileLevel: 'documentLevel',
+          contextLevel: 'documentLevel',
           profileId: 'observability-log-document-profile',
         });
       });

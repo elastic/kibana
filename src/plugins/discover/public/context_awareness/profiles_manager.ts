@@ -195,7 +195,7 @@ export class ProfilesManager {
         }
 
         this.ebtManager.trackContextualProfileResolvedEvent({
-          profileLevel: ContextualProfileLevel.documentLevel,
+          contextLevel: ContextualProfileLevel.documentLevel,
           profileId: context.profileId,
         });
 
@@ -239,11 +239,11 @@ export class ProfilesManager {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
     this.ebtManager.trackContextualProfileResolvedEvent({
-      profileLevel: ContextualProfileLevel.rootLevel,
+      contextLevel: ContextualProfileLevel.rootLevel,
       profileId: rootContextProfileId,
     });
     this.ebtManager.trackContextualProfileResolvedEvent({
-      profileLevel: ContextualProfileLevel.dataSourceLevel,
+      contextLevel: ContextualProfileLevel.dataSourceLevel,
       profileId: dataSourceContextProfileId,
     });
 

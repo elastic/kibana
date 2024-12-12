@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // but the data source profile should change because of the different data source
         expect(events[0].properties).to.eql({
-          profileLevel: 'dataSourceLevel',
+          contextLevel: 'dataSourceLevel',
           profileId: 'example-data-source-profile',
         });
 
@@ -178,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         expect(events[1].properties).to.eql({
-          profileLevel: 'dataSourceLevel',
+          contextLevel: 'dataSourceLevel',
           profileId: 'default-data-source-profile',
         });
 
@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(events.length).to.be(1);
 
         expect(events[0].properties).to.eql({
-          profileLevel: 'documentLevel',
+          contextLevel: 'documentLevel',
           profileId: 'default-document-profile',
         });
       });

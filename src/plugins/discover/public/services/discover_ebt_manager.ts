@@ -39,7 +39,7 @@ interface FieldUsageEventData {
  * Duplicated events for the same profile level will not be sent.
  */
 const CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved';
-const CONTEXTUAL_PROFILE_LEVEL = 'profileLevel';
+const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 const CONTEXTUAL_PROFILE_ID = 'profileId';
 
 interface ContextualProfileResolvedEventData {
@@ -269,25 +269,25 @@ export class DiscoverEBTManager {
   }
 
   public trackContextualProfileResolvedEvent({
-    profileLevel,
+    contextLevel,
     profileId,
   }: {
-    profileLevel: ContextualProfileLevel;
+    contextLevel: ContextualProfileLevel;
     profileId: string;
   }) {
     if (!this.reportEvent) {
       return;
     }
 
-    if (this.lastResolvedContextProfiles[profileLevel] === profileId) {
+    if (this.lastResolvedContextProfiles[contextLevel] === profileId) {
       // avoid sending duplicate events to EBT
       return;
     }
 
-    this.lastResolvedContextProfiles[profileLevel] = profileId;
+    this.lastResolvedContextProfiles[contextLevel] = profileId;
 
     const eventData: ContextualProfileResolvedEventData = {
-      [CONTEXTUAL_PROFILE_LEVEL]: profileLevel,
+      [CONTEXTUAL_PROFILE_LEVEL]: contextLevel,
       [CONTEXTUAL_PROFILE_ID]: profileId,
     };
 
