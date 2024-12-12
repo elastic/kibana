@@ -12,6 +12,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
+import { ActionVariable } from '@kbn/alerting-types';
 import {
   ChatCompleteParams,
   RerankParams,
@@ -26,7 +27,7 @@ import { InferenceActionConnector, InferenceActionParams } from './types';
 
 const InferenceServiceParamsFields: React.FunctionComponent<
   ActionParamsProps<InferenceActionParams>
-> = ({ actionParams, editAction, index, errors, actionConnector }) => {
+> = ({ actionParams, editAction, index, errors, actionConnector, messageVariables }) => {
   const { subAction, subActionParams } = actionParams;
 
   const { taskType, provider } = (actionConnector as unknown as InferenceActionConnector).config;
@@ -80,6 +81,7 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     return (
       <UnifiedCompletionParamsFields
         errors={errors}
+        messageVariables={messageVariables}
         editSubActionParams={editSubActionParams}
         subActionParams={subActionParams as UnifiedChatCompleteParams}
       />
@@ -144,16 +146,20 @@ const UnifiedCompletionParamsFields: React.FunctionComponent<{
   subActionParams: UnifiedChatCompleteParams;
   errors: RuleFormParamsErrors;
   editSubActionParams: (params: Partial<InferenceActionParams['subActionParams']>) => void;
-}> = ({ subActionParams, editSubActionParams, errors }) => {
+  messageVariables: ActionVariable[] | undefined;
+}> = ({ subActionParams, editSubActionParams, errors, messageVariables }) => {
+  const { body } = subActionParams ?? {};
+
   return (
     <>
       <JsonEditorWithMessageVariables
+        messageVariables={messageVariables}
         paramsProperty={'body'}
-        inputTargetValue={JSON.stringify(subActionParams.body)}
+        inputTargetValue={JSON.stringify(body)}
         label={i18n.BODY}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
-          editSubActionParams({ body: { ...JSON.parse(json) } });
+          editSubActionParams({ body: JSON.parse(json) });
         }}
         onBlur={() => {
           if (!subActionParams.body) {
