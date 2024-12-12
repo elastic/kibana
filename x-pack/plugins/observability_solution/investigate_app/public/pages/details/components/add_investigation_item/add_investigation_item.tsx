@@ -10,8 +10,8 @@ import { css } from '@emotion/css';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AddFromLibraryButton } from '../add_from_library_button';
 import { useInvestigation } from '../../contexts/investigation_context';
+import { AddFromLibraryButton } from '../add_from_library_button';
 import { EsqlWidgetPreview } from './esql_widget_preview';
 
 const emptyPreview = css`
