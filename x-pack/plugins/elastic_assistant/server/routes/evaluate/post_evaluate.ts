@@ -64,8 +64,12 @@ export const postEvaluateRoute = (
     .post({
       access: INTERNAL_API_ACCESS,
       path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['elasticAssistant'],
+        },
+      },
       options: {
-        tags: ['access:elasticAssistant'],
         timeout: {
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
@@ -150,6 +154,8 @@ export const postEvaluateRoute = (
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
 
           const inference = ctx.elasticAssistant.inference;
+          const productDocsAvailable =
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Data clients
           const anonymizationFieldsDataClient =
@@ -280,6 +286,7 @@ export const postEvaluateRoute = (
                 connectorId: connector.id,
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
+                ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
               };
 
               const tools: StructuredTool[] = assistantTools.flatMap(

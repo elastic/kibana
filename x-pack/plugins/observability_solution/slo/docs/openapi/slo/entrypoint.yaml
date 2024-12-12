@@ -12,8 +12,10 @@ tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
 servers:
-  - url: "http://localhost:5601"
-    description: local
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
 paths:
   "/s/{spaceId}/api/observability/slos":
     $ref: "paths/s@{spaceid}@api@slos.yaml"
@@ -31,17 +33,3 @@ paths:
   #   $ref: "paths/s@{spaceid}@api@slos@_definitions.yaml"
   "/s/{spaceId}/api/observability/slos/_delete_instances":
     $ref: "paths/s@{spaceid}@api@slos@_delete_instances.yaml"
-# Security is defined when files are joined in oas_docs
-# components:
-#   securitySchemes:
-#     basicAuth:
-#       type: http
-#       scheme: basic
-#     apiKeyAuth:
-#       type: apiKey
-#       in: header
-#       name: Authorization
-#       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-# security:
-#   - basicAuth: []
-#   - apiKeyAuth: []

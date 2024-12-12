@@ -66,8 +66,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
         const [core] = await getStartServices();
         const { application, chrome, executionContext } = core;
-        const { analytics, i18n: i18nStart, theme } = core;
-        const startServices = { analytics, i18n: i18nStart, theme };
+        const { analytics, i18n: i18nStart, theme, userProfile } = core;
+        const startServices = { analytics, i18n: i18nStart, theme, userProfile };
 
         this.docTitleService.setup(chrome.docTitle.change);
         this.breadcrumbService.setup(chrome.setBreadcrumbs);
@@ -116,7 +116,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]
           .filter(
             // Some tools do not use a string title, so we filter those out
-            (tool) => !tool.enableRouting && !tool.isDisabled() && typeof tool.title === 'string'
+            (tool) => !tool.isDisabled() && typeof tool.title === 'string'
           )
           .map((tool) => {
             const deepLink: AppDeepLink = {

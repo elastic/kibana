@@ -9,11 +9,12 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
 import {
+  ANOTHER_1024_CHARS,
+  CONSISTENT_TAGS,
+  MORE_THAN_1024_CHARS,
   createDegradedFieldsRecord,
   defaultNamespace,
   getInitialTestLogs,
-  ANOTHER_1024_CHARS,
-  MORE_THAN_1024_CHARS,
 } from './data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
@@ -44,14 +45,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const customComponentTemplateName = 'logs-synth@mappings';
 
   const nginxAccessDatasetName = 'nginx.access';
-  const customComponentTemplateNameNginx = 'logs-nginx.access@custom';
+  const customComponentTemplateNameNginx = `logs-${nginxAccessDatasetName}@custom`;
   const nginxAccessDataStreamName = `${type}-${nginxAccessDatasetName}-${defaultNamespace}`;
   const nginxPkg = {
     name: 'nginx',
     version: '1.23.0',
   };
 
-  describe('Degraded fields flyout', () => {
+  const apmAppDatasetName = 'apm.app.tug';
+  const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
+
+  describe('Degraded fields flyout', function () {
     describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([
@@ -183,6 +187,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     .timestamp(timestamp)
                 );
             }),
+          // Ingest Degraded Logs with 26 fields in Apm DataSet
+          timerange(moment(to).subtract(count, 'minute'), moment(to))
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => {
+              return Array(1)
+                .fill(0)
+                .flatMap(() =>
+                  log
+                    .create()
+                    .dataset(apmAppDatasetName)
+                    .message('a log message')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .service(serviceName)
+                    .namespace(defaultNamespace)
+                    .defaults({
+                      'service.name': serviceName,
+                      'trace.id': generateShortId(),
+                      test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
+                    })
+                    .timestamp(timestamp)
+                );
+            }),
         ]);
 
         // Set Limit of 25
@@ -196,6 +225,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Set Limit of 42
         await PageObjects.datasetQuality.setDataStreamSettings(nginxAccessDataStreamName, {
           'mapping.total_fields.limit': 42,
+        });
+
+        // Set Limit of 26
+        await PageObjects.datasetQuality.setDataStreamSettings(apmAppDataStreamName, {
+          'mapping.total_fields.limit': 25,
         });
 
         await synthtrace.index([
@@ -247,11 +281,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     .timestamp(timestamp)
                 );
             }),
+          // Ingest Degraded Logs with 27 fields in Apm APP DataSet
+          timerange(moment(to).subtract(count, 'minute'), moment(to))
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => {
+              return Array(1)
+                .fill(0)
+                .flatMap(() =>
+                  log
+                    .create()
+                    .dataset(apmAppDatasetName)
+                    .message('a log message')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .service(serviceName)
+                    .namespace(defaultNamespace)
+                    .defaults({
+                      'service.name': serviceName,
+                      'trace.id': generateShortId(),
+                      test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      'cloud.project.id': generateShortId(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
+                    })
+                    .timestamp(timestamp)
+                );
+            }),
         ]);
 
         // Rollover Datastream to reset the limit to default which is 1000
         await PageObjects.datasetQuality.rolloverDataStream(degradedDatasetWithLimitDataStreamName);
         await PageObjects.datasetQuality.rolloverDataStream(nginxAccessDataStreamName);
+        await PageObjects.datasetQuality.rolloverDataStream(apmAppDataStreamName);
 
         // Set Limit of 26
         await PageObjects.datasetQuality.setDataStreamSettings(
@@ -270,6 +331,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }) + '-000002',
           {
             'mapping.total_fields.limit': 43,
+          }
+        );
+
+        // Set Limit of 27
+        await PageObjects.datasetQuality.setDataStreamSettings(
+          PageObjects.datasetQuality.generateBackingIndexNameWithoutVersion({
+            dataset: apmAppDatasetName,
+          }) + '-000002',
+          {
+            'mapping.total_fields.limit': 27,
           }
         );
 
@@ -318,6 +389,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                    })
+                    .timestamp(timestamp)
+                );
+            }),
+          // Ingest Degraded Logs with 27 fields in Apm APP DataSet
+          timerange(moment(to).subtract(count, 'minute'), moment(to))
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) => {
+              return Array(1)
+                .fill(0)
+                .flatMap(() =>
+                  log
+                    .create()
+                    .dataset(apmAppDatasetName)
+                    .message('a log message')
+                    .logLevel(MORE_THAN_1024_CHARS)
+                    .service(serviceName)
+                    .namespace(defaultNamespace)
+                    .defaults({
+                      'service.name': serviceName,
+                      'trace.id': generateShortId(),
+                      test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      'cloud.project.id': generateShortId(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
                     })
                     .timestamp(timestamp)
                 );
@@ -722,6 +819,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
         });
 
+        it('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
+          await PageObjects.datasetQuality.navigateToDetails({
+            dataStream: apmAppDataStreamName,
+            expandedDegradedField: 'cloud.project',
+          });
+
+          // Field Limit Mitigation Section should exist
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutFieldLimitMitigationAccordion'
+          );
+
+          // Should display the panel to increase field limit
+          await testSubjects.existOrFail(
+            'datasetQualityDetailsDegradedFieldFlyoutIncreaseFieldLimitPanel'
+          );
+
+          // Should display official online documentation link
+          await testSubjects.existOrFail(
+            'datasetQualityManualMitigationsPipelineOfficialDocumentationLink'
+          );
+
+          const linkButton = await testSubjects.find(
+            'datasetQualityManualMitigationsPipelineOfficialDocumentationLink'
+          );
+
+          const linkURL = await linkButton.getAttribute('href');
+
+          expect(linkURL?.endsWith('mapping-settings-limit.html')).to.be(true);
+        });
+
         it('should display increase field limit as a possible mitigation for non integration', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: degradedDatasetWithLimitDataStreamName,
@@ -787,10 +914,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(newFieldLimit).to.be(newLimit);
 
           // Should display the apply button
-          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButtonButton');
+          await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingLimitButton');
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -817,7 +944,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
           const applyButtonDisabledStatus = await applyButton.getAttribute('disabled');
 
@@ -844,7 +971,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.tryForTime(5000, async () => {
             const applyButton = await testSubjects.find(
-              'datasetQualityIncreaseFieldMappingLimitButtonButton'
+              'datasetQualityIncreaseFieldMappingLimitButton'
             );
             await applyButton.click();
 
@@ -864,7 +991,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           const applyButton = await testSubjects.find(
-            'datasetQualityIncreaseFieldMappingLimitButtonButton'
+            'datasetQualityIncreaseFieldMappingLimitButton'
           );
 
           await applyButton.click();

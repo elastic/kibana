@@ -13,7 +13,11 @@ import { useDatasetQualityDetailsState } from '../../../../../hooks';
 import { getComponentTemplatePrefixFromIndexTemplate } from '../../../../../../common/utils/component_template_name';
 import { otherMitigationsCustomComponentTemplate } from '../../../../../../common/translations';
 
-export function CreateEditComponentTemplateLink({ isIntegration }: { isIntegration: boolean }) {
+export function CreateEditComponentTemplateLink({
+  areIntegrationAssetsAvailable,
+}: {
+  areIntegrationAssetsAvailable: boolean;
+}) {
   const {
     services: {
       application,
@@ -54,7 +58,7 @@ export function CreateEditComponentTemplateLink({ isIntegration }: { isIntegrati
     name,
   ]);
 
-  const templateUrl = isIntegration ? componentTemplatePath : indexTemplatePath;
+  const templateUrl = areIntegrationAssetsAvailable ? componentTemplatePath : indexTemplatePath;
 
   const onClickHandler = useCallback(async () => {
     const options = {

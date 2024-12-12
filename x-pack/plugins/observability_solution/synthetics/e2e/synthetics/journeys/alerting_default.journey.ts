@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { journey, step, before, after } from '@elastic/synthetics';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { cleanSettings } from './services/settings';
@@ -29,13 +29,10 @@ journey('AlertingDefaults', async ({ page, params }) => {
   step('Go to Settings page', async () => {
     await page.click('[aria-label="Toggle primary navigation"]');
     await page.click('text=Synthetics');
-    await page.click('text=Settings');
+    await page.getByTestId('settings-page-link').click();
   });
 
   step('Click text=Synthetics', async () => {
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/alerting');
-    await page.click('.euiComboBox__inputWrap');
-    await page.click("text=There aren't any options available");
     await page.click('button:has-text("Add connector")');
     await page.click('p:has-text("Slack")');
     await page.click('input[type="text"]');

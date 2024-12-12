@@ -41,6 +41,7 @@ import { SelfManagePreference } from './create_connector';
 
 interface StartStepProps {
   error?: string | React.ReactNode;
+  isRunningLocally: boolean;
   onSelfManagePreferenceChange(preference: SelfManagePreference): void;
   selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
@@ -49,6 +50,7 @@ interface StartStepProps {
 
 export const StartStep: React.FC<StartStepProps> = ({
   title,
+  isRunningLocally,
   selfManagePreference,
   setCurrentStep,
   onSelfManagePreferenceChange,
@@ -65,6 +67,7 @@ export const StartStep: React.FC<StartStepProps> = ({
     generatedConfigData,
     isGenerateLoading,
     isCreateLoading,
+    isFormDirty,
   } = useValues(NewConnectorLogic);
   const { setRawName, createConnector, generateConnectorName, setFormDirty } =
     useActions(NewConnectorLogic);
@@ -209,14 +212,17 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Elastic managed' }
                   )}
                   checked={selfManagePreference === 'native'}
-                  disabled={selectedConnector?.isNative === false}
+                  disabled={
+                    selectedConnector?.isNative === false || isRunningLocally || isFormDirty
+                  }
                   onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ConnectorDescriptionPopover
-                  isDisabled={selectedConnector?.isNative === false}
+                  showIsOnlySelfManaged={selectedConnector?.isNative === false}
+                  isRunningLocally={isRunningLocally}
                   isNative
                 />
               </EuiFlexItem>
@@ -229,12 +235,13 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Self-managed' }
                   )}
                   checked={selfManagePreference === 'selfManaged'}
+                  disabled={isFormDirty}
                   onChange={() => onSelfManagePreferenceChange('selfManaged')}
                   name="setUp"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover isDisabled={false} isNative={false} />
+                <ConnectorDescriptionPopover showIsOnlySelfManaged={false} isNative={false} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

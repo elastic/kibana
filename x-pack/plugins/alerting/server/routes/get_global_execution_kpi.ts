@@ -46,7 +46,8 @@ export const getGlobalExecutionKPIRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         return res.ok({
           body: await rulesClient.getGlobalExecutionKpiWithAuth(rewriteReq(req.query)),
         });

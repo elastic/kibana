@@ -856,7 +856,7 @@ describe('Create Lifecycle', () => {
     test('should return empty when nothing is registered', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       const result = registry.list();
-      expect(result).toMatchInlineSnapshot(`Set {}`);
+      expect(result).toMatchInlineSnapshot(`Map {}`);
     });
 
     test('should return registered types', () => {
@@ -888,8 +888,8 @@ describe('Create Lifecycle', () => {
       });
       const result = registry.list();
       expect(result).toMatchInlineSnapshot(`
-        Set {
-          Object {
+        Map {
+          "test" => Object {
             "actionGroups": Array [
               Object {
                 "id": "testActionGroup",

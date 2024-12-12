@@ -12,7 +12,6 @@ import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
@@ -25,7 +24,8 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
   toasts: ToastsStart;
   enabled?: boolean;
   params: {
-    featureIds: AlertConsumers[];
+    ruleTypeIds: string[];
+    consumers?: string[];
     groupByField: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
     filters?: QueryDslQueryContainer[];
@@ -49,7 +49,7 @@ export interface UseGetAlertsGroupAggregationsQueryProps {
  * `groupByField` buckets computed over a field with a null/absent value are marked with the
  * `isNullGroup` flag set to true and their key is set to the `--` string.
  *
- * Applies alerting RBAC through featureIds.
+ * Applies alerting RBAC through ruleTypeIds.
  */
 export const useGetAlertsGroupAggregationsQuery = <T>({
   http,
@@ -61,7 +61,7 @@ export const useGetAlertsGroupAggregationsQuery = <T>({
     if (error) {
       toasts.addDanger(
         i18n.translate(
-          'alertsUIShared.hooks.useFindAlertsQuery.unableToFetchAlertsGroupingAggregations',
+          'alertsUIShared.hooks.useGetAlertsGroupAggregationsQuery.unableToFetchAlertsGroupingAggregations',
           {
             defaultMessage: 'Unable to fetch alerts grouping aggregations',
           }

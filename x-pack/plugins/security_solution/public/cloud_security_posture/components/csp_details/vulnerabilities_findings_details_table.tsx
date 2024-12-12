@@ -9,8 +9,10 @@ import React, { memo, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  buildVulnerabilityEntityFlyoutPreviewQuery,
+  type VulnSeverity,
+} from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import type {
@@ -30,6 +32,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 type VulnerabilitiesFindingDetailFields = Pick<
@@ -52,14 +55,18 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     );
   }, []);
 
+  const [currentFilter, setCurrentFilter] = useState<string>('');
+
   const { data } = useVulnerabilitiesFindings({
-    query: buildEntityFlyoutPreviewQuery('host.name', value),
+    query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
     sort: [],
     enabled: true,
     pageSize: 1,
   });
 
-  const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
+  const { counts } = useHasVulnerabilities('host.name', value);
+
+  const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -119,6 +126,18 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       'vulnerabilities'
     );
   };
+
+  const vulnerabilityStats = getVulnerabilityStats(
+    {
+      critical,
+      high,
+      medium,
+      low,
+      none,
+    },
+    setCurrentFilter,
+    currentFilter
+  );
 
   const columns: Array<EuiBasicTableColumn<VulnerabilitiesFindingDetailFields>> = [
     {
@@ -220,15 +239,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
           <EuiIcon type={'popout'} />
         </SecuritySolutionLinkAnchor>
         <EuiSpacer size="xl" />
-        <DistributionBar
-          stats={getVulnerabilityStats({
-            critical: CRITICAL,
-            high: HIGH,
-            medium: MEDIUM,
-            low: LOW,
-            none: NONE,
-          })}
-        />
+        <DistributionBar stats={vulnerabilityStats} />
         <EuiSpacer size="l" />
         <EuiBasicTable
           items={pageOfItems || []}

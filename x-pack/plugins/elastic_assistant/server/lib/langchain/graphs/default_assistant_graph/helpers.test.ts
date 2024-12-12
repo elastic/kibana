@@ -117,6 +117,131 @@ describe('streamGraph', () => {
         );
       });
     });
+    it('on_llm_end events with finish_reason != stop should not end the stream', async () => {
+      mockStreamEvents.mockReturnValue({
+        next: jest
+          .fn()
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_stream',
+              data: { chunk: { message: { content: 'content' } } },
+              tags: [AGENT_NODE_TAG],
+            },
+            done: false,
+          })
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_end',
+              data: {
+                output: {
+                  generations: [[{ generationInfo: { finish_reason: 'function_call' }, text: '' }]],
+                },
+              },
+              tags: [AGENT_NODE_TAG],
+            },
+          })
+          .mockResolvedValue({
+            done: true,
+          }),
+        return: jest.fn(),
+      });
+
+      const response = await streamGraph(requestArgs);
+
+      expect(response).toBe(mockResponseWithHeaders);
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+      await waitFor(() => {
+        expect(mockOnLlmResponse).not.toHaveBeenCalled();
+      });
+    });
+    it('on_llm_end events without a finish_reason should end the stream', async () => {
+      mockStreamEvents.mockReturnValue({
+        next: jest
+          .fn()
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_stream',
+              data: { chunk: { message: { content: 'content' } } },
+              tags: [AGENT_NODE_TAG],
+            },
+            done: false,
+          })
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_end',
+              data: {
+                output: {
+                  generations: [[{ generationInfo: {}, text: 'final message' }]],
+                },
+              },
+              tags: [AGENT_NODE_TAG],
+            },
+          })
+          .mockResolvedValue({
+            done: true,
+          }),
+        return: jest.fn(),
+      });
+
+      const response = await streamGraph(requestArgs);
+
+      expect(response).toBe(mockResponseWithHeaders);
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+      await waitFor(() => {
+        expect(mockOnLlmResponse).toHaveBeenCalledWith(
+          'final message',
+          { transactionId: 'transactionId', traceId: 'traceId' },
+          false
+        );
+      });
+    });
+    it('on_llm_end events is called with chunks if there is no final text value', async () => {
+      mockStreamEvents.mockReturnValue({
+        next: jest
+          .fn()
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_stream',
+              data: { chunk: { message: { content: 'content' } } },
+              tags: [AGENT_NODE_TAG],
+            },
+            done: false,
+          })
+          .mockResolvedValueOnce({
+            value: {
+              name: 'ActionsClientChatOpenAI',
+              event: 'on_llm_end',
+              data: {
+                output: {
+                  generations: [[{ generationInfo: {}, text: '' }]],
+                },
+              },
+              tags: [AGENT_NODE_TAG],
+            },
+          })
+          .mockResolvedValue({
+            done: true,
+          }),
+        return: jest.fn(),
+      });
+
+      const response = await streamGraph(requestArgs);
+
+      expect(response).toBe(mockResponseWithHeaders);
+      expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
+      await waitFor(() => {
+        expect(mockOnLlmResponse).toHaveBeenCalledWith(
+          'content',
+          { transactionId: 'transactionId', traceId: 'traceId' },
+          false
+        );
+      });
+    });
   });
 
   describe('Tool Calling Agent and Structured Chat Agent streaming', () => {

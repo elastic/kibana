@@ -8,7 +8,7 @@
 import { Plugin, CoreSetup } from '@kbn/core/server';
 
 import { PluginSetupContract as ActionsSetup } from '@kbn/actions-plugin/server';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
+import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 import {
   getConnectorType as getSystemLogExampleConnectorType,
@@ -17,7 +17,7 @@ import {
 
 // this plugin's dependencies
 export interface TriggersActionsUiExampleDeps {
-  alerting: AlertingSetup;
+  alerting: AlertingServerSetup;
   actions: ActionsSetup;
 }
 export class TriggersActionsUiExamplePlugin

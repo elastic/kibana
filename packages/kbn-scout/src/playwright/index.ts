@@ -19,4 +19,12 @@ export { expect } from './expect';
 
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
 export type { PageObjects } from './page_objects';
-export type { ScoutTestFixtures, ScoutWorkerFixtures, ScoutPage } from './fixtures';
+export type {
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+  ScoutPage,
+  EsArchiverFixture,
+} from './fixtures';
+
+// use to tag tests
+export { tags } from './tags';

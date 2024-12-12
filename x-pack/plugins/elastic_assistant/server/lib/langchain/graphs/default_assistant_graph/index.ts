@@ -35,6 +35,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   esClient,
   inference,
   langChainMessages,
+  llmTasks,
   llmType,
   isOssModel,
   logger: parentLogger,
@@ -106,6 +107,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     inference,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
+    llmTasks,
     logger,
     onNewReplacements,
     replacements,
@@ -173,6 +175,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     logger,
     tools,
     replacements,
+    // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
+    ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
   });
   const inputs: GraphInputs = {
     responseLanguage,

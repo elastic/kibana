@@ -39,15 +39,14 @@ export async function loadRuleTags({
 export async function loadRuleAggregations({
   http,
   searchText,
-  typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-  filterConsumers,
+  ruleTypeIds,
+  consumers,
 }: LoadRuleAggregationsProps): Promise<AggregateRulesResponse> {
   const filters = mapFiltersToKql({
-    typesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
@@ -61,7 +60,8 @@ export async function loadRuleAggregations({
         search: searchText,
         filter: filters.length ? filters.join(' and ') : undefined,
         default_search_operator: 'AND',
-        filter_consumers: filterConsumers,
+        rule_type_ids: ruleTypeIds,
+        consumers,
       }),
     }
   );

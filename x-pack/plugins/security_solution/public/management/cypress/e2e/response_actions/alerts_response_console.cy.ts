@@ -27,7 +27,8 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/179598
+describe.skip(
   'Response console: From Alerts',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
@@ -82,6 +83,15 @@ describe(
 
       if (ruleId) {
         cleanupRule(ruleId);
+      }
+    });
+
+    afterEach(function () {
+      if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
+        cy.task('captureHostVmAgentDiagnostics', {
+          hostname: createdHost.hostname,
+          fileNamePrefix: this.currentTest?.fullTitle(),
+        });
       }
     });
 

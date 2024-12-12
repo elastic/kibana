@@ -74,6 +74,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-logging-browser-mocks",
     "@kbn/presentation-publishing",
+    "@kbn/securitysolution-rules",
     "@kbn/alerts-ui-shared",
     "@kbn/cloud-plugin",
     "@kbn/core-http-server-mocks",

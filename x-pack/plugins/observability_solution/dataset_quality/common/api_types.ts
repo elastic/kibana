@@ -95,13 +95,24 @@ export const integrationRt = rt.intersection([
 
 export type IntegrationType = rt.TypeOf<typeof integrationRt>;
 
+export const checkAndLoadIntegrationResponseRt = rt.union([
+  rt.type({ isIntegration: rt.literal(false), areAssetsAvailable: rt.boolean }),
+  rt.type({
+    isIntegration: rt.literal(true),
+    areAssetsAvailable: rt.literal(true),
+    integration: integrationRt,
+  }),
+]);
+
+export type CheckAndLoadIntegrationResponse = rt.TypeOf<typeof checkAndLoadIntegrationResponseRt>;
+
 export const getIntegrationsResponseRt = rt.exact(
   rt.type({
     integrations: rt.array(integrationRt),
   })
 );
 
-export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
+export type IntegrationsResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
 export const degradedFieldRt = rt.type({
   name: rt.string,

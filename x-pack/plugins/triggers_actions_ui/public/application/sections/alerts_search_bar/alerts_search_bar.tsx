@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
@@ -17,19 +17,15 @@ import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { TriggersAndActionsUiServices } from '../../..';
-import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
-const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];
 
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
 // Also TODO: Replace all references to this component with the one from alerts-ui-shared
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,
-  featureIds = EMPTY_FEATURE_IDS,
-  ruleTypeId,
+  ruleTypeIds,
   query,
   filters,
   quickFilters = [],
@@ -58,33 +54,25 @@ export function AlertsSearchBar({
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
-    featureIds,
+    ruleTypeIds: ruleTypeIds ?? [],
     http,
     dataViewsService,
     toasts,
   });
-  const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns = useMemo(() => {
-    if (ruleTypeId && aadFields?.length) {
-      return [{ title: ruleTypeId, fields: aadFields }];
+    if (ruleTypeIds && dataView?.fields?.length) {
+      return [{ title: ruleTypeIds.join(','), fields: dataView.fields }];
     }
+
     if (dataView) {
       return [dataView];
     }
+
     return null;
-  }, [aadFields, dataView, ruleTypeId]);
+  }, [dataView, ruleTypeIds]);
 
-  const ruleType = useLoadRuleTypesQuery({
-    filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
-    enabled: ruleTypeId !== undefined,
-  });
-
-  const isSecurity =
-    (featureIds && featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM)) ||
-    (ruleType &&
-      ruleTypeId &&
-      ruleType.ruleTypesState.data.get(ruleTypeId)?.producer === AlertConsumers.SIEM);
+  const isSecurity = ruleTypeIds?.some(isSiemRuleType) ?? false;
 
   const onSearchQuerySubmit = useCallback(
     (
@@ -174,7 +162,7 @@ export function AlertsSearchBar({
       appName={appName}
       disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
       // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
-      indexPatterns={!indexPatterns || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns}
+      indexPatterns={!indexPatterns ? NO_INDEX_PATTERNS : indexPatterns}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}
