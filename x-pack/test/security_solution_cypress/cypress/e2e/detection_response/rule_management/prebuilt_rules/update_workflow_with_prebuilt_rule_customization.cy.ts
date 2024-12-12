@@ -202,7 +202,7 @@ describe(
       });
 
       it('should disable `Update all rules` button when all  rules have conflicts', () => {
-        cy.get(UPGRADE_SELECTED_RULES_BUTTON).should('be.disabled');
+        cy.get(UPGRADE_ALL_RULES_BUTTON).should('be.disabled');
       });
     });
 
