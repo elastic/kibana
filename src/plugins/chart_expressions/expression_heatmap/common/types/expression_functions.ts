@@ -71,6 +71,7 @@ export interface HeatmapGridConfig {
   yTitle?: string;
   // X-axis
   isXAxisLabelVisible: boolean;
+  xAxisLabelRotation?: number;
   isXAxisTitleVisible: boolean;
   xTitle?: string;
 }
