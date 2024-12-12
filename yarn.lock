@@ -5408,7 +5408,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/security-solution/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs_data_quality_dashboard":
   version "0.0.0"
   uid ""
 
@@ -7076,7 +7076,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/packages/security-solution/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
   version "0.0.0"
   uid ""
 
@@ -7084,7 +7084,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-features@link:x-pack/packages/security-solution/features":
+"@kbn/security-solution-features@link:x-pack/solutions/security/packages/features":
   version "0.0.0"
   uid ""
 
@@ -7092,7 +7092,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-navigation@link:x-pack/packages/security-solution/navigation":
+"@kbn/security-solution-navigation@link:x-pack/solutions/security/packages/navigation":
   version "0.0.0"
   uid ""
 
@@ -7104,15 +7104,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/packages/security-solution/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side_nav":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-storybook-config@link:x-pack/packages/security-solution/storybook/config":
+"@kbn/security-solution-storybook-config@link:x-pack/solutions/security/packages/storybook/config":
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-upselling@link:x-pack/packages/security-solution/upselling":
+"@kbn/security-solution-upselling@link:x-pack/solutions/security/packages/upselling":
   version "0.0.0"
   uid ""
 
@@ -7128,7 +7128,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/packages/security-solution/data_table":
+"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data_table":
   version "0.0.0"
   uid ""
 

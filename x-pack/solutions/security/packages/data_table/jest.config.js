@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/security-solution/features'],
+  roots: ['<rootDir>/x-pack/solutions/security/packages/data_table'],
+  rootDir: '../../../../..',
 };
