@@ -21,7 +21,8 @@ function myRequestHandler(
         data: {
           anyData: {},
         },
-      })
+      }),
+      logger
     ),
   });
 }

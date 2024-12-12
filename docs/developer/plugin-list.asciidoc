@@ -28,7 +28,7 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
@@ -541,7 +541,7 @@ Plugin server-side only. Plugin has three main functions:
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_usage/README.md[dataUsage]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/data_usage/README.md[dataUsage]
 |Serverless only plugin for users to view data usage
 
 
@@ -747,15 +747,15 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
 |This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
 |The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
@@ -917,11 +917,11 @@ routes, etc.
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/streams/README.md[streams]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/streams/README.md[streams]
 |This plugin provides an interface to manage streams
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/streams_app/README.md[streamsApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/streams_app/README.md[streamsApp]
 |Home of the Streams app plugin, which allows users to manage Streams via the UI.
 
 
