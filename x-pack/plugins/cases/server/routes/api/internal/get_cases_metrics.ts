@@ -12,10 +12,12 @@ import type { metricsApiV1 } from '../../../../common/types/api';
 import { INTERNAL_CASE_METRICS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const getCasesMetricRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_CASE_METRICS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
   },

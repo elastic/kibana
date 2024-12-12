@@ -8,7 +8,7 @@
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
+import { ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
@@ -47,7 +47,7 @@ export type FunctionCallChatFunction = (
     Parameters<ObservabilityAIAssistantClient['chat']>[1],
     'connectorId' | 'simulateFunctionCalling' | 'tracer'
   >
-) => Observable<ChatCompletionChunkEvent>;
+) => Observable<ChatEvent>;
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
   options: {
