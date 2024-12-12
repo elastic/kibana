@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   AnalyticsServiceSetup,
+  type AuditLogger,
   AuthenticatedUser,
   ElasticsearchClient,
   Logger,
@@ -18,6 +19,7 @@ import {
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
+import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import {
   CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT,
   CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT,
@@ -26,6 +28,7 @@ import { getKnowledgeBaseEntry } from './get_knowledge_base_entry';
 import { CreateKnowledgeBaseEntrySchema, UpdateKnowledgeBaseEntrySchema } from './types';
 
 export interface CreateKnowledgeBaseEntryParams {
+  auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
   knowledgeBaseIndex: string;
   logger: Logger;
@@ -37,6 +40,7 @@ export interface CreateKnowledgeBaseEntryParams {
 }
 
 export const createKnowledgeBaseEntry = async ({
+  auditLogger,
   esClient,
   knowledgeBaseIndex,
   spaceId,
@@ -75,12 +79,26 @@ export const createKnowledgeBaseEntry = async ({
       logger,
       user,
     });
-
+    auditLogger?.log(
+      knowledgeBaseAuditEvent({
+        action: KnowledgeBaseAuditAction.CREATE,
+        id: newKnowledgeBaseEntry?.id,
+        name: newKnowledgeBaseEntry?.name,
+        outcome: AUDIT_OUTCOME.SUCCESS,
+      })
+    );
     telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, telemetryPayload);
     return newKnowledgeBaseEntry;
   } catch (err) {
     logger.error(
       `Error creating Knowledge Base Entry: ${err} with kbResource: ${knowledgeBaseEntry.name}`
+    );
+    auditLogger?.log(
+      knowledgeBaseAuditEvent({
+        action: KnowledgeBaseAuditAction.CREATE,
+        outcome: AUDIT_OUTCOME.FAILURE,
+        error: err,
+      })
     );
     telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_ERROR_EVENT.eventType, {
       ...telemetryPayload,

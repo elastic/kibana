@@ -6,8 +6,8 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { byTestId, waitForLoadingToFinish } from '../../helpers/utils';
-import { recordVideo } from '../../helpers/record_video';
 
 journey('UptimeOverview', ({ page, params }) => {
   recordVideo(page);

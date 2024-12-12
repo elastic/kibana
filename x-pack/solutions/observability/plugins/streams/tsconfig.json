@@ -29,6 +29,7 @@
     "@kbn/licensing-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/observability-utils-server",
-    "@kbn/observability-utils-common"
+    "@kbn/observability-utils-common",
+    "@kbn/safer-lodash-set"
   ]
 }
