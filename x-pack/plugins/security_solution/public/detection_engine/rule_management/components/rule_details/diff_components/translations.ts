@@ -21,6 +21,7 @@ import {
   HISTORY_WINDOW_SIZE_FIELD_LABEL,
   DATA_SOURCE_FIELD_LABEL,
   ALERT_SUPPRESSION_FIELD_LABEL,
+  INVESTIGATION_FIELDS_FIELD_LABEL,
 } from '../translations';
 
 /**
@@ -37,6 +38,7 @@ export const fieldToDisplayNameMap: Record<string, string> = {
   references: REFERENCES_FIELD_LABEL,
   threat_indicator_path: THREAT_INDICATOR_PATH_LABEL,
   index_patterns: INDEX_FIELD_LABEL,
+  investigation_fields: INVESTIGATION_FIELDS_FIELD_LABEL,
   data_view_id: DATA_VIEW_ID_FIELD_LABEL,
   threat: THREAT_FIELD_LABEL,
   eql_query: i18n.translate(
