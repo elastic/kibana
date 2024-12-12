@@ -37,6 +37,8 @@
       "searchInferenceEndpoints",
       "usageCollection"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }
