@@ -98,8 +98,15 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isKibanaResponse(result)) {
           return result;
         } else if (isObservable(result)) {
+          const controller = new AbortController();
+          request.events.aborted$.subscribe(() => {
+            controller.abort();
+          });
           return response.ok({
-            body: observableIntoEventSourceStream(result as Observable<ServerSentEvent>),
+            body: observableIntoEventSourceStream(result as Observable<ServerSentEvent>, {
+              logger,
+              signal: controller.signal,
+            }),
           });
         } else {
           const body = result || {};
