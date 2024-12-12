@@ -604,6 +604,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       cases: plugins.cases,
       manifestManager,
       licenseService,
+      telemetryConfigProvider: this.telemetryConfigProvider,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,

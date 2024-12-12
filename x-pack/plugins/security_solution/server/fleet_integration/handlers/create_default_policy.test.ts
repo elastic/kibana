@@ -23,6 +23,7 @@ import type {
 } from '../types';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
+import type { TelemetryConfigProvider } from '../../../common/telemetry_config/telemetry_config_provider';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -33,14 +34,24 @@ describe('Create Default Policy tests ', () => {
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   let productFeaturesService: ProductFeaturesService;
+  let telemetryConfigProviderMock: Pick<TelemetryConfigProvider, 'isOptedIn'> = {
+    isOptedIn: false,
+  };
 
   const createDefaultPolicyCallback = async (
-    config: AnyPolicyCreateConfig | undefined
+    config?: AnyPolicyCreateConfig
   ): Promise<PolicyConfig> => {
     const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
-    return createDefaultPolicy(licenseService, config, cloud, esClientInfo, productFeaturesService);
+    return createDefaultPolicy(
+      licenseService,
+      config,
+      cloud,
+      esClientInfo,
+      productFeaturesService,
+      telemetryConfigProviderMock as TelemetryConfigProvider
+    );
   };
 
   beforeEach(() => {
@@ -277,6 +288,18 @@ describe('Create Default Policy tests ', () => {
       });
       // Ransomware is windows only
       expect(policy.windows.ransomware.mode).toBe('off');
+    });
+  });
+
+  describe('Global Telemetry Config', () => {
+    it('should save telemetry config state in policy based on telemetry config provider', async () => {
+      telemetryConfigProviderMock = { isOptedIn: false };
+      let policyConfig = await createDefaultPolicyCallback();
+      expect(policyConfig.global_telemetry_enabled).toBe(false);
+
+      telemetryConfigProviderMock = { isOptedIn: true };
+      policyConfig = await createDefaultPolicyCallback();
+      expect(policyConfig.global_telemetry_enabled).toBe(true);
     });
   });
 });
