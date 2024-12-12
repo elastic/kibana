@@ -137,7 +137,7 @@
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
     "xpack.searchAssistant": "plugins/search_assistant",
-    "xpack.searchProfiler": "plugins/searchprofiler",
+    "xpack.searchProfiler": "platform/plugins/shared/searchprofiler",
     "xpack.security": [
       "plugins/security",
       "packages/security"

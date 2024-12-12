@@ -7028,7 +7028,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/searchprofiler-plugin@link:x-pack/plugins/searchprofiler":
+"@kbn/searchprofiler-plugin@link:x-pack/platform/plugins/shared/searchprofiler":
   version "0.0.0"
   uid ""
 

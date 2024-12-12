@@ -882,6 +882,7 @@ x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/license_management @elastic/kibana-management
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
 x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
+x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
 x-pack/plugins/actions @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 x-pack/plugins/asset_inventory @elastic/kibana-cloud-security-posture
@@ -965,7 +966,6 @@ x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
 x-pack/plugins/search_solution/search_navigation @elastic/search-kibana
-x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/security_solution @elastic/security-solution
 x-pack/plugins/security_solution_ess @elastic/security-solution
