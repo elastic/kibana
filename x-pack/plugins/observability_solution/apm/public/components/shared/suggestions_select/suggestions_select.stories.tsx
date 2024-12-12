@@ -19,6 +19,7 @@ interface Args {
   field: string;
   placeholder: string;
   terms: string[];
+  isInitializing: boolean;
 }
 
 const stories: Meta<Args> = {
@@ -52,13 +53,20 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({ allOption, customOptionText, field, placeholder }) => {
+export const Example: Story<Args> = ({
+  allOption,
+  customOptionText,
+  field,
+  placeholder,
+  isInitializing,
+}) => {
   return (
     <SuggestionsSelect
       customOptions={[allOption]}
       customOptionText={customOptionText}
       fieldName={field}
       onChange={() => {}}
+      isInitializing={isInitializing}
       placeholder={placeholder}
       start={'2022-04-13T10:29:28.541Z'}
       end={'2021-04-13T10:29:28.541Z'}
@@ -71,4 +79,5 @@ Example.args = {
   customOptionText: 'Add {searchValue} as a new thing',
   field: 'test.field',
   placeholder: 'Select thing',
+  isInitializing: true,
 };

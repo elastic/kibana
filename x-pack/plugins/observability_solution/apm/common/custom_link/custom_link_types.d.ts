@@ -29,6 +29,7 @@ export type FilterKey = (typeof FILTER_OPTIONS)[number];
 export interface Filter {
   key: FilterKey | '';
   value: string;
+  isInitializing: boolean;
 }
 
 export interface CustomLink {

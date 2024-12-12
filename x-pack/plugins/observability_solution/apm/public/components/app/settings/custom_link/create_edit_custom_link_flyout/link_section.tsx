@@ -25,9 +25,10 @@ interface Props {
   onChangeLabel: (label: string) => void;
   url?: string;
   onChangeUrl: (url: string) => void;
+  onFocus?: () => void;
 }
 
-export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
+export function LinkSection({ label, onChangeLabel, url, onChangeUrl, onFocus }: Props) {
   const inputFields: InputField[] = [
     {
       name: 'label',
@@ -102,6 +103,7 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
               value={field.value}
               onChange={(e) => field.onChange(e.target.value)}
               data-test-subj={field.name}
+              onFocus={onFocus}
             />
           </EuiFormRow>
         );
