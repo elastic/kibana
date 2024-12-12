@@ -2699,8 +2699,7 @@
         "@types/react-is"
       ],
       "reviewers": [
-        "team:visualizations",
-        "dej611"
+        "team:visualizations"
       ],
       "matchBaseBranches": [
         "main"
