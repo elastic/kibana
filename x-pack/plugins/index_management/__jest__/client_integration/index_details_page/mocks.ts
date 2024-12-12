@@ -117,3 +117,26 @@ export const testIndexStats = {
     },
   },
 };
+
+export const testSystemIndexName = 'test_index';
+export const testSystemIndexMock: Index = {
+  health: 'green',
+  status: 'open',
+  name: testSystemIndexName,
+  uuid: 'test1234',
+  primary: '1',
+  replica: '2',
+  documents: 1,
+  documents_deleted: 0,
+  size: '20kb',
+  primary_size: '10kb',
+  isFrozen: false,
+  aliases: 'none',
+  hidden: false,
+  isRollupIndex: false,
+  ilm: {
+    index: 'test_index',
+    managed: false,
+  },
+  isFollowerIndex: false,
+};
