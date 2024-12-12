@@ -126,12 +126,17 @@ RUN for iter in {1..10}; do \
       apt-get update  && \
       apt-get upgrade -y  && \
       apt-get install -y --no-install-recommends \
-       fontconfig libnss3 curl ca-certificates && \
+       fontconfig libnss3 curl ca-certificates {{#serverless}}libjemalloc2 {{/serverless}}&& \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)
+
+{{#serverless}}
+# Use jemalloc as the default memory allocator (https://github.com/nodejs/help/issues/1518)
+RUN echo "/usr/lib/$(arch)-linux-gnu/libjemalloc.so.2" >> /etc/ld.so.preload
+{{/serverless}}
 {{/ubuntu}}
 {{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig libstdc++ libnss findutils shadow ca-certificates
