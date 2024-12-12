@@ -610,13 +610,17 @@ export function getControlSuggestion(
   type: EsqlControlType,
   variables?: string[]
 ): SuggestionRawDefinition[] {
+  const typeWithCapital = type.charAt(0).toUpperCase() + type.slice(1);
   // need to get the variables from the service
   return [
     {
       label: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.createControlLabel',
         {
-          defaultMessage: 'Create control',
+          defaultMessage: '{typeWithCapital} control',
+          values: {
+            typeWithCapital,
+          },
         }
       ),
       text: '',
@@ -624,10 +628,7 @@ export function getControlSuggestion(
       detail: i18n.translate(
         'kbn-esql-validation-autocomplete.esql.autocomplete.createControlDetailLabel',
         {
-          defaultMessage: 'Click to create a {type} control',
-          values: {
-            type,
-          },
+          defaultMessage: 'Click to create',
         }
       ),
       sortText: '1A',
