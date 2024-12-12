@@ -27,7 +27,7 @@ const getEventsParamsSchema = z
             });
             return z.NEVER;
           }
-          return eventTypes;
+          return val.split(',').map((v) => eventTypeSchema.parse(v));
         }),
       })
       .partial(),
