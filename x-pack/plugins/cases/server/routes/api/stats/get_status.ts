@@ -12,6 +12,7 @@ import { CASE_STATUS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { statsApiV1 } from '../../../../common/types/api';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 /**
  * @deprecated since version 8.1.0
@@ -26,6 +27,7 @@ export const getStatusRoute = ({
   createCasesRoute({
     method: 'get',
     path: CASE_STATUS_URL,
+    security: DEFAULT_CASES_ROUTE_SECURITY,
     options: { deprecated: true },
     routerOptions: {
       access: isServerless ? 'internal' : 'public',
