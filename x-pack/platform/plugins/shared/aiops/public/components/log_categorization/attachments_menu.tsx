@@ -217,6 +217,7 @@ export const AttachmentsMenu = ({
                     defaultMessage: 'Attachments',
                   }
                 )}
+                color="text"
                 iconSide="right"
                 isSelected={isActionMenuOpen}
                 iconType={isActionMenuOpen ? 'arrowUp' : 'arrowDown'}

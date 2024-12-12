@@ -423,6 +423,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                       aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
                         defaultMessage: 'Actions',
                       })}
+                      color="text"
                       iconSide="right"
                       isSelected={isMenuOpen}
                       iconType={isMenuOpen ? 'arrowUp' : 'arrowDown'}

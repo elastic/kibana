@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexItem,
   EuiForm,
@@ -217,6 +216,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                 aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
+                color="text"
                 iconSide="right"
                 isSelected={isActionMenuOpen}
                 iconType={isActionMenuOpen ? 'arrowUp' : 'arrowDown'}

@@ -565,6 +565,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         defaultMessage: 'Context menu',
                       }
                     )}
+                    color="text"
                     iconSide="right"
                     isSelected={isActionMenuOpen}
                     iconType={isActionMenuOpen ? 'arrowUp' : 'arrowDown'}
