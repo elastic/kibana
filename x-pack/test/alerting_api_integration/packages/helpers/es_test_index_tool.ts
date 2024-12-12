@@ -84,6 +84,18 @@ export class ESTestIndexTool {
                   },
                 },
               },
+              orchestrator: {
+                properties: {
+                  cluster: {
+                    properties: {
+                      name: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },

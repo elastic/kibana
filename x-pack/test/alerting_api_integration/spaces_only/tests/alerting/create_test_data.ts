@@ -117,6 +117,11 @@ export async function createEsDocument(
       id: '1',
       name: 'host-1',
     },
+    orchestrator: {
+      cluster: {
+        name: 'cluster-1',
+      },
+    },
     ...(group ? { group } : {}),
   };
 
@@ -171,6 +176,18 @@ export async function createDataStream(es: Client, name: string) {
                 },
                 name: {
                   type: 'keyword',
+                },
+              },
+            },
+            orchestrator: {
+              properties: {
+                cluster: {
+                  properties: {
+                    name: {
+                      type: 'keyword',
+                      ignore_above: 1024,
+                    },
+                  },
                 },
               },
             },

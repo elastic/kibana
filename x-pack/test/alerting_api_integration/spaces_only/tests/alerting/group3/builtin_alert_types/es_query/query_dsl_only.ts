@@ -150,7 +150,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               'host.hostname',
               'host.hostname.keyword',
               'host.id',
-              'host.name'
+              'host.name',
+              'orchestrator.cluster.name'
             ).sort()
           ).to.eql(Object.keys(hit._source).sort());
         });
@@ -267,6 +268,42 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       }
     });
 
+    it(`runs correctly: _source field for ECS group by fields`, async () => {
+      // write documents from now to the future end date in groups
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'always fire',
+        esQuery: `
+          {
+            "fields": ["*"],
+            "query": {
+                "match_all": { }
+            }
+        }`.replace(`"`, `\"`),
+        size: 100,
+        thresholdComparator: '>',
+        threshold: [-1],
+        groupBy: 'top',
+        termField: 'orchestrator.cluster.name',
+        termSize: 1,
+      });
+
+      const docs = await waitForDocs(2);
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { name, title } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query for group cluster-1`);
+
+        const hits = JSON.parse(doc._source.hits);
+        expect(hits).not.to.be.empty();
+        hits.forEach((hit: any) => {
+          expect(hit.fields).not.to.be.empty();
+          expect(hit.fields['orchestrator.cluster.name'][0]).to.eql('cluster-1');
+        });
+      }
+    });
+
     async function createRule(params: CreateRuleParams): Promise<string> {
       const action = {
         id: connectorId,
@@ -323,6 +360,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               timeField: params.timeField || 'date',
               esQuery: params.esQuery,
             };
+      if (params.groupBy === 'top') {
+        ruleParams.termField = params.termField;
+        ruleParams.termSize = params.termSize;
+      }
 
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
