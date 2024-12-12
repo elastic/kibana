@@ -8,6 +8,7 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { SubFeatureType } from '@kbn/actions-plugin/common';
 
 export interface ActionType {
   id: string;
@@ -18,5 +19,5 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
-  subFeatureType?: string;
+  subFeatureType?: SubFeatureType;
 }

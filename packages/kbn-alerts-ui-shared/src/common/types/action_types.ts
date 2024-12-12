@@ -13,6 +13,7 @@ import { IconType, RecursivePartial } from '@elastic/eui';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { TypeRegistry } from '../type_registry';
 import { RuleFormParamsErrors } from './rule_types';
+import { SubFeatureType } from '@kbn/actions-plugin/common';
 
 export interface GenericValidationResult<T> {
   errors: Record<Extract<keyof T, string>, string[] | unknown>;
@@ -130,7 +131,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   hideInUi?: boolean;
   modalWidth?: number;
   isSystemActionType?: boolean;
-  subFeatureType?: string;
+  subFeatureType?: SubFeatureType;
 }
 
 export type ActionTypeRegistryContract<Connector = unknown, Params = unknown> = PublicMethodsOf<

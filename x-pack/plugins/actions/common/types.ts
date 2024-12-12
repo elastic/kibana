@@ -15,6 +15,11 @@ export {
   SecurityConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
 } from './connector_feature_config';
+
+export enum SubFeatureType {
+  EDR = 'edr',
+}
+
 export interface ActionType {
   id: string;
   name: string;
@@ -24,7 +29,7 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
-  subFeatureType?: string;
+  subFeatureType?: SubFeatureType;
 }
 
 export enum InvalidEmailReason {

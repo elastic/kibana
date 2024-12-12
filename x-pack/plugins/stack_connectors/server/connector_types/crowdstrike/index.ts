@@ -9,12 +9,8 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { EdrForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import {
-  urlAllowListValidator,
-  SubFeatureType,
-  ActionExecutionSourceType,
-} from '@kbn/actions-plugin/server';
+import { EdrForSecurityConnectorFeatureId, SubFeatureType } from '@kbn/actions-plugin/common';
+import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import {
   EDR_EXECUTE_PRIVILEGE,
   EDR_SUB_ACTIONS_EXECUTE_PRIVILEGE,

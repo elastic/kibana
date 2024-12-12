@@ -98,7 +98,7 @@ export const connectorTypesResponseSchema = schema.object({
     meta: { description: 'Indicates whether the action is a system action.' },
   }),
   sub_feature_type: schema.maybe(
-    schema.string({
+    schema.oneOf([schema.literal('edr')], {
       meta: {
         description: 'Indicates the sub-feature type the connector is grouped under.',
       },

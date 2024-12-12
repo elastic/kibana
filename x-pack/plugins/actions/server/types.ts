@@ -23,7 +23,7 @@ import { ServiceParams } from './sub_action_framework/types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
-import { ActionTypeExecutorResult } from '../common';
+import { ActionTypeExecutorResult, SubFeatureType } from '../common';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { ActionsConfigurationUtilities } from './actions_config';
@@ -44,10 +44,6 @@ import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';
 export { ActionExecutionSourceType } from './lib';
 import { ConnectorUsageCollector } from './usage';
 export { ConnectorUsageCollector } from './usage';
-
-export enum SubFeatureType {
-  EDR = 'edr',
-}
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;

@@ -16,9 +16,9 @@ import type {
   ActionTypeParams,
   RenderParameterTemplates,
   Services,
-  SubFeatureType,
   ValidatorType as ValidationSchema,
 } from '../types';
+import { SubFeatureType } from '../../common';
 import type { SubActionConnector } from './sub_action_connector';
 import type { HookServices } from '../types';
 import { ActionExecutionSourceType } from '../lib';

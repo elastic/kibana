@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SubFeatureType } from '..';
+import { SubFeatureType } from '../../common';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import {

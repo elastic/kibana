@@ -17,7 +17,8 @@ import {
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
-import { ActionType as ConnectorType, ConnectorUsageCollector, SubFeatureType } from '../types';
+import { ActionType as ConnectorType, ConnectorUsageCollector } from '../types';
+import { SubFeatureType } from '../../common';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
   ActionExecutionSourceType,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SubFeatureType } from '@kbn/actions-plugin/common';
 import { transformConnectorTypesResponse } from './transform_connector_types_response';
 
 describe('transformConnectorTypesResponse', () => {
@@ -21,7 +22,7 @@ describe('transformConnectorTypesResponse', () => {
         minimum_license_required: 'basic',
         supported_feature_ids: ['stackAlerts'],
         is_system_action_type: true,
-        sub_feature_type: 'test-sub-feature',
+        sub_feature_type: SubFeatureType.EDR,
       },
       {
         id: 'actionType2Id',
@@ -45,7 +46,7 @@ describe('transformConnectorTypesResponse', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['stackAlerts'],
         isSystemActionType: true,
-        subFeatureType: 'test-sub-feature',
+        subFeatureType: 'edr',
       },
       {
         id: 'actionType2Id',
