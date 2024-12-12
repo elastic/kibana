@@ -21,7 +21,7 @@ export const links: LinkItem = {
   path: TIMELINES_PATH,
   globalNavPosition: 7,
   // It only makes sense to show this link when the user is also granted access to security solution
-  capabilities: [`${SECURITY_FEATURE_ID}.show`, `${TIMELINE_FEATURE_ID}.read`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${TIMELINE_FEATURE_ID}.read`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.timelines', {
       defaultMessage: 'Timelines',
@@ -35,6 +35,7 @@ export const links: LinkItem = {
       }),
       path: `${TIMELINES_PATH}/template`,
       sideNavDisabled: true,
+      capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${TIMELINE_FEATURE_ID}.read`]],
     },
   ],
 };

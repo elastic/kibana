@@ -10,7 +10,7 @@ import {
   NOTES_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
-  TIMELINE_FEATURE_ID,
+  NOTES_FEATURE_ID,
 } from '../../common/constants';
 import { NOTES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
@@ -24,7 +24,7 @@ export const links: LinkItem = {
       'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
   }),
   // It only makes sense to show this link when the user is also granted access to security solution
-  capabilities: [`${SECURITY_FEATURE_ID}.show`, `${TIMELINE_FEATURE_ID}.read`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${NOTES_FEATURE_ID}.read`]],
   landingIcon: 'filebeatApp',
   skipUrlState: true,
   hideTimeline: true,
