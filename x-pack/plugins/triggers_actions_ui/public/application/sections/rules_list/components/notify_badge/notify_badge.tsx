@@ -446,7 +446,11 @@ const InvalidSnoozeButton: React.FC<InvalidSnoozeButtonProps> = memo(
 );
 
 const isSnoozeScheduleValid = (snoozeSchedule: RuleSnoozeSettings['snoozeSchedule']) => {
-  return snoozeSchedule?.every(isSnoozeValid);
+  if (snoozeSchedule == null || snoozeSchedule.length === 0) {
+    return true;
+  }
+
+  return snoozeSchedule.every(isSnoozeValid);
 };
 
 const isSnoozeValid = (snooze: NonNullable<RuleSnoozeSettings['snoozeSchedule']>[number]) => {
