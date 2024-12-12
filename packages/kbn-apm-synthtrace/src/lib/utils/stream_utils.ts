@@ -8,11 +8,29 @@
  */
 
 import { eachSeries } from 'async';
-import MultiStream from 'multistream';
-import { Duplex, Readable, Transform } from 'stream';
+import { Duplex, Readable, Transform, PassThrough } from 'stream';
+
+/**
+ * Pipe one or many streams sequentially into the destination stream. Once all
+ * source streams have been exhausted, the destination stream is ended.
+ * @param sources A collection of streams to read from
+ * @param destination The stream to pipe data to
+ */
+async function combineStreams(sources: Readable[], destination: PassThrough) {
+  for (const stream of sources) {
+    await new Promise((resolve, reject) => {
+      stream.on('end', resolve);
+      stream.on('error', reject);
+      stream.pipe(destination, { end: false });
+    });
+  }
+  destination.emit('end');
+}
 
 export function sequential(...streams: Readable[]) {
-  return new MultiStream(streams, { objectMode: true });
+  const output = new PassThrough({ objectMode: true });
+  combineStreams(streams, output).catch((err) => output.destroy(err));
+  return output;
 }
 
 export function fork(...streams: Transform[]): Duplex {
