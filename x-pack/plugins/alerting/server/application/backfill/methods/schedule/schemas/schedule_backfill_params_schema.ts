@@ -14,6 +14,7 @@ export const scheduleBackfillParamSchema = schema.object(
     ruleId: schema.string(),
     start: schema.string(),
     end: schema.maybe(schema.string()),
+    runActions: schema.maybe(schema.boolean()),
   },
   {
     validate({ start, end }) {
