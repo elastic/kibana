@@ -9,18 +9,30 @@ import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import type { UseGraphPreviewParams, UseGraphPreviewResult } from './use_graph_preview';
 import { useGraphPreview } from './use_graph_preview';
-import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
-import { mockFieldData } from '../../shared/mocks/mock_get_fields_data';
+import type { GetFieldsData } from './use_get_fields_data';
+import { mockFieldData } from '../mocks/mock_get_fields_data';
+
+const mockGetFieldsData: GetFieldsData = (field: string) => {
+  if (field === 'kibana.alert.original_event.id') {
+    return 'eventId';
+  } else if (field === 'actor.entity.id') {
+    return 'actorId';
+  } else if (field === 'target.entity.id') {
+    return 'targetId';
+  }
+
+  return mockFieldData[field];
+};
 
 describe('useGraphPreview', () => {
   let hookResult: RenderHookResult<UseGraphPreviewResult, UseGraphPreviewParams>;
 
   it(`should return false when missing actor`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
-      if (field === 'kibana.alert.original_event.id') {
-        return 'eventId';
+      if (field === 'actor.entity.id') {
+        return;
       }
-      return mockFieldData[field];
+      return mockGetFieldsData(field);
     };
 
     hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
@@ -35,22 +47,42 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
+      hookResult.result.current;
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual([]);
+    expect(targetIds).toEqual(['targetId']);
     expect(action).toEqual(['action']);
   });
 
   it(`should return false when missing event.action`, () => {
+    hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+      initialProps: {
+        getFieldsData: mockGetFieldsData,
+        ecsData: {
+          _id: 'id',
+        },
+      },
+    });
+
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
+      hookResult.result.current;
+    expect(hasGraphRepresentation).toEqual(false);
+    expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
+    expect(eventIds).toEqual(['eventId']);
+    expect(actorIds).toEqual(['actorId']);
+    expect(targetIds).toEqual(['targetId']);
+    expect(action).toEqual(undefined);
+  });
+
+  it(`should return false when missing target`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
-      if (field === 'kibana.alert.original_event.id') {
-        return 'eventId';
-      } else if (field === 'actor.entity.id') {
-        return 'actorId';
+      if (field === 'target.entity.id') {
+        return;
       }
-      return mockFieldData[field];
+      return mockGetFieldsData(field);
     };
 
     hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
@@ -62,20 +94,23 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
+      hookResult.result.current;
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual(['actorId']);
+    expect(targetIds).toEqual([]);
     expect(action).toEqual(undefined);
   });
 
   it(`should return false when missing original_event.id`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
-      if (field === 'actor.entity.id') {
-        return 'actorId';
+      if (field === 'kibana.alert.original_event.id') {
+        return;
       }
-      return mockFieldData[field];
+
+      return mockGetFieldsData(field);
     };
 
     hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
@@ -90,11 +125,13 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
+      hookResult.result.current;
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual([]);
     expect(actorIds).toEqual(['actorId']);
+    expect(targetIds).toEqual(['targetId']);
     expect(action).toEqual(['action']);
   });
 
@@ -102,13 +139,9 @@ describe('useGraphPreview', () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === '@timestamp') {
         return;
-      } else if (field === 'kibana.alert.original_event.id') {
-        return 'eventId';
-      } else if (field === 'actor.entity.id') {
-        return 'actorId';
       }
 
-      return mockFieldData[field];
+      return mockGetFieldsData(field);
     };
 
     hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
@@ -123,28 +156,20 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
+      hookResult.result.current;
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(null);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual(['actorId']);
+    expect(targetIds).toEqual(['targetId']);
     expect(action).toEqual(['action']);
   });
 
   it(`should return true when alert is has graph preview`, () => {
-    const getFieldsData: GetFieldsData = (field: string) => {
-      if (field === 'kibana.alert.original_event.id') {
-        return 'eventId';
-      } else if (field === 'actor.entity.id') {
-        return 'actorId';
-      }
-
-      return mockFieldData[field];
-    };
-
     hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
       initialProps: {
-        getFieldsData,
+        getFieldsData: mockGetFieldsData,
         ecsData: {
           _id: 'id',
           event: {
@@ -154,11 +179,13 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
-    expect(isAuditLog).toEqual(true);
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
+      hookResult.result.current;
+    expect(hasGraphRepresentation).toEqual(true);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual(['actorId']);
+    expect(targetIds).toEqual(['targetId']);
     expect(action).toEqual(['action']);
   });
 
@@ -168,6 +195,8 @@ describe('useGraphPreview', () => {
         return ['id1', 'id2'];
       } else if (field === 'actor.entity.id') {
         return ['actorId1', 'actorId2'];
+      } else if (field === 'target.entity.id') {
+        return ['targetId1', 'targetId2'];
       }
 
       return mockFieldData[field];
@@ -185,11 +214,13 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action } = hookResult.result.current;
-    expect(isAuditLog).toEqual(true);
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
+      hookResult.result.current;
+    expect(hasGraphRepresentation).toEqual(true);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['id1', 'id2']);
     expect(actorIds).toEqual(['actorId1', 'actorId2']);
     expect(action).toEqual(['action1', 'action2']);
+    expect(targetIds).toEqual(['targetId1', 'targetId2']);
   });
 });

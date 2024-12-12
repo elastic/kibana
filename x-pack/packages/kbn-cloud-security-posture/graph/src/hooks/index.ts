@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './src/components';
-export { useFetchGraphData } from './src/hooks';
+export { useFetchGraphData } from './use_fetch_graph_data';

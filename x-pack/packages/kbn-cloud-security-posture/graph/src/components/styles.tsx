@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
+import type {
+  EuiIconProps,
+  _EuiBackgroundColor,
+  CommonProps,
+  EuiListGroupItemProps,
+} from '@elastic/eui';
 import {
-  EuiIcon,
   useEuiBackgroundColor,
   useEuiTheme,
-  type EuiIconProps,
-  type _EuiBackgroundColor,
-  EuiListGroupItemProps,
+  EuiIcon,
   EuiListGroupItem,
   EuiText,
 } from '@elastic/eui';
@@ -59,22 +62,24 @@ const RoundedEuiIcon: React.FC<RoundedEuiIconProps> = ({ color, background, ...r
 );
 
 export const ExpandPopoverListItem: React.FC<
-  Pick<EuiListGroupItemProps, 'iconType' | 'label' | 'onClick'>
+  CommonProps & Pick<EuiListGroupItemProps, 'iconType' | 'label' | 'onClick'>
 > = (props) => {
+  const { iconType, label, onClick, ...rest } = props;
   const { euiTheme } = useEuiTheme();
   return (
     <EuiListGroupItem
+      {...rest}
       icon={
-        props.iconType ? (
-          <RoundedEuiIcon color="primary" background="primary" type={props.iconType} size="s" />
+        iconType ? (
+          <RoundedEuiIcon color="primary" background="primary" type={iconType} size="s" />
         ) : undefined
       }
       label={
         <EuiText size="s" color={euiTheme.colors.primaryText}>
-          {props.label}
+          {label}
         </EuiText>
       }
-      onClick={props.onClick}
+      onClick={onClick}
     />
   );
 };

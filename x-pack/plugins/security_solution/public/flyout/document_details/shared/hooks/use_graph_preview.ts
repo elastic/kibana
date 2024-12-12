@@ -7,8 +7,8 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
-import type { GetFieldsData } from '../../shared/hooks/use_get_fields_data';
-import { getField, getFieldArray } from '../../shared/utils';
+import type { GetFieldsData } from './use_get_fields_data';
+import { getField, getFieldArray } from '../utils';
 
 export interface UseGraphPreviewParams {
   /**
@@ -41,14 +41,19 @@ export interface UseGraphPreviewResult {
   actorIds: string[];
 
   /**
+   * Array of target entity IDs associated with the alert
+   */
+  targetIds: string[];
+
+  /**
    * Action associated with the event
    */
   action?: string[];
 
   /**
-   * Boolean indicating if the event is an audit log (contains event ids, actor ids and action)
+   * Boolean indicating if the event is has a graph representation (contains event ids, actor ids and action)
    */
-  isAuditLog: boolean;
+  hasGraphRepresentation: boolean;
 }
 
 /**
@@ -64,9 +69,14 @@ export const useGraphPreview = ({
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
   const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
+  const targetIds = getFieldArray(getFieldsData('target.entity.id'));
   const action: string[] | undefined = get(['event', 'action'], ecsData);
-  const isAuditLog =
-    Boolean(timestamp) && actorIds.length > 0 && Boolean(action?.length) && eventIds.length > 0;
+  const hasGraphRepresentation =
+    Boolean(timestamp) &&
+    Boolean(action?.length) &&
+    actorIds.length > 0 &&
+    eventIds.length > 0 &&
+    targetIds.length > 0;
 
-  return { timestamp, eventIds, actorIds, action, isAuditLog };
+  return { timestamp, eventIds, actorIds, action, targetIds, hasGraphRepresentation };
 };

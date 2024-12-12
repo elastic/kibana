@@ -46,12 +46,9 @@ export const useGraphPopover = (id: string): GraphPopoverState => {
 
   const state: PopoverState = useMemo(() => ({ isOpen, anchorElement }), [isOpen, anchorElement]);
 
-  return useMemo(
-    () => ({
-      id,
-      actions,
-      state,
-    }),
-    [id, actions, state]
-  );
+  return {
+    id,
+    actions,
+    state,
+  };
 };
