@@ -16,7 +16,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -61,17 +60,19 @@ function asTrees(definitions: StreamDefinition[]) {
 }
 
 export function StreamsList({
-  listFetch,
+  definitions,
   query,
+  showControls,
 }: {
-  listFetch: AbortableAsyncState<{ definitions: StreamDefinition[] }>;
-  query: string;
+  definitions: StreamDefinition[] | undefined;
+  query?: string;
+  showControls: boolean;
 }) {
   const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>({});
   const [showClassic, setShowClassic] = React.useState(true);
   const items = useMemo(() => {
-    return listFetch.value?.definitions ?? [];
-  }, [listFetch.value?.definitions]);
+    return definitions ?? [];
+  }, [definitions]);
 
   const filteredItems = useMemo(() => {
     return items
@@ -96,42 +97,48 @@ export function StreamsList({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiTitle size="xxs">
-        <h2>
-          {i18n.translate('xpack.streams.streamsTable.tableTitle', {
-            defaultMessage: 'Streams',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
-          {Object.keys(collapsed).length === 0 ? (
-            <EuiButtonEmpty
-              iconType="fold"
-              size="s"
-              onClick={() => setCollapsed(Object.fromEntries(items.map((item) => [item.id, true])))}
-            >
-              {i18n.translate('xpack.streams.streamsTable.collapseAll', {
-                defaultMessage: 'Collapse all',
+      {showControls && (
+        <>
+          <EuiTitle size="xxs">
+            <h2>
+              {i18n.translate('xpack.streams.streamsTable.tableTitle', {
+                defaultMessage: 'Streams',
               })}
-            </EuiButtonEmpty>
-          ) : (
-            <EuiButtonEmpty iconType="unfold" onClick={() => setCollapsed({})} size="s">
-              {i18n.translate('xpack.streams.streamsTable.expandAll', {
-                defaultMessage: 'Expand all',
-              })}
-            </EuiButtonEmpty>
-          )}
-          <EuiSwitch
-            label={i18n.translate('xpack.streams.streamsTable.showClassicStreams', {
-              defaultMessage: 'Show classic streams',
-            })}
-            compressed
-            checked={showClassic}
-            onChange={(e) => setShowClassic(e.target.checked)}
-          />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            </h2>
+          </EuiTitle>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+              {Object.keys(collapsed).length === 0 ? (
+                <EuiButtonEmpty
+                  iconType="fold"
+                  size="s"
+                  onClick={() =>
+                    setCollapsed(Object.fromEntries(items.map((item) => [item.id, true])))
+                  }
+                >
+                  {i18n.translate('xpack.streams.streamsTable.collapseAll', {
+                    defaultMessage: 'Collapse all',
+                  })}
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty iconType="unfold" onClick={() => setCollapsed({})} size="s">
+                  {i18n.translate('xpack.streams.streamsTable.expandAll', {
+                    defaultMessage: 'Expand all',
+                  })}
+                </EuiButtonEmpty>
+              )}
+              <EuiSwitch
+                label={i18n.translate('xpack.streams.streamsTable.showClassicStreams', {
+                  defaultMessage: 'Show classic streams',
+                })}
+                compressed
+                checked={showClassic}
+                onChange={(e) => setShowClassic(e.target.checked)}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </>
+      )}
       <EuiFlexItem grow={false}>
         {treeView.map((tree) => (
           <StreamNode key={tree.id} node={tree} collapsed={collapsed} setCollapsed={setCollapsed} />

@@ -61,7 +61,11 @@ export function StreamListView() {
             />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <StreamsList listFetch={streamsListFetch} query={query} />
+            <StreamsList
+              definitions={streamsListFetch.value?.definitions}
+              query={query}
+              showControls
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </StreamsAppPageBody>
