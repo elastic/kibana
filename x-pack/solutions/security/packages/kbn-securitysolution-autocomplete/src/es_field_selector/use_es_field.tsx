@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiComboBoxOptionOption,
   EuiIcon,

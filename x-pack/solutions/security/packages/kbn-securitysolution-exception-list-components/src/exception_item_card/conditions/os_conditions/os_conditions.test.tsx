@@ -33,6 +33,7 @@ describe('OsCondition', () => {
     expect(wrapper.container).toMatchSnapshot();
   });
   it('should return any os sent', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const wrapper = render(<OsCondition os={['MacPro' as any]} dataTestSubj="OsConditionMac" />);
     expect(wrapper.getByTestId('osLabel')).toHaveTextContent(i18n.CONDITION_OS);
     expect(wrapper.getByTestId('osValue')).toHaveTextContent(

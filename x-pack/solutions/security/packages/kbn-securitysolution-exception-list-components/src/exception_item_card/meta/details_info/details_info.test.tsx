@@ -27,6 +27,7 @@ describe('MetaInfoDetails', () => {
       <MetaInfoDetails
         dataTestSubj="MetaInfoDetails"
         label="created_by"
+        // eslint-disable-next-line react/jsx-no-literals
         lastUpdate={<p>Last update value</p>}
         lastUpdateValue="value"
       />

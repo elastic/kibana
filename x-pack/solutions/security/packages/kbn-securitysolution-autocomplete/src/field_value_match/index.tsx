@@ -21,6 +21,7 @@ import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../../../../src/plugins/unified_search/public';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AutocompleteStart = any;
 
 import * as i18n from '../translations';

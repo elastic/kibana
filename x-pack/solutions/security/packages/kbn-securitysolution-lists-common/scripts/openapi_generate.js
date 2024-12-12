@@ -6,6 +6,7 @@
  */
 
 require('../../../../../../src/setup_node_env');
+// eslint-disable-next-line import/no-nodejs-modules
 const { join, resolve } = require('path');
 const { generate } = require('@kbn/openapi-generator');
 const { REPO_ROOT } = require('@kbn/repo-info');

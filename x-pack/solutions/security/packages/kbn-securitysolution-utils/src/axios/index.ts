@@ -16,6 +16,7 @@ export class FormattedAxiosError extends Error {
   public readonly response: {
     status: number;
     statusText: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any;
   };
 

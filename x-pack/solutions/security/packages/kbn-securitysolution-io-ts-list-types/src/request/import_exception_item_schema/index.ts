@@ -8,15 +8,14 @@
 import * as t from 'io-ts';
 
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { Tags } from '../../common/tags';
+import { Tags, tags } from '../../common/tags';
 import { NamespaceType } from '../../common/default_namespace';
 import { name } from '../../common/name';
 import { description } from '../../common/description';
 import { namespace_type } from '../../common/namespace_type';
-import { tags } from '../../common/tags';
 import { meta } from '../../common/meta';
 import { list_id } from '../../common/list_id';
-import { item_id } from '../../common/item_id';
+import { item_id, ItemId } from '../../common/item_id';
 import { id } from '../../common/id';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
@@ -26,7 +25,6 @@ import { _version } from '../../common/underscore_version';
 import { tie_breaker_id } from '../../common/tie_breaker_id';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
-import { ItemId } from '../../common/item_id';
 import { EntriesArray } from '../../common/entries';
 import { DefaultImportCommentsArray } from '../../common/default_import_comments_array';
 import { ExpireTimeOrUndefined, expireTimeOrUndefined, ImportCommentsArray } from '../../common';

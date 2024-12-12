@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { searchOrUndefined } from '.';
 
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('search', () => {
   test('it will validate a correct search', () => {
