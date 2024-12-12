@@ -9,6 +9,7 @@
 
 import stripAnsi from 'strip-ansi';
 
+import type { CodeOwnership } from '@kbn/code-owners';
 import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
 
 export type TestFailure = FailedTestCase['$'] & {
@@ -18,6 +19,7 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
+  owners?: CodeOwnership;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -78,6 +80,7 @@ export function getFailures(report: TestReport) {
   for (const testCase of makeFailedTestCaseIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
+    const owners = testCase.$.owners;
 
     const failureObj = {
       // unwrap xml weirdness
@@ -87,6 +90,7 @@ export function getFailures(report: TestReport) {
       likelyIrrelevant,
       'system-out': getText(testCase['system-out']),
       commandLine,
+      owners,
     };
 
     // cleaning up duplicates
