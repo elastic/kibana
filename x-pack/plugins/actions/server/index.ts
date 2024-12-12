@@ -23,6 +23,7 @@ export type {
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
 } from './types';
+export { SubFeatureType } from './types';
 
 export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
 
@@ -53,3 +54,4 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
 };
 
 export { urlAllowListValidator } from './sub_action_framework/helpers';
+export { ActionExecutionSourceType } from './lib/action_execution_source';

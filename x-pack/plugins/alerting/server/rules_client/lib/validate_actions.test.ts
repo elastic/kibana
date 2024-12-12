@@ -13,6 +13,7 @@ import { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } fro
 describe('validateActions', () => {
   const loggerErrorMock = jest.fn();
   const getBulkMock = jest.fn();
+  const listTypesMock = jest.fn();
   const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     id: 'test',
     name: 'My test rule',
@@ -68,9 +69,14 @@ describe('validateActions', () => {
     getActionsClient: () => {
       return {
         getBulk: getBulkMock,
+        listTypes: listTypesMock,
       };
     },
   };
+
+  beforeEach(() => {
+    listTypesMock.mockResolvedValue([]);
+  });
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -305,6 +311,22 @@ describe('validateActions', () => {
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Failed to validate actions due to the following error: Action\'s alertsFilter days has invalid values: (111:[0,8]) "'
+    );
+  });
+
+  it('should return error message if the action is an EDR sub-feature connector type', async () => {
+    getBulkMock.mockResolvedValueOnce([{ actionTypeId: 'test.edr', name: 'test name' }]);
+    listTypesMock.mockResolvedValueOnce([
+      {
+        id: 'test.edr',
+        name: 'EDR connector type',
+        subFeatureType: 'edr',
+      },
+    ]);
+    await expect(
+      validateActions(context as unknown as RulesClientContext, ruleType, data, false)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to validate actions due to the following error: Invalid EDR connectors"'
     );
   });
 });
