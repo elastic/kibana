@@ -120,7 +120,7 @@ export const VisualizeTab = memo(() => {
   }, [panels.left?.path?.subTab]);
 
   // Decide whether to show the graph preview or not
-  const { isAuditLog } = useGraphPreview({
+  const { hasGraphRepresentation } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
@@ -131,7 +131,7 @@ export const VisualizeTab = memo(() => {
 
   const options = [...visualizeButtons];
 
-  if (isAuditLog && isGraphFeatureEnabled) {
+  if (hasGraphRepresentation && isGraphFeatureEnabled) {
     options.push(graphVisualizationButton);
   }
 

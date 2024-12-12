@@ -85,7 +85,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      isAuditLog: true,
+      hasGraphRepresentation: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -135,7 +135,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      isAuditLog: true,
+      hasGraphRepresentation: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
@@ -188,7 +188,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      isAuditLog: true,
+      hasGraphRepresentation: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
@@ -242,7 +242,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      isAuditLog: true,
+      hasGraphRepresentation: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -292,7 +292,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      isAuditLog: false,
+      hasGraphRepresentation: false,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();

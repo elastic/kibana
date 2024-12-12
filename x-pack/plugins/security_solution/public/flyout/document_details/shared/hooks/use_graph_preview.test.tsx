@@ -47,9 +47,9 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action, targetIds } =
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
       hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual([]);
@@ -67,9 +67,9 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action, targetIds } =
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
       hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual(['actorId']);
@@ -94,9 +94,9 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action, targetIds } =
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
       hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual(['actorId']);
@@ -125,9 +125,9 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action, targetIds } =
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
       hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual([]);
     expect(actorIds).toEqual(['actorId']);
@@ -156,9 +156,9 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action, targetIds } =
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
       hookResult.result.current;
-    expect(isAuditLog).toEqual(false);
+    expect(hasGraphRepresentation).toEqual(false);
     expect(timestamp).toEqual(null);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual(['actorId']);
@@ -179,9 +179,9 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action, targetIds } =
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
       hookResult.result.current;
-    expect(isAuditLog).toEqual(true);
+    expect(hasGraphRepresentation).toEqual(true);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['eventId']);
     expect(actorIds).toEqual(['actorId']);
@@ -214,9 +214,9 @@ describe('useGraphPreview', () => {
       },
     });
 
-    const { isAuditLog, timestamp, eventIds, actorIds, action, targetIds } =
+    const { hasGraphRepresentation, timestamp, eventIds, actorIds, action, targetIds } =
       hookResult.result.current;
-    expect(isAuditLog).toEqual(true);
+    expect(hasGraphRepresentation).toEqual(true);
     expect(timestamp).toEqual(mockFieldData['@timestamp'][0]);
     expect(eventIds).toEqual(['id1', 'id2']);
     expect(actorIds).toEqual(['actorId1', 'actorId2']);

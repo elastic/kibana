@@ -48,7 +48,7 @@ export const GraphPreviewContainer: React.FC = () => {
   const {
     eventIds,
     timestamp = new Date().toISOString(),
-    isAuditLog,
+    hasGraphRepresentation,
   } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
@@ -64,7 +64,7 @@ export const GraphPreviewContainer: React.FC = () => {
       },
     },
     options: {
-      enabled: isAuditLog,
+      enabled: hasGraphRepresentation,
       refetchOnWindowFocus: false,
     },
   });

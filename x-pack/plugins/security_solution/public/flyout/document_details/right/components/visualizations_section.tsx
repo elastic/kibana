@@ -39,13 +39,13 @@ export const VisualizationsSection = memo(() => {
   );
 
   // Decide whether to show the graph preview or not
-  const { isAuditLog } = useGraphPreview({
+  const { hasGraphRepresentation } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
   });
 
   const shouldShowGraphPreview =
-    visualizationInFlyoutEnabled && isGraphFeatureEnabled && isAuditLog;
+    visualizationInFlyoutEnabled && isGraphFeatureEnabled && hasGraphRepresentation;
 
   return (
     <ExpandableSection

@@ -105,7 +105,7 @@ describe('<VisualizationsSection />', () => {
       statsNodes: undefined,
     });
     mockUseGraphPreview.mockReturnValue({
-      isAuditLog: true,
+      hasGraphRepresentation: true,
     });
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,

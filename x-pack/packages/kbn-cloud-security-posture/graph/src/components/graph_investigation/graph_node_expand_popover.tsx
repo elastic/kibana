@@ -12,7 +12,7 @@ import { ExpandPopoverListItem } from '../styles';
 import { GraphPopover } from '../../..';
 import {
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
-  GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
 } from '../test_ids';
@@ -21,7 +21,7 @@ interface GraphNodeExpandPopoverProps {
   isOpen: boolean;
   anchorElement: HTMLElement | null;
   closePopover: () => void;
-  onExploreRelatedEntitiesClick: () => void;
+  onShowRelatedEntitiesClick: () => void;
   onShowActionsByEntityClick: () => void;
   onShowActionsOnEntityClick: () => void;
 }
@@ -31,7 +31,7 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
     isOpen,
     anchorElement,
     closePopover,
-    onExploreRelatedEntitiesClick,
+    onShowRelatedEntitiesClick,
     onShowActionsByEntityClick,
     onShowActionsOnEntityClick,
   }) => {
@@ -66,8 +66,8 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
             label={i18n.translate('xpack.csp.graph.graphNodeExpandPopover.showRelatedEvents', {
               defaultMessage: 'Show related events',
             })}
-            onClick={onExploreRelatedEntitiesClick}
-            data-test-subj={GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID}
+            onClick={onShowRelatedEntitiesClick}
+            data-test-subj={GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID}
           />
         </EuiListGroup>
       </GraphPopover>

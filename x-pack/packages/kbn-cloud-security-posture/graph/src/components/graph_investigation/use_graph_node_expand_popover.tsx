@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import { useGraphPopover } from '../../..';
 import type { ExpandButtonClickCallback, NodeProps } from '../types';
 import { GraphNodeExpandPopover } from './graph_node_expand_popover';
@@ -32,6 +32,7 @@ export const useGraphNodeExpandPopover = ({
     unToggleCallback: () => void;
   } | null>(null);
 
+  // Handler to close the popover, reset selected node and unToggle callback
   const closePopoverHandler = useCallback(() => {
     selectedNode.current = null;
     unToggleCallbackRef.current?.();
@@ -39,6 +40,11 @@ export const useGraphNodeExpandPopover = ({
     closePopover();
   }, [closePopover]);
 
+  /**
+   * Handles the click event on the node expand button.
+   * Closes the current popover if open and sets the pending open state
+   * if the clicked node is different from the currently selected node.
+   */
   const onNodeExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
       // Close the current popover if open
@@ -52,25 +58,14 @@ export const useGraphNodeExpandPopover = ({
     [closePopoverHandler]
   );
 
-  useEffect(() => {
-    // Open pending popover if the popover is not open
-    if (!state.isOpen && pendingOpen) {
-      const { node, el, unToggleCallback } = pendingOpen;
-
-      selectedNode.current = node;
-      unToggleCallbackRef.current = unToggleCallback;
-      openPopover(el);
-
-      setPendingOpen(null);
-    }
-  }, [state.isOpen, pendingOpen, openPopover]);
-
+  // PopoverComponent is a memoized component that renders the GraphNodeExpandPopover
+  // It handles the display of the popover and the actions that can be performed on the node
   const PopoverComponent = memo(() => (
     <GraphNodeExpandPopover
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
-      onExploreRelatedEntitiesClick={() => {
+      onShowRelatedEntitiesClick={() => {
         onExploreRelatedEntitiesClick(selectedNode.current as NodeProps);
         closePopoverHandler();
       }}
@@ -85,19 +80,28 @@ export const useGraphNodeExpandPopover = ({
     />
   ));
 
-  PopoverComponent.displayName = GraphNodeExpandPopover.displayName;
+  // Open pending popover if the popover is not open
+  // This block checks if there is a pending popover to be opened.
+  // If the popover is not currently open and there is a pending popover,
+  // it sets the selected node, stores the unToggle callback, and opens the popover.
+  if (!state.isOpen && pendingOpen) {
+    const { node, el, unToggleCallback } = pendingOpen;
 
-  return useMemo(
-    () => ({
-      onNodeExpandButtonClick,
-      PopoverComponent,
-      id,
-      actions: {
-        ...actions,
-        closePopover: closePopoverHandler,
-      },
-      state,
-    }),
-    [PopoverComponent, actions, closePopoverHandler, id, onNodeExpandButtonClick, state]
-  );
+    selectedNode.current = node;
+    unToggleCallbackRef.current = unToggleCallback;
+    openPopover(el);
+
+    setPendingOpen(null);
+  }
+
+  return {
+    onNodeExpandButtonClick,
+    PopoverComponent,
+    id,
+    actions: {
+      ...actions,
+      closePopover: closePopoverHandler,
+    },
+    state,
+  };
 };

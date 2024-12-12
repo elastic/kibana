@@ -51,9 +51,9 @@ export interface UseGraphPreviewResult {
   action?: string[];
 
   /**
-   * Boolean indicating if the event is an audit log (contains event ids, actor ids and action)
+   * Boolean indicating if the event is has a graph representation (contains event ids, actor ids and action)
    */
-  isAuditLog: boolean;
+  hasGraphRepresentation: boolean;
 }
 
 /**
@@ -71,12 +71,12 @@ export const useGraphPreview = ({
   const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
   const targetIds = getFieldArray(getFieldsData('target.entity.id'));
   const action: string[] | undefined = get(['event', 'action'], ecsData);
-  const isAuditLog =
+  const hasGraphRepresentation =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     actorIds.length > 0 &&
     eventIds.length > 0 &&
     targetIds.length > 0;
 
-  return { timestamp, eventIds, actorIds, action, targetIds, isAuditLog };
+  return { timestamp, eventIds, actorIds, action, targetIds, hasGraphRepresentation };
 };

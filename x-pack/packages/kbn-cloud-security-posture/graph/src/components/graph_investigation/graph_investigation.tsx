@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -14,50 +14,20 @@ import {
   buildEsQuery,
   isCombinedFilter,
   buildCombinedFilter,
-  isPhraseFilter,
+  isFilter,
+  FilterStateStore,
 } from '@kbn/es-query';
-import type { Filter, Query, TimeRange, BoolQuery, PhraseFilter } from '@kbn/es-query';
+import type { Filter, Query, TimeRange, PhraseFilter } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Graph, type NodeViewModel } from '../../..';
+import { Graph } from '../../..';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
 import { useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
+import { ACTOR_ENTITY_ID, RELATED_ENTITY, TARGET_ENTITY_ID } from '../../common/constants';
 
 const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
-
-const useTimeRange = (timestamp: string) => {
-  const [timeRange, setTimeRange] = useState<TimeRange>({
-    from: `${timestamp}||-30m`,
-    to: `${timestamp}||+30m`,
-  });
-
-  const setPartialTimeRange = (newTimeRange: Partial<typeof timeRange>) => {
-    setTimeRange((currTimeRange) => ({ ...currTimeRange, ...newTimeRange }));
-  };
-
-  return { timeRange, setTimeRange, setPartialTimeRange };
-};
-
-const useGraphData = (eventIds: string[], timeRange: TimeRange, filter: { bool: BoolQuery }) => {
-  const { data, refresh, isFetching } = useFetchGraphData({
-    req: {
-      query: {
-        eventIds,
-        esQuery: filter,
-        start: timeRange.from,
-        end: timeRange.to,
-      },
-    },
-    options: {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-    },
-  });
-
-  return { data, refresh, isFetching };
-};
 
 const buildPhraseFilter = (field: string, value: string, dataViewId?: string): PhraseFilter => ({
   meta: {
@@ -79,6 +49,16 @@ const buildPhraseFilter = (field: string, value: string, dataViewId?: string): P
   },
 });
 
+/**
+ * Adds a filter to the existing list of filters based on the provided key and value.
+ * It will always use the first filter in the list to build a combined filter with the new filter.
+ *
+ * @param dataViewId - The ID of the data view to which the filter belongs.
+ * @param prev - The previous list of filters.
+ * @param key - The key for the filter.
+ * @param value - The value for the filter.
+ * @returns A new list of filters with the added filter.
+ */
 const addFilter = (dataViewId: string, prev: Filter[], key: string, value: string) => {
   const [firstFilter, ...otherFilters] = prev;
 
@@ -96,7 +76,7 @@ const addFilter = (dataViewId: string, prev: Filter[], key: string, value: strin
       },
       ...otherFilters,
     ];
-  } else if (isPhraseFilter(firstFilter)) {
+  } else if (isFilter(firstFilter) && firstFilter.meta?.type !== 'custom') {
     return [
       buildCombinedFilter(BooleanRelation.OR, [firstFilter, buildPhraseFilter(key, value)], {
         id: dataViewId,
@@ -104,7 +84,15 @@ const addFilter = (dataViewId: string, prev: Filter[], key: string, value: strin
       ...otherFilters,
     ];
   } else {
-    return [buildPhraseFilter(key, value, dataViewId), ...prev];
+    return [
+      {
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        ...buildPhraseFilter(key, value, dataViewId),
+      },
+      ...prev,
+    ];
   }
 };
 
@@ -114,43 +102,27 @@ const useGraphPopovers = (
 ) => {
   const nodeExpandPopover = useGraphNodeExpandPopover({
     onExploreRelatedEntitiesClick: (node) => {
-      setSearchFilters((prev) => addFilter(dataViewId, prev, 'related.entity', node.id));
+      setSearchFilters((prev) => addFilter(dataViewId, prev, RELATED_ENTITY, node.id));
     },
     onShowActionsByEntityClick: (node) => {
-      setSearchFilters((prev) => addFilter(dataViewId, prev, 'actor.entity.id', node.id));
+      setSearchFilters((prev) => addFilter(dataViewId, prev, ACTOR_ENTITY_ID, node.id));
     },
     onShowActionsOnEntityClick: (node) => {
-      setSearchFilters((prev) => addFilter(dataViewId, prev, 'target.entity.id', node.id));
+      setSearchFilters((prev) => addFilter(dataViewId, prev, TARGET_ENTITY_ID, node.id));
     },
   });
 
-  const popovers = [nodeExpandPopover];
-  const popoverOpenWrapper = (cb: Function, ...args: unknown[]) => {
-    popovers.forEach(({ actions: { closePopover } }) => {
-      closePopover();
-    });
-    cb(...args);
-  };
+  const openPopoverCallback = useCallback(
+    (cb: Function, ...args: unknown[]) => {
+      [nodeExpandPopover].forEach(({ actions: { closePopover } }) => {
+        closePopover();
+      });
+      cb(...args);
+    },
+    [nodeExpandPopover]
+  );
 
-  return { nodeExpandPopover, popoverOpenWrapper };
-};
-
-const useGraphNodes = (
-  nodes: NodeViewModel[],
-  expandButtonClickHandler: (...args: unknown[]) => void
-) => {
-  return useMemo(() => {
-    return nodes.map((node) => {
-      const nodeHandlers =
-        node.shape !== 'label' && node.shape !== 'group'
-          ? {
-              expandButtonClick: expandButtonClickHandler,
-            }
-          : undefined;
-      return { ...node, ...nodeHandlers };
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes]);
+  return { nodeExpandPopover, openPopoverCallback };
 };
 
 interface GraphInvestigationProps {
@@ -163,42 +135,63 @@ interface GraphInvestigationProps {
  * Graph investigation view allows the user to expand nodes and view related entities.
  */
 export const GraphInvestigation: React.FC<GraphInvestigationProps> = memo(
-  ({ dataView, eventIds, timestamp }: GraphInvestigationProps) => {
+  ({ dataView, eventIds, timestamp = new Date().toISOString() }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
-    const { timeRange, setTimeRange } = useTimeRange(timestamp ?? new Date().toISOString());
+    const [timeRange, setTimeRange] = useState<TimeRange>({
+      from: `${timestamp}||-30m`,
+      to: `${timestamp}||+30m`,
+    });
 
     const {
       services: { uiSettings },
     } = useKibana();
-    const [query, setQuery] = useState<{ bool: BoolQuery }>(
-      buildEsQuery(
-        dataView,
-        [],
-        [...searchFilters],
-        getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
-      )
-    );
-
-    useEffect(() => {
-      setQuery(
+    const query = useMemo(
+      () =>
         buildEsQuery(
           dataView,
           [],
           [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
-        )
-      );
-    }, [searchFilters, dataView, uiSettings]);
+        ),
+      [searchFilters, dataView, uiSettings]
+    );
 
-    const { nodeExpandPopover, popoverOpenWrapper } = useGraphPopovers(
+    const { nodeExpandPopover, openPopoverCallback } = useGraphPopovers(
       dataView?.id ?? '',
       setSearchFilters
     );
     const expandButtonClickHandler = (...args: unknown[]) =>
-      popoverOpenWrapper(nodeExpandPopover.onNodeExpandButtonClick, ...args);
+      openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const isPopoverOpen = [nodeExpandPopover].some(({ state: { isOpen } }) => isOpen);
-    const { data, refresh, isFetching } = useGraphData(eventIds, timeRange, query);
-    const nodes = useGraphNodes(data?.nodes ?? [], expandButtonClickHandler);
+    const { data, refresh, isFetching } = useFetchGraphData({
+      req: {
+        query: {
+          eventIds,
+          esQuery: query,
+          start: timeRange.from,
+          end: timeRange.to,
+        },
+      },
+      options: {
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
+      },
+    });
+
+    const nodes = useMemo(() => {
+      return (
+        data?.nodes.map((node) => {
+          const nodeHandlers =
+            node.shape !== 'label' && node.shape !== 'group'
+              ? {
+                  expandButtonClick: expandButtonClickHandler,
+                }
+              : undefined;
+          return { ...node, ...nodeHandlers };
+        }) ?? []
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data?.nodes]);
 
     return (
       <>
