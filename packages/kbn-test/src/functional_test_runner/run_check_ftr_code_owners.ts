@@ -10,7 +10,11 @@
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '@kbn/code-owners';
+import {
+  getCodeOwnersForFile,
+  getPathsWithOwnersReversed,
+  type CodeOwnership,
+} from '@kbn/code-owners';
 
 const TEST_DIRECTORIES = ['test', 'x-pack/test', 'x-pack/test_serverless'];
 
@@ -36,10 +40,8 @@ export async function runCheckFtrCodeOwnersCli() {
 
       const testFiles = await getRepoFiles(TEST_DIRECTORIES);
       for (const { repoRel } of testFiles) {
-        const owners = getCodeOwnersForFile(repoRel, reversedCodeowners);
-        if (owners === undefined || owners === '') {
-          missingOwners.add(repoRel);
-        }
+        const owners: CodeOwnership = getCodeOwnersForFile(repoRel, reversedCodeowners);
+        if (owners === undefined || owners.teams === '') missingOwners.add(repoRel);
       }
 
       const timeSpent = fmtMs(performance.now() - start);

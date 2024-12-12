@@ -78,6 +78,7 @@ export interface Actions {
   setHasCelInput: (payload: State['hasCelInput']) => void;
   setResult: (payload: State['result']) => void;
   setCelInputResult: (payload: State['celInputResult']) => void;
+  completeStep: () => void;
 }
 
 const ActionsContext = createContext<Actions | undefined>(undefined);

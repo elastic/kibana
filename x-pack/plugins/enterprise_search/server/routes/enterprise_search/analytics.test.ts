@@ -25,7 +25,7 @@ describe('Enterprise Search Analytics API', () => {
   let mockRouter: MockRouter;
   const mockClient = {};
 
-  describe('GET /internal/enterprise_search/analytics/collections', () => {
+  describe('GET /internal/elasticsearch/analytics/collections', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
@@ -34,7 +34,7 @@ describe('Enterprise Search Analytics API', () => {
       mockRouter = new MockRouter({
         context,
         method: 'get',
-        path: '/internal/enterprise_search/analytics/collections',
+        path: '/internal/elasticsearch/analytics/collections',
       });
 
       const mockDataPlugin = {
@@ -99,7 +99,7 @@ describe('Enterprise Search Analytics API', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/analytics/collections/{id}', () => {
+  describe('GET /internal/elasticsearch/analytics/collections/{id}', () => {
     beforeEach(() => {
       const context = {
         core: Promise.resolve({ elasticsearch: { client: mockClient } }),
@@ -108,7 +108,7 @@ describe('Enterprise Search Analytics API', () => {
       mockRouter = new MockRouter({
         context,
         method: 'get',
-        path: '/internal/enterprise_search/analytics/collections/{name}',
+        path: '/internal/elasticsearch/analytics/collections/{name}',
       });
 
       const mockDataPlugin = {
