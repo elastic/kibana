@@ -14,6 +14,6 @@ export default createTestConfig('security_and_spaces', {
   ssl: true,
   enableActionsProxy: true,
   publicBaseUrl: true,
-  testFiles: [require.resolve('./tests/alerting')],
+  testFiles: [require.resolve('./tests')],
   useDedicatedTaskRunner: true,
 });
