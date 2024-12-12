@@ -925,6 +925,32 @@ owner: elastic`,
       });
     });
 
+    it('should avoid loading archive when isAirGapped == true', async () => {
+      const mockContract = createAppContextStartContractMock({ isAirGapped: true });
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchInfo.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+        assets: [],
+      } as unknown as RegistryPackage);
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'my-package',
+          pkgVersion: '1.0.0',
+        })
+      ).resolves.toMatchObject({
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+      });
+
+      expect(MockRegistry.getPackage).not.toHaveBeenCalled();
+    });
+
     describe('installation status', () => {
       it('should be not_installed when no package SO exists', async () => {
         const soClient = savedObjectsClientMock.create();
