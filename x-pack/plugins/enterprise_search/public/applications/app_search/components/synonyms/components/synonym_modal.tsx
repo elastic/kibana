@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,6 +38,7 @@ export const SynonymModal: React.FC = () => {
   const { isModalOpen, modalLoading, activeSynonymSet } = useValues(SynonymsLogic);
   const { closeModal, createSynonymSet, updateSynonymSet, deleteSynonymSet } =
     useActions(SynonymsLogic);
+  const modalTitleId = useGeneratedHtmlId();
 
   const modalTitle = activeSynonymSet ? SYNONYM_UPDATE_TITLE : SYNONYM_CREATE_TITLE;
   const id = activeSynonymSet?.id || 'createNewSynonymSet';
@@ -46,9 +48,9 @@ export const SynonymModal: React.FC = () => {
     : (newSynonyms: string[]) => createSynonymSet(newSynonyms);
 
   return isModalOpen ? (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{modalTitle}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{modalTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <FlashMessages />
       <EuiModalBody>
@@ -82,7 +84,12 @@ export const SynonymModal: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              data-test-subj="enterpriseSearchSynonymModalButton"
+              onClick={closeModal}
+            >
+              {CANCEL_BUTTON_LABEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

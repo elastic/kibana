@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getPalette } from '../palettes';
+import { KbnPalettes } from '@kbn/palettes';
 import { RootState } from './color_mapping';
 
-export function selectPalette(getPaletteFn: ReturnType<typeof getPalette>) {
-  return (state: RootState) => getPaletteFn(state.colorMapping.paletteId);
+export function selectPalette(palettes: KbnPalettes) {
+  return (state: RootState) => palettes.get(state.colorMapping.paletteId);
 }
 export function selectColorMode(state: RootState) {
   return state.colorMapping.colorMode;
