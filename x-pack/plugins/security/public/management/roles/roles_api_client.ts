@@ -5,12 +5,25 @@
  * 2.0.
  */
 
+import type { Criteria } from '@elastic/eui';
+import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
+
 import type { HttpStart } from '@kbn/core/public';
-import type { BulkUpdatePayload, BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public';
+import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import { copyRole } from '../../../common/model';
+
+export interface QueryRoleParams {
+  query: QueryContainer;
+  from: number;
+  size: number;
+  filters?: {
+    showReserved?: boolean;
+  };
+  sort: Criteria<Role>['sort'];
+}
 
 const version = API_VERSIONS.roles.public.v1;
 
@@ -21,6 +34,12 @@ export class RolesAPIClient {
     return await this.http.get<Role[]>('/api/security/role', {
       version,
       query: { replaceDeprecatedPrivileges: true },
+    });
+  };
+
+  public queryRoles = async (params?: QueryRoleParams) => {
+    return await this.http.post<QueryRolesResult>(`/api/security/role/_query`, {
+      body: JSON.stringify(params || {}),
     });
   };
 
@@ -42,6 +61,7 @@ export class RolesAPIClient {
       query: { createOnly },
     });
   };
+
 
   public bulkUpdateRoles = async ({
     rolesUpdate,
