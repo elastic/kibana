@@ -14,7 +14,7 @@
       "tags": [],
       "label": "StreamsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/streams/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -29,7 +29,7 @@
             "Observable",
             "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
           ],
-          "path": "x-pack/plugins/streams/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -44,7 +44,7 @@
       "tags": [],
       "label": "StreamsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/streams/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -131,9 +131,7 @@
             "Condition",
             "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
-            "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }[]; trees: ",
-            "StreamTree",
-            "[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
+            "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -159,7 +157,7 @@
             "Condition",
             "; }, { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
-            "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+            "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; managed: Zod.ZodDefault<Zod.ZodBoolean>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
             "Condition",
             ", Zod.ZodTypeDef, ",
             "Condition",
@@ -169,19 +167,19 @@
             "Condition",
             "; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { children: { id: string; condition?: ",
             "Condition",
-            "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+            "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
             "; }[]; }, { children?: { id: string; condition?: ",
             "Condition",
-            "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+            "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; managed?: boolean | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
             "; }[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { children: { id: string; condition?: ",
             "Condition",
-            "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+            "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
             "; }[]; }; }, { path: { id: string; }; body: { children?: { id: string; condition?: ",
             "Condition",
-            "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+            "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; managed?: boolean | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
             "; }[] | undefined; }; }>, ",
             "StreamsRouteHandlerResources",
@@ -215,7 +213,7 @@
             "Condition",
             "; }, { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
-            "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+            "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; managed: Zod.ZodDefault<Zod.ZodBoolean>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
             "Condition",
             ", Zod.ZodTypeDef, ",
             "Condition",
@@ -223,7 +221,7 @@
             "Condition",
             "; }, { id: string; condition?: ",
             "Condition",
-            "; }>, \"many\">>; }, { id: Zod.ZodString; managed: Zod.ZodDefault<Zod.ZodBoolean>; unmanaged_elasticsearch_assets: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodEnum<[\"ingest_pipeline\", \"component_template\", \"index_template\", \"data_stream\"]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }>, \"many\">>; }>, \"children\">, \"strip\", Zod.ZodTypeAny, { id: string; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+            "; }>, \"many\">>; }, { id: Zod.ZodString; unmanaged_elasticsearch_assets: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodEnum<[\"ingest_pipeline\", \"component_template\", \"index_template\", \"data_stream\"]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }>, \"many\">>; }>, \"children\">, \"strip\", Zod.ZodTypeAny, { id: string; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
             "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, { id: string; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; managed?: boolean | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
             "Condition",
@@ -269,11 +267,11 @@
             },
             "<\"POST /api/streams/_enable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
             "StreamsRouteHandlerResources",
-            ", { acknowledged: true; }, undefined>; }, ",
+            ", { acknowledged: true; message: string; }, undefined>; }, ",
             "StreamsRepositoryClientOptions",
             ">"
           ],
-          "path": "x-pack/plugins/streams/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -288,7 +286,7 @@
             "Observable",
             "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
           ],
-          "path": "x-pack/plugins/streams/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/streams/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -308,7 +306,7 @@
         "tags": [],
         "label": "ListStreamResponse",
         "description": [],
-        "path": "x-pack/plugins/streams/server/lib/streams/stream_crud.ts",
+        "path": "x-pack/solutions/observability/plugins/streams/server/lib/streams/stream_crud.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -326,7 +324,7 @@
               "Condition",
               "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }[]"
             ],
-            "path": "x-pack/plugins/streams/server/lib/streams/stream_crud.ts",
+            "path": "x-pack/solutions/observability/plugins/streams/server/lib/streams/stream_crud.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -346,7 +344,7 @@
         "signature": [
           "{}"
         ],
-        "path": "x-pack/plugins/streams/common/config.ts",
+        "path": "x-pack/solutions/observability/plugins/streams/common/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -427,9 +425,7 @@
           "Condition",
           "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
-          "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }[]; trees: ",
-          "StreamTree",
-          "[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
+          "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }[]; }, undefined>; \"DELETE /api/streams/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -455,7 +451,7 @@
           "Condition",
           "; }, { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
-          "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+          "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; managed: Zod.ZodDefault<Zod.ZodBoolean>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
           "Condition",
           ", Zod.ZodTypeDef, ",
           "Condition",
@@ -465,19 +461,19 @@
           "Condition",
           "; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { children: { id: string; condition?: ",
           "Condition",
-          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
           "; }[]; }, { children?: { id: string; condition?: ",
           "Condition",
-          "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; managed?: boolean | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
           "; }[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { path: { id: string; }; body: { children: { id: string; condition?: ",
           "Condition",
-          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
           "; }[]; }; }, { path: { id: string; }; body: { children?: { id: string; condition?: ",
           "Condition",
-          "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "; }[] | undefined; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; managed?: boolean | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
           "; }[] | undefined; }; }>, ",
           "StreamsRouteHandlerResources",
@@ -511,7 +507,7 @@
           "Condition",
           "; }, { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
-          "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
+          "; }>, \"many\">>; fields: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; type: Zod.ZodEnum<[\"keyword\", \"match_only_text\", \"long\", \"double\", \"date\", \"boolean\", \"ip\"]>; }, \"strip\", Zod.ZodTypeAny, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }, { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }>, \"many\">>; managed: Zod.ZodDefault<Zod.ZodBoolean>; children: Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; condition: Zod.ZodOptional<Zod.ZodType<",
           "Condition",
           ", Zod.ZodTypeDef, ",
           "Condition",
@@ -519,7 +515,7 @@
           "Condition",
           "; }, { id: string; condition?: ",
           "Condition",
-          "; }>, \"many\">>; }, { id: Zod.ZodString; managed: Zod.ZodDefault<Zod.ZodBoolean>; unmanaged_elasticsearch_assets: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodEnum<[\"ingest_pipeline\", \"component_template\", \"index_template\", \"data_stream\"]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }>, \"many\">>; }>, \"children\">, \"strip\", Zod.ZodTypeAny, { id: string; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "; }>, \"many\">>; }, { id: Zod.ZodString; unmanaged_elasticsearch_assets: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodEnum<[\"ingest_pipeline\", \"component_template\", \"index_template\", \"data_stream\"]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }, { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }>, \"many\">>; }>, \"children\">, \"strip\", Zod.ZodTypeAny, { id: string; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; managed: boolean; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
           "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }, { id: string; fields?: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[] | undefined; managed?: boolean | undefined; processing?: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
           "Condition",
@@ -565,9 +561,9 @@
           },
           "<\"POST /api/streams/_enable\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
           "StreamsRouteHandlerResources",
-          ", { acknowledged: true; }, undefined>; }"
+          ", { acknowledged: true; message: string; }, undefined>; }"
         ],
-        "path": "x-pack/plugins/streams/server/routes/index.ts",
+        "path": "x-pack/solutions/observability/plugins/streams/server/routes/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -581,7 +577,7 @@
       "tags": [],
       "label": "StreamsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/streams/server/plugin.ts",
+      "path": "x-pack/solutions/observability/plugins/streams/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -595,7 +591,7 @@
       "tags": [],
       "label": "StreamsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/streams/server/plugin.ts",
+      "path": "x-pack/solutions/observability/plugins/streams/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -623,7 +619,7 @@
           "Condition",
           "; }[]; inheritedFields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; from: string; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/plugins/streams/common/types.ts",
+        "path": "x-pack/solutions/observability/plugins/streams/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -642,7 +638,7 @@
           "Condition",
           "; }[]; unmanaged_elasticsearch_assets?: { id: string; type: \"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\"; }[] | undefined; }"
         ],
-        "path": "x-pack/plugins/streams/common/types.ts",
+        "path": "x-pack/solutions/observability/plugins/streams/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
