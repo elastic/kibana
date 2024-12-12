@@ -18,7 +18,7 @@ export const waitForAlertToComplete = async (
   await waitFor(
     async () => {
       const response = await supertest
-        .get(`/api/alerting/rule/${id}/state`)
+        .get(`/internal/alerting/rule/${id}/state`)
         .set('kbn-xsrf', 'true');
       if (response.status !== 200) {
         log.debug(
@@ -27,7 +27,7 @@ export const waitForAlertToComplete = async (
           )}, status: ${JSON.stringify(response.status)}`
         );
       }
-      return response.body.previousStartedAt != null;
+      return response.body.previous_started_at != null;
     },
     'waitForAlertToComplete',
     log
