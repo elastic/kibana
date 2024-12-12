@@ -50,6 +50,7 @@ import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plu
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
@@ -87,6 +88,7 @@ export interface InfraClientStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   dashboard: DashboardStart;
   embeddable?: EmbeddableStart;

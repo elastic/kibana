@@ -21,6 +21,7 @@ export const checkMissingGroups = async (
   esClient: ElasticsearchClient,
   metricParams: MetricExpressionParams,
   indexPattern: string,
+  timeFieldName: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
   logger: Logger,
@@ -31,7 +32,7 @@ export const checkMissingGroups = async (
     return missingGroups;
   }
   const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
-  const baseFilters = createBaseFilters(metricParams, currentTimeframe, filterQuery);
+  const baseFilters = createBaseFilters(metricParams, currentTimeframe, timeFieldName, filterQuery);
   const groupByFields = isString(groupBy) ? [groupBy] : groupBy ? groupBy : [];
 
   const searches = missingGroups.flatMap((group) => {

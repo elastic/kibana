@@ -8,6 +8,8 @@ import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Filter } from '@kbn/es-query';
 export { INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { SnapshotCustomMetricInput } from '../../http_api';
 
@@ -113,6 +115,15 @@ export type MetricExpressionParams =
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
 export type FilterQuery = string | typeof QUERY_INVALID;
+
+export interface SearchConfigurationType {
+  index: SerializedSearchSourceFields;
+  query: {
+    query: string;
+    language: string;
+  };
+  filter?: Filter[];
+}
 
 export interface AlertExecutionDetails {
   alertId: string;
