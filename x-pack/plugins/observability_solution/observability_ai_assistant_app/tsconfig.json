@@ -10,7 +10,8 @@
     "scripts/**/*",
     "typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    ".storybook/**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/es-types",
@@ -69,7 +70,14 @@
     "@kbn/cloud-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/ai-assistant-common",
+    "@kbn/observability-utils-server",
+    "@kbn/observability-utils-common",
+    "@kbn/slo-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/data-service",
     "@kbn/inference-common",
+    "@kbn/observability-ai-server",
+    "@kbn/observability-ai-common",
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-common",
   ],
