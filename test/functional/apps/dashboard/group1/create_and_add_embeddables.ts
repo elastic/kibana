@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await dashboard.switchToEditMode();
       await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Log stream (deprecated)');
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Pattern analysis');
       await dashboardAddPanel.expectEditorMenuClosed();
     });
 
