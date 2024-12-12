@@ -38,12 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('alert and action creation', () => {
       before(async () => {
-        await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
-          anomalyThreshold: 50,
-          description: '',
-          metricAlias: 'kbn-data-forge-fake_hosts.fake_hosts-*',
-          name: 'Default',
-        });
+        // await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
+        //   anomalyThreshold: 50,
+        //   description: '',
+        //   metricAlias: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+        //   name: 'Default',
+        // });
         dataForgeConfig = {
           schedule: [
             {
@@ -88,7 +88,18 @@ export default function ({ getService }: FtrProviderContext) {
                 metric: 'system.cpu.user.pct',
               },
             ],
-            sourceId: 'default',
+            sourceId: '',
+            searchConfiguration: {
+              index: {
+                id: 'infra_rules_data_view',
+                title: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+                timeFieldName: '@timestamp',
+              },
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+            },
             alertOnNoData: true,
             alertOnGroupDisappear: true,
           },
@@ -197,7 +208,18 @@ export default function ({ getService }: FtrProviderContext) {
                 metric: 'system.cpu.user.pct',
               },
             ],
-            sourceId: 'default',
+            sourceId: '',
+            searchConfiguration: {
+              index: {
+                id: 'infra_rules_data_view',
+                title: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+                timeFieldName: '@timestamp',
+              },
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+            },
             alertOnNoData: true,
             alertOnGroupDisappear: true,
           });

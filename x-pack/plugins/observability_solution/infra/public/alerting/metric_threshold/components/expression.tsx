@@ -33,7 +33,10 @@ import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { GenericAggType, RuleConditionChart } from '@kbn/observability-plugin/public';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
-import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
+import {
+  MetricsExplorerFields,
+  MetricsExplorerGroupBy,
+} from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
@@ -66,7 +69,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const [dataView, setDataView] = useState<DataView>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
-  const derivedIndexPattern = useMemo<DataViewBase>(
+  const dataViewIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
       title: dataView?.getIndexPattern() || 'unknown-index',
@@ -336,61 +339,60 @@ export const Expressions: React.FC<Props> = (props) => {
         </h4>
       </EuiText>
       <EuiSpacer size="xs" />
-      {dataView &&
-        ruleParams.criteria.map((e, idx) => {
-          let metricExpression = [
-            {
-              aggType: e.aggType as GenericAggType,
-              // RuleConditionChart uses A,B,C etc in its parser to identify multiple conditions
-              name: String.fromCharCode('A'.charCodeAt(0) + idx),
-              field: e.metric || '',
-            },
-          ];
-          if (e.customMetrics) {
-            metricExpression = e.customMetrics.map((metric) => ({
-              name: metric.name,
-              aggType: metric.aggType as GenericAggType,
-              field: metric.field || '',
-              filter: metric.filter,
-            }));
-          }
-          return (
-            <ExpressionRow
-              canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
-              fields={derivedIndexPattern.fields as any}
-              remove={removeExpression}
-              addExpression={addExpression}
-              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-              expressionId={idx}
-              setRuleParams={updateParams}
-              errors={(errors[idx] as IErrorObject) || emptyError}
-              expression={e || {}}
-            >
-              <RuleConditionChart
-                metricExpression={{
-                  metrics: metricExpression,
-                  threshold: e.threshold,
-                  comparator: e.comparator,
-                  timeSize,
-                  timeUnit,
-                  warningComparator: e.warningComparator,
-                  warningThreshold: e.warningThreshold,
-                }}
-                searchConfiguration={{
-                  index: dataView.id,
-                  query: {
-                    query: ruleParams.filterQueryText || '',
-                    language: 'kuery',
-                  },
-                }}
-                timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
-                error={(errors[idx] as IErrorObject) || emptyError}
-                dataView={dataView}
-                groupBy={ruleParams.groupBy}
-              />
-            </ExpressionRow>
-          );
-        })}
+      {ruleParams.criteria?.map((e, idx) => {
+        let metricExpression = [
+          {
+            aggType: e.aggType as GenericAggType,
+            // RuleConditionChart uses A,B,C etc in its parser to identify multiple conditions
+            name: String.fromCharCode('A'.charCodeAt(0) + idx),
+            field: e.metric || '',
+          },
+        ];
+        if (e.customMetrics) {
+          metricExpression = e.customMetrics.map((metric) => ({
+            name: metric.name,
+            aggType: metric.aggType as GenericAggType,
+            field: metric.field || '',
+            filter: metric.filter,
+          }));
+        }
+        return (
+          <ExpressionRow
+            canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
+            fields={dataViewIndexPattern.fields}
+            remove={removeExpression}
+            addExpression={addExpression}
+            key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+            expressionId={idx}
+            setRuleParams={updateParams}
+            errors={(errors[idx] as IErrorObject) || emptyError}
+            expression={e || {}}
+          >
+            <RuleConditionChart
+              metricExpression={{
+                metrics: metricExpression,
+                threshold: e.threshold,
+                comparator: e.comparator,
+                timeSize,
+                timeUnit,
+                warningComparator: e.warningComparator,
+                warningThreshold: e.warningThreshold,
+              }}
+              searchConfiguration={{
+                index: dataView?.id,
+                query: {
+                  query: ruleParams.filterQueryText || '',
+                  language: 'kuery',
+                },
+              }}
+              timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
+              error={(errors[idx] as IErrorObject) || emptyError}
+              dataView={dataView}
+              groupBy={ruleParams.groupBy}
+            />
+          </ExpressionRow>
+        );
+      })}
 
       <div style={{ marginLeft: 28 }}>
         <ForLastExpression
@@ -465,7 +467,7 @@ export const Expressions: React.FC<Props> = (props) => {
         fullWidth
         display="rowCompressed"
       >
-        {(metadata && derivedIndexPattern && (
+        {(metadata && dataViewIndexPattern && (
           <MetricsExplorerKueryBar
             onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
@@ -495,7 +497,7 @@ export const Expressions: React.FC<Props> = (props) => {
       >
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields as any}
+          fields={dataViewIndexPattern.fields as MetricsExplorerFields}
           options={{
             ...options,
             groupBy: ruleParams.groupBy || undefined,
