@@ -23,7 +23,7 @@ interface ThemeInfo {
   defaultThemeName: ThemeName;
 }
 
-const getThemeInfo = ({ isDist = true, isServerless }: GetThemeSettingsOptions): ThemeInfo => {
+const getThemeInfo = ({ isDist, isServerless }: GetThemeSettingsOptions): ThemeInfo => {
   const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
 
   const themeInfo: ThemeInfo = {
@@ -34,11 +34,11 @@ const getThemeInfo = ({ isDist = true, isServerless }: GetThemeSettingsOptions):
   if (!isDist) {
     // Allow environment-specific config when not building for distribution
     themeInfo.defaultDarkMode = themeTags[0]?.endsWith('dark') || false;
+  }
 
-    if (!isServerless) {
-      // Default to Borealis theme in non-serverless
-      themeInfo.defaultThemeName = 'borealis';
-    }
+  if (!isServerless) {
+    // Default to Borealis theme in non-serverless
+    themeInfo.defaultThemeName = 'borealis';
   }
 
   return themeInfo;
@@ -46,8 +46,8 @@ const getThemeInfo = ({ isDist = true, isServerless }: GetThemeSettingsOptions):
 
 export interface GetThemeSettingsOptions {
   isServerless: boolean;
-  isDist?: boolean;
-  isThemeSwitcherEnabled?: boolean;
+  isDist: boolean;
+  isThemeSwitcherEnabled: boolean | undefined;
 }
 
 export const getThemeSettings = (

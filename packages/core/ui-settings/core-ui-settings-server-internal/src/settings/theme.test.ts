@@ -12,6 +12,8 @@ import { getThemeSettings, type GetThemeSettingsOptions } from './theme';
 
 const defaultOptions: GetThemeSettingsOptions = {
   isServerless: false,
+  isDist: true,
+  isThemeSwitcherEnabled: undefined,
 };
 
 describe('theme settings', () => {
@@ -49,41 +51,41 @@ describe('theme settings', () => {
 
     describe('readonly', () => {
       it('should be readonly when `isServerless = true`', () => {
-        expect(getThemeSettings({ isServerless: true })['theme:name'].readonly).toBe(true);
-        expect(getThemeSettings({ isServerless: false })['theme:name'].readonly).toBe(false);
+        expect(
+          getThemeSettings({ ...defaultOptions, isServerless: true })['theme:name'].readonly
+        ).toBe(true);
+        expect(
+          getThemeSettings({ ...defaultOptions, isServerless: false })['theme:name'].readonly
+        ).toBe(false);
       });
 
       it('should be editable when `isThemeSwitcherEnabled = true`', () => {
         expect(
-          getThemeSettings({ isServerless: true, isThemeSwitcherEnabled: true })['theme:name']
-            .readonly
+          getThemeSettings({ ...defaultOptions, isServerless: true, isThemeSwitcherEnabled: true })[
+            'theme:name'
+          ].readonly
         ).toBe(false);
         expect(
-          getThemeSettings({ isServerless: false, isThemeSwitcherEnabled: true })['theme:name']
-            .readonly
+          getThemeSettings({
+            ...defaultOptions,
+            isServerless: false,
+            isThemeSwitcherEnabled: true,
+          })['theme:name'].readonly
         ).toBe(false);
       });
     });
 
     describe('value', () => {
-      it('should default to `amsterdam`', () => {
-        expect(getThemeSettings({ isServerless: false })['theme:name'].value).toBe('amsterdam');
-        expect(getThemeSettings({ isServerless: true })['theme:name'].value).toBe('amsterdam');
+      it('should default to `amsterdam` when `isServerless = true`', () => {
+        expect(
+          getThemeSettings({ ...defaultOptions, isServerless: true })['theme:name'].value
+        ).toBe('amsterdam');
       });
 
-      it('should default to `borealis` when `isDist = false` and `isServerless = false`', () => {
-        expect(getThemeSettings({ isDist: false, isServerless: false })['theme:name'].value).toBe(
-          'borealis'
-        );
-      });
-
-      it('should default to `amsterdam` wen `isDist = true`', () => {
-        expect(getThemeSettings({ isDist: true, isServerless: false })['theme:name'].value).toBe(
-          'amsterdam'
-        );
-        expect(getThemeSettings({ isDist: true, isServerless: true })['theme:name'].value).toBe(
-          'amsterdam'
-        );
+      it('should default to `borealis` when `isServerless = false`', () => {
+        expect(
+          getThemeSettings({ ...defaultOptions, isServerless: false })['theme:name'].value
+        ).toBe('borealis');
       });
     });
   });
@@ -97,12 +99,6 @@ describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
 
     process.env.KBN_OPTIMIZER_THEMES = 'v8light,v8dark';
     settings = getThemeSettings({ ...defaultOptions, isDist: false });
-    expect(settings['theme:darkMode'].value).toBe('disabled');
-  });
-
-  it('ignores the value when isDist is undefined', () => {
-    process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
-    const settings = getThemeSettings({ ...defaultOptions, isDist: undefined });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 

@@ -16,10 +16,10 @@ import { getThemeSettings } from './theme';
 import { getStateSettings } from './state';
 import { getAnnouncementsSettings } from './announcements';
 
-interface GetCoreSettingsOptions {
+export interface GetCoreSettingsOptions {
   isServerless: boolean;
-  isDist?: boolean;
-  isThemeSwitcherEnabled?: boolean;
+  isDist: boolean;
+  isThemeSwitcherEnabled: boolean | undefined;
 }
 
 export const getCoreSettings = (
