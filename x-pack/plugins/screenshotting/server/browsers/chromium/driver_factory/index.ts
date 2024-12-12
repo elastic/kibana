@@ -97,17 +97,15 @@ let numOfSessionsInProgress = 0;
 const promisesWaitingForSharedBrowser: Array<(value: unknown) => void> = [];
 
 function closeSharedBrowser() {
-  try {
-    (async () => {
-      // eslint-disable-next-line no-console
-      console.log('*** Closing browser');
-      await sharedBrowser?.close();
-      sharedBrowser = undefined;
-    })();
-  } catch (e) {
+  (async () => {
+    // eslint-disable-next-line no-console
+    console.log('*** Closing browser');
+    await sharedBrowser?.close();
+    sharedBrowser = undefined;
+  })().catch((e) => {
     // eslint-disable-next-line no-console
     console.log('*** Failed during the closing of the shared browser', e);
-  }
+  });
 }
 
 export class HeadlessChromiumDriverFactory {
