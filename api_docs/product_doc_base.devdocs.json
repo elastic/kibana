@@ -14,7 +14,7 @@
       "tags": [],
       "label": "ProductDocBasePluginSetup",
       "description": [],
-      "path": "x-pack/plugins/ai_infra/product_doc_base/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "ProductDocBasePluginStart",
       "description": [],
-      "path": "x-pack/plugins/ai_infra/product_doc_base/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -42,7 +42,7 @@
           "signature": [
             "InstallationAPI"
           ],
-          "path": "x-pack/plugins/ai_infra/product_doc_base/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -71,7 +71,7 @@
           "DocSearchResponse",
           ">"
         ],
-        "path": "x-pack/plugins/ai_infra/product_doc_base/server/services/search/types.ts",
+        "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -86,7 +86,7 @@
             "signature": [
               "DocSearchOptions"
             ],
-            "path": "x-pack/plugins/ai_infra/product_doc_base/server/services/search/types.ts",
+            "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -102,7 +102,7 @@
       "tags": [],
       "label": "ProductDocBaseSetupContract",
       "description": [],
-      "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -116,7 +116,7 @@
       "tags": [],
       "label": "ProductDocBaseStartContract",
       "description": [],
-      "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -134,7 +134,7 @@
             "DocSearchResponse",
             ">"
           ],
-          "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -149,7 +149,7 @@
               "signature": [
                 "DocSearchOptions"
               ],
-              "path": "x-pack/plugins/ai_infra/product_doc_base/server/services/search/types.ts",
+              "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/services/search/types.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -165,7 +165,7 @@
           "signature": [
             "DocumentationManagerAPI"
           ],
-          "path": "x-pack/plugins/ai_infra/product_doc_base/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
