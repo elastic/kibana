@@ -164,7 +164,7 @@ export const findAndRelocateModules = async (params: RelocateModulesParams) => {
   await safeExec(`git restore --staged .`);
   await safeExec(`git restore .`);
   await safeExec(`git clean -f -d`);
-  await safeExec(`git checkout ${baseBranch} && git pull upstream ${baseBranch} && git push`);
+  await safeExec(`git checkout ${baseBranch} && git pull upstream ${baseBranch}`);
 
   if (prNumber) {
     // checkout existing PR, reset all commits, rebase from baseBranch
