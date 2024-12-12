@@ -46,12 +46,12 @@ export const storybookAliases = {
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/observability_solution/infra/.storybook',
   inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
-  investigate: 'x-pack/plugins/observability_solution/investigate_app/.storybook',
+  investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
   logs_explorer: 'x-pack/plugins/observability_solution/logs_explorer/.storybook',
   management: 'packages/kbn-management/storybook/config',
-  observability: 'x-pack/plugins/observability_solution/observability/.storybook',
+  observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   observability_ai_assistant:
     'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
@@ -63,7 +63,7 @@ export const storybookAliases = {
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
-  security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
+  security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',
   slo: 'x-pack/plugins/observability_solution/slo/.storybook',
