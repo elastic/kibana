@@ -1234,9 +1234,6 @@ export class DataViewsService {
    */
 
   async createSavedObject(dataView: AbstractDataView, overwrite = false) {
-    if (!(await this.getCanSave())) {
-      throw new DataViewInsufficientAccessError();
-    }
     const dupe = await findByName(this.savedObjectsClient, dataView.getName());
 
     if (dupe) {
@@ -1248,18 +1245,27 @@ export class DataViewsService {
     }
 
     const body = dataView.getAsSavedObjectBody();
+    try {
+      const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
+        body,
+        {
+          id: dataView.id,
+          initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
+          overwrite,
+        }
+      )) as SavedObject<DataViewAttributes>;
 
-    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
-      id: dataView.id,
-      initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
-      overwrite,
-    })) as SavedObject<DataViewAttributes>;
-
-    if (this.savedObjectsCache) {
-      this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      if (this.savedObjectsCache) {
+        this.savedObjectsCache.push(response as SavedObject<IndexPatternListSavedObjectAttrs>);
+      }
+      dataView.version = response.version;
+      dataView.namespaces = response.namespaces || [];
+    } catch (err) {
+      if (err?.body?.statusCode === 403) {
+        throw new DataViewInsufficientAccessError();
+      }
+      throw err;
     }
-    dataView.version = response.version;
-    dataView.namespaces = response.namespaces || [];
   }
 
   /**
@@ -1277,9 +1283,6 @@ export class DataViewsService {
     displayErrors: boolean = true
   ) {
     if (!indexPattern.id) return;
-    if (!(await this.getCanSave())) {
-      throw new DataViewInsufficientAccessError(indexPattern.id);
-    }
 
     // get the list of attributes
     const body = indexPattern.getAsSavedObjectBody();
@@ -1303,6 +1306,9 @@ export class DataViewsService {
         indexPattern.version = response.version;
       })
       .catch(async (err) => {
+        if (err?.body?.statusCode === 403) {
+          throw new DataViewInsufficientAccessError(indexPattern.id);
+        }
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
           const samePattern = await this.getDataViewLazy(indexPattern.id!);
           // What keys changed from now and what the server returned
@@ -1372,12 +1378,18 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
-    if (!(await this.getCanSave())) {
-      throw new DataViewInsufficientAccessError(indexPatternId);
-    }
-    this.dataViewCache.delete(indexPatternId);
-    this.dataViewLazyCache.delete(indexPatternId);
-    return this.savedObjectsClient.delete(indexPatternId);
+    return this.savedObjectsClient
+      .delete(indexPatternId)
+      .then(() => {
+        this.dataViewCache.delete(indexPatternId);
+        this.dataViewLazyCache.delete(indexPatternId);
+      })
+      .catch((err) => {
+        if (err?.body?.statusCode === 403) {
+          throw new DataViewInsufficientAccessError(indexPatternId);
+        }
+        throw err;
+      });
   }
 
   private async getDefaultDataViewId() {
