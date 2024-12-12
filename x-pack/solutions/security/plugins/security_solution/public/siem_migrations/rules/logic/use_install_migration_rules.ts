@@ -19,9 +19,8 @@ export const INSTALL_MIGRATION_RULES_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION
 export const useInstallMigrationRules = (migrationId: string) => {
   const { addError } = useAppToasts();
 
-  const invalidateGetRuleMigrations = useInvalidateGetMigrationRules(migrationId);
-  const invalidateGetMigrationTranslationStats =
-    useInvalidateGetMigrationTranslationStats(migrationId);
+  const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
+  const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
   return useMutation<InstallMigrationRulesResponse, Error, { ids: string[]; enabled: boolean }>(
     ({ ids, enabled = false }) => installMigrationRules({ migrationId, ids, enabled }),
@@ -31,8 +30,8 @@ export const useInstallMigrationRules = (migrationId: string) => {
         addError(error, { title: i18n.INSTALL_MIGRATION_RULES_FAILURE });
       },
       onSettled: () => {
-        invalidateGetRuleMigrations();
-        invalidateGetMigrationTranslationStats();
+        invalidateGetRuleMigrations(migrationId);
+        invalidateGetMigrationTranslationStats(migrationId);
       },
     }
   );

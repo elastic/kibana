@@ -17,10 +17,12 @@ import * as i18n from './translations';
 
 export interface BulkActionsProps {
   isTableLoading: boolean;
+  numberOfFailedRules: number;
   numberOfTranslatedRules: number;
   numberOfSelectedRules: number;
   installTranslatedRule?: () => void;
   installSelectedRule?: () => void;
+  reprocessFailedRules?: () => void;
 }
 
 /**
@@ -29,13 +31,16 @@ export interface BulkActionsProps {
 export const BulkActions: React.FC<BulkActionsProps> = React.memo(
   ({
     isTableLoading,
+    numberOfFailedRules,
     numberOfTranslatedRules,
     numberOfSelectedRules,
     installTranslatedRule,
     installSelectedRule,
+    reprocessFailedRules,
   }) => {
     const disableInstallTranslatedRulesButton = isTableLoading || !numberOfTranslatedRules;
     const showInstallSelectedRulesButton = isTableLoading || numberOfSelectedRules > 0;
+    const showRetryFailedRulesButton = isTableLoading || numberOfFailedRules > 0;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         {showInstallSelectedRulesButton ? (
@@ -53,9 +58,23 @@ export const BulkActions: React.FC<BulkActionsProps> = React.memo(
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
+        {showRetryFailedRulesButton ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="refresh"
+              color={'warning'}
+              data-test-subj="reprocessFailedRulesButton"
+              onClick={reprocessFailedRules}
+              disabled={isTableLoading}
+              aria-label={i18n.REPROCESS_FAILED_ARIA_LABEL}
+            >
+              {i18n.REPROCESS_FAILED_RULES(numberOfFailedRules)}
+              {isTableLoading && <EuiLoadingSpinner size="s" />}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <EuiButton
-            fill
             iconType="plusInCircle"
             data-test-subj="installTranslatedRulesButton"
             onClick={installTranslatedRule}

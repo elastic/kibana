@@ -41,3 +41,10 @@ export const UPDATE_MIGRATION_RULES_FAILURE = i18n.translate(
     defaultMessage: 'Failed to update migration rules',
   }
 );
+
+export const RETRY_FAILED_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.retryFailedRulesFailDescription',
+  {
+    defaultMessage: 'Failed to reprocess migration rules',
+  }
+);
