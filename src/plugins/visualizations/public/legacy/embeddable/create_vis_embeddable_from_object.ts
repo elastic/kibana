@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
+import { IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Vis } from '../../types';
 import type {
@@ -21,6 +21,7 @@ import { getHttp, getTimeFilter, getCapabilities } from '../../services';
 import { urlFor } from '../../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
+import { AttributeService } from './attribute_service';
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only

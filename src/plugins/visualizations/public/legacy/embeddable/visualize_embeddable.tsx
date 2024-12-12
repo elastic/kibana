@@ -23,7 +23,6 @@ import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import {
   Adapters,
-  AttributeService,
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
@@ -53,6 +52,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../../utils/saved_visualize_utils';
 import { VisSavedObject } from '../../types';
 import { toExpressionAst } from '../../embeddable/to_ast';
+import { AttributeService } from './attribute_service';
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;

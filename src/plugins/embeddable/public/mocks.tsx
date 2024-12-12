@@ -38,7 +38,6 @@ import { EmbeddablePublicPlugin } from './plugin';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 
-export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
 
@@ -114,7 +113,6 @@ const createStartContract = (): Start => {
     inject: jest.fn(),
     getAllMigrations: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
-    getAttributeService: jest.fn(),
   };
   return startContract;
 };
