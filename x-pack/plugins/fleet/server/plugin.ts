@@ -817,6 +817,12 @@ export class FleetPlugin
         internalSoClient
       ),
       agentPolicyService: {
+        create: agentPolicyService.create,
+        runExternalCallbacks: agentPolicyService.runExternalCallbacks,
+        checkTamperProtectionLicense: agentPolicyService.checkTamperProtectionLicense,
+        checkAgentless: agentPolicyService.checkAgentless,
+        requireUniqueName: agentPolicyService.requireUniqueName,
+        triggerAgentPolicyUpdatedEvent: agentPolicyService.triggerAgentPolicyUpdatedEvent,
         get: agentPolicyService.get,
         list: agentPolicyService.list,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
