@@ -108,7 +108,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
                 {
                   field: 'process.executable.caseless',
                   operator: 'included',
-                  type: 'wildcard',
+                  type: 'match',
                   value:
                     '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity',
                 },
