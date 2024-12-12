@@ -135,15 +135,20 @@ export function TraceList({ response }: Props) {
   const { data: { items } = { items: [] }, status } = response;
   const { onPageReady } = usePerformanceContext();
 
-  const { query } = useApmParams('/traces');
+  const {
+    query,
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/traces');
 
   const traceListColumns = useMemo(() => getTraceListColumns({ query }), [query]);
 
   useEffect(() => {
     if (status === FETCH_STATUS.SUCCESS) {
-      onPageReady();
+      onPageReady({
+        meta: { rangeFrom, rangeTo },
+      });
     }
-  }, [status, onPageReady]);
+  }, [status, onPageReady, rangeFrom, rangeTo]);
 
   return (
     <ManagedTable
