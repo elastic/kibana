@@ -9,6 +9,8 @@
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import { ExecutionContextService } from './execution_context_service';
@@ -18,14 +20,19 @@ describe('ExecutionContextService', () => {
   let curApp$: BehaviorSubject<string>;
   let execService: ExecutionContextService;
   let analytics: jest.Mocked<AnalyticsServiceSetup>;
+  let history: jest.Mocked<InternalApplicationStart['history']>;
 
   beforeEach(() => {
     analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+    history = applicationServiceMock.createInternalStartContract().history as jest.Mocked<
+      InternalApplicationStart['history']
+    >;
     execService = new ExecutionContextService();
     execContext = execService.setup({ analytics });
     curApp$ = new BehaviorSubject('app1');
     execContext = execService.start({
       curApp$,
+      history,
     });
   });
 
@@ -94,6 +101,50 @@ describe('ExecutionContextService', () => {
       }
     `
     );
+  });
+
+  it('url updates automatically when there is a navigation', async () => {
+    execContext.set({
+      type: 'ghf',
+      meta: {
+        foo: 1,
+      },
+      description: 'first set',
+    });
+
+    expect(execContext.get()).toMatchInlineSnapshot(
+      {
+        name: 'app1',
+        description: 'first set',
+        type: 'ghf',
+        url: '/',
+      },
+      `
+      Object {
+        "description": "first set",
+        "meta": Object {
+          "foo": 1,
+        },
+        "name": "app1",
+        "type": "ghf",
+        "url": "/",
+      }
+    `
+    );
+
+    history.listen.mock.calls[0][0]({ ...history.location, pathname: '/another-path' }, 'PUSH');
+
+    expect(execContext.get()).toMatchInlineSnapshot(`
+      Object {
+        "description": "first set",
+        "meta": Object {
+          "foo": 1,
+        },
+        "name": "app1",
+        "type": "ghf",
+        "url": "/another-path",
+      }
+    `);
   });
 
   it('sets context and adds current url and appid when getting it', () => {

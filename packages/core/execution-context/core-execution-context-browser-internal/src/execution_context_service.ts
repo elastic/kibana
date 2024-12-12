@@ -8,6 +8,7 @@
  */
 
 import { compact, isEqual, isUndefined, omitBy } from 'lodash';
+import type { History } from 'history';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { map } from 'rxjs';
@@ -32,6 +33,7 @@ export interface SetupDeps {
 
 export interface StartDeps {
   curApp$: Observable<string | undefined>;
+  history: History<unknown>;
 }
 
 /** @internal */
@@ -75,7 +77,7 @@ export class ExecutionContextService
     return this.contract;
   }
 
-  public start({ curApp$ }: StartDeps) {
+  public start({ curApp$, history }: StartDeps) {
     const start = this.contract!;
 
     // Track app id changes and clear context on app change
@@ -83,6 +85,13 @@ export class ExecutionContextService
       curApp$.subscribe((appId) => {
         this.appId = appId;
         start.clear();
+      })
+    );
+
+    // Track URL changes to make sure that we reflect the new path name
+    this.subscription.add(
+      history.listen((location) => {
+        start.set({ url: location.pathname });
       })
     );
 
