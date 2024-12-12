@@ -17,7 +17,7 @@ import {
   Capabilities as UICapabilities,
 } from '@kbn/core/server';
 import { ConfigType } from './config';
-import { FeatureRegistry } from './feature_registry';
+import { FeatureRegistry, GetKibanaFeaturesParams } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
@@ -50,7 +50,7 @@ export interface FeaturesPluginSetup {
    * @deprecated
    * @removeBy 8.8.0
    */
-  getKibanaFeatures(): KibanaFeature[];
+  getKibanaFeatures(params?: Pick<GetKibanaFeaturesParams, 'omitDeprecated'>): KibanaFeature[];
 
   /**
    * Calling this function during setup will crash Kibana.

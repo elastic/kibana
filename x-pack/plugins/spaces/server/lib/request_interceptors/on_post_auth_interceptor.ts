@@ -106,7 +106,10 @@ export function initSpacesOnPostAuthRequestInterceptor({
         }
       }
 
-      const allFeatures = features.getKibanaFeatures();
+      // The spaces client returns migrated feature IDs in `disabledFeatures`, so we need to omit deprecated features.
+      // Otherwise apps granted by deprecated features will be considered available when they shouldn't be,
+      // since their IDs won't be present in `disabledFeatures`.
+      const allFeatures = features.getKibanaFeatures({ omitDeprecated: true });
       const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
         allFeatures,
         space.disabledFeatures,
