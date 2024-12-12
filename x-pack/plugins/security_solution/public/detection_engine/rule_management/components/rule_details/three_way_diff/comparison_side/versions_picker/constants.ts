@@ -99,7 +99,7 @@ export const getOptionsForDiffOutcome = (
       }
 
       if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
-        return [
+        const options = [
           {
             value: SelectedVersions.BaseFinal,
             text: i18n.MY_CHANGES_TITLE,
@@ -110,12 +110,17 @@ export const getOptionsForDiffOutcome = (
             text: i18n.UPDATE_FROM_ELASTIC_TITLE,
             title: i18n.UPDATE_FROM_ELASTIC_EXPLANATION,
           },
-          {
+        ];
+
+        if (hasResolvedValueDifferentFromSuggested) {
+          options.push({
             value: SelectedVersions.BaseCurrent,
             text: i18n.MY_ORIGINAL_CHANGES_TITLE,
             title: i18n.MY_ORIGINAL_CHANGES_EXPLANATION,
-          },
-        ];
+          });
+        }
+
+        return options;
       }
     }
     case ThreeWayDiffOutcome.MissingBaseCanUpdate: {
