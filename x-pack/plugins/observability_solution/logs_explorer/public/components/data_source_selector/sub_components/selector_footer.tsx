@@ -57,7 +57,7 @@ export const ESQLButton = (props: DiscoverEsqlUrlProps) => {
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiButton {...linkProps} color="accentSecondary" size="s" data-test-subj="esqlLink">
+      <EuiButton {...linkProps} color="text" size="s" data-test-subj="esqlLink">
         {tryEsql}
       </EuiButton>
     </EuiFlexItem>
