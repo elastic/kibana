@@ -35,7 +35,12 @@ import type {
   VisualizationInfo,
 } from '../../types';
 import { renewIDs } from '../../utils';
-import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
+import type {
+  FormBasedLayer,
+  FormBasedPersistedState,
+  FormBasedPrivateState,
+  TextBasedLayer,
+} from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
@@ -335,8 +340,11 @@ export function getUnsupportedOperationsWarningMessage(
     [FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn | undefined]
   > = Object.values(state.layers)
     // filter layers without dataView loaded yet
-    .filter(({ indexPatternId }) => dataViews.indexPatterns[indexPatternId])
+    .filter((layer) => layer.type !== 'esql' && dataViews.indexPatterns[layer.indexPatternId])
     .flatMap((layer) => {
+      if (layer.type === 'esql') {
+        return [];
+      }
       const dataView = dataViews.indexPatterns[layer.indexPatternId];
       const columnsEntries = Object.entries(layer.columns);
       return columnsEntries
@@ -453,7 +461,9 @@ export function getPrecisionErrorWarningMessages(
         return acc;
       }, [] as Array<{ layerId: string; column: DatatableColumn }>)
       .forEach(({ layerId, column }) => {
-        const currentLayer = state.layers[layerId];
+        if (state.layers[layerId]?.type === 'esql') return;
+
+        const currentLayer = state.layers[layerId] as FormBasedLayer;
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
           const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
@@ -554,7 +564,7 @@ export function getPrecisionErrorWarningMessages(
                           layerId,
                           newLayer: updateDefaultLabels(
                             updateColumnParam({
-                              layer: currentLayer,
+                              layer: currentLayer as FormBasedLayer,
                               columnId: column.id,
                               paramName: 'orderBy',
                               value: {
@@ -612,8 +622,8 @@ export function getNotifiableFeatures(
   const features: UserMessage[] = [];
   const layers = Object.entries(state.layers);
   const layersWithCustomSamplingValues = layers.filter(
-    ([, layer]) => getSamplingValue(layer) !== 1
-  );
+    ([, layer]) => layer.type !== 'esql' && getSamplingValue(layer) !== 1
+  ) as Array<[string, FormBasedLayer]>;
   if (layersWithCustomSamplingValues.length) {
     features.push({
       uniqueId: LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
@@ -632,7 +642,9 @@ export function getNotifiableFeatures(
       displayLocations: [{ id: 'embeddableBadge' }],
     });
   }
-  const layersWithIgnoreGlobalFilters = layers.filter(([, layer]) => layer.ignoreGlobalFilters);
+  const layersWithIgnoreGlobalFilters = layers.filter(
+    ([, layer]) => layer.type !== 'esql' && layer.ignoreGlobalFilters
+  ) as Array<[string, FormBasedLayer]>;
   if (layersWithIgnoreGlobalFilters.length) {
     features.push({
       uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
@@ -920,7 +932,7 @@ export function getFiltersInLayer(
 }
 
 export const cloneLayer = (
-  layers: Record<string, FormBasedLayer>,
+  layers: Record<string, FormBasedLayer | TextBasedLayer>,
   layerId: string,
   newLayerId: string,
   getNewId: (id: string) => string
@@ -930,7 +942,9 @@ export const cloneLayer = (
       ...layers,
       [newLayerId]: renewIDs(
         layers[layerId],
-        Object.keys(layers[layerId]?.columns ?? {}),
+        layers[layerId].type === 'esql'
+          ? (layers[layerId] as TextBasedLayer).columns.map((c) => c.columnId)
+          : Object.keys(layers[layerId]?.columns ?? {}),
         getNewId
       ),
     };

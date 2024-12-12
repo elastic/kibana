@@ -15,7 +15,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
 import { GenericIndexPatternColumn } from '../form_based';
-import { FormBasedPrivateState } from '../types';
+import { FormBasedLayer, FormBasedPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../../common/types';
 import { getOperationSupportMatrix } from './operation_support';
@@ -44,14 +44,14 @@ export const FormBasedDimensionEditorComponent = function FormBasedDimensionPane
   props: FormBasedDimensionEditorProps
 ) {
   const layerId = props.layerId;
-  const currentIndexPattern = props.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  const layer = props.state.layers[layerId] as FormBasedLayer;
+  const currentIndexPattern = props.indexPatterns[layer?.indexPatternId];
   if (!currentIndexPattern) {
     return null;
   }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  const selectedColumn: GenericIndexPatternColumn | null =
-    props.state.layers[layerId].columns[props.columnId] || null;
+  const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] || null;
   return (
     <DimensionEditor
       {...props}
