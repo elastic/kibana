@@ -46,6 +46,8 @@ export const useMockDashboardApi = ({
         from: 'now-24h',
         to: 'now',
       }),
+      filters$: new BehaviorSubject([]),
+      query$: new BehaviorSubject(''),
       viewMode: new BehaviorSubject('edit'),
       panels$,
       rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),

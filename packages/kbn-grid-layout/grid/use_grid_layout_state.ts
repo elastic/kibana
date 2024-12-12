@@ -63,7 +63,7 @@ export const useGridLayoutState = ({
   const gridLayoutStateManager = useMemo(() => {
     const resolvedLayout = cloneDeep(layout);
     resolvedLayout.forEach((row, rowIndex) => {
-      resolvedLayout[rowIndex] = resolveGridRow(row);
+      resolvedLayout[rowIndex] = resolveGridRow(row, gridSettings.columnCount);
     });
 
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
