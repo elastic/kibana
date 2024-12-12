@@ -15,16 +15,16 @@ export interface DataUsageMetricsPageProps {
   'data-test-subj'?: string;
 }
 export const DataUsageMetricsPage = memo<DataUsageMetricsPageProps>(
-  ({ 'data-test-subj': dataTestSubj = 'DataUsagePage' }) => {
+  ({ 'data-test-subj': dataTestSubj = 'data-usage' }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
       <DataUsagePage
-        data-test-subj={dataTestSubj}
+        data-test-subj={getTestId('page')}
         title={DATA_USAGE_PAGE.title}
         subtitle={DATA_USAGE_PAGE.subTitle}
       >
-        <DataUsageMetrics data-test-subj={getTestId()} />
+        <DataUsageMetrics data-test-subj={getTestId('metrics')} />
       </DataUsagePage>
     );
   }

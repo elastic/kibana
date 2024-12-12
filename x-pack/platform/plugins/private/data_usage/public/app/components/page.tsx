@@ -59,7 +59,7 @@ export const DataUsagePage = memo<PropsWithChildren<DataUsagePageProps & CommonP
     }, [getTestId, subtitle]);
 
     return (
-      <div {...otherProps}>
+      <div {...otherProps} data-test-subj={dataTestSubj}>
         <>
           <EuiPageHeader
             pageTitle={header}

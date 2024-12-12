@@ -92,19 +92,19 @@ describe('DataUsageMetrics Page', () => {
 
   it('renders', () => {
     const { getByTestId } = renderComponent();
-    expect(getByTestId(`${testId}-header`)).toBeTruthy();
+    expect(getByTestId(`${testId}-page-header`)).toBeTruthy();
   });
 
   it('should show page title', () => {
     const { getByTestId } = renderComponent();
-    expect(getByTestId(`${testId}-title`)).toBeTruthy();
-    expect(getByTestId(`${testId}-title`)).toHaveTextContent('Data Usage');
+    expect(getByTestId(`${testId}-page-title`)).toBeTruthy();
+    expect(getByTestId(`${testId}-page-title`)).toHaveTextContent('Data Usage');
   });
 
   it('should show page description', () => {
     const { getByTestId } = renderComponent();
-    expect(getByTestId(`${testId}-description`)).toBeTruthy();
-    expect(getByTestId(`${testId}-description`)).toHaveTextContent(
+    expect(getByTestId(`${testId}-page-description`)).toBeTruthy();
+    expect(getByTestId(`${testId}-page-description`)).toHaveTextContent(
       'Monitor data ingested and retained by data streams over the past 10 days.'
     );
   });
