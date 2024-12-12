@@ -484,8 +484,8 @@ export class ObservabilityAIAssistantClient {
     let tools: Record<string, { description: string; schema: any }> | undefined;
     let toolChoice: ToolChoiceType | { function: string } | undefined;
 
-    if (functions && functions.length > 0) {
-      tools = functions?.reduce((acc, fn) => {
+    if (functions?.length) {
+      tools = functions.reduce((acc, fn) => {
         acc[fn.name] = {
           description: fn.description,
           schema: fn.parameters,
