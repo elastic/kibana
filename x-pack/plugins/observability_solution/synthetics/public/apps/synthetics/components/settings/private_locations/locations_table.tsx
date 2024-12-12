@@ -18,6 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
+import { ALL_SPACES_LABEL } from '../components/spaces_select';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
@@ -95,6 +97,17 @@ export const PrivateLocationsTable = ({
             ))}
           </EuiFlexGroup>
         );
+      },
+    },
+    {
+      name: 'Spaces',
+      field: 'spaces',
+      sortable: true,
+      render: (spaces: string[]) => {
+        if (!spaces || spaces.length === 0 || spaces.includes(ALL_SPACES_ID)) {
+          return ALL_SPACES_LABEL;
+        }
+        return spaces.join(', ');
       },
     },
     {

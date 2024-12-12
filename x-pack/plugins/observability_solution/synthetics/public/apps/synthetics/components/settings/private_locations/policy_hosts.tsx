@@ -17,9 +17,11 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { AgentPolicyCallout } from './agent_policy_callout';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
@@ -31,9 +33,13 @@ export const PolicyHostsField = ({ privateLocations }: { privateLocations: Priva
     control,
     formState: { isSubmitted },
     trigger,
+    getValues,
   } = useFormContext<PrivateLocation>();
   const { isTouched, error } = control.getFieldState(AGENT_POLICY_FIELD_NAME);
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
+  const selectedPolicyId = getValues(AGENT_POLICY_FIELD_NAME);
+
+  const selectedPolicy = data?.find((item) => item.id === selectedPolicyId);
 
   const policyHostsOptions = data?.map((item) => {
     const hasLocation = privateLocations.find((location) => location.agentPolicyId === item.id);
@@ -89,36 +95,40 @@ export const PolicyHostsField = ({ privateLocations }: { privateLocations: Priva
   });
 
   return (
-    <EuiFormRow
-      fullWidth
-      label={POLICY_HOST_LABEL}
-      helpText={showFieldInvalid ? SELECT_POLICY_HOSTS_HELP_TEXT : undefined}
-      isInvalid={showFieldInvalid}
-      error={showFieldInvalid ? SELECT_POLICY_HOSTS : undefined}
-    >
-      <Controller
-        name={AGENT_POLICY_FIELD_NAME}
-        control={control}
-        rules={{ required: true }}
-        render={({ field }) => (
-          <SuperSelect
-            fullWidth
-            aria-label={SELECT_POLICY_HOSTS}
-            placeholder={SELECT_POLICY_HOSTS}
-            valueOfSelected={field.value}
-            itemLayoutAlign="top"
-            popoverProps={{ repositionOnScroll: true }}
-            hasDividers
-            isInvalid={showFieldInvalid}
-            options={policyHostsOptions ?? []}
-            {...field}
-            onBlur={async () => {
-              await trigger();
-            }}
-          />
-        )}
-      />
-    </EuiFormRow>
+    <>
+      <EuiFormRow
+        fullWidth
+        label={POLICY_HOST_LABEL}
+        helpText={showFieldInvalid ? SELECT_POLICY_HOSTS_HELP_TEXT : undefined}
+        isInvalid={showFieldInvalid}
+        error={showFieldInvalid ? SELECT_POLICY_HOSTS : undefined}
+      >
+        <Controller
+          name={AGENT_POLICY_FIELD_NAME}
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <SuperSelect
+              fullWidth
+              aria-label={SELECT_POLICY_HOSTS}
+              placeholder={SELECT_POLICY_HOSTS}
+              valueOfSelected={field.value}
+              itemLayoutAlign="top"
+              popoverProps={{ repositionOnScroll: true }}
+              hasDividers
+              isInvalid={showFieldInvalid}
+              options={policyHostsOptions ?? []}
+              {...field}
+              onBlur={async () => {
+                await trigger();
+              }}
+            />
+          )}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      {selectedPolicy?.agents === 0 && <AgentPolicyCallout />}
+    </>
   );
 };
 
