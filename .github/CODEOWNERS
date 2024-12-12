@@ -804,7 +804,6 @@ x-pack/packages/observability/observability_utils/observability_utils_browser @e
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security/api_key_management @elastic/kibana-security
 x-pack/packages/security/authorization_core @elastic/kibana-security
@@ -846,6 +845,7 @@ x-pack/platform/packages/private/ml/time_buckets @elastic/ml-ui
 x-pack/platform/packages/private/ml/ui_actions @elastic/ml-ui
 x-pack/platform/packages/private/ml/url_state @elastic/ml-ui
 x-pack/platform/packages/private/ml/validators @elastic/ml-ui
+x-pack/platform/packages/private/rollup @elastic/kibana-management
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management

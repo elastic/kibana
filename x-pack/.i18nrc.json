@@ -124,7 +124,7 @@
       "plugins/reporting"
     ],
     "xpack.rollupJobs": [
-      "packages/rollup",
+      "platform/packages/private/rollup",
       "plugins/rollup"
     ],
     "xpack.runtimeFields": "plugins/runtime_fields",

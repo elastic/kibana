@@ -6824,7 +6824,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rollup@link:x-pack/packages/rollup":
+"@kbn/rollup@link:x-pack/platform/packages/private/rollup":
   version "0.0.0"
   uid ""
 
