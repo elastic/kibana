@@ -17,8 +17,10 @@
       "search",
       "connectors"
     ],
-    "requiredPlugins": [],
-    "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredPlugins": [
+      "taskManager",
+      "fleet"
+    ],
+    "optionalPlugins": []
   }
 }
