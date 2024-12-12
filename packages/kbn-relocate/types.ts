@@ -21,4 +21,5 @@ export interface Commit {
 export interface PullRequest {
   number: string;
   commits: Commit[];
+  headRefName: string;
 }

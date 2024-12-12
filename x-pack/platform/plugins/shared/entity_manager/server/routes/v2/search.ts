@@ -24,9 +24,9 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
       const client = await getScopedClient({ request });
-      const entities = await client.v2.searchEntities(params.body);
+      const result = await client.v2.searchEntities(params.body);
 
-      return response.ok({ body: { entities } });
+      return response.ok({ body: result });
     } catch (e) {
       logger.error(e);
 
@@ -51,9 +51,9 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
   }),
   handler: async ({ request, response, params, getScopedClient }) => {
     const client = await getScopedClient({ request });
-    const entities = await client.v2.searchEntitiesBySources(params.body);
+    const result = await client.v2.searchEntitiesBySources(params.body);
 
-    return response.ok({ body: { entities } });
+    return response.ok({ body: result });
   },
 });
 
