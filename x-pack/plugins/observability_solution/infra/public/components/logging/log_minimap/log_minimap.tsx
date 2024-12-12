@@ -15,7 +15,7 @@ import moment from 'moment';
 import * as React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';
@@ -58,10 +58,15 @@ export const LogMinimap = ({
   summaryBuckets,
   summaryHighlightBuckets,
   width,
-  target,
+  target: initialTarget,
 }: LogMinimapProps) => {
   const [timeCursorY, setTimeCursorY] = useState<number>(0);
+  const [target, setTarget] = useState<number | null>(initialTarget);
   const theme = useEuiTheme();
+
+  useEffect(() => {
+    setTarget(initialTarget);
+  }, [initialTarget]);
 
   const handleClick: React.MouseEventHandler<SVGSVGElement> = (event) => {
     const minimapTop = event.currentTarget.getBoundingClientRect().top;
