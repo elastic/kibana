@@ -870,6 +870,7 @@ x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-manag
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
+x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
@@ -952,7 +953,6 @@ x-pack/plugins/observability_solution/uptime @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/ux @elastic/obs-ux-management-team
 x-pack/plugins/osquery @elastic/security-defend-workflows
 x-pack/plugins/reporting @elastic/appex-sharedux
-x-pack/plugins/rollup @elastic/kibana-management
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/plugins/runtime_fields @elastic/kibana-management
 x-pack/plugins/saved_objects_tagging @elastic/appex-sharedux
