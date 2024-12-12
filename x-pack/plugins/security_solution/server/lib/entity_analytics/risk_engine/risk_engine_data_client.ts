@@ -319,4 +319,11 @@ export class RiskEngineDataClient {
 
     return RiskEngineStatusEnum.ENABLED;
   }
+
+  public async update_risk_engine_saved_object(attributes: {}) {
+    return updateSavedObjectAttribute({
+      savedObjectsClient: this.options.soClient,
+      attributes,
+    });
+  }
 }
