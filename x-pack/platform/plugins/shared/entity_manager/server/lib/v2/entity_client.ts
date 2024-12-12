@@ -14,13 +14,19 @@ import {
   storeSourceDefinition,
 } from './definitions/source_definition';
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
-import { getEntityInstancesQuery } from './queries';
-import { mergeEntitiesList, sortEntitiesList } from './queries/utils';
+import { getEntityInstancesQuery, getEntityCountQuery } from './queries';
+import {
+  isFulfilledResult,
+  isRejectedResult,
+  mergeEntitiesList,
+  sortEntitiesList,
+} from './queries/utils';
 import {
   EntitySourceDefinition,
   EntityTypeDefinition,
   SearchByType,
   SearchBySources,
+  CountByTypes,
 } from './types';
 import { UnknownEntityType } from './errors/unknown_entity_type';
 import { runESQLQuery } from './run_esql_query';
@@ -79,7 +85,7 @@ export class EntityClient {
         limit,
       });
       this.options.logger.debug(
-        () => `Entity query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+        () => `Entity instances query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
       );
 
       const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
@@ -92,15 +98,10 @@ export class EntityClient {
       return rawEntities;
     });
 
-    const results = await Promise.allSettled(searches);
-    const entities = (
-      results.filter((result) => result.status === 'fulfilled') as Array<
-        PromiseFulfilledResult<EntityV2[]>
-      >
-    ).flatMap((result) => result.value);
-    const errors = (
-      results.filter((result) => result.status === 'rejected') as PromiseRejectedResult[]
-    ).map((result) => result.reason.message);
+    const { entities, errors } = await Promise.allSettled(searches).then((results) => ({
+      entities: results.filter(isFulfilledResult).flatMap((result) => result.value),
+      errors: results.filter(isRejectedResult).map((result) => result.reason.message as string),
+    }));
 
     if (sources.length === 1) {
       return { entities, errors };
@@ -116,6 +117,63 @@ export class EntityClient {
         entities: mergeEntitiesList({ entities, sources, metadataFields }),
       }).slice(0, limit),
     };
+  }
+
+  async countEntities({ start, end, types = [], filters = [] }: CountByTypes) {
+    if (types.length === 0) {
+      types = (await this.readTypeDefinitions()).map((definition) => definition.id);
+    }
+
+    const counts = await Promise.all(
+      types.map(async (type) => {
+        const sources = await this.readSourceDefinitions({ type });
+        if (sources.length === 0) {
+          return { type, value: 0, errors: [] };
+        }
+
+        const { sources: validSources, errors } = await Promise.allSettled(
+          sources.map((source) =>
+            validateFields({
+              source,
+              esClient: this.options.clusterClient.asCurrentUser,
+              logger: this.options.logger,
+            }).then(() => source)
+          )
+        ).then((results) => ({
+          sources: results.filter(isFulfilledResult).flatMap((result) => result.value),
+          errors: results.filter(isRejectedResult).map((result) => result.reason.message as string),
+        }));
+
+        const { query, filter } = getEntityCountQuery({
+          sources: validSources,
+          filters,
+          start,
+          end,
+        });
+        this.options.logger.info(
+          `Entity count query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+        );
+
+        const [{ count }] = await runESQLQuery<{ count: number }>('count entities', {
+          query,
+          filter,
+          esClient: this.options.clusterClient.asCurrentUser,
+          logger: this.options.logger,
+        });
+
+        return { type, value: count, errors };
+      })
+    );
+
+    return counts.reduce(
+      (result, count) => {
+        result.types[count.type] = count.value;
+        result.total += count.value;
+        result.errors.push(...count.errors);
+        return result;
+      },
+      { total: 0, types: {} as Record<string, number>, errors: [] as string[] }
+    );
   }
 
   async storeTypeDefinition(type: EntityTypeDefinition) {
