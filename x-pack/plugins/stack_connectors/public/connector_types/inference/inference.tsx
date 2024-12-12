@@ -86,6 +86,7 @@ export function getConnectorType(): InferenceConnector {
         ![
           SUB_ACTION.COMPLETION,
           SUB_ACTION.SPARSE_EMBEDDING,
+          SUB_ACTION.UNIFIED_COMPLETION,
           SUB_ACTION.RERANK,
           SUB_ACTION.TEXT_EMBEDDING,
         ].includes(subAction)
