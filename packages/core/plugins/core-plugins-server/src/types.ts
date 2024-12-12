@@ -294,7 +294,7 @@ export interface Plugin<
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
+  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
