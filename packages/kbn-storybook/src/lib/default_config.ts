@@ -112,16 +112,15 @@ export const defaultConfig: StorybookConfig = {
       config.presets = [];
     }
 
-    config.presets.push([
-      require.resolve('@kbn/babel-preset/common_preset'),
-      //   require.resolve('@emotion/babel-preset-css-prop'),
-      //   {
-      //     // There's an issue where emotion classnames may be duplicated,
-      //     // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
-      //     // https://github.com/emotion-js/emotion/issues/2417
-      //     autoLabel: 'always',
-      //     labelFormat: '[filename]--[local]',
-      //   },
+    config.presets.push(require.resolve('@kbn/babel-preset/common_preset'), [
+      require.resolve('@emotion/babel-preset-css-prop'),
+      {
+        // There's an issue where emotion classnames may be duplicated,
+        // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
+        // https://github.com/emotion-js/emotion/issues/2417
+        autoLabel: 'always',
+        labelFormat: '[filename]--[local]',
+      },
     ]);
 
     return config;
