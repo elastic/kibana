@@ -267,7 +267,7 @@ export const useCurrentConversation = ({
 
     let conversation: Partial<Conversation> = {};
     if (currentConversation?.apiConfig) {
-      const { defaultSystemPromptId, ...restApiConfig } = currentConversation?.apiConfig;
+      const { defaultSystemPromptId: _, ...restApiConfig } = currentConversation?.apiConfig;
       conversation =
         restApiConfig.actionTypeId != null
           ? {
