@@ -11,12 +11,12 @@ category:
   - slug: vulnerability-updates
 ---
 
-# Introduction
+## Introduction
 
 This article will discuss a previously-unnamed vulnerability class in Windows, showing how long-standing incorrect assumptions in the design of core Windows features can result in both undefined behavior and security vulnerabilities. We will demonstrate how one such vulnerability in the Windows 11 kernel can be exploited to achieve arbitrary code execution with kernel privileges.
 
 
-# Windows file sharing
+## Windows file sharing
 
 When an application opens a file on Windows, it typically uses some form of the Win32 [**CreateFile**](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew) API.
 
@@ -43,7 +43,7 @@ Sharing isn’t mandatory. Callers can pass a share mode of zero to obtain exclu
 > An open file that is not shared (dwShareMode set to zero) cannot be opened again, either by the application that opened it or by another application, until its handle has been closed. This is also referred to as exclusive access.
 
 
-## Sharing enforcement
+### Sharing enforcement
 
 In the kernel, sharing is enforced by filesystem drivers. As a file is opened, it’s the responsibility of the filesystem driver to call [**IoCheckShareAccess**](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-iocheckshareaccess) or [**IoCheckLinkShareAccess**](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-iochecklinkshareaccess) to see whether the requested **DesiredAccess**/**ShareMode** tuple is compatible with any existing handles to the file being opened. [NTFS](https://learn.microsoft.com/en-us/windows-server/storage/file-server/ntfs-overview) is the primary filesystem on Windows, but it’s closed-source, so for illustrative purposes we’ll instead look at Microsoft’s FastFAT sample code performing [the same check](https://github.com/Microsoft/Windows-driver-samples/blob/622212c3fff587f23f6490a9da939fb85968f651/filesys/fastfat/create.c#L6822-L6884). Unlike an IDA decompilation, it even comes with comments!
 
@@ -119,7 +119,7 @@ if (FlagOn(*DesiredAccess, FILE_WRITE_DATA) || DeleteOnClose) {
 Another way to think of this check is that **ZwMapViewOfSection(SEC_IMAGE)** implies no-write-sharing as long as the view exists.
 
 
-# Authenticode
+## Authenticode
 
 The [Windows Authenticode Specification](https://download.microsoft.com/download/9/c/5/9c5b2167-8017-4bae-9fde-d599bac8184a/authenticode_pe.docx) describes a way to employ cryptography to “sign” PE files. A “digital signature” cryptographically attests that the PE was produced by a particular entity. Digital signatures are tamper-evident, meaning that any material modification of signed files should be detectable because the digital signature will no longer match. Digital signatures are typically appended to the end of PE files.
 
@@ -128,7 +128,7 @@ The [Windows Authenticode Specification](https://download.microsoft.com/download
 Authenticode can’t apply traditional hashing (e.g. **sha256sum**) in this case, because the act of appending the signature would change the file’s hash, breaking the signature it just generated. Instead, the Authenticode specification describes an algorithm to skip specific portions of the PE file that will be changed during the signing process. This algorithm is called **authentihash**. You can use authentihash with any hashing algorithm, such as SHA256. When a PE file is digitally signed, the file’s authentihash is what’s actually signed.
 
 
-## Code integrity
+### Code integrity
 
 Windows has a few different ways to validate Authenticode signatures. User mode applications can call [**WinVerifyTrust**](https://learn.microsoft.com/en-us/windows/win32/api/wintrust/nf-wintrust-winverifytrust) to validate a file’s signature in user mode. The Code Integrity (CI) subsystem, residing in ```ci.dll```,  validates signatures in the kernel. If [Hypervisor-Protected Code Integrity](https://learn.microsoft.com/en-us/windows-hardware/drivers/bringup/device-guard-and-credential-guard) is running, the Secure Kernel employs ```skci.dll``` to validate Authenticode. This article will focus on Code Integrity (```ci.dll```) in the regular kernel.
 
@@ -148,7 +148,7 @@ User Mode Code Integrity (UMCI):
 KMCI and UMCI implement different policies for different scenarios. For example, the policy for Protected Processes is different from that of INTEGRITYCHECK.
 
 
-# Incorrect assumptions
+## Incorrect assumptions
 
 Microsoft [documentation](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea) implies that files successfully opened without write sharing can’t be modified by another user or process.
 
@@ -176,7 +176,7 @@ If those paged-out pages are later touched, the CPU will issue a page fault and 
 Note the following exception: The memory manager may treat PE-relocated pages as unmodified, dynamically reapplying relocations during page faults.
 
 
-## Page hashes
+### Page hashes
 
 Page hashes are a list of hashes of each 4KB page within a PE file. Since pages are 4KB, page faults typically occur on 4KB of data at a time. Full Authenticode verification requires the entire contiguous PE file, which isn’t available during a page fault. Page hashes allow the MM to validate hashes of individual pages during page faults.
 
@@ -187,7 +187,7 @@ CI can also compute them on-the-fly during signature validation, a mechanism we�
 Page hashes are not free - they use CPU and slow down page faults. They’re not used in most cases.
 
 
-# Attacking code integrity
+## Attacking code integrity
 
 Imagine a scenario where a ransomware operator wants to ransom a hospital, so they send a phishing email to a hospital employee. The employee opens the email attachment and enables macros, running the ransomware. The ransomware employs a UAC bypass to immediately elevate to admin, then attempts to terminate any security software on the system so it can operate unhindered. Anti-Malware services run as [Protected Process Light](https://learn.microsoft.com/en-us/windows/win32/services/protecting-anti-malware-services-) (PPL), protecting them from tampering by malware with admin rights, so the ransomware can’t terminate the Anti-Malware service.
 
@@ -202,7 +202,7 @@ When a network redirector is in use, the server on the other end of the pipe nee
 An attacker can employ a network redirector to modify a PPL’s DLL server-side, bypassing sharing restrictions. This means that PEs backing an executable image section are incorrectly assumed to be immutable. This is a class of vulnerability that we are calling **False File Immutability** (FFI).
 
 
-## Paging exploitation
+### Paging exploitation
 
 If an attacker successfully exploits False File Immutability to inject code into an in-use PE, wouldn’t page hashes catch such an attack?  The answer is: sometimes. If we look at the following table, we can see that page hashes are enforced for kernel drivers and Protected Processes, but not for PPL, so let’s pretend we’re an attacker targeting PPL.
 
@@ -219,7 +219,7 @@ Last year at Black Hat Asia 2023 ([abstract](https://www.blackhat.com/asia-23/br
 Alongside the presentation, we released the [PPLFault exploit](https://github.com/gabriellandau/PPLFault) which demonstrates the vulnerability by dumping the memory of an otherwise-protected PPL. We also released the GodFault exploit chain, which combines the PPLFault Admin-to-PPL exploit with the AngryOrchard PPL-to-kernel exploit to achieve full read/write control of physical memory from user mode. We did this to motivate Microsoft to take action on a vulnerability that MSRC [declined to fix](https://www.elastic.co/security-labs/forget-vulnerable-drivers-admin-is-all-you-need) because it did not meet their [servicing criteria](https://www.microsoft.com/en-us/msrc/windows-security-servicing-criteria). Thankfully, the Windows Defender team at Microsoft stepped up, [releasing a fix](https://x.com/GabrielLandau/status/1757818200127946922) in February 2024 that enforces dynamic page hashes for executable images loaded over network redirectors, breaking PPLFault.
 
 
-# New research
+## New research
 
 Above, we discussed Authenticode signatures embedded within PE files. In addition to embedded signatures, Windows supports a form of detached signature called a [security catalog](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/catalog-files). Security catalogs (.cat files) are essentially a list of signed authentihashes. Every PE with an authentihash in that list is considered to be signed by that signer. Windows keeps a large collection of catalog files in ```C:\Windows\System32\CatRoot``` which CI loads, validates, and caches.
 
@@ -240,7 +240,7 @@ Breaking this down, we see a few key insights. First, **ZwCreateSection(SEC_COMM
 Next, the file is opened without **FILE_SHARE_WRITE**, meaning write sharing is denied. This is intended to prevent modification of the security catalog during processing. However, as we have shown above, this is a bad assumption and another example of False File Immutability. It should be possible, in theory, to perform a PPLFault-style attack on security catalog processing.
 
 
-## Planning the attack
+### Planning the attack
 
 ![](/assets/images/false-file-immutability/image11.png)
 
@@ -254,7 +254,7 @@ The general flow of the attack is as follows:
  7. CI finds the malicious driver’s authentihash in the catalog and loads the driver. At this point, the attacker has achieved arbitrary code execution in the kernel.
 
 
-## Implementation and considerations
+### Implementation and considerations
 
 The plan is to use a PPLFault-style attack, but there are some important differences in this situation. PPLFault used an [opportunistic lock](https://learn.microsoft.com/en-us/windows/win32/fileio/opportunistic-locks) (oplock) to deterministically freeze the victim process’s initialization. This gave the attacker time to switch over to the payload and flush the system working set. Unfortunately, we couldn’t find any good opportunities for oplocks here. Instead, we’re going to pursue a probabilistic approach: rapidly toggling the security catalog between the malicious and benign versions.
 
@@ -279,14 +279,14 @@ The attacker wins if CI validates a benign catalog then parses a malicious one.
 ![Code Integrity validating a benign catalog, then parsing a malicious one](/assets/images/false-file-immutability/image20.png)
 
 
-## Exploit demo
+### Exploit demo
 
 We named the exploit **ItsNotASecurityBoundary** as an homage to MSRC's [policy](https://www.microsoft.com/en-us/msrc/windows-security-servicing-criteria) that "Administrator-to-kernel is not a security boundary.”  The code is in GitHub [here](https://github.com/gabriellandau/ItsNotASecurityBoundary).
 
 Demo video [here](https://drive.google.com/file/d/13Uw38ZrNeYwfoIuD76qlLgyXP8kRc8Nz/view?usp=sharing).
 
 
-# Understanding these vulnerabilities
+## Understanding these vulnerabilities
 
 In order to properly defend against these vulnerabilities, we first need to understand them better.
 
@@ -311,7 +311,7 @@ First, the attacking client sets a packet’s structure’s length field to 16 b
 Double-read vulnerabilities frequently apply to shared-memory scenarios. They commonly occur in drivers that operate on user-writable buffers. Due to False File Immutability, developers need to be aware that their scope is actually much wider, and includes all files writable by attackers. Denying write sharing does not necessarily prevent file modification.
 
 
-## Affected Operations
+### Affected Operations
 
 What types of operations are affected by False File Immutability?
 
@@ -322,7 +322,7 @@ What types of operations are affected by False File Immutability?
 | Regular I/O | **ReadFile** **ZwReadFile** | 1. Avoid double reads\  2. Copy the file to a heap buffer before processing |
 
 
-## What else could be vulnerable?
+### What else could be vulnerable?
 
 Looking for potentially-vulnerable calls to **ZwMapViewOfSection** in the NT kernel yields quite a few interesting functions:
 
@@ -339,27 +339,27 @@ Looking outside of the NT kernel, we can find other drivers to investigate:
 ![Potentially-vulnerable uses of **ZwMapViewOfSection** in Windows 11 kernel drivers](/assets/images/false-file-immutability/image1.png)
 
 
-## Don’t forget about user mode
+### Don’t forget about user mode
 
 We’ve mostly been discussing the kernel up to this point, but it’s important to note that any user mode application that calls **ReadFile**, **MapViewOfFile**, or **LoadLibrary** on an attacker-controllable file, denying write sharing for immutability, may be vulnerable. Here’s a few hypothetical examples.
 
 
-### MapViewOfFile
+#### MapViewOfFile
 
 Imagine an application that is split into two components - a low-privileged worker process with network access, and a privileged service that installs updates. The worker downloads updates and stages them to a specific folder. When the privileged service sees a new update staged, it first validates the signature before installing the update. An attacker could abuse FFI to modify the update after the signature check.
 
 
-### ReadFile
+#### ReadFile
 
 Since files are subject to double-read vulnerabilities, anything that parses complex file formats may be vulnerable, including antivirus engines and search indexers.
 
 
-### LoadLibrary
+#### LoadLibrary
 
 Some applications rely on UMCI to prevent attackers from loading malicious DLLs into their processes. As we’ve shown with PPLFault, FFI can defeat UMCI.
 
 
-# Stopping the exploit
+## Stopping the exploit
 
 Per their official servicing guidelines, MSRC won’t service Admin -> Kernel vulnerabilities by default. In this parlance, servicing means “fix via security update.”  This type of vulnerability, however, allows malware to bypass [AV Process Protections](https://learn.microsoft.com/en-us/windows/win32/services/protecting-anti-malware-services-), leaving AV and EDR vulnerable to instant-kill attacks.
 
@@ -376,7 +376,7 @@ As mentioned above in the Affected Operations section, applications can mitigate
 An alternative mitigation strategy to break these types of exploits is to pin the pages of the file mapping into physical memory using an API such as **MmProbeAndLockPages**. This prevents eviction of those pages when the attacker empties the working set.
 
 
-## End-user detection and mitigation
+### End-user detection and mitigation
 
 Fortunately, there is a way for end-users to mitigate this exploit without changes from Microsoft – Hypervisor Protected Code Integrity (HVCI). If HVCI is enabled, CI.dll doesn’t do catalog parsing at all. Instead, it sends the catalog contents to the Secure Kernel, which runs in a separate virtual machine on the same host. The Secure Kernel stores the received catalog contents in its own heap, from which signature validation and parsing are performed. Just like with the **ExAllocatePool** mitigation described above, the exploit is mitigated because file changes have no effect on the heap copy.
 
@@ -387,7 +387,7 @@ The probabilistic nature of this attack means that there are likely many failed 
 ![**Microsoft-Windows-CodeIntegrity/Operational** event log showing an invalid security catalog](/assets/images/false-file-immutability/image4.png)
 
 
-# Disclosure
+## Disclosure
 
 The disclosure timeline is as follows:
  - 2024-02-14: We reported ItsNotASecurityBoundary and FineButWeCanStillEasilyStopIt to MSRC as VULN-119340, suggesting **ExAllocatePool** and **MmProbeAndLockPages** as simple low-risk fixes
@@ -397,7 +397,7 @@ The disclosure timeline is as follows:
  - 2024-06-14: MSRC closed the case, stating "We have completed our investigation and determined that the case doesn't meet our bar for servicing at this time. As a result, we have opened a next-version candidate bug for the issue, and it will be evaluated for upcoming releases. Thanks, again, for sharing this report with us."
 
 
-# Fixing Code Integrity
+## Fixing Code Integrity
 
 Looking at the original implementation of **CI!I_MapAndSizeDataFile**, we can see the legacy code calling **ZwCreateSection** and **ZwMapViewOfSection**:
 
@@ -408,7 +408,7 @@ Contrast that with the new **CI!CipMapAndSizeDataFileWithMDL**, which follows th
 ![The new **CI!CipMapAndSizeDataFileWithMDL** has a mitigation](/assets/images/false-file-immutability/image3.png)
 
 
-# Summary and conclusion
+## Summary and conclusion
 
 Today we discussed and named a bug class: **False File Immutability**. We are aware of two public exploits that leverage it, PPLFault and ItsNotASecurityBoundary.
 
