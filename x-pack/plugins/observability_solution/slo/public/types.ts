@@ -38,6 +38,7 @@ import { DefaultClientOptions, RouteRepositoryClient } from '@kbn/server-route-r
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -84,6 +85,7 @@ export interface SLOPublicPluginsStart {
   discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  eventBus: EventBusPluginStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;

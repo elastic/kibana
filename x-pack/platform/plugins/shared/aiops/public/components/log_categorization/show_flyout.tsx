@@ -19,9 +19,9 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { AiopsAppContext, type AiopsAppContextValue } from '@kbn/aiops-context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
-import { AiopsAppContext, type AiopsAppContextValue } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);

@@ -12,6 +12,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 export const DataSourceContext = createContext<DataViewAndSavedSearch>({
   get dataView(): never {

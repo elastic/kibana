@@ -54,10 +54,10 @@ window.__kbnThemeTag__ = "${themeTag}";
 window.__kbnPublicPath__ = ${publicPathMap};
 window.__kbnBundles__ = kbnBundlesLoader();
 
-if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
-  var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
-  legacyBrowserError.style.display = 'flex';
-} else {
+// if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
+//   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
+//   legacyBrowserError.style.display = 'flex';
+// } else {
   if (!window.__kbnCspNotEnforced__ && window.console) {
     window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
   }
@@ -156,6 +156,6 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
     });
   }
-}
+// }
   `;
 };

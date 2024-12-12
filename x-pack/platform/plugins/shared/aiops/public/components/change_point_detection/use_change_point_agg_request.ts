@@ -14,8 +14,8 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useReload } from '../../hooks/use_reload';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type {
   ChangePointAnnotation,
   ChangePointDetectionRequestParams,
