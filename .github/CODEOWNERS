@@ -949,7 +949,6 @@ x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/uptime @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/ux @elastic/obs-ux-management-team
-x-pack/plugins/observability_solution/ux @elastic/obs-ux-infra_services-team
 x-pack/plugins/painless_lab @elastic/kibana-management
 x-pack/plugins/remote_clusters @elastic/kibana-management
 x-pack/plugins/reporting @elastic/appex-sharedux
