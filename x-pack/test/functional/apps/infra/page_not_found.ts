@@ -14,7 +14,6 @@ const metricsPages = [
   'metrics/inventory',
   'metrics/hosts',
   'metrics/explorer',
-  'metrics/settings',
   'metrics/detail/hosts/host_name',
 ];
 

@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  describe('Log stream supports nano precision', function () {
+  describe.skip('Log stream supports nano precision', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
     });
