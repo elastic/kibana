@@ -299,16 +299,6 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
-      api_key: {
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-          name: {
-            type: 'keyword',
-          },
-        },
-      },
     },
   },
 };

@@ -237,12 +237,6 @@ export const EventSchema = schema.maybe(
             ),
           })
         ),
-        api_key: schema.maybe(
-          schema.object({
-            id: ecsString(),
-            name: ecsString(),
-          })
-        ),
       })
     ),
   })
