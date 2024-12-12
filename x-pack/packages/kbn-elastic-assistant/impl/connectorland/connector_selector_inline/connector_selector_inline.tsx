@@ -9,15 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
-import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { AIConnector } from '../connector_selector';
+import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
 import { getGenAiConfig } from '../helpers';
-import { useLoadActionTypes } from '../use_load_action_types';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -65,11 +63,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     stats = null,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { actionTypeRegistry, http, assistantAvailability } = useAssistantContext();
+    const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
-    const { data: actionTypes } = useLoadActionTypes({ http });
 
     const onChange = useCallback(
       async (connector: AIConnector) => {
@@ -118,30 +115,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         responsive={false}
       >
         <EuiFlexItem>
-          {actionTypes && (
-            <ConnectorSelector
-              http={http}
-              isDisabled={localIsDisabled}
-              displayFancy={(displayText) => (
-                <EuiText
-                  className={inputDisplayClassName}
-                  size="s"
-                  color={euiThemeVars.euiColorPrimaryText}
-                >
-                  {displayText}
-                </EuiText>
-              )}
-              isOpen={isOpen}
-              selectedConnectorId={selectedConnectorId}
-              setIsOpen={setIsOpen}
-              onConnectorSelectionChange={onChange}
-              actionTypeRegistry={actionTypeRegistry}
-              actionTypes={actionTypes}
-              stats={stats}
-            />
-          )}
-
-          {/* <ConnectorSelector
+          <ConnectorSelector
             displayFancy={(displayText) => (
               <EuiText
                 className={inputDisplayClassName}
@@ -157,7 +131,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             setIsOpen={setIsOpen}
             onConnectorSelectionChange={onChange}
             stats={stats}
-          /> */}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

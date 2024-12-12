@@ -40,7 +40,7 @@ export const ConnectorActivePanel = React.memo<ConnectorActivePanelProps>(
 
     const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
-    const { actionTypes } = useFilteredActionTypes(http, toasts);
+    const actionTypes = useFilteredActionTypes(http, toasts);
 
     const {
       assistantAvailability: { isAssistantEnabled },

@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ASSISTANT_CARD_CREATE_NEW_CONNECTOR_POPOVER = i18n.translate(
+export const CREATE_NEW_CONNECTOR_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.createNewConnectorPopover',
   {
-    defaultMessage: 'Create new connector',
+    defaultMessage: 'AI service provider',
   }
 );
 

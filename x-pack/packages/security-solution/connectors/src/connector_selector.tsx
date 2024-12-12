@@ -220,7 +220,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
             onChange={onChange}
             options={allConnectorOptions}
             valueOfSelected={selectedConnectorId}
-            placeholder={i18n.INLINE_CONNECTOR_PLACEHOLDER}
+            placeholder={i18n.CONNECTOR_SELECTOR_PLACEHOLDER}
             popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
           />
         )}

@@ -10,7 +10,6 @@ import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/conn
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import { LOAD_CONNECTORS_QUERY_KEY } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
-import { type CreateConnectorPopoverProps } from './create_connector_popover';
 import * as i18n from './translations';
 import { MissingPrivilegesDescription } from './missing_privileges';
 import { ConnectorSetup } from './connector_setup';
@@ -18,7 +17,9 @@ import { ConnectorActivePanel } from './connector_active_panel';
 import { useStoredAssistantConnectorId } from '../../../../hooks/use_stored_state';
 import { useOnboardingContext } from '../../../../onboarding_context';
 
-interface ConnectorCardsProps extends CreateConnectorPopoverProps {
+interface ConnectorCardsProps {
+  onConnectorSaved: () => void;
+  canCreateConnectors?: boolean;
   connectors?: AIConnector[]; // make connectors optional to handle loading state
   selectedConnectorId?: string;
   setSelectedConnectorId: (connectorId: string) => void;

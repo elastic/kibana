@@ -72,7 +72,7 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
     const { actionTypeRegistry, http, assistantAvailability, toasts } = useAssistantContext();
     const { euiTheme } = useEuiTheme();
 
-    const { actionTypes } = useFilteredActionTypes(http, toasts);
+    const actionTypes = useFilteredActionTypes(http, toasts);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { setApiConfig } = useConversation();
 
