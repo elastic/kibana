@@ -92,7 +92,23 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 let sharedBrowser: Browser | undefined;
 let sharedBrowserInitializing = false;
+let closeBrowserTimeout: NodeJS.Timeout | undefined;
+let numOfSessionsInProgress = 0;
 const promisesWaitingForSharedBrowser: Array<(value: unknown) => void> = [];
+
+function closeSharedBrowser() {
+  try {
+    (async () => {
+      // eslint-disable-next-line no-console
+      console.log('*** Closing browser');
+      await sharedBrowser?.close();
+      sharedBrowser = undefined;
+    })();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('*** Failed during the closing of the shared browser', e);
+  }
+}
 
 export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
@@ -151,6 +167,11 @@ export class HeadlessChromiumDriverFactory {
 
       (async () => {
         try {
+          numOfSessionsInProgress++;
+          if (closeBrowserTimeout) {
+            clearTimeout(closeBrowserTimeout);
+            closeBrowserTimeout = undefined;
+          }
           if (sharedBrowserInitializing) {
             await new Promise((resolve) => {
               promisesWaitingForSharedBrowser.push(resolve);
@@ -224,6 +245,15 @@ export class HeadlessChromiumDriverFactory {
               logger.error(error);
             }
 
+            numOfSessionsInProgress--;
+            if (closeBrowserTimeout) {
+              clearTimeout(closeBrowserTimeout);
+              closeBrowserTimeout = undefined;
+            }
+            if (numOfSessionsInProgress <= 0) {
+              // Close browser 1m after no activity
+              closeBrowserTimeout = setTimeout(closeSharedBrowser, 60000);
+            }
             // try {
             //   logger.debug('Attempting to close browser...');
             //   await browser?.close();
