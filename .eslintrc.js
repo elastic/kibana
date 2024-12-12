@@ -1013,7 +1013,7 @@ module.exports = {
     {
       // disable imports from legacy uptime plugin
       files: [
-        'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-restricted-imports': [

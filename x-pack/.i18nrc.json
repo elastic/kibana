@@ -169,7 +169,7 @@
       "plugins/observability_solution/uptime"
     ],
     "xpack.synthetics": [
-      "plugins/observability_solution/synthetics"
+      "solutions/observability/plugins/synthetics"
     ],
     "xpack.ux": [
       "plugins/observability_solution/ux"
