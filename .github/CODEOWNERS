@@ -991,9 +991,7 @@ x-pack/solutions/observability/plugins/streams @elastic/streams-program-team
 x-pack/solutions/observability/plugins/streams_app @elastic/streams-program-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
-ty/plugins/uptime @elastic/obs-ux-management-team
+x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
