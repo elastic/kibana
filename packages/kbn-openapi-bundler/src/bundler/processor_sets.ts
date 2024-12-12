@@ -40,6 +40,16 @@ export const DEFAULT_BUNDLING_PROCESSORS: Readonly<DocumentNodeProcessor[]> = [
 ];
 
 /**
+ * Processors which should be applied to documents before merging them together.
+ */
+export const DEFAULT_MERGING_PROCESSORS: Readonly<DocumentNodeProcessor[]> = [
+  // x-internal is quite well known custom property to skip internal API parts.
+  // Enabling it to avoid leaking internal APIs/API parts coming from non processed
+  // by the bundler Kibana domains.
+  createSkipNodeWithInternalPropProcessor(X_INTERNAL),
+];
+
+/**
  * Adds createIncludeLabelsProcessor processor, see createIncludeLabelsProcessor description
  * for more details
  */
