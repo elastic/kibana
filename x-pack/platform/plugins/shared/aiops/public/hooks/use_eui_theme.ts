@@ -6,7 +6,7 @@
  */
 
 import { useCurrentEuiThemeVars, useIsDarkTheme as useIsDarkThemeMl } from '@kbn/ml-kibana-theme';
-import { useAiopsAppContext } from './use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 export function useEuiTheme() {
   const { theme } = useAiopsAppContext();

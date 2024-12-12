@@ -59,6 +59,7 @@ export const ChangePointDetectionPage: FC = () => {
               'charts',
               'data',
               'embeddable',
+              'eventBus',
               'executionContext',
               'fieldFormats',
               'http',

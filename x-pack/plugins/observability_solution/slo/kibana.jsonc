@@ -26,6 +26,7 @@
       "dataViews",
       "discoverShared",
       "embeddable",
+      "eventBus",
       "features",
       "fieldFormats",
       "lens",

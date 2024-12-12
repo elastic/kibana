@@ -14,7 +14,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { getEsQueryConfig } from '@kbn/data-service';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useDataSource } from '../../hooks/use_data_source';
 interface Props {
   searchString: Query['query'];

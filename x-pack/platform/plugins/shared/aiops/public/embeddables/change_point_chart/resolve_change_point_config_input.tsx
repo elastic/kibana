@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
-import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext } from '@kbn/aiops-context';
 import type { AiopsPluginStartDeps } from '../../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
 import type { ChangePointEmbeddableState } from './types';

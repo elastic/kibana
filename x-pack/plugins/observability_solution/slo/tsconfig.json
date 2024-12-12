@@ -101,5 +101,7 @@
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
     "@kbn/security-plugin-types-public",
+    "@kbn/server-route-repository-utils",
+    "@kbn/event-bus-plugin"
   ]
 }

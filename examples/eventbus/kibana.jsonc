@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/eventbus-example-plugin",
+  "owner": "@elastic/ml-ui",
+  "plugin": {
+    "id": "eventBusExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "developerExamples",
+      "eventBus",
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

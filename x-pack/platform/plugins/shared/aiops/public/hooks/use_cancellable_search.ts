@@ -9,7 +9,7 @@ import { useCallback, useRef, useState } from 'react';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs';
-import { useAiopsAppContext } from './use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 export function useCancellableSearch() {
   const { data } = useAiopsAppContext();
