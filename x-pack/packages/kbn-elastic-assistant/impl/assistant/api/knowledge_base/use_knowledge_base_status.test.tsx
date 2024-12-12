@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKnowledgeBaseStatus, UseKnowledgeBaseStatusParams } from './use_knowledge_base_status';
 import { getKnowledgeBaseStatus as _getKnowledgeBaseStatus } from './api';
 
@@ -49,10 +49,8 @@ describe('useKnowledgeBaseStatus', () => {
     jest.clearAllMocks();
   });
   it('should call api to get knowledge base status without resource arg', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useKnowledgeBaseStatus(defaultProps));
-      await waitForNextUpdate();
-
+    renderHook(() => useKnowledgeBaseStatus(defaultProps));
+    await waitFor(() => {
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/',
         {
@@ -65,12 +63,8 @@ describe('useKnowledgeBaseStatus', () => {
     });
   });
   it('should call api to get knowledge base status with resource arg', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() =>
-        useKnowledgeBaseStatus({ ...defaultProps, resource: 'something' })
-      );
-      await waitForNextUpdate();
-
+    renderHook(() => useKnowledgeBaseStatus({ ...defaultProps, resource: 'something' }));
+    await waitFor(() =>
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/knowledge_base/something',
         {
@@ -78,26 +72,18 @@ describe('useKnowledgeBaseStatus', () => {
           signal: undefined,
           version: '1',
         }
-      );
-    });
+      )
+    );
   });
 
   it('should return status response', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useKnowledgeBaseStatus(defaultProps));
-      await waitForNextUpdate();
-
-      await expect(result.current).resolves.toStrictEqual(statusResponse);
-    });
+    const { result } = renderHook(() => useKnowledgeBaseStatus(defaultProps));
+    await waitFor(() => expect(result.current).resolves.toStrictEqual(statusResponse));
   });
 
   it('should display error toast when api throws error', async () => {
     getKnowledgeBaseStatusMock.mockRejectedValue(new Error('this is an error'));
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useKnowledgeBaseStatus(defaultProps));
-      await waitForNextUpdate();
-
-      expect(toasts.addError).toHaveBeenCalled();
-    });
+    renderHook(() => useKnowledgeBaseStatus(defaultProps));
+    await waitFor(() => expect(toasts.addError).toHaveBeenCalled());
   });
 });

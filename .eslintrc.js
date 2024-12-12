@@ -919,6 +919,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -938,6 +939,7 @@ module.exports = {
         'x-pack/plugins/observability_solution/observability/**/*.stories.*',
         'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
         'x-pack/plugins/observability_solution/slo/**/*.stories.*',
+        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'react/function-component-definition': [
@@ -967,7 +969,7 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/aiops/**/*.tsx',
+        'x-pack/platform/plugins/shared/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
         'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'src/plugins/ai_assistant_management/**/*.tsx',
@@ -1073,11 +1075,12 @@ module.exports = {
      */
     {
       files: [
-        'x-pack/plugins/aiops/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/data_visualizer/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/aiops/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/private/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1099,7 +1102,7 @@ module.exports = {
         'x-pack/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
@@ -1137,7 +1140,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
@@ -1152,7 +1155,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1173,7 +1176,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
@@ -1207,7 +1210,7 @@ module.exports = {
         'x-pack/packages/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/kbn-langchain/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/security-solution/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
@@ -1306,8 +1309,8 @@ module.exports = {
       overrides: [
         {
           files: [
-            'x-pack/packages/security-solution/features/**/*.{js,mjs,ts,tsx}',
-            'x-pack/packages/security-solution/navigation/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/features/**/*.{js,mjs,ts,tsx}',
+            'x-pack/solutions/security/packages/navigation/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',

@@ -29,7 +29,6 @@ export const storybookAliases = {
   dashboard: 'src/plugins/dashboard/.storybook',
   data: 'src/plugins/data/.storybook',
   discover: 'src/plugins/discover/.storybook',
-  embeddable: 'src/plugins/embeddable/.storybook',
   esql_ast_inspector: 'examples/esql_ast_inspector/.storybook',
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expandable_flyout: 'packages/kbn-expandable-flyout/.storybook',
@@ -54,9 +53,9 @@ export const storybookAliases = {
   management: 'packages/kbn-management/storybook/config',
   observability: 'x-pack/plugins/observability_solution/observability/.storybook',
   observability_ai_assistant:
-    'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
+    'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/.storybook',
   observability_ai_assistant_app:
-    'x-pack/plugins/observability_solution/observability_ai_assistant_app/.storybook',
+    'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_inventory: 'x-pack/plugins/observability_solution/inventory/.storybook',
   observability_shared: 'x-pack/plugins/observability_solution/observability_shared/.storybook',
   observability_slo: 'x-pack/plugins/observability_solution/slo/.storybook',
@@ -64,7 +63,7 @@ export const storybookAliases = {
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
-  security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
+  security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',
   slo: 'x-pack/plugins/observability_solution/slo/.storybook',

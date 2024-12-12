@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useGetDataStreamStatuses } from './use_get_data_stream_statuses';

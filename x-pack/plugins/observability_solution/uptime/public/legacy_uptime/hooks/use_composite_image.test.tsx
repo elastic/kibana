@@ -6,7 +6,7 @@
  */
 
 import * as redux from 'react-redux';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../common/runtime_types';
 import { shouldCompose, useCompositeImage } from './use_composite_image';
 import * as compose from '../lib/helper/compose_screenshot_images';
@@ -147,6 +147,17 @@ describe('use composite image', () => {
     let removeChildSpy: jest.Mock;
     let selectorSpy: jest.SpyInstance;
     let composeSpy: jest.SpyInstance;
+    let documentCreateElementSpy: jest.SpyInstance<
+      ReturnType<typeof document.createElement>,
+      Parameters<typeof document.createElement>
+    >;
+
+    // store reference to original document.createElement
+    const superCreateElement = document.createElement;
+
+    beforeAll(() => {
+      documentCreateElementSpy = jest.spyOn(document, 'createElement');
+    });
 
     beforeEach(() => {
       useDispatchMock = jest.fn();
@@ -158,7 +169,13 @@ describe('use composite image', () => {
         toDataURL: jest.fn().mockReturnValue('compose success'),
       };
       // @ts-expect-error mocking canvas element for testing
-      jest.spyOn(document, 'createElement').mockReturnValue(canvasMock);
+      documentCreateElementSpy.mockImplementation(function (tagName, options) {
+        if (tagName === 'canvas') {
+          return canvasMock;
+        }
+
+        return superCreateElement.call(document, tagName, options);
+      });
       jest.spyOn(redux, 'useDispatch').mockReturnValue(useDispatchMock);
       selectorSpy = jest.spyOn(redux, 'useSelector').mockReturnValue({ blocks });
       composeSpy = jest
@@ -182,7 +199,7 @@ describe('use composite image', () => {
 
     it('composes when all required blocks are loaded', async () => {
       const onComposeImageSuccess = jest.fn();
-      const { waitFor } = renderHook(() => useCompositeImage(imgRef, onComposeImageSuccess));
+      renderHook(() => useCompositeImage(imgRef, onComposeImageSuccess));
 
       expect(selectorSpy).toHaveBeenCalled();
       expect(composeSpy).toHaveBeenCalledTimes(1);
