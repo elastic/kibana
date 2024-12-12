@@ -7,22 +7,23 @@
 import { useCallback, useMemo } from 'react';
 import type { InventoryEntity } from '../../common/entities';
 import { useAdHocDataView } from './use_adhoc_data_view';
-import { useFetchEntityDefinitionIndexPattern } from './use_fetch_entity_definition_index_patterns';
+import { useFetchEntityDefinition } from './use_fetch_entity_definition';
 import { useKibana } from './use_kibana';
 
 export const useDiscoverRedirect = (entity: InventoryEntity) => {
   const {
     services: { share, application, entityManager },
   } = useKibana();
-  const { entityDefinitionIndexPatterns, isEntityDefinitionIndexPatternsLoading } =
-    useFetchEntityDefinitionIndexPattern(entity.entityType);
+  const { entityDefinitions, isEntityDefinitionLoading } = useFetchEntityDefinition(
+    entity.entityDefinitionId
+  );
 
   const title = useMemo(
     () =>
-      !isEntityDefinitionIndexPatternsLoading && (entityDefinitionIndexPatterns ?? []).length > 0
-        ? entityDefinitionIndexPatterns[0].join()
+      !isEntityDefinitionLoading && entityDefinitions && entityDefinitions?.length > 0
+        ? entityDefinitions[0]?.indexPatterns?.join(',')
         : '',
-    [entityDefinitionIndexPatterns, isEntityDefinitionIndexPatternsLoading]
+    [entityDefinitions, isEntityDefinitionLoading]
   );
 
   const { dataView } = useAdHocDataView(title);
@@ -53,5 +54,5 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
     entityManager.entityClient,
   ]);
 
-  return { getDiscoverEntitiesRedirectUrl, isEntityDefinitionIndexPatternsLoading };
+  return { getDiscoverEntitiesRedirectUrl, isEntityDefinitionLoading };
 };
