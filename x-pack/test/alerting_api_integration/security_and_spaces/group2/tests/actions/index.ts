@@ -56,6 +56,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types_system'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./bulk_enqueue'));
+    loadTestFile(require.resolve('./sub_feature_descriptions'));
 
     /**
      * Sub action framework
