@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/deeplinks/observability'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/deeplinks/observability'],
 };
