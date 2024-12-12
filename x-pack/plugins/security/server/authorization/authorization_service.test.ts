@@ -38,6 +38,9 @@ const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
 const mockCheckSavedObjectsPrivilegesWithRequest = Symbol();
 const mockPrivilegesService = Symbol();
 const mockAuthorizationMode = Symbol();
+const mockEsSecurityResponse = {
+  security: { operator_privileges: { enabled: false, available: false } },
+};
 beforeEach(() => {
   mockCheckPrivilegesFactory.mockReturnValue({
     checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
@@ -59,6 +62,9 @@ afterEach(() => {
 
 it(`#setup returns exposed services`, () => {
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  mockClusterClient.asInternalUser.transport.request.mockImplementation(
+    async () => mockEsSecurityResponse
+  );
   const mockGetSpacesService = jest
     .fn()
     .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() });
@@ -126,6 +132,9 @@ describe('#start', () => {
     statusSubject = new Subject<OnlineStatusRetryScheduler>();
 
     const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    mockClusterClient.asInternalUser.transport.request.mockImplementation(
+      async () => mockEsSecurityResponse
+    );
     const mockCoreSetup = coreMock.createSetup();
 
     const authorizationService = new AuthorizationService();
@@ -194,6 +203,9 @@ describe('#start', () => {
 
 it('#stop unsubscribes from license and ES updates.', async () => {
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  mockClusterClient.asInternalUser.transport.request.mockImplementation(
+    async () => mockEsSecurityResponse
+  );
   const statusSubject = new Subject<OnlineStatusRetryScheduler>();
   const mockCoreSetup = coreMock.createSetup();
 

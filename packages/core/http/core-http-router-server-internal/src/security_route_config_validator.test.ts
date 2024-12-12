@@ -220,6 +220,16 @@ describe('RouteSecurity validation', () => {
     expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
   });
 
+  it('should pass validation when operator privileges are combined with superuser', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: [ReservedPrivilegesSet.operator, ReservedPrivilegesSet.superuser],
+      },
+    };
+
+    expect(() => validRouteSecurity(routeSecurity)).not.toThrow();
+  });
+
   it('should fail validation when anyRequired and allRequired have the same values', () => {
     const invalidRouteSecurity = {
       authz: {
@@ -289,7 +299,7 @@ describe('RouteSecurity validation', () => {
     };
 
     expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."`
+      `"[authz.requiredPrivileges]: Using superuser privileges in anyRequired is not allowed"`
     );
   });
 
@@ -302,6 +312,43 @@ describe('RouteSecurity validation', () => {
 
     expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
       `"[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."`
+    );
+  });
+
+  it('should fail validation when anyRequired has operator privileges set', () => {
+    const invalidRouteSecurity = {
+      authz: {
+        requiredPrivileges: [
+          { anyRequired: ['privilege1', 'privilege2'], allRequired: ['privilege4'] },
+          { anyRequired: ['privilege5', ReservedPrivilegesSet.operator] },
+        ],
+      },
+    };
+
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Using operator privileges in anyRequired is not allowed"`
+    );
+  });
+
+  it('should fail validation when operator privileges set is used as standalone', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: [{ allRequired: [ReservedPrivilegesSet.operator] }],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Operator privileges cannot be used standalone"`
+    );
+
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: [ReservedPrivilegesSet.operator],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.requiredPrivileges]: Operator privileges cannot be used standalone"`
     );
   });
 });

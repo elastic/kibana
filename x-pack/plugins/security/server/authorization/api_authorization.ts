@@ -35,6 +35,8 @@ export function initAPIAuthorization(
     checkPrivilegesDynamicallyWithRequest,
     checkPrivilegesWithRequest,
     mode,
+    getCurrentUser,
+    getSecurityConfig,
   }: AuthorizationServiceSetup,
   logger: Logger
 ) {
@@ -52,8 +54,55 @@ export function initAPIAuthorization(
       }
 
       const authz = security.authz as AuthzEnabled;
+      const normalizeRequiredPrivileges = async (
+        privileges: AuthzEnabled['requiredPrivileges']
+      ) => {
+        const hasOperatorPrivileges = privileges.some(
+          (privilege) =>
+            privilege === ReservedPrivilegesSet.operator ||
+            (typeof privilege === 'object' &&
+              privilege.allRequired?.includes(ReservedPrivilegesSet.operator))
+        );
 
-      const { requestedPrivileges, requestedReservedPrivileges } = authz.requiredPrivileges.reduce(
+        // nothing to normalize
+        if (!hasOperatorPrivileges) {
+          return privileges;
+        }
+
+        const securityConfig = await getSecurityConfig();
+
+        // nothing to normalize
+        if (securityConfig.operator_privileges.enabled) {
+          return privileges;
+        }
+
+        return privileges.reduce<AuthzEnabled['requiredPrivileges']>((acc, privilege) => {
+          if (typeof privilege === 'object') {
+            const operatorPrivilegeIndex =
+              privilege.allRequired?.findIndex((p) => p === ReservedPrivilegesSet.operator) ?? -1;
+
+            acc.push(
+              operatorPrivilegeIndex !== -1
+                ? {
+                    anyRequired: privilege.anyRequired,
+                    // @ts-ignore wrong types for `toSpliced`
+                    allRequired: privilege.allRequired?.toSpliced(operatorPrivilegeIndex, 1),
+                  }
+                : privilege
+            );
+          }
+
+          if (privilege !== ReservedPrivilegesSet.operator) {
+            acc.push(privilege);
+          }
+
+          return acc;
+        }, []);
+      };
+
+      const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
+
+      const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
         (acc, privilegeEntry) => {
           const privileges =
             typeof privilegeEntry === 'object'
@@ -97,9 +146,19 @@ export function initAPIAuthorization(
           const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(
             request
           ).globally(SUPERUSER_PRIVILEGES);
-
           kibanaPrivileges[ReservedPrivilegesSet.superuser] =
             checkSuperuserPrivilegesResponse.hasAllRequested;
+        }
+
+        if (reservedPrivilege === ReservedPrivilegesSet.operator) {
+          const currentUser = getCurrentUser(request);
+          const securityConfig = await getSecurityConfig();
+          const isOperator = currentUser?.operator ?? false;
+
+          kibanaPrivileges[ReservedPrivilegesSet.operator] = securityConfig.operator_privileges
+            .enabled
+            ? isOperator
+            : false;
         }
       }
 
@@ -118,8 +177,8 @@ export function initAPIAuthorization(
         return kibanaPrivileges[kbPrivilege];
       };
 
-      for (const requiredPrivilege of authz.requiredPrivileges) {
-        if (!hasRequestedPrivilege(requiredPrivilege)) {
+      for (const privilege of requiredPrivileges) {
+        if (!hasRequestedPrivilege(privilege)) {
           const missingPrivileges = Object.keys(kibanaPrivileges).filter(
             (key) => !kibanaPrivileges[key]
           );
