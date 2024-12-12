@@ -60,9 +60,8 @@ export const createApiLogic = <Result, Args>(
       apiSuccess: (result) => {
         if (options.showSuccessFlashFn) {
           flashSuccessToast(options.showSuccessFlashFn(result), {
-            ariaLive: 'assertive',
+            'aria-live': 'assertive',
             role: 'alert',
-            toastLifeTimeMs: 2000,
           });
         }
       },
