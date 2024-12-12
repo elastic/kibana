@@ -131,7 +131,7 @@ export const performBulkActionRoute = (
             'actions',
           ]);
 
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();

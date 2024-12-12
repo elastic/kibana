@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -21,17 +21,20 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SloClient } from './client';
 
 export type { SLOConfig } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SLOServerSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SLOServerStart {}
+export interface SLOServerStart {
+  getSloClientWithRequest: (request: KibanaRequest) => SloClient;
+}
 
 export interface SLOPluginSetupDependencies {
-  alerting: PluginSetupContract;
+  alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
@@ -44,7 +47,7 @@ export interface SLOPluginSetupDependencies {
 }
 
 export interface SLOPluginStartDependencies {
-  alerting: PluginStartContract;
+  alerting: AlertingServerStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;

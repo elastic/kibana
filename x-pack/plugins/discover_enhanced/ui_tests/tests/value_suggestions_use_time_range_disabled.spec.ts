@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
 import { test, testData, assertionMessages } from '../fixtures';
 
 test.describe(
   'Discover app - value suggestions: useTimeRange disabled',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
       await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
       await uiSettings.set({
         defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
-        'doc_table:legacy': false,
         'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
         'autocomplete:useTimeRange': false,
       });
     });
 
     test.afterAll(async ({ uiSettings, kbnClient }) => {
-      await uiSettings.unset('doc_table:legacy', 'defaultIndex', 'timepicker:timeDefaults');
+      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await uiSettings.set({ 'autocomplete:useTimeRange': true });
       await kbnClient.savedObjects.cleanStandardList();
     });

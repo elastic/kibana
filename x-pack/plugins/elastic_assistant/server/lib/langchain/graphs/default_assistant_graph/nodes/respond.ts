@@ -7,6 +7,7 @@
 
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { StringWithAutocomplete } from '@langchain/core/dist/utils/types';
+import { RunnableConfig } from '@langchain/core/runnables';
 import { AGENT_NODE_TAG } from './run_agent';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
@@ -14,9 +15,11 @@ import { NodeType } from '../constants';
 export interface RespondParams extends NodeParamsBase {
   state: AgentState;
   model: BaseChatModel;
+  config?: RunnableConfig;
 }
 
 export async function respond({
+  config,
   logger,
   state,
   model,
@@ -34,7 +37,7 @@ export async function respond({
 
     const responseMessage = await model
       // use AGENT_NODE_TAG to identify as agent node for stream parsing
-      .withConfig({ runName: 'Summarizer', tags: [AGENT_NODE_TAG] })
+      .withConfig({ runName: 'Summarizer', tags: [AGENT_NODE_TAG], signal: config?.signal })
       .invoke([userMessage]);
 
     return {

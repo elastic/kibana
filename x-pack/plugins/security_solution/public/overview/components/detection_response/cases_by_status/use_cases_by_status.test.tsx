@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import type { UseCasesByStatusProps, UseCasesByStatusResults } from './use_cases_by_status';
 import { useCasesByStatus } from './use_cases_by_status';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
@@ -40,14 +38,6 @@ mockGetCasesMetrics.mockResolvedValue({
   },
 });
 
-mockGetCasesMetrics.mockResolvedValueOnce({
-  status: {
-    open: 0,
-    inProgress: 0,
-    closed: 0,
-  },
-});
-
 const mockUseKibana = {
   services: {
     cases: {
@@ -67,81 +57,88 @@ describe('useCasesByStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  test('init', () => {
-    const { result } = renderHook<
-      PropsWithChildren<UseCasesByStatusProps>,
-      UseCasesByStatusResults
-    >(() => useCasesByStatus({}), {
+  test('init', async () => {
+    mockGetCasesMetrics.mockResolvedValueOnce({
+      status: {
+        open: 0,
+        inProgress: 0,
+        closed: 0,
+      },
+    });
+
+    const { result } = renderHook(() => useCasesByStatus({}), {
       wrapper: TestProviders,
     });
-    expect(result.current).toEqual({
-      closed: 0,
-      inProgress: 0,
-      isLoading: true,
-      open: 0,
-      totalCounts: 0,
-      updatedAt: dateNow,
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        closed: 0,
+        inProgress: 0,
+        isLoading: true,
+        open: 0,
+        totalCounts: 0,
+        updatedAt: dateNow,
+      });
     });
   });
 
   test('fetch data', async () => {
-    const { result, waitForNextUpdate } = renderHook<
-      PropsWithChildren<UseCasesByStatusProps>,
-      UseCasesByStatusResults
-    >(() => useCasesByStatus({ skip: false }), {
+    const { result } = renderHook(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
-    expect(result.current).toEqual({
-      closed: 3,
-      inProgress: 2,
-      isLoading: false,
-      open: 1,
-      totalCounts: 6,
-      updatedAt: dateNow,
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current).toEqual({
+        closed: 3,
+        inProgress: 2,
+        isLoading: false,
+        open: 1,
+        totalCounts: 6,
+        updatedAt: dateNow,
+      });
     });
   });
 
   test('it should call setQuery when fetching', async () => {
-    const { waitForNextUpdate } = renderHook<
-      PropsWithChildren<UseCasesByStatusProps>,
-      UseCasesByStatusResults
-    >(() => useCasesByStatus({ skip: false }), {
+    renderHook(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
-    expect(mockSetQuery).toHaveBeenCalled();
+    await waitFor(() => expect(mockSetQuery).toHaveBeenCalled());
   });
 
   test('it should call deleteQuery when unmounting', async () => {
-    const { waitForNextUpdate, unmount } = renderHook<
-      PropsWithChildren<UseCasesByStatusProps>,
-      UseCasesByStatusResults
-    >(() => useCasesByStatus({ skip: false }), {
+    // muting setState warning that happens on unmount
+    // because it's a noop and going to be removed
+    // in the next version of React
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { unmount } = renderHook(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
 
     unmount();
 
-    expect(mockDeleteQuery).toHaveBeenCalled();
+    waitFor(() => {
+      expect(mockDeleteQuery).toHaveBeenCalled();
+    });
+
+    consoleError.mockRestore();
   });
 
   test('skip', async () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
     const localProps = { skip: false };
 
-    const { rerender, waitForNextUpdate } = renderHook<
-      PropsWithChildren<UseCasesByStatusProps>,
-      UseCasesByStatusResults
-    >(() => useCasesByStatus(localProps), {
+    const { rerender } = renderHook(() => useCasesByStatus(localProps), {
       wrapper: TestProviders,
     });
-    await waitForNextUpdate();
 
     localProps.skip = true;
-    act(() => rerender());
-    act(() => rerender());
-    expect(abortSpy).toHaveBeenCalledTimes(2);
+
+    rerender();
+    rerender();
+
+    await waitFor(() => {
+      expect(abortSpy).toHaveBeenCalledTimes(2);
+    });
   });
 });

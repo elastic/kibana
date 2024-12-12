@@ -270,7 +270,7 @@
         "label": "getVulnerabilityStats",
         "description": [],
         "signature": [
-          "(counts: VulnerabilityCounts) => VulnerabilitiesDistributionBarProps[]"
+          "(counts: VulnerabilityCounts, filterFunction?: ((filter: string) => void) | undefined, currentFilter?: string | undefined) => VulnerabilitiesDistributionBarProps[]"
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_helpers.ts",
         "deprecated": false,
@@ -290,6 +290,36 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getVulnerabilityStats.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "filterFunction",
+            "description": [],
+            "signature": [
+              "((filter: string) => void) | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getVulnerabilityStats.$3",
+            "type": "string",
+            "tags": [],
+            "label": "currentFilter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -444,9 +474,9 @@
             "label": "query",
             "description": [],
             "signature": [
-              "{ bool: { filter: ",
+              "{ bool: { filter: (",
               "QueryDslQueryContainer",
-              "[]; }; } | undefined"
+              " | undefined)[] | undefined; }; } | undefined"
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
@@ -1044,6 +1074,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.HOST_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_NAME",
+        "description": [],
+        "signature": [
+          "\"host.name\""
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/public/src/constants/component_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.LatestFindingsRequest",
         "type": "Type",
         "tags": [],
@@ -1117,6 +1162,21 @@
           "{ [x: string]: FilterValue; }"
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.USER_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "USER_NAME",
+        "description": [],
+        "signature": [
+          "\"user.name\""
+        ],
+        "path": "x-pack/packages/kbn-cloud-security-posture/public/src/constants/component_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

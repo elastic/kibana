@@ -215,6 +215,88 @@ export const CONSOLE_COMMANDS = {
   },
 };
 
+export const CROWDSTRIKE_CONSOLE_COMMANDS = {
+  runscript: {
+    args: {
+      raw: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.raw.about',
+          {
+            defaultMessage: 'Raw script content',
+          }
+        ),
+      },
+      cloudFile: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.cloudFile.about',
+          {
+            defaultMessage: 'Script name in cloud storage',
+          }
+        ),
+      },
+      commandLine: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.commandLine.about',
+          {
+            defaultMessage: 'Command line arguments',
+          }
+        ),
+      },
+      hostPath: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.hostPath.about',
+          {
+            defaultMessage: 'Absolute or relative path of script on host machine',
+          }
+        ),
+      },
+      timeout: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.timeout.about',
+          {
+            defaultMessage: 'Timeout in seconds',
+          }
+        ),
+      },
+    },
+    title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
+      defaultMessage: 'Isolate',
+    }),
+    about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
+      defaultMessage: 'Run a script on the host',
+    }),
+    helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
+      defaultMessage: `
+Command Examples for Running Scripts:
+
+1. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments.
+
+   runscript --CloudFile="CloudScript1.ps1" --CommandLine="-Verbose true"
+
+2. Executes a script saved in the CrowdStrike cloud with the specified command-line arguments and a 180-second timeout.
+
+   runscript --CloudFile="CloudScript1.ps1" --CommandLine="-Verbose true" -Timeout=180
+
+3. Executes a raw script provided entirely within the "--Raw" flag.
+
+   runscript --Raw="Get-ChildItem."
+
+4. Executes a script located on the remote host at the specified path with the provided command-line arguments.
+
+   runscript --HostPath="C:\\temp\\LocalScript.ps1" --CommandLine="-Verbose true"
+
+`,
+    }),
+    privileges: i18n.translate(
+      'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
+      {
+        defaultMessage:
+          'Insufficient privileges to run script. Contact your Kibana administrator if you think you should have this permission.',
+      }
+    ),
+  },
+};
+
 export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
   return {
     title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {

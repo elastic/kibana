@@ -17,6 +17,7 @@ import { I18nStart } from '@kbn/core-i18n-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { UserProfileService } from '@kbn/core-user-profile-browser';
 
 /**
  * Contextual services used by a {@link Form} component.
@@ -42,6 +43,7 @@ interface KibanaDependencies {
     globalClient: Pick<IUiSettingsClient, 'set'>;
   };
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   i18n: I18nStart;
   /** The portion of the {@link ToastsStart} contract used by this component. */
   notifications: {

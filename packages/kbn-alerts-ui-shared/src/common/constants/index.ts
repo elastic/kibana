@@ -12,3 +12,5 @@ export * from './i18n_weekdays';
 export * from './routes';
 
 export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
+
+export const ALERTING_FEATURE_ID = 'alerts';

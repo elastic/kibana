@@ -6,8 +6,7 @@
  */
 
 import * as React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 interface HighlightedIntervalProps {
   className?: string;
@@ -53,14 +52,14 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
 
 HighlightedInterval.displayName = 'HighlightedInterval';
 
-const HighlightTargetMarker = euiStyled.line`
-  stroke: ${(props) => props.theme.eui.euiColorPrimary};
+const HighlightTargetMarker = styled.line`
+  stroke: ${(props) => props.theme.euiTheme.colors.primary};
   stroke-width: 1;
 `;
 
-const HighlightPolygon = euiStyled.polygon`
-  fill: ${(props) => props.theme.eui.euiColorPrimary};
+const HighlightPolygon = styled.polygon`
+  fill: ${(props) => props.theme.euiTheme.colors.primary};
   fill-opacity: 0.3;
-  stroke: ${(props) => props.theme.eui.euiColorPrimary};
+  stroke: ${(props) => props.theme.euiTheme.colors.primary};
   stroke-width: 1;
 `;

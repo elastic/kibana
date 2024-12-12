@@ -10,19 +10,20 @@ import { test, testData, assertionMessages } from '../fixtures';
 
 test.describe(
   'Discover app - value suggestions non-time based',
-  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
+  { tag: ['@ess', '@svlSearch', '@svlOblt'] },
+  // TODO: Update to use an ES archive with an index accessible to 'viewer'
+  // for running this test against the Security serverless project.
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.NO_TIME_FIELD);
       await kbnClient.importExport.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
       await uiSettings.set({
         defaultIndex: 'without-timefield',
-        'doc_table:legacy': false,
       });
     });
 
     test.afterAll(async ({ kbnClient, uiSettings }) => {
-      await uiSettings.unset('doc_table:legacy', 'defaultIndex');
+      await uiSettings.unset('defaultIndex');
       await kbnClient.savedObjects.cleanStandardList();
     });
 

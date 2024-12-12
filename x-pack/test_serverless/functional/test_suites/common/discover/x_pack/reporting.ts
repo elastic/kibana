@@ -28,11 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const toasts = getService('toasts');
 
-  const setFieldsFromSource = async (setValue: boolean) => {
-    await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
-    await browser.refresh();
-  };
-
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
@@ -305,24 +300,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const { text: csvFile } = await getReport();
         expectSnapshot(csvFile).toMatch();
-      });
-
-      it('generates a report with discover:searchFieldsFromSource = true', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal('740');
-        });
-
-        await setFieldsFromSource(true);
-
-        const { text: csvFile } = await getReport();
-        expectSnapshot(csvFile).toMatch();
-
-        await setFieldsFromSource(false);
-        // TODO: We refreshed the page in `setFieldsFromSource`,
-        // so no toast will be shown
-        checkForReportingToasts = false;
       });
     });
   });

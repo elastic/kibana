@@ -29,6 +29,7 @@ type Meta = t.TypeOf<typeof metaSchema>;
 type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 type GroupBy = t.TypeOf<typeof groupBySchema>;
 type StoredSLOSettings = t.OutputOf<typeof sloSettingsSchema>;
+type SLOSettings = t.TypeOf<typeof sloSettingsSchema>;
 
 export type {
   Objective,
@@ -41,4 +42,5 @@ export type {
   GroupBy,
   GroupSummary,
   StoredSLOSettings,
+  SLOSettings,
 };

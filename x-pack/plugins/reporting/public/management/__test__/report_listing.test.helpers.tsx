@@ -73,9 +73,6 @@ export const mockConfig: ClientConfigType = {
       enabled: true,
     },
   },
-  roles: {
-    enabled: false,
-  },
   statefulSettings: { enabled: true },
 };
 

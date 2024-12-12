@@ -37,7 +37,8 @@ export const bulkDisableRulesRoute = ({
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async (context, req, res) => {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
 
           const body: BulkDisableRulesRequestBodyV1 = req.body;
           const { filter, ids, untrack } = body;

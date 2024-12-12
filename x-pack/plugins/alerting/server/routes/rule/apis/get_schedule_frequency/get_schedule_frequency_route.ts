@@ -24,7 +24,8 @@ export const getScheduleFrequencyRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async (context, req, res) => {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
 
         const scheduleFrequencyResult = await rulesClient.getScheduleFrequency();
 

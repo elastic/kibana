@@ -156,7 +156,6 @@ export async function fetchEsQuery({
       sourceFieldsParams: params.sourceFields,
     }),
     link,
-    query: sortedQuery,
     index: params.index,
   };
 }

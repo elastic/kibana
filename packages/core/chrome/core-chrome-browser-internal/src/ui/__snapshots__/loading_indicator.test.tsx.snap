@@ -1,31 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`kbnLoadingIndicator is hidden by default 1`] = `
-<EuiIcon
-  aria-label="Elastic Logo"
-  className="chrHeaderLogo__cluster"
-  data-test-subj="globalLoadingIndicator-hidden"
-  size="l"
-  type="logoElastic"
-/>
+<Fragment>
+  <EmotionGlobal
+    styles={
+      Object {
+        ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
+          "display": "flex",
+        },
+      }
+    }
+  />
+  <EuiIcon
+    aria-label="Elastic Logo"
+    data-test-subj="globalLoadingIndicator-hidden"
+    size="l"
+    type="logoElastic"
+  />
+</Fragment>
 `;
 
 exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
-<EuiIcon
-  aria-label="Elastic Logo"
-  className="chrHeaderLogo__cluster"
-  data-test-subj="globalLoadingIndicator-hidden"
-  size="l"
-  type="logoElastic"
-/>
+<Fragment>
+  <EmotionGlobal
+    styles={
+      Object {
+        ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
+          "display": "flex",
+        },
+      }
+    }
+  />
+  <EuiIcon
+    aria-label="Elastic Logo"
+    data-test-subj="globalLoadingIndicator-hidden"
+    size="l"
+    type="logoElastic"
+  />
+</Fragment>
 `;
 
 exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
-<EuiImage
-  alt="logo"
-  aria-label="User logo"
-  data-test-subj="globalLoadingIndicator-hidden"
-  size={24}
-  src="customLogo"
-/>
+<Fragment>
+  <EmotionGlobal
+    styles={
+      Object {
+        ".euiHeaderSectionItem .euiButtonEmpty__text": Object {
+          "display": "flex",
+        },
+      }
+    }
+  />
+  <EuiImage
+    alt="logo"
+    aria-label="User logo"
+    data-test-subj="globalLoadingIndicator-hidden"
+    size={24}
+    src="customLogo"
+  />
+</Fragment>
 `;

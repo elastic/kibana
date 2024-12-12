@@ -61,7 +61,8 @@ export const getAlertInstanceSummaryRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       trackLegacyRouteUsage('instanceSummary', usageCounter);
-      const rulesClient = (await context.alerting).getRulesClient();
+      const alertingContext = await context.alerting;
+      const rulesClient = await alertingContext.getRulesClient();
       const { id } = req.params;
       const { dateStart } = req.query;
       const summary = await rulesClient.getAlertSummary({ id, dateStart });

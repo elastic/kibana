@@ -28,10 +28,12 @@ export const calculateRuleSourceForImport = ({
   rule,
   prebuiltRuleAssetsByRuleId,
   isKnownPrebuiltRule,
+  isRuleCustomizationEnabled,
 }: {
   rule: ValidatedRuleToImport;
   prebuiltRuleAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
   isKnownPrebuiltRule: boolean;
+  isRuleCustomizationEnabled: boolean;
 }): { ruleSource: RuleSource; immutable: boolean } => {
   const assetWithMatchingVersion = prebuiltRuleAssetsByRuleId[rule.rule_id];
   // We convert here so that RuleSource calculation can
@@ -43,6 +45,7 @@ export const calculateRuleSourceForImport = ({
     rule: ruleResponseForImport,
     assetWithMatchingVersion,
     isKnownPrebuiltRule,
+    isRuleCustomizationEnabled,
   });
 
   return {
