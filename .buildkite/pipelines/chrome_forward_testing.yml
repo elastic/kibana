@@ -3,8 +3,8 @@ env:
   # This is what will switch the FTRs/cypress pipeline to use Chrome Beta
   USE_CHROME_BETA: 'true'
 agents:
-  image: family/kibana-ubuntu-2004
-  imageProject: elastic-images-prod
+  image: kibana-ubuntu-2004-1732561171
+  imageProject: elastic-images-qa
   provider: gcp
 
 steps:
