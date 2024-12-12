@@ -205,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
         'case_2_feature_a',
         'case_4_feature_a',
         'case_4_feature_b',
+        'siem',
       ]);
       for (const feature of features) {
         if (
