@@ -11,14 +11,21 @@ import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
+import type { HostMetadata } from '../../../../common/endpoint/types';
+import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
+
 import {
   ActionType,
   Category,
-  type SearchParams,
   SourceType,
 } from '../../../../common/endpoint/types/workflow_insights';
-
-import { buildEsQueryParams, createDatastream, createPipeline } from './helpers';
+import { EndpointMetadataService } from '../metadata';
+import {
+  buildEsQueryParams,
+  createDatastream,
+  createPipeline,
+  groupEndpointIdsByOS,
+} from './helpers';
 import {
   COMPONENT_TEMPLATE_NAME,
   DATA_STREAM_PREFIX,
@@ -27,6 +34,7 @@ import {
   TOTAL_FIELDS_LIMIT,
 } from './constants';
 import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
+import { createMockEndpointAppContext } from '../../mocks';
 
 jest.mock('@kbn/data-stream-adapter', () => ({
   DataStreamSpacesAdapter: jest.fn().mockImplementation(() => ({
@@ -142,6 +150,47 @@ describe('helpers', () => {
       expect(result).toEqual([
         { nested: { path: 'target', query: { terms: { 'target.ids': ['target1'] } } } },
       ]);
+    });
+  });
+
+  describe('groupEndpointIdsByOS', () => {
+    let endpointMetadataService: jest.Mocked<EndpointMetadataService>;
+
+    beforeEach(() => {
+      const mockEndpointAppContextService = createMockEndpointAppContext().service;
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn().mockReturnValue({
+        getMetadataForEndpoints: jest.fn(),
+      });
+      endpointMetadataService =
+        mockEndpointAppContextService.getEndpointMetadataService() as jest.Mocked<EndpointMetadataService>;
+    });
+
+    it('should correctly group endpoint IDs by OS type', async () => {
+      const endpointIds = ['endpoint1', 'endpoint2', 'endpoint3'];
+      const metadata = [
+        {
+          host: { os: { name: 'Windows' } },
+          agent: { id: 'agent1' },
+        },
+        {
+          host: { os: { name: 'Linux' } },
+          agent: { id: 'agent2' },
+        },
+        {
+          host: { os: { name: 'MacOS' } },
+          agent: { id: 'agent3' },
+        },
+      ] as HostMetadata[];
+
+      endpointMetadataService.getMetadataForEndpoints.mockResolvedValue(metadata);
+
+      const result = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
+
+      expect(result).toEqual({
+        windows: ['agent1'],
+        linux: ['agent2'],
+        macos: ['agent3'],
+      });
     });
   });
 });

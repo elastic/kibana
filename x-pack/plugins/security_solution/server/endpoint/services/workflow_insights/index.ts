@@ -122,6 +122,8 @@ class SecurityWorkflowInsightsService {
     defendInsights: DefendInsight[],
     request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
   ): Promise<WriteResponseBase[]> {
+    await this.isInitialized;
+
     const workflowInsights = await buildWorkflowInsights({
       defendInsights,
       request,
