@@ -444,7 +444,7 @@
     "@kbn/deeplinks-fleet": "link:packages/deeplinks/fleet",
     "@kbn/deeplinks-management": "link:packages/deeplinks/management",
     "@kbn/deeplinks-ml": "link:src/platform/packages/shared/deeplinks/ml",
-    "@kbn/deeplinks-observability": "link:packages/deeplinks/observability",
+    "@kbn/deeplinks-observability": "link:src/platform/packages/shared/deeplinks/observability",
     "@kbn/deeplinks-search": "link:packages/deeplinks/search",
     "@kbn/deeplinks-security": "link:packages/deeplinks/security",
     "@kbn/deeplinks-shared": "link:packages/deeplinks/shared",
