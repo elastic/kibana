@@ -7,6 +7,7 @@
 
 import Path from 'path';
 import { execSync } from 'child_process';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const ES_ARCHIVE_DIR = './fixtures/es_archiver';
 
@@ -16,7 +17,7 @@ const NODE_TLS_REJECT_UNAUTHORIZED = '1';
 export const esArchiverLoad = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
   execSync(
-    `node ../../../../../scripts/es_archiver load "${path}" --config ../../../../test/functional/config.base.js`,
+    `node ${REPO_ROOT}/scripts/es_archiver load "${path}" --config ${REPO_ROOT}/test/functional/config.base.js`,
     { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };
@@ -24,14 +25,7 @@ export const esArchiverLoad = (folder: string) => {
 export const esArchiverUnload = (folder: string) => {
   const path = Path.join(ES_ARCHIVE_DIR, folder);
   execSync(
-    `node ../../../../../scripts/es_archiver unload "${path}" --config ../../../../test/functional/config.base.js`,
-    { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
-  );
-};
-
-export const esArchiverResetKibana = () => {
-  execSync(
-    `node ../../../../../scripts/es_archiver empty-kibana-index --config ../../../../test/functional/config.base.js`,
+    `node ${REPO_ROOT}/scripts/es_archiver unload "${path}" --config ${REPO_ROOT}/test/functional/config.base.js`,
     { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };

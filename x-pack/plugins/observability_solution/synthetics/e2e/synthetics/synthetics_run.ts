@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SyntheticsRunner, argv } from '@kbn/observability-synthetics-test-data';
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
-import { argv } from '../helpers/parse_args_params';
-import { SyntheticsRunner } from '../helpers/synthetics_runner';
 
 const { headless, grep, bail: pauseOnError } = argv;
 
