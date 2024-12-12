@@ -280,7 +280,6 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
-export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
 
 export const EVENT_GRAPH_VISUALIZATION_API = '/internal/cloud_security_posture/graph' as const;
 
@@ -354,10 +353,6 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
-
-export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',

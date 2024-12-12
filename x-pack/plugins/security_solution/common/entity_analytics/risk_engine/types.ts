@@ -13,7 +13,6 @@ export enum RiskScoreEntity {
 }
 
 export interface InitRiskEngineResult {
-  legacyRiskEngineDisabled: boolean;
   riskEngineResourcesInstalled: boolean;
   riskEngineConfigurationCreated: boolean;
   riskEngineEnabled: boolean;
