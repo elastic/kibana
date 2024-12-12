@@ -6,3 +6,4 @@
  */
 
 export { makeUpSummary, makeDownSummary } from './src/make_summaries';
+export * from './src/e2e';

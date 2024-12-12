@@ -22,7 +22,7 @@ interface CelInputStepProps {
 
 export const CelInputStep = React.memo<CelInputStepProps>(
   ({ integrationSettings, connector, isGenerating }) => {
-    const { setIsGenerating, setStep, setCelInputResult } = useActions();
+    const { setIsGenerating, setStep, setCelInputResult, completeStep } = useActions();
 
     const onGenerationCompleted = useCallback<OnComplete>(
       (result: State['celInputResult']) => {
@@ -43,7 +43,14 @@ export const CelInputStep = React.memo<CelInputStepProps>(
         <EuiFlexItem>
           <StepContentWrapper title={i18n.CEL_INPUT_TITLE} subtitle={i18n.CEL_INPUT_DESCRIPTION}>
             <EuiPanel hasShadow={false} hasBorder>
-              <EuiForm component="form" fullWidth>
+              <EuiForm
+                component="form"
+                fullWidth
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  completeStep();
+                }}
+              >
                 <ApiDefinitionInput integrationSettings={integrationSettings} />
               </EuiForm>
             </EuiPanel>
