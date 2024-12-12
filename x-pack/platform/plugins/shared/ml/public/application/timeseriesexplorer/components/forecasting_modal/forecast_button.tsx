@@ -20,7 +20,8 @@ export const ForecastButton: FC<Props> = ({ isDisabled, onClick, mode = 'full' }
   const Button = mode === 'full' ? EuiButton : EuiButtonEmpty;
   return (
     <Button
-      color="text"
+      // Keep primary color for EmptyButton
+      color={mode === 'full' ? 'text' : 'primary'}
       onClick={onClick}
       isDisabled={isDisabled}
       data-test-subj="mlSingleMetricViewerButtonForecast"
