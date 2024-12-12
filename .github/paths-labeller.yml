@@ -31,6 +31,6 @@
 - 'ci:project-deploy-observability':
     - 'packages/kbn-apm-*/**/*.*'
     - 'x-pack/plugins/observability_solution/**/*.*'
-    - 'x-pack/plugins/serverless_observability/**/*.*'
+    - 'x-pack/solutions/observability/plugins/serverless_observability/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
     - 'x-pack/test/observability_*/**/*.*'

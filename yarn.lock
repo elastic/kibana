@@ -7228,7 +7228,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
+"@kbn/serverless-observability@link:x-pack/solutions/observability/plugins/serverless_observability":
   version "0.0.0"
   uid ""
 
