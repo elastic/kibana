@@ -107,88 +107,13 @@ describe('getUnitedEntityDefinition', () => {
         }
       `);
     });
-    it('fieldRetentionDefinition', () => {
-      //   expect(unitedDefinition.fieldRetentionDefinition).toMatchInlineSnapshot(`
-      //     Object {
-      //       "entityType": "host",
-      //       "fields": Array [
-      //         Object {
-      //           "field": "host.domain",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.hostname",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.id",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.os.name",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.os.type",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.ip",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.mac",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.type",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "host.architecture",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "entity.source",
-      //           "operation": "prefer_oldest_value",
-      //         },
-      //         Object {
-      //           "field": "asset.criticality",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //         Object {
-      //           "field": "host.risk.calculated_level",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //         Object {
-      //           "field": "host.risk.calculated_score",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //         Object {
-      //           "field": "host.risk.calculated_score_norm",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //       ],
-      //       "matchField": "host.name",
-      //     }
-      //   `);
-    });
+
     it('entityManagerDefinition', () => {
       const entityManagerDefinition = convertToEntityManagerDefinition(description, {
         namespace: 'test',
-        fieldHistoryLength: 10,
-        indexPattern: '',
         filter: '',
       });
+
       expect(entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{host.name}}",
@@ -422,71 +347,9 @@ describe('getUnitedEntityDefinition', () => {
         }
       `);
     });
-    it('fieldRetentionDefinition', () => {
-      //   expect(unitedDefinition.fieldRetentionDefinition).toMatchInlineSnapshot(`
-      //     Object {
-      //       "entityType": "user",
-      //       "fields": Array [
-      //         Object {
-      //           "field": "user.domain",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "user.email",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "user.full_name",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "user.hash",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "user.id",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "user.roles",
-      //           "maxLength": 10,
-      //           "operation": "collect_values",
-      //         },
-      //         Object {
-      //           "field": "entity.source",
-      //           "operation": "prefer_oldest_value",
-      //         },
-      //         Object {
-      //           "field": "asset.criticality",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //         Object {
-      //           "field": "user.risk.calculated_level",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //         Object {
-      //           "field": "user.risk.calculated_score",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //         Object {
-      //           "field": "user.risk.calculated_score_norm",
-      //           "operation": "prefer_newest_value",
-      //         },
-      //       ],
-      //       "matchField": "user.name",
-      //     }
-      //   `);
-    });
     it('entityManagerDefinition', () => {
       const entityManagerDefinition = convertToEntityManagerDefinition(description, {
         namespace: 'test',
-        fieldHistoryLength: 10,
-        indexPattern: '',
         filter: '',
       });
       expect(entityManagerDefinition).toMatchInlineSnapshot(`
@@ -620,17 +483,22 @@ describe('getUnitedEntityDefinition', () => {
   });
 
   describe('service', () => {
-    const unitedDefinition = getUnitedEntityDefinition({
+    const description = createEngineDescription({
       entityType: 'service',
       namespace: 'test',
-      fieldHistoryLength: 10,
-      indexPatterns,
-      syncDelay: '1m',
-      frequency: '1m',
+      requestParams: {
+        fieldHistoryLength: 10,
+      },
+      defaultIndexPatterns,
+      config: {
+        syncDelay: duration('1m'),
+        frequency: duration('1m'),
+        developer: { pipelineDebugMode: false },
+      },
     });
 
     it('mapping', () => {
-      expect(unitedDefinition.indexMappings).toMatchInlineSnapshot(`
+      expect(description.indexMappings).toMatchInlineSnapshot(`
         Object {
           "properties": Object {
             "@timestamp": Object {
@@ -698,81 +566,13 @@ describe('getUnitedEntityDefinition', () => {
         }
       `);
     });
-    it('fieldRetentionDefinition', () => {
-      expect(unitedDefinition.fieldRetentionDefinition).toMatchInlineSnapshot(`
-        Object {
-          "entityType": "service",
-          "fields": Array [
-            Object {
-              "field": "service.address",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.environment",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.ephemeral_id",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.id",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.node.name",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.node.roles",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.state",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.type",
-              "maxLength": 10,
-              "operation": "collect_values",
-            },
-            Object {
-              "field": "service.version",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "entity.source",
-              "operation": "prefer_oldest_value",
-            },
-            Object {
-              "field": "asset.criticality",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.risk.calculated_level",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.risk.calculated_score",
-              "operation": "prefer_newest_value",
-            },
-            Object {
-              "field": "service.risk.calculated_score_norm",
-              "operation": "prefer_newest_value",
-            },
-          ],
-          "matchField": "service.name",
-        }
-      `);
-    });
+
     it('entityManagerDefinition', () => {
-      expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
+      const entityManagerDefinition = convertToEntityManagerDefinition(description, {
+        namespace: 'test',
+        filter: '',
+      });
+      expect(entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{service.name}}",
           "id": "security_service_test",
