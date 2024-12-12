@@ -3375,6 +3375,31 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
+      client_emails: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_cloud',
+          },
+        ],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.outlook.client_emails.label', {
+          defaultMessage: 'Client Email Addresses (comma-separated)',
+        }),
+        options: [],
+        order: 5,
+        required: false,
+        sensitive: false,
+        tooltip: translate('searchConnectors.nativeConnectors.outlook.client_emails.tooltip', {
+          defaultMessage:
+            'Specify the email addresses to limit data fetching to specific clients. If set to *, data will be fetched for all users.',
+        }),
+        type: LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '*',
+      },
       exchange_server: {
         default_value: null,
         depends_on: [
@@ -3388,7 +3413,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Exchange Server',
         }),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.outlook.exchange_server.tooltip', {
@@ -3415,7 +3440,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 6,
+        order: 7,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3442,7 +3467,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Exchange server username',
         }),
         options: [],
-        order: 7,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -3464,7 +3489,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Exchange server password',
         }),
         options: [],
-        order: 8,
+        order: 9,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -3486,7 +3511,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Exchange server domain name',
         }),
         options: [],
-        order: 9,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.outlook.domain.tooltip', {
@@ -3510,7 +3535,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Enable SSL',
         }),
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -3536,7 +3561,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'SSL certificate',
         }),
         options: [],
-        order: 11,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -3556,7 +3581,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 12,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -3577,7 +3602,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 13,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
