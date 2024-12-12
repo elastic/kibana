@@ -67,9 +67,6 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
         type: 'rank_features',
       },
       confidence: keyword,
-      is_correction: {
-        type: 'boolean',
-      },
       public: {
         type: 'boolean',
       },
