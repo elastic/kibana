@@ -6,15 +6,13 @@
  */
 import expect from '@kbn/expect';
 
-import { ComboBoxService } from '@kbn/test-suites-src/functional/services/combo_box';
-
 import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const es = getService('es');
-  const comboBox = getService('comboBox') as ComboBoxService;
+  const comboBox = getService('comboBox');
   return {
     helpers: {
       async deleteAllConnectors() {
