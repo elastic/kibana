@@ -23,25 +23,36 @@ const loginUser = Cypress.env('CLOUD_SERVERLESS') ? ROLE.admin : ROLE.system_ind
 const roleName = `test_${Math.random().toString().substring(2, 6)}`;
 let spaceId: string = '';
 
-describe('Feature Categories', () => {
-  before(() => {
-    login(loginUser);
-    createSpace(`foo_${Math.random().toString().substring(2, 6)}`).then((response) => {
-      spaceId = response.body.id;
+describe(
+  'Feature Categories',
+  {
+    tags: ['@serverless', '@skipInServerlessMKI'],
+    env: {
+      ftrConfig: {
+        productTypes: [{ product_line: 'security', product_tier: 'complete' }],
+      },
+    },
+  },
+  () => {
+    before(() => {
+      login(loginUser);
+      createSpace(`foo_${Math.random().toString().substring(2, 6)}`).then((response) => {
+        spaceId = response.body.id;
+      });
     });
-  });
 
-  beforeEach(() => {
-    login(loginUser);
-    navigateToRolePage();
-    setRoleName(roleName);
-    openKibanaFeaturePrivilegesFlyout();
-    setKibanaPrivilegeSpace(spaceId);
-  });
-  it('should not have o11y and Elasticsearch feature categories', () => {
-    getSecuritySolutionCategoryKibanaPrivileges().should('be.visible');
-    getManagementCategoryKibanaPrivileges().should('be.visible');
-    getObservabilityCategoryKibanaPrivileges().should('not.exist');
-    getESCategoryKibanaPrivileges().should('not.exist');
-  });
-});
+    beforeEach(() => {
+      login(loginUser);
+      navigateToRolePage();
+      setRoleName(roleName);
+      openKibanaFeaturePrivilegesFlyout();
+      setKibanaPrivilegeSpace(spaceId);
+    });
+    it('should not have o11y and Elasticsearch feature categories', () => {
+      getSecuritySolutionCategoryKibanaPrivileges().should('be.visible');
+      getManagementCategoryKibanaPrivileges().should('be.visible');
+      getObservabilityCategoryKibanaPrivileges().should('not.exist');
+      getESCategoryKibanaPrivileges().should('not.exist');
+    });
+  }
+);
