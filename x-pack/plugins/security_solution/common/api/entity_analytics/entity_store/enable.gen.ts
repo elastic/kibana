@@ -26,6 +26,10 @@ export const InitEntityStoreRequestBody = z.object({
   fieldHistoryLength: z.number().int().optional().default(10),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
+  /**
+   * The lookback period for the entity store
+   */
+  lookbackPeriod: z.string().optional().default('24h'),
 });
 export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequestBody>;
 

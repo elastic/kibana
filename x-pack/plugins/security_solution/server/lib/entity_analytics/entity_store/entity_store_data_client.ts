@@ -200,7 +200,12 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    {
+      indexPattern = '',
+      lookbackPeriod = '24h',
+      filter = '',
+      fieldHistoryLength = 10,
+    }: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
@@ -218,7 +223,11 @@ export class EntityStoreDataClient {
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
-        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+        this.init(
+          entity,
+          { indexPattern, lookbackPeriod, filter, fieldHistoryLength },
+          { pipelineDebugMode }
+        )
       )
     );
 
@@ -279,7 +288,12 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    {
+      indexPattern = '',
+      lookbackPeriod = '24h',
+      filter = '',
+      fieldHistoryLength = 10,
+    }: InitEntityEngineRequestBody & { lookbackPeriod?: string },
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     if (!this.options.taskManager) {
