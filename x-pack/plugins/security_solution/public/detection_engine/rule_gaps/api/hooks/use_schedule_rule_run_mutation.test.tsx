@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { useScheduleRuleRunMutation } from './use_schedule_rule_run_mutation';
 import { renderMutation } from '../../../../management/hooks/test_utils';
 import { scheduleRuleRunMock } from '../../logic/__mocks__/mock';

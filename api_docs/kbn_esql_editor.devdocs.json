@@ -83,15 +83,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined, abortController: AbortController | undefined, dataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined) => Promise<",
+          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -195,19 +187,12 @@
           {
             "parentPluginId": "@kbn/esql-editor",
             "id": "def-public.fetchFieldsFromESQL.$5",
-            "type": "Object",
+            "type": "string",
             "tags": [],
-            "label": "dataView",
+            "label": "timeFieldName",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
+              "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,

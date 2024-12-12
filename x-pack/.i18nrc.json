@@ -32,7 +32,7 @@
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.dataQuality": "plugins/data_quality",
     "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
-    "xpack.dataUsage": "plugins/data_usage",
+    "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",
     "xpack.elasticAssistant": "packages/kbn-elastic-assistant",
@@ -102,10 +102,10 @@
     ],
     "xpack.observability": "plugins/observability_solution/observability",
     "xpack.observabilityAiAssistant": [
-      "plugins/observability_solution/observability_ai_assistant",
-      "plugins/observability_solution/observability_ai_assistant_app"
+      "platform/plugins/shared/observability_solution/observability_ai_assistant",
+      "solutions/observability/plugins/observability_ai_assistant_app"
     ],
-    "xpack.observabilityAiAssistantManagement": "plugins/observability_solution/observability_ai_assistant_management",
+    "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "plugins/observability_solution/observability_logs_explorer",
     "xpack.observability_onboarding": "plugins/observability_solution/observability_onboarding",
     "xpack.observabilityShared": "plugins/observability_solution/observability_shared",

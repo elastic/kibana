@@ -1612,7 +1612,7 @@
             "section": "def-common.ScoutTestFixtures",
             "text": "ScoutTestFixtures"
           },
-          ", ",
+          " & { validateTags: void; }, ",
           "PlaywrightWorkerArgs",
           " & ",
           "PlaywrightWorkerOptions",
@@ -1798,7 +1798,7 @@
           },
           " extends Pick<",
           "PlaywrightTestConfig",
-          "<{}, {}>, \"testDir\" | \"workers\">"
+          "<{}, {}>, \"workers\" | \"testDir\">"
         ],
         "path": "packages/kbn-scout/src/playwright/types/index.ts",
         "deprecated": false,
@@ -2144,6 +2144,63 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.tags",
+        "type": "Object",
+        "tags": [],
+        "label": "tags",
+        "description": [],
+        "path": "packages/kbn-scout/src/playwright/tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.tags.ESS_ONLY",
+            "type": "Array",
+            "tags": [],
+            "label": "ESS_ONLY",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.tags.SERVERLESS_ONLY",
+            "type": "Array",
+            "tags": [],
+            "label": "SERVERLESS_ONLY",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.tags.DEPLOYMENT_AGNOSTIC",
+            "type": "Array",
+            "tags": [],
+            "label": "DEPLOYMENT_AGNOSTIC",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

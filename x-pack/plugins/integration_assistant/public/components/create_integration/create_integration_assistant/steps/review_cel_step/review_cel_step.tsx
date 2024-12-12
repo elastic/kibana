@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiForm, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import type { State } from '../../state';
+import { useActions, type State } from '../../state';
 import { StepContentWrapper } from '../step_content_wrapper';
 import * as i18n from './translations';
 import { CelConfigResults } from './cel_config_results';
@@ -17,15 +17,24 @@ interface ReviewCelStepProps {
 }
 
 export const ReviewCelStep = React.memo<ReviewCelStepProps>(({ isGenerating, celInputResult }) => {
+  const { completeStep } = useActions();
+
   return (
     <StepContentWrapper title={i18n.TITLE} subtitle={i18n.DESCRIPTION}>
       <EuiPanel hasShadow={false} hasBorder data-test-subj="reviewCelStep">
         {isGenerating ? (
           <EuiLoadingSpinner size="l" />
         ) : (
-          <>
+          <EuiForm
+            component="form"
+            fullWidth
+            onSubmit={(e) => {
+              e.preventDefault();
+              completeStep();
+            }}
+          >
             <CelConfigResults celInputResult={celInputResult} />
-          </>
+          </EuiForm>
         )}
       </EuiPanel>
     </StepContentWrapper>

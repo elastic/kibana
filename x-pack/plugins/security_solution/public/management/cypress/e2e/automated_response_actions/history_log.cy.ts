@@ -12,7 +12,8 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 
 import { login, ROLE } from '../../tasks/login';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/171640
+describe.skip(
   'Response actions history page',
   {
     tags: [

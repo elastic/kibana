@@ -7,4 +7,4 @@
 
 import type { State } from '../../state';
 
-export const isConnectorStepReady = ({ connector }: State) => connector != null;
+export const isConnectorStepReadyToComplete = ({ connector }: State) => connector != null;
