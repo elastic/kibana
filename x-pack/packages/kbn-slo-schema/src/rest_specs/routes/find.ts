@@ -23,20 +23,27 @@ const findSLOParamsSchema = t.partial({
   query: t.partial({
     filters: t.string,
     kqlQuery: t.string,
+    // Used for page pagination (until we migrate to cursor pagination)
     page: t.string,
     perPage: t.string,
     sortBy: sortBySchema,
     sortDirection: sortDirectionSchema,
     hideStale: toBooleanRt,
+    // Used for cursor pagination, searchAfter is a stringified JSON array
+    searchAfter: t.string,
+    size: t.string,
   }),
 });
 
-const findSLOResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloWithDataResponseSchema),
-});
+const findSLOResponseSchema = t.intersection([
+  t.type({
+    page: t.number,
+    perPage: t.number,
+    total: t.number,
+    results: t.array(sloWithDataResponseSchema),
+  }),
+  t.partial({ searchAfter: t.array(t.union([t.string, t.number])), size: t.number }),
+]);
 
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
