@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { maxSizeOrUndefined } from '.';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('maxSizeOrUndefined', () => {
   test('it will validate a correct max value', () => {

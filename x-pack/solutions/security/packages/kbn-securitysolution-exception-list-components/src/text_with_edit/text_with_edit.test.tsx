@@ -35,6 +35,7 @@ describe('TextWithEdit', () => {
         isReadonly={false}
         dataTestSubj="TextWithEditTest"
         text="Test"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onEdit={onEdit as any}
       />
     );

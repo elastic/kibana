@@ -8,8 +8,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { ReactElement } from 'react';
-import { ElementType } from 'react';
+import { ReactElement, ElementType } from 'react';
 import { generateLinkedRulesMenuItems } from '.';
 import { rules } from '../mocks/rule_references.mock';
 import {
@@ -45,7 +44,7 @@ describe('generateLinedRulesMenuItems', () => {
       leftIcon: 'check',
     }) as ReactElement[];
 
-    result.map((link) => {
+    result.forEach((link) => {
       const wrapper = render(link);
       expect(wrapper.container).toMatchSnapshot();
       expect(wrapper.getByTestId('generateLinedRulesMenuItemsTestActionItem1a2b3c'));

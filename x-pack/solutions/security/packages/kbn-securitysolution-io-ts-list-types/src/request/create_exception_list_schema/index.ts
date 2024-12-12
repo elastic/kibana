@@ -17,13 +17,12 @@ import {
 import { exceptionListType } from '../../common/exception_list';
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { Tags } from '../../common/tags';
+import { Tags, tags } from '../../common/tags';
 import { ListId } from '../../common/list_id';
 import { NamespaceType } from '../../common/default_namespace';
 import { name } from '../../common/name';
 import { description } from '../../common/description';
 import { namespace_type } from '../../common/namespace_type';
-import { tags } from '../../common/tags';
 import { meta } from '../../common/meta';
 
 export const createExceptionListSchema = t.intersection([

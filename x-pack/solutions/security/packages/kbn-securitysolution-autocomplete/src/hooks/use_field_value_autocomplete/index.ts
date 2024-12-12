@@ -14,6 +14,7 @@ import { DataViewBase, DataViewFieldBase, getDataViewFieldSubtypeNested } from '
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../../../../../src/plugins/unified_search/public';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AutocompleteStart = any;
 
 interface FuncArgs {

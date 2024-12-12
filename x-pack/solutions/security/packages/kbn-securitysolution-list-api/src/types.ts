@@ -19,6 +19,7 @@ import type {
 // These originally came from this location below before moving them to this hacked "any" types:
 // import { HttpStart, NotificationsStart } from '../../../../../../../../src/core/public';
 interface HttpStart {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fetch: <T>(...args: any) => any;
 }
 

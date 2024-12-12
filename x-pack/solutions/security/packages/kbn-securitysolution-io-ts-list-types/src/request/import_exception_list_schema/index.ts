@@ -17,15 +17,13 @@ import {
 
 import { exceptionListType } from '../../common/exception_list';
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { Tags } from '../../common/tags';
-import { ListId } from '../../common/list_id';
+import { Tags, tags } from '../../common/tags';
+import { ListId, list_id } from '../../common/list_id';
 import { NamespaceType } from '../../common/default_namespace';
 import { name } from '../../common/name';
 import { description } from '../../common/description';
 import { namespace_type } from '../../common/namespace_type';
-import { tags } from '../../common/tags';
 import { meta } from '../../common/meta';
-import { list_id } from '../../common/list_id';
 import { id } from '../../common/id';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';

@@ -12,7 +12,7 @@ import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
 
 import { DefaultCreateCommentsArray } from '../../common/default_create_comments_array';
 import { CreateCommentsArray } from '../../common/create_comment';
-import { Tags } from '../../common/tags';
+import { Tags, tags } from '../../common/tags';
 import { ItemId } from '../../common/item_id';
 import { EntriesArray } from '../../common/entries';
 import { NamespaceType } from '../../common/default_namespace';
@@ -24,7 +24,6 @@ import { name } from '../../common/name';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
-import { tags } from '../../common/tags';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
 import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
 

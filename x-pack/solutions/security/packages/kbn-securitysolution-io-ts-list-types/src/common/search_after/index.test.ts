@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { searchAfterOrUndefined } from '.';
 
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('searchAfter', () => {
   test('it will validate a correct search_after', () => {

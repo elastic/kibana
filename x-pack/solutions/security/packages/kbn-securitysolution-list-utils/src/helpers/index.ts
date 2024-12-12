@@ -1043,6 +1043,7 @@ export const hasWrongOperatorWithWildcard = (
     return item;
   });
 
+  // eslint-disable-next-line array-callback-return
   return allEntries.some((e) => {
     if (e.type !== 'list' && 'value' in e) {
       return validateHasWildcardWithWrongOperator({
