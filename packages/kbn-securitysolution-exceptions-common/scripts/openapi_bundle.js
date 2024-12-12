@@ -22,21 +22,7 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['serverless'],
-      prototypeDocument: {
-        info: {
-          title: 'Security Exceptions API (Elastic Cloud Serverless)',
-          description:
-            "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
-        },
-        tags: [
-          {
-            name: 'Security Exceptions API',
-            'x-displayName': 'Security exceptions',
-            description:
-              "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
-          },
-        ],
-      },
+      prototypeDocument: join(ROOT, 'scripts/openapi_bundle_info/exceptions_serverless.info.yaml'),
     },
   });
 
@@ -48,21 +34,7 @@ const ROOT = resolve(__dirname, '..');
     ),
     options: {
       includeLabels: ['ess'],
-      prototypeDocument: {
-        info: {
-          title: 'Security Exceptions API (Elastic Cloud and self-hosted)',
-          description:
-            "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
-        },
-        tags: [
-          {
-            name: 'Security Exceptions API',
-            'x-displayName': 'Security exceptions',
-            description:
-              "Exceptions API allows you to manage detection rule exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.",
-          },
-        ],
-      },
+      prototypeDocument: join(ROOT, 'scripts/openapi_bundle_info/exceptions_ess.info.yaml'),
     },
   });
 })();
