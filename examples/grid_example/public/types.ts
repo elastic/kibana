@@ -15,8 +15,15 @@ export interface DashboardGridData {
   i: string;
 }
 
+interface DashboardPanelState {
+  type: string;
+  gridData: DashboardGridData & { row?: number };
+  explicitInput: Partial<any> & { id: string };
+  version?: string;
+}
+
 export interface MockedDashboardPanelMap {
-  [key: string]: { id: string; gridData: DashboardGridData & { row: number } };
+  [key: string]: DashboardPanelState;
 }
 
 export type MockedDashboardRowMap = Array<{ title: string; collapsed: boolean }>;
