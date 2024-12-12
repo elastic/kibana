@@ -428,8 +428,8 @@ export function mlSavedObjectServiceFactory(
   }
 
   async function canCreateGlobalMlSavedObjects(
-    mlSavedObjectType: MlSavedObjectType,
-    request: KibanaRequest
+    request: KibanaRequest,
+    mlSavedObjectType?: MlSavedObjectType
   ) {
     if (authorization === undefined) {
       return true;
@@ -438,6 +438,10 @@ export function mlSavedObjectServiceFactory(
     const { canCreateJobsGlobally, canCreateTrainedModelsGlobally } = await authorizationCheck(
       request
     );
+    if (mlSavedObjectType === undefined) {
+      return canCreateJobsGlobally && canCreateTrainedModelsGlobally;
+    }
+
     return mlSavedObjectType === 'trained-model'
       ? canCreateTrainedModelsGlobally
       : canCreateJobsGlobally;

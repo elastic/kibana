@@ -39,6 +39,10 @@ export interface CanDeleteMLSpaceAwareItemsResponse {
   };
 }
 
+export interface CanSyncToAllSpacesResponse {
+  canSync: boolean;
+}
+
 export type JobsSpacesResponse = {
   [jobType in JobType]: { [jobId: string]: string[] };
 };

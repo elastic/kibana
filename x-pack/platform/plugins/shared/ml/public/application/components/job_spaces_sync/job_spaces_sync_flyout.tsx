@@ -38,15 +38,20 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [canSync, setCanSync] = useState(false);
   const [syncResp, setSyncResp] = useState<SyncSavedObjectResponse | null>(null);
+  const [canSyncToAllSpaces, setCanSyncToAllSpaces] = useState<boolean>(true);
   const {
-    savedObjects: { syncSavedObjects },
+    savedObjects: { syncSavedObjects, canSyncToAllSpaces: canSyncToAllSpacesFunc },
   } = useMlApi();
 
   async function loadSyncList(simulate: boolean = true) {
     setLoading(true);
     try {
-      const resp = await syncSavedObjects(simulate);
+      const resp = await syncSavedObjects(simulate, canSyncToAllSpaces);
       setSyncResp(resp);
+
+      if (simulate === true) {
+        setCanSyncToAllSpaces((await canSyncToAllSpacesFunc()).canSync);
+      }
 
       const count = Object.values(resp).reduce((acc, cur) => acc + Object.keys(cur).length, 0);
       setCanSync(count > 0);
