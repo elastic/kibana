@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeComputed, euiPaletteForTemperature, euiPaletteForStatus } from '@elastic/eui';
+import {
+  EuiThemeComputed,
+  euiPaletteForTemperature,
+  euiPaletteForStatus,
+  euiPaletteRed,
+} from '@elastic/eui';
 import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
 export const getLogLevelColor = (
@@ -16,8 +21,11 @@ export const getLogLevelColor = (
 ): string | undefined => {
   const euiPaletteForTemperature6 = euiPaletteForTemperature(6);
   const euiPaletteForStatus9 = euiPaletteForStatus(9);
+  const euiPaletteRed9 = euiPaletteRed(14);
 
   switch (logLevelCoalescedValue) {
+    case LogLevelCoalescedValue.trace:
+      return euiTheme.colors.vis.euiColorVisGrey0;
     case LogLevelCoalescedValue.debug:
       return euiPaletteForTemperature6[2]; // lighter, closer to the default color for all other unknown log levels
     case LogLevelCoalescedValue.info:
@@ -27,15 +35,16 @@ export const getLogLevelColor = (
     case LogLevelCoalescedValue.warning:
       return euiPaletteForStatus9[4];
     case LogLevelCoalescedValue.error:
-      return euiPaletteForStatus9[5];
+      return euiPaletteRed9[9];
     case LogLevelCoalescedValue.critical:
-      return euiPaletteForStatus9[6];
+      return euiPaletteRed9[10];
     case LogLevelCoalescedValue.alert:
-      return euiPaletteForStatus9[7];
+      return euiPaletteRed9[11];
     case LogLevelCoalescedValue.emergency:
+      return euiPaletteRed9[12];
     case LogLevelCoalescedValue.fatal:
-      return euiPaletteForStatus9[8];
+      return euiPaletteRed9[13];
     default:
-      return euiTheme.colors.lightShade;
+      return euiTheme.colors.vis.euiColorVisGrey0;
   }
 };
