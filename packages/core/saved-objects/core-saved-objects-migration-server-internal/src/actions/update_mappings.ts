@@ -44,11 +44,13 @@ export const updateMappings = ({
 > => {
   return () => {
     return client.indices
-      .putMapping({
-        index,
-        timeout: DEFAULT_TIMEOUT,
-        ...mappings,
-      })
+      .putMapping(
+        {
+          index,
+          ...mappings,
+        },
+        { requestTimeout: DEFAULT_TIMEOUT }
+      )
       .then(() => Either.right('update_mappings_succeeded' as const))
       .catch((res) => {
         const errorType = res?.body?.error?.type;

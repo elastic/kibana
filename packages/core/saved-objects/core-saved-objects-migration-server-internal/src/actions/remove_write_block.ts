@@ -37,17 +37,19 @@ export const removeWriteBlock =
   > =>
   () => {
     return client.indices
-      .putSettings({
-        index,
-        // Don't change any existing settings
-        preserve_existing: true,
-        settings: {
-          blocks: {
-            write: false,
+      .putSettings(
+        {
+          index,
+          // Don't change any existing settings
+          preserve_existing: true,
+          settings: {
+            blocks: {
+              write: false,
+            },
           },
         },
-        timeout,
-      })
+        { requestTimeout: timeout }
+      )
       .then((res) => {
         return res.acknowledged === true
           ? Either.right('remove_write_block_succeeded' as const)

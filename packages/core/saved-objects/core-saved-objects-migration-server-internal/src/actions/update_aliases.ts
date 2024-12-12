@@ -52,10 +52,12 @@ export const updateAliases =
   > =>
   () => {
     return client.indices
-      .updateAliases({
-        actions: aliasActions,
-        timeout,
-      })
+      .updateAliases(
+        {
+          actions: aliasActions,
+        },
+        { requestTimeout: timeout }
+      )
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts
         // the new cluster state update but not all nodes have applied the
