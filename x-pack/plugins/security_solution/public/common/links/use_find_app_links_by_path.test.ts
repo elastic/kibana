@@ -6,7 +6,7 @@
  */
 
 import { ExternalPageName } from '@kbn/security-solution-navigation';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { APP_PATH, SecurityPageName } from '../../../common';
 import { useFindAppLinksByPath } from './use_find_app_links_by_path';
 

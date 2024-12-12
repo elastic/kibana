@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import type { ReturnQueryAlerts } from './use_query';
 import { useQueryAlerts } from './use_query';
 import { ALERTS_QUERY_NAMES } from './constants';
@@ -28,31 +28,20 @@ describe('useQueryAlerts', () => {
   });
 
   test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        [object, string],
-        ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>(defaultProps));
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        loading: false,
-        data: null,
-        response: '',
-        request: '',
-        setQuery: result.current.setQuery,
-        refetch: null,
-      });
+    const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+    expect(result.current).toEqual({
+      loading: true,
+      data: null,
+      response: '',
+      request: '',
+      setQuery: result.current.setQuery,
+      refetch: null,
     });
   });
 
   test('fetch alerts data', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        [object, string],
-        ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>(defaultProps));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+    await waitFor(() =>
       expect(result.current).toEqual({
         loading: false,
         data: alertsMock,
@@ -60,61 +49,48 @@ describe('useQueryAlerts', () => {
         request: JSON.stringify({ index: [indexName] ?? [''], body: mockAlertsQuery }, null, 2),
         setQuery: result.current.setQuery,
         refetch: result.current.refetch,
-      });
-    });
+      })
+    );
   });
 
   test('re-fetch alerts data', async () => {
     const spyOnfetchQueryAlerts = jest.spyOn(api, 'fetchQueryAlerts');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        [object, string],
-        ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>(defaultProps));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      if (result.current.refetch) {
-        result.current.refetch();
-      }
-      await waitForNextUpdate();
-      expect(spyOnfetchQueryAlerts).toHaveBeenCalledTimes(2);
+    const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+    await waitFor(() => expect(result.current.refetch).toBeDefined());
+
+    act(() => {
+      result.current.refetch!();
     });
+
+    await waitFor(() => expect(spyOnfetchQueryAlerts).toHaveBeenCalledTimes(2));
   });
 
   test('fetch alert when index name changed', async () => {
     const spyOnfetchRules = jest.spyOn(api, 'fetchQueryAlerts');
-    await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<
-        [object, string],
-        ReturnQueryAlerts<unknown, unknown>
-      >((args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }), {
+    const { rerender } = renderHook<ReturnQueryAlerts<unknown, unknown>, [object, string]>(
+      (args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }),
+      {
         initialProps: [mockAlertsQuery, indexName],
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      rerender([mockAlertsQuery, 'new-mock-index-name']);
-      await waitForNextUpdate();
-      expect(spyOnfetchRules).toHaveBeenCalledTimes(2);
-    });
+      }
+    );
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    rerender([mockAlertsQuery, 'new-mock-index-name']);
+    await waitFor(() => expect(spyOnfetchRules).toHaveBeenCalledTimes(2));
   });
 
   test('fetch alert when query object changed', async () => {
     const spyOnfetchRules = jest.spyOn(api, 'fetchQueryAlerts');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        [object, string],
-        ReturnQueryAlerts<unknown, unknown>
-      >((args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }), {
+    const { result } = renderHook<ReturnQueryAlerts<unknown, unknown>, [object, string]>(
+      (args) => useQueryAlerts({ ...defaultProps, query: args[0], indexName: args[1] }),
+      {
         initialProps: [mockAlertsQuery, indexName],
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      if (result.current.setQuery) {
-        result.current.setQuery({ ...mockAlertsQuery });
       }
-      await waitForNextUpdate();
-      expect(spyOnfetchRules).toHaveBeenCalledTimes(2);
-    });
+    );
+    await waitFor(() => expect(result.current.setQuery).toBeDefined());
+
+    result.current.setQuery({ ...mockAlertsQuery });
+
+    await waitFor(() => expect(spyOnfetchRules).toHaveBeenCalledTimes(2));
   });
 
   test('if there is an error when fetching data, we should get back the init value for every properties', async () => {
@@ -122,12 +98,8 @@ describe('useQueryAlerts', () => {
     spyOnGetUserPrivilege.mockImplementation(() => {
       throw new Error('Something went wrong, let see what happen');
     });
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, ReturnQueryAlerts<unknown, unknown>>(
-        () => useQueryAlerts<unknown, unknown>(defaultProps)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useQueryAlerts<unknown, unknown>(defaultProps));
+    await waitFor(() =>
       expect(result.current).toEqual({
         loading: false,
         data: null,
@@ -135,25 +107,20 @@ describe('useQueryAlerts', () => {
         request: '',
         setQuery: result.current.setQuery,
         refetch: result.current.refetch,
-      });
-    });
+      })
+    );
   });
 
   test('skip', async () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
-    await act(async () => {
-      const localProps = { ...defaultProps, skip: false };
-      const { rerender, waitForNextUpdate } = renderHook<
-        [object, string],
-        ReturnQueryAlerts<unknown, unknown>
-      >(() => useQueryAlerts<unknown, unknown>(localProps));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+    const localProps = { ...defaultProps, skip: false };
+    const { rerender } = renderHook(() => useQueryAlerts<unknown, unknown>(localProps));
 
-      localProps.skip = true;
-      act(() => rerender());
-      act(() => rerender());
-      expect(abortSpy).toHaveBeenCalledTimes(2);
-    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    localProps.skip = true;
+    rerender();
+    rerender();
+    expect(abortSpy).toHaveBeenCalledTimes(2);
   });
 });

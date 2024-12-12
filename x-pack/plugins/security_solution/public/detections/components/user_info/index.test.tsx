@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useUserInfo, ManageUserInfo } from '.';
 import type { Capabilities } from '@kbn/core/public';
 
@@ -38,29 +38,25 @@ describe('useUserInfo', () => {
     jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
   it('returns default state', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useUserInfo(), {
-        wrapper: TestProviders,
-      });
-      await waitForNextUpdate();
+    const { result } = renderHook(() => useUserInfo(), {
+      wrapper: TestProviders,
+    });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(result.all).toHaveLength(1);
-      expect(result.current).toEqual({
-        canUserCRUD: null,
-        canUserREAD: null,
-        hasEncryptionKey: null,
-        hasIndexManage: null,
-        hasIndexMaintenance: null,
-        hasIndexWrite: null,
-        hasIndexRead: null,
-        hasIndexUpdateDelete: null,
-        isAuthenticated: null,
-        isSignalIndexExists: null,
-        loading: true,
-        signalIndexName: null,
-        signalIndexMappingOutdated: null,
-      });
-      expect(result.error).toBeUndefined();
+    expect(result.current).toEqual({
+      canUserCRUD: null,
+      canUserREAD: null,
+      hasEncryptionKey: null,
+      hasIndexManage: null,
+      hasIndexMaintenance: null,
+      hasIndexWrite: null,
+      hasIndexRead: null,
+      hasIndexUpdateDelete: null,
+      isAuthenticated: null,
+      isSignalIndexExists: null,
+      loading: true,
+      signalIndexName: null,
+      signalIndexMappingOutdated: null,
     });
   });
 
@@ -70,7 +66,7 @@ describe('useUserInfo', () => {
       name: 'mock-signal-index',
       index_mapping_outdated: true,
     });
-    const wrapper = ({ children }: { children: JSX.Element }) => (
+    const wrapper = ({ children }: React.PropsWithChildren) => (
       <TestProviders>
         <UserPrivilegesProvider
           kibanaCapabilities={{ siem: { show: true, crud: true } } as unknown as Capabilities}
@@ -79,12 +75,11 @@ describe('useUserInfo', () => {
         </UserPrivilegesProvider>
       </TestProviders>
     );
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useUserInfo(), { wrapper });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+
+    renderHook(() => useUserInfo(), { wrapper });
+    await waitFor(() => {
+      expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
+      expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
     });
-    expect(spyOnGetSignalIndex).toHaveBeenCalledTimes(2);
-    expect(spyOnCreateSignalIndex).toHaveBeenCalledTimes(1);
   });
 });
