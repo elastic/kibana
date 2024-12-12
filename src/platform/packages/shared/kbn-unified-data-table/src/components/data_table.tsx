@@ -812,8 +812,10 @@ export const UnifiedDataTable = ({
   const {
     rowHeight: headerRowHeight,
     rowHeightLines: headerRowHeightLines,
+    lineCountInput: headerLineCountInput,
     onChangeRowHeight: onChangeHeaderRowHeight,
     onChangeRowHeightLines: onChangeHeaderRowHeightLines,
+    setLineCountInput: setHeaderLineCountInput,
   } = useRowHeight({
     storage,
     consumer,
@@ -823,7 +825,14 @@ export const UnifiedDataTable = ({
     onUpdateRowHeight: onUpdateHeaderRowHeight,
   });
 
-  const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
+  const {
+    rowHeight,
+    rowHeightLines,
+    lineCountInput,
+    onChangeRowHeight,
+    onChangeRowHeightLines,
+    setLineCountInput,
+  } = useRowHeight({
     storage,
     consumer,
     key: 'dataGridRowHeight',
@@ -1031,6 +1040,10 @@ export const UnifiedDataTable = ({
             maxAllowedSampleSize={maxAllowedSampleSize}
             sampleSize={sampleSizeState}
             onChangeSampleSize={onUpdateSampleSize}
+            lineCountInput={lineCountInput}
+            setLineCountInput={setLineCountInput}
+            headerLineCountInput={headerLineCountInput}
+            setHeaderLineCountInput={setHeaderLineCountInput}
           />
         </>
       ),
@@ -1050,6 +1063,10 @@ export const UnifiedDataTable = ({
     rowHeightLines,
     sampleSizeState,
     onUpdateDataGridDensity,
+    lineCountInput,
+    setLineCountInput,
+    headerLineCountInput,
+    setHeaderLineCountInput,
   ]);
 
   const toolbarVisibility = useMemo(

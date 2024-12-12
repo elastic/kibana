@@ -8,7 +8,7 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { isValidRowHeight } from '../utils/validate_row_height';
 import {
   DataGridOptionsRecord,
@@ -98,6 +98,10 @@ export const useRowHeight = ({
     });
   }, [configRowHeight, consumer, key, rowHeightState, storage]);
 
+  const [lineCountInput, setLineCountInput] = useState(
+    rowHeightLines > 0 ? rowHeightLines : configRowHeight
+  );
+
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
     switch (rowHeightLines) {
       case ROWS_HEIGHT_OPTIONS.auto:
@@ -119,15 +123,16 @@ export const useRowHeight = ({
           break;
         case RowHeightMode.single:
           newRowHeightLines = ROWS_HEIGHT_OPTIONS.single;
+          setLineCountInput(1); // normalize "single" to "custom" with value 1 and populate input
           break;
         default:
-          newRowHeightLines = configRowHeight;
+          newRowHeightLines = lineCountInput;
       }
 
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
     },
-    [configRowHeight, consumer, key, onUpdateRowHeight, storage]
+    [configRowHeight, consumer, key, onUpdateRowHeight, storage, lineCountInput]
   );
 
   const onChangeRowHeightLines = useCallback(
@@ -141,7 +146,9 @@ export const useRowHeight = ({
   return {
     rowHeight,
     rowHeightLines,
+    lineCountInput,
     onChangeRowHeight: onUpdateRowHeight ? onChangeRowHeight : undefined,
     onChangeRowHeightLines: onUpdateRowHeight ? onChangeRowHeightLines : undefined,
+    setLineCountInput,
   };
 };
