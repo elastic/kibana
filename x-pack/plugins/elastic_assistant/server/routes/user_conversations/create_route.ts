@@ -44,14 +44,12 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 

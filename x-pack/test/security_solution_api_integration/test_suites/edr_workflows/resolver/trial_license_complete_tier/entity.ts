@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless Resolver tests for the entity route', function () {
+  describe('@ess @serverless @serverlessQA Resolver tests for the entity route', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {

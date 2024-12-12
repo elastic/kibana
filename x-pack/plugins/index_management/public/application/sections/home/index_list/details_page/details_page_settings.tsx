@@ -15,7 +15,8 @@ import { DetailsPageSettingsContent } from './details_page_settings_content';
 
 export const DetailsPageSettings: FunctionComponent<{
   indexName: string;
-}> = ({ indexName }) => {
+  hasUpdateSettingsPrivilege?: boolean;
+}> = ({ indexName, hasUpdateSettingsPrivilege }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexSettings(indexName);
 
   if (isLoading) {
@@ -76,6 +77,7 @@ export const DetailsPageSettings: FunctionComponent<{
       data={data}
       indexName={indexName}
       reloadIndexSettings={resendRequest}
+      hasUpdateSettingsPrivilege={hasUpdateSettingsPrivilege}
     />
   );
 };

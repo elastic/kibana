@@ -24,6 +24,8 @@ const defaultProps: CasesProps = {
     update: true,
     connectors: true,
     settings: true,
+    reopenCase: true,
+    createComment: true,
   },
 };
 
@@ -42,6 +44,8 @@ export const CasesPageWithNoPermissions = {
       update: false,
       connectors: false,
       settings: false,
+      reopenCase: false,
+      createComment: false,
     },
   },
 };

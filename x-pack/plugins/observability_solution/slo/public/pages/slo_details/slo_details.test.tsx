@@ -30,7 +30,7 @@ import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summ
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -41,7 +41,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_fetch_active_alerts');

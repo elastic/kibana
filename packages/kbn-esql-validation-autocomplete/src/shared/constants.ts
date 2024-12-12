@@ -16,3 +16,19 @@ export const DOUBLE_BACKTICK = '``';
 export const SINGLE_BACKTICK = '`';
 
 export const METADATA_FIELDS = ['_version', '_id', '_index', '_source', '_ignored', '_index_mode'];
+
+export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'qstr'];
+export const UNSUPPORTED_COMMANDS_BEFORE_QSTR = new Set([
+  'show',
+  'row',
+  'dissect',
+  'enrich',
+  'eval',
+  'grok',
+  'keep',
+  'mv_expand',
+  'rename',
+  'stats',
+  'limit',
+]);
+export const UNSUPPORTED_COMMANDS_BEFORE_MATCH = new Set(['limit']);

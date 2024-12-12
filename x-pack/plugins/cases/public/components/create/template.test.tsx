@@ -6,29 +6,16 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { templatesConfigurationMock } from '../../containers/mock';
 import { TemplateSelector } from './templates';
 
-// FLAKY: https://github.com/elastic/kibana/issues/193482
-describe.skip('TemplateSelector', () => {
-  let appMockRender: AppMockRenderer;
+describe('TemplateSelector', () => {
   const onTemplateChange = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
-  });
-
   it('renders correctly', async () => {
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}
@@ -43,7 +30,7 @@ describe.skip('TemplateSelector', () => {
   it('selects a template correctly', async () => {
     const selectedTemplate = templatesConfigurationMock[2];
 
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}
@@ -69,7 +56,7 @@ describe.skip('TemplateSelector', () => {
   it('shows selected template as default', async () => {
     const templateToSelect = templatesConfigurationMock[1];
 
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}
@@ -85,7 +72,7 @@ describe.skip('TemplateSelector', () => {
     const templateToSelect = templatesConfigurationMock[1];
     const newTemplate = templatesConfigurationMock[2];
 
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}
@@ -112,7 +99,7 @@ describe.skip('TemplateSelector', () => {
   it('shows the selected option correctly', async () => {
     const selectedTemplate = templatesConfigurationMock[2];
 
-    appMockRender.render(
+    render(
       <TemplateSelector
         isLoading={false}
         templates={templatesConfigurationMock}

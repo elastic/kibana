@@ -4,105 +4,83 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGridSorting } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { flattenObject } from '@kbn/observability-utils-common/object/flatten_object';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { EntityColumnIds } from '../../../common/entities';
-import { EntitiesGrid } from '../../components/entities_grid';
-import { useInventorySearchBarContext } from '../../context/inventory_search_bar_context_provider';
+import { EntitiesSummary } from '../../components/entities_summary';
+import { EntityGroupAccordion } from '../../components/entity_group_accordion';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
+import { useInventoryDecodedQueryParams } from '../../hooks/use_inventory_decoded_query_params';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
-import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
+import { GroupBySelector } from '../../components/group_by_selector';
+import { groupEntityTypesByStatus } from '../../utils/group_entity_types_by_status';
 
 export function InventoryPage() {
-  const { searchBarContentSubject$ } = useInventorySearchBarContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pageIndex, kuery, entityTypes } = query;
-
-  const inventoryRoute = useInventoryRouter();
+  const { refreshSubject$ } = useUnifiedSearchContext();
+  const {
+    query: { kuery },
+  } = useInventoryParams('/');
+  const { entityTypes } = useInventoryDecodedQueryParams();
 
   const {
-    value = { entities: [] },
-    loading,
+    value = { groupBy: ENTITY_TYPE, groups: [], entitiesCount: 0 },
     refresh,
+    loading,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
-      return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
+      const { entityTypesOff, entityTypesOn } = groupEntityTypesByStatus(entityTypes);
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
         params: {
+          path: {
+            field: ENTITY_TYPE,
+          },
           query: {
-            sortDirection,
-            sortField,
-            entityTypes: entityTypes?.length ? JSON.stringify(entityTypes) : undefined,
+            includeEntityTypes: entityTypesOn.length ? JSON.stringify(entityTypesOn) : undefined,
+            excludeEntityTypes: entityTypesOff.length ? JSON.stringify(entityTypesOff) : undefined,
             kuery,
           },
         },
         signal,
       });
     },
-    [entityTypes, inventoryAPIClient, kuery, sortDirection, sortField]
+    [entityTypes, inventoryAPIClient, kuery]
   );
 
   useEffectOnce(() => {
-    const searchBarContentSubscription = searchBarContentSubject$.subscribe(
-      ({ refresh: isRefresh, ...queryParams }) => {
-        if (isRefresh) {
-          refresh();
-        } else {
-          inventoryRoute.push('/', {
-            path: {},
-            query: { ...query, ...queryParams },
-          });
-        }
-      }
-    );
-    return () => {
-      searchBarContentSubscription.unsubscribe();
-    };
+    const refreshSubscription = refreshSubject$.subscribe(refresh);
+    return () => refreshSubscription.unsubscribe();
   });
 
-  function handlePageChange(nextPage: number) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: { ...query, pageIndex: nextPage },
-    });
-  }
-
-  function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        sortField: sorting.id as EntityColumnIds,
-        sortDirection: sorting.direction,
-      },
-    });
-  }
-
-  function handleTypeFilter(entityType: string) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        // Override the current entity types
-        entityTypes: [entityType],
-      },
-    });
-  }
-
   return (
-    <EntitiesGrid
-      entities={value.entities}
-      loading={loading}
-      sortDirection={sortDirection}
-      sortField={sortField}
-      onChangePage={handlePageChange}
-      onChangeSort={handleSortChange}
-      pageIndex={pageIndex}
-      onFilterByType={handleTypeFilter}
-    />
+    <>
+      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EntitiesSummary totalEntities={value.entitiesCount} totalGroups={value.groups.length} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <GroupBySelector />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {value.groups.map((group) => {
+        const groupValue = flattenObject(group)[value.groupBy];
+        return (
+          <EntityGroupAccordion
+            key={`${value.groupBy}-${groupValue}`}
+            groupBy={value.groupBy}
+            groupValue={groupValue}
+            groupCount={group.count}
+            isLoading={loading}
+          />
+        );
+      })}
+    </>
   );
 }

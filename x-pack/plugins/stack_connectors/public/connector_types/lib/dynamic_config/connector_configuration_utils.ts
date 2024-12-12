@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProperties, FieldType } from './types';
+import { ConfigProperties, FieldType } from '../../../../common/dynamic_config/types';
 
 export type ConnectorConfigEntry = ConfigProperties & { key: string };
 

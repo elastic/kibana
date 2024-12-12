@@ -13,7 +13,10 @@ import type { GetMaintenanceWindowParams } from '../application/maintenance_wind
 import { updateMaintenanceWindow } from '../application/maintenance_window/methods/update/update_maintenance_window';
 import type { UpdateMaintenanceWindowParams } from '../application/maintenance_window/methods/update/types';
 import { findMaintenanceWindows } from '../application/maintenance_window/methods/find/find_maintenance_windows';
-import type { FindMaintenanceWindowsResult } from '../application/maintenance_window/methods/find/types';
+import type {
+  FindMaintenanceWindowsResult,
+  FindMaintenanceWindowsParams,
+} from '../application/maintenance_window/methods/find/types';
 import { deleteMaintenanceWindow } from '../application/maintenance_window/methods/delete/delete_maintenance_window';
 import type { DeleteMaintenanceWindowParams } from '../application/maintenance_window/methods/delete/types';
 import { archiveMaintenanceWindow } from '../application/maintenance_window/methods/archive/archive_maintenance_window';
@@ -75,7 +78,8 @@ export class MaintenanceWindowClient {
     getMaintenanceWindow(this.context, params);
   public update = (params: UpdateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
     updateMaintenanceWindow(this.context, params);
-  public find = (): Promise<FindMaintenanceWindowsResult> => findMaintenanceWindows(this.context);
+  public find = (params?: FindMaintenanceWindowsParams): Promise<FindMaintenanceWindowsResult> =>
+    findMaintenanceWindows(this.context, params);
   public delete = (params: DeleteMaintenanceWindowParams): Promise<{}> =>
     deleteMaintenanceWindow(this.context, params);
   public archive = (params: ArchiveMaintenanceWindowParams): Promise<MaintenanceWindow> =>

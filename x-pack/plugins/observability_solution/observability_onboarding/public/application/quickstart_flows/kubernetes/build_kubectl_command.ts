@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { ElasticAgentVersionInfo } from '../../../../common/types';
+
 interface Params {
   encodedApiKey: string;
   onboardingId: string;
   elasticsearchUrl: string;
-  elasticAgentVersion: string;
+  elasticAgentVersionInfo: ElasticAgentVersionInfo;
 }
 
 const KUSTOMIZE_TEMPLATE_URL =
@@ -19,16 +21,16 @@ export function buildKubectlCommand({
   encodedApiKey,
   onboardingId,
   elasticsearchUrl,
-  elasticAgentVersion,
+  elasticAgentVersionInfo,
 }: Params) {
   const escapedElasticsearchUrl = elasticsearchUrl.replace(/\//g, '\\/');
 
   return `
-    kubectl kustomize ${KUSTOMIZE_TEMPLATE_URL}\\?ref\\=v${elasticAgentVersion}
+    kubectl kustomize ${KUSTOMIZE_TEMPLATE_URL}\\?ref\\=v${elasticAgentVersionInfo.agentBaseVersion}
       | sed -e 's/JUFQSV9LRVkl/${encodedApiKey}/g'
             -e "s/%ES_HOST%/${escapedElasticsearchUrl}/g"
             -e "s/%ONBOARDING_ID%/${onboardingId}/g"
-            -e "s/\\(docker.elastic.co\\/beats\\/elastic-agent\:\\).*$/\\1${elasticAgentVersion}/g"
+            -e "s/\\(docker.elastic.co\\/beats\\/elastic-agent\:\\).*$/\\1${elasticAgentVersionInfo.agentDockerImageVersion}/g"
             -e  "/{CA_TRUSTED}/c\\ "
       |  kubectl apply -f-
   `

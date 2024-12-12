@@ -23,7 +23,12 @@ export function registerFlameChartSearchRoute({
   router.get(
     {
       path: paths.Flamechart,
-      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling'],
+        },
+      },
+      options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),

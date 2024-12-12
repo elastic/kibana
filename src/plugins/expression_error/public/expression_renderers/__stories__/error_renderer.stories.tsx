@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getErrorRenderer } from '../error_renderer';
 
 export default {
@@ -21,7 +22,9 @@ export const Default = {
     const config = {
       error: thrownError,
     };
-    return <Render renderer={getErrorRenderer()} config={config} />;
+    return (
+      <Render renderer={getErrorRenderer(coreMock.createStart().theme.theme$)} config={config} />
+    );
   },
 
   name: 'default',

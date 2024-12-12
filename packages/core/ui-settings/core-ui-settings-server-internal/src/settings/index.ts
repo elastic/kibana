@@ -18,6 +18,7 @@ import { getAnnouncementsSettings } from './announcements';
 
 interface GetCoreSettingsOptions {
   isDist?: boolean;
+  isThemeSwitcherEnabled?: boolean;
 }
 
 export const getCoreSettings = (

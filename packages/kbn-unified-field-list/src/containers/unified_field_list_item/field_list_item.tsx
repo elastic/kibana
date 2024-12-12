@@ -15,6 +15,8 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
+import { isESQLFieldGroupable } from '@kbn/esql-utils';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
@@ -32,7 +34,7 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
-import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
+import { canProvideStatsForEsqlField } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -141,6 +143,10 @@ export interface UnifiedFieldListItemProps {
    */
   dataView: DataView;
   /**
+   * Callback to update breakdown field
+   */
+  onAddBreakdownField?: (breakdownField: DataViewField | undefined) => void;
+  /**
    * Callback to add/select the field
    */
   onAddFieldToWorkspace: (field: DataViewField) => void;
@@ -215,6 +221,7 @@ function UnifiedFieldListItemComponent({
   field,
   highlight,
   dataView,
+  onAddBreakdownField,
   onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
   onAddFilter,
@@ -231,6 +238,9 @@ function UnifiedFieldListItemComponent({
   additionalFilters,
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
+
+  const isBreakdownSupported =
+    searchMode === 'documents' ? fieldSupportsBreakdown(field) : isESQLFieldGroupable(field);
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
@@ -394,18 +404,19 @@ function UnifiedFieldListItemComponent({
       data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
         <FieldPopoverHeader
-          services={services}
-          field={field}
           closePopover={closePopover}
+          field={field}
+          onAddBreakdownField={isBreakdownSupported ? onAddBreakdownField : undefined}
           onAddFieldToWorkspace={!isSelected ? toggleDisplay : undefined}
           onAddFilter={onAddFilter}
-          onEditField={onEditField}
           onDeleteField={onDeleteField}
+          onEditField={onEditField}
+          services={services}
           {...customPopoverHeaderProps}
         />
       )}
       renderContent={
-        (searchMode === 'text-based' && canProvideStatsForFieldTextBased(field)) ||
+        (searchMode === 'text-based' && canProvideStatsForEsqlField(field)) ||
         searchMode === 'documents'
           ? renderPopover
           : undefined

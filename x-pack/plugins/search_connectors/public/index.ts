@@ -13,4 +13,3 @@ export function plugin() {
 }
 
 export type { SearchConnectorsPluginSetup, SearchConnectorsPluginStart } from './types';
-export type { ConnectorDefinition } from '../common/types';

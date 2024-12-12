@@ -8,16 +8,15 @@
 import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import {
+  SLOWithSummaryResponse,
   occurrencesBudgetingMethodSchema,
   querySchema,
   rollingTimeWindowTypeSchema,
-  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { DisplayQuery } from './display_query';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -26,9 +25,9 @@ import {
   toIndicatorTypeLabel,
 } from '../../../../utils/slo/labels';
 import { ApmIndicatorOverview } from './apm_indicator_overview';
-import { SyntheticsIndicatorOverview } from './synthetics_indicator_overview';
-
+import { DisplayQuery } from './display_query';
 import { OverviewItem } from './overview_item';
+import { SyntheticsIndicatorOverview } from './synthetics_indicator_overview';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -170,6 +169,19 @@ export function Overview({ slo }: Props) {
             }
           />
         )}
+
+        <OverviewItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.settings.syncDelay', {
+            defaultMessage: 'Sync delay',
+          })}
+          subtitle={slo.settings.syncDelay}
+        />
+        <OverviewItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.settings.frequency', {
+            defaultMessage: 'Frequency',
+          })}
+          subtitle={slo.settings.frequency}
+        />
       </EuiFlexGrid>
     </EuiPanel>
   );

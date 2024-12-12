@@ -12,6 +12,8 @@ import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY, MAX_CAPACITY, TaskManagerConfig } from '../config';
 import { TaskCost } from '../task';
+import { getMsearchStatusCode } from './msearch_error';
+import { getBulkUpdateStatusCode } from './bulk_update_error';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -164,7 +166,14 @@ function countErrors(errors$: Observable<Error>, countInterval: number): Observa
         (e) =>
           SavedObjectsErrorHelpers.isTooManyRequestsError(e) ||
           SavedObjectsErrorHelpers.isEsUnavailableError(e) ||
-          isEsCannotExecuteScriptError(e)
+          SavedObjectsErrorHelpers.isGeneralError(e) ||
+          isEsCannotExecuteScriptError(e) ||
+          getMsearchStatusCode(e) === 429 ||
+          getMsearchStatusCode(e) === 500 ||
+          getMsearchStatusCode(e) === 503 ||
+          getBulkUpdateStatusCode(e) === 429 ||
+          getBulkUpdateStatusCode(e) === 500 ||
+          getBulkUpdateStatusCode(e) === 503
       )
     )
   ).pipe(

@@ -32,15 +32,4 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    required: [data]
-                    properties:
-                      data:
-                        type: object
-                        required: [getOneTimeline]
-                        properties:
-                          getOneTimeline:
-                            $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                  - type: object
-                    additionalProperties: false
+                $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

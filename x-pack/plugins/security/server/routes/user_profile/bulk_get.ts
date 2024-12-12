@@ -24,7 +24,11 @@ export function defineBulkGetUserProfilesRoute({
           dataPath: schema.maybe(schema.string()),
         }),
       },
-      options: { tags: ['access:bulkGetUserProfiles'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['bulkGetUserProfiles'],
+        },
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const userProfileServiceInternal = getUserProfileService();

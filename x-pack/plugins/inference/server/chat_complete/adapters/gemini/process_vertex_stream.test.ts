@@ -6,7 +6,7 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { ChatCompletionEventType } from '../../../../common/chat_complete';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk } from './types';
 
@@ -97,17 +97,17 @@ describe('processVertexStream', () => {
 
       expectObservable(processed$).toBe('--(ab)', {
         a: {
+          content: 'last chunk',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        b: {
           tokens: {
             completion: 1,
             prompt: 2,
             total: 3,
           },
           type: ChatCompletionEventType.ChatCompletionTokenCount,
-        },
-        b: {
-          content: 'last chunk',
-          tool_calls: [],
-          type: ChatCompletionEventType.ChatCompletionChunk,
         },
       });
     });

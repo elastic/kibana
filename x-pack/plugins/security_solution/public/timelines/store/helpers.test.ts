@@ -18,7 +18,10 @@ import type {
   DataProvidersAnd,
 } from '../components/timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
-import { defaultColumnHeaderType } from '../components/timeline/body/column_headers/default_headers';
+import {
+  defaultUdtHeaders,
+  defaultColumnHeaderType,
+} from '../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   RESIZED_COLUMN_MIN_WITH,
@@ -50,7 +53,6 @@ import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import type { TimelineById } from './types';
 import { Direction } from '../../../common/search_strategy';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 jest.mock('../../common/utils/normalize_time_range');
 jest.mock('../../common/utils/default_date_settings', () => {
@@ -102,7 +104,6 @@ const basicTimeline: TimelineModel = {
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isLoading: false,
   isSaving: false,
   isSelectAllChecked: false,
   itemsPerPage: 25,

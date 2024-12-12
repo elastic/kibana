@@ -7,7 +7,7 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
   render as reactTestLibRender,
@@ -29,6 +29,7 @@ import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
@@ -165,6 +166,10 @@ export const mockCore: () => Partial<CoreStart> = () => {
           })}
         </div>
       ),
+    },
+    chrome: {
+      ...defaultCore.chrome,
+      getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
     },
   };
 

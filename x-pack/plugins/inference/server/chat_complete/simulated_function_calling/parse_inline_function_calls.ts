@@ -8,11 +8,11 @@
 import { Observable } from 'rxjs';
 import { Logger } from '@kbn/logging';
 import {
+  createInferenceInternalError,
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
   ChatCompletionEventType,
-} from '../../../common/chat_complete';
-import { createInferenceInternalError } from '../../../common/errors';
+} from '@kbn/inference-common';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';
 
 function matchOnSignalStart(buffer: string) {

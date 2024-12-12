@@ -88,6 +88,47 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('closeDetailsButton');
     });
 
+    describe('shows the correct index mode in the details flyout', function () {
+      it('standard index mode', async () => {
+        // Open details flyout of existing data stream - it has standard index mode
+        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
+        // Check that index mode detail exists and its label is "Standard"
+        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be('Standard');
+        // Close flyout
+        await testSubjects.click('closeDetailsButton');
+      });
+
+      it('logsdb index mode', async () => {
+        // Create an index template with a logsdb index mode
+        await es.indices.putIndexTemplate({
+          name: `logsdb_index_template`,
+          index_patterns: ['test-logsdb'],
+          data_stream: {},
+          template: {
+            settings: { mode: 'logsdb' },
+          },
+        });
+        // Create a data stream matching the index pattern of the index template above
+        await es.indices.createDataStream({
+          name: 'test-logsdb',
+        });
+        await browser.refresh();
+        // Open details flyout of data stream
+        await pageObjects.indexManagement.clickDataStreamNameLink('test-logsdb');
+        // Check that index mode detail exists and its label is "LogsDB"
+        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
+        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be('LogsDB');
+        // Close flyout
+        await testSubjects.click('closeDetailsButton');
+        // Delete data stream and index template
+        await es.indices.deleteDataStream({ name: 'test-logsdb' });
+        await es.indices.deleteIndexTemplate({
+          name: `logsdb_index_template`,
+        });
+      });
+    });
+
     it('allows to update data retention', async () => {
       // Open details flyout
       await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);

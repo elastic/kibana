@@ -225,6 +225,17 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
+                      logger: {
+                        warn: (message: string, warning: any) => {
+                          // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
+                          if (warning?.deprecationType?.id === 'mixed-decls') return;
+                          if (warning.deprecation)
+                            return process.stderr.write(
+                              `DEPRECATION WARNING: ${message}\n${warning.stack}`
+                            );
+                          process.stderr.write('WARNING: ' + message);
+                        },
+                      },
                     },
                   },
                 },
@@ -298,15 +309,6 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
-        // TODO: remove once https://github.com/xyflow/xyflow/pull/4755 gets released
-        '@xyflow/react/dist/style.css': Path.resolve(
-          worker.repoRoot,
-          'node_modules/@xyflow/react/dist/style.css'
-        ),
-        '@xyflow/react': Path.resolve(
-          worker.repoRoot,
-          'node_modules/@xyflow/react/dist/esm/index.js'
-        ),
       },
     },
 

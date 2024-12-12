@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  MISCONFIGURATION_INSIGHT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { getFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -34,6 +39,10 @@ interface MisconfigurationsInsightProps {
    * The data-test-subj to use for the component
    */
   ['data-test-subj']?: string;
+  /**
+   * used to track the instance of this component, prefer kebab-case
+   */
+  telemetrySuffix?: string;
 }
 
 /*
@@ -44,15 +53,24 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   fieldName,
   direction,
   'data-test-subj': dataTestSubj,
+  telemetrySuffix,
 }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
+    query: buildGenericEntityFlyoutPreviewQuery(fieldName, name),
     sort: [],
     enabled: true,
     pageSize: 1,
   });
+
+  useEffect(() => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.COUNT,
+      `${MISCONFIGURATION_INSIGHT}-${telemetrySuffix}`
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;

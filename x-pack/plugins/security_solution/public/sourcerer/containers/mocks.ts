@@ -38,19 +38,6 @@ export const mockSourcererScope: SelectedDataView = {
       },
     },
   },
-  indexPattern: {
-    fields: [
-      {
-        aggregatable: false,
-        esTypes: undefined,
-        name: '_id',
-        searchable: true,
-        subType: undefined,
-        type: 'string',
-      },
-    ],
-    title: mockPatterns.join(),
-  },
   sourcererDataView: mockGlobalState.sourcerer.defaultDataView,
   selectedPatterns: mockPatterns,
   indicesExist: true,

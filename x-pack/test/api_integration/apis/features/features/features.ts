@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
             'guidedOnboardingFeature',
             'monitoring',
             'observabilityAIAssistant',
-            'observabilityCases',
+            'observabilityCasesV2',
             'savedObjectsManagement',
             'savedQueryManagement',
             'savedObjectsTagging',
@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
             'apm',
             'stackAlerts',
             'canvas',
-            'generalCases',
+            'generalCasesV2',
             'infrastructure',
             'inventory',
             'logs',
@@ -133,9 +133,10 @@ export default function ({ getService }: FtrProviderContext) {
             'slo',
             'securitySolutionAssistant',
             'securitySolutionAttackDiscovery',
-            'securitySolutionCases',
+            'securitySolutionCasesV2',
             'fleet',
             'fleetv2',
+            'entityManager',
           ].sort()
         );
       });
@@ -161,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           'guidedOnboardingFeature',
           'monitoring',
           'observabilityAIAssistant',
-          'observabilityCases',
+          'observabilityCasesV2',
           'savedObjectsManagement',
           'savedQueryManagement',
           'savedObjectsTagging',
@@ -169,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
           'apm',
           'stackAlerts',
           'canvas',
-          'generalCases',
+          'generalCasesV2',
           'infrastructure',
           'inventory',
           'logs',
@@ -183,9 +184,10 @@ export default function ({ getService }: FtrProviderContext) {
           'slo',
           'securitySolutionAssistant',
           'securitySolutionAttackDiscovery',
-          'securitySolutionCases',
+          'securitySolutionCasesV2',
           'fleet',
           'fleetv2',
+          'entityManager',
         ];
 
         const features = body.filter(

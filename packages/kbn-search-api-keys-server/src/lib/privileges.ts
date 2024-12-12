@@ -19,9 +19,15 @@ export async function fetchUserStartPrivileges(
     // and can also have permissions for index monitoring
     const securityCheck = await client.security.hasPrivileges({
       cluster: ['manage'],
+      index: [
+        {
+          names: ['*'],
+          privileges: ['read', 'write'],
+        },
+      ],
     });
 
-    return securityCheck?.cluster?.manage ?? false;
+    return securityCheck.has_all_requested ?? false;
   } catch (e) {
     logger.error(`Error checking user privileges for search API Keys`);
     logger.error(e);

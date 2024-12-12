@@ -1,5 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-security-common",
-  "owner": ["@elastic/kibana-core", "@elastic/kibana-security"]
+  "owner": [
+    "@elastic/kibana-core",
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

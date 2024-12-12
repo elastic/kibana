@@ -19,6 +19,9 @@ export const registerMarkAsResolvedRoute = (
   router.post(
     {
       path: '/mark_as_resolved',
+      options: {
+        access: 'internal',
+      },
       validate: {
         body: schema.object({
           domainId: schema.string(),

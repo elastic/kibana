@@ -45,12 +45,6 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
-        // TODO: remove once https://github.com/xyflow/xyflow/pull/4755 gets released
-        '@xyflow/react/dist/style.css': resolve(
-          REPO_ROOT,
-          'node_modules/@xyflow/react/dist/style.css'
-        ),
-        '@xyflow/react': resolve(REPO_ROOT, 'node_modules/@xyflow/react/dist/esm/index.js'),
       },
     },
     stats: 'errors-only',

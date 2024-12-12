@@ -17,7 +17,7 @@ import {
   TimelineTypeEnum,
 } from '../../../../common/api/timeline';
 import { TestProviders } from '../../../common/mock';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../common/hooks/use_selector');

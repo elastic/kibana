@@ -26,6 +26,7 @@ export type ESQLSingleAstItem =
   | ESQLTimeInterval
   | ESQLList
   | ESQLLiteral
+  | ESQLIdentifier
   | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
@@ -75,6 +76,13 @@ export interface ESQLAstNodeFormatting {
 
 export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   type: 'command';
+
+  /**
+   * The subtype of the command. For example, the `JOIN` command can be: (1)
+   * LOOKUP JOIN, (2) LEFT JOIN, (3) RIGHT JOIN.
+   */
+  commandType?: string;
+
   args: ESQLAstItem[];
 }
 
@@ -131,6 +139,11 @@ export interface ESQLFunction<
    * Default is 'variadic-call'.
    */
   subtype?: Subtype;
+
+  /**
+   * A node representing the function or operator being called.
+   */
+  operator?: ESQLIdentifier | ESQLParamLiteral;
 
   args: ESQLAstItem[];
 }
@@ -271,6 +284,15 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   type: 'column';
 
   /**
+   * A ES|QL column name can be composed of multiple parts,
+   * e.g: part1.part2.`part``3️⃣`.?param. Where parts can be quoted, or not
+   * quoted, or even be a parameter.
+   *
+   * The args list contains the parts of the column name.
+   */
+  args: Array<ESQLIdentifier | ESQLParam>;
+
+  /**
    * An identifier can be composed of multiple parts, e.g: part1.part2.`part``3️⃣`.
    * This property contains the parsed unquoted parts of the identifier.
    * For example: `['part1', 'part2', 'part`3️⃣']`.
@@ -363,6 +385,10 @@ export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
   value: string;
 }
 
+export interface ESQLIdentifier extends ESQLAstBaseItem {
+  type: 'identifier';
+}
+
 export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedParamLiteral =>
   isESQLAstBaseItem(node) &&
   (node as ESQLNamedParamLiteral).literalType === 'param' &&
@@ -375,6 +401,11 @@ export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedPar
 export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
   value: number;
 }
+
+export type ESQLParam =
+  | ESQLUnnamedParamLiteral
+  | ESQLNamedParamLiteral
+  | ESQLPositionalParamLiteral;
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
@@ -404,7 +435,7 @@ export interface ESQLAstGenericComment<SubType extends 'single-line' | 'multi-li
   type: 'comment';
   subtype: SubType;
   text: string;
-  location: ESQLLocation;
+  location?: ESQLLocation;
 }
 
 export type ESQLAstCommentSingleLine = ESQLAstGenericComment<'single-line'>;

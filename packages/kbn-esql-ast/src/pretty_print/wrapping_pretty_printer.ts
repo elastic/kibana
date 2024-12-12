@@ -20,6 +20,7 @@ import {
 } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
 import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
 
@@ -259,6 +260,8 @@ export class WrappingPrettyPrinter {
       }
     }
 
+    const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
     if (!oneArgumentPerLine) {
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
@@ -271,7 +274,8 @@ export class WrappingPrettyPrinter {
         if (formattedArgLength > largestArg) {
           largestArg = formattedArgLength;
         }
-        let separator = txt ? ',' : '';
+
+        let separator = txt ? (commaBetweenArgs ? ',' : '') : '';
         let fragment = '';
 
         if (needsWrap) {
@@ -329,7 +333,7 @@ export class WrappingPrettyPrinter {
         const arg = ctx.visitExpression(args[i], {
           indent,
           remaining: this.opts.wrap - indent.length,
-          suffix: isLastArg ? '' : ',',
+          suffix: isLastArg ? '' : commaBetweenArgs ? ',' : '',
         });
         const separator = isFirstArg ? '' : '\n';
         const indentation = arg.indented ? '' : indent;
@@ -557,8 +561,9 @@ export class WrappingPrettyPrinter {
         indent: inp.indent,
         remaining: inp.remaining - option.length - 1,
       });
-      const argsFormatted = args.txt ? ` ${args.txt}` : '';
-      const txt = `${option}${argsFormatted}`;
+      const argsFormatted = args.txt ? `${args.txt[0] === '\n' ? '' : ' '}${args.txt}` : '';
+      const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' =' : '';
+      const txt = `${option}${separator}${argsFormatted}`;
 
       return { txt, lines: args.lines };
     })

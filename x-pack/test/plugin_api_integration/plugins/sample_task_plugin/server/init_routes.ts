@@ -116,6 +116,34 @@ export function initRoutes(
 
   router.post(
     {
+      path: `/api/sample_tasks/run_mark_removed_tasks_as_unrecognized`,
+      validate: {
+        body: schema.object({}),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      try {
+        const taskManager = await taskManagerStart;
+        await taskManager.ensureScheduled({
+          id: 'mark_removed_tasks_as_unrecognized',
+          taskType: 'task_manager:mark_removed_tasks_as_unrecognized',
+          schedule: { interval: '1h' },
+          state: {},
+          params: {},
+        });
+        return res.ok({ body: await taskManager.runSoon('mark_removed_tasks_as_unrecognized') });
+      } catch (err) {
+        return res.ok({ body: { id: 'mark_removed_tasks_as_unrecognized', error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
       path: `/api/sample_tasks/bulk_enable`,
       validate: {
         body: schema.object({

@@ -814,9 +814,11 @@ describe('Agentless Agent service', () => {
           policy_id: 'mocked-agentless-agent-policy-id',
           stack_version: 'mocked-kibana-version-infinite',
           labels: {
-            organization: 'elastic',
-            division: 'cloud',
-            team: 'fleet',
+            owner: {
+              org: 'elastic',
+              division: 'cloud',
+              team: 'fleet',
+            },
           },
         }),
         headers: expect.anything(),
@@ -911,9 +913,11 @@ describe('Agentless Agent service', () => {
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
           labels: {
-            organization: 'elastic',
-            division: 'cloud',
-            team: 'fleet',
+            owner: {
+              org: 'elastic',
+              division: 'cloud',
+              team: 'fleet',
+            },
           },
         },
         headers: expect.anything(),

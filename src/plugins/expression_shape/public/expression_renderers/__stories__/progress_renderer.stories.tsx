@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getProgressRenderer } from '../progress_renderer';
 import { Progress } from '../../../common';
 
@@ -34,7 +35,9 @@ export const Default = {
       valueWeight: 15,
     };
 
-    return <Render renderer={getProgressRenderer()} config={config} />;
+    return (
+      <Render renderer={getProgressRenderer(coreMock.createStart().theme.theme$)} config={config} />
+    );
   },
 
   name: 'default',

@@ -95,7 +95,7 @@ describe('Save dashboard state', () => {
       currentState: {
         ...getSampleDashboardInput(),
         title: 'BooThree',
-        panels: { idOne: { type: 'boop' } },
+        panels: { aVerySpecialVeryUniqueId: { type: 'boop' } },
       } as unknown as DashboardContainerInput,
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
@@ -106,7 +106,11 @@ describe('Save dashboard state', () => {
     expect(contentManagementService.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          panelsJSON: expect.not.stringContaining('neverGonnaGetThisId'),
+          panels: expect.arrayContaining([
+            expect.objectContaining({
+              panelIndex: expect.not.stringContaining('aVerySpecialVeryUniqueId'),
+            }),
+          ]),
         }),
       })
     );

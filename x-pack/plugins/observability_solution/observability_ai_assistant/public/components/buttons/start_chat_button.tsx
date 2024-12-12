@@ -18,7 +18,7 @@ export function StartChatButton(props: React.ComponentProps<typeof EuiButton>) {
       {...props}
     >
       {i18n.translate('xpack.observabilityAiAssistant.insight.response.startChat', {
-        defaultMessage: 'Start chat',
+        defaultMessage: 'Start conversation',
       })}
     </EuiButton>
   );

@@ -65,8 +65,10 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: STATS_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(

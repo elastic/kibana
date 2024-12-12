@@ -8,7 +8,7 @@
 import { find } from 'lodash';
 import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getIndexPatterns } from './get_index_patterns';
+import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 /**

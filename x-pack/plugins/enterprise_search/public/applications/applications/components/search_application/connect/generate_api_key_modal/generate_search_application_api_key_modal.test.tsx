@@ -9,13 +9,15 @@ import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiModal, EuiFieldText, EuiCodeBlock } from '@elastic/eui';
 
 const mockActions = { makeRequest: jest.fn(), setKeyName: jest.fn() };
 
 const mockValues = { apiKey: '', isLoading: false, isSuccess: false, keyName: '' };
+
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { GenerateSearchApplicationApiKeyModal } from './generate_search_application_api_key_modal';
 
@@ -50,7 +52,7 @@ describe('GenerateSearchApplicationApiKeyModal', () => {
     });
 
     it('pre-set the key name with search application name', () => {
-      mount(
+      mountWithIntl(
         <GenerateSearchApplicationApiKeyModal
           searchApplicationName="puggles"
           onClose={onCloseMock}

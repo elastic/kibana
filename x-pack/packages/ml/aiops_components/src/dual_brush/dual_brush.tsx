@@ -6,7 +6,9 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useRef, type FC } from 'react';
+import React, { useEffect, useMemo, useRef, type FC } from 'react';
+
+import { htmlIdGenerator } from '@elastic/eui';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
@@ -86,6 +88,11 @@ interface DualBrushProps {
    * Width
    */
   width: number;
+  /**
+   * Whether the brush should be non-interactive. When true, the brush is still visible
+   * but cannot be moved or resized by the user.
+   */
+  nonInteractive?: boolean;
 }
 
 /**
@@ -96,9 +103,22 @@ interface DualBrushProps {
  * @returns The DualBrush component.
  */
 export const DualBrush: FC<DualBrushProps> = (props) => {
-  const { windowParameters, min, max, onChange, marginLeft, snapTimestamps, width } = props;
+  const {
+    windowParameters,
+    min,
+    max,
+    onChange,
+    marginLeft,
+    snapTimestamps,
+    width,
+    nonInteractive,
+  } = props;
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
+
+  // id to prefix html ids for the brushes since this component can be used
+  // multiple times within dashboard and embedded charts.
+  const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
   // We need to pass props to refs here because the d3-brush code doesn't consider
   // native React prop changes. The brush code does its own check whether these props changed then.
@@ -135,10 +155,10 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           const xMax = x(maxRef.current) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
-          const baselineBrush = d3.select('#aiops-brush-baseline');
+          const baselineBrush = d3.select(`#aiops-brush-baseline-${htmlId}`);
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
-          const deviationBrush = d3.select('#aiops-brush-deviation');
+          const deviationBrush = d3.select(`#aiops-brush-deviation-${htmlId}`);
           const deviationSelection = d3.brushSelection(deviationBrush.node() as SVGGElement);
 
           if (!isBrushXSelection(deviationSelection) || !isBrushXSelection(baselineSelection)) {
@@ -260,7 +280,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           .insert('g', '.brush')
           .attr('class', 'brush')
           .attr('id', (b: DualBrush) => {
-            return 'aiops-brush-' + b.id;
+            return `aiops-brush-${b.id}-${htmlId}`;
           })
           .attr('data-test-subj', (b: DualBrush) => {
             // Uppercase the first character of the `id` so we get aiopsBrushBaseline/aiopsBrushDeviation.
@@ -294,6 +314,10 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
           .selectAll('.handle')
           .attr('rx', BRUSH_HANDLE_ROUNDED_CORNER)
           .attr('ry', BRUSH_HANDLE_ROUNDED_CORNER);
+
+        if (nonInteractive) {
+          mlBrushSelection.merge(mlBrushSelection).attr('pointer-events', 'none');
+        }
 
         mlBrushSelection.exit().remove();
       }
@@ -339,6 +363,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
       drawBrushes();
     }
   }, [
+    htmlId,
     min,
     max,
     width,
@@ -348,6 +373,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
     deviationMax,
     snapTimestamps,
     onChange,
+    nonInteractive,
   ]);
 
   return (

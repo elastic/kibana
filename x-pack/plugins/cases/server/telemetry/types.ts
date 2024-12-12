@@ -17,6 +17,10 @@ export interface Bucket<T extends string | number = string | number> {
   key: T;
 }
 
+export interface AlertBuckets {
+  buckets: Array<{ topAlertsPerBucket: { value: number } }>;
+}
+
 export interface Buckets<T extends string | number = string | number> {
   buckets: Array<Bucket<T>>;
 }

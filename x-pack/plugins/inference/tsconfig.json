@@ -19,7 +19,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/sse-utils",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",
     "@kbn/core",
@@ -33,6 +32,7 @@
     "@kbn/core-http-server",
     "@kbn/actions-plugin",
     "@kbn/config-schema",
+    "@kbn/inference-common",
     "@kbn/es-types",
     "@kbn/field-types",
     "@kbn/expressions-plugin",

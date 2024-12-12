@@ -67,7 +67,7 @@ export const remove = (
     return undefined;
   }
 
-  const success = generic.removeCommandArgument(ast, node);
+  const success = generic.commands.args.remove(ast, node);
 
   return success ? node : undefined;
 };
@@ -78,7 +78,7 @@ export const insert = (
   clusterName?: string,
   index: number = -1
 ): ESQLSource | undefined => {
-  const command = generic.findCommandByName(ast, 'from');
+  const command = generic.commands.findByName(ast, 'from');
 
   if (!command) {
     return;
@@ -87,7 +87,7 @@ export const insert = (
   const source = Builder.expression.indexSource(indexName, clusterName);
 
   if (index === -1) {
-    generic.appendCommandArgument(command, source);
+    generic.commands.args.append(command, source);
   } else {
     command.args.splice(index, 0, source);
   }

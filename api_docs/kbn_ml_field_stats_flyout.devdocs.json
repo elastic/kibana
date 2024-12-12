@@ -655,6 +655,14 @@
             "section": "def-public.FieldStatsServices",
             "text": "FieldStatsServices"
           },
+          "; theme: ",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-public.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
+          },
           "; timeRangeMs?: ",
           {
             "pluginId": "@kbn/ml-date-picker",

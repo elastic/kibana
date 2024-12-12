@@ -9,7 +9,9 @@
 
 import React, { FC, useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem, transparentize, useEuiTheme } from '@elastic/eui';
+import classNames from 'classnames';
+import { css } from '@emotion/css';
 
 import { useNavigation as useServices } from '../../../services';
 import { NavItemLabel } from './panel_nav_item_label';
@@ -24,6 +26,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab } = item;
   const href = deepLink?.url ?? item.href;
+  const { euiTheme } = useEuiTheme();
 
   const onClick = useCallback<React.MouseEventHandler>(
     (e) => {
@@ -41,7 +44,14 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
       key={id}
       label={<NavItemLabel item={item} />}
       wrapText
-      className="sideNavPanelLink"
+      className={classNames(
+        'sideNavPanelLink',
+        css`
+          &.sideNavPanelLink:hover {
+            background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+          }
+        `
+      )}
       size="s"
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}

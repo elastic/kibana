@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AnalyticsServiceStart, I18nStart, ThemeServiceSetup } from '@kbn/core/public';
+import { AnalyticsServiceStart, CoreStart, I18nStart, ThemeServiceSetup } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getAnalytics, setAnalytics] = createGetterSetter<AnalyticsServiceStart>('Analytics');
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
+export const [getNotifications, setNotifications] =
+  createGetterSetter<CoreStart['notifications']>('Notifications');
 export const [getTheme, setTheme] = createGetterSetter<ThemeServiceSetup>('Theme');

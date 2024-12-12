@@ -32,7 +32,17 @@ const actionsClient = actionsClientMock.create();
 jest.mock('../../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
-jest.mock('../helpers');
+
+jest.mock('../helpers', () => {
+  const original = jest.requireActual('../helpers');
+
+  return {
+    ...original,
+    appendAssistantMessageToConversation: jest.fn(),
+    createConversationWithUserInput: jest.fn(),
+    langChainExecute: jest.fn(),
+  };
+});
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
 
 const mockLangChainExecute = langChainExecute as jest.Mock;
@@ -76,7 +86,7 @@ const mockContext = {
         indexTemplateAndPattern: {
           alias: 'knowledge-base-alias',
         },
-        isModelDeployed: jest.fn().mockResolvedValue(true),
+        isInferenceEndpointExists: jest.fn().mockResolvedValue(true),
       }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
@@ -280,6 +290,7 @@ describe('chatCompleteRoute', () => {
                 actionTypeId: '.gen-ai',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,
+                isEnabledKnowledgeBase: false,
               });
             }),
           };

@@ -91,6 +91,7 @@ const NavigationWrapper: FC<Props & Omit<Partial<EuiCollapsibleNavBetaProps>, 'c
 };
 
 const groupExamplesNavigationTree: NavigationTreeDefinitionUI = {
+  id: 'es',
   body: [
     // My custom project
     {
@@ -259,6 +260,7 @@ export const GroupsExamples = {
 };
 
 const navigationTree: NavigationTreeDefinitionUI = {
+  id: 'es',
   body: [
     // My custom project
     {
@@ -572,6 +574,7 @@ const panelContentProvider: ContentProvider = (id: string) => {
 };
 
 const navigationTreeWithPanels: NavigationTreeDefinitionUI = {
+  id: 'es',
   body: [
     // My custom project
     {

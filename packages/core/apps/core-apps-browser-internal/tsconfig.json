@@ -24,7 +24,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-internal",
     "@kbn/core-mount-utils-browser-internal",
-    "@kbn/core-status-common-internal",
     "@kbn/core-http-browser-internal",
     "@kbn/core-application-browser-mocks",
     "@kbn/core-notifications-browser-mocks",

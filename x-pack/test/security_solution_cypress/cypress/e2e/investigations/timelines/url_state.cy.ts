@@ -24,8 +24,8 @@ describe('Open timeline', { tags: ['@serverless', '@ess'] }, () => {
     deleteTimelines();
     visit(TIMELINES_URL);
     createTimeline().then((response) => {
-      timelineSavedObjectId = response.body.data.persistTimeline.timeline.savedObjectId;
-      return response.body.data.persistTimeline.timeline.savedObjectId;
+      timelineSavedObjectId = response.body.savedObjectId;
+      return response.body.savedObjectId;
     });
     createRule(getNewRule());
     visitWithTimeRange(ALERTS_URL);

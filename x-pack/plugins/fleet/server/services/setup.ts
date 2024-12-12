@@ -21,6 +21,8 @@ import { AUTO_UPDATE_PACKAGES, FLEET_SETUP_LOCK_TYPE } from '../../common/consta
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError, FleetSetupLock } from '../../common/types';
 
+import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
+
 import { appContextService } from './app_context';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import {
@@ -36,7 +38,10 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
+import {
+  ensureFleetEventIngestedPipelineIsInstalled,
+  ensureFleetFinalPipelineIsInstalled,
+} from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
@@ -336,6 +341,7 @@ export async function ensureFleetGlobalEsAssets(
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
+    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
   ]);
   const assetResults = globalAssetsRes.flat();
   if (assetResults.some((asset) => asset.isCreated)) {
@@ -355,7 +361,7 @@ export async function ensureFleetGlobalEsAssets(
           );
         });
       },
-      { concurrency: 10 }
+      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
     );
   }
 }

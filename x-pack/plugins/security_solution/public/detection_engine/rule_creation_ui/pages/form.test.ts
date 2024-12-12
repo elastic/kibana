@@ -7,7 +7,6 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import type { FormData, FormHook, ValidationError } from '../../../shared_imports';
-import { ERROR_CODES as ESQL_ERROR_CODES } from '../../rule_creation/logic/esql_validator';
 import { EQL_ERROR_CODES } from '../../../common/hooks/eql/api';
 import type {
   AboutStepRule,
@@ -15,9 +14,9 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../detections/pages/detection_engine/rules/types';
-
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../rule_creation/components/alert_suppression_edit';
+import { ESQL_ERROR_CODES } from '../../rule_creation/components/esql_query_edit';
 import { useRuleFormsErrors } from './form';
-import { transformEqlResponseErrorToValidationError } from '../components/eql_query_bar/validators';
 
 const getFormWithErrorsMock = <T extends FormData = FormData>(fields: {
   [key: string]: { errors: Array<ValidationError<EQL_ERROR_CODES | ESQL_ERROR_CODES>> };
@@ -32,13 +31,15 @@ describe('useRuleFormsErrors', () => {
     it('should return blocking error in case of syntax validation error', async () => {
       const { result } = renderHook(() => useRuleFormsErrors());
 
-      const validationError = transformEqlResponseErrorToValidationError({
-        code: EQL_ERROR_CODES.INVALID_SYNTAX,
-        messages: ["line 1:5: missing 'where' at 'demo'"],
-      });
       const defineStepForm = getFormWithErrorsMock<DefineStepRule>({
         queryBar: {
-          errors: [validationError],
+          errors: [
+            {
+              code: EQL_ERROR_CODES.INVALID_SYNTAX,
+              message: '',
+              messages: ["line 1:5: missing 'where' at 'demo'"],
+            },
+          ],
         },
       });
 
@@ -52,13 +53,17 @@ describe('useRuleFormsErrors', () => {
     it('should return non-blocking error in case of missing data source validation error', async () => {
       const { result } = renderHook(() => useRuleFormsErrors());
 
-      const validationError = transformEqlResponseErrorToValidationError({
-        code: EQL_ERROR_CODES.MISSING_DATA_SOURCE,
-        messages: ['index_not_found_exception Found 1 problem line -1:-1: Unknown index [*,-*]'],
-      });
       const defineStepForm = getFormWithErrorsMock<DefineStepRule>({
         queryBar: {
-          errors: [validationError],
+          errors: [
+            {
+              code: EQL_ERROR_CODES.MISSING_DATA_SOURCE,
+              message: '',
+              messages: [
+                'index_not_found_exception Found 1 problem line -1:-1: Unknown index [*,-*]',
+              ],
+            },
+          ],
         },
       });
 
@@ -74,15 +79,17 @@ describe('useRuleFormsErrors', () => {
     it('should return non-blocking error in case of missing data field validation error', async () => {
       const { result } = renderHook(() => useRuleFormsErrors());
 
-      const validationError = transformEqlResponseErrorToValidationError({
-        code: EQL_ERROR_CODES.INVALID_EQL,
-        messages: [
-          'Found 2 problems\nline 1:1: Unknown column [event.category]\nline 1:13: Unknown column [event.name]',
-        ],
-      });
       const defineStepForm = getFormWithErrorsMock<DefineStepRule>({
         queryBar: {
-          errors: [validationError],
+          errors: [
+            {
+              code: EQL_ERROR_CODES.INVALID_EQL,
+              message: '',
+              messages: [
+                'Found 2 problems\nline 1:1: Unknown column [event.category]\nline 1:13: Unknown column [event.name]',
+              ],
+            },
+          ],
         },
       });
 
@@ -98,13 +105,15 @@ describe('useRuleFormsErrors', () => {
     it('should return non-blocking error in case of failed request error', async () => {
       const { result } = renderHook(() => useRuleFormsErrors());
 
-      const validationError = transformEqlResponseErrorToValidationError({
-        code: EQL_ERROR_CODES.FAILED_REQUEST,
-        error: new Error('Some internal error'),
-      });
       const defineStepForm = getFormWithErrorsMock<DefineStepRule>({
         queryBar: {
-          errors: [validationError],
+          errors: [
+            {
+              code: EQL_ERROR_CODES.FAILED_REQUEST,
+              message: 'An error occurred while validating your EQL query',
+              error: new Error('Some internal error'),
+            },
+          ],
         },
       });
 
@@ -120,13 +129,15 @@ describe('useRuleFormsErrors', () => {
     it('should return blocking and non-blocking errors', async () => {
       const { result } = renderHook(() => useRuleFormsErrors());
 
-      const validationError = transformEqlResponseErrorToValidationError({
-        code: EQL_ERROR_CODES.MISSING_DATA_SOURCE,
-        messages: ['Missing data source'],
-      });
       const defineStepForm = getFormWithErrorsMock<DefineStepRule>({
         queryBar: {
-          errors: [validationError],
+          errors: [
+            {
+              code: EQL_ERROR_CODES.MISSING_DATA_SOURCE,
+              message: '',
+              messages: ['Missing data source'],
+            },
+          ],
         },
       });
       const aboutStepForm = getFormWithErrorsMock<AboutStepRule>({
@@ -248,7 +259,7 @@ describe('useRuleFormsErrors', () => {
 
       const defineStepForm = getFormWithErrorsMock<DefineStepRule>({
         queryBar: { errors: [esqlValidationError] },
-        groupByFields: { errors: [groupByValidationError] },
+        [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: { errors: [groupByValidationError] },
       });
       const aboutStepForm = getFormWithErrorsMock<AboutStepRule>({
         name: {

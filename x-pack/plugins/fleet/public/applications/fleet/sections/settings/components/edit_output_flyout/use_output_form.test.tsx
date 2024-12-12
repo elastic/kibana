@@ -12,7 +12,7 @@ import {
 
 describe('use_output_form', () => {
   describe('extractDefaultDynamicKafkaTopics', () => {
-    it('should return empty array if not topics are passed', () => {
+    it('should return empty array if not topic are passed', () => {
       const res = extractDefaultDynamicKafkaTopics({
         type: 'kafka',
         name: 'new',
@@ -23,37 +23,25 @@ describe('use_output_form', () => {
       expect(res).toEqual([]);
     });
 
-    it('should return empty array if topics have length == 0', () => {
+    it('should return empty array if topic do not include %{[', () => {
       const res = extractDefaultDynamicKafkaTopics({
         type: 'kafka',
         name: 'new',
         is_default: false,
         is_default_monitoring: false,
-        topics: [],
+        topic: 'something',
       });
 
       expect(res).toEqual([]);
     });
 
-    it('should return empty array if topics do not include %{[', () => {
+    it('should return options for combobox if topic include %{[', () => {
       const res = extractDefaultDynamicKafkaTopics({
         type: 'kafka',
         name: 'new',
         is_default: false,
         is_default_monitoring: false,
-        topics: [{ topic: 'something' }],
-      });
-
-      expect(res).toEqual([]);
-    });
-
-    it('should return options for combobox if topics include %{[', () => {
-      const res = extractDefaultDynamicKafkaTopics({
-        type: 'kafka',
-        name: 'new',
-        is_default: false,
-        is_default_monitoring: false,
-        topics: [{ topic: '%{[default.dataset]}' }],
+        topic: '%{[default.dataset]}',
       });
 
       expect(res).toEqual([
@@ -64,13 +52,13 @@ describe('use_output_form', () => {
       ]);
     });
 
-    it('should return options for combobox if topics include %{[ and some special characters', () => {
+    it('should return options for combobox if topic include %{[ and some special characters', () => {
       const res = extractDefaultDynamicKafkaTopics({
         type: 'kafka',
         name: 'new',
         is_default: false,
         is_default_monitoring: false,
-        topics: [{ topic: '%{[@timestamp]}' }],
+        topic: '%{[@timestamp]}',
       });
 
       expect(res).toEqual([
@@ -81,13 +69,13 @@ describe('use_output_form', () => {
       ]);
     });
 
-    it('should return options for combobox if topics include %{[ and a custom name', () => {
+    it('should return options for combobox if topic include %{[ and a custom name', () => {
       const res = extractDefaultDynamicKafkaTopics({
         type: 'kafka',
         name: 'new',
         is_default: false,
         is_default_monitoring: false,
-        topics: [{ topic: '%{[something]}' }],
+        topic: '%{[something]}',
       });
 
       expect(res).toEqual([
@@ -100,7 +88,7 @@ describe('use_output_form', () => {
   });
 
   describe('extractDefaultStaticKafkaTopic', () => {
-    it('should return empty array if not topics are passed', () => {
+    it('should return empty array if not topic are passed', () => {
       const res = extractDefaultStaticKafkaTopic({
         type: 'kafka',
         name: 'new',
@@ -111,52 +99,28 @@ describe('use_output_form', () => {
       expect(res).toEqual('');
     });
 
-    it('should return empty array if topics have length == 0', () => {
+    it('should return empty string if topic include %{[', () => {
       const res = extractDefaultStaticKafkaTopic({
         type: 'kafka',
         name: 'new',
         is_default: false,
         is_default_monitoring: false,
-        topics: [],
+        topic: '%{[something]}',
       });
 
       expect(res).toEqual('');
     });
 
-    it('should return empty string if topics include %{[', () => {
+    it('should return the topic if topic field is defined', () => {
       const res = extractDefaultStaticKafkaTopic({
         type: 'kafka',
         name: 'new',
         is_default: false,
         is_default_monitoring: false,
-        topics: [{ topic: '%{[something]}' }],
-      });
-
-      expect(res).toEqual('');
-    });
-
-    it('should return the topic if topics field is defined', () => {
-      const res = extractDefaultStaticKafkaTopic({
-        type: 'kafka',
-        name: 'new',
-        is_default: false,
-        is_default_monitoring: false,
-        topics: [{ topic: 'something' }],
+        topic: 'something',
       });
 
       expect(res).toEqual('something');
-    });
-
-    it('should return the last topic if topics field is defined and has multiple', () => {
-      const res = extractDefaultStaticKafkaTopic({
-        type: 'kafka',
-        name: 'new',
-        is_default: false,
-        is_default_monitoring: false,
-        topics: [{ topic: 'something_1' }, { topic: 'something_2' }, { topic: 'something_3' }],
-      });
-
-      expect(res).toEqual('something_3');
     });
   });
 });

@@ -52,8 +52,8 @@ export default ({ getService }: FtrProviderContext) => {
   const utils = getService('securitySolutionUtils');
   let username: string;
 
-  // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess update_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
+  describe.skip('@ess update_rules_bulk', () => {
     before(async () => {
       username = await utils.getUsername();
     });

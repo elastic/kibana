@@ -7,10 +7,15 @@
 
 import { filter, from, map, switchMap, tap } from 'rxjs';
 import { Readable } from 'stream';
+import {
+  Message,
+  MessageRole,
+  createInferenceInternalError,
+  ToolChoiceType,
+  ToolSchemaType,
+  type ToolOptions,
+} from '@kbn/inference-common';
 import { parseSerdeChunkMessage } from './serde_utils';
-import { Message, MessageRole } from '../../../../common/chat_complete';
-import { createInferenceInternalError } from '../../../../common/errors';
-import { ToolChoiceType, type ToolOptions } from '../../../../common/chat_complete/tools';
 import { InferenceConnectorAdapter } from '../../types';
 import type { BedRockMessage, BedrockToolChoice } from './types';
 import {
@@ -19,7 +24,6 @@ import {
 } from './serde_eventstream_into_observable';
 import { processCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
-import { ToolSchemaType } from '../../../../common/chat_complete/tool_schema';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({ executor, system, messages, toolChoice, tools }) => {

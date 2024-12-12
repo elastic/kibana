@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { TestProviders, mockIndexPattern } from '../../mock';
+import { TestProviders, mockDataViewSpec } from '../../mock';
 
 import { allEvents, defaultOptions } from './helpers';
 import type { Props as TopNProps } from './top_n';
@@ -107,7 +107,7 @@ describe('TopN', () => {
     field,
     filters: [],
     from: '2020-04-14T00:31:47.695Z',
-    indexPattern: mockIndexPattern,
+    indexPattern: mockDataViewSpec,
     options: defaultOptions,
     query,
     setAbsoluteRangeDatePickerTarget: InputsModelId.global,

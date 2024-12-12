@@ -22,11 +22,10 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.x 8.16 8.15 7.17
+      branch_configuration: main 8.x 8.17 8.16 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/build.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -53,6 +52,10 @@ spec:
           cronline: 0 22 * * * America/New_York
           message: Daily build
           branch: '8.x'
+        Daily build (8.17):
+          cronline: 0 22 * * * America/New_York
+          message: Daily build
+          branch: '8.17'
         Daily build (8.16):
           cronline: 0 22 * * * America/New_York
           message: Daily build
@@ -92,11 +95,10 @@ spec:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.x 8.16 8.15 7.17
+      branch_configuration: main 8.x 8.17 8.16 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/promote.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -142,11 +144,10 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
       allow_rebuilds: true
-      branch_configuration: main 8.x 8.16 8.15 7.17
+      branch_configuration: main 8.x 8.17 8.16 8.15 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_snapshots/verify.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false

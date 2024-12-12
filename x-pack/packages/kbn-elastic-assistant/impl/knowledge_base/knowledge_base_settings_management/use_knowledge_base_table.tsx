@@ -11,6 +11,7 @@ import {
   EuiBasicTableColumn,
   EuiIcon,
   EuiText,
+  EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -29,11 +30,16 @@ import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
 import { isSystemEntry } from './helpers';
+import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 
 const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   const { userProfileService } = useAssistantContext();
 
   const userProfile = useAsync(async () => {
+    if (isSystemEntry(entry) || entry.createdBy === 'unknown') {
+      return;
+    }
+
     const profile = await userProfileService?.bulkGet<{ avatar: UserProfileAvatarData }>({
       uids: new Set([entry.createdBy]),
       dataPath: 'avatar',
@@ -45,7 +51,7 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
     () => userProfile?.value?.username ?? 'Unknown',
     [userProfile?.value?.username]
   );
-  const userAvatar = userProfile.value?.avatar;
+  const userAvatar = userProfile?.value?.avatar;
   const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
   const userImage = isSystemEntry(entry) ? (
     <EuiIcon
@@ -142,12 +148,14 @@ export const useKnowledgeBaseTable = () => {
       isEditEnabled,
       onDeleteActionClicked,
       onEditActionClicked,
+      isKbSetupInProgress,
     }: {
       existingIndices?: string[];
       isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
       onEditActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      isKbSetupInProgress: boolean;
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
       return [
         {
@@ -180,11 +188,27 @@ export const useKnowledgeBaseTable = () => {
         {
           name: i18n.COLUMN_ENTRIES,
           render: (entry: KnowledgeBaseEntryResponse) => {
-            return isSystemEntry(entry)
-              ? entry.text
-              : entry.type === DocumentEntryType.value
-              ? '1'
-              : '-';
+            return isSystemEntry(entry) ? (
+              <>
+                {`${entry.text}`}
+                {isKbSetupInProgress ? (
+                  <EuiLoadingSpinner
+                    size="m"
+                    css={css`
+                      margin-left: 8px;
+                    `}
+                  />
+                ) : (
+                  <EuiToolTip content={i18n.SECURITY_LABS_NOT_FULLY_LOADED}>
+                    <SetupKnowledgeBaseButton display="refresh" />
+                  </EuiToolTip>
+                )}
+              </>
+            ) : entry.type === DocumentEntryType.value ? (
+              '1'
+            ) : (
+              '-'
+            );
           },
         },
         {

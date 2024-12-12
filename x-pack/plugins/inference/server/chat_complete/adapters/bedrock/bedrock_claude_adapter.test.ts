@@ -8,8 +8,7 @@
 import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
-import { MessageRole } from '../../../../common/chat_complete';
-import { ToolChoiceType } from '../../../../common/chat_complete/tools';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import { bedrockClaudeAdapter } from './bedrock_claude_adapter';
 import { addNoToolUsageDirective } from './prompts';
 

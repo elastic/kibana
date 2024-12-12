@@ -7,74 +7,28 @@
 
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Filter } from '@kbn/es-query';
-import {
-  SECURITY_DEFAULT_DATA_VIEW_ID,
-  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
-} from '@kbn/cloud-security-posture-common';
+import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { findingsNavigation } from '../constants/navigation';
 import { useDataView } from './use_data_view';
 import { CspClientPluginStartDeps } from '../..';
-import { encodeQuery } from '../utils/query_utils';
+import { NavFilter, encodeQueryUrl, composeQueryFilters } from '../utils/query_utils';
 
-interface NegatedValue {
-  value: string | number;
-  negate: boolean;
-}
-
-type FilterValue = string | number | NegatedValue;
-
-export type NavFilter = Record<string, FilterValue>;
-
-const createFilter = (key: string, filterValue: FilterValue, dataViewId: string): Filter => {
-  let negate = false;
-  let value = filterValue;
-  if (typeof filterValue === 'object') {
-    negate = filterValue.negate;
-    value = filterValue.value;
-  }
-  // If the value is '*', we want to create an exists filter
-  if (value === '*') {
-    return {
-      query: { exists: { field: key } },
-      meta: { type: 'exists', index: dataViewId },
-    };
-  }
-  return {
-    meta: {
-      alias: null,
-      negate,
-      disabled: false,
-      type: 'phrase',
-      key,
-      index: dataViewId,
-    },
-    query: { match_phrase: { [key]: value } },
-  };
-};
-const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID) => {
+const useNavigate = (pathname: string, dataViewId?: string) => {
   const history = useHistory();
-  const { services } = useKibana<CoreStart & CspClientPluginStartDeps>();
 
+  const { services } = useKibana<CoreStart & CspClientPluginStartDeps>();
   return useCallback(
     (filterParams: NavFilter = {}, groupBy?: string[]) => {
-      const filters = Object.entries(filterParams).map(([key, filterValue]) =>
-        createFilter(key, filterValue, dataViewId)
-      );
+      const filters = composeQueryFilters(filterParams, dataViewId);
 
       history.push({
         pathname,
-        search: encodeQuery({
-          // Set query language from user's preference
-          query: services.data.query.queryString.getDefaultQuery(),
-          filters,
-          ...(groupBy && { groupBy }),
-        }),
+        search: encodeQueryUrl(services.data, filters, groupBy),
       });
     },
-    [history, pathname, services.data.query.queryString, dataViewId]
+    [dataViewId, history, pathname, services.data]
   );
 };
 
@@ -85,3 +39,17 @@ export const useNavigateFindings = () => {
 
 export const useNavigateVulnerabilities = () =>
   useNavigate(findingsNavigation.vulnerabilities.path);
+
+export const useNavigateNativeVulnerabilities = () => {
+  const navToVulnerabilities = useNavigateVulnerabilities();
+
+  return useCallback(
+    (filterParams: NavFilter = {}, groupBy?: string[]) => {
+      navToVulnerabilities(
+        { ...filterParams, 'data_stream.dataset': 'cloud_security_posture.vulnerabilities' },
+        groupBy
+      );
+    },
+    [navToVulnerabilities]
+  );
+};

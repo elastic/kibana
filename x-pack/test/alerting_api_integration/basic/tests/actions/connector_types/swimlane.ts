@@ -16,8 +16,8 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const mockSwimlane = {
-    name: 'A swimlane action',
-    actionTypeId: '.swimlane',
+    name: 'A swimlane connector',
+    connector_type_id: '.swimlane',
     config: {
       apiUrl: 'http://swimlane.mynonexistent.co',
       appId: '123456asdf',
@@ -69,9 +69,9 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SWIMLANE)
       );
     });
-    it('should return 403 when creating a swimlane action', async () => {
+    it('should return 403 when creating a swimlane connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           ...mockSwimlane,

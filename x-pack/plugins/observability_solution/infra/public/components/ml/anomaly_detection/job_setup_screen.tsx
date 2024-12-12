@@ -38,7 +38,7 @@ import { FixedDatePicker } from '../../fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../containers/ml/modules/metrics_k8s/module_descriptor';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
-import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
+import { KibanaEnvironmentContext, useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 
 interface Props {
@@ -60,6 +60,7 @@ export const JobSetupScreen = (props: Props) => {
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
   const { euiTheme } = useEuiTheme();
+  const { telemetry } = useKibanaContextForPlugin().services;
 
   const indices = host.sourceConfiguration.indices;
 
@@ -95,23 +96,47 @@ export const JobSetupScreen = (props: Props) => {
     }
   }, [props.jobType, kubernetes.jobSummaries, host.jobSummaries]);
 
-  const updateStart = useCallback((date: Moment) => {
-    setStartDate(date);
-  }, []);
+  const updateStart = useCallback(
+    (date: Moment) => {
+      setStartDate(date);
+      telemetry.reportAnomalyDetectionDateFieldChange({
+        job_type: props.jobType,
+        start_date: date.toISOString(),
+      });
+    },
+    [telemetry, props.jobType]
+  );
 
   const createJobs = useCallback(() => {
+    const date = moment(startDate).toDate();
     if (hasSummaries) {
+      telemetry.reportAnomalyDetectionSetup({
+        job_type: props.jobType,
+        configured_fields: {
+          start_date: date.toISOString(),
+          partition_field: partitionField ? partitionField[0] : undefined,
+          filter_field: filter ? filter : undefined,
+        },
+      });
       cleanUpAndSetUpModule(
         indices,
-        moment(startDate).toDate().getTime(),
+        date.getTime(),
         undefined,
         filterQuery,
         partitionField ? partitionField[0] : undefined
       );
     } else {
+      telemetry.reportAnomalyDetectionSetup({
+        job_type: props.jobType,
+        configured_fields: {
+          start_date: date.toISOString(),
+          partition_field: partitionField ? partitionField[0] : undefined,
+          filter_field: filter,
+        },
+      });
       setUpModule(
         indices,
-        moment(startDate).toDate().getTime(),
+        date.getTime(),
         undefined,
         filterQuery,
         partitionField ? partitionField[0] : undefined
@@ -125,22 +150,36 @@ export const JobSetupScreen = (props: Props) => {
     indices,
     partitionField,
     startDate,
+    telemetry,
+    filter,
+    props.jobType,
   ]);
 
   const onFilterChange = useCallback(
     (f: string) => {
       setFilter(f || '');
       setFilterQuery(convertKueryToElasticSearchQuery(f, metricsView?.dataViewReference) || '');
+      telemetry.reportAnomalyDetectionFilterFieldChange({
+        job_type: props.jobType,
+        filter_field: f ? f : undefined,
+      });
     },
-    [metricsView?.dataViewReference]
+    [metricsView?.dataViewReference, telemetry, props.jobType]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 500), [onFilterChange]);
 
-  const onPartitionFieldChange = useCallback((value: Array<{ label: string }>) => {
-    setPartitionField(value.map((v) => v.label));
-  }, []);
+  const onPartitionFieldChange = useCallback(
+    (value: Array<{ label: string }>) => {
+      setPartitionField(value.map((v) => v.label));
+      telemetry.reportAnomalyDetectionPartitionFieldChange({
+        job_type: props.jobType,
+        partition_field: value.length > 0 ? value[0].label : undefined,
+      });
+    },
+    [telemetry, props.jobType]
+  );
 
   useEffect(() => {
     if (props.jobType === 'kubernetes') {

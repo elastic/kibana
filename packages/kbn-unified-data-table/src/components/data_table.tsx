@@ -138,6 +138,10 @@ export interface UnifiedDataTableProps {
    */
   showColumnTokens?: boolean;
   /**
+   * Set to true to allow users to drag and drop columns for reordering
+   */
+  canDragAndDropColumns?: boolean;
+  /**
    * Optional value for providing configuration setting for UnifiedDataTable header row height
    */
   configHeaderRowHeight?: number;
@@ -257,6 +261,12 @@ export interface UnifiedDataTableProps {
    * Update rows per page state
    */
   onUpdateRowsPerPage?: (rowsPerPage: number) => void;
+  /**
+   *
+   * this callback is triggered when user navigates to a different page
+   *
+   */
+  onUpdatePageIndex?: (pageIndex: number) => void;
   /**
    * Configuration option to limit sample size slider
    */
@@ -425,6 +435,7 @@ export const UnifiedDataTable = ({
   columns,
   columnsMeta,
   showColumnTokens,
+  canDragAndDropColumns,
   configHeaderRowHeight,
   headerRowHeightState,
   onUpdateHeaderRowHeight,
@@ -488,6 +499,7 @@ export const UnifiedDataTable = ({
   getRowIndicator,
   dataGridDensityState,
   onUpdateDataGridDensity,
+  onUpdatePageIndex,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -513,6 +525,8 @@ export const UnifiedDataTable = ({
     replaceSelectedDocs,
     docIdsInSelectionOrder,
   } = selectedDocsState;
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -591,49 +605,55 @@ export const UnifiedDataTable = ({
     typeof rowsPerPageState === 'number' && rowsPerPageState > 0
       ? rowsPerPageState
       : DEFAULT_ROWS_PER_PAGE;
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: currentPageSize,
-  });
+
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(
-    () => Math.ceil(rowCount / pagination.pageSize),
-    [rowCount, pagination]
+    () => Math.ceil(rowCount / currentPageSize),
+    [rowCount, currentPageSize]
   );
+
+  useEffect(() => {
+    /**
+     * Syncs any changes in pageIndex because of changes in pageCount
+     * to the consumer.
+     *
+     */
+    setCurrentPageIndex((previousPageIndex: number) => {
+      const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
+      if (calculatedPageIndex !== previousPageIndex) {
+        onUpdatePageIndex?.(calculatedPageIndex);
+      }
+      return calculatedPageIndex;
+    });
+  }, [onUpdatePageIndex, pageCount]);
 
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {
       onUpdateRowsPerPage?.(pageSize);
     };
 
-    const onChangePage = (pageIndex: number) =>
-      setPagination((paginationData) => ({ ...paginationData, pageIndex }));
+    const onChangePage = (newPageIndex: number) => {
+      setCurrentPageIndex(newPageIndex);
+      onUpdatePageIndex?.(newPageIndex);
+    };
 
     return isPaginationEnabled
       ? {
           onChangeItemsPerPage,
           onChangePage,
-          pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
-          pageSize: pagination.pageSize,
-          pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(pagination.pageSize),
+          pageIndex: currentPageIndex,
+          pageSize: currentPageSize,
+          pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
         }
       : undefined;
   }, [
     isPaginationEnabled,
-    pagination.pageIndex,
-    pagination.pageSize,
-    pageCount,
     rowsPerPageOptions,
     onUpdateRowsPerPage,
+    currentPageSize,
+    currentPageIndex,
+    onUpdatePageIndex,
   ]);
-
-  useEffect(() => {
-    setPagination((paginationData) =>
-      paginationData.pageSize === currentPageSize
-        ? paginationData
-        : { ...paginationData, pageSize: currentPageSize }
-    );
-  }, [currentPageSize, setPagination]);
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
@@ -870,13 +890,20 @@ export const UnifiedDataTable = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
+      canDragAndDropColumns: defaultColumns ? false : canDragAndDropColumns,
       visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
         const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
         onSetColumns(newColumns, dontModifyColumns);
       },
     }),
-    [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
+    [
+      visibleColumns,
+      onSetColumns,
+      shouldPrependTimeFieldColumn,
+      canDragAndDropColumns,
+      defaultColumns,
+    ]
   );
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
@@ -1128,8 +1155,6 @@ export const UnifiedDataTable = ({
             />
           ) : (
             <EuiDataGridMemoized
-              // Using this as the `key` is a workaround for https://github.com/elastic/eui/issues/7962. This forces a re-render if the density is changed.
-              key={dataGridDensity}
               id={dataGridId}
               aria-describedby={randomId}
               aria-labelledby={ariaLabelledBy}

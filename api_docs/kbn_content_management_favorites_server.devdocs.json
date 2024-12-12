@@ -43,7 +43,8 @@
             "section": "def-server.UsageCollectionSetup",
             "text": "UsageCollectionSetup"
           },
-          " | undefined; }) => void"
+          " | undefined; }) => ",
+          "FavoritesRegistrySetup"
         ],
         "path": "packages/content-management/favorites/favorites_server/src/index.ts",
         "deprecated": false,
@@ -132,6 +133,34 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.AddFavoriteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "AddFavoriteResponse",
+        "description": [],
+        "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.AddFavoriteResponse.favoriteIds",
+            "type": "Array",
+            "tags": [],
+            "label": "favoriteIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
         "id": "def-server.GetFavoritesResponse",
         "type": "Interface",
         "tags": [],
@@ -154,13 +183,71 @@
             "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.GetFavoritesResponse.favoriteMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "favoriteMetadata",
+            "description": [],
+            "signature": [
+              "Record<string, object> | undefined"
+            ],
+            "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.RemoveFavoriteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RemoveFavoriteResponse",
+        "description": [],
+        "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.RemoveFavoriteResponse.favoriteIds",
+            "type": "Array",
+            "tags": [],
+            "label": "favoriteIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.FavoritesSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "FavoritesSetup",
+        "description": [],
+        "signature": [
+          "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
+        ],
+        "path": "packages/content-management/favorites/favorites_server/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {

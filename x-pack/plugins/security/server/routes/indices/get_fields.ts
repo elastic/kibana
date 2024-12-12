@@ -14,6 +14,12 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/fields/{query}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
       validate: { params: schema.object({ query: schema.string() }) },
     },
     async (context, request, response) => {

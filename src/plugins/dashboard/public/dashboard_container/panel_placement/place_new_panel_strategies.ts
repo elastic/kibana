@@ -20,9 +20,9 @@ export const runPanelPlacementStrategy = (
     case PanelPlacementStrategy.placeAtTop:
       const otherPanels = { ...currentPanels };
       for (const [id, panel] of Object.entries(currentPanels)) {
-        const currentPanel = cloneDeep(panel);
-        currentPanel.gridData.y = currentPanel.gridData.y + height;
-        otherPanels[id] = currentPanel;
+        const { gridData, ...currentPanel } = cloneDeep(panel);
+        const newGridData = { ...gridData, y: gridData.y + height };
+        otherPanels[id] = { ...currentPanel, gridData: newGridData };
       }
       return {
         newPanelPlacement: { x: 0, y: 0, w: width, h: height },

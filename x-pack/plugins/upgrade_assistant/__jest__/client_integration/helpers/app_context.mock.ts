@@ -80,6 +80,7 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
   featureSet: {
     mlSnapshots: true,
     migrateSystemIndices: true,
+    migrateDataStreams: true,
     reindexCorrectiveActions: true,
   },
   kibanaVersionInfo: {
@@ -108,7 +109,6 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
   },
   plugins: {
     share: shareMock,
-    infra: undefined,
     cloud: {
       ...cloudMock.createSetup(),
       isCloudEnabled: false,

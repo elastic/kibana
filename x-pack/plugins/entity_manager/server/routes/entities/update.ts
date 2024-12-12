@@ -12,6 +12,8 @@ import { InvalidTransformError } from '../../lib/entities/errors/invalid_transfo
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
 import { EntityDefinitionUpdateConflict } from '../../lib/entities/errors/entity_definition_update_conflict';
+import { findEntityDefinitionById } from '../../lib/entities/find_entity_definition';
+import { canManageEntityDefinition } from '../../lib/auth';
 
 /**
  * @openapi
@@ -52,14 +54,43 @@ import { EntityDefinitionUpdateConflict } from '../../lib/entities/errors/entity
  */
 export const updateEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'PATCH /internal/entities/definition/{id}',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
+    },
+  },
   params: z.object({
     path: z.object({ id: z.string() }),
     body: entityDefinitionUpdateSchema,
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
-    const entityClient = await getScopedClient({ request });
-
+  handler: async ({ context, request, response, params, logger, getScopedClient }) => {
     try {
+      const core = await context.core;
+      const definition = await findEntityDefinitionById({
+        id: params.path.id,
+        esClient: core.elasticsearch.client.asCurrentUser,
+        soClient: core.savedObjects.client,
+      });
+      if (!definition) {
+        throw new EntityDefinitionNotFound(`Unable to find entity definition [${params.path.id}]`);
+      }
+
+      const isAuthorized = await canManageEntityDefinition(
+        core.elasticsearch.client.asCurrentUser,
+        params.body.indexPatterns ?? definition.indexPatterns
+      );
+      if (!isAuthorized) {
+        return response.forbidden({
+          body: {
+            message:
+              'Current Kibana user does not have the required permissions to update the entity definition',
+          },
+        });
+      }
+
+      const entityClient = await getScopedClient({ request });
       const updatedDefinition = await entityClient.updateEntityDefinition({
         id: params.path.id,
         definitionUpdate: params.body,

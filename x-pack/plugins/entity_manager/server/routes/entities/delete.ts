@@ -14,6 +14,7 @@ import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_f
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
 import { createEntityManagerServerRoute } from '../create_entity_manager_server_route';
+import { canDeleteEntityDefinition } from '../../lib/auth/privileges';
 
 /**
  * @openapi
@@ -51,12 +52,30 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  */
 export const deleteEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'DELETE /internal/entities/definition/{id}',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
+    },
+  },
   params: z.object({
     path: deleteEntityDefinitionParamsSchema,
     query: deleteEntityDefinitionQuerySchema,
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
+  handler: async ({ context, request, response, params, logger, getScopedClient }) => {
     try {
+      const currentUserClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const isAuthorized = await canDeleteEntityDefinition(currentUserClient);
+      if (!isAuthorized) {
+        return response.forbidden({
+          body: {
+            message:
+              'Current Kibana user does not have the required permissions to delete the entity definition',
+          },
+        });
+      }
+
       const client = await getScopedClient({ request });
       await client.deleteEntityDefinition({
         id: params.path.id,

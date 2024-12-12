@@ -12,8 +12,8 @@ import type {
   ChatCompletionTokenCountEvent,
   FunctionCallingMode,
   Message,
-} from '../../common/chat_complete';
-import type { ToolOptions } from '../../common/chat_complete/tools';
+  ToolOptions,
+} from '@kbn/inference-common';
 import type { InferenceExecutor } from './utils';
 
 /**

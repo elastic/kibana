@@ -9,6 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
+import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 import { GetElser } from '../types';
 
@@ -53,7 +56,6 @@ export const pipelineExists = async ({ esClient, id }: PipelineExistsParams): Pr
 interface CreatePipelineParams {
   esClient: ElasticsearchClient;
   id: string;
-  modelId: string;
 }
 
 /**
@@ -62,20 +64,14 @@ interface CreatePipelineParams {
  * @param params params
  * @param params.esClient Elasticsearch client with privileges to check for ingest pipelines
  * @param params.id ID of the ingest pipeline
- * @param params.modelId ID of the ELSER model
  *
  * @returns Promise<boolean> indicating whether the pipeline was created
  */
-export const createPipeline = async ({
-  esClient,
-  id,
-  modelId,
-}: CreatePipelineParams): Promise<boolean> => {
+export const createPipeline = async ({ esClient, id }: CreatePipelineParams): Promise<boolean> => {
   try {
     const response = await esClient.ingest.putPipeline(
       knowledgeBaseIngestPipeline({
         id,
-        modelId,
       })
     );
 
@@ -103,3 +99,45 @@ export const deletePipeline = async ({ esClient, id }: DeletePipelineParams): Pr
 
   return response.acknowledged;
 };
+
+export const removeLegacyQuickPrompt = async (esClient: ElasticsearchClient) => {
+  try {
+    const deleteQuery: DeleteByQueryRequest = {
+      index: `${getResourceName('prompts')}-*`,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                name: ESQL_QUERY_GENERATION_TITLE,
+              },
+            },
+            {
+              term: {
+                prompt_type: 'quick',
+              },
+            },
+            {
+              term: {
+                is_default: true,
+              },
+            },
+          ],
+        },
+      },
+    };
+    return esClient.deleteByQuery(deleteQuery);
+  } catch (e) {
+    // swallow any errors
+    return {
+      total: 0,
+    };
+  }
+};
+
+const ESQL_QUERY_GENERATION_TITLE = i18n.translate(
+  'xpack.elasticAssistantPlugin.assistant.quickPrompts.esqlQueryGenerationTitle',
+  {
+    defaultMessage: 'ES|QL Query Generation',
+  }
+);

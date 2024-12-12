@@ -2015,7 +2015,22 @@
       "path": "src/plugins/content_management/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-server.ContentManagementServerSetup.favorites",
+          "type": "Object",
+          "tags": [],
+          "label": "favorites",
+          "description": [],
+          "signature": [
+            "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
+          ],
+          "path": "src/plugins/content_management/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },

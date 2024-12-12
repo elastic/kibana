@@ -2,6 +2,11 @@
   "type": "plugin",
   "id": "@kbn/search-connectors-plugin",
   "owner": "@elastic/search-kibana",
+  // TODO this is currently used from Observability too, must be refactored before solution-specific builds
+  // see x-pack/plugins/observability_solution/observability_ai_assistant_management/public/routes/components/search_connector_tab.tsx
+  // cc sphilipse
+  "group": "search",
+  "visibility": "private",
   "description": "Plugin hosting shared features for connectors",
   "plugin": {
     "id": "searchConnectors",

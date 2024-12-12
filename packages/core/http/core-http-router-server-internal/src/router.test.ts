@@ -305,6 +305,23 @@ describe('Router', () => {
       );
     });
 
+    it('throws if route has security declared wrong', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          // we use 'any' because validate requires valid Type or function usage
+          {
+            path: '/',
+            validate: false,
+            options: { security: { authz: { requiredPrivileges: [] } } } as any,
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\`options.security\` is not allowed in route config. Use \`security\` instead."`
+      );
+    });
+
     it('throws if options.body.output is not a valid value', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       expect(() =>

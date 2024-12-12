@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
@@ -28,7 +29,13 @@ const Renderer = ({
     emptyImage: elasticOutline,
   };
 
-  return <Render renderer={getRepeatImageRenderer()} config={config} width="400px" />;
+  return (
+    <Render
+      renderer={getRepeatImageRenderer(coreMock.createStart().theme.theme$)}
+      config={config}
+      width="400px"
+    />
+  );
 };
 
 export default {

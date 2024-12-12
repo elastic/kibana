@@ -8,7 +8,7 @@
 import type { TimelineFilter } from '../objects/timeline';
 import { getDataTestSubjectSelector } from '../helpers/common';
 
-export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
+export const ADD_NOTE_BUTTON = '[data-test-subj="securitySolutionNotesAddNotesButton"]';
 
 export const ADD_FILTER =
   '[data-test-subj="timeline-search-or-filter"] [data-test-subj="addFilter"]';
@@ -61,15 +61,13 @@ export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-butto
 
 export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
 
-export const ADD_NOTE_CONTAINER = '[data-test-subj="add-note-container"]';
+export const NOTE_CARD_CONTENT = (index: number) =>
+  `[data-test-subj="securitySolutionNotesNotesComment-${index}"]`;
 
-export const RESOLVER_GRAPH_CONTAINER = '[data-test-subj="resolver:graph"]';
+export const NOTE_DESCRIPTION =
+  '[data-test-subj="securitySolutionNotesTimelineDescriptionComment"]';
 
-export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
-
-export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';
-
-export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
+export const NOTES_TEXT_AREA = '[data-test-subj="euiMarkdownEditorTextArea"]';
 
 export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
 
@@ -81,7 +79,8 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
-export const DELETE_NOTE = '[data-test-subj="delete-note"]';
+export const DELETE_NOTE = (index: number) =>
+  `[data-test-subj="securitySolutionNotesDeleteNotesButton-${index}"]`;
 
 export const MARKDOWN_INVESTIGATE_BUTTON =
   '[data-test-subj="insight-investigate-in-timeline-button"]';
@@ -117,8 +116,6 @@ export const QUERY_EVENT_COUNT = '[data-test-subj="query-events-count"]';
 export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
-
-export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
 export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
 
@@ -217,8 +214,6 @@ export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem
 export const TIMELINE_TITLE = '[data-test-subj="timeline-modal-header-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-modal-title-input"]';
-
-export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 
 export const TIMESTAMP_TOGGLE_FIELD =
   '[data-test-subj="actionItem-security-detailsFlyout-cellActions-toggleColumn"]';

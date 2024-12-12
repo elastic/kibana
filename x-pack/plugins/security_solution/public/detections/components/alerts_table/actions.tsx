@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { getOr, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import dateMath from '@kbn/datemath';
@@ -51,7 +51,6 @@ import {
   isThresholdRule,
 } from '../../../../common/detection_engine/utils';
 import { TimelineId } from '../../../../common/types/timeline';
-import type { TimelineResponse } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type {
   SendAlertToTimelineActionProps,
@@ -67,10 +66,7 @@ import type {
 } from '../../../../common/search_strategy/timeline';
 import { TimelineEventsQueries } from '../../../../common/search_strategy/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
-import {
-  omitTypenameInTimeline,
-  formatTimelineResponseToModel,
-} from '../../../timelines/components/open_timeline/helpers';
+import { formatTimelineResponseToModel } from '../../../timelines/components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/kuery';
 import { getField, getFieldKey } from '../../../helpers';
 import {
@@ -936,7 +932,6 @@ export const sendBulkEventsToTimelineAction = async (
 export const sendAlertToTimelineAction = async ({
   createTimeline,
   ecsData: ecs,
-  updateTimelineIsLoading,
   searchStrategyClient,
   getExceptionFilter,
 }: SendAlertToTimelineActionProps) => {
@@ -962,7 +957,6 @@ export const sendAlertToTimelineAction = async ({
   // For now we do not want to populate the template timeline if we have alertIds
   if (!isEmpty(timelineId)) {
     try {
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
         getTimelineTemplate(timelineId),
         lastValueFrom(
@@ -982,15 +976,9 @@ export const sendAlertToTimelineAction = async ({
           )
         ),
       ]);
-
-      const resultingTimeline: TimelineResponse = getOr(
-        {},
-        'data.getOneTimeline',
-        responseTimeline
-      );
       const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
-      if (!isEmpty(resultingTimeline)) {
-        const timelineTemplate = omitTypenameInTimeline(resultingTimeline);
+      if (!isEmpty(responseTimeline)) {
+        const timelineTemplate = responseTimeline;
         const { timeline, notes } = formatTimelineResponseToModel(
           timelineTemplate,
           true,
@@ -1092,7 +1080,6 @@ export const sendAlertToTimelineAction = async ({
     } catch (error) {
       /* eslint-disable-next-line no-console */
       console.error(error);
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       return createTimeline({
         from,
         notes: null,

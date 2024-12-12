@@ -44,7 +44,7 @@ class Package {
    * @param {Package} b
    */
   static sorter(a, b) {
-    return a.manifest.id.localeCompare(b.manifest.id);
+    return a.manifest.id.localeCompare(b.manifest.id, 'en');
   }
 
   /**

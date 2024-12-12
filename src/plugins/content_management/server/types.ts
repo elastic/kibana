@@ -9,6 +9,7 @@
 
 import type { Version } from '@kbn/object-versioning';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { FavoritesSetup } from '@kbn/content-management-favorites-server';
 import type { CoreApi, StorageContextGetTransformFn } from './core';
 
 export interface ContentManagementServerSetupDependencies {
@@ -18,8 +19,9 @@ export interface ContentManagementServerSetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerStartDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContentManagementServerSetup extends CoreApi {}
+export interface ContentManagementServerSetup extends CoreApi {
+  favorites: FavoritesSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerStart {}

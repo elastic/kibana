@@ -189,7 +189,7 @@ export const AddPanelFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2 id={modalTitleId}>
             {i18n.translate('embeddableApi.addPanel.Title', { defaultMessage: 'Add from library' })}
           </h2>
@@ -197,6 +197,7 @@ export const AddPanelFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SavedObjectFinder
+          id="embeddableAddPanel"
           services={{
             contentClient: contentManagement.client,
             savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),

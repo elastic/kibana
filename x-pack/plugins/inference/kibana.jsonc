@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/inference-plugin",
   "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "inference",
     "server": true,

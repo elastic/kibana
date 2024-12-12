@@ -28,6 +28,12 @@ const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 
 jest.mock('../../components/agent_reassign_policy_modal');
 
+jest.mock('../hooks/export_csv', () => ({
+  useExportCSV: jest.fn().mockReturnValue({
+    generateReportingJobCSV: jest.fn(),
+  }),
+}));
+
 const defaultProps = {
   nAgentsInTable: 10,
   totalManagedAgentIds: [],

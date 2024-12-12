@@ -26,7 +26,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import moment from 'moment';
-import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { KnowledgeBaseEntryRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import { v4 } from 'uuid';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
 import { useKibana } from '../../hooks/use_kibana';
@@ -45,20 +47,24 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const { mutateAsync: deleteEntry, isLoading: isDeleting } = useDeleteKnowledgeBaseEntry();
 
   const [isPublic, setIsPublic] = useState(entry?.public ?? false);
-
-  const [newEntryId, setNewEntryId] = useState(entry?.id ?? '');
+  const [newEntryTitle, setNewEntryTitle] = useState(entry?.title ?? '');
   const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
 
-  const isEntryIdInvalid = newEntryId.trim() === '';
+  const isEntryTitleInvalid = newEntryTitle.trim() === '';
   const isEntryTextInvalid = newEntryText.trim() === '';
-  const isFormInvalid = isEntryIdInvalid || isEntryTextInvalid;
+  const isFormInvalid = isEntryTitleInvalid || isEntryTextInvalid;
 
   const handleSubmit = async () => {
     await createEntry({
       entry: {
-        id: newEntryId,
+        id: entry?.id ?? v4(),
+        title: newEntryTitle,
         text: newEntryText,
         public: isPublic,
+        role: KnowledgeBaseEntryRole.UserEntry,
+        confidence: 'high',
+        is_correction: false,
+        labels: {},
       },
     });
 
@@ -85,8 +91,8 @@ export function KnowledgeBaseEditManualEntryFlyout({
               : i18n.translate(
                   'xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.editEntryLabel',
                   {
-                    defaultMessage: 'Edit {id}',
-                    values: { id: entry.id },
+                    defaultMessage: 'Edit {title}',
+                    values: { title: entry?.title },
                   }
                 )}
           </h2>
@@ -94,23 +100,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {!entry ? (
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiFormRow.idLabel',
-              { defaultMessage: 'Name' }
-            )}
-          >
-            <EuiFieldText
-              data-test-subj="knowledgeBaseEditManualEntryFlyoutIdInput"
-              fullWidth
-              value={newEntryId}
-              onChange={(e) => setNewEntryId(e.target.value)}
-              isInvalid={isEntryIdInvalid}
-            />
-          </EuiFormRow>
-        ) : (
+        {entry ? (
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiText color="subdued" size="s">
@@ -136,7 +126,26 @@ export function KnowledgeBaseEditManualEntryFlyout({
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        ) : null}
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiFormRow.idLabel',
+            { defaultMessage: 'Name' }
+          )}
+        >
+          <EuiFieldText
+            data-test-subj="knowledgeBaseEditManualEntryFlyoutIdInput"
+            fullWidth
+            value={newEntryTitle}
+            onChange={(e) => setNewEntryTitle(e.target.value)}
+            isInvalid={isEntryTitleInvalid}
+          />
+        </EuiFormRow>
+
         <EuiSpacer size="m" />
 
         <EuiFlexGroup alignItems="center">

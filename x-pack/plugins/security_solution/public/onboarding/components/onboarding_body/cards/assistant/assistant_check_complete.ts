@@ -9,16 +9,19 @@ import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugi
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../types';
-import { AllowedActionTypeIds } from './constants';
+import { AIActionTypeIds } from '../common/connectors/constants';
 import type { AssistantCardMetadata } from './types';
 
 export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AssistantCardMetadata
-> = async ({ http }) => {
+> = async ({ http, application }) => {
   const allConnectors = await loadConnectors({ http });
+  const {
+    capabilities: { actions },
+  } = application;
 
   const aiConnectors = allConnectors.reduce((acc: AIConnector[], connector) => {
-    if (!connector.isMissingSecrets && AllowedActionTypeIds.includes(connector.actionTypeId)) {
+    if (!connector.isMissingSecrets && AIActionTypeIds.includes(connector.actionTypeId)) {
       acc.push(connector);
     }
     return acc;
@@ -37,6 +40,8 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete<
     completeBadgeText,
     metadata: {
       connectors: aiConnectors,
+      canExecuteConnectors: Boolean(actions?.show && actions?.execute),
+      canCreateConnectors: Boolean(actions?.save),
     },
   };
 };

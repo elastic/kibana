@@ -1,0 +1,38 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  exclude = [
+    "**/test_helpers.ts",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+BUNDLER_DEPS = [
+  "@npm//react",
+  "@npm//tslib",
+  "@npm//react-use",
+  "//packages/react/kibana_context/common",
+  "//packages/react/kibana_context/root",
+]
+
+js_library(
+  name = "theme",
+  package_name = "@kbn/react-kibana-context-theme",
+  srcs = ["package.json"] + SRCS,
+  deps = BUNDLER_DEPS,
+  visibility = ["//visibility:public"],
+)

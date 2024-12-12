@@ -90,9 +90,13 @@ export const fetchFieldCandidates = createAsyncThunk(
       ...selectedKeywordFieldCandidates,
       ...selectedTextFieldCandidates,
     ];
-    const fieldFilterSkippedItems = fieldFilterUniqueItems.filter(
+    const initialFieldFilterSkippedItems = fieldFilterUniqueItems.filter(
       (d) => !fieldFilterUniqueSelectedItems.includes(d)
     );
+
+    const currentFieldFilterSkippedItems = (
+      thunkApi.getState() as { logRateAnalysisFieldCandidates: FieldCandidatesState }
+    ).logRateAnalysisFieldCandidates.currentFieldFilterSkippedItems;
 
     thunkApi.dispatch(
       setAllFieldCandidates({
@@ -102,7 +106,13 @@ export const fetchFieldCandidates = createAsyncThunk(
           fieldFilterUniqueSelectedItems.length
         ),
         fieldFilterUniqueItems,
-        fieldFilterSkippedItems,
+        initialFieldFilterSkippedItems,
+        // If the currentFieldFilterSkippedItems is null, we're on the first load,
+        // only then we set the current skipped fields to the initial skipped fields.
+        currentFieldFilterSkippedItems:
+          currentFieldFilterSkippedItems === null
+            ? initialFieldFilterSkippedItems
+            : currentFieldFilterSkippedItems,
         keywordFieldCandidates,
         textFieldCandidates,
         selectedKeywordFieldCandidates,
@@ -116,18 +126,20 @@ export interface FieldCandidatesState {
   isLoading: boolean;
   fieldSelectionMessage?: string;
   fieldFilterUniqueItems: string[];
-  fieldFilterSkippedItems: string[];
+  initialFieldFilterSkippedItems: string[];
+  currentFieldFilterSkippedItems: string[] | null;
   keywordFieldCandidates: string[];
   textFieldCandidates: string[];
   selectedKeywordFieldCandidates: string[];
   selectedTextFieldCandidates: string[];
 }
 
-function getDefaultState(): FieldCandidatesState {
+export function getDefaultState(): FieldCandidatesState {
   return {
     isLoading: false,
     fieldFilterUniqueItems: [],
-    fieldFilterSkippedItems: [],
+    initialFieldFilterSkippedItems: [],
+    currentFieldFilterSkippedItems: null,
     keywordFieldCandidates: [],
     textFieldCandidates: [],
     selectedKeywordFieldCandidates: [],
@@ -145,6 +157,12 @@ export const logRateAnalysisFieldCandidatesSlice = createSlice({
     ) => {
       return { ...state, ...action.payload };
     },
+    setCurrentFieldFilterSkippedItems: (
+      state: FieldCandidatesState,
+      action: PayloadAction<string[]>
+    ) => {
+      return { ...state, currentFieldFilterSkippedItems: action.payload };
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchFieldCandidates.pending, (state) => {
@@ -157,4 +175,5 @@ export const logRateAnalysisFieldCandidatesSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { setAllFieldCandidates } = logRateAnalysisFieldCandidatesSlice.actions;
+export const { setAllFieldCandidates, setCurrentFieldFilterSkippedItems } =
+  logRateAnalysisFieldCandidatesSlice.actions;

@@ -44,6 +44,10 @@ export function SvlApiKeysProvider({ getService, getPageObjects }: FtrProviderCo
       expect(sessionStorageKey.encoded).to.eql(apiKey);
     },
 
+    async expectAPIKeyNoPrivileges() {
+      await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
+    },
+
     async getAPIKeyFromSessionStorage() {
       return getAPIKeyFromSessionStorage();
     },

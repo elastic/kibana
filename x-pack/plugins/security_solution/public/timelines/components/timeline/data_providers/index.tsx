@@ -109,9 +109,6 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-  const isLoading = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isLoading
-  );
   const dataProviders = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders
   );
@@ -167,7 +164,7 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
                   dataProviders={dataProviders}
                 />
               ) : (
-                <DroppableWrapper isDropDisabled={isLoading} droppableId={droppableId}>
+                <DroppableWrapper droppableId={droppableId}>
                   <Empty browserFields={browserFields} timelineId={timelineId} />
                 </DroppableWrapper>
               )}

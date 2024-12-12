@@ -28,7 +28,7 @@ import {
   USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
   USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -38,7 +38,7 @@ import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
-import { useSummaryChartData } from '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
@@ -80,7 +80,9 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 
 jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
+  useSourcererDataView: jest
+    .fn()
+    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -107,8 +109,17 @@ jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 
 jest.mock(
-  '../../../../detections/components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data'
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
 
 const timestamp = '2022-07-25T08:20:18.966Z';
 
@@ -165,7 +176,7 @@ describe('<UserDetails />', () => {
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
-    (useSummaryChartData as jest.Mock).mockReturnValue({ isLoading: false, items: [] });
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   it('should render user details correctly', () => {
@@ -298,9 +309,9 @@ describe('<UserDetails />', () => {
     });
 
     it('should render alert count when data is available', () => {
-      (useSummaryChartData as jest.Mock).mockReturnValue({
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
         isLoading: false,
-        items: [{ key: 'high', value: 78, label: 'High' }],
+        items: mockAlertData,
       });
 
       const { getByTestId } = renderUserDetails(mockContextValue);

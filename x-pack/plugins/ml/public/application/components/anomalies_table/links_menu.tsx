@@ -930,7 +930,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="log_rate_analysis"
-          icon="machineLearningApp"
+          icon="logRateAnalysis"
           href={openInLogRateAnalysisUrl}
           data-test-subj="mlAnomaliesListRowAction_runLogRateAnalysisButton"
         >
@@ -946,7 +946,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"
-          icon="machineLearningApp"
+          icon="logPatternAnalysis"
           onClick={() => {
             closePopover();
             const additionalField = getAdditionalField(anomaly);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
@@ -40,22 +41,30 @@ export const isESQLColumnSortable = (column: DatatableColumn): boolean => {
   return true;
 };
 
+// Helper function to check if a field is groupable based on its type and esType
+const isGroupable = (type: string | undefined, esType: string | undefined): boolean => {
+  // we don't allow grouping on the unknown field types
+  if (type === UNKNOWN_FIELD) {
+    return false;
+  }
+  // we don't allow grouping on tsdb counter fields
+  if (esType && esType.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
+    return false;
+  }
+  return true;
+};
+
 /**
  * Check if a column is groupable (| STATS ... BY <column>).
  *
  * @param column The DatatableColumn of the field.
  * @returns True if the column is groupable, false otherwise.
  */
-
 export const isESQLColumnGroupable = (column: DatatableColumn): boolean => {
-  // we don't allow grouping on the unknown field types
-  if (column.meta?.type === UNKNOWN_FIELD) {
-    return false;
-  }
-  // we don't allow grouping on tsdb counter fields
-  if (column.meta?.esType && column.meta?.esType?.indexOf(TSDB_COUNTER_FIELDS_PREFIX) !== -1) {
-    return false;
-  }
+  return isGroupable(column.meta?.type, column.meta?.esType);
+};
 
-  return true;
+export const isESQLFieldGroupable = (field: FieldSpec): boolean => {
+  if (field.timeSeriesMetric === 'counter') return false;
+  return isGroupable(field.type, field.esTypes?.[0]);
 };

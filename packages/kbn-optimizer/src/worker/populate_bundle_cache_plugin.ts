@@ -121,6 +121,7 @@ export class PopulateBundleCachePlugin {
 
           if (bundle.manifestPath) {
             await addReferenced(bundle.manifestPath);
+            workUnits += 1;
           }
 
           for (const module of compilation.modules) {
@@ -167,7 +168,7 @@ export class PopulateBundleCachePlugin {
             }
 
             if (isConcatenatedModule(module)) {
-              moduleCount += module.modules.length;
+              moduleCount += 1;
               continue;
             }
 

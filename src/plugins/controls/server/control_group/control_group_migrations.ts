@@ -14,7 +14,7 @@ import {
   type SerializedControlState,
 } from '../../common';
 import { OptionsListControlState } from '../../common/options_list';
-import { SerializableControlGroupState } from './control_group_persistence';
+import { SerializableControlGroupState } from './types';
 
 export const makeControlOrdersZeroBased = (state: SerializableControlGroupState) => {
   if (

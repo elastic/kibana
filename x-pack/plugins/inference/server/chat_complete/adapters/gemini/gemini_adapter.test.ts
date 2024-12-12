@@ -11,8 +11,7 @@ import { noop, tap, lastValueFrom, toArray, Subject } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { MessageRole } from '../../../../common/chat_complete';
-import { ToolChoiceType } from '../../../../common/chat_complete/tools';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import { geminiAdapter } from './gemini_adapter';
 
 describe('geminiAdapter', () => {

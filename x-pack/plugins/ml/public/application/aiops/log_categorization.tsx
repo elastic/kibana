@@ -63,6 +63,8 @@ export const LogCategorizationPage: FC = () => {
               'uiActions',
               'uiSettings',
               'unifiedSearch',
+              'embeddable',
+              'cases',
             ]),
           }}
         />

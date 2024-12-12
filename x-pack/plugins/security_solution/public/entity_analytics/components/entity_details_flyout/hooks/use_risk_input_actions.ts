@@ -17,6 +17,7 @@ import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 /**
  * The returned actions only support alerts risk inputs.
@@ -61,7 +62,7 @@ export const useRiskInputActions = (inputs: InputAlert[], closePopover: () => vo
       },
 
       addToNewTimeline: () => {
-        telemetry.reportAddRiskInputToTimelineClicked({
+        telemetry.reportEvent(EntityEventTypes.AddRiskInputToTimelineClicked, {
           quantity: inputs.length,
         });
 

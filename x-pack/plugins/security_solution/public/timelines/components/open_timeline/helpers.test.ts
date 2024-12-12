@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { cloneDeep, getOr, omit } from 'lodash/fp';
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { cloneDeep, omit } from 'lodash/fp';
+import { waitFor, renderHook } from '@testing-library/react';
 
-import { mockTimelineResults, mockGetOneTimelineResult } from '../../../common/mock';
+import { mockTimelineResults } from '../../../common/mock';
 import { timelineDefaults } from '../../store/defaults';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../store/actions';
 import type { QueryTimelineById } from './helpers';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
   getPinnedEventCount,
   isUntitled,
-  omitTypenameInTimeline,
   useQueryTimelineById,
   formatTimelineResponseToModel,
 } from './helpers';
@@ -35,7 +32,7 @@ import {
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
 import { resolveTimeline } from '../../containers/api';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 
@@ -646,13 +643,6 @@ describe('helpers', () => {
         jest.clearAllMocks();
       });
 
-      test('dispatch updateIsLoading to true', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-      });
-
       test('get timeline by Id', () => {
         expect(resolveTimeline).toHaveBeenCalled();
       });
@@ -663,7 +653,7 @@ describe('helpers', () => {
 
       test('Do not override daterange if TimelineStatus is active', () => {
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
+          selectedTimeline.timeline,
           args.duplicate,
           args.timelineType
         );
@@ -671,18 +661,11 @@ describe('helpers', () => {
           ...timeline,
         });
       });
-
-      test('dispatch updateIsLoading to false', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
-      });
     });
 
     describe('update a timeline', () => {
       const selectedTimeline = { ...mockSelectedTimeline };
-      const untitledTimeline = { ...mockSelectedTimeline, title: '' };
+      const untitledTimeline = { timeline: { ...mockSelectedTimeline.timeline, title: '' } };
       const onOpenTimeline = jest.fn();
       const args: QueryTimelineById = {
         duplicate: false,
@@ -699,21 +682,15 @@ describe('helpers', () => {
       afterEach(() => {
         jest.clearAllMocks();
       });
-
       test('should get timeline by Id with correct statuses', async () => {
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           await queryTimelineById(args);
         });
 
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-
         // expect(resolveTimeline).toHaveBeenCalled();
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(getOr({}, 'data.timeline', selectedTimeline)),
+          selectedTimeline.timeline,
           args.duplicate,
           args.timelineType
         );
@@ -741,11 +718,6 @@ describe('helpers', () => {
             },
           });
         });
-
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
       });
 
       test('should update timeline correctly when timeline is untitled', async () => {
@@ -764,11 +736,6 @@ describe('helpers', () => {
           queryTimelineById(newArgs);
         });
 
-        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-
         expect(mockUpdateTimeline).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
@@ -778,22 +745,13 @@ describe('helpers', () => {
             }),
           })
         );
-        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
       });
 
       test('should update timeline correctly when timeline is already saved and onOpenTimeline is not provided', async () => {
-        (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
+        (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
-        });
-
-        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
         });
 
         await waitFor(() => {
@@ -801,7 +759,7 @@ describe('helpers', () => {
             1,
             expect.objectContaining({
               timeline: expect.objectContaining({
-                columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+                columns: selectedTimeline.timeline.columns!.map((col) => ({
                   columnHeaderType: col.columnHeaderType,
                   id: col.id,
                   initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
@@ -823,7 +781,7 @@ describe('helpers', () => {
         waitFor(() => {
           expect(onOpenTimeline).toHaveBeenCalledWith(
             expect.objectContaining({
-              columns: mockSelectedTimeline.data.timeline.columns.map((col) => ({
+              columns: mockSelectedTimeline.timeline.columns!.map((col) => ({
                 columnHeaderType: col.columnHeaderType,
                 id: col.id,
                 initialWidth: defaultUdtHeaders.find((defaultCol) => col.id === defaultCol.id)
@@ -860,20 +818,13 @@ describe('helpers', () => {
         jest.clearAllMocks();
       });
 
-      test('dispatch updateIsLoading to true', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-      });
-
       test('get timeline by Id', () => {
         expect(resolveTimeline).toHaveBeenCalled();
       });
 
       test('override daterange if TimelineStatus is immutable', () => {
         const { timeline } = formatTimelineResponseToModel(
-          omitTypenameInTimeline(getOr({}, 'data.timeline', template)),
+          template.timeline,
           args.duplicate,
           args.timelineType
         );
@@ -885,35 +836,6 @@ describe('helpers', () => {
           },
         });
       });
-
-      test('dispatch updateIsLoading to false', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
-      });
-    });
-  });
-
-  describe('omitTypenameInTimeline', () => {
-    test('should not modify the passed in timeline if no __typename exists', () => {
-      const result = omitTypenameInTimeline(mockGetOneTimelineResult);
-
-      expect(result).toEqual(mockGetOneTimelineResult);
-    });
-
-    test('should return timeline with __typename removed when it exists', () => {
-      const mockTimeline = {
-        ...mockGetOneTimelineResult,
-        __typename: 'something, something',
-      };
-      const result = omitTypenameInTimeline(mockTimeline);
-      const expectedTimeline = {
-        ...mockTimeline,
-        __typename: undefined,
-      };
-
-      expect(result).toEqual(expectedTimeline);
     });
   });
 });

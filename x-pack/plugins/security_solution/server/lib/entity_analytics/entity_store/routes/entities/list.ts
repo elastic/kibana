@@ -32,8 +32,10 @@ export const listEntitiesRoute = (router: EntityAnalyticsRoutesDeps['router'], l
     .get({
       access: 'public',
       path: LIST_ENTITIES_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

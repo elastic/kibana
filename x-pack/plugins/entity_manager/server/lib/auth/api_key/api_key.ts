@@ -9,6 +9,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import { EntityManagerServerSetup } from '../../../types';
 import { canManageEntityDefinition, entityDefinitionRuntimePrivileges } from '../privileges';
+import { BUILT_IN_ALLOWED_INDICES } from '../../entities/built_in/constants';
 
 export interface EntityDiscoveryAPIKey {
   id: string;
@@ -45,7 +46,7 @@ export const checkIfEntityDiscoveryAPIKeyIsValid = async (
 
   server.logger.debug('validating API key has runtime privileges for entity discovery');
 
-  return canManageEntityDefinition(esClient);
+  return canManageEntityDefinition(esClient, BUILT_IN_ALLOWED_INDICES);
 };
 
 export const generateEntityDiscoveryAPIKey = async (

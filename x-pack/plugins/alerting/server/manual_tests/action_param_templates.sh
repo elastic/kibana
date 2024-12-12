@@ -24,10 +24,10 @@ KIBANA_URL=https://elastic:changeme@localhost:5601
 
 # create email action
 ACTION_ID_EMAIL=`curl -X POST --insecure --silent \
-  $KIBANA_URL/api/actions/action \
+  $KIBANA_URL/api/actions/connector \
   -H "kbn-xsrf: foo" -H "content-type: application/json" \
   -d '{
-    "actionTypeId": ".email",
+    "connector_type_id": ".email",
     "name": "email for action_param_templates test",
     "config": {
       "from": "team-alerting@example.com",
@@ -41,10 +41,10 @@ echo "email action id:   $ACTION_ID_EMAIL"
 
 # create slack action
 ACTION_ID_SLACK=`curl -X POST --insecure --silent \
-  $KIBANA_URL/api/actions/action \
+  $KIBANA_URL/api/actions/connector \
   -H "kbn-xsrf: foo" -H "content-type: application/json" \
   -d "{
-    \"actionTypeId\": \".slack\",
+    \"connector_type_id\": \".slack\",
     \"name\": \"slack for action_param_templates test\",
     \"config\": {
     },
@@ -56,10 +56,10 @@ echo "slack action id:   $ACTION_ID_SLACK"
 
 # create webhook action
 ACTION_ID_WEBHOOK=`curl -X POST --insecure --silent \
-  $KIBANA_URL/api/actions/action \
+  $KIBANA_URL/api/actions/connector \
   -H "kbn-xsrf: foo" -H "content-type: application/json" \
   -d "{
-    \"actionTypeId\": \".webhook\",
+    \"connector_type_id\": \".webhook\",
     \"name\": \"webhook for action_param_templates test\",
     \"config\": {
       \"url\": \"$SLACK_WEBHOOKURL\",
@@ -108,7 +108,7 @@ ALERT_ID=`curl -X POST --insecure --silent \
       }
     ],
     \"params\": {
-      \"index\": [\".kibana\"], 
+      \"index\": [\".kibana\"],
       \"timeField\": \"updated_at\",
       \"aggType\": \"count\",
       \"groupBy\": \"all\",

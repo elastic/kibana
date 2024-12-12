@@ -9,8 +9,8 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useEffect, useState } from 'react';
 import { getListOfSloSummaryIndices } from '../../../../common/summary_indices';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
-import { useKibana } from '../../../utils/kibana_react';
-import { useGetSettings } from '../../slo_settings/use_get_settings';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useGetSettings } from '../../slo_settings/hooks/use_get_settings';
 
 export const useSloSummaryDataView = () => {
   const { http } = useKibana().services;

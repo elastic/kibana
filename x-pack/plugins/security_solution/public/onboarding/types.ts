@@ -9,7 +9,8 @@ import type React from 'react';
 import type { IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
 
-import type { OnboardingCardId } from './constants';
+import type { ExperimentalFeatures } from '../../common';
+import type { OnboardingTopicId, OnboardingCardId } from './constants';
 import type { RequiredCapabilities } from '../common/lib/capabilities';
 import type { StartServices } from '../types';
 
@@ -41,6 +42,7 @@ export type CheckCompleteResponse<TMetadata extends {} = {}> =
 
 export type SetComplete = (isComplete: boolean) => void;
 export type IsCardComplete = (cardId: OnboardingCardId) => boolean;
+export type IsCardAvailable = (cardId: OnboardingCardId) => boolean;
 export type SetExpandedCardId = (
   cardId: OnboardingCardId | null,
   options?: { scroll?: boolean }
@@ -60,6 +62,10 @@ export type OnboardingCardComponent<TMetadata extends {} = {}> = React.Component
    */
   isCardComplete: IsCardComplete;
   /**
+   * Function to check if a specific card is rendered.
+   */
+  isCardAvailable: IsCardAvailable;
+  /**
    * Function to expand a specific card ID and scroll to it.
    */
   setExpandedCardId: SetExpandedCardId;
@@ -74,7 +80,38 @@ export type OnboardingCardCheckComplete<TMetadata extends {} = {}> = (
   services: StartServices
 ) => Promise<CheckCompleteResponse<TMetadata>>;
 
-export interface OnboardingCardConfig<TMetadata extends {} = {}> {
+export interface OnboardingConfigAvailabilityProps {
+  /**
+   * The RBAC capability strings required to enable the item. It uses object dot notation. e.g. `'siem.crud'`.
+   *
+   * The format of the capabilities property supports OR and AND mechanism:
+   *
+   * To specify capabilities in an OR fashion, they can be defined in a single level array like: `capabilities: [cap1, cap2]`.
+   * If either of "cap1 || cap2" is granted the item will be included.
+   *
+   * To specify capabilities with AND conditional, use a second level array: `capabilities: [['cap1', 'cap2']]`.
+   * This would result in the boolean expression "cap1 && cap2", both capabilities must be granted to include the item.
+   *
+   * They can also be combined like: `capabilities: ['cap1', ['cap2', 'cap3']]` which would result in the boolean expression "cap1 || (cap2 && cap3)".
+   *
+   * For the single capability requirement: `capabilities: 'cap1'`, which is the same as `capabilities: ['cap1']`
+   *
+   * Default is `undefined` (no capabilities required)
+   */
+  capabilitiesRequired?: RequiredCapabilities;
+  /**
+   * Minimum license required to enable the item.
+   * Default is `basic`
+   */
+  licenseTypeRequired?: LicenseType;
+  /**
+   * The experimental features required to enable the item.
+   */
+  experimentalFlagRequired?: keyof ExperimentalFeatures;
+}
+
+export interface OnboardingCardConfig<TMetadata extends {} = {}>
+  extends OnboardingConfigAvailabilityProps {
   id: OnboardingCardId;
   title: string;
   icon: IconType;
@@ -89,29 +126,6 @@ export interface OnboardingCardConfig<TMetadata extends {} = {}> {
    * @returns Promise for the complete status
    */
   checkComplete?: OnboardingCardCheckComplete<TMetadata>;
-  /**
-   * The RBAC capability strings required to enable the card. It uses object dot notation. e.g. `'siem.crud'`.
-   *
-   * The format of the capabilities property supports OR and AND mechanism:
-   *
-   * To specify capabilities in an OR fashion, they can be defined in a single level array like: `capabilities: [cap1, cap2]`.
-   * If either of "cap1 || cap2" is granted the card will be included.
-   *
-   * To specify capabilities with AND conditional, use a second level array: `capabilities: [['cap1', 'cap2']]`.
-   * This would result in the boolean expression "cap1 && cap2", both capabilities must be granted to include the card.
-   *
-   * They can also be combined like: `capabilities: ['cap1', ['cap2', 'cap3']]` which would result in the boolean expression "cap1 || (cap2 && cap3)".
-   *
-   * For the single capability requirement: `capabilities: 'cap1'`, which is the same as `capabilities: ['cap1']`
-   *
-   * Default is `undefined` (no capabilities required)
-   */
-  capabilities?: RequiredCapabilities;
-  /**
-   * Minimum license required to enable the card.
-   * Default is `basic`
-   */
-  licenseType?: LicenseType;
 }
 
 export interface OnboardingGroupConfig {
@@ -119,4 +133,20 @@ export interface OnboardingGroupConfig {
   // It's not possible to type the cards array with the generic type for all the cards metadata
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cards: Array<OnboardingCardConfig<any>>;
+}
+
+export interface TopicConfig extends OnboardingConfigAvailabilityProps {
+  id: OnboardingTopicId;
+  /**
+   * The onboarding topic title.
+   */
+  title: string;
+  /**
+   * The onboarding body configuration.
+   */
+  body: OnboardingGroupConfig[];
+}
+
+export interface OnboardingRouteParams {
+  topicId?: OnboardingTopicId;
 }

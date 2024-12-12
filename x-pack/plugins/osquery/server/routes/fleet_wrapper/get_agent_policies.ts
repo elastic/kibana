@@ -21,7 +21,11 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
     .get({
       access: 'internal',
       path: '/internal/osquery/fleet_wrapper/agent_policies',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
     })
     .addVersion(
       {
@@ -59,7 +63,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
             (agentPolicy: GetAgentPoliciesResponseItem) =>
               agentService?.asInternalUser
                 .getAgentStatusForAgentPolicy(agentPolicy.id)
-                .then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
+                .then(({ active: agentTotal }) => (agentPolicy.agents = agentTotal)),
             { concurrency: 10 }
           );
         }

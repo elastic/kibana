@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import type { ChangeEvent } from 'react';
 import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
-import { StepDefineRule, aggregatableFields } from '.';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { StepDefineRule } from '.';
 import type { StepDefineRuleProps } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
@@ -25,13 +27,58 @@ import {
   createIndexPatternField,
   getSelectToggleButtonForName,
 } from '../../../rule_creation/components/required_fields/required_fields.test';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
+import {
+  expectDuration,
+  expectSuppressionFields,
+  setDuration,
+  setDurationType,
+  setSuppressionFields,
+} from '../../../rule_creation/components/alert_suppression_edit/test_helpers';
+import {
+  selectEuiComboBoxOption,
+  selectFirstEuiComboBoxOption,
+} from '../../../../common/test/eui/combobox';
+import {
+  addRelatedIntegrationRow,
+  setVersion,
+} from '../../../rule_creation/components/related_integrations/test_helpers';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
+import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
+
+// Set the extended default timeout for all define rule step form test
+jest.setTimeout(10 * 1000);
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');
+
+const MOCKED_QUERY_BAR_TEST_ID = 'mockedQueryBar';
+const MOCKED_LANGUAGE_INPUT_TEST_ID = 'languageInput';
+
+// Mocking QueryBar to avoid pulling and mocking a ton of dependencies
 jest.mock('../../../../common/components/query_bar', () => {
   return {
-    QueryBar: jest.fn(({ filterQuery }) => {
-      return <div data-test-subj="query-bar">{`${filterQuery.query} ${filterQuery.language}`}</div>;
+    QueryBar: jest.fn().mockImplementation(({ filterQuery, onSubmitQuery }) => {
+      const handleQueryChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+        onSubmitQuery({ query: event.target.value, language: filterQuery.language });
+      };
+
+      const handleLanguageChange = (event: ChangeEvent<HTMLInputElement>) => {
+        onSubmitQuery({ query: filterQuery.query, language: event.target.value });
+      };
+
+      return (
+        <div data-test-subj={MOCKED_QUERY_BAR_TEST_ID}>
+          <textarea value={filterQuery.query} onChange={handleQueryChange} />
+          <input
+            role="listbox"
+            type="text"
+            value={filterQuery.language}
+            onChange={handleLanguageChange}
+            data-test-subj={MOCKED_LANGUAGE_INPUT_TEST_ID}
+          />
+        </div>
+      );
     }),
   };
 });
@@ -48,12 +95,19 @@ jest.mock('../ai_assistant', () => {
   };
 });
 
-jest.mock('../data_view_selector_field/use_data_views');
+jest.mock('../data_view_selector_field/use_data_view_list_items');
+
+jest.mock('../../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({
+    isAtLeast: jest.fn().mockReturnValue(true),
+  }),
+}));
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
+
   return {
     ...originalModule,
     useToasts: jest.fn().mockReturnValue({
@@ -62,41 +116,43 @@ jest.mock('../../../../common/lib/kibana', () => {
       addWarning: jest.fn(),
       remove: jest.fn(),
     }),
-    useKibana: () => ({
-      services: {
-        ...originalModule.useKibana().services,
-        storage: {
-          get: jest.fn().mockReturnValue(true),
-        },
-        application: {
-          getUrlForApp: (appId: string, options?: { path?: string }) =>
-            `/app/${appId}${options?.path}`,
-          navigateToApp: jest.fn(),
-          capabilities: {
-            actions: {
-              delete: true,
-              save: true,
-              show: true,
+    useKibana: () => {
+      return {
+        services: {
+          ...originalModule.useKibana().services,
+          storage: {
+            get: jest.fn().mockReturnValue(true),
+          },
+          application: {
+            getUrlForApp: (appId: string, options?: { path?: string }) =>
+              `/app/${appId}${options?.path}`,
+            navigateToApp: jest.fn(),
+            capabilities: {
+              actions: {
+                delete: true,
+                save: true,
+                show: true,
+              },
+            },
+          },
+          data: {
+            search: {
+              search: () => ({
+                subscribe: () => ({
+                  unsubscribe: jest.fn(),
+                }),
+              }),
+            },
+          },
+          spaces: {
+            ui: {
+              components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
+              redirectLegacyUrl: mockRedirectLegacyUrl,
             },
           },
         },
-        data: {
-          search: {
-            search: () => ({
-              subscribe: () => ({
-                unsubscribe: jest.fn(),
-              }),
-            }),
-          },
-        },
-        spaces: {
-          ui: {
-            components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
-            redirectLegacyUrl: mockRedirectLegacyUrl,
-          },
-        },
-      },
-    }),
+      };
+    },
   };
 });
 jest.mock('../../../../common/hooks/use_selector', () => {
@@ -149,63 +205,27 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_from_timeline');
 
-test('aggregatableFields', function () {
-  expect(
-    aggregatableFields([
-      {
-        name: 'error.message',
-        type: 'string',
-        esTypes: ['text'],
-        searchable: true,
-        aggregatable: false,
-        readFromDocValues: false,
-      },
-    ])
-  ).toEqual([]);
-});
-
-test('aggregatableFields with aggregatable: true', function () {
-  expect(
-    aggregatableFields([
-      {
-        name: 'error.message',
-        type: 'string',
-        esTypes: ['text'],
-        searchable: true,
-        aggregatable: false,
-        readFromDocValues: false,
-      },
-      {
-        name: 'file.path',
-        type: 'string',
-        esTypes: ['keyword'],
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: false,
-      },
-    ])
-  ).toEqual([
-    {
-      name: 'file.path',
-      type: 'string',
-      esTypes: ['keyword'],
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: false,
-    },
-  ]);
-});
+jest.mock('../../../../common/hooks/esql/use_esql_availability');
+jest.mock('../../../../common/components/ml/hooks/use_ml_rule_config');
 
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
 
 const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
+const DEFINE_RULE_FORM_STEP = 'defineRuleFormStepQueryEditor';
 
 describe('StepDefineRule', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
+    (useEsqlAvailability as jest.Mock).mockReturnValue({ isEsqlRuleTypeEnabled: true });
+    (useMLRuleConfig as jest.Mock).mockReturnValue({
+      allJobsStarted: true,
+      hasMlAdminPermissions: true,
+      hasMlLicense: true,
+      loading: false,
+      mlSuppressionFields: [],
+    });
   });
 
   it('renders correctly', () => {
@@ -214,6 +234,189 @@ describe('StepDefineRule', () => {
     });
 
     expect(screen.getByTestId('stepDefineRule')).toBeDefined();
+  });
+
+  describe('query', () => {
+    it.each([
+      ['query', 'eql'],
+      ['query', 'esql'],
+    ] as RuleType[][])(
+      'persists kuery when switching between "%s" and "%s" rule types',
+      async (ruleTypeA, ruleTypeB) => {
+        render(<TestForm />, {
+          wrapper: TestProviders,
+        });
+
+        typeQuery('someField : *');
+        selectQueryLanguage('kuery');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+
+        await selectRuleType(ruleTypeB);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, '');
+
+        await selectRuleType(ruleTypeA);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+      }
+    );
+
+    it.each([
+      ['query', 'threshold'],
+      ['query', 'new_terms'],
+    ] as RuleType[][])(
+      'persists kuery when switching between "%s" and "%s" rule types',
+      async (ruleTypeA, ruleTypeB) => {
+        render(<TestForm />, {
+          wrapper: TestProviders,
+        });
+
+        typeQuery('someField : *');
+        selectQueryLanguage('kuery');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+
+        await selectRuleType(ruleTypeB);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+
+        await selectRuleType(ruleTypeA);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+      }
+    );
+
+    it.each([['query'], ['threshold'], ['threat_match'], ['new_terms']] as RuleType[][])(
+      'persists kuery when switching between "%s" and "threat_match"  rule types',
+      async (ruleType) => {
+        render(<TestForm />, {
+          wrapper: TestProviders,
+        });
+        await selectRuleType(ruleType);
+        typeQuery('someField : *');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+
+        await selectRuleType('threat_match');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+
+        await selectRuleType(ruleType);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'someField : *');
+      }
+    );
+
+    it.each([['query'], ['esql'], ['threshold'], ['new_terms']] as RuleType[][])(
+      'persists EQL query when switching between "eql" and "%s" rule types',
+      async (switchRuleType) => {
+        render(<TestForm />, {
+          wrapper: TestProviders,
+        });
+
+        await selectRuleType('eql');
+        typeQuery('process where process.name == "regsvr32.exe"');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'process where process.name == "regsvr32.exe"');
+
+        await selectRuleType(switchRuleType);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, '');
+
+        await selectRuleType('eql');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'process where process.name == "regsvr32.exe"');
+      }
+    );
+
+    it.each([['query'], ['eql'], ['threshold'], ['new_terms']] as RuleType[][])(
+      'persists ES|QL query when switching between "esql" and "%s" rule types',
+      async (switchRuleType) => {
+        render(<TestForm />, {
+          wrapper: TestProviders,
+        });
+        await selectRuleType('esql');
+        typeQuery('from test*');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'from test*');
+
+        await selectRuleType(switchRuleType);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, '');
+
+        await selectRuleType('esql');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, 'from test*');
+      }
+    );
+
+    it('makes sure "threat_match" rule has "*:*" kuery by default', async () => {
+      render(<TestForm />, {
+        wrapper: TestProviders,
+      });
+      await selectRuleType('threat_match');
+
+      expectQuery(DEFINE_RULE_FORM_STEP, '*:*');
+    });
+
+    it.each([['query'], ['eql'], ['esql'], ['threshold'], ['new_terms']] as RuleType[][])(
+      'makes sure "threat_match" rule has "*:*" kuery when switched from "%s" rule type without user input',
+      async (ruleType) => {
+        render(<TestForm />, {
+          wrapper: TestProviders,
+        });
+        await selectRuleType(ruleType);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, '');
+
+        await selectRuleType('threat_match');
+
+        expectQuery(DEFINE_RULE_FORM_STEP, '*:*');
+
+        await selectRuleType(ruleType);
+
+        expectQuery(DEFINE_RULE_FORM_STEP, '');
+      }
+    );
+  });
+
+  describe('alert suppression', () => {
+    it('persists state when switching between custom query and threshold rule types', async () => {
+      const mockFields: FieldSpec[] = [
+        {
+          name: 'test-field',
+          type: 'string',
+          searchable: false,
+          aggregatable: true,
+        },
+      ];
+
+      render(
+        <TestForm
+          indexPattern={{
+            title: '',
+            fields: mockFields,
+          }}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await setSuppressionFields(['test-field']);
+      setDurationType('Per time period');
+      setDuration(10, 'h');
+
+      await selectRuleType('threshold');
+
+      expectDuration(10, 'h');
+
+      await selectRuleType('query');
+
+      expectSuppressionFields(['test-field']);
+      expectDuration(10, 'h');
+    });
   });
 
   describe('related integrations', () => {
@@ -363,7 +566,7 @@ describe('StepDefineRule', () => {
       );
     });
 
-    it('submits saved early required fields without the "ecs" property', async () => {
+    it('submits saved earlier required fields', async () => {
       const initialState = {
         index: ['test-index'],
         queryBar: {
@@ -388,7 +591,7 @@ describe('StepDefineRule', () => {
 
       expect(handleSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          requiredFields: [{ name: 'host.name', type: 'string' }],
+          requiredFields: initialState.requiredFields,
         }),
         true
       );
@@ -445,7 +648,7 @@ describe('StepDefineRule', () => {
 
   describe('handleSetRuleFromTimeline', () => {
     it('updates KQL query correctly', () => {
-      const kqlQuery = {
+      const timelineKqlQuery = {
         index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
         queryBar: {
           filters: [],
@@ -459,7 +662,7 @@ describe('StepDefineRule', () => {
 
       mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
         useEffect(() => {
-          handleSetRuleFromTimeline(kqlQuery);
+          handleSetRuleFromTimeline(timelineKqlQuery);
         }, [handleSetRuleFromTimeline]);
 
         return { onOpenTimeline, loading: false };
@@ -469,13 +672,14 @@ describe('StepDefineRule', () => {
         wrapper: TestProviders,
       });
 
-      expect(screen.getAllByTestId('query-bar')[0].textContent).toBe(
-        `${kqlQuery.queryBar.query.query} ${kqlQuery.queryBar.query.language}`
-      );
+      expectQuery(DEFINE_RULE_FORM_STEP, timelineKqlQuery.queryBar.query.query);
+      expectQueryLanguage(DEFINE_RULE_FORM_STEP, timelineKqlQuery.queryBar.query.language);
     });
 
     it('updates EQL query correctly', async () => {
-      const eqlQuery = {
+      jest.useFakeTimers();
+
+      const timelineEqlQuery = {
         index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
         queryBar: {
           filters: [],
@@ -494,20 +698,28 @@ describe('StepDefineRule', () => {
         },
       };
 
+      const setRuleFromTimelineFactory =
+        (handleSetRuleFromTimeline: (value: unknown) => void) => async () =>
+          act(async () => handleSetRuleFromTimeline(timelineEqlQuery));
+
+      let setRuleFromTimeline!: () => void;
+
       mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
-        useEffect(() => {
-          handleSetRuleFromTimeline(eqlQuery);
-        }, [handleSetRuleFromTimeline]);
+        setRuleFromTimeline = setRuleFromTimelineFactory(handleSetRuleFromTimeline);
 
         return { onOpenTimeline, loading: false };
       });
 
-      render(<TestForm ruleType="eql" />, {
+      render(<TestForm />, {
         wrapper: TestProviders,
       });
 
-      expect(screen.getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(
-        eqlQuery.queryBar.query.query
+      await setRuleFromTimeline();
+
+      jest.runAllTimers();
+
+      expect(screen.getByTestId('eqlQueryBarTextInput')).toHaveValue(
+        timelineEqlQuery.queryBar.query.query
       );
 
       await act(async () => {
@@ -516,14 +728,14 @@ describe('StepDefineRule', () => {
 
       expect(
         within(screen.getByTestId('eql-event-category-field')).queryByRole('combobox')
-      ).toHaveValue(eqlQuery.eqlOptions.eventCategoryField);
+      ).toHaveValue(timelineEqlQuery.eqlOptions.eventCategoryField);
 
       expect(
         within(screen.getByTestId('eql-tiebreaker-field')).queryByRole('combobox')
-      ).toHaveValue(eqlQuery.eqlOptions.tiebreakerField);
+      ).toHaveValue(timelineEqlQuery.eqlOptions.tiebreakerField);
 
       expect(within(screen.getByTestId('eql-timestamp-field')).queryByRole('combobox')).toHaveValue(
-        eqlQuery.eqlOptions.timestampField
+        timelineEqlQuery.eqlOptions.timestampField
       );
     });
   });
@@ -537,15 +749,9 @@ describe('StepDefineRule', () => {
           saved_id: null,
         },
       };
-      render(
-        <TestForm
-          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
-          initialState={initialState}
-        />,
-        {
-          wrapper: TestProviders,
-        }
-      );
+      render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+        wrapper: TestProviders,
+      });
 
       expect(screen.getByTestId('ai-assistant')).toBeInTheDocument();
     });
@@ -558,31 +764,26 @@ describe('StepDefineRule', () => {
           saved_id: null,
         },
       };
-      render(
-        <TestForm
-          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
-          initialState={initialState}
-        />,
-        {
-          wrapper: TestProviders,
-        }
-      );
+      render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+        wrapper: TestProviders,
+      });
 
       expect(screen.queryByTestId('ai-assistant')).toBe(null);
     });
 
     it('does not render assistant when query is valid', () => {
-      render(<TestForm formProps={{ isQueryBarValid: true, ruleType: 'query' }} />, {
+      render(<TestForm formProps={{ isQueryBarValid: true }} />, {
         wrapper: TestProviders,
       });
 
       expect(screen.queryByTestId('ai-assistant')).toBe(null);
     });
 
-    it('does not render assistant for ML rule type', () => {
-      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'machine_learning' }} />, {
+    it('does not render assistant for ML rule type', async () => {
+      render(<TestForm formProps={{ isQueryBarValid: false }} />, {
         wrapper: TestProviders,
       });
+      await selectRuleType('machine_learning');
 
       expect(screen.queryByTestId('ai-assistant')).toBe(null);
     });
@@ -591,7 +792,6 @@ describe('StepDefineRule', () => {
 
 interface TestFormProps {
   initialState?: Partial<DefineStepRule>;
-  ruleType?: RuleType;
   indexPattern?: DataViewBase;
   onSubmit?: FormSubmitHandler<DefineStepRule>;
   formProps?: Partial<StepDefineRuleProps>;
@@ -599,12 +799,10 @@ interface TestFormProps {
 
 function TestForm({
   initialState,
-  ruleType = stepDefineDefaultValue.ruleType,
   indexPattern = { fields: [], title: '' },
   onSubmit,
   formProps,
 }: TestFormProps): JSX.Element {
-  const [selectedEqlOptions, setSelectedEqlOptions] = useState(stepDefineDefaultValue.eqlOptions);
   const { form } = useForm({
     options: { stripEmptyFields: false },
     schema: defineRuleSchema,
@@ -619,23 +817,19 @@ function TestForm({
         form={form}
         indicesConfig={[]}
         threatIndicesConfig={[]}
-        optionsSelected={selectedEqlOptions}
-        setOptionsSelected={setSelectedEqlOptions}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
         isQueryBarValid={true}
         setIsQueryBarValid={jest.fn()}
         setIsThreatQueryBarValid={jest.fn()}
-        ruleType={ruleType}
         index={stepDefineDefaultValue.index}
         threatIndex={stepDefineDefaultValue.threatIndex}
-        groupByFields={stepDefineDefaultValue.groupByFields}
+        alertSuppressionFields={stepDefineDefaultValue[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
         dataSourceType={stepDefineDefaultValue.dataSourceType}
         shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
         queryBarTitle=""
         queryBarSavedId=""
         thresholdFields={[]}
-        enableThresholdSuppression={false}
         {...formProps}
       />
       <button type="button" onClick={form.submit}>
@@ -651,77 +845,52 @@ function submitForm(): Promise<void> {
   });
 }
 
-function addRelatedIntegrationRow(): Promise<void> {
-  return act(async () => {
-    fireEvent.click(screen.getByText('Add integration'));
-  });
-}
-
-function setVersion({ input, value }: { input: HTMLInputElement; value: string }): Promise<void> {
-  return act(async () => {
-    fireEvent.input(input, {
-      target: { value },
+function typeQuery(query: string): void {
+  act(() => {
+    fireEvent.input(within(screen.getByTestId(DEFINE_RULE_FORM_STEP)).getByRole('textbox'), {
+      target: { value: query },
     });
   });
 }
 
-function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
-
-  return waitFor(() => {
-    const listWithOptionsElement = document.querySelector('[role="listbox"]');
-    const emptyListElement = document.querySelector('.euiComboBoxOptionsList__empty');
-
-    expect(listWithOptionsElement || emptyListElement).toBeInTheDocument();
-  });
+function expectQuery(containerTestId: string, expectedQuery: string): void {
+  expect(within(screen.getByTestId(containerTestId)).getByRole('textbox')).toHaveValue(
+    expectedQuery
+  );
 }
 
-type SelectEuiComboBoxOptionParameters =
-  | {
-      comboBoxToggleButton: HTMLElement;
-      optionIndex: number;
-      optionText?: undefined;
-    }
-  | {
-      comboBoxToggleButton: HTMLElement;
-      optionText: string;
-      optionIndex?: undefined;
-    };
-
-function selectEuiComboBoxOption({
-  comboBoxToggleButton,
-  optionIndex,
-  optionText,
-}: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
-
-    const options = Array.from(
-      document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
-    );
-
-    if (typeof optionText === 'string') {
-      const optionToSelect = options.find((option) => option.textContent === optionText);
-
-      if (optionToSelect) {
-        fireEvent.click(optionToSelect);
-      } else {
-        throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
-            .map((option) => option.textContent)
-            .join(', ')}`
-        );
+function selectQueryLanguage(language: 'kuery' | 'eql' | 'esql'): void {
+  act(() => {
+    fireEvent.input(
+      within(screen.getByTestId(DEFINE_RULE_FORM_STEP)).getByTestId(MOCKED_LANGUAGE_INPUT_TEST_ID),
+      {
+        target: { value: language },
       }
-    } else {
-      fireEvent.click(options[optionIndex]);
-    }
+    );
   });
 }
 
-function selectFirstEuiComboBoxOption({
-  comboBoxToggleButton,
-}: {
-  comboBoxToggleButton: HTMLElement;
-}): Promise<void> {
-  return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
+function expectQueryLanguage(containerTestId: string, expectedLanguage: string): void {
+  expect(
+    within(screen.getByTestId(containerTestId)).getByTestId(MOCKED_LANGUAGE_INPUT_TEST_ID)
+  ).toHaveValue(expectedLanguage);
 }
+
+async function selectRuleType(ruleType: RuleType): Promise<void> {
+  const testId = RULE_TYPE_TEST_ID_MAP[ruleType];
+
+  await act(async () => fireEvent.click(screen.getByTestId(testId)));
+
+  expect(within(screen.getByTestId(testId)).getByRole('switch')).toBeChecked();
+}
+
+const RULE_TYPE_TEST_ID_MAP = {
+  query: 'customRuleType',
+  saved_query: 'customRuleType',
+  eql: 'eqlRuleType',
+  machine_learning: 'machineLearningRuleType',
+  threshold: 'thresholdRuleType',
+  threat_match: 'threatMatchRuleType',
+  new_terms: 'newTermsRuleType',
+  esql: 'esqlRuleType',
+};

@@ -5,18 +5,36 @@
  * 2.0.
  */
 
-import { map } from 'rxjs';
-import { ChatCompleteAPI, ChatCompletionEventType, MessageRole } from '../chat_complete';
-import { withoutTokenCountEvents } from '../chat_complete/without_token_count_events';
-import { OutputAPI, OutputEvent, OutputEventType } from '.';
-import { ensureMultiTurn } from '../ensure_multi_turn';
+import {
+  ChatCompleteAPI,
+  ChatCompletionEventType,
+  MessageRole,
+  OutputAPI,
+  OutputEventType,
+  OutputOptions,
+  ToolSchema,
+  withoutTokenCountEvents,
+} from '@kbn/inference-common';
+import { isObservable, map } from 'rxjs';
+import { ensureMultiTurn } from '../utils/ensure_multi_turn';
 
-export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
-  return (id, { connectorId, input, schema, system, previousMessages, functionCalling }) => {
-    return chatCompleteApi({
+export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI;
+export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
+  return ({
+    id,
+    connectorId,
+    input,
+    schema,
+    system,
+    previousMessages,
+    functionCalling,
+    stream,
+  }: OutputOptions<string, ToolSchema | undefined, boolean>) => {
+    const response = chatCompleteApi({
       connectorId,
-      system,
+      stream,
       functionCalling,
+      system,
       messages: ensureMultiTurn([
         ...(previousMessages || []),
         {
@@ -35,27 +53,42 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI): OutputAPI {
             toolChoice: { function: 'structuredOutput' as const },
           }
         : {}),
-    }).pipe(
-      withoutTokenCountEvents(),
-      map((event): OutputEvent<any, any> => {
-        if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
-          return {
-            type: OutputEventType.OutputUpdate,
-            id,
-            content: event.content,
-          };
-        }
+    });
 
+    if (isObservable(response)) {
+      return response.pipe(
+        withoutTokenCountEvents(),
+        map((event) => {
+          if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
+            return {
+              type: OutputEventType.OutputUpdate,
+              id,
+              content: event.content,
+            };
+          }
+
+          return {
+            id,
+            output:
+              event.toolCalls.length && 'arguments' in event.toolCalls[0].function
+                ? event.toolCalls[0].function.arguments
+                : undefined,
+            content: event.content,
+            type: OutputEventType.OutputComplete,
+          };
+        })
+      );
+    } else {
+      return response.then((chatResponse) => {
         return {
           id,
+          content: chatResponse.content,
           output:
-            event.toolCalls.length && 'arguments' in event.toolCalls[0].function
-              ? event.toolCalls[0].function.arguments
+            chatResponse.toolCalls.length && 'arguments' in chatResponse.toolCalls[0].function
+              ? chatResponse.toolCalls[0].function.arguments
               : undefined,
-          content: event.content,
-          type: OutputEventType.OutputComplete,
         };
-      })
-    );
+      });
+    }
   };
 }

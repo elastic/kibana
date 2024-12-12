@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import './expandable_section.scss';
-
 import type { FC } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import type { ScatterplotMatrixProps } from '../../../../../components/scatterplot_matrix';
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
@@ -20,11 +18,15 @@ import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix'
 import { ExpandableSection } from './expandable_section';
 
 export const ExpandableSectionSplom: FC<ScatterplotMatrixProps> = (props) => {
+  const {
+    euiTheme: { size },
+  } = useEuiTheme();
+
   const splomSectionHeaderItems = undefined;
   const splomSectionContent = (
     <>
       <EuiHorizontalRule size="full" margin="none" />
-      <div className="mlExpandableSection-contentPadding">
+      <div css={{ padding: `${size.s}` }}>
         <ScatterplotMatrix {...props} />
       </div>
     </>

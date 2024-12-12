@@ -124,10 +124,25 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export interface ArchiveEntry {
+  path: string;
+  buffer?: Buffer;
+}
+
+export interface ArchiveIterator {
+  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  getPaths: () => Promise<string[]>;
+}
+
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
+  /**
+   * @deprecated Use `archiveIterator` to access the package archive entries
+   * without loading them all into memory at once.
+   */
   assetsMap: AssetsMap;
   paths: string[];
+  archiveIterator: ArchiveIterator;
 }
 
 export type ArchivePackage = PackageSpecManifest &
@@ -296,6 +311,7 @@ export type RegistrySearchResult = Pick<
   | 'icons'
   | 'internal'
   | 'data_streams'
+  | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
 >;
@@ -531,8 +547,8 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  installationInfo?: InstallationInfo;
   savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

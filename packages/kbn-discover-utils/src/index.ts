@@ -14,3 +14,4 @@ export * from './utils';
 export * from './data_types';
 
 export * from './components/custom_control_columns';
+export { AppMenuRegistry } from './components/app_menu/app_menu_registry';

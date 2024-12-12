@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getShapeRenderer } from '..';
 import { Shape } from '../../../common/types';
@@ -27,7 +28,9 @@ export const Default = {
       maintainAspect: true,
     };
 
-    return <Render renderer={getShapeRenderer()} config={config} />;
+    return (
+      <Render renderer={getShapeRenderer(coreMock.createStart().theme.theme$)} config={config} />
+    );
   },
 
   name: 'default',

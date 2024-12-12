@@ -30,8 +30,10 @@ import { useDispatch } from 'react-redux';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
+import {
+  defaultUdtHeaders,
+  defaultColumnHeaderType,
+} from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import * as timelineActions from '../../../../store/actions';
@@ -39,6 +41,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from '../../../../../notes/components/test_ids';
 import { userEvent } from '@testing-library/user-event';
+import * as notesApi from '../../../../../notes/api/api';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -50,10 +53,6 @@ jest.mock('../../../../containers/details');
 
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../body/events', () => ({
-  Events: () => <></>,
 }));
 
 jest.mock('../../../../../sourcerer/containers');
@@ -156,7 +155,9 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 let useTimelineEventsMock = jest.fn();
 
 describe('query tab with unified timeline', () => {
+  const fetchNotesMock = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
   beforeAll(() => {
+    fetchNotesMock.mockImplementation(jest.fn());
     jest.mocked(useExpandableFlyoutApi).mockImplementation(() => ({
       ...createExpandableFlyoutApiMock(),
       openFlyout: mockOpenFlyout,
@@ -178,6 +179,7 @@ describe('query tab with unified timeline', () => {
   afterEach(() => {
     jest.clearAllMocks();
     storageMock.clear();
+    fetchNotesMock.mockClear();
     cleanup();
     localStorage.clear();
   });
@@ -423,6 +425,130 @@ describe('query tab with unified timeline', () => {
         });
         fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
         expect(loadPageMock).toHaveBeenNthCalledWith(1, 1);
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should load notes for current page only',
+      async () => {
+        const mockStateWithNoteInTimeline = {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                /* 1 record for each page */
+                itemsPerPage: 1,
+                pageIndex: 0,
+                itemsPerPageOptions: [1, 2, 3, 4, 5],
+                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                pinnedEventIds: { '1': true },
+              },
+            },
+          },
+        };
+
+        render(
+          <TestProviders
+            store={createMockStore({
+              ...structuredClone(mockStateWithNoteInTimeline),
+            })}
+          >
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
+
+        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+        expect(fetchNotesMock).toHaveBeenCalledWith(['1']);
+
+        // Page : 2
+
+        fetchNotesMock.mockClear();
+        expect(screen.getByTestId('pagination-button-1')).toBeVisible();
+
+        fireEvent.click(screen.getByTestId('pagination-button-1'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('pagination-button-1')).toHaveAttribute('aria-current', 'true');
+
+          expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
+        });
+
+        // Page : 3
+
+        fetchNotesMock.mockClear();
+        expect(screen.getByTestId('pagination-button-2')).toBeVisible();
+        fireEvent.click(screen.getByTestId('pagination-button-2'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('pagination-button-2')).toHaveAttribute('aria-current', 'true');
+
+          expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    it(
+      'should load notes for correct page size',
+      async () => {
+        const mockStateWithNoteInTimeline = {
+          ...mockGlobalState,
+          timeline: {
+            ...mockGlobalState.timeline,
+            timelineById: {
+              [TimelineId.test]: {
+                ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                /* 1 record for each page */
+                itemsPerPage: 1,
+                pageIndex: 0,
+                itemsPerPageOptions: [1, 2, 3, 4, 5],
+                savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                pinnedEventIds: { '1': true },
+              },
+            },
+          },
+        };
+
+        render(
+          <TestProviders
+            store={createMockStore({
+              ...structuredClone(mockStateWithNoteInTimeline),
+            })}
+          >
+            <TestComponent />
+          </TestProviders>
+        );
+
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
+
+        expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+        expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+          'Rows per page: 1'
+        );
+        fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('tablePagination-2-rows')).toBeVisible();
+        });
+
+        fetchNotesMock.mockClear();
+        fireEvent.click(screen.getByTestId('tablePagination-2-rows'));
+
+        await waitFor(() => {
+          expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [
+            mockTimelineData[0]._id,
+            mockTimelineData[1]._id,
+          ]);
+        });
       },
       SPECIAL_TEST_TIMEOUT
     );
@@ -882,12 +1008,12 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - notes', () => {
-    describe('securitySolutionNotesEnabled = true', () => {
+    describe('securitySolutionNotesDisabled = false', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return true;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return false;
             }
             return allowedExperimentalValues[feature];
           })
@@ -937,12 +1063,12 @@ describe('query tab with unified timeline', () => {
       );
     });
 
-    describe('securitySolutionNotesEnabled = false', () => {
+    describe('securitySolutionNotesDisabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return false;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return true;
             }
             return allowedExperimentalValues[feature];
           })
@@ -1071,12 +1197,12 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('Leading actions - pin', () => {
-    describe('securitySolutionNotesEnabled = true', () => {
+    describe('securitySolutionNotesDisabled = false', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return true;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return false;
             }
             return allowedExperimentalValues[feature];
           })
@@ -1155,12 +1281,12 @@ describe('query tab with unified timeline', () => {
       );
     });
 
-    describe('securitySolutionNotesEnabled = false', () => {
+    describe('securitySolutionNotesDisabled = true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
           jest.fn((feature: keyof ExperimentalFeatures) => {
-            if (feature === 'securitySolutionNotesEnabled') {
-              return false;
+            if (feature === 'securitySolutionNotesDisabled') {
+              return true;
             }
             return allowedExperimentalValues[feature];
           })

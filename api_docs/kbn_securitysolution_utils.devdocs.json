@@ -244,6 +244,60 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.debounceAsync",
+        "type": "Function",
+        "tags": [],
+        "label": "debounceAsync",
+        "description": [
+          "\nUnlike lodash's debounce, which resolves intermediate calls with the most\nrecent value, this implementation waits to resolve intermediate calls until\nthe next invocation resolves.\n"
+        ],
+        "signature": [
+          "(fn: (...args: Args) => Result, intervalMs: number) => (...args: Args) => Promise<Awaited<Result>>"
+        ],
+        "path": "packages/kbn-securitysolution-utils/src/debounce_async/debounce_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.debounceAsync.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "an async function"
+            ],
+            "signature": [
+              "(...args: Args) => Result"
+            ],
+            "path": "packages/kbn-securitysolution-utils/src/debounce_async/debounce_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.debounceAsync.$2",
+            "type": "number",
+            "tags": [],
+            "label": "intervalMs",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-securitysolution-utils/src/debounce_async/debounce_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A debounced async function that resolves on the next invocation"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.getIndexListFromEsqlQuery",
         "type": "Function",
         "tags": [],
@@ -412,13 +466,13 @@
         "label": "isAggregatingQuery",
         "description": [],
         "signature": [
-          "(ast: ",
+          "(astExpression: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAst",
-            "text": "ESQLAst"
+            "section": "def-common.ESQLAstQueryExpression",
+            "text": "ESQLAstQueryExpression"
           },
           ") => boolean"
         ],
@@ -429,17 +483,17 @@
           {
             "parentPluginId": "@kbn/securitysolution-utils",
             "id": "def-common.isAggregatingQuery.$1",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
-            "label": "ast",
+            "label": "astExpression",
             "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
                 "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLAst",
-                "text": "ESQLAst"
+                "section": "def-common.ESQLAstQueryExpression",
+                "text": "ESQLAstQueryExpression"
               }
             ],
             "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
@@ -1042,7 +1096,7 @@
         "label": "TrustedAppConditionEntryField",
         "description": [],
         "signature": [
-          "\"process.hash.*\" | \"process.executable.caseless\" | \"process.Ext.code_signature\""
+          "\"process.hash.*\" | \"process.executable.caseless\" | \"process.Ext.code_signature\" | \"process.code_signature\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,

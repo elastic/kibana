@@ -25,7 +25,6 @@ export interface ReportingPublicPluginStartDependencies {
 
 export interface ClientConfigType {
   csv: {
-    enablePanelActionDownload: boolean;
     scroll: {
       duration: string;
       size: number;
@@ -37,7 +36,6 @@ export interface ClientConfigType {
       intervalErrorMultiplier: number;
     };
   };
-  roles: { enabled: boolean };
   export_types: {
     pdf: { enabled: boolean };
     png: { enabled: boolean };

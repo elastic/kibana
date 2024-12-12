@@ -19,15 +19,14 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { FormHook, ValidationError } from '../../../shared_imports';
 import { useForm, useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../components/step_define_rule/schema';
-import type { EqlOptionsSelected } from '../../../../common/search_strategy';
 import {
   schema as aboutRuleSchema,
   threatMatchAboutSchema,
 } from '../components/step_about_rule/schema';
+import { ESQL_ERROR_CODES } from '../../rule_creation/components/esql_query_edit';
 import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
 import { getSchema as getActionsRuleSchema } from '../../rule_creation/components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
-import { ERROR_CODES as ESQL_ERROR_CODES } from '../../rule_creation/logic/esql_validator';
 import { EQL_ERROR_CODES } from '../../../common/hooks/eql/api';
 import * as i18n from './translations';
 
@@ -53,20 +52,14 @@ export const useRuleForms = ({
     options: { stripEmptyFields: false },
     schema: defineRuleSchema,
   });
-  const [eqlOptionsSelected, setEqlOptionsSelected] = useState<EqlOptionsSelected>(
-    defineStepDefault.eqlOptions
-  );
   const [defineStepFormData] = useFormData<DefineStepRule | {}>({
     form: defineStepForm,
   });
   // FormData doesn't populate on the first render, so we use the defaultValue if the formData
   // doesn't have what we wanted
   const defineStepData = useMemo(
-    () =>
-      'index' in defineStepFormData
-        ? { ...defineStepFormData, eqlOptions: eqlOptionsSelected }
-        : defineStepDefault,
-    [defineStepDefault, defineStepFormData, eqlOptionsSelected]
+    () => ('index' in defineStepFormData ? defineStepFormData : defineStepDefault),
+    [defineStepDefault, defineStepFormData]
   );
 
   // ABOUT STEP FORM
@@ -118,8 +111,6 @@ export const useRuleForms = ({
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
-    eqlOptionsSelected,
-    setEqlOptionsSelected,
   };
 };
 

@@ -11,6 +11,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AiopsPluginStartDeps } from '../types';
 import type { ChangePointDetectionSharedComponent } from './change_point_detection';
 import type { PatternAnalysisSharedComponent } from './pattern_analysis';
+import type { LogRateAnalysisEmbeddableWrapper } from './log_rate_analysis_embeddable_wrapper';
 
 const ChangePointDetectionLazy = dynamic(async () => import('./change_point_detection'));
 
@@ -37,3 +38,24 @@ export const getPatternAnalysisComponent = (
 };
 
 export type { PatternAnalysisSharedComponent } from './pattern_analysis';
+
+const LogRateAnalysisEmbeddableWrapperLazy = dynamic(
+  async () => import('./log_rate_analysis_embeddable_wrapper')
+);
+
+export const getLogRateAnalysisEmbeddableWrapperComponent = (
+  coreStart: CoreStart,
+  pluginStart: AiopsPluginStartDeps
+): LogRateAnalysisEmbeddableWrapper => {
+  return React.memo((props) => {
+    return (
+      <LogRateAnalysisEmbeddableWrapperLazy
+        coreStart={coreStart}
+        pluginStart={pluginStart}
+        {...props}
+      />
+    );
+  });
+};
+
+export type { LogRateAnalysisEmbeddableWrapper } from './log_rate_analysis_embeddable_wrapper';

@@ -81,7 +81,7 @@ export interface EditorContext {
   triggerKind: number;
 }
 
-export type GetFieldsByTypeFn = (
+export type GetColumnsByTypeFn = (
   type: string | string[],
   ignored?: string[],
   options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }

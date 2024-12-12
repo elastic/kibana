@@ -123,6 +123,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
             dslQuery={jobCreator.query}
+            theme={services.theme}
           >
             <>
               <EuiFlexGroup gutterSize="s">

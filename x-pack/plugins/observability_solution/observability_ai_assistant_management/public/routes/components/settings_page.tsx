@@ -22,9 +22,8 @@ export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp },
+      application: { navigateToApp, isAppRegistered },
       serverless,
-      enterpriseSearch,
     },
   } = useKibana();
 
@@ -98,7 +97,7 @@ export function SettingsPage() {
         }
       ),
       content: <SearchConnectorTab />,
-      disabled: enterpriseSearch == null,
+      disabled: !isAppRegistered('enterpriseSearch'),
     },
   ];
 

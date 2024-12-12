@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toClientContract } from '../settings/private_locations/helpers';
+import { allLocationsToClientContract } from '../settings/private_locations/helpers';
 import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
@@ -45,7 +45,7 @@ export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
       const { locations: privateLocations, agentPolicies } =
         await getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient);
 
-      const result = toClientContract({ locations: privateLocations }, agentPolicies);
+      const result = allLocationsToClientContract({ locations: privateLocations }, agentPolicies);
       return {
         locations: result,
       };

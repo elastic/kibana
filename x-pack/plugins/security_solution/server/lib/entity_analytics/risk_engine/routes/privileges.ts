@@ -24,8 +24,10 @@ export const riskEnginePrivilegesRoute = (
     .get({
       access: 'internal',
       path: RISK_ENGINE_PRIVILEGES_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

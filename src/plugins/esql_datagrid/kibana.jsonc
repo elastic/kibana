@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/esql-datagrid",
   "owner": "@elastic/kibana-esql",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "esqlDataGrid",
     "server": false,

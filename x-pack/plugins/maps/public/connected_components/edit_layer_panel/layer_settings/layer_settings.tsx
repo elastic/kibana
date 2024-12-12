@@ -94,7 +94,7 @@ export function LayerSettings(props: Props) {
       return null;
     }
     return (
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow display="columnCompressed">
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.maps.layerPanel.settingsPanel.fittableFlagTooltip', {
@@ -157,7 +157,7 @@ export function LayerSettings(props: Props) {
     }
 
     return (
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow display="columnCompressed">
         <EuiSwitch
           label={i18n.translate('xpack.maps.layerPanel.settingsPanel.labelsOnTop', {
             defaultMessage: `Show labels on top`,
@@ -173,7 +173,7 @@ export function LayerSettings(props: Props) {
 
   const renderDisableTooltips = () => {
     return !isVectorLayer(props.layer) ? null : (
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow display="columnCompressed">
         <EuiSwitch
           label={i18n.translate('xpack.maps.layerPanel.settingsPanel.DisableTooltips', {
             defaultMessage: `Show tooltips`,

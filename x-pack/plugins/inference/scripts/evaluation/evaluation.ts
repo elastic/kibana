@@ -89,8 +89,8 @@ function runEvaluations() {
           const evaluationClient = createInferenceEvaluationClient({
             connectorId: connector.connectorId,
             evaluationConnectorId,
-            outputApi: (id, parameters) =>
-              chatClient.output(id, {
+            outputApi: (parameters) =>
+              chatClient.output({
                 ...parameters,
                 connectorId: evaluationConnectorId,
               }) as any,

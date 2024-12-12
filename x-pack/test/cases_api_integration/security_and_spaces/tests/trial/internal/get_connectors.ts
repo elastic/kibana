@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+      actionsRemover.add('default', jiraConnector.id, 'connector', 'actions');
 
       const theCase = await pushCase({
         supertest,
@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+        actionsRemover.add('default', jiraConnector.id, 'connector', 'actions');
 
         await updateCase({
           supertest,
@@ -264,7 +264,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
 
-          actionsRemover.add('default', serviceNow2.id, 'action', 'actions');
+          actionsRemover.add('default', serviceNow2.id, 'connector', 'actions');
 
           // change to serviceNow2 connector
           await updateCase({
@@ -566,7 +566,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           ]);
 
-          actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
+          actionsRemover.add('default', jiraConnector.id, 'connector', 'actions');
 
           await updateCase({
             supertest,
@@ -607,7 +607,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             });
 
-            actionsRemover.add('default', serviceNowConnector.id, 'action', 'actions');
+            actionsRemover.add('default', serviceNowConnector.id, 'connector', 'actions');
 
             const updatedCasesServiceNow = await updateCase({
               supertest,

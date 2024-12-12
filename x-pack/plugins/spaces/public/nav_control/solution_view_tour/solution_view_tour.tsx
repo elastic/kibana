@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiLink, EuiText, EuiTourStep } from '@elastic/eui';
 import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 
-import type { OnBoardingDefaultSolution } from '@kbn/cloud-plugin/common';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,9 +26,9 @@ const LearnMoreLink = () => (
   </EuiLink>
 );
 
-const solutionMap: Record<OnBoardingDefaultSolution, string> = {
+const solutionMap: Record<SolutionId, string> = {
   es: i18n.translate('xpack.spaces.navControl.tour.esSolution', {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }),
   security: i18n.translate('xpack.spaces.navControl.tour.securitySolution', {
     defaultMessage: 'Security',

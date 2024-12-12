@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   UseInvestigationGuideParams,
   UseInvestigationGuideResult,
@@ -22,7 +22,7 @@ jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fall
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
 describe('useInvestigationGuide', () => {
-  let hookResult: RenderHookResult<UseInvestigationGuideParams, UseInvestigationGuideResult>;
+  let hookResult: RenderHookResult<UseInvestigationGuideResult, UseInvestigationGuideParams>;
 
   it('should return loading true', () => {
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ ruleId: 'ruleId' });

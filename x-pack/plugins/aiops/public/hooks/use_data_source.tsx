@@ -8,10 +8,10 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const DataSourceContext = createContext<DataViewAndSavedSearch>({
   get dataView(): never {
@@ -30,6 +30,7 @@ export interface DataViewAndSavedSearch {
 }
 
 export interface DataSourceContextProviderProps {
+  dataViews: DataViewsPublicPluginStart;
   dataViewId?: string;
   savedSearchId?: string;
   /** Output resolves data view objects */
@@ -43,19 +44,13 @@ export interface DataSourceContextProviderProps {
  * @constructor
  */
 export const DataSourceContextProvider: FC<PropsWithChildren<DataSourceContextProviderProps>> = ({
+  dataViews,
   dataViewId,
-  savedSearchId,
   children,
   onChange,
 }) => {
   const [value, setValue] = useState<DataViewAndSavedSearch>();
   const [error, setError] = useState<Error>();
-
-  const {
-    data: { dataViews },
-    // uiSettings,
-    // savedSearch: savedSearchService,
-  } = useAiopsAppContext();
 
   /**
    * Resolve data view or saved search if exists.

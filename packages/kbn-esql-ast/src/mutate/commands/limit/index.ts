@@ -19,7 +19,7 @@ import { Predicate } from '../../types';
  * @returns A collection of "LIMIT" commands.
  */
 export const list = (ast: ESQLAstQueryExpression): IterableIterator<ESQLCommand> => {
-  return generic.listCommands(ast, (cmd) => cmd.name === 'limit');
+  return generic.commands.list(ast, (cmd) => cmd.name === 'limit');
 };
 
 /**
@@ -55,13 +55,13 @@ export const find = (
  * @returns The removed "LIMIT" command, if any.
  */
 export const remove = (ast: ESQLAstQueryExpression, index: number = 0): ESQLCommand | undefined => {
-  const command = generic.findCommandByName(ast, 'limit', index);
+  const command = generic.commands.findByName(ast, 'limit', index);
 
   if (!command) {
     return;
   }
 
-  const success = generic.removeCommand(ast, command);
+  const success = !!generic.commands.remove(ast, command);
 
   if (!success) {
     return;
@@ -128,7 +128,7 @@ export const upsert = (
     args: [literal],
   });
 
-  generic.appendCommand(ast, command);
+  generic.commands.append(ast, command);
 
   return command;
 };

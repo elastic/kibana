@@ -14,7 +14,6 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { untrackRuleAlerts, migrateLegacyActions } from '../../../../rules_client/lib';
-import { RuleAttributes } from '../../../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
@@ -40,7 +39,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
   let apiKeyCreatedByUser: boolean | undefined | null = false;
-  let attributes: RuleAttributes;
+  let attributes: RawRule;
 
   try {
     const decryptedRule = await getDecryptedRuleSo({

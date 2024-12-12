@@ -63,6 +63,13 @@ import { startTransforms } from '../../lib/entities/start_transforms';
  */
 export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
   endpoint: 'PUT /internal/entities/managed/enablement',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint leverages the security plugin to evaluate the privileges needed as part of its core flow',
+    },
+  },
   params: z.object({
     query: createEntityDefinitionQuerySchema,
   }),
@@ -120,9 +127,9 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
-      const clusterClient = core.elasticsearch.client;
+      const esClient = core.elasticsearch.client.asCurrentUser;
       const installedDefinitions = await installBuiltInEntityDefinitions({
-        clusterClient,
+        esClient,
         soClient,
         logger,
         definitions: builtInDefinitions,
@@ -131,7 +138,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       if (!params.query.installOnly) {
         await Promise.all(
           installedDefinitions.map((installedDefinition) =>
-            startTransforms(clusterClient.asSecondaryAuthUser, installedDefinition, logger)
+            startTransforms(esClient, installedDefinition, logger)
           )
         );
       }

@@ -90,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
           const expectedKeys = [
             'name',
             'indexPatterns',
+            'indexMode',
             'hasSettings',
             'hasAliases',
             'hasMappings',
@@ -114,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           const expectedKeys = [
             'name',
             'indexPatterns',
+            'indexMode',
             'template',
             '_kbnMeta',
             'allowAutoCreate',

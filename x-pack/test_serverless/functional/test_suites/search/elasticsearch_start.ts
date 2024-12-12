@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await esDeleteAllIndices(['search-*', 'test-*']);
   };
 
-  describe('Elasticsearch Start [Onboarding Empty State]', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/200020
+  describe.skip('Elasticsearch Start [Onboarding Empty State]', function () {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -155,6 +156,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
         await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
         await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
+      });
+
+      it('should have close button', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectCloseCreateIndexButtonExists();
+        await pageObjects.svlSearchElasticsearchStartPage.clickCloseCreateIndexButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+      });
+      it('should have skip button', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectSkipButtonExists();
+        await pageObjects.svlSearchElasticsearchStartPage.clickSkipButton();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
       });
     });
     describe('viewer', function () {

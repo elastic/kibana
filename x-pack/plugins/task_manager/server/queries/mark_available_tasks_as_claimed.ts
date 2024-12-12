@@ -202,7 +202,6 @@ export interface UpdateFieldsAndMarkAsFailedOpts {
   };
   claimableTaskTypes: string[];
   skippedTaskTypes: string[];
-  unusedTaskTypes: string[];
   taskMaxAttempts: { [field: string]: number };
 }
 
@@ -210,7 +209,6 @@ export const updateFieldsAndMarkAsFailed = ({
   fieldUpdates,
   claimableTaskTypes,
   skippedTaskTypes,
-  unusedTaskTypes,
   taskMaxAttempts,
 }: UpdateFieldsAndMarkAsFailedOpts): ScriptClause => {
   const setScheduledAtScript = `if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
@@ -227,8 +225,6 @@ export const updateFieldsAndMarkAsFailed = ({
     source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
       ${setScheduledAtAndMarkAsClaimed}
-    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
-      ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
     }`,
@@ -238,7 +234,6 @@ export const updateFieldsAndMarkAsFailed = ({
       fieldUpdates,
       claimableTaskTypes,
       skippedTaskTypes,
-      unusedTaskTypes,
       taskMaxAttempts,
     },
   };

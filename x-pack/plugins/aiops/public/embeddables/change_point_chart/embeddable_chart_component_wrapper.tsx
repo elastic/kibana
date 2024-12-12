@@ -6,11 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { buildEsQuery } from '@kbn/es-query';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ChangePointDetectionProps } from '../../shared_components/change_point_detection';
 import { ChangePointsTable } from '../../components/change_point_detection/change_points_table';
 import {
@@ -48,7 +49,6 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
   splitField,
   partitions,
   onError,
-  onLoading,
   onRenderComplete,
   onChange,
   emptyState,
@@ -72,8 +72,8 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     mergedQuery.bool.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: searchBounds.min?.valueOf(),
-          to: searchBounds.max?.valueOf(),
+          gte: searchBounds.min?.valueOf(),
+          lte: searchBounds.max?.valueOf(),
           format: 'epoch_millis',
         },
       },
@@ -101,10 +101,6 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     10000
   );
 
-  useEffect(() => {
-    onLoading(isLoading);
-  }, [onLoading, isLoading]);
-
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
     let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {
       if (defaultSort.direction === 'asc') {
@@ -124,6 +120,10 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
 
     return resultChangePoints;
   }, [results, maxSeriesToPlot, onChange]);
+
+  if (isLoading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
 
   return (
     <div

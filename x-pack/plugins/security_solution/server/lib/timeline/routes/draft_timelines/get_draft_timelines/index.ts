@@ -24,8 +24,10 @@ export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => 
   router.versioned
     .get({
       path: TIMELINE_DRAFT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -47,13 +49,7 @@ export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => 
 
           if (draftTimeline?.savedObjectId) {
             return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    timeline: draftTimeline,
-                  },
-                },
-              },
+              body: draftTimeline,
             });
           }
 
@@ -63,18 +59,13 @@ export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => 
           });
 
           if (newTimelineResponse.code === 200) {
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: {
-                    timeline: newTimelineResponse.timeline,
-                  },
-                },
-              },
+            return response.ok({ body: newTimelineResponse.timeline });
+          } else {
+            return siemResponse.error({
+              body: newTimelineResponse.message,
+              statusCode: newTimelineResponse.code,
             });
           }
-
-          return response.ok({});
         } catch (err) {
           const error = transformError(err);
 
