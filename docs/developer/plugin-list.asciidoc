@@ -938,11 +938,11 @@ in their infrastructure.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/threat_intelligence/README.md[threatIntelligence]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/threat_intelligence/README.md[threatIntelligence]
 |Elastic Threat Intelligence makes it easy to analyze and investigate potential security threats by aggregating data from multiple sources in one place. You’ll be able to view data from all activated threat intelligence feeds and take action.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/timelines/README.md[timelines]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/timelines/README.md[timelines]
 |Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 

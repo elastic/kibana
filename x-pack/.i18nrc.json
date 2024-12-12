@@ -160,8 +160,8 @@
       "plugins/saved_objects_tagging"
     ],
     "xpack.taskManager": "legacy/plugins/task_manager",
-    "xpack.threatIntelligence": "plugins/threat_intelligence",
-    "xpack.timelines": "plugins/timelines",
+    "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
+    "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",

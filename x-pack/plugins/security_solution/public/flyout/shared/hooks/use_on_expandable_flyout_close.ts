@@ -19,7 +19,7 @@ export interface UseOnCloseParams {
 
 /**
  * Hook to abstract the logic of listening to the onClose event for the Security Solution application.
- * The kbn-expandable-flyout package provides the onClose callback, but has there are only 2 instances of the expandable flyout in Security Solution (normal and timeline)
+ * The expandable-flyout package provides the onClose callback, but has there are only 2 instances of the expandable flyout in Security Solution (normal and timeline)
  * we need a way to propagate the onClose event to all other components.
  * 2 event names are available, we pick the correct one depending on which flyout is open (if the timeline flyout is open, it is always on top, so we choose that one).
  */

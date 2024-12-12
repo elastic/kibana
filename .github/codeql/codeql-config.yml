@@ -84,6 +84,6 @@ paths-ignore:
   - x-pack/plugins/osquery/scripts
   - x-pack/plugins/rule_registry/scripts
   - x-pack/plugins/security_solution/scripts
-  - x-pack/plugins/threat_intelligence/scripts
+  - x-pack/solutions/security/plugins/threat_intelligence/scripts
   - x-pack/scripts
   - x-pack/test
