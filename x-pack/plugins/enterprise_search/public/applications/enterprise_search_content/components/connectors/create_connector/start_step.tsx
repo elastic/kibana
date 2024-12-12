@@ -65,6 +65,7 @@ export const StartStep: React.FC<StartStepProps> = ({
     generatedConfigData,
     isGenerateLoading,
     isCreateLoading,
+    isFormDirty,
   } = useValues(NewConnectorLogic);
   const { setRawName, createConnector, generateConnectorName, setFormDirty } =
     useActions(NewConnectorLogic);
@@ -208,7 +209,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Elastic managed' }
                   )}
                   checked={selfManagePreference === 'native'}
-                  disabled={selectedConnector?.isNative === false || isRunningLocally}
+                  disabled={
+                    selectedConnector?.isNative === false || isRunningLocally || isFormDirty
+                  }
                   onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
                 />
@@ -229,6 +232,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Self-managed' }
                   )}
                   checked={selfManagePreference === 'selfManaged'}
+                  disabled={isFormDirty}
                   onChange={() => onSelfManagePreferenceChange('selfManaged')}
                   name="setUp"
                 />

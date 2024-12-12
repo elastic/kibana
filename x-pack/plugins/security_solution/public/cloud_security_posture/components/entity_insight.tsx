@@ -76,7 +76,9 @@ export const EntityInsight = <T,>({
   const { items: alertsData } = useAlertsByStatus({
     entityFilter,
     signalIndexName,
-    queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
+    queryId: isPreviewMode
+      ? `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}ALERTS_PREVIEW_TRUE`
+      : `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}ALERTS_PREVIEW_FALSE`,
     to,
     from,
   });
