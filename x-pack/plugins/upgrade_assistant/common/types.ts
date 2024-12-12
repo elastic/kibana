@@ -121,8 +121,8 @@ export interface ReindexOperation {
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
-// 7.0 -> 8.0 warnings
-export type ReindexWarningTypes = 'customTypeName' | 'indexSetting' | 'replaceIndexWithAlias';
+// 8.0 -> 9.0 warnings
+export type ReindexWarningTypes = 'indexSetting' | 'replaceIndexWithAlias';
 
 export interface ReindexWarning {
   warningType: ReindexWarningTypes;
@@ -130,8 +130,6 @@ export interface ReindexWarning {
    * Optional metadata for deprecations
    *
    * @remark
-   * For example, for the "customTypeName" deprecation,
-   * we want to surface the typeName to the user.
    * For "indexSetting" we want to surface the deprecated settings.
    */
   meta?: {

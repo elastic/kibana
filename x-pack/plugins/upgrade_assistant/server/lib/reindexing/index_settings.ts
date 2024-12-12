@@ -8,7 +8,7 @@
 import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../common/types';
 import { versionService } from '../version';
-import { FlatSettings, FlatSettingsWithTypeName } from './types';
+import { FlatSettings } from './types';
 export interface ParsedIndexName {
   cleanIndexName: string;
   baseName: string;
@@ -75,27 +75,8 @@ export const generateNewIndexName = (indexName: string): string => {
     : `${currentVersion}-${sourceName}`;
 };
 
-export const getCustomTypeWarning = (
-  flatSettings: FlatSettingsWithTypeName | FlatSettings
-): ReindexWarning | undefined => {
-  const DEFAULT_TYPE_NAME = '_doc';
-  // In 7+, it's not possible to have more than one type,
-  // so always grab the first (and only) key.
-  const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
-  const typeNameWarning = Boolean(typeName && typeName !== DEFAULT_TYPE_NAME);
-
-  if (typeNameWarning) {
-    return {
-      warningType: 'customTypeName',
-      meta: {
-        typeName,
-      },
-    };
-  }
-};
-
 export const getDeprecatedSettingWarning = (
-  flatSettings: FlatSettingsWithTypeName | FlatSettings
+  flatSettings: FlatSettings
 ): ReindexWarning | undefined => {
   const { settings } = flatSettings;
 
@@ -131,18 +112,11 @@ export const getDeprecatedSettingWarning = (
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
-export const getReindexWarnings = (
-  flatSettings: FlatSettingsWithTypeName | FlatSettings
-): ReindexWarning[] => {
+export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[] => {
   const warnings = [] as ReindexWarning[];
 
-  if (versionService.getMajorVersion() === 7) {
-    const customTypeWarning = getCustomTypeWarning(flatSettings);
+  if (versionService.getMajorVersion() === 8) {
     const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);
-
-    if (customTypeWarning) {
-      warnings.push(customTypeWarning);
-    }
 
     if (deprecatedSettingWarning) {
       warnings.push(deprecatedSettingWarning);

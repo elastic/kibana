@@ -53,12 +53,6 @@ describe('WarningsFlyoutStep', () => {
         ...defaultProps,
         warnings: [
           {
-            warningType: 'customTypeName',
-            meta: {
-              typeName: 'my_mapping_type',
-            },
-          },
-          {
             warningType: 'indexSetting',
             meta: {
               deprecatedSettings: ['index.force_memory_term_dictionary'],
@@ -76,9 +70,7 @@ describe('WarningsFlyoutStep', () => {
       button.simulate('click');
       expect(defaultPropsWithWarnings.continueReindex).not.toHaveBeenCalled();
 
-      // first warning (customTypeName)
-      wrapper.find(`input#${idForWarning(0)}`).simulate('change');
-      // second warning (indexSetting)
+      // first warning (indexSetting)
       wrapper.find(`input#${idForWarning(1)}`).simulate('change');
       button.simulate('click');
 
