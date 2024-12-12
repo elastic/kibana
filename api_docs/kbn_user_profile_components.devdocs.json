@@ -872,6 +872,14 @@
                 "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
+              "; userProfile: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
               "; i18n: ",
               {
                 "pluginId": "@kbn/core-i18n-browser",
@@ -981,7 +989,15 @@
                     "section": "def-common.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
-                  "; }"
+                  "; userProfile?: Pick<",
+                  {
+                    "pluginId": "@kbn/core-user-profile-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                    "section": "def-public.UserProfileService",
+                    "text": "UserProfileService"
+                  },
+                  ", \"getUserProfile$\"> | undefined; }"
                 ],
                 "path": "packages/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,

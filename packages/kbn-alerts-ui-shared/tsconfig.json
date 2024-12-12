@@ -2,19 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/rule-data-utils",
@@ -40,16 +31,9 @@
     "@kbn/search-types",
     "@kbn/utility-types",
     "@kbn/safer-lodash-set",
-    "@kbn/core-application-browser",
-    "@kbn/react-kibana-mount",
-    "@kbn/core-i18n-browser",
-    "@kbn/core-theme-browser",
     "@kbn/alerts-as-data-utils",
-    "@kbn/test-jest-helpers",
-    "@kbn/core-ui-settings-browser",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-table-persist"
   ]
 }

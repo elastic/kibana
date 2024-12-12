@@ -12,15 +12,22 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { IndexStats } from '@kbn/es-archiver/src/lib/stats';
+import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
 
 import { ScoutServerConfig } from '../../../types';
 import { KibanaUrl } from '../../../common/services/kibana_url';
 
-interface EsArchiverFixture {
+export interface EsArchiverFixture {
   loadIfNeeded: (
     name: string,
     performance?: LoadActionPerfOptions | undefined
   ) => Promise<Record<string, IndexStats>>;
+}
+
+export interface UiSettingsFixture {
+  set: (values: UiSettingValues) => Promise<void>;
+  unset: (...values: string[]) => Promise<any>;
+  setDefaultTime: ({ from, to }: { from: string; to: string }) => Promise<void>;
 }
 
 export interface ScoutWorkerFixtures {
@@ -29,6 +36,7 @@ export interface ScoutWorkerFixtures {
   kbnUrl: KibanaUrl;
   esClient: Client;
   kbnClient: KbnClient;
+  uiSettings: UiSettingsFixture;
   esArchiver: EsArchiverFixture;
   samlAuth: SamlSessionManager;
 }

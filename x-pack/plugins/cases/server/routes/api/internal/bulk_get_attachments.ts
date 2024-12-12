@@ -14,10 +14,12 @@ import { INTERNAL_BULK_GET_ATTACHMENTS_URL } from '../../../../common/constants'
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
+import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const bulkGetAttachmentsRoute = createCasesRoute({
   method: 'post',
   path: INTERNAL_BULK_GET_ATTACHMENTS_URL,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
     params: schema.object({
       case_id: schema.string(),

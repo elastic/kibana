@@ -10,7 +10,6 @@
 import {
   copyToClipboard,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -21,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import type { IShareContext } from '../../context';
+import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
 
 type LinkProps = Pick<
   IShareContext,
@@ -33,7 +32,7 @@ type LinkProps = Pick<
   | 'delegatedShareUrlHandler'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
->;
+> & { objectConfig?: ShareContextObjectTypeConfig };
 
 interface UrlParams {
   [extensionName: string]: {
@@ -44,6 +43,7 @@ interface UrlParams {
 export const LinkContent = ({
   isDirty,
   objectType,
+  objectConfig = {},
   shareableUrl,
   urlService,
   shareableUrlLocatorParams,
@@ -116,6 +116,8 @@ export const LinkContent = ({
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
+  const { draftModeCallOut: DraftModeCallout } = objectConfig;
+
   return (
     <>
       <EuiForm>
@@ -126,21 +128,10 @@ export const LinkContent = ({
             values={{ objectType }}
           />
         </EuiText>
-        {isDirty && objectType === 'lens' && (
+        {isDirty && DraftModeCallout && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
-              title={
-                <FormattedMessage id="share.link.warning.title" defaultMessage="Unsaved changes" />
-              }
-            >
-              <FormattedMessage
-                id="share.link.warning.lens"
-                defaultMessage="Copy the link to get a temporary link. Save the lens visualization to create a permanent link."
-              />
-            </EuiCallOut>
+            {DraftModeCallout}
           </>
         )}
         <EuiSpacer size="l" />

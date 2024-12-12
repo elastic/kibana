@@ -18,12 +18,14 @@ import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
 import { RunTestsOptions } from './flags';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
+import { getPlaywrightGrepTag } from '../utils';
 
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
-  const reportTime = getTimeReporter(log, 'scripts/scout_test');
+  const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
 
   const config = await loadServersConfig(options.mode, log);
+  const playwrightGrepTag = getPlaywrightGrepTag(config);
   const playwrightConfigPath = options.configPath;
 
   await withProcRunner(log, async (procs) => {
@@ -59,7 +61,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       // Running 'npx playwright test --config=${playwrightConfigPath}'
       await procs.run(`playwright`, {
         cmd: resolve(REPO_ROOT, './node_modules/.bin/playwright'),
-        args: ['test', `--config=${playwrightConfigPath}`, ...(options.headed ? ['--headed'] : [])],
+        args: [
+          'test',
+          `--config=${playwrightConfigPath}`,
+          `--grep=${playwrightGrepTag}`,
+          ...(options.headed ? ['--headed'] : []),
+        ],
         cwd: resolve(REPO_ROOT),
         env: {
           ...process.env,

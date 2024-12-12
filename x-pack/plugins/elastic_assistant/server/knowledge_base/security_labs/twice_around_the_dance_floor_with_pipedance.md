@@ -230,7 +230,7 @@ PIPEDANCE is designed to conduct covert operations using named pipes and has var
 
 ### Detection
 
-- [Suspicious Windows Service Execution](https://github.com/elastic/endpoint-rules/blob/main/rules/privilege_escalation_suspicious_services_child.toml)
+- [Suspicious Windows Service Execution](https://github.com/elastic/protections-artifacts/blob/main/behavior/rules/windows/privilege_escalation_suspicious_windows_service_execution.toml)
 - [NullSessionPipe Registry Modification](https://www.elastic.co/guide/en/security/current/nullsessionpipe-registry-modification.html)
 - [Potential Lateral Tool Transfer via SMB Share](https://www.elastic.co/guide/en/security/master/potential-lateral-tool-transfer-via-smb-share.html)
 
