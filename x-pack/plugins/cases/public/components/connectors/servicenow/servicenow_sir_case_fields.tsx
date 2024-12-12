@@ -14,6 +14,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CheckBoxField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { JsonFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ServiceNowSIRFieldsType } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
@@ -23,6 +24,7 @@ import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
 import { DeprecatedCallout } from '../deprecated_callout';
+import { validateJSON } from './validate_json';
 
 const choicesToGet = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -219,6 +221,33 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<ConnectorFieldsProps
                   disabled: isLoadingChoices,
                   isLoading: isLoadingChoices,
                 },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="fields.additionalFields"
+              component={JsonFieldWrapper}
+              config={{
+                label: i18n.ADDITIONAL_FIELDS_LABEL,
+                validations: [
+                  {
+                    validator: validateJSON,
+                  },
+                ],
+              }}
+              componentProps={{
+                euiCodeEditorProps: {
+                  fullWidth: true,
+                  height: '200px',
+                  options: {
+                    fontSize: '12px',
+                    renderValidationDecorations: 'off',
+                  },
+                },
+                dataTestSubj: 'additionalFieldsEditor',
               }}
             />
           </EuiFlexItem>
