@@ -14,11 +14,13 @@ import {
 } from '@kbn/core/server';
 import { InferenceProvider } from '../../common/inference/types';
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
+import { DEFAULT_STACK_CONNECTORS_ROUTE_SECURITY } from './constants';
 
 export const getInferenceServicesRoute = (router: IRouter) => {
   router.get(
     {
       path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_inference/_services`,
+      security: DEFAULT_STACK_CONNECTORS_ROUTE_SECURITY,
       options: {
         access: 'internal',
       },

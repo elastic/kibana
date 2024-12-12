@@ -15,6 +15,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { AlertingRulesConfig } from '@kbn/alerting-plugin/server';
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { DEFAULT_TRIGGERS_ACCTIONS_UI_ROUTE_SECURITY } from './constants';
 
 export interface ConfigRouteOpts {
   logger: Logger;
@@ -38,6 +39,7 @@ export function createConfigRoute({
   router.get(
     {
       path,
+      security: DEFAULT_TRIGGERS_ACCTIONS_UI_ROUTE_SECURITY,
       validate: false,
       options: {
         access: 'internal',

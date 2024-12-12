@@ -13,6 +13,7 @@ import {
   KibanaResponseFactory,
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
+import { DEFAULT_TRIGGERS_ACCTIONS_UI_ROUTE_SECURITY } from './constants';
 
 export function createHealthRoute(
   logger: Logger,
@@ -25,6 +26,7 @@ export function createHealthRoute(
   router.get(
     {
       path,
+      security: DEFAULT_TRIGGERS_ACCTIONS_UI_ROUTE_SECURITY,
       validate: false,
       options: {
         access: 'internal',
