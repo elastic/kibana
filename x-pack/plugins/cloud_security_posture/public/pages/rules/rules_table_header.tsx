@@ -23,12 +23,8 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import {
-  RuleStateAttributesWithoutStates,
-  useChangeCspRuleState,
-} from './use_change_csp_rule_state';
-import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
+import { useRules } from './rules_context';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -38,49 +34,17 @@ export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
-interface RulesTableToolbarProps {
-  search: (value: string) => void;
-  onSectionChange: (value: string[] | undefined) => void;
-  onRuleNumberChange: (value: string[] | undefined) => void;
-  sectionSelectOptions: string[];
-  ruleNumberSelectOptions: string[];
-  totalRulesCount: number;
-  searchValue: string;
-  isSearching: boolean;
-  pageSize: number;
-  selectedRules: CspBenchmarkRulesWithStates[];
-  setEnabledDisabledItemsFilter: (filterState: string) => void;
-  enabledDisabledItemsFilterState: string;
-  setSelectAllRules: () => void;
-  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-}
-
-interface RuleTableCount {
-  pageSize: number;
-  total: number;
-  selectedRules: CspBenchmarkRulesWithStates[];
-  setSelectAllRules: () => void;
-  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-}
-
-export const RulesTableHeader = ({
-  search,
-  searchValue,
-  isSearching,
-  totalRulesCount,
-  pageSize,
-  onSectionChange,
-  onRuleNumberChange,
-  sectionSelectOptions,
-  ruleNumberSelectOptions,
-  selectedRules,
-  setEnabledDisabledItemsFilter,
-  enabledDisabledItemsFilterState,
-  setSelectAllRules,
-  setSelectedRules,
-}: RulesTableToolbarProps) => {
-  const [selectedSection, setSelectedSection] = useState<string[]>([]);
-  const [selectedRuleNumber, setSelectedRuleNumber] = useState<string[]>([]);
+export const RulesTableHeader = () => {
+  const {
+    section,
+    setSection,
+    ruleNumber,
+    setRuleNumber,
+    sectionSelectOptions,
+    ruleNumberSelectOptions,
+    setEnabledDisabledItemsFilter,
+    enabledDisabledItemsFilter,
+  } = useRules();
   const sectionOptions = sectionSelectOptions.map((option) => ({
     key: option,
     label: option,
@@ -91,12 +55,12 @@ export const RulesTableHeader = ({
   }));
 
   const toggleEnabledRulesFilter = () => {
-    if (enabledDisabledItemsFilterState === 'enabled') setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilter === 'enabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('enabled');
   };
 
   const toggleDisabledRulesFilter = () => {
-    if (enabledDisabledItemsFilterState === 'disabled') setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilter === 'disabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('disabled');
   };
 
@@ -104,7 +68,7 @@ export const RulesTableHeader = ({
     <EuiFlexGroup direction="column">
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={1}>
-          <SearchField isSearching={isSearching} searchValue={searchValue} search={search} />
+          <SearchField />
         </EuiFlexItem>
         <EuiFlexItem grow={0}>
           <EuiFlexGroup gutterSize="s" direction="row">
@@ -121,14 +85,15 @@ export const RulesTableHeader = ({
                   }
                 )}
                 id={'cis-section-multi-select-filter'}
-                onChange={(section) => {
-                  setSelectedSection([...section?.selectedOptionKeys]);
-                  onSectionChange(
-                    section?.selectedOptionKeys ? section?.selectedOptionKeys : undefined
+                onChange={(changedSections) => {
+                  setSection(
+                    changedSections?.selectedOptionKeys
+                      ? changedSections?.selectedOptionKeys
+                      : undefined
                   );
                 }}
                 options={sectionOptions}
-                selectedOptionKeys={selectedSection}
+                selectedOptionKeys={section}
               />
             </EuiFlexItem>
             <EuiFlexItem
@@ -144,14 +109,15 @@ export const RulesTableHeader = ({
                   }
                 )}
                 id={'rule-number-multi-select-filter'}
-                onChange={(ruleNumber) => {
-                  setSelectedRuleNumber([...ruleNumber?.selectedOptionKeys]);
-                  onRuleNumberChange(
-                    ruleNumber?.selectedOptionKeys ? ruleNumber?.selectedOptionKeys : undefined
+                onChange={(changedRuleNumbers) => {
+                  setRuleNumber(
+                    changedRuleNumbers?.selectedOptionKeys
+                      ? changedRuleNumbers?.selectedOptionKeys
+                      : undefined
                   );
                 }}
                 options={ruleNumberOptions}
-                selectedOptionKeys={selectedRuleNumber}
+                selectedOptionKeys={ruleNumber}
               />
             </EuiFlexItem>
             <EuiFlexItem
@@ -162,7 +128,7 @@ export const RulesTableHeader = ({
               <EuiFilterGroup>
                 <EuiFilterButton
                   withNext
-                  hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
+                  hasActiveFilters={enabledDisabledItemsFilter === 'enabled'}
                   onClick={toggleEnabledRulesFilter}
                   data-test-subj={RULES_ENABLED_FILTER}
                 >
@@ -172,7 +138,7 @@ export const RulesTableHeader = ({
                   />
                 </EuiFilterButton>
                 <EuiFilterButton
-                  hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
+                  hasActiveFilters={enabledDisabledItemsFilter === 'disabled'}
                   onClick={toggleDisabledRulesFilter}
                   data-test-subj={RULES_DISABLED_FILTER}
                 >
@@ -187,13 +153,7 @@ export const RulesTableHeader = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
-        <CurrentPageOfTotal
-          pageSize={pageSize}
-          total={totalRulesCount}
-          selectedRules={selectedRules}
-          setSelectAllRules={setSelectAllRules}
-          setSelectedRules={setSelectedRules}
-        />
+        <CurrentPageOfTotal />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -201,20 +161,17 @@ export const RulesTableHeader = ({
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-const SearchField = ({
-  search,
-  isSearching,
-  searchValue,
-}: Pick<RulesTableToolbarProps, 'isSearching' | 'searchValue' | 'search'>) => {
-  const [localValue, setLocalValue] = useState(searchValue);
+const SearchField = () => {
+  const { search, setSearch, loading } = useRules();
+  const [localValue, setLocalValue] = useState(search);
 
-  useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
+  useDebounce(() => setSearch(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
 
   return (
     <div>
       <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
-          isLoading={isSearching}
+          isLoading={loading}
           placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
             defaultMessage: 'Search by Rule Name',
           })}
@@ -228,45 +185,25 @@ const SearchField = ({
   );
 };
 
-const CurrentPageOfTotal = ({
-  pageSize,
-  total,
-  selectedRules,
-  setSelectAllRules,
-  setSelectedRules,
-}: RuleTableCount) => {
+const CurrentPageOfTotal = () => {
+  const {
+    selectedRules,
+    setSelectedRules,
+    rulesShown,
+    total,
+    setSelectAllRules,
+    toggleSelectedRulesStates,
+  } = useRules();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onPopoverClick = () => {
     setIsPopoverOpen((e) => !e);
   };
 
-  const { mutate: mutateRulesStates } = useChangeCspRuleState();
-
-  const changeCspRuleState = (state: 'mute' | 'unmute') => {
-    const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
-      (e: CspBenchmarkRulesWithStates) => ({
-        benchmark_id: e?.metadata.benchmark.id,
-        benchmark_version: e?.metadata.benchmark.version,
-        rule_number: e?.metadata.benchmark.rule_number!,
-        rule_id: e?.metadata.id,
-      })
-    );
-    // Only do the API Call IF there are no undefined value for rule number in the selected rules
-    if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
-      mutateRulesStates({
-        newState: state,
-        ruleIds: bulkSelectedRules,
-      });
-      setIsPopoverOpen(false);
-    }
-    setSelectedRules([]);
-  };
-
   const changeCspRuleStateMute = () => {
-    changeCspRuleState('mute');
+    toggleSelectedRulesStates('mute');
   };
   const changeCspRuleStateUnmute = () => {
-    changeCspRuleState('unmute');
+    toggleSelectedRulesStates('unmute');
   };
 
   const areAllSelectedRulesMuted = selectedRules.every((rule) => rule?.state === 'muted');
@@ -312,9 +249,9 @@ const CurrentPageOfTotal = ({
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
+              defaultMessage="Showing {rulesShown} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
               values={{
-                pageSize,
+                rulesShown,
                 total,
                 selectedRulesAmount: selectedRules.length || 0,
                 pipe: '\u2000|\u2000',
