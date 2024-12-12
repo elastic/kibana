@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './drilldown_grouping';
+type EsqlLanguage = 'esql';
+
+export interface RuleTranslationSchema {
+  ruleName: string;
+  // The type is compatible with the validation function used in form schema
+  queryBar: { query: { query: string; language: EsqlLanguage } };
+}
