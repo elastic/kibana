@@ -692,7 +692,6 @@ export class SessionIndex {
 
     let indexMappingsVersion: string | undefined;
     try {
-      // get mapping using index alias
       const indexMappings = await this.options.elasticsearchClient.indices.getMapping({
         index: this.aliasName,
       });
@@ -713,7 +712,6 @@ export class SessionIndex {
         } to ${SESSION_INDEX_MAPPINGS_VERSION} version.`
       );
       try {
-        // use alias to put mapping
         await this.options.elasticsearchClient.indices.putMapping({
           index: this.aliasName,
           ...sessionIndexSettings.mappings,
