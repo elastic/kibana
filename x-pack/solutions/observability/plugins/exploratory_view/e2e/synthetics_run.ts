@@ -29,7 +29,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
         ['rum_8.0.0', 'rum_test_data']
       );
       await syntheticsRunner.loadTestData(
-        `${REPO_ROOT}/x-pack/plugins/observability_solution/synthetics/e2e/fixtures/es_archiver/`,
+        `${REPO_ROOT}/x-pack/solutions/observability/plugins/synthetics/e2e/fixtures/es_archiver/`,
         ['full_heartbeat', 'browser']
       );
       await syntheticsRunner.loadTestFiles(async () => {

@@ -7572,11 +7572,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-e2e@link:x-pack/plugins/observability_solution/synthetics/e2e":
+"@kbn/synthetics-e2e@link:x-pack/solutions/observability/plugins/synthetics/e2e":
   version "0.0.0"
   uid ""
 
-"@kbn/synthetics-plugin@link:x-pack/plugins/observability_solution/synthetics":
+"@kbn/synthetics-plugin@link:x-pack/solutions/observability/plugins/synthetics":
   version "0.0.0"
   uid ""
 

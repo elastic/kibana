@@ -21,7 +21,7 @@
 - 'Team:obs-ux-management':
     - 'x-pack/solutions/observability/plugins/observability/**/*.*'
     - 'x-pack/plugins/observability_solution/slo/**/*.*'
-    - 'x-pack/plugins/observability_solution/synthetics/**/*.*'
+    - 'x-pack/solutions/observability/plugins/synthetics/**/*.*'
     - 'x-pack/solutions/observability/plugins/exploratory_view/**/*.*'
 - 'Team:Obs AI Assistant':
     - 'x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/**/*.*'
