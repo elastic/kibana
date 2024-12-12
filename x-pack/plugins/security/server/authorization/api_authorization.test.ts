@@ -20,7 +20,11 @@ import { authorizationMock } from './index.mock';
 describe('initAPIAuthorization', () => {
   test(`protected route when "mode.useRbacForRequest()" returns false continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
-    const mockAuthz = authorizationMock.create();
+    const mockAuthz = {
+      ...authorizationMock.create(),
+      getCurrentUser: jest.fn(),
+      getSecurityConfig: jest.fn(),
+    };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
@@ -44,7 +48,11 @@ describe('initAPIAuthorization', () => {
 
   test(`unprotected route when "mode.useRbacForRequest()" returns true continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
-    const mockAuthz = authorizationMock.create();
+    const mockAuthz = {
+      ...authorizationMock.create(),
+      getCurrentUser: jest.fn(),
+      getSecurityConfig: jest.fn(),
+    };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
@@ -68,7 +76,11 @@ describe('initAPIAuthorization', () => {
 
   test(`protected route when "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
-    const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
+    const mockAuthz = {
+      ...authorizationMock.create({ version: '1.0.0-zeta1' }),
+      getCurrentUser: jest.fn(),
+      getSecurityConfig: jest.fn(),
+    };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
@@ -105,7 +117,11 @@ describe('initAPIAuthorization', () => {
 
   test(`protected route when "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 403`, async () => {
     const mockHTTPSetup = coreMock.createSetup().http;
-    const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
+    const mockAuthz = {
+      ...authorizationMock.create({ version: '1.0.0-zeta1' }),
+      getCurrentUser: jest.fn(),
+      getSecurityConfig: jest.fn(),
+    };
     initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
@@ -170,7 +186,11 @@ describe('initAPIAuthorization', () => {
     ) => {
       test(description, async () => {
         const mockHTTPSetup = coreMock.createSetup().http;
-        const mockAuthz = authorizationMock.create({ version: '1.0.0-zeta1' });
+        const mockAuthz = {
+          ...authorizationMock.create({ version: '1.0.0-zeta1' }),
+          getCurrentUser: jest.fn(),
+          getSecurityConfig: jest.fn(),
+        };
         initAPIAuthorization(mockHTTPSetup, mockAuthz, loggingSystemMock.create().get());
 
         const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
