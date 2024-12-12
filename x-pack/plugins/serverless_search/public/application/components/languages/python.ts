@@ -23,7 +23,7 @@ client = Elasticsearch(
   docLink: docLinks.pythonClient,
   github: {
     link: 'https://github.com/elastic/elasticsearch-py',
-    label: i18n.translate('xpack.enterpriseSearch.languages.python.githubLabel', {
+    label: i18n.translate('xpack.serverlessSearch.languages.python.githubLabel', {
       defaultMessage: 'elasticsearch-py',
     }),
   },
@@ -69,7 +69,7 @@ client.bulk(operations=documents${ingestPipeline ? `, pipeline="${ingestPipeline
 # If your application uses async/await in Python you can install with the async extra
 # python -m pip install elasticsearch[async]
   `,
-  name: i18n.translate('xpack.enterpriseSearch.languages.python', {
+  name: i18n.translate('xpack.serverlessSearch.languages.python', {
     defaultMessage: 'Python',
   }),
   testConnection: `client.info()`,
