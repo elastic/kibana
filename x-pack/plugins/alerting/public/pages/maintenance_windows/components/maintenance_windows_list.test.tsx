@@ -95,6 +95,15 @@ describe('MaintenanceWindowsList', () => {
         isLoading={false}
         items={items}
         readOnly={false}
+        page={1}
+        perPage={10}
+        total={22}
+        onPageChange={() => {}}
+        inputText={''}
+        onSearchKeyup={() => {}}
+        onSelectedStatusesChange={() => {}}
+        selectedStatuses={[]}
+        onSearchChange={() => {}}
       />
     );
 
@@ -128,6 +137,15 @@ describe('MaintenanceWindowsList', () => {
         isLoading={false}
         items={items}
         readOnly={true}
+        page={1}
+        perPage={10}
+        total={22}
+        onPageChange={() => {}}
+        inputText={''}
+        onSearchKeyup={() => {}}
+        onSelectedStatusesChange={() => {}}
+        selectedStatuses={[]}
+        onSearchChange={() => {}}
       />
     );
 
@@ -145,6 +163,15 @@ describe('MaintenanceWindowsList', () => {
         isLoading={false}
         items={items}
         readOnly={false}
+        page={1}
+        perPage={10}
+        total={22}
+        onPageChange={() => {}}
+        inputText={''}
+        onSearchKeyup={() => {}}
+        onSelectedStatusesChange={() => {}}
+        selectedStatuses={[]}
+        onSearchChange={() => {}}
       />
     );
     fireEvent.click(result.getByTestId('refresh-button'));

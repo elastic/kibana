@@ -721,3 +721,8 @@ export const START_TRIAL = i18n.translate(
 export const REFRESH = i18n.translate('xpack.alerting.maintenanceWindows.refreshButton', {
   defaultMessage: 'Refresh',
 });
+
+export const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alerting.maintenanceWindows.searchPlaceholder',
+  { defaultMessage: 'Search' }
+);
