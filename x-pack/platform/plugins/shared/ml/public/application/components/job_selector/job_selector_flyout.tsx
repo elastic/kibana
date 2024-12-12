@@ -98,9 +98,13 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
   const applySelection = useCallback(() => {
     const selectedGroupIds = newSelection.filter((id) => groups.some((group) => group.id === id));
 
-    const jobsInSelectedGroups = groups
-      .filter((group) => selectedGroupIds.includes(group.id))
-      .flatMap((group) => group.jobIds);
+    const jobsInSelectedGroups = [
+      ...new Set(
+        groups
+          .filter((group) => selectedGroupIds.includes(group.id))
+          .flatMap((group) => group.jobIds)
+      ),
+    ];
 
     const standaloneJobs = newSelection.filter(
       (id) => !selectedGroupIds.includes(id) && !jobsInSelectedGroups.includes(id)
