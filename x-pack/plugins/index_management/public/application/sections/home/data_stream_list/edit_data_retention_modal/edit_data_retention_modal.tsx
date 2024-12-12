@@ -59,6 +59,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   isBulkEdit,
 }) => {
   const lifecycle = dataStreams[0]?.lifecycle;
+  const isSingleDataStream = dataStreams.length === 1;
 
   const {
     history,
@@ -66,9 +67,9 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   } = useAppContext();
   const dataStreamNames = dataStreams.map(({ name }: DataStream) => name as string);
   const globalMaxRetention = deserializeGlobalMaxRetention(lifecycle?.globalMaxRetention);
-  const { size, unit } = isBulkEdit
-    ? { size: undefined, unit: undefined }
-    : splitSizeAndUnits(lifecycle?.data_retention as string);
+  const { size, unit } = isSingleDataStream
+    ? splitSizeAndUnits(lifecycle?.data_retention as string)
+    : { size: undefined, unit: undefined };
 
   const {
     services: { notificationService },
@@ -79,11 +80,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
-      dataRetentionEnabled: isBulkEdit ? true : lifecycle?.enabled,
+      dataRetentionEnabled: isSingleDataStream ? lifecycle?.enabled : true,
       // When data retention is not set and lifecycle is enabled, is the only scenario in
       // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
       // dont have inifinite data retention.
-      infiniteRetentionPeriod: !isBulkEdit && lifecycle?.enabled && !lifecycle?.data_retention,
+      infiniteRetentionPeriod:
+        isSingleDataStream && lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: editDataRetentionFormSchema,
     id: 'editDataRetentionForm',
@@ -179,11 +181,14 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       (ds: DataStream) =>
         formData.dataRetention &&
         formData.timeUnit &&
-        ((typeof ds.lifecycle?.data_retention === 'string' &&
-          isRetentionBiggerThan(
-            ds.lifecycle.data_retention,
-            `${formData.dataRetention}${formData.timeUnit}`
-          )) ||
+        ((ds.lifecycle?.enabled &&
+          !ds.lifecycle?.data_retention &&
+          !ds.lifecycle?.effective_retention) ||
+          (typeof ds.lifecycle?.data_retention === 'string' &&
+            isRetentionBiggerThan(
+              ds.lifecycle.data_retention,
+              `${formData.dataRetention}${formData.timeUnit}`
+            )) ||
           (ds.lifecycle?.effective_retention &&
             isRetentionBiggerThan(
               ds.lifecycle.effective_retention,
@@ -203,7 +208,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="xpack.idxMgmt.dataStreams.editDataRetentionModal.modalTitleText"
-              defaultMessage="Edit data retention {dataStreamCount, plural, one {} other {for {dataStreamCount} data streams}}"
+              defaultMessage="Edit data retention for {dataStreamCount} {dataStreamCount, plural, one {data stream} other {data streams}}"
               values={{ dataStreamCount: dataStreams?.length }}
             />
           </EuiModalHeaderTitle>
@@ -265,7 +270,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
             }
             helpText={
               isBulkEdit &&
-              globalMaxRetention && (
+              lifecycle?.globalMaxRetention && (
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreams.editDataRetentionModal.learnMoreLinkText"
                   defaultMessage="Maximum data retention period for this project is {maxRetention} {unitText}. {manageSettingsLink}"
