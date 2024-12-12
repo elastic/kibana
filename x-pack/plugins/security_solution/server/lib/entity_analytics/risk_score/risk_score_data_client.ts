@@ -40,6 +40,10 @@ import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import { RiskScoreAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import {
+  createIngestTimestampPipeline,
+  getIngestPipelineName,
+} from '../utils/create_ingest_pipeline';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -95,15 +99,19 @@ export class RiskScoreDataClient {
       options: {
         index: getRiskScoreLatestIndex(this.options.namespace),
         mappings: mappingFromFieldMap(riskScoreFieldMap, false),
+        settings: {
+          'index.default_pipeline': getIngestPipelineName(this.options.namespace),
+        },
       },
     });
   };
 
   public async init() {
     const namespace = this.options.namespace;
+    const esClient = this.options.esClient;
 
     try {
-      const esClient = this.options.esClient;
+      await createIngestTimestampPipeline(esClient, namespace);
 
       const indexPatterns = getIndexPatternDataStream(namespace);
 
@@ -157,6 +165,7 @@ export class RiskScoreDataClient {
               lifecycle: {},
               settings: {
                 'index.mapping.total_fields.limit': totalFieldsLimit,
+                'index.default_pipeline': getIngestPipelineName(namespace),
               },
               mappings: {
                 dynamic: false,
