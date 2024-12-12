@@ -8,7 +8,6 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { EntityV2 } from '@kbn/entities-schema';
-import { without } from 'lodash';
 import {
   ReadSourceDefinitionOptions,
   readSourceDefinitions,
@@ -16,7 +15,7 @@ import {
 } from './definitions/source_definition';
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
 import { getEntityInstancesQuery, getEntityCountQuery } from './queries';
-import { mergeEntitiesList } from './queries/utils';
+import { mergeEntitiesList, sortEntitiesList } from './queries/utils';
 import {
   EntitySourceDefinition,
   EntityTypeDefinition,
@@ -26,6 +25,7 @@ import {
 } from './types';
 import { UnknownEntityType } from './errors/unknown_entity_type';
 import { runESQLQuery } from './run_esql_query';
+import { validateFields } from './validate_fields';
 
 export class EntityClient {
   constructor(
@@ -60,72 +60,63 @@ export class EntityClient {
     sort,
     limit,
   }: SearchBySources) {
-    const entities = await Promise.all(
-      sources.map(async (source) => {
-        const mandatoryFields = [
-          ...source.identity_fields,
-          ...(source.timestamp_field ? [source.timestamp_field] : []),
-          ...(source.display_name ? [source.display_name] : []),
-        ];
-        const metaFields = [...metadataFields, ...source.metadata_fields];
+    const searches = sources.map(async (source) => {
+      const availableMetadataFields = await validateFields({
+        source,
+        metadataFields,
+        esClient: this.options.clusterClient.asCurrentUser,
+        logger: this.options.logger,
+      });
 
-        // operations on an unmapped field result in a failing query so we verify
-        // field capabilities beforehand
-        const { fields } = await this.options.clusterClient.asCurrentUser.fieldCaps({
-          index: source.index_patterns,
-          fields: [...mandatoryFields, ...metaFields],
-        });
+      const { query, filter } = getEntityInstancesQuery({
+        source: {
+          ...source,
+          metadata_fields: availableMetadataFields,
+          filters: [...source.filters, ...filters],
+        },
+        start,
+        end,
+        sort,
+        limit,
+      });
+      this.options.logger.debug(
+        () => `Entity instances query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
+      );
 
-        const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
-        if (!sourceHasMandatoryFields) {
-          // we can't build entities without id fields so we ignore the source.
-          // TODO filters should likely behave similarly. we should also throw
-          const missingFields = mandatoryFields.filter((field) => !fields[field]);
-          this.options.logger.info(
-            `Ignoring source for type [${source.type_id}] with index_patterns [${
-              source.index_patterns
-            }] because some mandatory fields [${missingFields.join(', ')}] are not mapped`
-          );
-          return [];
-        }
+      const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
+        query,
+        filter,
+        esClient: this.options.clusterClient.asCurrentUser,
+        logger: this.options.logger,
+      });
 
-        // but metadata field not being available is fine
-        const availableMetadataFields = metaFields.filter((field) => fields[field]);
-        if (availableMetadataFields.length < metaFields.length) {
-          this.options.logger.info(
-            `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(
-              ', '
-            )}]`
-          );
-        }
+      return rawEntities;
+    });
 
-        const { query, filter } = getEntityInstancesQuery({
-          source: {
-            ...source,
-            metadata_fields: availableMetadataFields,
-            filters: [...source.filters, ...filters],
-          },
-          start,
-          end,
-          sort,
-          limit,
-        });
-        this.options.logger.debug(
-          () => `Entity instances query: ${query}\nfilter: ${JSON.stringify(filter, null, 2)}`
-        );
+    const results = await Promise.allSettled(searches);
+    const entities = (
+      results.filter((result) => result.status === 'fulfilled') as Array<
+        PromiseFulfilledResult<EntityV2[]>
+      >
+    ).flatMap((result) => result.value);
+    const errors = (
+      results.filter((result) => result.status === 'rejected') as PromiseRejectedResult[]
+    ).map((result) => result.reason.message);
 
-        const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
-          query,
-          filter,
-          esClient: this.options.clusterClient.asCurrentUser,
-          logger: this.options.logger,
-        });
+    if (sources.length === 1) {
+      return { entities, errors };
+    }
 
-        return rawEntities;
-      })
-    ).then((results) => results.flat());
-
-    return mergeEntitiesList(sources, entities).slice(0, limit);
+    // we have to manually merge, sort and limit entities since we run
+    // independant queries for each source
+    return {
+      errors,
+      entities: sortEntitiesList({
+        sources,
+        sort,
+        entities: mergeEntitiesList({ entities, sources, metadataFields }),
+      }).slice(0, limit),
+    };
   }
 
   async countEntities({ start, end, types = [], filters = [] }: CountByTypes) {

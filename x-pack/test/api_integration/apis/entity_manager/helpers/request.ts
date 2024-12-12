@@ -94,7 +94,10 @@ export const upgradeBuiltinDefinitions = async (
 export const createEntityTypeDefinition = (
   supertest: Agent,
   params: {
-    type: { id: string };
+    type: {
+      id: string;
+      display_name: string;
+    };
   }
 ) => {
   return supertest
@@ -115,6 +118,25 @@ export const createEntitySourceDefinition = (
     .set('kbn-xsrf', 'xxx')
     .send({ source: params.source })
     .expect(201);
+};
+
+export const searchEntities = async (
+  supertest: Agent,
+  params: {
+    type: string;
+    start?: string;
+    end?: string;
+    metadata_fields?: string[];
+    filters?: string[];
+  },
+  expectedCode?: number
+) => {
+  const response = await supertest
+    .post('/internal/entities/v2/_search')
+    .set('kbn-xsrf', 'xxx')
+    .send(params)
+    .expect(expectedCode ?? 200);
+  return response.body;
 };
 
 export const countEntities = async (

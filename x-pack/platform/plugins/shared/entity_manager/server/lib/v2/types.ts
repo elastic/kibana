@@ -83,6 +83,8 @@ const searchCommonRt = z.object({
   filters: z.optional(z.array(z.string())).default([]),
 });
 
+export type SearchCommon = z.output<typeof searchCommonRt>;
+
 export const searchByTypeRt = z.intersection(
   searchCommonRt,
   z.object({
