@@ -84,9 +84,10 @@ const ListHeaderContainer = styled(EuiFlexGroup)`
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, handleDuplicate, readOnly }) => {
     const {
+      isSaving,
+      rulesLoading,
       linkedRules,
       showManageRulesFlyout,
-      showManageButtonLoader,
       disableManageButton,
       onManageRules,
       onSaveManageRules,
@@ -260,7 +261,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
         {showManageRulesFlyout ? (
           <ManageRules
             linkedRules={linkedRules as Rule[]}
-            showButtonLoader={showManageButtonLoader}
+            showButtonLoader={rulesLoading || isSaving}
             saveIsDisabled={disableManageButton}
             onSave={onSaveManageRules}
             onCancel={onCancelManageRules}

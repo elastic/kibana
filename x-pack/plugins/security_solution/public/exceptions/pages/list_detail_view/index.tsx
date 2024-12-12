@@ -36,6 +36,8 @@ export const ListsDetailViewComponent: FC = () => {
     isLoading,
     invalidListId,
     isReadOnly,
+    isSaving,
+    rulesLoading,
     list,
     canUserEditList,
     listId,
@@ -49,7 +51,6 @@ export const ListsDetailViewComponent: FC = () => {
     headerBackOptions,
     showReferenceErrorModal,
     referenceModalState,
-    showManageButtonLoader,
     refreshExceptions,
     disableManageButton,
     onEditListDetails,
@@ -134,7 +135,7 @@ export const ListsDetailViewComponent: FC = () => {
         {showManageRulesFlyout ? (
           <ManageRules
             linkedRules={linkedRules as Rule[]}
-            showButtonLoader={showManageButtonLoader}
+            showButtonLoader={rulesLoading || isSaving}
             saveIsDisabled={disableManageButton}
             onSave={onSaveManageRules}
             onCancel={onCancelManageRules}
@@ -178,7 +179,8 @@ export const ListsDetailViewComponent: FC = () => {
     handleReferenceDelete,
     showReferenceErrorModal,
     showManageRulesFlyout,
-    showManageButtonLoader,
+    rulesLoading,
+    isSaving,
     disableManageButton,
     onSaveManageRules,
     onCancelManageRules,
