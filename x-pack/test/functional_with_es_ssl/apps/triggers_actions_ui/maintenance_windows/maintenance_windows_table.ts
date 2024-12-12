@@ -266,7 +266,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('paginates maintenance windows correctly', async () => {
       new Array(12).fill(null).map(async (_, index) => {
         const mw = await createMaintenanceWindow({
-          name: index + 'pagination',
+          name: index + '-pagination',
           getService,
         });
         objectRemover.add(mw.id, 'rules/maintenance_window', 'alerting', true);
