@@ -5,35 +5,17 @@
  * 2.0.
  */
 
-import { euiLightVars as theme } from '@kbn/ui-theme';
-const { euiColorDarkShade, euiColorWarning } = theme;
+import { useEuiTheme } from '@elastic/eui';
 
-export const errorColor = '#c23c2b';
-export const neutralColor = euiColorDarkShade;
-export const successColor = '#327a42';
-export const warningColor = euiColorWarning;
-
-const httpStatusCodeColors: Record<string, string> = {
-  1: neutralColor,
-  2: successColor,
-  3: neutralColor,
-  4: warningColor,
-  5: errorColor,
+export const useGetStatusColor = (status: string | number) => {
+  const { euiTheme } = useEuiTheme();
+  const httpStatusCodeColors: Record<string, string> = {
+    1: euiTheme.colors.vis.euiColorVisGrey0,
+    2: euiTheme.colors.vis.euiColorVisSuccess0,
+    3: euiTheme.colors.vis.euiColorVisGrey0,
+    4: euiTheme.colors.vis.euiColorVisWarning0,
+    5: euiTheme.colors.vis.euiColorVisDanger0,
+  };
+  const intStatus = typeof status === 'string' ? parseInt(status.replace(/\D/g, ''), 10) : status;
+  return httpStatusCodeColors[intStatus.toString().substring(0, 1)];
 };
-
-function getStatusColor(status: number) {
-  return httpStatusCodeColors[status.toString().substr(0, 1)];
-}
-
-/**
- * Convert an HTTP status code to a color.
- *
- * If passed a string, it will remove all non-numeric characters
- */
-export function httpStatusCodeToColor(status: string | number) {
-  if (typeof status === 'string') {
-    return getStatusColor(parseInt(status.replace(/\D/g, ''), 10));
-  } else {
-    return getStatusColor(status);
-  }
-}

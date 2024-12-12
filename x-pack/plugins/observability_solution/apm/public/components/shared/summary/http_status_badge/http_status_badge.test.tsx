@@ -8,52 +8,58 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { HttpStatusBadge } from '.';
-import {
-  successColor,
-  neutralColor,
-  warningColor,
-  errorColor,
-} from '../../../../utils/http_status_code_to_color';
+import { renderHook } from '@testing-library/react-hooks';
+import { useEuiTheme } from '@elastic/eui';
 
 describe('HttpStatusBadge', () => {
   describe('render', () => {
     describe('with status code 100', () => {
       it('renders with neutral color', () => {
         const wrapper = mount(<HttpStatusBadge status={100} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(neutralColor);
+        const { result } = renderHook(() => useEuiTheme());
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
+          result.current.euiTheme.colors.vis.euiColorVisGrey0
+        );
       });
     });
 
     describe('with status code 200', () => {
       it('renders with success color', () => {
         const wrapper = mount(<HttpStatusBadge status={200} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(successColor);
+        const { result } = renderHook(() => useEuiTheme());
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
+          result.current.euiTheme.colors.vis.euiColorVisSuccess0
+        );
       });
     });
 
     describe('with status code 301', () => {
       it('renders with neutral color', () => {
         const wrapper = mount(<HttpStatusBadge status={301} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(neutralColor);
+        const { result } = renderHook(() => useEuiTheme());
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
+          result.current.euiTheme.colors.vis.euiColorVisGrey0
+        );
       });
     });
 
     describe('with status code 404', () => {
       it('renders with warning color', () => {
         const wrapper = mount(<HttpStatusBadge status={404} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(warningColor);
+        const { result } = renderHook(() => useEuiTheme());
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
+          result.current.euiTheme.colors.vis.euiColorVisWarning0
+        );
       });
     });
 
     describe('with status code 502', () => {
       it('renders with error color', () => {
         const wrapper = mount(<HttpStatusBadge status={502} />);
-
-        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(errorColor);
+        const { result } = renderHook(() => useEuiTheme());
+        expect(wrapper.find('HttpStatusBadge EuiBadge').prop('color')).toEqual(
+          result.current.euiTheme.colors.vis.euiColorVisDanger0
+        );
       });
     });
 

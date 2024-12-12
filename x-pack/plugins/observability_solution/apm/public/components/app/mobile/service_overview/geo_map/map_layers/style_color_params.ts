@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { SettingsSpec } from '@elastic/charts';
-
-export const DEFAULT_DATE_FORMAT = 'HH:mm:ss';
-export const CHART_SETTINGS: Partial<SettingsSpec> = {
-  showLegend: false,
-};
+export interface StyleColorParams {
+  lineColor: string;
+  labelColor: string;
+  labelOutlineColor: string;
+}

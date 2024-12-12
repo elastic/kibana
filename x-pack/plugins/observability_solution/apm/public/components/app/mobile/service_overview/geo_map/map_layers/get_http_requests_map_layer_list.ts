@@ -26,6 +26,7 @@ import {
 } from '../../../../../../../common/es_fields/apm';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
 import { MobileSpanSubtype, MobileSpanType } from '../../../../../../../common/mobile/constants';
+import { StyleColorParams } from './style_color_params';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
@@ -41,7 +42,11 @@ const label = i18n.translate('xpack.apm.serviceOverview.embeddedMap.httpRequests
   defaultMessage: 'HTTP requests',
 });
 
-export function getHttpRequestsLayerList(maps: MapsStartApi | undefined, dataViewId: string) {
+export function getHttpRequestsLayerList(
+  maps: MapsStartApi | undefined,
+  dataViewId: string,
+  styleColors: StyleColorParams
+) {
   const whereQuery = {
     language: 'kuery',
     query: `${PROCESSOR_EVENT}:${ProcessorEvent.span} and ${SPAN_SUBTYPE}:${MobileSpanSubtype.Http} and ${SPAN_TYPE}:${MobileSpanType.External}`,
@@ -74,7 +79,7 @@ export function getHttpRequestsLayerList(maps: MapsStartApi | undefined, dataVie
       id: 'world_countries',
       tooltipProperties: [COUNTRY_NAME],
     },
-    style: getLayerStyle(HTTP_REQUEST_PER_COUNTRY, PalleteColors.BluetoRed),
+    style: getLayerStyle(HTTP_REQUEST_PER_COUNTRY, PalleteColors.BluetoRed, styleColors),
     id: uuidv4(),
     label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.httpRequests.country.label', {
       defaultMessage: 'HTTP requests per country',
@@ -113,7 +118,7 @@ export function getHttpRequestsLayerList(maps: MapsStartApi | undefined, dataVie
       id: 'administrative_regions_lvl2',
       tooltipProperties: ['region_iso_code'],
     },
-    style: getLayerStyle(HTTP_REQUESTS_PER_REGION, PalleteColors.YellowtoRed),
+    style: getLayerStyle(HTTP_REQUESTS_PER_REGION, PalleteColors.YellowtoRed, styleColors),
     id: uuidv4(),
     label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.httpRequests.region.label', {
       defaultMessage: 'HTTP requests per region',

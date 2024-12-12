@@ -13,6 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './map_layers/get_layer_list';
 import { MapTypes } from '../../../../../../common/mobile/constants';
+import { StyleColorParams } from './map_layers/style_color_params';
 
 function EmbeddedMapComponent({
   selectedMap,
@@ -21,6 +22,11 @@ function EmbeddedMapComponent({
   kuery = '',
   filters,
   dataView,
+  styleColors = {
+    lineColor: '',
+    labelColor: '',
+    labelOutlineColor: '',
+  },
 }: {
   selectedMap: MapTypes;
   start: string;
@@ -28,6 +34,7 @@ function EmbeddedMapComponent({
   kuery?: string;
   filters: Filter[];
   dataView?: DataView;
+  styleColors?: StyleColorParams;
 }) {
   const { maps } = useKibana<ApmPluginStartDeps>().services;
 
@@ -37,9 +44,10 @@ function EmbeddedMapComponent({
           selectedMap,
           maps,
           dataViewId: dataView?.id,
+          styleColors,
         })
       : [];
-  }, [selectedMap, maps, dataView?.id]);
+  }, [selectedMap, maps, dataView?.id, styleColors]);
 
   return (
     <div
