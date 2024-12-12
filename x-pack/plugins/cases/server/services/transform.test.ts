@@ -6,13 +6,15 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorTypes } from '../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../common/types/domain';
 import { createESJiraConnector, createJiraConnector } from './test_utils';
 import {
   findConnectorIdReference,
   transformESConnectorOrUseDefault,
   transformESConnectorToExternalModel,
   transformFieldsToESModel,
+  transformCustomFieldsToESModel,
+  transformCustomFieldsToExternalModel,
 } from './transform';
 
 describe('service transform helpers', () => {
@@ -203,6 +205,158 @@ describe('service transform helpers', () => {
           Object {
             "key": "parent",
             "value": "2",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('transformCustomFieldsToESModel', () => {
+    it('returns an empty array when customFields is an empty array', () => {
+      expect(transformCustomFieldsToESModel([]).length).toBe(0);
+    });
+
+    it('returns an array with no transformations if no custom fields are lists', () => {
+      expect(
+        transformCustomFieldsToESModel([
+          { key: 'custom', value: 'value', type: CustomFieldTypes.TEXT },
+          { key: 'custom2', value: 'value2', type: CustomFieldTypes.TEXT },
+        ])
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "key": "custom",
+            "type": "text",
+            "value": "value",
+          },
+          Object {
+            "key": "custom2",
+            "type": "text",
+            "value": "value2",
+          },
+        ]
+      `);
+    });
+
+    it('transforms custom list fields to the ES model of { key: fieldKey.optionKey, value: optionLabel }', () => {
+      expect(
+        transformCustomFieldsToESModel([
+          {
+            key: 'customField',
+            value: { optionKey: 'optionLabel' },
+            type: CustomFieldTypes.LIST,
+          },
+        ])
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "key": "customField.optionKey",
+            "type": "list",
+            "value": "optionLabel",
+          },
+        ]
+      `);
+    });
+
+    it('transforms a mix of custom fields to the ES model', () => {
+      expect(
+        transformCustomFieldsToESModel([
+          { key: 'custom', value: 'value', type: CustomFieldTypes.TEXT },
+          {
+            key: 'customField',
+            value: { optionKey: 'optionLabel' },
+            type: CustomFieldTypes.LIST,
+          },
+        ])
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "key": "custom",
+            "type": "text",
+            "value": "value",
+          },
+          Object {
+            "key": "customField.optionKey",
+            "type": "list",
+            "value": "optionLabel",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('transformCustomFieldsToExternalModel', () => {
+    it('returns an empty array when customFields is an empty array', () => {
+      expect(transformCustomFieldsToExternalModel([]).length).toBe(0);
+    });
+
+    it('returns an array with no transformations if no custom fields are lists', () => {
+      expect(
+        transformCustomFieldsToExternalModel([
+          { key: 'custom', value: 'value', type: CustomFieldTypes.TEXT },
+          { key: 'custom2', value: 'value2', type: CustomFieldTypes.TEXT },
+        ])
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "key": "custom",
+            "type": "text",
+            "value": "value",
+          },
+          Object {
+            "key": "custom2",
+            "type": "text",
+            "value": "value2",
+          },
+        ]
+      `);
+    });
+
+    it('transforms custom list fields to the external model of { key: fieldKey, value: { optionKey: optionLabel } }', () => {
+      expect(
+        transformCustomFieldsToExternalModel([
+          {
+            key: 'customField.optionKey',
+            value: 'optionLabel',
+            type: CustomFieldTypes.LIST,
+          },
+        ])
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "key": "customField",
+            "type": "list",
+            "value": Object {
+              "optionKey": "optionLabel",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('transforms a mix of custom fields to the external model', () => {
+      expect(
+        transformCustomFieldsToExternalModel([
+          { key: 'custom', value: 'value', type: CustomFieldTypes.TEXT },
+          {
+            key: 'customField.optionKey',
+            value: 'optionLabel',
+            type: CustomFieldTypes.LIST,
+          },
+        ])
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "key": "custom",
+            "type": "text",
+            "value": "value",
+          },
+          Object {
+            "key": "customField",
+            "type": "list",
+            "value": Object {
+              "optionKey": "optionLabel",
+            },
           },
         ]
       `);

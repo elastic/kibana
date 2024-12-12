@@ -127,7 +127,7 @@ export function transformCustomFieldsToExternalModel(
       // Don't simply do const [key, selectedKey] = customField.key.split('.') in case the `key` contains a '.'
       const keyParts = customField.key.split('.');
       const selectedKey = keyParts[keyParts.length - 1];
-      const key = keyParts.slice(-1).join('.');
+      const key = keyParts.slice(0, -1).join('.');
       const label = customField.value;
       return {
         ...customField,
