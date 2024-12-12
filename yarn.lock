@@ -6852,7 +6852,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/runtime-fields-plugin@link:x-pack/plugins/runtime_fields":
+"@kbn/runtime-fields-plugin@link:x-pack/platform/plugins/private/runtime_fields":
   version "0.0.0"
   uid ""
 

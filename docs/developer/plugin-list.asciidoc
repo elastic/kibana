@@ -807,7 +807,7 @@ Elastic.
 |The rule registry plugin aims to make it easy for rule type producers to have their rules produce the data that they need to build rich experiences on top of a unified experience, without the risk of mapping conflicts.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/runtime_fields/README.md[runtimeFields]
 |Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 
