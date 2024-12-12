@@ -6572,6 +6572,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/palettes@link:packages/kbn-palettes":
+  version "0.0.0"
+  uid ""
+
 "@kbn/panel-loader@link:packages/kbn-panel-loader":
   version "0.0.0"
   uid ""
@@ -6693,6 +6697,10 @@
   uid ""
 
 "@kbn/recently-accessed@link:packages/kbn-recently-accessed":
+  version "0.0.0"
+  uid ""
+
+"@kbn/relocate@link:packages/kbn-relocate":
   version "0.0.0"
   uid ""
 
