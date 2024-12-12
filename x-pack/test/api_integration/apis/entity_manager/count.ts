@@ -38,7 +38,9 @@ export default function ({ getService }: FtrProviderContext) {
         filters: [],
         timestamp_field: 'custom_timestamp',
       };
-      await createEntityTypeDefinition(supertest, { type: { id: '20-services' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: '20-services', display_name: '20-services' },
+      });
       await createEntitySourceDefinition(supertest, { source });
 
       cleanup.push(
@@ -64,7 +66,9 @@ export default function ({ getService }: FtrProviderContext) {
         filters: [],
         timestamp_field: 'custom_timestamp',
       };
-      await createEntityTypeDefinition(supertest, { type: { id: 'chumble' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'chumble', display_name: 'chumble' },
+      });
       await createEntitySourceDefinition(supertest, { source: sourceType1 });
 
       const sourceType2 = {
@@ -76,7 +80,9 @@ export default function ({ getService }: FtrProviderContext) {
         filters: [],
         timestamp_field: '@timestamp',
       };
-      await createEntityTypeDefinition(supertest, { type: { id: 'shleem' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'shleem', display_name: 'shleem' },
+      });
       await createEntitySourceDefinition(supertest, { source: sourceType2 });
 
       const sourceType3 = {
@@ -88,7 +94,9 @@ export default function ({ getService }: FtrProviderContext) {
         filters: [],
         timestamp_field: '@timestamp',
       };
-      await createEntityTypeDefinition(supertest, { type: { id: 'shmuckle' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'shmuckle', display_name: 'shmuckle' },
+      });
       await createEntitySourceDefinition(supertest, { source: sourceType3 });
 
       cleanup = await Promise.all([
@@ -134,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('aggregates type count across sources', async () => {
-      await createEntityTypeDefinition(supertest, { type: { id: 'fleeb' } });
+      await createEntityTypeDefinition(supertest, { type: { id: 'fleeb', display_name: 'fleeb' } });
       await Promise.all([
         createEntitySourceDefinition(supertest, {
           source: {
@@ -199,7 +207,9 @@ export default function ({ getService }: FtrProviderContext) {
     it('respects start and end parameters', async () => {
       const now = moment();
 
-      await createEntityTypeDefinition(supertest, { type: { id: 'grumbo' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'grumbo', display_name: 'grumbo' },
+      });
       await createEntitySourceDefinition(supertest, {
         source: {
           id: 'source-1-with-grumbos',
@@ -262,7 +272,9 @@ export default function ({ getService }: FtrProviderContext) {
         metadata_fields: [],
         filters: [],
       };
-      await createEntityTypeDefinition(supertest, { type: { id: 'chumble' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'chumble', display_name: 'chumble' },
+      });
       await createEntitySourceDefinition(supertest, { source: sourceType1 });
 
       const sourceType2 = {
@@ -273,7 +285,9 @@ export default function ({ getService }: FtrProviderContext) {
         metadata_fields: [],
         filters: [],
       };
-      await createEntityTypeDefinition(supertest, { type: { id: 'shleem' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'shleem', display_name: 'shleem' },
+      });
       await createEntitySourceDefinition(supertest, { source: sourceType2 });
 
       const sourceType3 = {
@@ -284,7 +298,9 @@ export default function ({ getService }: FtrProviderContext) {
         metadata_fields: [],
         filters: [],
       };
-      await createEntityTypeDefinition(supertest, { type: { id: 'shmuckle' } });
+      await createEntityTypeDefinition(supertest, {
+        type: { id: 'shmuckle', display_name: 'shmuckle' },
+      });
       await createEntitySourceDefinition(supertest, { source: sourceType3 });
 
       cleanup = await Promise.all([
