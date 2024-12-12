@@ -49,18 +49,10 @@ export const flashSuccessToast = (message: string, toastOptions: ToastOptions = 
   });
 };
 
-export const flashErrorToast = (
-  message: string,
-  delay: number = 0,
-  toastOptions: ToastOptions = {}
-) => {
-  setTimeout(
-    () =>
-      FlashMessagesLogic.values.notifications.toasts.add({
-        ...FLASH_MESSAGE_TYPES.error,
-        ...toastOptions,
-        title: message,
-      }),
-    delay * 1000
-  );
+export const flashErrorToast = (message: string, toastOptions: ToastOptions = {}) => {
+  FlashMessagesLogic.values.notifications.toasts.add({
+    ...FLASH_MESSAGE_TYPES.error,
+    ...toastOptions,
+    title: message,
+  });
 };
