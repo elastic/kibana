@@ -20,9 +20,8 @@ import type { MigrateRuleState } from './agent/types';
 import { RuleMigrationsRetriever } from './retrievers';
 import type {
   MigrationAgent,
-  RuleMigrationTaskPrepareParams,
-  RuleMigrationTaskRunParams,
   RuleMigrationTaskStartParams,
+  RuleMigrationTaskCreateAgentParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
@@ -63,82 +62,40 @@ export class RuleMigrationsTaskClient {
       return { exists: true, started: false };
     }
 
-    const abortController = new AbortController();
-
-    // Retrieve agent from prepare and pass it to run right after without awaiting but using .then
-    this.prepare({ ...params, abortController })
-      .then((agent) => this.run({ ...params, agent, abortController }))
-      .catch((error) => {
-        this.logger.error(`Error starting migration ID:${migrationId} with error:${error}`, error);
-      });
+    // run the migration without awaiting it to execute it in the background
+    this.run(params).catch((error) => {
+      this.logger.error(`Error executing migration ID:${migrationId}`, error);
+    });
 
     return { exists: true, started: true };
   }
 
-  private async prepare({
-    migrationId,
-    connectorId,
-    inferenceClient,
-    actionsClient,
-    rulesClient,
-    soClient,
-    abortController,
-  }: RuleMigrationTaskPrepareParams): Promise<MigrationAgent> {
-    await Promise.all([
-      // Populates the indices used for RAG searches on prebuilt rules and integrations.
-      await this.data.prebuiltRules.create({ rulesClient, soClient }),
-      // Will use Fleet API client for integration retrieval as an argument once feature is available
-      await this.data.integrations.create(),
-    ]).catch((error) => {
-      this.logger.error(`Error preparing RAG indices for migration ID:${migrationId}`, error);
-      throw error;
-    });
-
-    const ruleMigrationsRetriever = new RuleMigrationsRetriever(this.data, migrationId);
-
-    const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
-    const model = await actionsClientChat.createModel({
-      signal: abortController.signal,
-      temperature: 0.05,
-    });
-
-    const agent = getRuleMigrationAgent({
-      connectorId,
-      model,
-      inferenceClient,
-      ruleMigrationsRetriever,
-      logger: this.logger,
-    });
-    return agent;
-  }
-
-  private async run({
-    migrationId,
-    agent,
-    invocationConfig,
-    abortController,
-  }: RuleMigrationTaskRunParams): Promise<void> {
+  private async run(params: RuleMigrationTaskStartParams): Promise<void> {
+    const { migrationId, invocationConfig } = params;
     if (this.migrationsRunning.has(migrationId)) {
       // This should never happen, but just in case
       throw new Error(`Task already running for migration ID:${migrationId} `);
     }
     this.logger.info(`Starting migration ID:${migrationId}`);
 
+    const abortController = new AbortController();
     this.migrationsRunning.set(migrationId, { user: this.currentUser.username, abortController });
-    const config: RunnableConfig = {
-      ...invocationConfig,
-      // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
-    };
 
     const abortPromise = abortSignalToPromise(abortController.signal);
+    const withAbortRace = async <T>(task: Promise<T>) => Promise.race([task, abortPromise.promise]);
+
+    const sleep = async (seconds: number) => {
+      this.logger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
+      await withAbortRace(new Promise((resolve) => setTimeout(resolve, seconds * 1000)));
+    };
 
     try {
-      const sleep = async (seconds: number) => {
-        this.logger.debug(`Sleeping ${seconds}s for migration ID:${migrationId}`);
-        await Promise.race([
-          new Promise((resolve) => setTimeout(resolve, seconds * 1000)),
-          abortPromise.promise,
-        ]);
+      this.logger.debug(`Creating agent for migration ID:${migrationId}`);
+      const agent = await withAbortRace(this.createAgent({ ...params, abortController }));
+
+      const config: RunnableConfig = {
+        ...invocationConfig,
+        // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
       };
 
       let isDone: boolean = false;
@@ -154,10 +111,12 @@ export class RuleMigrationsTaskClient {
             try {
               const start = Date.now();
 
-              const migrationResult: MigrateRuleState = await Promise.race([
-                agent.invoke({ original_rule: ruleMigration.original_rule }, config),
-                abortPromise.promise, // workaround for the issue with the langGraph signal
-              ]);
+              const invocation = agent.invoke(
+                { original_rule: ruleMigration.original_rule },
+                config
+              );
+              // using withAbortRace is a workaround for the issue with the langGraph signal not working properly
+              const migrationResult = await withAbortRace<MigrateRuleState>(invocation);
 
               const duration = (Date.now() - start) / 1000;
               this.logger.debug(
@@ -209,6 +168,38 @@ export class RuleMigrationsTaskClient {
       this.migrationsRunning.delete(migrationId);
       abortPromise.cleanup();
     }
+  }
+
+  private async createAgent({
+    migrationId,
+    connectorId,
+    inferenceClient,
+    actionsClient,
+    rulesClient,
+    soClient,
+    abortController,
+  }: RuleMigrationTaskCreateAgentParams): Promise<MigrationAgent> {
+    const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
+    const model = await actionsClientChat.createModel({
+      signal: abortController.signal,
+      temperature: 0.05,
+    });
+
+    const ruleMigrationsRetriever = new RuleMigrationsRetriever(migrationId, {
+      data: this.data,
+      rules: rulesClient,
+      savedObjects: soClient,
+    });
+    await ruleMigrationsRetriever.initialize();
+
+    const agent = getRuleMigrationAgent({
+      connectorId,
+      model,
+      inferenceClient,
+      ruleMigrationsRetriever,
+      logger: this.logger,
+    });
+    return agent;
   }
 
   /** Updates all the rules in a migration to be re-executed */

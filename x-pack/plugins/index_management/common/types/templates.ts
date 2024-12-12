@@ -51,7 +51,7 @@ export interface TemplateDeserialized {
   priority?: number; // Composable template only
   allowAutoCreate: string;
   order?: number; // Legacy template only
-  indexMode: IndexMode;
+  indexMode?: IndexMode;
   ilmPolicy?: {
     name: string;
   };
