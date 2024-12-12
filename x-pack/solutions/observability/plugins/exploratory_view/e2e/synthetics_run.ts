@@ -25,7 +25,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
 
       await syntheticsRunner.setup();
       await syntheticsRunner.loadTestData(
-        `${REPO_ROOT}/x-pack/plugins/observability_solution/ux/e2e/fixtures/`,
+        `${REPO_ROOT}/x-pack/solutions/observability/plugins/ux/e2e/fixtures/`,
         ['rum_8.0.0', 'rum_test_data']
       );
       await syntheticsRunner.loadTestData(
