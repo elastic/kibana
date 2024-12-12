@@ -7,10 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_BUTTON = i18n.translate('expandableFlyout.previewSection.backButton', {
-  defaultMessage: 'Back',
-});
+export const BACK_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.backButton',
+  {
+    defaultMessage: 'Back',
+  }
+);
 
-export const CLOSE_BUTTON = i18n.translate('expandableFlyout.previewSection.closeButton', {
-  defaultMessage: 'Close',
-});
+export const CLOSE_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);

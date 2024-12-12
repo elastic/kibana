@@ -35,39 +35,66 @@ import {
 } from './test_ids';
 import { selectPushVsOverlay, useDispatch, useSelector } from '../store/redux';
 
-const SETTINGS_MENU_ICON_BUTTON = i18n.translate('expandableFlyout.settingsMenu.popoverButton', {
-  defaultMessage: 'Open flyout settings menu',
-});
+const SETTINGS_MENU_ICON_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.settingsMenu.popoverButton',
+  {
+    defaultMessage: 'Open flyout settings menu',
+  }
+);
 const SETTINGS_MENU_ICON_BUTTON_TOOLTIP = i18n.translate(
-  'expandableFlyout.settingsMenu.popoverButton',
+  'securitySolutionPackages.expandableFlyout.settingsMenu.popoverButton',
   {
     defaultMessage: 'Flyout settings',
   }
 );
-const SETTINGS_MENU_TITLE = i18n.translate('expandableFlyout.settingsMenu.popoverTitle', {
-  defaultMessage: 'Flyout settings',
-});
-const FLYOUT_TYPE_TITLE = i18n.translate('expandableFlyout.settingsMenu.flyoutTypeTitle', {
-  defaultMessage: 'Flyout type',
-});
-const FLYOUT_TYPE_OVERLAY_MODE = i18n.translate('expandableFlyout.settingsMenu.overlayMode', {
-  defaultMessage: 'Overlay',
-});
-const FLYOUT_TYPE_PUSH_MODE = i18n.translate('expandableFlyout.settingsMenu.pushMode', {
-  defaultMessage: 'Push',
-});
-const FLYOUT_TYPE_OVERLAY_TOOLTIP = i18n.translate('expandableFlyout.settingsMenu.overlayTooltip', {
-  defaultMessage: 'Displays the flyout over the page',
-});
-const FLYOUT_TYPE_PUSH_TOOLTIP = i18n.translate('expandableFlyout.settingsMenu.pushTooltip', {
-  defaultMessage: 'Displays the flyout next to the page',
-});
-const FLYOUT_RESIZE_TITLE = i18n.translate('expandableFlyout.renderMenu.flyoutResizeTitle', {
-  defaultMessage: 'Flyout size',
-});
-const FLYOUT_RESIZE_BUTTON = i18n.translate('expandableFlyout.renderMenu.flyoutResizeButton', {
-  defaultMessage: 'Reset size',
-});
+const SETTINGS_MENU_TITLE = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.settingsMenu.popoverTitle',
+  {
+    defaultMessage: 'Flyout settings',
+  }
+);
+const FLYOUT_TYPE_TITLE = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.settingsMenu.flyoutTypeTitle',
+  {
+    defaultMessage: 'Flyout type',
+  }
+);
+const FLYOUT_TYPE_OVERLAY_MODE = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.settingsMenu.overlayMode',
+  {
+    defaultMessage: 'Overlay',
+  }
+);
+const FLYOUT_TYPE_PUSH_MODE = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.settingsMenu.pushMode',
+  {
+    defaultMessage: 'Push',
+  }
+);
+const FLYOUT_TYPE_OVERLAY_TOOLTIP = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.settingsMenu.overlayTooltip',
+  {
+    defaultMessage: 'Displays the flyout over the page',
+  }
+);
+const FLYOUT_TYPE_PUSH_TOOLTIP = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.settingsMenu.pushTooltip',
+  {
+    defaultMessage: 'Displays the flyout next to the page',
+  }
+);
+const FLYOUT_RESIZE_TITLE = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.renderMenu.flyoutResizeTitle',
+  {
+    defaultMessage: 'Flyout size',
+  }
+);
+const FLYOUT_RESIZE_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.renderMenu.flyoutResizeButton',
+  {
+    defaultMessage: 'Reset size',
+  }
+);
 
 export interface FlyoutCustomProps {
   /**
