@@ -47,7 +47,7 @@ export class ScoutPlaywrightReporter implements Reporter {
   readonly name: string;
   readonly runId: string;
   private report: ScoutReport;
-  private codeOwnersEntries: CodeOwnersEntry[];
+  private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
