@@ -113,7 +113,7 @@ Add a link to lens embeddable readme
 
 #### Example
 A simple usage of lens embeddable example and playground options
-[embedded_lens_example](../../../../../../examples/embedded_lens_example)
+[embedded_lens_example](../../../../../../../examples/embedded_lens_example)
 
 ## Exploratory view Embeddable
 
@@ -153,9 +153,9 @@ usage looks like this
 ```
 
 there is an example in kibana example which you can view using
-`yarn start --run-examples` and view the code at [Exploratory view embeddable](../../../../../../examples/exploratory_view_example)
+`yarn start --run-examples` and view the code at [Exploratory view embeddable](../../../../../../../examples/exploratory_view_example)
 
 #### Example
 A simple usage of lens embeddable example and playground options, run kibana with
 `yarn start --run-example` to see this example in action
-source code is defined at [embedded_lens_example](../../../../../../examples/embedded_lens_example)
+source code is defined at [embedded_lens_example](../../../../../../../examples/embedded_lens_example)
