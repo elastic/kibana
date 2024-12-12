@@ -28,7 +28,7 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
@@ -454,7 +454,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/aiops/README.md[aiops]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/aiops/README.md[aiops]
 |The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team.
 
 
@@ -541,11 +541,11 @@ Plugin server-side only. Plugin has three main functions:
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_usage/README.md[dataUsage]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/data_usage/README.md[dataUsage]
 |Serverless only plugin for users to view data usage
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/data_visualizer/README.md[dataVisualizer]
 |The data_visualizer plugin enables you to explore the fields in your data.
 
 
@@ -643,7 +643,7 @@ Index Management by running this series of requests in Console:
 |This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/inference/README.md[inference]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/inference/README.md[inference]
 |The inference plugin is a central place to handle all interactions with the Elasticsearch Inference API and
 external LLM APIs. Its goals are:
 
@@ -698,7 +698,7 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/llm_tasks/README.md[llmTasks]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/llm_tasks/README.md[llmTasks]
 |This plugin contains various LLM tasks.
 
 
@@ -726,7 +726,7 @@ using the CURL scripts in the scripts folder.
 |Exposes utilities to access metrics data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ml/readme.md[ml]
 |This plugin provides access to the machine learning features provided by
 Elastic.
 
@@ -747,15 +747,15 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_ai_assistant_app/README.md[observabilityAIAssistantApp]
 |This app registers defaults functions. It exists as a separate plugin to avoid cyclical dependencies.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_ai_assistant_management/README.md[observabilityAiAssistantManagement]
 |The observabilityAiAssistantManagement plugin manages the Ai Assistant for Observability and Search management section.
 
 
@@ -779,7 +779,7 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ai_infra/product_doc_base/README.md[productDocBase]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md[productDocBase]
 |This plugin contains the product documentation base service.
 
 
@@ -917,11 +917,11 @@ routes, etc.
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/streams/README.md[streams]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/streams/README.md[streams]
 |This plugin provides an interface to manage streams
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/streams_app/README.md[streamsApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/streams_app/README.md[streamsApp]
 |Home of the Streams app plugin, which allows users to manage Streams via the UI.
 
 
@@ -946,7 +946,7 @@ in their infrastructure.
 |Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/transform/readme.md[transform]
 |This plugin provides access to the transforms features provided by Elastic.
 
 
@@ -988,4 +988,4 @@ include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
-include::{kibana-root}/x-pack/plugins/translations/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/platform/plugins/private/translations/README.asciidoc[leveloffset=+1]

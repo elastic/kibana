@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import React from 'react';
+import { renderHook, act } from '@testing-library/react';
 import * as reactRedux from 'react-redux';
 import { useBins, useMonitorStatusData } from './use_monitor_status_data';
 import { WrappedHelper } from '../../../utils/testing';
 import * as selectedMonitorHook from '../hooks/use_selected_monitor';
 import * as selectedLocationHook from '../hooks/use_selected_location';
 import { omit } from 'lodash';
+
+const Wrapper = ({ children }: React.PropsWithChildren) =>
+  React.createElement(WrappedHelper, null, children);
 
 describe('useMonitorStatusData', () => {
   let dispatchMock: jest.Mock;
@@ -65,7 +69,7 @@ describe('useMonitorStatusData', () => {
       initialSizeRef: { current: { clientWidth: 0 } as any },
     };
     const { result } = renderHook(() => useMonitorStatusData(props), {
-      wrapper: WrappedHelper,
+      wrapper: Wrapper,
     });
     expect(result.current).toBeDefined();
     expect(result.current.minsPerBin).toBeNull();
@@ -81,7 +85,7 @@ describe('useMonitorStatusData', () => {
       initialSizeRef: { current: { clientWidth: 0 } as any },
     };
     const { result } = renderHook(() => useMonitorStatusData(props), {
-      wrapper: WrappedHelper,
+      wrapper: Wrapper,
     });
     await act(async () => {
       result.current.handleResize({ width: 250, height: 800 });
@@ -162,7 +166,7 @@ describe('useBins', () => {
             },
           ],
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: Wrapper }
     );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
@@ -340,7 +344,7 @@ describe('useBins', () => {
           fromMillis: 1728310613654,
           toMillis: 1728313563654,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: Wrapper }
     );
     expect(result.current).toMatchInlineSnapshot(`
       Object {
