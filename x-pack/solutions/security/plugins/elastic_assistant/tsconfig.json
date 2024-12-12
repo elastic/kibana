@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -10,7 +10,7 @@
     "scripts/**/*.ts",
     // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
-    "../../../typings/**/*"
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

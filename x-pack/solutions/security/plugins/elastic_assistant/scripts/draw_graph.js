@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
-require('./create_conversations_script').create();
+require('../../../../../../src/setup_node_env');
+require('./draw_graph_script').draw();
