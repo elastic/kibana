@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
+import { CONCURRENT_SPACES_TO_CHECK } from '../../deprecations/constants';
 import { defaultLogViewId } from '../../../common/log_views';
 import { MIGRATE_LOG_VIEW_SETTINGS_URL } from '../../../common/http_api/deprecations';
 import { logSourcesKibanaAdvancedSettingRT } from '../../../common';
@@ -23,17 +25,54 @@ export const initMigrateLogViewSettingsRoute = ({
     { path: MIGRATE_LOG_VIEW_SETTINGS_URL, validate: false },
     async (context, request, response) => {
       try {
+        const { elasticsearch, savedObjects } = await context.core;
         const [_, pluginStartDeps, pluginStart] = await getStartServices();
 
-        const logSourcesService =
-          await pluginStartDeps.logsDataAccess.services.logSourcesServiceFactory.getScopedLogSourcesService(
-            request
-          );
-        const logViewsClient = pluginStart.logViews.getScopedClient(request);
+        const allAvailableSpaces = await pluginStartDeps.spaces.spacesService
+          .createSpacesClient(request)
+          .getAll({ purpose: 'any' });
 
-        const logView = await logViewsClient.getLogView(defaultLogViewId);
+        const updated = await pMap(
+          allAvailableSpaces,
+          async (space) => {
+            const spaceScopedSavedObjectsClient = savedObjects.client.asScopedToNamespace(space.id);
 
-        if (!logView || logSourcesKibanaAdvancedSettingRT.is(logView.attributes.logIndices)) {
+            const logSourcesServicePromise =
+              pluginStartDeps.logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(
+                spaceScopedSavedObjectsClient
+              );
+            const logViewsClient = pluginStart.logViews.getClient(
+              spaceScopedSavedObjectsClient,
+              elasticsearch.client.asCurrentUser,
+              logSourcesServicePromise
+            );
+
+            const logView = await logViewsClient.getLogView(defaultLogViewId);
+
+            if (!logView || logSourcesKibanaAdvancedSettingRT.is(logView.attributes.logIndices)) {
+              return false;
+            }
+
+            const indices = (
+              await logViewsClient.getResolvedLogView({
+                type: 'log-view-reference',
+                logViewId: defaultLogViewId,
+              })
+            ).indices;
+
+            const logSourcesService = await logSourcesServicePromise;
+            await logSourcesService.setLogSources([{ indexPattern: indices }]);
+            await logViewsClient.putLogView(defaultLogViewId, {
+              logIndices: { type: 'kibana_advanced_setting' },
+            });
+
+            return true;
+          },
+          { concurrency: CONCURRENT_SPACES_TO_CHECK }
+        );
+
+        if (!updated.includes(true)) {
+          // Only throw if none of the spaces was able to migrate
           return response.customError({
             body: new Error(
               "Unable to migrate log view settings. A log view either doesn't exist or is already using the Kibana advanced setting."
@@ -42,17 +81,6 @@ export const initMigrateLogViewSettingsRoute = ({
           });
         }
 
-        const indices = (
-          await logViewsClient.getResolvedLogView({
-            type: 'log-view-reference',
-            logViewId: defaultLogViewId,
-          })
-        ).indices;
-
-        await logSourcesService.setLogSources([{ indexPattern: indices }]);
-        await logViewsClient.putLogView(defaultLogViewId, {
-          logIndices: { type: 'kibana_advanced_setting' },
-        });
         return response.ok();
       } catch (error) {
         throw error;
