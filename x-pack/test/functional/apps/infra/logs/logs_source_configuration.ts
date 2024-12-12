@@ -10,7 +10,6 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { DATES } from '../constants';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -32,11 +31,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Logs Source Configuration', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
     });
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
     });
 
     describe('Allows indices configuration', () => {
