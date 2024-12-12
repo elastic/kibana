@@ -251,6 +251,7 @@ export const useTimelineEventsHandler = ({
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
+
         if (activeBatch === 0) {
           setLoading(DataLoadingState.loading);
         } else {
@@ -414,7 +415,6 @@ export const useTimelineEventsHandler = ({
           activePage: 0,
           querySize: (newActiveBatch + 1) * limit,
         };
-        console.log(`Pagination with new Fields:`, { newPagination });
       }
 
       const currentRequest = {
@@ -471,31 +471,6 @@ export const useTimelineEventsHandler = ({
     [id, timelineRequest, timelineSearch, timerangeKind]
   );
 
-  /*
-    cleanup timeline events response when the filters were removed completely
-    to avoid displaying previous query results
-  */
-  useEffect(() => {
-    if (isEmpty(filterQuery)) {
-      setTimelineResponse({
-        id,
-        inspect: {
-          dsl: [],
-          response: [],
-        },
-        refetch: refetchGrid,
-        totalCount: -1,
-        pageInfo: {
-          activePage: 0,
-          querySize: 0,
-        },
-        events: [],
-        loadNextBatch,
-        refreshedAt: 0,
-      });
-    }
-  }, [filterQuery, id, refetchGrid, loadNextBatch]);
-
   const finalTimelineLineResponse = useMemo(() => {
     return {
       ...timelineResponse,
@@ -541,8 +516,6 @@ export const useTimelineEvents = ({
     timerangeKind,
   });
 
-  console.log({ timelineResponse: timelineResponse.pageInfo });
-
   useEffect(() => {
     /*
      * `timelineSearchHandler` only returns the events for the current page.
@@ -562,7 +535,6 @@ export const useTimelineEvents = ({
       } else {
         result = [timelineResponse.events];
       }
-      console.log({ result, activePage });
       return result;
     });
   }, [timelineResponse.events, timelineResponse.pageInfo, dataLoadingState, limit]);
