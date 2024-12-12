@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-theme';
+
+import type { EuiThemeComputed } from '@elastic/eui-theme-common';
 
 import type { SimplifiedAgentStatus } from '../../../types';
-
-const visColors = euiPaletteColorBlindBehindText();
-const colorToHexMap = {
-  // using variables as mentioned here https://elastic.github.io/eui/#/guidelines/getting-started
-  default: euiLightVars.euiColorLightShade,
-  primary: visColors[1],
-  success: visColors[0],
-  accent: visColors[2],
-  warning: visColors[5],
-  danger: visColors[9],
-  inactive: euiLightVars.euiColorDarkShade,
-  lightest: euiLightVars.euiColorDisabled,
-};
 
 export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
   'healthy',
@@ -33,20 +20,24 @@ export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
   'unenrolled',
 ];
 
-export function getColorForAgentStatus(agentStatus: SimplifiedAgentStatus): string {
+export function getColorForAgentStatus(
+  agentStatus: SimplifiedAgentStatus,
+  euiTheme: EuiThemeComputed<{}>
+): string {
+  // using variables as mentioned here https://eui.elastic.co/#/theming/colors/values
   switch (agentStatus) {
     case 'healthy':
-      return colorToHexMap.success;
+      return euiTheme.colors.success;
     case 'offline':
-      return colorToHexMap.default;
+      return euiTheme.colors.lightShade;
     case 'inactive':
-      return colorToHexMap.inactive;
+      return euiTheme.colors.darkShade;
     case 'unhealthy':
-      return colorToHexMap.warning;
+      return euiTheme.colors.warning;
     case 'updating':
-      return colorToHexMap.primary;
+      return euiTheme.colors.primary;
     case 'unenrolled':
-      return colorToHexMap.lightest;
+      return euiTheme.colors.disabled;
     default:
       throw new Error(`Unsupported Agent status ${agentStatus}`);
   }
