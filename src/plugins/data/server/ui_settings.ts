@@ -55,7 +55,7 @@ export function getUiSettings(
       value: true,
       description: i18n.translate('data.advancedSettings.docTableHighlightText', {
         defaultMessage:
-          'Highlight results in Discover and Saved Searches Dashboard. ' +
+          'Highlights search results in Discover and Discover session panels on dashboards. ' +
           'Highlighting makes requests slow when working on big documents.',
       }),
       category: ['discover'],

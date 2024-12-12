@@ -434,7 +434,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "name": "Generate CSV reports from Saved Search panels",
+                "name": "Generate CSV reports from Discover session panels",
                 "savedObject": Object {
                   "all": Array [],
                   "read": Array [],
