@@ -4,6 +4,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       machineType: n2-standard-2
+      diskSizeGb: 75
 
   - wait
 
@@ -26,6 +27,7 @@ steps:
     agents:
       machineType: n2-highcpu-8
       preemptible: true
+      diskSizeGb: 75
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -39,6 +41,7 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -50,6 +53,7 @@ steps:
     agents:
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -62,6 +66,7 @@ steps:
     agents:
       machineType: n2-standard-32
       preemptible: true
+      diskSizeGb: 75
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -74,6 +79,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -88,6 +94,7 @@ steps:
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
+      diskSizeGb: 75
     key: check_types
     timeout_in_minutes: 60
     retry:
@@ -101,6 +108,7 @@ steps:
     label: Mark CI Stats as ready
     agents:
       machineType: n2-standard-2
+      diskSizeGb: 75
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -114,6 +122,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
+      diskSizeGb: 75
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -129,6 +138,7 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     key: build_api_docs
     timeout_in_minutes: 90
     retry:
