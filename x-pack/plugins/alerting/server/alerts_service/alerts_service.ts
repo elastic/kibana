@@ -428,6 +428,7 @@ export class AlertsService implements IAlertsService {
       const componentTemplate = getComponentTemplate({
         fieldMap: mappings.fieldMap,
         dynamic: mappings.dynamic,
+        dynamicTemplates: mappings.dynamicTemplates,
         context,
       });
       initFns.push(
