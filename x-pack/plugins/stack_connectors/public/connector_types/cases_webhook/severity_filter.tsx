@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import {
   EuiFlexGroup,
@@ -13,6 +12,7 @@ import {
   EuiHealth,
   EuiSuperSelect,
   EuiSuperSelectOption,
+  useEuiTheme,
 } from '@elastic/eui';
 import * as i18n from './translations';
 
@@ -23,31 +23,32 @@ export enum CaseSeverity {
   CRITICAL = 'critical',
 }
 
-export const severities = {
-  [CaseSeverity.LOW]: {
-    color: euiLightVars.euiColorVis0,
-    label: i18n.SEVERITY_LOW_LABEL,
-  },
-  [CaseSeverity.MEDIUM]: {
-    color: euiLightVars.euiColorVis5,
-    label: i18n.SEVERITY_MEDIUM_LABEL,
-  },
-  [CaseSeverity.HIGH]: {
-    color: euiLightVars.euiColorVis7,
-    label: i18n.SEVERITY_HIGH_LABEL,
-  },
-  [CaseSeverity.CRITICAL]: {
-    color: euiLightVars.euiColorVis9,
-    label: i18n.SEVERITY_CRITICAL_LABEL,
-  },
-};
-
 interface Props {
   selectedSeverity: CaseSeverity;
   onSeverityChange: (status: CaseSeverity) => void;
 }
 
 export const SeverityFilter: React.FC<Props> = ({ selectedSeverity, onSeverityChange }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const severities = {
+    [CaseSeverity.LOW]: {
+      color: euiTheme.colors.vis.euiColorVis0,
+      label: i18n.SEVERITY_LOW_LABEL,
+    },
+    [CaseSeverity.MEDIUM]: {
+      color: euiTheme.colors.vis.euiColorVis5,
+      label: i18n.SEVERITY_MEDIUM_LABEL,
+    },
+    [CaseSeverity.HIGH]: {
+      color: euiTheme.colors.vis.euiColorVis7,
+      label: i18n.SEVERITY_HIGH_LABEL,
+    },
+    [CaseSeverity.CRITICAL]: {
+      color: euiTheme.colors.vis.euiColorVis9,
+      label: i18n.SEVERITY_CRITICAL_LABEL,
+    },
+  };
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
     const severityData = severities[severity];
