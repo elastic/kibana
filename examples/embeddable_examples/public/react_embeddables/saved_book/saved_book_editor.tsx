@@ -69,10 +69,7 @@ export const openSavedBookEditor = (
             resolve({ addToLibrary });
           }}
         />,
-        {
-          theme: core.theme,
-          i18n: core.i18n,
-        }
+        core
       ),
       {
         type: isCreate ? 'overlay' : 'push',

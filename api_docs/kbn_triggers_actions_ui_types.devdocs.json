@@ -110,7 +110,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
         ],
         "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,
@@ -236,6 +236,51 @@
             "text": "RuleType"
           },
           "<string, string>>"
+        ],
+        "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.RuleTypeIndexWithDescriptions",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeIndexWithDescriptions",
+        "description": [],
+        "signature": [
+          "Map<string, ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleTypeWithDescription",
+            "text": "RuleTypeWithDescription"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.RuleTypeWithDescription",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeWithDescription",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleType",
+            "text": "RuleType"
+          },
+          "<string, string> & { description?: string | undefined; }"
         ],
         "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,

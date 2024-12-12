@@ -11,7 +11,7 @@ import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { AIActionTypeIds } from '../../common/connectors/constants';
 import type { AIConnectorCardMetadata } from './types';
 
-export const checkAssistantCardComplete: OnboardingCardCheckComplete<
+export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
   AIConnectorCardMetadata
 > = async ({ http, application, siemMigrations }) => {
   let isComplete = false;

@@ -95,10 +95,19 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
       unsavedChanges,
       resetUnsavedChanges: () => {
         const lastSaved = lastSavedState$.getValue();
+
+        // Do not reset to undefined or empty last saved state
+        // Temporary fix for https://github.com/elastic/kibana/issues/201627
+        // TODO remove when architecture fix resolves issue.
+        if (comparatorKeys.length && (!lastSaved || Object.keys(lastSaved).length === 0)) {
+          return false;
+        }
+
         for (const key of comparatorKeys) {
           const setter = comparators[key][1]; // setter function is the 1st element of the tuple
           setter(lastSaved?.[key] as RuntimeState[typeof key]);
         }
+        return true;
       },
       snapshotRuntimeState,
     } as PublishesUnsavedChanges<RuntimeState> & HasSnapshottableState<RuntimeState>,

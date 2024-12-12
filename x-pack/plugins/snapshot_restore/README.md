@@ -75,3 +75,11 @@ To run ES with plugins:
 2. `cd .es/8.0.0`
 3. `bin/elasticsearch-plugin install https://snapshots.elastic.co/downloads/elasticsearch-plugins/repository-hdfs/repository-hdfs-8.0.0-SNAPSHOT.zip`
 4. Run `bin/elasticsearch` from the `.es/8.0.0` directory. Otherwise, starting ES with `yarn es snapshot` would overwrite the plugins you just installed.
+
+
+### SLM status
+Snapshot lifecycle management (SLM) status is "RUNNING" by default, but it can be stoped manually (for mantenaince purpouses, for instance). When this happens, no schedule snapshots will be taken. Docs: https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshot-lifecycle-management-api.html 
+
+* To check the SLM status you can run `GET _slm/status`
+* To start SLM `POST /_slm/start` 
+* To stop SLM `POST /_slm/stop`

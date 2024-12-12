@@ -35,5 +35,6 @@
     "@kbn/management-settings-section-registry",
     "@kbn/core-notifications-browser",
     "@kbn/core-chrome-browser",
+    "@kbn/core-user-profile-browser-mocks",
   ]
 }

@@ -24444,7 +24444,7 @@
             "label": "monitoring_http",
             "description": [],
             "signature": [
-              "{ enabled: boolean; host?: string | undefined; port?: number | undefined; buffer?: { enabled: boolean; } | undefined; } | undefined"
+              "{ enabled?: boolean | undefined; host?: string | undefined; port?: number | undefined; buffer?: { enabled: boolean; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
