@@ -1785,7 +1785,7 @@
     "micromatch": "^4.0.8",
     "mini-css-extract-plugin": "1.1.0",
     "minimist": "^1.2.6",
-    "mocha": "^10.1.0",
+    "mocha": "^10.3.0",
     "mocha-junit-reporter": "^2.0.2",
     "mocha-multi-reporters": "^1.5.1",
     "mochawesome": "^7.1.3",
