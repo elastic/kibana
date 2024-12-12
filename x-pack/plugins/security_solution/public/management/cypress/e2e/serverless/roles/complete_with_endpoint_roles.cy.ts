@@ -30,7 +30,8 @@ import {
   visitPolicyList,
 } from '../../../screens';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170052
+describe.skip(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
     tags: ['@serverless', '@skipInServerlessMKI'],
@@ -43,9 +44,7 @@ describe(
         // This is not needed for this test, but it's a good example of
         // how to enable experimental features in the Cypress tests.
         // kbnServerArgs: [
-        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        //     'featureFlagName',
-        //   ])}`,
+        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify(['featureFlagName'])}`,
         // ],
       },
     },
@@ -127,6 +126,8 @@ describe(
         'get-file',
         'upload',
         'scan'
+        // TODO: currently not implemented for Endpoint
+        // 'runscript'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');
