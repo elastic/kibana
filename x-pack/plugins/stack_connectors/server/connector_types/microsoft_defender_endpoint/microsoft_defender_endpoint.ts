@@ -25,7 +25,8 @@ import {
   MicrosoftDefenderEndpointSecrets,
   MicrosoftDefenderEndpointReleaseHostParams,
   MicrosoftDefenderEndpointTestConnectorParams,
-  MicrosoftDefenderEndpointAgentDetails,
+  MicrosoftDefenderEndpointMachine,
+  MicrosoftDefenderEndpointMachineAction,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export const API_MAX_RESULTS = 1000;
@@ -137,21 +138,49 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   public async getAgentDetails(
     { id }: MicrosoftDefenderEndpointAgentDetailsParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<MicrosoftDefenderEndpointAgentDetails> {
-    return this.fetchFromMicrosoft({ url: `${this.urls.machines}/${id}` }, connectorUsageCollector);
+  ): Promise<MicrosoftDefenderEndpointMachine> {
+    // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/machine
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachine>(
+      { url: `${this.urls.machines}/${id}` },
+      connectorUsageCollector
+    );
   }
 
   public async isolateHost(
-    options: MicrosoftDefenderEndpointIsolateHostParams,
+    { id, comment }: MicrosoftDefenderEndpointIsolateHostParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ) {
-    throw new Error('Not implemented (yet)');
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference: https://learn.microsoft.com/en-us/defender-endpoint/api/isolate-machine
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machines}/${id}/isolate`,
+        method: 'POST',
+        data: {
+          Comment: comment,
+          IsolationType: 'Full',
+        },
+      },
+      connectorUsageCollector
+    );
   }
 
   public async releaseHost(
-    options: MicrosoftDefenderEndpointReleaseHostParams,
+    { id, comment }: MicrosoftDefenderEndpointReleaseHostParams,
     connectorUsageCollector: ConnectorUsageCollector
-  ) {
-    throw new Error('Not implemented (yet)');
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/unisolate-machine
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machines}/${id}/unisolate`,
+        method: 'POST',
+        data: {
+          Comment: comment,
+        },
+      },
+      connectorUsageCollector
+    );
   }
 }

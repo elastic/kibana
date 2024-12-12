@@ -33,7 +33,7 @@ export type MicrosoftDefenderEndpointAgentDetailsParams = TypeOf<typeof AgentDet
 /**
  * @see https://learn.microsoft.com/en-us/defender-endpoint/api/machine
  */
-export interface MicrosoftDefenderEndpointAgentDetails {
+export interface MicrosoftDefenderEndpointMachine {
   /** machine identity. */
   id: string;
   /** machine fully qualified name. */
@@ -82,6 +82,57 @@ export interface MicrosoftDefenderEndpointAgentDetails {
   ipAddresses: string[];
   /** Operating system architecture. Possible values are: 32-bit, 64-bit. Use this property instead of osProcessor. */
   osArchitecture: string;
+}
+
+/**
+ * @see https://learn.microsoft.com/en-us/defender-endpoint/api/machineaction
+ */
+export interface MicrosoftDefenderEndpointMachineAction {
+  /** Identity of the Machine Action entity. */
+  ID: string;
+  /** Type of the action. Possible values are: RunAntiVirusScan, Offboard, LiveResponse, CollectInvestigationPackage, Isolate, Unisolate, StopAndQuarantineFile, RestrictCodeExecution, and UnrestrictCodeExecution. */
+  type:
+    | 'RunAntiVirusScan'
+    | 'Offboard'
+    | 'LiveResponse'
+    | 'CollectInvestigationPackage'
+    | 'Isolate'
+    | 'Unisolate'
+    | 'StopAndQuarantineFile'
+    | 'RestrictCodeExecution'
+    | 'UnrestrictCodeExecution';
+  /** Scope of the action. Full or Selective for Isolation, Quick or Full for antivirus scan. */
+  scope: string;
+  /** Identity of the person that executed the action. */
+  requestor: string;
+  /** Id the customer can submit in the request for custom correlation. */
+  externalID: string;
+  /** The name of the user/application that submitted the action. */
+  requestSource: string;
+  /** Commands to run. Allowed values are PutFile, RunScript, GetFile. */
+  commands: Array<'PutFile' | 'RunScript' | 'GetFile'>;
+  /** Identity of the person that canceled the action. */
+  cancellationRequestor: string;
+  /** Comment that was written when issuing the action. */
+  requestorComment: string;
+  /** Comment that was written when canceling the action. */
+  cancellationComment: string;
+  /** Current status of the command. Possible values are: Pending, InProgress, Succeeded, Failed, TimeOut, and Cancelled. */
+  status: 'Pending' | 'InProgress' | 'Succeeded' | 'Failed' | 'TimeOut' | 'Cancelled';
+  /** ID of the machine on which the action was executed. */
+  machineId: string;
+  /** Name of the machine on which the action was executed. */
+  computerDnsName: string;
+  /** The date and time when the action was created. */
+  creationDateTimeUtc: string;
+  /** The date and time when the action was canceled. */
+  cancellationDateTimeUtc: string;
+  /** The last date and time when the action status was updated. */
+  lastUpdateDateTimeUtc: string;
+  /** Machine action title. */
+  title: string;
+  /** Contains two Properties. string fileIdentifier, Enum fileIdentifierType with the possible values: Sha1, Sha256, and Md5. */
+  relatedFileInfo: { fileIdentifier: string; fileIdentifierType: 'Sha1' | 'Sha256' | 'Md5' };
 }
 
 export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestConnectorParamsSchema>;

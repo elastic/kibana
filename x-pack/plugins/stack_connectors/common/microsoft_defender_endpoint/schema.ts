@@ -38,11 +38,13 @@ export const AgentDetailsParamsSchema = schema.object({
 });
 
 export const IsolateHostParamsSchema = schema.object({
-  // FIXME:PT define params once we know them
+  id: schema.string({ minLength: 1 }),
+  comment: schema.string({ minLength: 1 }),
 });
 
 export const ReleaseHostParamsSchema = schema.object({
-  // FIXME:PT define params once we know them
+  id: schema.string({ minLength: 1 }),
+  comment: schema.string({ minLength: 1 }),
 });
 
 // ----------------------------------
