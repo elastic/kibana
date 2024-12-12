@@ -394,6 +394,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             }
           }}
           dataStreams={dataStreamsToEditDataRetention}
+          isBulkEdit={true}
         />
       ) : null}
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (

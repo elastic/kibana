@@ -48,6 +48,7 @@ interface Props {
   ilmPolicyName?: string;
   ilmPolicyLink?: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
+  isBulkEdit: boolean;
 }
 
 export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
@@ -55,6 +56,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   ilmPolicyName,
   ilmPolicyLink,
   onClose,
+  isBulkEdit,
 }) => {
   const lifecycle = dataStreams[0]?.lifecycle;
 
@@ -62,10 +64,9 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     history,
     plugins: { cloud },
   } = useAppContext();
-  const isSingleDataStream = dataStreams.length === 1;
   const dataStreamNames = dataStreams.map(({ name }: DataStream) => name as string);
   const globalMaxRetention = deserializeGlobalMaxRetention(lifecycle?.globalMaxRetention);
-  const { size, unit } = isSingleDataStream
+  const { size, unit } = isBulkEdit
     ? splitSizeAndUnits(lifecycle?.data_retention as string)
     : { size: undefined, unit: undefined };
 
@@ -78,12 +79,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     defaultValue: {
       dataRetention: size,
       timeUnit: unit || 'd',
-      dataRetentionEnabled: isSingleDataStream ? lifecycle?.enabled : true,
+      dataRetentionEnabled: isBulkEdit ? lifecycle?.enabled : true,
       // When data retention is not set and lifecycle is enabled, is the only scenario in
       // which data retention will be infinite. If lifecycle isnt set or is not enabled, we
       // dont have inifinite data retention.
       infiniteRetentionPeriod:
-        isSingleDataStream && lifecycle?.enabled && !lifecycle?.data_retention,
+        isBulkEdit && lifecycle?.enabled && !lifecycle?.data_retention,
     },
     schema: editDataRetentionFormSchema,
     id: 'editDataRetentionForm',
@@ -191,7 +192,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
     <EuiModal
       onClose={() => onClose()}
       data-test-subj="editDataRetentionModal"
-      css={{ minWidth: isSingleDataStream ? 450 : 650, maxWidth: 650 }}
+      css={{ minWidth: isBulkEdit ? 650 : 450, maxWidth: 650 }}
     >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
@@ -205,7 +206,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          {isSingleDataStream && ilmPolicyLink && isDSLWithILMIndices(dataStreams[0]) && (
+          {isBulkEdit && ilmPolicyLink && isDSLWithILMIndices(dataStreams[0]) && (
             <>
               <MixedIndicesCallout
                 history={history}
@@ -218,7 +219,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           )}
 
           {enableProjectLevelRetentionChecks &&
-            isSingleDataStream &&
+            isBulkEdit &&
             lifecycle?.globalMaxRetention && (
               <>
                 <FormattedMessage
@@ -261,7 +262,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               </EuiText>
             }
             helpText={
-              !isSingleDataStream &&
+              !isBulkEdit &&
               globalMaxRetention && (
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreams.editDataRetentionModal.learnMoreLinkText"
@@ -284,7 +285,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               )
             }
             componentProps={{
-              fullWidth: !isSingleDataStream,
+              fullWidth: isBulkEdit,
               euiFieldProps: {
                 disabled:
                   formData.infiniteRetentionPeriod ||

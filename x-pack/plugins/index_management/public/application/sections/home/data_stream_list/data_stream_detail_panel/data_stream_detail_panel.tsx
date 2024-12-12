@@ -551,6 +551,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           ilmPolicyName={dataStream?.ilmPolicyName}
           ilmPolicyLink={ilmPolicyLink}
           dataStreams={[dataStream]}
+          isBulkEdit={false}
         />
       )}
 
