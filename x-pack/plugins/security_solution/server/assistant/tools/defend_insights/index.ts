@@ -114,7 +114,7 @@ export const DEFEND_INSIGHTS_TOOL: AssistantTool = Object.freeze({
         });
         const insights: DefendInsight[] = result.records;
 
-        securityWorkflowInsightsService.createFromDefendInsights(insights, request);
+        await securityWorkflowInsightsService.createFromDefendInsights(insights, request);
 
         return JSON.stringify({ eventsContextCount, insights }, null, 2);
       },
