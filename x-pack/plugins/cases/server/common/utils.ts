@@ -88,6 +88,7 @@ export const transformNewCase = ({
   assignees: dedupAssignees(newCase.assignees) ?? [],
   category: newCase.category ?? null,
   customFields: newCase.customFields ?? [],
+  observables: [],
 });
 
 export const transformCases = ({

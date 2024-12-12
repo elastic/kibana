@@ -14,7 +14,11 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ConnectorTypes } from '../../../common';
 import { casesQueriesKeys } from '../constants';
-import { customFieldsConfigurationMock, templatesConfigurationMock } from '../mock';
+import {
+  customFieldsConfigurationMock,
+  observableTypesMock,
+  templatesConfigurationMock,
+} from '../mock';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
@@ -42,6 +46,7 @@ describe('usePersistConfiguration', () => {
     templates: [],
     version: '',
     id: '',
+    observableTypes: observableTypesMock,
   };
 
   let appMockRender: AppMockRenderer;
@@ -70,6 +75,7 @@ describe('usePersistConfiguration', () => {
         customFields: [],
         owner: 'securitySolution',
         templates: [],
+        observableTypes: observableTypesMock,
       });
     });
 
@@ -95,6 +101,7 @@ describe('usePersistConfiguration', () => {
         customFields: [],
         templates: [],
         owner: 'securitySolution',
+        observableTypes: observableTypesMock,
       });
     });
 
@@ -125,6 +132,7 @@ describe('usePersistConfiguration', () => {
         customFields: customFieldsConfigurationMock,
         templates: templatesConfigurationMock,
         owner: 'securitySolution',
+        observableTypes: observableTypesMock,
       });
     });
   });
@@ -148,6 +156,7 @@ describe('usePersistConfiguration', () => {
         customFields: [],
         templates: [],
         version: 'test-version',
+        observableTypes: observableTypesMock,
       });
     });
 
@@ -178,6 +187,7 @@ describe('usePersistConfiguration', () => {
         customFields: customFieldsConfigurationMock,
         templates: templatesConfigurationMock,
         version: 'test-version',
+        observableTypes: observableTypesMock,
       });
     });
   });

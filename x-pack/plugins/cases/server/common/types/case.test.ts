@@ -50,6 +50,7 @@ describe('case types', () => {
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
+      observables: [],
     };
     const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
       (acc, type) => ({ ...acc, ...type.type.props }),

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { validateDuplicatedKeysInRequest } from './validators';
+import {
+  validateDuplicatedKeysInRequest,
+  validateDuplicatedObservableTypesInRequest,
+  validateDuplicatedObservablesInRequest,
+} from './validators';
 
 describe('validators', () => {
   describe('validateDuplicatedKeysInRequest', () => {
@@ -49,6 +53,103 @@ describe('validators', () => {
             },
           ],
           fieldName: 'foobar',
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe('validateDuplicatedObservableTypesInRequest', () => {
+    it('returns fields in request that have duplicated observable types', () => {
+      expect(() =>
+        validateDuplicatedObservableTypesInRequest({
+          requestFields: [
+            {
+              label: 'triplicated_label',
+            },
+            {
+              label: 'triplicated_label',
+            },
+            {
+              label: 'triplicated_label',
+            },
+            {
+              label: 'duplicated_label',
+            },
+            {
+              label: 'duplicated_label',
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated observable types in request: triplicated_label,duplicated_label"`
+      );
+    });
+
+    it('does not throw if no fields in request have duplicated observable types', () => {
+      expect(() =>
+        validateDuplicatedObservableTypesInRequest({
+          requestFields: [
+            {
+              label: '1',
+            },
+            {
+              label: '2',
+            },
+          ],
+        })
+      ).not.toThrow();
+    });
+
+    it('does throw if the provided label duplicates builtin type', () => {
+      expect(() =>
+        validateDuplicatedObservableTypesInRequest({
+          requestFields: [
+            {
+              label: 'email',
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated observable types in request: email"`
+      );
+    });
+  });
+
+  describe('validateDuplicatedObservablesInRequest', () => {
+    it('returns observables in request that have duplicated labels', () => {
+      expect(() =>
+        validateDuplicatedObservablesInRequest({
+          requestFields: [
+            {
+              value: 'value',
+              typeKey: 'typeKey',
+            },
+            {
+              value: 'value',
+              typeKey: 'typeKey',
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid duplicated observables in request."`);
+    });
+
+    it('does not throw if no fields in request have duplicated observables', () => {
+      expect(() =>
+        validateDuplicatedObservablesInRequest({
+          requestFields: [
+            {
+              value: 'value',
+              typeKey: 'typeKey',
+            },
+            {
+              value: 'value 1',
+              typeKey: 'typeKey',
+            },
+            {
+              value: 'value',
+              typeKey: 'typeKey 2',
+            },
+          ],
         })
       ).not.toThrow();
     });

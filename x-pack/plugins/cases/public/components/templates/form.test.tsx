@@ -57,6 +57,7 @@ describe('TemplateForm', () => {
       version: '',
       id: '',
       owner: mockedTestProvidersOwner[0],
+      observableTypes: [],
     },
     onChange: jest.fn(),
     initialValue: null,
@@ -343,6 +344,7 @@ describe('TemplateForm', () => {
             description: undefined,
             name: 'Template 1',
             tags: [],
+            observables: [],
           },
           isValid: true,
         })

@@ -51,6 +51,22 @@ jest.mock('./components/case_view_files', () => ({
     .mockReturnValue(<div data-test-subj="test-case-view-files">{'Case view files'}</div>),
 }));
 
+jest.mock('./components/case_view_observables', () => ({
+  CaseViewObservables: jest
+    .fn()
+    .mockReturnValue(
+      <div data-test-subj="test-case-view-observables">{'Case view observables'}</div>
+    ),
+}));
+
+jest.mock('./components/case_view_similar_cases', () => ({
+  CaseViewSimilarCases: jest
+    .fn()
+    .mockReturnValue(
+      <div data-test-subj="test-case-view-similar-cases">{'Case view similar cases'}</div>
+    ),
+}));
+
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCasesTitleBreadcrumbsMock = useCasesTitleBreadcrumbs as jest.Mock;
 

@@ -59,3 +59,27 @@ export const modelVersion1: SavedObjectsModelVersion = {
     forwardCompatibility: casesSchemaV1.extends({}, { unknowns: 'ignore' }),
   },
 };
+
+/**
+ * Adds case observables to the cases SO.
+ */
+export const modelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        observables: {
+          type: 'nested',
+          properties: {
+            typeKey: {
+              type: 'keyword',
+            },
+            value: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+  ],
+};
