@@ -42,3 +42,7 @@ export const taskSchemaV1 = schema.object({
 export const taskSchemaV2 = taskSchemaV1.extends({
   partition: schema.maybe(schema.number()),
 });
+
+export const taskSchemaV3 = taskSchemaV2.extends({
+  priority: schema.maybe(schema.number()),
+});
