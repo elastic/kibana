@@ -26,7 +26,7 @@ export const allowedExperimentalValues = Object.freeze({
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
