@@ -38,8 +38,14 @@ const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '', isNotSaved: fa
 };
 
 const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch }) => {
-  const { embedUrlParamExtensions, shareableUrlForSavedObject, shareableUrl, objectType, isDirty } =
-    useShareTabsContext()!;
+  const {
+    embedUrlParamExtensions,
+    shareableUrlForSavedObject,
+    shareableUrl,
+    objectType,
+    objectTypeMeta,
+    isDirty,
+  } = useShareTabsContext()!;
 
   const setIsNotSaved = useCallback(() => {
     dispatch({
@@ -55,8 +61,10 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
         shareableUrlForSavedObject,
         shareableUrl,
         objectType,
+        objectConfig: objectTypeMeta?.config?.embed,
         isNotSaved: state?.isNotSaved,
         setIsNotSaved,
+        isDirty,
       }}
     />
   );
