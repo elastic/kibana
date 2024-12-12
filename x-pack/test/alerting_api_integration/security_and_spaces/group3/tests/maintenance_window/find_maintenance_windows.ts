@@ -147,8 +147,8 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             case 'space_1_all at space1':
               expect(response.body.total).to.eql(2);
               expect(response.statusCode).to.eql(200);
-              expect(response.body.data[0].id).to.eql(createdMaintenanceWindow1.id);
-              expect(response.body.data[0].title).to.eql('test-maintenance-window');
+              expect(response.body.data[0].id).to.eql(createdMaintenanceWindow2.id);
+              expect(response.body.data[0].title).to.eql('test-maintenance-window2');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -531,10 +531,10 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
             case 'space_1_all at space1':
               expect(response.body.total).to.eql(2);
               expect(response.statusCode).to.eql(200);
-              expect(response.body.data[0].title).to.eql('test-running-maintenance-window');
-              expect(response.body.data[0].status).to.eql('running');
-              expect(response.body.data[1].title).to.eql('test-finished-maintenance-window');
-              expect(response.body.data[1].status).to.eql('finished');
+              expect(response.body.data[0].title).to.eql('test-finished-maintenance-window');
+              expect(response.body.data[0].status).to.eql('finished');
+              expect(response.body.data[1].title).to.eql('test-running-maintenance-window');
+              expect(response.body.data[1].status).to.eql('running');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

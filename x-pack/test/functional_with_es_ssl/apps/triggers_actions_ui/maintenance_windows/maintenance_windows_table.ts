@@ -211,13 +211,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter maintenance windows by the archived status', async () => {
-      const running = await createMaintenanceWindow({
-        name: 'archived-mw',
-        getService,
-      });
-      objectRemover.add(running.id, 'rules/maintenance_window', 'alerting', true);
       const finished = await createMaintenanceWindow({
-        name: 'finished-mw',
+        name: 'finished-maintenance-window',
         startDate: new Date('05-01-2023'),
         notRecurring: true,
         getService,
@@ -227,14 +222,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const date = new Date();
       date.setDate(date.getDate() + 1);
       const upcoming = await createMaintenanceWindow({
-        name: 'upcoming-mw',
+        name: 'upcoming-maintenance-window',
         startDate: date,
         getService,
       });
       objectRemover.add(upcoming.id, 'rules/maintenance_window', 'alerting', true);
+      
+      const archived = await createMaintenanceWindow({
+        name: 'archived-maintenance-window',
+        getService,
+      });
+      objectRemover.add(archived.id, 'rules/maintenance_window', 'alerting', true);
       await browser.refresh();
 
-      await pageObjects.maintenanceWindows.searchMaintenanceWindows('archived-mw');
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('window');
 
       const list = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
       expect(list.length).to.eql(3);
@@ -247,7 +248,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(
-          `Cancelled and archived running maintenance window 'archived-mw'`
+          `Cancelled and archived running maintenance window 'archived-maintenance-window'`
         );
       });
 
@@ -265,12 +266,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('paginates maintenance windows correctly', async () => {
       new Array(12).fill(null).map(async (_, index) => {
         const mw = await createMaintenanceWindow({
-          name: 'running-mw' + index,
+          name: index + 'pagination',
           getService,
         });
         objectRemover.add(mw.id, 'rules/maintenance_window', 'alerting', true);
       });
       await browser.refresh();
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('pagination');
+      await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
 
       await testSubjects.click('tablePaginationPopoverButton');
       await testSubjects.click('tablePagination-25-rows');
