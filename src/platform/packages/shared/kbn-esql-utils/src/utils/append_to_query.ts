@@ -8,6 +8,7 @@
  */
 
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { sanitazeESQLInput } from './sanitaze_input';
 
 // Append in a new line the appended text to take care of the case where the user adds a comment at the end of the query
 // in these cases a base query such as "from index // comment" will result in errors or wrong data if we don't append in a new line
@@ -43,7 +44,7 @@ export function appendWhereClauseToESQLQuery(
   let filterValue =
     typeof value === 'string' ? `"${value.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')}"` : value;
   // Adding the backticks here are they are needed for special char fields
-  let fieldName = `\`${field}\``;
+  let fieldName = sanitazeESQLInput(field);
 
   // casting to string
   // there are some field types such as the ip that need

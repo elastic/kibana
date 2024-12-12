@@ -37,3 +37,4 @@ export {
   isESQLColumnGroupable,
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
+export { sanitazeESQLInput } from './utils/sanitaze_input';
