@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestresources = getService('endpointTestResources');
 
   // FLAKY: https://github.com/elastic/kibana/issues/203908
+  // Failing: See https://github.com/elastic/kibana/issues/203903
   describe.skip('@ess @serverless @skipInServerlessMKI Endpoint policy response api', function () {
     let adminSupertest: TestAgent;
 
