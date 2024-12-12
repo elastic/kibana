@@ -178,7 +178,7 @@ function getHookedActionType() {
         source: config.source,
       };
       logger.info(`running hook pre-save for ${JSON.stringify(body)}`);
-      await services.scopedClusterClient.asInternalUser.index({
+      await services.scopedClusterClient.asCurrentUser.index({
         index: config.index,
         refresh: 'wait_for',
         body,
@@ -205,7 +205,7 @@ function getHookedActionType() {
         source: config.source,
       };
       logger.info(`running hook post-save for ${JSON.stringify(body)}`);
-      await services.scopedClusterClient.asInternalUser.index({
+      await services.scopedClusterClient.asCurrentUser.index({
         index: config.index,
         refresh: 'wait_for',
         body,
@@ -221,7 +221,7 @@ function getHookedActionType() {
         source: config.source,
       };
       logger.info(`running hook post-delete for ${JSON.stringify(body)}`);
-      await services.scopedClusterClient.asInternalUser.index({
+      await services.scopedClusterClient.asCurrentUser.index({
         index: config.index,
         refresh: 'wait_for',
         body,
