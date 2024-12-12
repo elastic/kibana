@@ -25,7 +25,7 @@ export const getLogLevelColor = (
 
   switch (logLevelCoalescedValue) {
     case LogLevelCoalescedValue.trace:
-      return euiTheme.colors.vis.euiColorVisGrey0;
+      return euiTheme.colors.mediumShade;
     case LogLevelCoalescedValue.debug:
       return euiPaletteForTemperature6[2]; // lighter, closer to the default color for all other unknown log levels
     case LogLevelCoalescedValue.info:
@@ -45,6 +45,6 @@ export const getLogLevelColor = (
     case LogLevelCoalescedValue.fatal:
       return euiPaletteRed9[13];
     default:
-      return euiTheme.colors.vis.euiColorVisGrey0;
+      return euiTheme.colors.mediumShade;
   }
 };
