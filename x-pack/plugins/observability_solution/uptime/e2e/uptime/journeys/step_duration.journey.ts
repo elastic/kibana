@@ -7,7 +7,7 @@
 
 import { journey, step, expect } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '../../helpers/record_video';
+import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { loginPageProvider } from '../../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
