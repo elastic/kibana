@@ -127,7 +127,7 @@ const contentLinks: AppDeepLink[] = [
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
-      defaultMessage: 'Web crawlers',
+      defaultMessage: 'Web Crawlers',
     }),
   },
 ];
