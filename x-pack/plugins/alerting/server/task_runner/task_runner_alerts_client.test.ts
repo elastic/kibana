@@ -470,7 +470,7 @@ describe('Task Runner', () => {
         expect(call.services.alertsClient?.setAlertData).toBeTruthy();
         expect(call.services.scopedClusterClient).toBeTruthy();
         expect(call.services).toBeTruthy();
-        expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 9 : 10);
+        expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 8 : 9);
 
         let debugCall = 1;
         expect(logger.debug).nthCalledWith(
@@ -493,10 +493,6 @@ describe('Task Runner', () => {
         expect(logger.debug).nthCalledWith(
           debugCall++,
           'Installing component template .alerts-legacy-alert-mappings'
-        );
-        expect(logger.debug).nthCalledWith(
-          debugCall++,
-          'Installing component template .alerts-ecs-mappings'
         );
         expect(logger.debug).nthCalledWith(
           debugCall++,

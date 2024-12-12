@@ -17,7 +17,6 @@ import {
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { getDataStreamAdapter } from '@kbn/alerting-plugin/server/alerts_service/lib/data_stream_adapter';
 
@@ -148,13 +147,9 @@ describe('resourceInstaller', () => {
           expect(mockClusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+          expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
           expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
             1,
-            expect.objectContaining({ name: ECS_COMPONENT_TEMPLATE_NAME })
-          );
-          expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
-            2,
             expect.objectContaining({ name: TECHNICAL_COMPONENT_TEMPLATE_NAME })
           );
         });
