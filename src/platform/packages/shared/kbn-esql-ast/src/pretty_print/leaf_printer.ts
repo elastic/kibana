@@ -27,9 +27,9 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
  * atomic short string.
  */
 export const LeafPrinter = {
-  source: (node: ESQLSource) => {
-    const { index, cluster } = node;
-    let text = index;
+  source: (node: ESQLSource): string => {
+    const { index, name, cluster } = node;
+    let text = index || name || '';
 
     if (cluster) {
       text = `${cluster}:${text}`;
