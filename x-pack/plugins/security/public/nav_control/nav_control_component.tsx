@@ -29,19 +29,26 @@ import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-compon
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 
-type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & { content?: ReactNode };
+type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'content'> & {
+  content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
+};
 
 interface ContextMenuProps {
   items: ContextMenuItem[];
+  closePopover: () => void;
 }
 
-const ContextMenuContent = ({ items }: ContextMenuProps) => {
+const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
   return (
     <>
       <EuiContextMenuPanel>
         {items.map((item, i) => {
           if (item.content) {
-            return <Fragment key={i}>{item.content}</Fragment>;
+            return (
+              <Fragment key={i}>
+                {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
+              </Fragment>
+            );
           }
           return (
             <EuiContextMenuItem
@@ -186,7 +193,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
           {
             id: 0,
             title: displayName,
-            content: <ContextMenuContent items={items} />,
+            content: (
+              <ContextMenuContent items={items} closePopover={() => setIsPopoverOpen(false)} />
+            ),
           },
         ]}
         data-test-subj="userMenu"

@@ -16,7 +16,7 @@ export interface UserMenuLink {
   order?: number;
   setAsProfile?: boolean;
   /** Render a custom ReactNode instead of the default <EuiContextMenuItem /> */
-  content?: ReactNode;
+  content?: ReactNode | ((args: { closePopover: () => void }) => ReactNode);
 }
 
 export interface SecurityNavControlServiceStart {
