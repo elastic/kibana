@@ -16,6 +16,7 @@ import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
+import { dropInlineScriptForTransmission } from '../../synthetics_service/utils/map_inline_to_project_fields';
 import { getMonitorNotFoundResponse } from './service_errors';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
@@ -54,11 +55,10 @@ export const triggerTestNow = async (
 
     const [, errors] = await syntheticsMonitorClient.testNowConfigs(
       {
-        monitor: normalizedMonitor.attributes as MonitorFields,
+        monitor: dropInlineScriptForTransmission(normalizedMonitor.attributes as MonitorFields),
         id: monitorId,
         testRunId,
       },
-      savedObjectsClient,
       privateLocations,
       spaceId
     );

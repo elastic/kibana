@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isNil, omitBy } from 'lodash';
+import { isEmpty, isNil, omit, omitBy } from 'lodash';
 import { Logger } from '@kbn/logging';
 import { replaceStringWithParams } from '../formatting_utils';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
@@ -89,6 +89,13 @@ export interface ConfigData {
   spaceId: string;
 }
 
+function stripInlineScript(config: BrowserFields): BrowserFields {
+  if (config?.[ConfigKey.SOURCE_PROJECT_CONTENT] && config?.[ConfigKey.SOURCE_INLINE]) {
+    return omit(config, ConfigKey.SOURCE_INLINE) as BrowserFields;
+  }
+  return config;
+}
+
 export const formatHeartbeatRequest = (
   { monitor, configId, heartbeatId, runOnce, testRunId, spaceId }: Omit<ConfigData, 'params'>,
   params?: string
@@ -101,7 +108,7 @@ export const formatHeartbeatRequest = (
   const { labels } = monitor;
 
   return {
-    ...monitor,
+    ...stripInlineScript(monitor as BrowserFields),
     id: heartbeatIdT,
     fields: {
       config_id: configId,

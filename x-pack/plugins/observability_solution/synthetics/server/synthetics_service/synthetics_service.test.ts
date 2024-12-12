@@ -10,9 +10,9 @@ import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import times from 'lodash/times';
-import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import { LocationStatus, HeartbeatConfig, ConfigKey } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
 import { SyntheticsServerSetup } from '../types';
@@ -354,6 +354,60 @@ describe('SyntheticsService', () => {
           data: expect.objectContaining({ license_level: 'platinum' }),
         })
       );
+    });
+
+    it('does not add zip to inline source', async () => {
+      const { service, locations } = getMockedService();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        monitors: [
+          {
+            attributes: {
+              ...getFakePayload([locations[0]]),
+              [ConfigKey.MONITOR_TYPE]: 'browser',
+              [ConfigKey.SOURCE_INLINE]: `step('goto', () => page.goto('https://elastic.co'))`,
+            },
+          },
+        ],
+      });
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      await service.pushConfigs();
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      const mockArg = (axios as jest.MockedFunction<typeof axios>).mock.calls[0][0];
+      const projectContent = (mockArg as AxiosRequestConfig).data.monitors[0].streams[0][
+        ConfigKey.SOURCE_PROJECT_CONTENT
+      ];
+      expect(projectContent).not.toBeDefined();
+    });
+
+    it('does not push a zip if inline content is missing', async () => {
+      const { service, locations } = getMockedService();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        monitors: [
+          {
+            attributes: {
+              ...getFakePayload([locations[0]]),
+              [ConfigKey.MONITOR_TYPE]: 'browser',
+              [ConfigKey.SOURCE_INLINE]: undefined,
+            },
+          },
+        ],
+      });
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      await service.pushConfigs();
+
+      expect(axios).toHaveBeenCalledTimes(1);
+      const mockArg = (axios as jest.MockedFunction<typeof axios>).mock.calls[0][0];
+      const projectContent = (mockArg as AxiosRequestConfig).data.monitors[0].streams[0][
+        ConfigKey.SOURCE_PROJECT_CONTENT
+      ];
+      expect(projectContent).toBeUndefined();
     });
 
     it.each([

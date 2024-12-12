@@ -158,7 +158,6 @@ export class SyntheticsPrivateLocation {
               `Unable to find Synthetics private location for agentId ${privateLocation.id}`
             );
           }
-
           const newPolicy = await this.generateNewPolicy(
             config,
             location,
