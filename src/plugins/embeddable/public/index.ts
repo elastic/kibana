@@ -10,7 +10,8 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
-export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
+export { useAddFromLibraryTypes } from './add_from_library/registry';
+export { openAddFromLibraryFlyout } from './add_from_library/open_add_from_library_flyout';
 export { EmbeddablePanel } from './embeddable_panel';
 export {
   cellValueTrigger,
@@ -21,8 +22,6 @@ export {
   defaultEmbeddableFactoryProvider,
   Embeddable,
   EmbeddableFactoryNotFoundError,
-  EmbeddableRenderer,
-  EmbeddableRoot,
   EmbeddableStateTransfer,
   ErrorEmbeddable,
   genericEmbeddableInputIsEqual,
@@ -51,7 +50,6 @@ export {
   SELECT_RANGE_TRIGGER,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
-  useEmbeddableFactory,
   VALUE_CLICK_TRIGGER,
   ViewMode,
   withEmbeddableSubscription,
@@ -71,7 +69,6 @@ export type {
   EmbeddableInstanceConfiguration,
   EmbeddableOutput,
   EmbeddablePackageState,
-  EmbeddableRendererProps,
   FilterableEmbeddable,
   IContainer,
   IEmbeddable,
@@ -80,7 +77,6 @@ export type {
   PanelState,
   PropertySpec,
   RangeSelectContext,
-  ReactEmbeddableSavedObject,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,

@@ -54,7 +54,7 @@
 }
 
 .embPanel__title {
-  @include euiTitle('xxxs');
+  @include euiTitle('xxs');
   overflow: hidden;
   line-height: 1.5;
   flex-grow: 1;
@@ -80,7 +80,7 @@
 
   .embPanel__titleText {
     @include euiTextTruncate;
-    font-weight: $euiFontWeightBold;
+    font-weight: $euiFontWeightSemiBold;
   }
 
   .embPanel__placeholderTitleText {
