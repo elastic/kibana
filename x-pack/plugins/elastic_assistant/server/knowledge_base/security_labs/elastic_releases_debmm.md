@@ -434,7 +434,7 @@ Covering non-commodity malware (APTs, zero-days, etc.) and emerging threats (new
 
 The expert tier focuses on advanced automation, seamless integration with other security tools, and continuous improvement through regular updates and external collaboration. While proactive threat hunting is essential for maintaining a solid security posture, it complements the ruleset management process by identifying new patterns and insights that can be incorporated into detection rules. Teams implement sophisticated automation for rule updates, ensuring continuous integration of advanced detections. At Elastic, our team is constantly refining our rulesets through daily triage, regular updates, and sharing [threat hunt queries](https://github.com/elastic/detection-rules/tree/main/hunting) in our public GitHub repository to help the community improve their detection capabilities. 
 
-![DEBMM - Tier 4](/assets/images/elastic-releases-debmm/image7.png "DEBMM - Tier 4")
+![DEBMM - Tier 4](/assets/images/elastic-releases-debmm/image1.png "DEBMM - Tier 4")
 
 ##### Criteria
 
@@ -480,11 +480,11 @@ Once you understand the DEBMM and its tiers, you can begin applying it to assess
 
 The following steps will guide you through the process:
 
-**1. Audit Your Current Maturity Tier**: Evaluate your existing detection rulesets against the criteria outlined in the DEBMM. Identify your rulesets' strengths, weaknesses, and most significant risks to help determine your current maturity tier. For more details, see the [Example Questionnaire](#Example-Questionnaire).
+**1. Audit Your Current Maturity Tier:** Evaluate your existing detection rulesets against the criteria outlined in the DEBMM. Identify your rulesets' strengths, weaknesses, and most significant risks to help determine your current maturity tier. For more details, see the [Example Questionnaire](#Example-Questionnaire).
 
-**2. Understand the Scope of Effort: **Recognize the significant and sustained effort required to move from one tier to the next. As teams progress through the tiers, the complexity and depth of activities increase, requiring more resources, advanced skills, and comprehensive strategies. For example, transitioning from Tier 1 to Tier 2 involves systematic rule tuning and detailed gap analysis, while advancing to Tier 3 and Tier 4 requires robust external validation processes, proactive threat hunting, and sophisticated automation.
+**2. Understand the Scope of Effort:** Recognize the significant and sustained effort required to move from one tier to the next. As teams progress through the tiers, the complexity and depth of activities increase, requiring more resources, advanced skills, and comprehensive strategies. For example, transitioning from Tier 1 to Tier 2 involves systematic rule tuning and detailed gap analysis, while advancing to Tier 3 and Tier 4 requires robust external validation processes, proactive threat hunting, and sophisticated automation.
 
-**3. Set Goals for Progression: **Define specific goals for advancing to the next tier. Use the qualitative and quantitative measures to set clear objectives for each criterion. 
+**3. Set Goals for Progression:** Define specific goals for advancing to the next tier. Use the qualitative and quantitative measures to set clear objectives for each criterion. 
 
 **4. Develop a Roadmap:** Create a detailed plan outlining the actions needed to achieve the goals. Include timelines, resources, and responsible team members. Ensure foundational practices from lower tiers are consistently applied as you progress while identifying opportunities for quick wins or significant impact by first addressing the most critical and riskiest areas for improvement.
 

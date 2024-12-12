@@ -10,7 +10,14 @@ image: "photo-edited-05@2x.jpg"
 category:
   - slug: attack-pattern
   - slug: malware-analysis
+tags:
+  - ghostpulse
+  - ref8207
 ---
+
+## Update
+
+In October 2024, we released an update to stage 2 of GHOSTPULSE that includes new evasion techniques. You can check it out [here](https://www.elastic.co/security-labs/tricks-and-treats).
 
 ## Preamble
 
@@ -71,7 +78,7 @@ Next, GHOSTPULSE builds an Import Address Table (IAT) incorporating essential AP
 
 ![Stage 1 hashing algorithm](/assets/images/ghostpulse-haunts-victims-using-defense-evasion-bag-o-tricks/image13.png)
 
-```
+``` python
 # Python code used for API hashing
 def calculate_api_name_hash(api_name):
     value = 0
@@ -82,7 +89,7 @@ def calculate_api_name_hash(api_name):
         
 Below is the Stage 1 IAT structure reconstructed from the GHOSTPULSE malware sample, provided for reference:
 
-```
+``` c
 struct core_stage1_IAT
 {
 void *kernel32_LoadLibraryW;
@@ -124,7 +131,7 @@ It then proceeds with its operation by reading and parsing the file named `hando
 
 The initial phase involves identifying the commencement of the encrypted data by searching for the IDAT string in the file, which is followed by a distinctive 4-byte tag value. If the tag corresponds to the value stored in the malware's configuration, the malware extracts the bytes of the encrypted blob. The initial structure is as follows:
 
-```
+``` c
 struct initial_idat_chunk
 {
   DWORD size_of_chunk;
@@ -145,7 +152,7 @@ struct initial_idat_chunk
 
 In the second step, the malware locates the next occurrence of IDAT and proceeds to extract the encrypted chunks that follow it which has the following format: 
 
-```
+``` c
 struct next_idat_chunk
 {
 DWORD size_of_chunk;
@@ -174,7 +181,7 @@ This technique is known as “module stomping”. The following image shows the 
 Stage 2 initiates by constructing a new IAT structure and utilizing the CRC32 algorithm as the API name hashing mechanism.
 The following is the IAT structure of stage 2:
 
-```
+``` c
 struct core_stage2_IAT
 {
   void *kernel32_module;
@@ -244,7 +251,7 @@ Concerning NT functions, the malware reads the ntdll.dll library from disk and w
 
 The following is the structure used by the malware to store NT API offsets:
 
-```
+``` c
 struct __unaligned __declspec(align(4)) core_stage2_nt_offsets_table
 {
   __int64 ntdll_module;
