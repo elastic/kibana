@@ -34,6 +34,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     previousMessages,
     functionCalling,
     stream,
+    abortSignal,
     retry,
   }: DefaultOutputOptions): OutputCompositeResponse<string, ToolSchema | undefined, boolean> {
     if (stream && retry !== undefined) {
@@ -52,6 +53,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
       connectorId,
       stream,
       functionCalling,
+      abortSignal,
       system,
       messages,
       ...(schema
@@ -113,6 +115,7 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
               input,
               schema,
               system,
+              abortSignal,
               previousMessages: messages.concat(
                 {
                   role: MessageRole.Assistant as const,

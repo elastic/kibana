@@ -402,5 +402,24 @@ describe('geminiAdapter', () => {
       expect(tapFn).toHaveBeenCalledWith({ chunk: 1 });
       expect(tapFn).toHaveBeenCalledWith({ chunk: 2 });
     });
+
+    it('propagates the abort signal when provided', () => {
+      const abortController = new AbortController();
+
+      geminiAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        abortSignal: abortController.signal,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          signal: abortController.signal,
+        }),
+      });
+    });
   });
 });
