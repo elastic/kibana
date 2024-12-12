@@ -135,7 +135,8 @@ export function initializeEditApi(
     inspectorApi,
     startDependencies,
     navigateToLensEditor,
-    uuid
+    uuid,
+    parentApi
   );
 
   /**

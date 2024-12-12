@@ -23,18 +23,21 @@ function getExpressionForLayer(
 
   let idMapper: Record<string, OriginalColumn[]> = {};
   layer.columns.forEach((col) => {
-    if (idMapper[col.fieldName]) {
-      idMapper[col.fieldName].push({
+    const columnId = col.fieldName;
+    if (idMapper[columnId]) {
+      idMapper[columnId].push({
         id: col.columnId,
         label: col.customLabel ? col.label : col.fieldName,
+        variable: col?.variable,
       } as OriginalColumn);
     } else {
       idMapper = {
         ...idMapper,
-        [col.fieldName]: [
+        [columnId]: [
           {
             id: col.columnId,
             label: col.customLabel ? col.label : col.fieldName,
+            variable: col?.variable,
           } as OriginalColumn,
         ],
       };

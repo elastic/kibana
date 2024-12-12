@@ -17,9 +17,9 @@
       "dataViews",
       "data",
       "unifiedSearch",
-      "uiActions"
+      "uiActions",
     ],
-    "requiredBundles": [],
+    "requiredBundles": ["esql"],
     "extraPublicDirs": [
       "common"
     ]

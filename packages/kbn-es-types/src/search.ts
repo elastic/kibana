@@ -680,6 +680,10 @@ export interface ESQLSearchResponse {
   _clusters?: estypes.ClusterStatistics;
 }
 
+interface ESQLFieldNamedParam {
+  [key: string]: string | number;
+}
+
 export interface ESQLSearchParams {
   // TODO: time_zone support was temporarily removed from ES|QL,
   // we will need to add it back in once it is supported again.
@@ -690,5 +694,7 @@ export interface ESQLSearchParams {
   locale?: string;
   include_ccs_metadata?: boolean;
   dropNullColumns?: boolean;
-  params?: estypesWithoutBodyKey.ScalarValue[] | Array<Record<string, string | undefined>>;
+  params?:
+    | estypesWithoutBodyKey.ScalarValue[]
+    | Array<Record<string, string | number | ESQLFieldNamedParam | undefined>>;
 }

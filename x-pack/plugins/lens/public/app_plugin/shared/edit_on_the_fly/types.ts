@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -86,6 +87,8 @@ export interface EditConfigPanelProps {
   // in cases where the embeddable is not filtered by time
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;
+
+  dashboardApi?: PresentationContainer;
 }
 
 export interface LayerConfigurationProps {

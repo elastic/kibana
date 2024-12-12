@@ -7,6 +7,7 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
@@ -50,7 +51,8 @@ export function prepareInlineEditPanel(
     stateTransfer: EmbeddableStateTransfer,
     skipAppLeave?: boolean
   ) => () => Promise<void>,
-  uuid?: string
+  uuid?: string,
+  parentApi?: unknown
 ) {
   return async function openConfigPanel({
     onApply,
@@ -137,6 +139,7 @@ export function prepareInlineEditPanel(
           }
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
+        dashboardApi={parentApi as PresentationContainer}
       />
     );
   };

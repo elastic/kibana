@@ -25,6 +25,14 @@ export const isClearableControl = (control: unknown): control is CanClearSelecti
   );
 };
 
+export interface CanClearVariables {
+  clearVariables: () => void;
+}
+
+export const isVariablesControl = (control: unknown): control is CanClearVariables => {
+  return typeof (control as CanClearVariables).clearVariables === 'function';
+};
+
 /**
  * Plugin types
  */

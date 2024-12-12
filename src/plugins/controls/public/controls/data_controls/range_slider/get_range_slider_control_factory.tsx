@@ -101,6 +101,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
           clearSelections: () => {
             selections.setValue(undefined);
           },
+          clearVariables: () => {},
           hasSelections$: selections.hasRangeSelection$,
         },
         {
