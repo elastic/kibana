@@ -279,7 +279,7 @@ export function initializePanelsManager(
       duplicatePanel: async (idToDuplicate: string) => {
         const panelToClone = getDashboardPanelFromId(idToDuplicate);
 
-        const duplicatedPanelState = await duplicateReactEmbeddableInput(
+        const duplicatedPanelState = duplicateReactEmbeddableInput(
           children$.value[idToDuplicate],
           panelToClone,
           await getPanelTitles()
