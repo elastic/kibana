@@ -76,9 +76,15 @@ export const Author = ({ author }: AuthorProps) => (
   <BadgeList badges={author} data-test-subj="authorPropertyValue" />
 );
 
-export const BuildingBlock = () => (
+interface BuildingBlockProps {
+  isBuildingBlockEnabled: boolean;
+}
+
+export const BuildingBlock = ({ isBuildingBlockEnabled }: BuildingBlockProps) => (
   <EuiText size="s" data-test-subj="buildingBlockPropertyValue">
-    {i18n.BUILDING_BLOCK_FIELD_DESCRIPTION}
+    {isBuildingBlockEnabled
+      ? i18n.BUILDING_BLOCK_ENABLED_FIELD_DESCRIPTION
+      : i18n.BUILDING_BLOCK_DISABLED_FIELD_DESCRIPTION}
   </EuiText>
 );
 
@@ -294,7 +300,7 @@ const prepareAboutSectionListItems = (
       title: (
         <span data-test-subj="buildingBlockPropertyTitle">{i18n.BUILDING_BLOCK_FIELD_LABEL}</span>
       ),
-      description: <BuildingBlock />,
+      description: <BuildingBlock isBuildingBlockEnabled={true} />,
     });
   }
 

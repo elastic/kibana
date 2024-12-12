@@ -84,6 +84,13 @@ export const DESCRIPTION_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const ALERT_SUPPRESSION_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.alertSuppressionFieldLabel',
+  {
+    defaultMessage: 'Alert suppression',
+  }
+);
+
 export const AUTHOR_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.authorFieldLabel',
   {
@@ -98,10 +105,24 @@ export const BUILDING_BLOCK_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const BUILDING_BLOCK_FIELD_DESCRIPTION = i18n.translate(
+export const BUILDING_BLOCK_ENABLED_FIELD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldDescription',
   {
     defaultMessage: 'All generated alerts will be marked as "building block" alerts',
+  }
+);
+
+export const BUILDING_BLOCK_DISABLED_FIELD_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockDisabledFieldDescription',
+  {
+    defaultMessage: 'Will not mark alerts as "building block" alerts',
+  }
+);
+
+export const DATA_SOURCE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.dataSourceFieldLabel',
+  {
+    defaultMessage: 'Data source',
   }
 );
 
@@ -165,6 +186,13 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleNameOverrideFieldLabel',
   {
     defaultMessage: 'Rule name override',
+  }
+);
+
+export const RULE_NAME_OVERRIDE_DISABLED_FIELD_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleNameOverrideDisabledFieldDescription',
+  {
+    defaultMessage: 'Rule name will not be overridden',
   }
 );
 

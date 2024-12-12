@@ -6,39 +6,13 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import { BuildingBlockReadOnly } from './building_block';
-import { FieldFinalReadOnly } from '../../field_final_readonly';
-import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
-import { mockCustomQueryRule } from '../../storybook/mocks';
-import { ThreeWayDiffStorybookProviders } from '../../storybook/three_way_diff_storybook_providers';
 
 export default {
   component: BuildingBlockReadOnly,
   title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/building_block',
 };
 
-interface TemplateProps {
-  finalDiffableRule: DiffableRule;
-}
+export const Default = () => <BuildingBlockReadOnly buildingBlock={{ type: 'default' }} />;
 
-const Template: Story<TemplateProps> = (args) => {
-  return (
-    <ThreeWayDiffStorybookProviders
-      finalDiffableRule={args.finalDiffableRule}
-      fieldName="building_block"
-    >
-      <FieldFinalReadOnly />
-    </ThreeWayDiffStorybookProviders>
-  );
-};
-
-export const Default = Template.bind({});
-
-Default.args = {
-  finalDiffableRule: mockCustomQueryRule({
-    building_block: {
-      type: 'default',
-    },
-  }),
-};
+export const NoValue = () => <BuildingBlockReadOnly />;
