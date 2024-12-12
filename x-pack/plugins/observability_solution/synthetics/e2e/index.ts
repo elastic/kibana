@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { SyntheticsRunner } from './helpers/synthetics_runner';
-export { argv } from './helpers/parse_args_params';
 export { loginPageProvider } from './page_objects/login';
 export { utilsPageProvider } from './page_objects/utils';
