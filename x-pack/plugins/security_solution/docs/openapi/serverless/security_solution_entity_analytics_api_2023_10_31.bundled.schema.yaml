@@ -987,7 +987,11 @@ components:
       enum:
         - user
         - host
+<<<<<<< HEAD
         - service
+=======
+        - universal
+>>>>>>> 18612a9349f ([CI] Auto-commit changed files from 'yarn openapi:bundle')
       type: string
     HostEntity:
       type: object
