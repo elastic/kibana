@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/securitysolution-list-api",
-  "version": "1.0.0",
-  "description": "security solution list REST API",
-  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "private": true
-}
