@@ -27,8 +27,10 @@ export class ExpressionMetricPlugin
   implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
-    expressions.registerFunction(metricFunction);
-    expressions.registerRenderer(metricRendererFactory(core));
+    core.getStartServices().then(([start]) => {
+      expressions.registerFunction(metricFunction);
+      expressions.registerRenderer(metricRendererFactory(start));
+    });
   }
 
   public start(core: CoreStart): ExpressionMetricPluginStart {}

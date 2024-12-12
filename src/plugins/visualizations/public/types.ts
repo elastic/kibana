@@ -34,6 +34,7 @@ export type StartServices = Pick<
   | 'analytics'
   | 'i18n'
   | 'theme'
+  | 'userProfile'
 >;
 
 export type { Vis, SerializedVis, VisParams };

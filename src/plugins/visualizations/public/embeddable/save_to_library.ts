@@ -9,7 +9,7 @@
 
 import { Reference } from '../../common/content_management';
 import { PersistedState } from '../persisted_state';
-import { getAnalytics, getI18n, getOverlays, getTheme } from '../services';
+import { getAnalytics, getI18n, getOverlays, getTheme, getUserProfile } from '../services';
 import { saveVisualization } from '../utils/saved_visualize_utils';
 import { VisualizeOutputState } from './types';
 
@@ -63,6 +63,7 @@ export const saveToLibrary = async ({
       i18n: getI18n(),
       overlays: getOverlays(),
       theme: getTheme(),
+      userProfile: getUserProfile(),
     },
     references ?? []
   );

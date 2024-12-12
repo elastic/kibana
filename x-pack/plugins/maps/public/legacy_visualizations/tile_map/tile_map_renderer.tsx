@@ -12,7 +12,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { TileMapVisRenderValue } from './tile_map_fn';
 import { TILE_MAP_RENDER } from './types';
-import { getAnalytics, getCoreI18n, getTheme } from '../../kibana_services';
+import { getCore } from '../../kibana_services';
 
 const Component = dynamic(async () => {
   const { TileMapVisualization } = await import('./tile_map_visualization');
@@ -40,11 +40,7 @@ export const tileMapRenderer = {
     };
 
     render(
-      <KibanaRenderContextProvider
-        analytics={getAnalytics()}
-        i18n={getCoreI18n()}
-        theme={getTheme()}
-      >
+      <KibanaRenderContextProvider {...getCore()}>
         <Component {...props} />
       </KibanaRenderContextProvider>,
       domNode

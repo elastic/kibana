@@ -23,6 +23,8 @@ import type {
   AnalyticsServiceStart,
   AppMountParameters,
   ScopedHistory,
+  ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type {
   FilterManager,
@@ -96,7 +98,8 @@ export interface DiscoverServices {
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme: CoreStart['theme'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
@@ -185,6 +188,7 @@ export const buildServices = memoize(
       embeddable: plugins.embeddable,
       i18n: core.i18n,
       theme: core.theme,
+      userProfile: core.userProfile,
       fieldFormats: plugins.fieldFormats,
       filterManager: plugins.data.query.filterManager,
       history,

@@ -33,8 +33,10 @@ export class ExpressionRepeatImagePlugin
     >
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRepeatImagePluginSetup {
-    expressions.registerFunction(repeatImageFunction);
-    expressions.registerRenderer(repeatImageRendererFactory(core));
+    core.getStartServices().then(([start]) => {
+      expressions.registerFunction(repeatImageFunction);
+      expressions.registerRenderer(repeatImageRendererFactory(start));
+    });
   }
 
   public start(core: CoreStart): ExpressionRepeatImagePluginStart {}

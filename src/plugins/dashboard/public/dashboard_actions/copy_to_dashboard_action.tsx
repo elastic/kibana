@@ -83,12 +83,11 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
 
-    const { theme, i18n } = coreServices;
     const session = coreServices.overlays.openModal(
-      toMountPoint(<CopyToDashboardModal closeModal={() => session.close()} api={embeddable} />, {
-        theme,
-        i18n,
-      }),
+      toMountPoint(
+        <CopyToDashboardModal closeModal={() => session.close()} api={embeddable} />,
+        coreServices
+      ),
       {
         maxWidth: 400,
         'data-test-subj': 'copyToDashboardPanel',

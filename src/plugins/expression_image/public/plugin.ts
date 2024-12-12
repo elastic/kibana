@@ -27,8 +27,10 @@ export class ExpressionImagePlugin
   implements Plugin<ExpressionImagePluginSetup, ExpressionImagePluginStart, SetupDeps, StartDeps>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionImagePluginSetup {
-    expressions.registerFunction(imageFunction);
-    expressions.registerRenderer(imageRendererFactory(core));
+    core.getStartServices().then(([start]) => {
+      expressions.registerFunction(imageFunction);
+      expressions.registerRenderer(imageRendererFactory(start));
+    });
   }
 
   public start(core: CoreStart): ExpressionImagePluginStart {}
