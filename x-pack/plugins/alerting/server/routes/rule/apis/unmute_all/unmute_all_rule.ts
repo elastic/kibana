@@ -13,6 +13,7 @@ import {
   unmuteAllRuleRequestParamsSchemaV1,
   UnmuteAllRuleRequestParamsV1,
 } from '../../../../../common/routes/rule/apis/unmute_all';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const unmuteAllRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -21,6 +22,7 @@ export const unmuteAllRuleRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_unmute_all`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Unmute all alerts`,

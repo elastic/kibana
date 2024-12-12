@@ -23,6 +23,7 @@ import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformUpdateBodyV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -31,6 +32,7 @@ export const updateRuleRoute = (
   router.put(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Update a rule`,

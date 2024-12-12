@@ -20,6 +20,7 @@ import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RouteOptions } from '..';
 import { countUsageOfPredefinedIds } from '../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -62,6 +63,7 @@ export const createAlertRoute = ({
         ),
         body: bodySchema,
       },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Create an alert',

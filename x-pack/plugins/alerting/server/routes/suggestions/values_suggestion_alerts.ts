@@ -25,6 +25,7 @@ import {
 } from '../../authorization';
 import { AlertingRequestHandlerContext } from '../../types';
 import { GetAlertIndicesAlias, ILicenseState } from '../../lib';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.ESDSL,
@@ -49,6 +50,7 @@ export function registerAlertsValueSuggestionsRoute(
   router.post(
     {
       path: '/internal/alerts/suggestions/values',
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: AlertsSuggestionsSchema,
     },

@@ -13,6 +13,7 @@ import {
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const updateRuleApiKeyRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -21,6 +22,7 @@ export const updateRuleApiKeyRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_update_api_key`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: 'Update the API key for a rule',
