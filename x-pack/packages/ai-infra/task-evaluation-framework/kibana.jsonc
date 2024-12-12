@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/task-evaluation-framework",
+  "owner": "@elastic/appex-ai-infra",
+  "devOnly": true
+}
