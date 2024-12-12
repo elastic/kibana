@@ -119,7 +119,7 @@
     "xpack.profiling": [
       "plugins/observability_solution/profiling"
     ],
-    "xpack.remoteClusters": "plugins/remote_clusters",
+    "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [
       "plugins/reporting"
     ],

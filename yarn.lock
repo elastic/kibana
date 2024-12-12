@@ -6704,7 +6704,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/remote-clusters-plugin@link:x-pack/plugins/remote_clusters":
+"@kbn/remote-clusters-plugin@link:x-pack/platform/plugins/private/remote_clusters":
   version "0.0.0"
   uid ""
 
