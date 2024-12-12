@@ -21,6 +21,7 @@ import {
   CONNECTOR_REQUIRED,
   CONNECTOR_TITLE,
   MESSAGE_REQUIRED,
+  STATUS_REQUIRED,
 } from './translations';
 
 export function getConnectorType(
@@ -38,7 +39,11 @@ export function getConnectorType(
       actionParams: ObsAIAssistantActionParams
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
       const validationResult = {
-        errors: { connector: new Array<string>(), message: new Array<string>() },
+        errors: {
+          connector: new Array<string>(),
+          message: new Array<string>(),
+          status: new Array<string>(),
+        },
       };
 
       if (!actionParams.connector) {
@@ -47,6 +52,10 @@ export function getConnectorType(
 
       if (!actionParams.message) {
         validationResult.errors.message.push(MESSAGE_REQUIRED);
+      }
+
+      if (!actionParams.status) {
+        validationResult.errors.status.push(STATUS_REQUIRED);
       }
 
       return validationResult;

@@ -8,12 +8,22 @@
 import React, { useEffect } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFlexItem, EuiSelect, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFormRow,
+  EuiFlexItem,
+  EuiSelect,
+  EuiSpacer,
+  EuiTextArea,
+  EuiSuperSelect,
+  EuiFormLabel,
+} from '@elastic/eui';
 import {
   ObservabilityAIAssistantService,
   useGenAIConnectorsWithoutContext,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ObsAIAssistantActionParams } from './types';
+import { ALERT_STATUSES, ALL_ALERTS } from '../../common/constants';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }
@@ -25,6 +35,12 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
     editAction('connector', selectedConnector, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConnector, index]);
+
+  useEffect(() => {
+    if (!actionParams.status) {
+      editAction('status', ALL_ALERTS.id, index);
+    }
+  }, [actionParams.status, editAction, index]);
 
   return (
     <>
@@ -52,7 +68,38 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
       </EuiFormRow>
 
       <EuiSpacer size="m" />
-
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate(
+          'xpack.observabilityAiAssistant.alertConnector.messageTextAreaFieldLabel',
+          {
+            defaultMessage: 'On status changes',
+          }
+        )}
+      >
+        <EuiSuperSelect
+          prepend={
+            <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${index}`}>
+              <FormattedMessage
+                id="xpack.observabilityAiAssistant.obsAIAssistantParamsFields"
+                defaultMessage="Run when"
+              />
+            </EuiFormLabel>
+          }
+          fullWidth
+          id={`addNewActionConnectorActionGroup-${index}`}
+          data-test-subj={`addNewActionConnectorActionGroup-${index}`}
+          options={ALERT_STATUSES.map(({ id: value, label }) => ({
+            value,
+            inputDisplay: label,
+          }))}
+          valueOfSelected={actionParams.status}
+          onChange={(status) => {
+            editAction('status', status, index);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
         label={i18n.translate(
