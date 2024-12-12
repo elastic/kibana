@@ -23,6 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('_count API', () => {
     let cleanup: Function[] = [];
 
+    before(() => clearEntityDefinitions(esClient));
+
     afterEach(async () => {
       await Promise.all([clearEntityDefinitions(esClient), ...cleanup.map((fn) => fn())]);
       cleanup = [];
