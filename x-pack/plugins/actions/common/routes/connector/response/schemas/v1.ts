@@ -97,6 +97,9 @@ export const connectorTypesResponseSchema = schema.object({
   is_system_action_type: schema.boolean({
     meta: { description: 'Indicates whether the action is a system action.' },
   }),
+  is_edr_action_type: schema.boolean({
+    meta: { description: 'Indicates whether the action is an EDR action.' },
+  }),
 });
 
 export const connectorExecuteResponseSchema = schema.object({

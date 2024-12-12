@@ -767,7 +767,7 @@ describe('actionTypeRegistry', () => {
     });
   });
 
-  describe('getSystemActionKibanaPrivileges()', () => {
+  describe('getActionKibanaPrivileges()', () => {
     it('should get the kibana privileges correctly for system actions', () => {
       const registry = new ActionTypeRegistry(actionTypeRegistryParams);
 
@@ -786,7 +786,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      const result = registry.getSystemActionKibanaPrivileges('test.system-action');
+      const result = registry.getActionKibanaPrivileges('test.system-action');
       expect(result).toEqual(['test/create']);
     });
 
@@ -807,7 +807,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      const result = registry.getSystemActionKibanaPrivileges('test.system-action');
+      const result = registry.getActionKibanaPrivileges('test.system-action');
       expect(result).toEqual([]);
     });
 
@@ -827,7 +827,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      const result = registry.getSystemActionKibanaPrivileges('foo');
+      const result = registry.getActionKibanaPrivileges('foo');
       expect(result).toEqual([]);
     });
 
@@ -850,7 +850,7 @@ describe('actionTypeRegistry', () => {
         executor,
       });
 
-      registry.getSystemActionKibanaPrivileges('test.system-action', { foo: 'bar' });
+      registry.getActionKibanaPrivileges('test.system-action', { foo: 'bar' });
       expect(getKibanaPrivileges).toHaveBeenCalledWith({ params: { foo: 'bar' } });
     });
   });
