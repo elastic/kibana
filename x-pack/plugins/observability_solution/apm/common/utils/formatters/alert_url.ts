@@ -13,7 +13,7 @@ const format = ({ pathname, query }: { pathname: string; query: Record<string, a
 
 export const getAlertUrlErrorCount = (serviceName: string, serviceEnv: string | undefined) =>
   format({
-    pathname: `/app/apm/services/${serviceName}/errors`,
+    pathname: `/app/apm/services/${encodeURIComponent(serviceName)}/errors`,
     query: {
       environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },
@@ -25,7 +25,7 @@ export const getAlertUrlTransaction = (
   transactionType: string
 ) =>
   format({
-    pathname: `/app/apm/services/${serviceName}`,
+    pathname: `/app/apm/services/${encodeURIComponent(serviceName)}`,
     query: {
       transactionType,
       environment: serviceEnv ?? ENVIRONMENT_ALL.value,
