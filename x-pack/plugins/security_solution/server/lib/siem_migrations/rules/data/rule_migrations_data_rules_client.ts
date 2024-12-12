@@ -13,6 +13,7 @@ import type {
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
+  Duration,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredRuleMigration } from '../types';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
@@ -52,9 +53,11 @@ export interface RuleMigrationGetOptions {
 }
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
- * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
- */
+ * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
 const BULK_MAX_SIZE = 500 as const;
+/* DEFAULT_SEARCH_BATCH_SIZE defines the default number of documents to retrieve per search operation
+ * when retrieving search results in batches. */
+const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
@@ -123,7 +126,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     { filters = {}, sort = {}, from, size }: RuleMigrationGetOptions = {}
   ): Promise<{ total: number; data: StoredRuleMigration[] }> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery(migrationId, { ...filters });
+    const query = this.getFilterQuery(migrationId, filters);
 
     const result = await this.esClient
       .search<RuleMigration>({
@@ -141,6 +144,22 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       total: this.getTotalHits(result),
       data: this.processResponseHits(result),
     };
+  }
+
+  /** Returns batching functions to traverse all the migration rules search results */
+  searchBatches(
+    migrationId: string,
+    options: { scroll?: Duration; size?: number; filters?: RuleMigrationFilters } = {}
+  ) {
+    const { size = DEFAULT_SEARCH_BATCH_SIZE, filters = {}, scroll } = options;
+    const query = this.getFilterQuery(migrationId, filters);
+    const search = { query, sort: '_doc', scroll, size }; // sort by _doc to ensure consistent order
+    try {
+      return this.getSearchBatches<RuleMigration>(search);
+    } catch (error) {
+      this.logger.error(`Error scrolling rule migrations: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
