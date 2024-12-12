@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
+import { css } from '@emotion/react';
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -47,6 +48,11 @@ export const EntityAnalyticsManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
+  const verticalSeparator = css`
+    height: ${euiTheme.size.l};
+    border-left: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+    margin: 0 ${euiTheme.size.s};
+  `;
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
@@ -81,10 +87,7 @@ export const EntityAnalyticsManagementPage = () => {
 
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
 
-  const isRunning = useMemo(
-    () => status === 'running' || (!!runAt && new Date(runAt) < new Date()),
-    [runAt, status]
-  );
+  const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
 
   const formatTimeFromNow = (time: string | undefined): string => {
     if (!time) {
@@ -116,7 +119,6 @@ export const EntityAnalyticsManagementPage = () => {
                   <>
                     {/* Run Engine Button */}
                     <EuiButton
-                      css={styles.ButtonStyle}
                       size="s"
                       iconType="play"
                       isLoading={isLoading}
@@ -138,7 +140,7 @@ export const EntityAnalyticsManagementPage = () => {
                 )}
 
                 {/* Risk Score Enable Section */}
-                <div css={styles.ToggleStyle}>
+                <div>
                   <RiskScoreEnableSection privileges={privileges} />
                 </div>
               </EuiFlexGroup>

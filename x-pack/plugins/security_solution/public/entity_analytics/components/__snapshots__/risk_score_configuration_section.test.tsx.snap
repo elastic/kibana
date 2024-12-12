@@ -5,20 +5,7 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
   <EuiFlexGroup
     alignItems="center"
   >
-    <div
-      css={
-        Object {
-          "map": undefined,
-          "name": "15ux7s5",
-          "next": undefined,
-          "styles": "
-    height: 24px;
-    width: 32px;
-  ",
-          "toString": [Function],
-        }
-      }
-    >
+    <div>
       <EuiSwitch
         checked={false}
         data-test-subj="includeClosedAlertsSwitch"
@@ -27,30 +14,7 @@ exports[`RiskScoreConfigurationSection renders correctly 1`] = `
       />
     </div>
     <Styled(div) />
-    <div
-      css={
-        Object {
-          "map": undefined,
-          "name": "16nl2q1",
-          "next": undefined,
-          "styles": "
-    flex-grow: 1;
-    max-width: 32px;
-    font-size: 24px;
-    input {
-      height: 24px;
-      padding: 8px;
-      border: 1px solid #D3DAE6;
-      border-radius: 4px;
-    }
-    @media (max-width: 100vw) {
-      max-width: 100%;
-    }
-  ",
-          "toString": [Function],
-        }
-      }
-    >
+    <div>
       <EuiSuperDatePicker
         compressed={false}
         end="now"

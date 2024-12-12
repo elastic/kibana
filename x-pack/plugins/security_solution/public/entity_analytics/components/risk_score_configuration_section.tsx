@@ -52,8 +52,14 @@ export const RiskScoreConfigurationSection = ({
     'includeClosedAlerts',
     includeClosedAlerts ?? false
   );
-  const [savedStart, setSavedStart] = useLocalStorage('savedFrom', from);
-  const [savedEnd, setSavedEnd] = useLocalStorage('savedto', to);
+  const [savedStart, setSavedStart] = useLocalStorage(
+    'entityAnalytics:riskScoreConfiguration:fromDate',
+    from
+  );
+  const [savedEnd, setSavedEnd] = useLocalStorage(
+    'entityAnalytics:riskScoreConfiguration:toDate',
+    to
+  );
 
   useEffect(() => {
     if (savedIncludeClosedAlerts !== null && savedIncludeClosedAlerts !== undefined) {
@@ -128,7 +134,7 @@ export const RiskScoreConfigurationSection = ({
   return (
     <>
       <EuiFlexGroup alignItems="center">
-        <div css={styles.ToggleStyle}>
+        <div>
           <EuiSwitch
             label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
             checked={includeClosedAlerts}
@@ -137,7 +143,7 @@ export const RiskScoreConfigurationSection = ({
           />
         </div>
         <styles.VerticalSeparator />
-        <div css={styles.DatePickerStyle}>
+        <div>
           <EuiSuperDatePicker
             start={start}
             end={end}

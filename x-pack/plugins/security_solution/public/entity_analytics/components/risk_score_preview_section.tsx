@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiAccordion,
   EuiPanel,
@@ -145,19 +145,6 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  useEffect(() => {
-    setFilters({
-      bool: {
-        must: [],
-        filter: includeClosedAlerts
-          ? [{ terms: { 'kibana.alert.workflow_status': ['closed', 'open'] } }]
-          : [{ terms: { 'kibana.alert.workflow_status': ['open'] } }],
-        should: [],
-        must_not: [],
-      },
-    });
-  }, [includeClosedAlerts]);
-
   const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
@@ -167,6 +154,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
       start: from,
       end: to,
     },
+    exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
   });
 
   const hosts = getRiskiestScores(data?.scores.host, 'host.name');
