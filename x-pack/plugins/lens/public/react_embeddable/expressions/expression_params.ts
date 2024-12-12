@@ -62,15 +62,20 @@ interface GetExpressionRendererPropsParams {
   api: LensApi;
   addUserMessages: (messages: UserMessage[]) => void;
   updateBlockingErrors: (error: Error) => void;
+  forceDSL?: boolean;
   getDisplayOptions: () => VisualizationDisplayOptions;
 }
 
 async function getExpressionFromDocument(
   document: LensDocument,
-  documentToExpression: (doc: LensDocument) => Promise<DocumentToExpressionReturnType>
+  documentToExpression: (
+    doc: LensDocument,
+    forceDSL?: boolean
+  ) => Promise<DocumentToExpressionReturnType>,
+  forceDSL?: boolean
 ) {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState, activeDatasourceState } =
-    await documentToExpression(document);
+    await documentToExpression(document, forceDSL);
   return {
     expression: ast ? toExpression(ast) : null,
     indexPatterns,
@@ -147,6 +152,7 @@ export async function getExpressionRendererParams(
     addUserMessages,
     updateBlockingErrors,
     searchContext,
+    forceDSL,
     getDisplayOptions,
   }: GetExpressionRendererPropsParams
 ): Promise<{
@@ -165,7 +171,7 @@ export async function getExpressionRendererParams(
     indexPatternRefs,
     activeVisualizationState,
     activeDatasourceState,
-  } = await getExpressionFromDocument(state.attributes, documentToExpression);
+  } = await getExpressionFromDocument(state.attributes, documentToExpression, forceDSL);
 
   // Apparently this change produces had lots of issues with solutions not using
   // the Embeddable incorrectly. Will comment for now and later on will restore it when
