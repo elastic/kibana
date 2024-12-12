@@ -15,7 +15,8 @@ export type SortField =
   | 'startTimeInMillis'
   | 'durationInMillis'
   | 'shards.total'
-  | 'shards.failed';
+  | 'shards.failed'
+  | 'state';
 
 export type SortDirection = Direction;
 
