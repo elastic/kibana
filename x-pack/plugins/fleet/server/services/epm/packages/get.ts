@@ -68,6 +68,8 @@ import { auditLoggingService } from '../../audit_logging';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
 
+import { airGappedUtils } from '../airgapped';
+
 import { createInstallableFrom } from '.';
 import {
   getPackageAssetsMapCache,
@@ -478,7 +480,11 @@ export async function getPackageInfo({
   let packageInfo;
   // We need to get input only packages from source to get all fields
   // see https://github.com/elastic/package-registry/issues/864
-  if (registryInfo && skipArchive && registryInfo.type !== 'input') {
+  if (
+    registryInfo &&
+    (skipArchive || airGappedUtils().shouldSkipRegistryRequests) &&
+    registryInfo.type !== 'input'
+  ) {
     packageInfo = registryInfo;
     // Fix the paths
     paths =
@@ -629,6 +635,7 @@ export async function getPackageFromSource(options: {
     } catch (err) {
       if (err instanceof RegistryResponseError && err.status === 404) {
         res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion}`);
       } else {
         throw err;
       }
@@ -763,7 +770,7 @@ export async function getPackageAssetsMap({
   packageInfo: PackageInfo;
   logger: Logger;
   ignoreUnverified?: boolean;
-}) {
+}): Promise<AssetsMap> {
   const cache = getPackageAssetsMapCache(packageInfo.name, packageInfo.version);
   if (cache) {
     return cache;
@@ -774,17 +781,22 @@ export async function getPackageAssetsMap({
     logger,
   });
 
-  let assetsMap: AssetsMap | undefined;
-  if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
-    // Try to get from registry
-    const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
-      ignoreUnverified,
-    });
-    assetsMap = pkg.assetsMap;
-  } else {
-    assetsMap = installedPackageWithAssets.assetsMap;
-  }
-  setPackageAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
+  try {
+    let assetsMap: AssetsMap | undefined;
+    if (installedPackageWithAssets?.installation.version !== packageInfo.version) {
+      // Try to get from registry
+      const pkg = await Registry.getPackage(packageInfo.name, packageInfo.version, {
+        ignoreUnverified,
+      });
+      assetsMap = pkg.assetsMap;
+    } else {
+      assetsMap = installedPackageWithAssets.assetsMap;
+    }
+    setPackageAssetsMapCache(packageInfo.name, packageInfo.version, assetsMap);
 
-  return assetsMap;
+    return assetsMap;
+  } catch (error) {
+    logger.warn(`getPackageAssetsMap error: ${error}`);
+    throw error;
+  }
 }

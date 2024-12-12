@@ -15,7 +15,6 @@ export {
 } from './categorical_color_mapping';
 export type { ColorMappingInputData } from './categorical_color_mapping';
 export type { ColorMapping } from './config';
-export * from './palettes';
 export * from './color/color_handling';
 export { SPECIAL_TOKENS_STRING_CONVERSION, getSpecialString } from './color/rule_matching';
 export {

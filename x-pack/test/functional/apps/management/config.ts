@@ -15,10 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.spaces.experimental.forceSolutionVisibility=true',
-      ],
+      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
     },
   };
 }
