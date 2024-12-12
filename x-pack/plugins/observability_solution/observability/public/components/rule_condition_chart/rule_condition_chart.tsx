@@ -138,19 +138,21 @@ export function RuleConditionChart({
       const errorDiv = document.querySelector('.lnsEmbeddedError');
       if (errorDiv) {
         const paragraphElements = errorDiv.querySelectorAll('p');
-        if (!paragraphElements || paragraphElements.length < 2) return;
+        if (!paragraphElements) return;
         paragraphElements[0].innerText = i18n.translate(
           'xpack.observability.ruleCondition.chart.error_equation.title',
           {
             defaultMessage: 'An error occurred while rendering the chart',
           }
         );
-        paragraphElements[1].innerText = i18n.translate(
-          'xpack.observability.ruleCondition.chart.error_equation.description',
-          {
-            defaultMessage: 'Check the rule equation.',
-          }
-        );
+        if (paragraphElements.length > 1) {
+          paragraphElements[1].innerText = i18n.translate(
+            'xpack.observability.ruleCondition.chart.error_equation.description',
+            {
+              defaultMessage: 'Check the rule equation.',
+            }
+          );
+        }
       }
     });
   }, [chartLoading, attributes]);
