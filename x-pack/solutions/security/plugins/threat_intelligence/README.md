@@ -84,7 +84,7 @@ Another option is to deploy a Staging instance. For Staging environment snapshot
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/elastic/kibana/blob/main/x-pack/plugins/threat_intelligence/CONTRIBUTING.md) for information on contributing.
+See [CONTRIBUTING.md](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/threat_intelligence/CONTRIBUTING.md) for information on contributing.
 
 ## Issues
 

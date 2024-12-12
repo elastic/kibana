@@ -67,7 +67,7 @@ export const storybookAliases = {
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'packages/shared-ux/storybook/config',
   slo: 'x-pack/plugins/observability_solution/slo/.storybook',
-  threat_intelligence: 'x-pack/plugins/threat_intelligence/.storybook',
+  threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',
   triggers_actions_ui: 'x-pack/plugins/triggers_actions_ui/.storybook',
   ui_actions_enhanced: 'src/plugins/ui_actions_enhanced/.storybook',
   unified_search: 'src/plugins/unified_search/.storybook',
