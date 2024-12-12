@@ -52,7 +52,7 @@ export const sslSchema = schema.object(
         schema.literal(TLS_V1_2),
         schema.literal(TLS_V1_3),
       ]),
-      { defaultValue: [TLS_V1_1, TLS_V1_2, TLS_V1_3], minSize: 1 }
+      { defaultValue: [TLS_V1_2, TLS_V1_3], minSize: 1 }
     ),
     clientAuthentication: schema.oneOf(
       [schema.literal('none'), schema.literal('optional'), schema.literal('required')],
