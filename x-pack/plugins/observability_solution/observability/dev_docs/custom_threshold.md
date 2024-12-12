@@ -7,7 +7,7 @@ Custom threshold rule is GA since 8.13.
 ### With data forge
 
 > [!TIP]
-> The following commands uses [kbn-data-forge](../../../../packages/kbn-data-forge/README.md) to generate some data for testing Custom threshold rule.
+> The following commands uses [kbn-data-forge](../../../../platform/packages/shared/kbn-data-forge/README.md) to generate some data for testing Custom threshold rule.
 
 Basic command to generate host data for 7 hosts:
 ```sh
