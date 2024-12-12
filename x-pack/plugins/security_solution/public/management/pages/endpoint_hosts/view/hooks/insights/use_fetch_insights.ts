@@ -38,13 +38,13 @@ export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConf
       } catch (error) {
         toasts.addDanger({
           title: WORKFLOW_INSIGHTS.toasts.fetchInsightsError,
-          text: error?.body?.message,
+          text: error?.message,
         });
         return [];
       }
     },
     {
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: false, // We need full control over when to refetch
     }
   );
 };

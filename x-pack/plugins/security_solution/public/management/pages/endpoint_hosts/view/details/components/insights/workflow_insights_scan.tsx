@@ -74,11 +74,10 @@ export const WorkflowInsightsScanSection = ({
   }, [aiConnectors, connectorId]);
 
   // Render the scan button only if a connector is selected
-  const renderScanButton = useMemo(() => {
+  const scanButton = useMemo(() => {
     if (!connectorExists) {
       return null;
     }
-
     return (
       <EuiFlexItem grow={false}>
         <EuiButton
@@ -125,7 +124,7 @@ export const WorkflowInsightsScanSection = ({
                 selectedConnectorId={connectorId}
               />
             </EuiFlexItem>
-            {renderScanButton}
+            {scanButton}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

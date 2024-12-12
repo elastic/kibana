@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
   EuiButtonIcon,
@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 
 interface WorkflowInsightsResultsProps {
@@ -24,7 +25,7 @@ interface WorkflowInsightsResultsProps {
   scanCompleted: boolean;
   endpointId: string;
 }
-import type { EndpointInsightRouteState } from '../../../../types';
+import type { WorkflowInsightRouteState } from '../../../../types';
 import { getEndpointDetailsPath } from '../../../../../../common/routing';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { APP_PATH, TRUSTED_APPS_PATH } from '../../../../../../../../common/constants';
@@ -55,50 +56,47 @@ export const WorkflowInsightsResults = ({
     setShowEmptyResultsCallout(results?.length === 0 && scanCompleted);
   }, [results, scanCompleted]);
 
-  const openArtifactCreationPage = ({
-    remediation,
-    id,
-  }: {
-    remediation: ExceptionListRemediationType;
-    id?: string;
-  }) => {
-    const getUrlBasedOnListId = (listId: string) => {
-      switch (listId) {
-        case 'endpoint_trusted_apps':
-        default:
-          return TRUSTED_APPS_PATH;
-      }
-    };
+  const openArtifactCreationPage = useCallback(
+    ({ remediation, id }: { remediation: ExceptionListRemediationType; id: string }) => {
+      const getUrlBasedOnListId = (listId: string) => {
+        switch (listId) {
+          case ENDPOINT_ARTIFACT_LISTS.trustedApps.id:
+          default:
+            return TRUSTED_APPS_PATH;
+        }
+      };
 
-    const url = `${APP_PATH}${getUrlBasedOnListId(remediation.list_id)}?show=create`;
+      const url = `${APP_PATH}${getUrlBasedOnListId(remediation.list_id)}?show=create`;
 
-    const state: EndpointInsightRouteState = {
-      insight: {
-        id,
-        back_url: `${APP_PATH}${getEndpointDetailsPath({
-          name: 'endpointDetails',
-          selected_endpoint: endpointId,
-        })}`,
-        item: {
-          comments: [],
-          description: remediation.description,
-          entries: remediation.entries,
-          list_id: remediation.list_id,
-          name: remediation.name,
-          namespace_type: 'agnostic',
-          tags: remediation.tags,
-          type: 'simple',
-          os_types: remediation.os_types,
+      const state: WorkflowInsightRouteState = {
+        insight: {
+          id,
+          back_url: `${APP_PATH}${getEndpointDetailsPath({
+            name: 'endpointDetails',
+            selected_endpoint: endpointId,
+          })}`,
+          item: {
+            comments: [],
+            description: remediation.description,
+            entries: remediation.entries,
+            list_id: remediation.list_id,
+            name: remediation.name,
+            namespace_type: 'agnostic',
+            tags: remediation.tags,
+            type: 'simple',
+            os_types: remediation.os_types,
+          },
         },
-      },
-    };
+      };
 
-    navigateToUrl(url, {
-      state,
-    });
-  };
+      navigateToUrl(url, {
+        state,
+      });
+    },
+    [endpointId, navigateToUrl]
+  );
 
-  const renderContent = () => {
+  const insights = useMemo(() => {
     if (showEmptyResultsCallout) {
       return (
         <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
@@ -124,7 +122,7 @@ export const WorkflowInsightsResults = ({
                       {insight.message}
                     </EuiText>
                     <EuiText size={'xs'} color={'subdued'}>
-                      {(item.entries[0] as { value: string }).value}
+                      {item.entries[0].type === 'match' && item.entries[0].value}
                     </EuiText>
                   </EuiText>
                 </EuiFlexItem>
@@ -136,7 +134,9 @@ export const WorkflowInsightsResults = ({
                     href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
                     onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                       e.preventDefault();
-                      openArtifactCreationPage({ remediation: item, id: insight.id });
+                      if (insight.id) {
+                        openArtifactCreationPage({ remediation: item, id: insight.id });
+                      }
                     }}
                   />
                 </EuiFlexItem>
@@ -147,7 +147,7 @@ export const WorkflowInsightsResults = ({
       });
     }
     return null;
-  };
+  }, [openArtifactCreationPage, results, showEmptyResultsCallout]);
 
   return (
     <>
@@ -159,7 +159,7 @@ export const WorkflowInsightsResults = ({
           <EuiSpacer size={'s'} />
         </>
       ) : null}
-      {renderContent()}
+      {insights}
     </>
   );
 };

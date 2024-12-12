@@ -33,11 +33,7 @@ export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) =>
 
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
-  return useMutation<
-    DefendInsightsResponse,
-    { body?: { message?: string } },
-    UseTriggerScanPayload
-  >(
+  return useMutation<DefendInsightsResponse, { body?: { error: string } }, UseTriggerScanPayload>(
     ({ endpointId, connectorId, actionTypeId }: UseTriggerScanPayload) =>
       http.post<DefendInsightsResponse>(DEFEND_INSIGHTS, {
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
@@ -59,7 +55,7 @@ export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) =>
       onError: (err) => {
         toasts.addDanger({
           title: WORKFLOW_INSIGHTS.toasts.scanError,
-          text: err?.body?.message,
+          text: err.body?.error,
         });
       },
     }

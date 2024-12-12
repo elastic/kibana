@@ -40,7 +40,7 @@ export const useFetchOngoingScans = ({
     wasPolling.current = isPolling;
   }, [isPolling, onSuccess]);
 
-  return useQuery<DefendInsightsResponse[], unknown, DefendInsightsResponse[]>(
+  return useQuery<DefendInsightsResponse[], { body?: { error: string } }, DefendInsightsResponse[]>(
     [`fetchOngoingTasks-${endpointId}`],
     async () => {
       try {
@@ -55,7 +55,7 @@ export const useFetchOngoingScans = ({
       } catch (error) {
         toasts.addDanger({
           title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
-          text: error?.body?.message,
+          text: error?.body?.error,
         });
         return [];
       }

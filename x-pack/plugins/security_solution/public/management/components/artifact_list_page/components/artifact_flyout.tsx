@@ -28,7 +28,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useLocation } from 'react-router-dom';
 import { useMarkInsightAsRemediated } from '../hooks/use_mark_workflow_insight_as_remediated';
-import type { EndpointInsightRouteState } from '../../../pages/endpoint_hosts/types';
+import type { WorkflowInsightRouteState } from '../../../pages/endpoint_hosts/types';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -201,8 +201,8 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       },
     } = useKibana().services;
 
-    const location = useLocation<EndpointInsightRouteState>();
-    const [sourceInsight, setSourceInsight] = useState<{ id?: string; back_url: string } | null>(
+    const location = useLocation<WorkflowInsightRouteState>();
+    const [sourceInsight, setSourceInsight] = useState<{ id: string; back_url: string } | null>(
       null
     );
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -304,8 +304,10 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             ? labels.flyoutEditSubmitSuccess(result)
             : labels.flyoutCreateSubmitSuccess(result)
         );
+
+        // Check if this artifact creation was opened from an endpoint insight
         try {
-          if (sourceInsight?.id && sourceInsight?.back_url) {
+          if (sourceInsight?.id) {
             await markInsightAsRemediated({ insightId: sourceInsight.id });
             return;
           }
@@ -317,6 +319,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
           // Close the flyout
           // `undefined` will cause params to be dropped from url
           setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
+
           onSuccess();
         }
       },
@@ -327,8 +330,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         markInsightAsRemediated,
         onSuccess,
         setUrlParams,
-        sourceInsight?.back_url,
-        sourceInsight?.id,
+        sourceInsight,
         toasts,
         urlParams,
       ]
@@ -389,7 +391,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
 
     // If this form was opened from an endpoint insight, prepopulate the form with the insight data
     useEffect(() => {
-      if (location.state?.insight) {
+      if (location.state?.insight?.id && location.state?.insight?.item) {
         setSourceInsight({
           id: location.state.insight.id,
           back_url: location.state.insight.back_url,

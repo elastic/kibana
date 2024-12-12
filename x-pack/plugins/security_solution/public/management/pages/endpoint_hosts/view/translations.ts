@@ -18,7 +18,7 @@ export const WORKFLOW_INSIGHTS = {
   titleRight: i18n.translate(
     'xpack.securitySolution.endpointDetails.workflowInsights.extraAction',
     {
-      defaultMessage: 'Last scans: ',
+      defaultMessage: 'Last scans:',
     }
   ),
   scan: {

@@ -157,10 +157,10 @@ export interface TransformStatsResponse {
   transforms: TransformStats[];
 }
 
-export interface EndpointInsightRouteState {
+export interface WorkflowInsightRouteState {
   insight?: {
     back_url: string;
-    id?: string;
+    id: string;
     item: CreateExceptionListItemSchema;
   };
 }

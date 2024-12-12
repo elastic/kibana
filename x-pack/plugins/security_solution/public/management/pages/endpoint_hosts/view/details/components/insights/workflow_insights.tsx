@@ -6,7 +6,8 @@
  */
 
 import { EuiHorizontalRule, EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import moment from 'moment';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
 import { useFetchOngoingScans } from '../../../hooks/insights/use_fetch_ongoing_tasks';
@@ -56,18 +57,21 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     setIsScanButtonDisabled(!!ongoingScans?.length || isLoadingOngoingScans);
   }, [ongoingScans, isLoadingOngoingScans]);
 
-  const renderLastResultsCaption = () => {
-    // TODO: get the last scan date from the insights data
-    // TODO: Format the date
-    if (!insights?.length || !insights[0]['@timestamp']) {
+  const lastResultCaption = useMemo(() => {
+    if (!insights?.length) {
       return null;
     }
+
+    const latestTimestamp = insights
+      .map((insight) => moment.utc(insight['@timestamp']))
+      .sort((a, b) => b.diff(a))[0];
+
     return (
       <EuiText color={'subdued'} size={'xs'}>
-        {`${WORKFLOW_INSIGHTS.titleRight}${insights[0]['@timestamp']}`}
+        {`${WORKFLOW_INSIGHTS.titleRight} ${latestTimestamp.local().fromNow()}`}
       </EuiText>
     );
-  };
+  }, [insights]);
 
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
@@ -90,7 +94,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
           </EuiText>
         }
         initialIsOpen
-        extraAction={renderLastResultsCaption()}
+        extraAction={lastResultCaption}
         paddingSize={'none'}
       >
         <EuiSpacer size={'m'} />

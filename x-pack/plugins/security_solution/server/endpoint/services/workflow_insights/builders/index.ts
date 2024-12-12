@@ -14,7 +14,7 @@ import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 
 import { InvalidDefendInsightTypeError } from '../../../../assistant/tools/defend_insights/errors';
-import { EndpointMetadataService } from '../../metadata';
+import type { EndpointMetadataService } from '../../metadata';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
 export interface BuildWorkflowInsightParams {
