@@ -30,6 +30,7 @@ const defaultProps: CasesProps = {
     settings: true,
     reopenCase: true,
     createComment: true,
+    assignCase: true,
   },
 };
 
@@ -49,5 +50,6 @@ CasesPageWithNoPermissions.args = {
     settings: false,
     reopenCase: false,
     createComment: false,
+    assignCase: false,
   },
 };

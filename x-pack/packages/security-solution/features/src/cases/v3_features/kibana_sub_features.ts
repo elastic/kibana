@@ -169,7 +169,7 @@ export const getCasesSubFeaturesMapV3 = ({
   };
 
   const casesAssignUsersCasesSubFeature: SubFeatureConfig = {
-    name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
+    name: i18n.translate('securitySolutionPackages.features.assignUsersSubFeatureName', {
       defaultMessage: 'Assign users',
     }),
     privilegeGroups: [
@@ -178,7 +178,7 @@ export const getCasesSubFeaturesMapV3 = ({
         privileges: [
           {
             id: 'case_assign',
-            name: i18n.translate('xpack.observability.features.assignUsersSubFeatureName', {
+            name: i18n.translate('securitySolutionPackages.features.assignUsersSubFeatureName', {
               defaultMessage: 'Assign users to cases',
             }),
             includeIn: 'all',
