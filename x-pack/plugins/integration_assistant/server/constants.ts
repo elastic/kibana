@@ -15,3 +15,4 @@ export enum LogFormat {
   STRUCTURED = 'structured',
   UNSTRUCTURED = 'unstructured',
 }
+export const PLUGIN_ID = 'integrationAssistant' as const;
