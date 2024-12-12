@@ -55,6 +55,9 @@ const resolveMemberExpressionRoot = (node: TSESTree.MemberExpression): TSESTree.
   return node.object as TSESTree.Identifier;
 };
 
+/**
+ * @description method to inspect values of interest found on an object
+ */
 const raiseReportIfPropertyHasInvalidCssColor = (
   context: Rule.RuleContext,
   propertyNode: TSESTree.Property,
@@ -66,22 +69,19 @@ const raiseReportIfPropertyHasInvalidCssColor = (
     propertyNode.key.type === 'Identifier' &&
     !htmlElementColorDeclarationRegex.test(propertyNode.key.name)
   ) {
-    return;
+    return didReport;
   }
 
   if (propertyNode.value.type === 'Literal') {
     if (
-      (didReport = checkPropertySpecifiesInvalidCSSColor(
+      (didReport = checkPropertySpecifiesInvalidCSSColor([
         // @ts-expect-error the key name is present in this scenario
         propertyNode.key.name,
-        // @ts-expect-error we already ascertained that the value here is a literal
-        propertyNode.value.value
-      ))
+        propertyNode.value.value,
+      ]))
     ) {
       context.report(messageToReport);
     }
-
-    return;
   } else if (propertyNode.value.type === 'Identifier') {
     const identifierDeclaration = context.sourceCode
       // @ts-expect-error
@@ -91,7 +91,7 @@ const raiseReportIfPropertyHasInvalidCssColor = (
       );
 
     if (
-      identifierDeclaration?.defs[0].node.init.type === 'Literal' &&
+      identifierDeclaration?.defs[0].node.init?.type === 'Literal' &&
       checkPropertySpecifiesInvalidCSSColor([
         // @ts-expect-error the key name is present in this scenario
         propertyNode.key.name,
@@ -111,8 +111,6 @@ const raiseReportIfPropertyHasInvalidCssColor = (
 
       didReport = true;
     }
-
-    return;
   } else if (propertyNode.value.type === 'MemberExpression') {
     // @ts-expect-error we ignore the case where this node could be a private identifier
     const MemberExpressionLeafName = propertyNode.value.property.name;
@@ -150,9 +148,9 @@ const raiseReportIfPropertyHasInvalidCssColor = (
     } else if (expressionRootDeclarationInit?.type === 'CallExpression') {
       // TODO: if this object was returned from invoking a function the best we can do is probably validate that the method invoked is one that returns an euitheme object
     }
-
-    return didReport;
   }
+
+  return didReport;
 };
 
 /**
@@ -173,7 +171,7 @@ const handleObjectProperties = (
     const spreadElementDeclaration = context.sourceCode
       // @ts-expect-error
       .getScope(propertyParentNode!.value.expression!)
-      .variables.find((variable) => variable.name === spreadElementIdentifierName);
+      .references.find((ref) => ref.identifier.name === spreadElementIdentifierName)?.resolved;
 
     if (!spreadElementDeclaration) {
       return;
@@ -190,11 +188,16 @@ const handleObjectProperties = (
       },
     };
 
-    (spreadElementDeclaration.defs[0].node.init as TSESTree.ObjectExpression).properties.forEach(
-      (spreadProperty) => {
-        handleObjectProperties(context, propertyParentNode, spreadProperty, reportMessage);
-      }
-    );
+    const spreadElementDeclarationNode = spreadElementDeclaration.defs[0].node.init;
+
+    // evaluate only statically defined declarations, other possibilities like callExpressions in this context complicate things
+    if (spreadElementDeclarationNode?.type === 'ObjectExpression') {
+      (spreadElementDeclarationNode as TSESTree.ObjectExpression).properties.forEach(
+        (spreadProperty) => {
+          handleObjectProperties(context, propertyParentNode, spreadProperty, reportMessage);
+        }
+      );
+    }
   }
 };
 
@@ -356,8 +359,12 @@ export const NoCssColor: Rule.RuleModule = {
               loc: property.loc,
               messageId: 'noCssColorSpecific',
               data: {
-                // @ts-expect-error the key name is always present else this code will not execute
-                property: property.key.name,
+                property:
+                  property.type === 'SpreadElement'
+                    ? // @ts-expect-error the key name is always present else this code will not execute
+                      String(property.argument.name)
+                    : // @ts-expect-error the key name is always present else this code will not execute
+                      String(property.key.name),
               },
             });
           });
