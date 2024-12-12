@@ -28,8 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/199782
-  describe.skip('Kibana API Deprecations', function () {
+  describe('Kibana API Deprecations', function () {
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
