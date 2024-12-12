@@ -4,8 +4,8 @@
   "owner": [
     "@elastic/obs-ux-logs-team"
   ],
-  "group": "observability",
-  "visibility": "private",
+  "group": "platform",
+  "visibility": "shared",
   "description": "This plugin introduces the concept of data set quality, where users can easily get an overview on the data sets they have.",
   "plugin": {
     "id": "datasetQuality",
