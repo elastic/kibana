@@ -6204,7 +6204,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-row@link:packages/kbn-management/settings/components/field_row":
+"@kbn/management-settings-components-field-row@link:src/platform/packages/shared/kbn-management/settings/components/field_row":
   version "0.0.0"
   uid ""
 
