@@ -47,7 +47,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
   paramsProperty,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const backgroundColor = euiTheme.colors.emptyShade;
+  const backgroundColor = euiTheme.colors.backgroundBasePlain;
 
   const textAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const selectableRef = React.useRef<EuiSelectable | null>(null);

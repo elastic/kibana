@@ -111,7 +111,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const [tab, setTab] = useState<string>(MESSAGES_TAB);
   const { euiTheme } = useEuiTheme();
   const subdued = euiTheme.colors.lightestShade;
-  const plain = euiTheme.colors.emptyShade;
+  const plain = euiTheme.colors.backgroundBasePlain;
 
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>(() => {
     if (!selectedRuleType.actionVariables) {
