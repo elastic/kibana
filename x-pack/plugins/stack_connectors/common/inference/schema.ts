@@ -55,7 +55,7 @@ const AITool = schema.object({
 // subset of OpenAI.ChatCompletionCreateParamsBase https://github.com/openai/openai-node/blob/master/src/resources/chat/completions.ts
 export const UnifiedChatCompleteParamsSchema = schema.object({
   body: schema.object({
-    messages: schema.arrayOf(AIMessage),
+    messages: schema.arrayOf(AIMessage, { defaultValue: [] }),
     model: schema.maybe(schema.string()),
     /**
      * The maximum number of [tokens](/tokenizer) that can be generated in the chat

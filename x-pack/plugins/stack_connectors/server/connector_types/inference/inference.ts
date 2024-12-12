@@ -143,7 +143,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     };
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(request, {
       headers: {
-        ['Content-Type']: 'dont-compress-this',
+        'content-type': 'dont-compress-this',
       },
     });
 
