@@ -43,6 +43,7 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     ({ dataProviders, from, to }) =>
     () =>
       new Promise((resolve) => window.alert('investigate in timeline')),
+  hasAccessToTimeline: true,
 
   SiemSearchBar: () => <div data-test-subj="SiemSearchBar">mock siem search</div>,
 

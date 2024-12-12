@@ -22,6 +22,7 @@ import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { useTimelineColumns } from './use_timeline_columns';
 import type { UnifiedTimelineDataGridCellContext } from '../../types';
 import { useTimelineUnifiedDataTableContext } from '../../unified_components/data_table/use_timeline_unified_data_table_context';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface UseTimelineControlColumnArgs {
   columns: ColumnHeaderOptions[];
@@ -55,6 +56,10 @@ export const useTimelineControlColumn = ({
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = useMemo(() => (isEnterprisePlus ? 6 : 5), [isEnterprisePlus]);
   const { localColumns } = useTimelineColumns(columns);
+  const {
+    notesPrivileges: { read: canReadNotes },
+    timelinePrivileges: { crud: canWriteTimelines },
+  } = useUserPrivileges();
 
   const RowCellRender = useMemo(
     () =>
@@ -102,10 +107,21 @@ export const useTimelineControlColumn = ({
             pinnedEventIds={pinnedEventIds}
             eventIdToNoteIds={eventIdToNoteIds}
             toggleShowNotes={onToggleShowNotes}
+            showNotes={canReadNotes}
+            disablePinAction={!canWriteTimelines}
           />
         );
       },
-    [events, timelineId, refetch, pinnedEventIds, eventIdToNoteIds, onToggleShowNotes]
+    [
+      events,
+      timelineId,
+      refetch,
+      pinnedEventIds,
+      eventIdToNoteIds,
+      onToggleShowNotes,
+      canReadNotes,
+      canWriteTimelines,
+    ]
   );
 
   // We need one less when the unified components are enabled because the document expand is provided by the unified data table

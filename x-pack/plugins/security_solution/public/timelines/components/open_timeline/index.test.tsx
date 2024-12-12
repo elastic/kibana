@@ -109,7 +109,8 @@ describe('StatefulOpenTimeline', () => {
       pageName: SecurityPageName.timelines,
     });
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
+      notesPrivileges: { crud: true, read: true },
     });
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);

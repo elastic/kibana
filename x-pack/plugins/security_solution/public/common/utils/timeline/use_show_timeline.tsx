@@ -8,14 +8,19 @@
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useShowTimelineForGivenPath } from './use_show_timeline_for_path';
+import { useUserPrivileges } from '../../components/user_privileges';
 
 export const useShowTimeline = () => {
   const { pathname } = useLocation();
   const getIsTimelineVisible = useShowTimelineForGivenPath();
+  const {
+    timelinePrivileges: { crud, read },
+  } = useUserPrivileges();
+  const canSeeTimeline = crud || read;
 
   const showTimeline = useMemo(
-    () => getIsTimelineVisible(pathname),
-    [pathname, getIsTimelineVisible]
+    () => canSeeTimeline && getIsTimelineVisible(pathname),
+    [pathname, canSeeTimeline, getIsTimelineVisible]
   );
   return [showTimeline];
 };

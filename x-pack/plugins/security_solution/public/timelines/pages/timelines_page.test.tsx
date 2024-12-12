@@ -59,7 +59,7 @@ describe('TimelinesPage', () => {
       services: {
         application: {
           capabilities: {
-            siem: {
+            securitySolutionTimeline: {
               crud: true,
             },
           },
@@ -79,7 +79,7 @@ describe('TimelinesPage', () => {
       services: {
         application: {
           capabilities: {
-            siem: {
+            securitySolutionTimeline: {
               crud: false,
             },
           },

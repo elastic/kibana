@@ -26,7 +26,7 @@ export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const { indicesExist } = useSourcererDataView();
   const capabilitiesCanUserCRUD: boolean =
-    !!useKibana().services?.application?.capabilities?.siem?.crud;
+    !!useKibana().services?.application?.capabilities?.securitySolutionTimeline?.crud;
 
   const [isImportDataModalOpen, setImportDataModal] = useState<boolean>(false);
   const openImportModal = useCallback(() => {

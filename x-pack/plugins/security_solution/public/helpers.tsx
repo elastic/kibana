@@ -24,7 +24,7 @@ import {
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   RULES_PATH,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
 import type {
@@ -234,8 +234,15 @@ export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabiliti
   if (CASES_SUB_PLUGIN_KEY === pluginKey) {
     return capabilities[CASES_FEATURE_ID].read_cases === true;
   }
-  return capabilities[SERVER_APP_ID].show === true;
+  return hasAccessToSecuritySolution(capabilities);
 };
+
+export function hasAccessToSecuritySolution(capabilities: Capabilities) {
+  return (
+    // Using `siemV2`
+    capabilities[SECURITY_FEATURE_ID]?.show === true
+  );
+}
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',

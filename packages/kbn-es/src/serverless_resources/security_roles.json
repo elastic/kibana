@@ -32,10 +32,12 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["read", "read_alerts"],
+          "siemV2": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
+          "securitySolutionTimeline": ["read"],
+          "securitySolutionNotes": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -79,10 +81,12 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["read", "read_alerts"],
+          "siemV2": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
+          "securitySolutionTimeline": ["read"],
+          "securitySolutionNotes": ["read"],
           "actions": ["read"],
           "builtInAlerts": ["read"]
         },
@@ -135,7 +139,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": [
+          "siemV2": [
             "all",
             "read_alerts",
             "crud_alerts",
@@ -153,6 +157,8 @@
           "securitySolutionCasesV2": ["all"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
+          "securitySolutionTimeline": ["all"],
+          "securitySolutionNotes": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "osquery": ["all"],
@@ -207,10 +213,12 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siemV2": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
+          "securitySolutionTimeline": ["all"],
+          "securitySolutionNotes": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"]
         },
@@ -260,10 +268,12 @@
       {
         "feature": {
           "ml": ["read"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siemV2": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
+          "securitySolutionTimeline": ["all"],
+          "securitySolutionNotes": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },
@@ -308,10 +318,12 @@
       {
         "feature": {
           "ml": ["all"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siemV2": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
+          "securitySolutionTimeline": ["all"],
+          "securitySolutionNotes": ["all"],
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "dev_tools": ["all"]
@@ -363,10 +375,12 @@
       {
         "feature": {
           "ml": ["all"],
-          "siem": ["all", "read_alerts", "crud_alerts"],
+          "siemV2": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
+          "securitySolutionTimeline": ["all"],
+          "securitySolutionNotes": ["all"],
           "actions": ["all"],
           "builtInAlerts": ["all"]
         },

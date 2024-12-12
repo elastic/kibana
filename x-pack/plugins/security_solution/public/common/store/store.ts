@@ -29,7 +29,6 @@ import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
-  SERVER_APP_ID,
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import * as timelineActions from '../../timelines/store/actions';
@@ -56,6 +55,7 @@ import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
+import { hasAccessToSecuritySolution } from '../../helpers';
 
 let store: Store<State, Action> | null = null;
 
@@ -71,7 +71,7 @@ export const createStoreFactory = async (
     index_mapping_outdated: null,
   };
   try {
-    if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
+    if (hasAccessToSecuritySolution(coreStart.application.capabilities)) {
       signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
         version: '2023-10-31',
         method: 'GET',

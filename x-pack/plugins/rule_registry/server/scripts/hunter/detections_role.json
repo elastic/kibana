@@ -6,7 +6,9 @@
   "kibana": [
     {
       "feature": {
-        "siem": ["all"]
+        "siemV2": ["all"],
+        "securitySolutionNotes": ["all"],
+        "securitySolutionTimeline": ["all"]
       },
       "spaces": ["*"]
     }

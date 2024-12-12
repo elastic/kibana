@@ -11,6 +11,7 @@ import React, { memo, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
@@ -39,6 +40,8 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
   );
+  const { notesPrivileges } = useUserPrivileges();
+  const canSeeNotes = notesPrivileges.crud || notesPrivileges.read;
 
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
@@ -49,14 +52,20 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (!securitySolutionNotesDisabled && !isPreview) {
+    if (canSeeNotes && !securitySolutionNotesDisabled && !isPreview) {
       tabList.push(tabs.notesTab);
     }
     if (visualizationInFlyoutEnabled && !isPreview) {
       return [tabs.visualizeTab, ...tabList];
     }
     return tabList;
-  }, [eventKind, isPreview, securitySolutionNotesDisabled, visualizationInFlyoutEnabled]);
+  }, [
+    eventKind,
+    isPreview,
+    canSeeNotes,
+    securitySolutionNotesDisabled,
+    visualizationInFlyoutEnabled,
+  ]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

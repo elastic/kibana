@@ -19,6 +19,7 @@ import { addProvider, showTimeline } from '../../../../timelines/store/actions';
 import { TimelineId } from '../../../../../common/types';
 import type { SecurityAppStore } from '../../../../common/store';
 import { fieldHasCellActions } from '../../utils';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 import {
   ADD_TO_TIMELINE_FAILED_TEXT,
   ADD_TO_TIMELINE_FAILED_TITLE,
@@ -39,7 +40,11 @@ export const createInvestigateInNewTimelineCellActionFactory = createCellActionF
     store: SecurityAppStore;
     services: StartServices;
   }): CellActionTemplate<SecurityCellAction> => {
-    const { notifications: notificationsService } = services;
+    const {
+      notifications: notificationsService,
+      application: { capabilities },
+    } = services;
+    const timelineCapabilities = extractTimelineCapabilities(capabilities);
 
     return {
       type: SecurityCellActionType.INVESTIGATE_IN_NEW_TIMELINE,
@@ -50,6 +55,7 @@ export const createInvestigateInNewTimelineCellActionFactory = createCellActionF
         const field = data[0]?.field;
 
         return (
+          (timelineCapabilities.read || timelineCapabilities.crud) &&
           data.length === 1 && // TODO Add support for multiple values
           fieldHasCellActions(field.name) &&
           isValidDataProviderField(field.name, field.type) &&

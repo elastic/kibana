@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   SecurityPageName,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
   SIEM_MIGRATIONS_RULES_PATH,
 } from '../../common/constants';
 import { SIEM_MIGRATIONS_RULES } from '../app/translations';
@@ -23,7 +23,7 @@ export const siemMigrationsLinks: LinkItem = {
   }),
   landingIcon: SiemMigrationsIcon,
   path: SIEM_MIGRATIONS_RULES_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SECURITY_FEATURE_ID}.show`],
   skipUrlState: true,
   hideTimeline: true,
   globalSearchKeywords: [

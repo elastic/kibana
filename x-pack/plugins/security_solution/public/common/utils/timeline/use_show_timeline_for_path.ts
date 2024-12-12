@@ -12,6 +12,7 @@ import { getLinksWithHiddenTimeline } from '../../links';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../lib/kibana';
+import { hasAccessToSecuritySolution } from '../../../helpers';
 
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
@@ -21,7 +22,12 @@ const isTimelinePathVisible = (currentPath: string): boolean => {
 
 export const useShowTimelineForGivenPath = () => {
   const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
-  const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
+  const {
+    services: {
+      application: { capabilities },
+    },
+  } = useKibana();
+  const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
   const isTimelineAllowed = useMemo(
     () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
