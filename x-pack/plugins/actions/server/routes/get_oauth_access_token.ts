@@ -12,6 +12,7 @@ import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 
 const oauthJwtBodySchema = schema.object({
   tokenUrl: schema.string(),
@@ -63,6 +64,7 @@ export const getOAuthAccessToken = (
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/_oauth_access_token`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       validate: {
         body: bodySchema,
       },

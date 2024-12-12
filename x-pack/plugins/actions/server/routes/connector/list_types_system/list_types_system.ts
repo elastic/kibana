@@ -16,6 +16,7 @@ import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { transformListTypesResponseV1 } from '../list_types/transforms';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const listTypesWithSystemRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -24,6 +25,7 @@ export const listTypesWithSystemRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector_types`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       validate: {
         query: connectorTypesQuerySchemaV1,
       },

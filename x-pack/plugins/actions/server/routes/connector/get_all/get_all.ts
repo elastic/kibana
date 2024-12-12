@@ -12,6 +12,7 @@ import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
 import { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
 
 export const getAllConnectorsRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
@@ -20,6 +21,7 @@ export const getAllConnectorsRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connectors`,
+      security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
         summary: `Get all connectors`,
