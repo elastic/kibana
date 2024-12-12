@@ -7940,7 +7940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/watcher-plugin@link:x-pack/plugins/watcher":
+"@kbn/watcher-plugin@link:x-pack/platform/plugins/private/watcher":
   version "0.0.0"
   uid ""
 

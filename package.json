@@ -1024,7 +1024,7 @@
     "@kbn/visualization-ui-components": "link:packages/kbn-visualization-ui-components",
     "@kbn/visualization-utils": "link:packages/kbn-visualization-utils",
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
-    "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
+    "@kbn/watcher-plugin": "link:x-pack/platform/plugins/private/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod": "link:packages/kbn-zod",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",

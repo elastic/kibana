@@ -875,6 +875,7 @@ x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
+x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
@@ -984,7 +985,6 @@ x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigatio
 x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
-x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant

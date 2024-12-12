@@ -7,9 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/watcher'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/watcher',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/private/watcher'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/watcher',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/watcher/{common,public,server}/**/*.{js,ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/platform/plugins/private/watcher/{common,public,server}/**/*.{js,ts,tsx}'],
 };
