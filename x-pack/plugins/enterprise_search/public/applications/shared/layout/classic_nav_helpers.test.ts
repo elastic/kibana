@@ -8,7 +8,7 @@
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-import type { ClassicNavItem } from '@kbn/search-navigation/public';
+import type { ClassicNavItem } from '../types';
 
 import '../../__mocks__/react_router';
 
