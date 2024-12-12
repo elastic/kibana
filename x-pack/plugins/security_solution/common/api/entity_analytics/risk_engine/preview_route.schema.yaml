@@ -58,16 +58,16 @@ components:
           description: Defines the time period over which scores will be evaluated. If unspecified, a range of `[now, now-30d]` will be used.
         weights:
           $ref: '../common/common.schema.yaml#/components/schemas/RiskScoreWeights'
-        excludeAlertStatuses:
+        exclude_alert_statuses:
           description: A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.
           type: array
           items:
             type: string
-            enum:
-              - open
-              - closed
-              - in-progress
-              - acknowledged
+        exclude_alert_tags:
+          description: A list of alert tags to exclude from the risk score calculation. If unspecified, all alert tags are included.
+          type: array
+          items:
+            type: string
           
 
     RiskScoresPreviewResponse:
