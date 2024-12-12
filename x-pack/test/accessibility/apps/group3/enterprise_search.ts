@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Overview', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/overview');
+        await common.navigateToApp('elasticsearch/overview');
       });
 
       it('loads a landing page with product cards', async function () {
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Content', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/content/search_indices');
+        await common.navigateToApp('elasticsearch/content/search_indices');
       });
 
       it('loads the indices page', async function () {
