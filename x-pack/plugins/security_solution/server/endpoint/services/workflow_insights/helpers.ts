@@ -15,7 +15,7 @@ import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
 import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 
-import { EndpointMetadataService } from '../metadata';
+import type { EndpointMetadataService } from '../metadata';
 import {
   COMPONENT_TEMPLATE_NAME,
   DATA_STREAM_PREFIX,

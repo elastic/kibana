@@ -19,7 +19,7 @@ import {
   Category,
   SourceType,
 } from '../../../../common/endpoint/types/workflow_insights';
-import { EndpointMetadataService } from '../metadata';
+import type { EndpointMetadataService } from '../metadata';
 import {
   buildEsQueryParams,
   createDatastream,
