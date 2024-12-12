@@ -22,7 +22,7 @@ export const useRiskScorePreview = ({
   const { fetchRiskScorePreview } = useEntityAnalyticsRoutes();
 
   return useQuery(
-    ['POST', 'FETCH_PREVIEW_RISK_SCORE', range, filter, exclude_alert_statuses],
+    ['POST', 'FETCH_PREVIEW_RISK_SCORE', range, filter, excludeAlertStatuses],
     async ({ signal }) => {
       if (!dataViewId) {
         return;
