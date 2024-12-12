@@ -263,8 +263,6 @@ packages/core/user-settings/core-user-settings-server-internal @elastic/kibana-s
 packages/core/user-settings/core-user-settings-server-mocks @elastic/kibana-security
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/fleet @elastic/fleet
-packages/deeplinks/observability @elastic/obs-ux-management-team
-packages/deeplinks/management @elastic/kibana-management
 packages/deeplinks/search @elastic/search-kibana
 packages/deeplinks/security @elastic/security-solution
 packages/deeplinks/shared @elastic/appex-sharedux
@@ -796,8 +794,6 @@ x-pack/packages/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
 x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
-x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security/api_key_management @elastic/kibana-security
 x-pack/packages/security/authorization_core @elastic/kibana-security
@@ -858,9 +854,9 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
-x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
@@ -972,7 +968,6 @@ x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 x-pack/plugins/upgrade_assistant @elastic/kibana-management
-x-pack/plugins/watcher @elastic/kibana-management
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
