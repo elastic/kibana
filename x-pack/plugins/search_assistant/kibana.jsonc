@@ -16,6 +16,7 @@
     "requiredPlugins": [
       "actions",
       "licensing",
+      "ml",
       "observabilityAIAssistant",
       "triggersActionsUi",
       "share"
