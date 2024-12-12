@@ -6188,7 +6188,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-plugin@link:src/plugins/management":
+"@kbn/management-plugin@link:src/platform/plugins/shared/management":
   version "0.0.0"
   uid ""
 
