@@ -22,6 +22,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
   IScopedClusterClient,
+  CoreRequestHandlerContext,
 } from '@kbn/core/server';
 import type {
   AgentService,
@@ -88,6 +89,7 @@ export type CspRequestHandlerContext = CustomRequestHandlerContext<{
   csp: CspApiRequestHandlerContext;
   fleet: FleetRequestHandlerContext['fleet'];
   alerting: AlertingApiRequestHandlerContext;
+  core: Promise<CoreRequestHandlerContext>;
 }>;
 
 /**

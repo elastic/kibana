@@ -14,17 +14,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['common', 'header', 'alerts', 'expandedFlyout']);
-  const alertsPage = pageObjects.alerts;
+  const pageObjects = getPageObjects(['common', 'header', 'networkEvents', 'expandedFlyout']);
+  const networkEventsPage = pageObjects.networkEvents;
   const expandedFlyout = pageObjects.expandedFlyout;
 
-  describe('Security Alerts Page - Graph visualization', function () {
+  describe('Security Network Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/cloud_security_posture_functional/es_archives/security_alerts'
-      );
       await esArchiver.load(
         'x-pack/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
@@ -32,32 +29,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await waitForPluginInitialized({ retry, supertest, logger });
 
       // Setting the timerange to fit the data and open the flyout for a specific alert
-      await alertsPage.navigateToAlertsPage(
-        `${alertsPage.getAbsoluteTimerangeFilter(
+      await networkEventsPage.navigateToNetworkEventsPage(
+        `${networkEventsPage.getAbsoluteTimerangeFilter(
           '2024-09-01T00:00:00.000Z',
           '2024-09-02T00:00:00.000Z'
-        )}&${alertsPage.getFlyoutFilter(
-          '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
-        )}`
+        )}&${networkEventsPage.getFlyoutFilter('1')}`
       );
 
-      await alertsPage.waitForListToHaveAlerts();
+      await networkEventsPage.waitForListToHaveEvents();
 
-      await alertsPage.flyout.expandVisualizations();
+      await networkEventsPage.flyout.expandVisualizations();
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/cloud_security_posture_functional/es_archives/security_alerts'
-      );
       await esArchiver.unload(
         'x-pack/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
     });
 
     it('expanded flyout - filter by node', async () => {
-      await alertsPage.flyout.assertGraphPreviewVisible();
-      await alertsPage.flyout.assertGraphNodesNumber(3);
+      await networkEventsPage.flyout.assertGraphPreviewVisible();
+      await networkEventsPage.flyout.assertGraphNodesNumber(3);
 
       await expandedFlyout.expandGraph();
       await expandedFlyout.waitGraphIsLoaded();

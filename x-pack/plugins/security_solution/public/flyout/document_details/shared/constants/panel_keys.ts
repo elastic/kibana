@@ -12,3 +12,5 @@ export const DocumentDetailsPreviewPanelKey = 'document-details-preview' as cons
 export const DocumentDetailsIsolateHostPanelKey = 'document-details-isolate-host' as const;
 export const DocumentDetailsAlertReasonPanelKey = 'document-details-alert-reason' as const;
 export const DocumentDetailsAnalyzerPanelKey = 'document-details-analyzer-details' as const;
+
+export const VisualizationTabGraphKey = 'graph-visualization' as const;
