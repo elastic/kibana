@@ -26,6 +26,10 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => ({} as Integration),
   }),
+  translation_finalized: Annotation<boolean>({
+    reducer: (current, value) => value ?? current,
+    default: () => false,
+  }),
   inline_query: Annotation<string>({
     reducer: (current, value) => value ?? current,
     default: () => '',

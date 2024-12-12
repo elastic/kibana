@@ -46,12 +46,17 @@ export const getMatchPrebuiltRuleNode = ({
       };
     });
 
+    const splunkRule = {
+      title: state.original_rule.title,
+      description: state.original_rule.description,
+    };
+
     /*
      * Takes the most relevant rule from the array of rule(s) returned by the semantic query, returns either the most relevant or none.
      */
     const response = (await mostRelevantRule.invoke({
       rules: JSON.stringify(elasticSecurityRules, null, 2),
-      ruleTitle: state.original_rule.title,
+      splunk_rule: JSON.stringify(splunkRule, null, 2),
     })) as GetMatchedRuleResponse;
     if (response.match) {
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);
@@ -67,7 +72,11 @@ export const getMatchPrebuiltRuleNode = ({
         };
       }
     }
-    if (['inputlookup', 'outputlookup'].includes(state.original_rule?.query)) {
+    const lookupTypes = ['inputlookup', 'outputlookup'];
+    if (
+      state.original_rule?.query &&
+      lookupTypes.some((type) => state.original_rule.query.includes(type))
+    ) {
       logger.debug(
         `Rule: ${state.original_rule?.title} did not match any prebuilt rule, but contains inputlookup, dropping`
       );
