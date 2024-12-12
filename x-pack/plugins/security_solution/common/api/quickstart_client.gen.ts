@@ -368,6 +368,8 @@ import type {
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
+  GetRuleMigrationResourcesMissingRequestParamsInput,
+  GetRuleMigrationResourcesMissingResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   GetRuleMigrationTranslationStatsRequestParamsInput,
@@ -1472,6 +1474,24 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Identifies missing resources from all the rules of an existing SIEM rules migration
+   */
+  async getRuleMigrationResourcesMissing(props: GetRuleMigrationResourcesMissingProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationResourcesMissing`);
+    return this.kbnClient
+      .request<GetRuleMigrationResourcesMissingResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/resources/missing',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the stats of a SIEM rules migration using the migration id provided
    */
   async getRuleMigrationStats(props: GetRuleMigrationStatsProps) {
@@ -2422,6 +2442,9 @@ export interface GetRuleMigrationPrebuiltRulesProps {
 export interface GetRuleMigrationResourcesProps {
   query: GetRuleMigrationResourcesRequestQueryInput;
   params: GetRuleMigrationResourcesRequestParamsInput;
+}
+export interface GetRuleMigrationResourcesMissingProps {
+  params: GetRuleMigrationResourcesMissingRequestParamsInput;
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;

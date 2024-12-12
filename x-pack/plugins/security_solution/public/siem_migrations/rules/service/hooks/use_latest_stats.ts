@@ -6,7 +6,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 export const useLatestStats = () => {
@@ -16,8 +16,12 @@ export const useLatestStats = () => {
     siemMigrations.rules.startPolling();
   }, [siemMigrations.rules]);
 
+  const refreshStats = useCallback(() => {
+    siemMigrations.rules.getRuleMigrationsStats(); // this updates latestStats$ internally
+  }, [siemMigrations.rules]);
+
   const latestStats$ = useMemo(() => siemMigrations.rules.getLatestStats$(), [siemMigrations]);
   const latestStats = useObservable(latestStats$, null);
 
-  return { data: latestStats ?? [], isLoading: latestStats === null };
+  return { data: latestStats ?? [], isLoading: latestStats === null, refreshStats };
 };

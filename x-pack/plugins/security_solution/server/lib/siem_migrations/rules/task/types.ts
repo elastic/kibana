@@ -30,20 +30,7 @@ export interface RuleMigrationTaskStartParams {
   soClient: SavedObjectsClientContract;
 }
 
-export interface RuleMigrationTaskPrepareParams {
-  migrationId: string;
-  connectorId: string;
-  inferenceClient: InferenceClient;
-  actionsClient: ActionsClient;
-  rulesClient: RulesClient;
-  soClient: SavedObjectsClientContract;
-  abortController: AbortController;
-}
-
-export interface RuleMigrationTaskRunParams {
-  migrationId: string;
-  invocationConfig: RunnableConfig;
-  agent: MigrationAgent;
+export interface RuleMigrationTaskCreateAgentParams extends RuleMigrationTaskStartParams {
   abortController: AbortController;
 }
 
