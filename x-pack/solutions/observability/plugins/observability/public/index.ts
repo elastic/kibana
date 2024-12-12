@@ -6,7 +6,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110905
-/* eslint-disable @kbn/eslint/no_export_all */
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';

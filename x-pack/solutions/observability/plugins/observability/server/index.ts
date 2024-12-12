@@ -6,7 +6,6 @@
  */
 
 // TODO: https://github.com/elastic/kibana/issues/110905
-/* eslint-disable @kbn/eslint/no_export_all */
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
