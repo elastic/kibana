@@ -6,7 +6,6 @@
  */
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
-import { z } from '@kbn/zod';
 import { keyBy } from 'lodash';
 import { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
@@ -17,23 +16,6 @@ import type {
   SummaryResult,
   SummarySearchClient,
 } from './summary_search_client/types';
-
-const searchAfterSchema = z
-  .string()
-  .optional()
-  .transform((value, ctx) => {
-    if (!value) return undefined;
-
-    try {
-      const parsedValue = z
-        .array(z.union([z.string(), z.number()]))
-        .min(1)
-        .parse(JSON.parse(value));
-      return parsedValue;
-    } catch (err) {
-      return undefined;
-    }
-  });
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
@@ -111,10 +93,9 @@ function toPagination(params: FindSLOParams): Pagination {
     if (!isNaN(size) && size > MAX_PER_PAGE_OR_SIZE) {
       throw new IllegalArgumentError('size limit set to 5000');
     }
-    const parsedSearchAfter = searchAfterSchema.parse(params.searchAfter);
 
     return {
-      searchAfter: parsedSearchAfter,
+      searchAfter: params.searchAfter,
       size: !isNaN(size) && size > 0 ? size : DEFAULT_SIZE,
     };
   }

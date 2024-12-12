@@ -33,7 +33,7 @@ interface Sort {
   direction: 'asc' | 'desc';
 }
 
-type Pagination = CursorPagination | PagePagination;
+type Pagination = CursorPagination | OffsetPagination;
 
 interface CursorPagination {
   searchAfter?: Array<string | number>;
@@ -44,12 +44,12 @@ function isCursorPagination(pagination: Pagination): pagination is CursorPaginat
   return (pagination as CursorPagination).size !== undefined;
 }
 
-interface PagePagination {
+interface OffsetPagination {
   page: number;
   perPage: number;
 }
 
-type Paginated<T> = CursorPaginated<T> | PagePaginated<T>;
+type Paginated<T> = CursorPaginated<T> | OffsetPaginated<T>;
 
 interface CursorPaginated<T> {
   total: number;
@@ -58,7 +58,7 @@ interface CursorPaginated<T> {
   results: T[];
 }
 
-interface PagePaginated<T> {
+interface OffsetPaginated<T> {
   total: number;
   page: number;
   perPage: number;
@@ -81,10 +81,10 @@ export type {
   Sort,
   Pagination,
   CursorPagination,
-  PagePagination,
+  OffsetPagination as PagePagination,
   Paginated,
   CursorPaginated,
-  PagePaginated,
+  OffsetPaginated as PagePaginated,
   SummarySearchClient,
 };
 export { isCursorPagination };

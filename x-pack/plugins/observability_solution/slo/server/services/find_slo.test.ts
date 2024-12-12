@@ -171,24 +171,6 @@ describe('FindSLO', () => {
           'size limit set to 5000'
         );
       });
-
-      it("defaults searchAfter to 'undefined' when not a valid stringified JSON array", async () => {
-        await expect(
-          findSLO.execute({ searchAfter: 'not an array', size: '40' })
-        ).resolves.not.toThrow();
-        expect(mockSummarySearchClient.search.mock.calls[0][3]).toStrictEqual({
-          size: 40,
-          searchAfter: undefined,
-        });
-      });
-
-      it("defaults searchAfter to 'undefined' when empty array", async () => {
-        await expect(findSLO.execute({ searchAfter: '[]', size: '40' })).resolves.not.toThrow();
-        expect(mockSummarySearchClient.search.mock.calls[0][3]).toStrictEqual({
-          size: 40,
-          searchAfter: undefined,
-        });
-      });
     });
   });
 });
