@@ -31,7 +31,7 @@ export class PlaceholderWidget implements monaco.editor.IContentWidget {
       const domNode = document.createElement('div');
       domNode.innerText = this.placeholderText;
       domNode.className = css`
-        color: ${this.euiTheme.colors.subduedText};
+        color: ${this.euiTheme.colors.textSubdued};
         width: max-content;
         pointer-events: none;
       `;

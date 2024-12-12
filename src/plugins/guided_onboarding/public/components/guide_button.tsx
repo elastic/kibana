@@ -58,7 +58,7 @@ export const GuideButton = ({
     <EuiButton
       isLoading={isLoading}
       onClick={toggleGuidePanel}
-      color="success"
+      color="accent"
       fill
       size="s"
       data-test-subj="guideButton"
@@ -97,7 +97,7 @@ export const GuideButton = ({
       return (
         <EuiButton
           onClick={navigateToLandingPage}
-          color="success"
+          color="accent"
           fill
           size="s"
           data-test-subj="guideButtonRedirect"

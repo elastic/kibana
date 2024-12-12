@@ -28,7 +28,7 @@ import {
 import * as StatusCheckStates from './status_check_states';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 
 class InstructionSetUi extends React.Component {
   constructor(props) {
