@@ -148,7 +148,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               <EuiSpacer size="s" />
               <EuiText>
                 <ul>
-                  {dataStreams.map((dataStream) => (
+                  {[...new Set([...dataStreams])].map((dataStream) => (
                     <li key={dataStream}>
                       <EuiCode>{dataStream}</EuiCode>
                     </li>
