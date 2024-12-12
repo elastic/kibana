@@ -6,7 +6,12 @@
  */
 
 import moment from 'moment';
-import { AnalyticsServiceSetup, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import {
+  AnalyticsServiceSetup,
+  AuditLogger,
+  IKibanaResponse,
+  KibanaResponseFactory,
+} from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -20,6 +25,11 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
+import {
+  AUDIT_OUTCOME,
+  KnowledgeBaseAuditAction,
+  knowledgeBaseAuditEvent,
+} from '../../../ai_assistant_data_clients/knowledge_base/audit_events';
 import { CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT } from '../../../lib/telemetry/event_based_telemetry';
 import { performChecks } from '../../helpers';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '../../../../common/constants';
@@ -62,7 +72,8 @@ const buildBulkResponse = (
     deleted = [],
     skipped = [],
   }: KnowledgeBaseEntryBulkCrudActionResults & { errors: BulkOperationError[] },
-  telemetry: AnalyticsServiceSetup
+  telemetry: AnalyticsServiceSetup,
+  auditLogger?: AuditLogger
 ): IKibanaResponse<KnowledgeBaseEntryBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
@@ -90,6 +101,39 @@ const buildBulkResponse = (
         sharing: entry.users.length ? 'private' : 'global',
         ...(entry.type === 'document' ? { source: entry.source } : {}),
       });
+      auditLogger?.log(
+        knowledgeBaseAuditEvent({
+          action: KnowledgeBaseAuditAction.CREATE,
+          id: entry.id,
+          name: entry.name,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        })
+      );
+    });
+  }
+
+  if (updated.length) {
+    updated.forEach((entry) => {
+      auditLogger?.log(
+        knowledgeBaseAuditEvent({
+          action: KnowledgeBaseAuditAction.UPDATE,
+          id: entry.id,
+          name: entry.name,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        })
+      );
+    });
+  }
+
+  if (deleted.length) {
+    deleted.forEach((deletedId) => {
+      auditLogger?.log(
+        knowledgeBaseAuditEvent({
+          action: KnowledgeBaseAuditAction.DELETE,
+          id: deletedId,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        })
+      );
     });
   }
   if (numFailed > 0) {
@@ -308,7 +352,8 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
               skipped: [],
               errors,
             },
-            ctx.elasticAssistant.telemetry
+            ctx.elasticAssistant.telemetry,
+            ctx.elasticAssistant.auditLogger
           );
         } catch (err) {
           const error = transformError(err);
