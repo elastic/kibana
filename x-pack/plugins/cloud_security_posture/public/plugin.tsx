@@ -74,7 +74,7 @@ export class CspPlugin
     const App = (props: CspRouterProps) => (
       <KibanaContextProvider services={{ ...core, ...plugins, storage }}>
         <RedirectAppLinks coreStart={core}>
-          <div style={{ width: '100%', height: '100%' }}>
+          <div css={{ width: '100%', height: '100%' }}>
             <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
               <CspRouter {...props} />
             </SetupContext.Provider>

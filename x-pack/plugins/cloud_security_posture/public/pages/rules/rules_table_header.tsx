@@ -212,7 +212,7 @@ const SearchField = ({
 
   return (
     <div>
-      <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+      <EuiFlexItem grow={true} css={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
           isLoading={isSearching}
           placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
@@ -220,7 +220,7 @@ const SearchField = ({
           })}
           value={localValue}
           onChange={(e) => setLocalValue(e.target.value)}
-          style={{ minWidth: 150 }}
+          css={{ minWidth: 150 }}
           fullWidth
         />
       </EuiFlexItem>
@@ -309,7 +309,7 @@ const CurrentPageOfTotal = ({
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems={'center'}>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+          <EuiText size="xs" textAlign="left" color="subdued" css={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
               defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} {pipe} Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
@@ -358,8 +358,8 @@ const CurrentPageOfTotal = ({
             anchorPosition="downLeft"
             panelPaddingSize="s"
           >
-            <EuiPopoverTitle style={{ minWidth: 240 }}>
-              <EuiText size="s" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <EuiPopoverTitle css={{ minWidth: 240 }}>
+              <EuiText size="s" textAlign="left" color="subdued" css={{ marginLeft: '8px' }}>
                 <b>
                   <FormattedMessage
                     id="xpack.csp.rules.rulesTable.bulkActionsOptionTitle"

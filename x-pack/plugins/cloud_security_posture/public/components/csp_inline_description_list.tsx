@@ -60,7 +60,7 @@ export const CspInlineDescriptionList = ({
       data-test-subj={testId}
       type="inline"
       titleProps={{
-        style: {
+        css: {
           background: 'initial',
           color: euiTheme.colors.subduedText,
           fontSize,
@@ -69,7 +69,7 @@ export const CspInlineDescriptionList = ({
         },
       }}
       descriptionProps={{
-        style: {
+        css: {
           color: euiTheme.colors.subduedText,
           marginRight: euiTheme.size.xs,
           fontSize,
