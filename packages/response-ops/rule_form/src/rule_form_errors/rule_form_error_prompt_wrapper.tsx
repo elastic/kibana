@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { useEuiBackgroundColorCSS, EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 interface RuleFormErrorPromptWrapperProps {
   hasBorder?: boolean;
@@ -18,7 +18,9 @@ interface RuleFormErrorPromptWrapperProps {
 export const RuleFormErrorPromptWrapper: React.FC<
   React.PropsWithChildren<RuleFormErrorPromptWrapperProps>
 > = ({ children, hasBorder, hasShadow }) => {
-  const styles = useEuiBackgroundColorCSS().transparent;
+  const styles = {
+    backgroundColor: 'transparent',
+  };
   return (
     <EuiPageTemplate offset={0} css={styles}>
       <EuiPageTemplate.EmptyPrompt paddingSize="none" hasBorder={hasBorder} hasShadow={hasShadow}>
