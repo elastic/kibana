@@ -28,6 +28,7 @@ import {
   limitedArraySchema,
   NonEmptyString,
   paginationSchema,
+  customFieldListValueSchema,
 } from '../../../schema';
 import {
   CaseCustomFieldToggleRt,
@@ -49,7 +50,6 @@ import { CasesStatusResponseRt } from '../stats/v1';
 import {
   CaseCustomFieldTextWithValidationValueRt,
   CaseCustomFieldNumberWithValidationValueRt,
-  CaseCustomFieldListWithValidationValueRt,
 } from '../custom_field/v1';
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
@@ -67,7 +67,7 @@ const CaseCustomFieldNumberWithValidationRt = rt.strict({
 const CaseCustomFieldListWithValidationRt = rt.strict({
   key: rt.string,
   type: CustomFieldListTypeRt,
-  value: rt.union([CaseCustomFieldListWithValidationValueRt('value'), rt.null]),
+  value: rt.union([customFieldListValueSchema, rt.null]),
 });
 
 const CustomFieldRt = rt.union([

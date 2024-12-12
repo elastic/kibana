@@ -6,11 +6,12 @@
  */
 
 import * as rt from 'io-ts';
+import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
 import {
-  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_CUSTOM_FIELD_OPTION_LENGTH,
-} from '../../../constants';
-import { limitedStringSchema, limitedNumberAsIntegerSchema } from '../../../schema';
+  limitedStringSchema,
+  limitedNumberAsIntegerSchema,
+  customFieldListValueSchema,
+} from '../../../schema';
 
 export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
   limitedStringSchema({
@@ -24,35 +25,6 @@ export const CaseCustomFieldNumberWithValidationValueRt = ({ fieldName }: { fiel
     fieldName,
   });
 
-export const CaseCustomFieldListWithValidationValueRt = (fieldValue: string) =>
-  new rt.Type(
-    'CaseCustomFieldListWithValidationValueRt',
-    rt.record(rt.string, rt.string).is,
-    (input, context) => {
-      if (typeof input !== 'object' || input === null) {
-        return rt.failure(input, context, 'Value must be an object.');
-      }
-
-      if (Object.keys(input).length === 0) {
-        return rt.failure(input, context, 'Value cannot be an empty object.');
-      }
-
-      if (Object.keys(input).length > 1) {
-        return rt.failure(input, context, 'Value must be a single key/value pair.');
-      }
-
-      if (Object.values(input)[0].length > MAX_CUSTOM_FIELD_OPTION_LENGTH) {
-        return rt.failure(
-          input,
-          context,
-          `The length of the label is too long. The maximum length is ${MAX_CUSTOM_FIELD_OPTION_LENGTH}.`
-        );
-      }
-      return rt.success(input);
-    },
-    rt.identity
-  );
-
 /**
  * Update custom_field
  */
@@ -63,7 +35,7 @@ export const CustomFieldPutRequestRt = rt.strict({
     rt.null,
     CaseCustomFieldTextWithValidationValueRt('value'),
     CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'value' }),
-    CaseCustomFieldListWithValidationValueRt('value'),
+    customFieldListValueSchema,
   ]),
   caseVersion: rt.string,
 });

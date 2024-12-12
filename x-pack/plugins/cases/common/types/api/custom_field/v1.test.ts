@@ -6,15 +6,11 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import {
-  MAX_CUSTOM_FIELD_OPTION_LENGTH,
-  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-} from '../../../constants';
+import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
 import {
   CaseCustomFieldTextWithValidationValueRt,
   CustomFieldPutRequestRt,
   CaseCustomFieldNumberWithValidationValueRt,
-  CaseCustomFieldListWithValidationValueRt,
 } from './v1';
 
 describe('Custom Fields', () => {
@@ -135,47 +131,6 @@ describe('Custom Fields', () => {
         PathReporter.report(numberCustomFieldValueType.decode(Number.MIN_SAFE_INTEGER - 1))[0]
       ).toContain(
         'The value field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
-      );
-    });
-  });
-
-  describe('CaseCustomFieldListWithValidationValueRt', () => {
-    const listCustomFieldValueType = CaseCustomFieldListWithValidationValueRt('value');
-
-    it('should decode list correctly', () => {
-      const query = listCustomFieldValueType.decode({
-        '1': 'foo',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: {
-          '1': 'foo',
-        },
-      });
-    });
-
-    it('should not be empty', () => {
-      expect(PathReporter.report(listCustomFieldValueType.decode({}))[0]).toContain(
-        'Value cannot be an empty object.'
-      );
-    });
-
-    it('should only be one key/value pair', () => {
-      expect(
-        PathReporter.report(listCustomFieldValueType.decode({ '1': 'foo', '2': 'bar' }))[0]
-      ).toContain('Value must be a single key/value pair.');
-    });
-
-    it(`limits the length of label to ${MAX_CUSTOM_FIELD_OPTION_LENGTH}`, () => {
-      expect(
-        PathReporter.report(
-          listCustomFieldValueType.decode({
-            '1': '#'.repeat(MAX_CUSTOM_FIELD_OPTION_LENGTH + 1),
-          })
-        )[0]
-      ).toContain(
-        `The length of the label is too long. The maximum length is ${MAX_CUSTOM_FIELD_OPTION_LENGTH}.`
       );
     });
   });

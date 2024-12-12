@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
-import { MAX_DOCS_PER_PAGE } from '../constants';
+import { MAX_DOCS_PER_PAGE, MAX_CUSTOM_FIELD_OPTION_LENGTH } from '../constants';
 import type { PartialPaginationType } from './types';
 import { PaginationSchemaRt } from './types';
 import { ALLOWED_MIME_TYPES } from '../constants/mime_types';
@@ -207,5 +207,33 @@ export const mimeTypeString = new rt.Type<string, string, unknown>(
 
       return rt.success(s);
     }),
+  rt.identity
+);
+
+export const customFieldListValueSchema = new rt.Type(
+  'CustomFieldListValue',
+  rt.record(rt.string, rt.string).is,
+  (input, context) => {
+    if (typeof input !== 'object' || input === null) {
+      return rt.failure(input, context, 'Value must be an object.');
+    }
+
+    if (Object.keys(input).length === 0) {
+      return rt.failure(input, context, 'Value cannot be an empty object.');
+    }
+
+    if (Object.keys(input).length > 1) {
+      return rt.failure(input, context, 'Value must be a single key/value pair.');
+    }
+
+    if (Object.values(input)[0].length > MAX_CUSTOM_FIELD_OPTION_LENGTH) {
+      return rt.failure(
+        input,
+        context,
+        `The length of the label is too long. The maximum length is ${MAX_CUSTOM_FIELD_OPTION_LENGTH}.`
+      );
+    }
+    return rt.success(input);
+  },
   rt.identity
 );

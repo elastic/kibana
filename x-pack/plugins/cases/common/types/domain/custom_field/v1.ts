@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { customFieldListValueSchema } from '../../../schema';
 
 export enum CustomFieldTypes {
   TEXT = 'text',
@@ -33,7 +34,7 @@ export const CaseCustomFieldToggleRt = rt.strict({
 export const CaseCustomFieldListRt = rt.strict({
   key: rt.string,
   type: CustomFieldListTypeRt,
-  value: rt.union([rt.record(rt.string, rt.string), rt.null]),
+  value: rt.union([customFieldListValueSchema, rt.null]),
 });
 
 export const CaseCustomFieldNumberRt = rt.strict({
