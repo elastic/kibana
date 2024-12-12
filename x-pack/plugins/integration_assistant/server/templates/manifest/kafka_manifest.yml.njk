@@ -26,7 +26,8 @@
       title: Dataset name
       description: |
         Dataset to write data to. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
-      default: kafka_log.generic
+      default: |
+        {{ package_name }}.{{ data_stream_name }}
       required: true
       show_user: true
     - name: pipeline

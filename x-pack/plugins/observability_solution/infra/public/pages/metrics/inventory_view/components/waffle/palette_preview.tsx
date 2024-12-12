@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import type { InventoryColorPalette } from '../../../../../common/inventory/types';
 import { getColorPalette } from '../../lib/get_color_palette';
 
@@ -27,19 +27,19 @@ export const PalettePreview = ({ steps, palette, reverse }: Props) => {
   );
 };
 
-const Swatch = euiStyled.div`
+const Swatch = styled.div`
   max-width: 15px;
   height: 12px;
   flex: 1 1 auto;
   &:first-child {
-    border-radius: ${(props) => props.theme.eui.euiBorderRadius} 0 0 ${(props) =>
-  props.theme.eui.euiBorderRadius};
+    border-radius: ${(props) => props.theme.euiTheme.border.radius} 0 0 ${(props) =>
+  props.theme.euiTheme.border.radius};
   }
   &:last-child {
-    border-radius: 0 ${(props) => props.theme.eui.euiBorderRadius} ${(props) =>
-  props.theme.eui.euiBorderRadius} 0;
+    border-radius: 0 ${(props) => props.theme.euiTheme.border.radius} ${(props) =>
+  props.theme.euiTheme.border.radius} 0;
 `;
 
-const Swatches = euiStyled.div`
+const Swatches = styled.div`
   display: flex;
 `;

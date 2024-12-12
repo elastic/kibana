@@ -29,7 +29,7 @@
           "\nPrepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context\nshould not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana."
         ],
         "signature": [
-          "({ theme: { theme$ }, globalStyles: globalStylesProp, colorMode: colorModeProp, modify, children, }: React.PropsWithChildren<",
+          "({ theme, globalStyles: globalStylesProp, colorMode: colorModeProp, modify, children, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-context-root",
             "scope": "common",
@@ -48,7 +48,7 @@
             "id": "def-common.KibanaEuiProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  theme: { theme$ },\n  globalStyles: globalStylesProp,\n  colorMode: colorModeProp,\n  modify,\n  children,\n}",
+            "label": "{\n  theme,\n  globalStyles: globalStylesProp,\n  colorMode: colorModeProp,\n  modify,\n  children,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -163,6 +163,28 @@
                 "section": "def-common.ThemeServiceStart",
                 "text": "ThemeServiceStart"
               }
+            ],
+            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-common.KibanaEuiProviderProps.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
+              },
+              ", \"getUserProfile$\"> | undefined"
             ],
             "path": "packages/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,

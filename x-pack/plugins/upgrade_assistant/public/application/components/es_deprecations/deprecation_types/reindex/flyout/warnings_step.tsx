@@ -27,7 +27,6 @@ import {
 } from '../../../../../../../common/types';
 import { useAppContext } from '../../../../../app_context';
 import {
-  CustomTypeNameWarningCheckbox,
   DeprecatedSettingWarningCheckbox,
   ReplaceIndexWithAliasWarningCheckbox,
   WarningCheckboxProps,
@@ -40,7 +39,6 @@ interface CheckedIds {
 const warningToComponentMap: {
   [key in ReindexWarningTypes]: React.FunctionComponent<WarningCheckboxProps>;
 } = {
-  customTypeName: CustomTypeNameWarningCheckbox,
   indexSetting: DeprecatedSettingWarningCheckbox,
   replaceIndexWithAlias: ReplaceIndexWithAliasWarningCheckbox,
 };
