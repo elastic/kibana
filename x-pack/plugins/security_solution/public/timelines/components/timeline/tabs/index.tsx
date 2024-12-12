@@ -312,8 +312,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const {
     notesPrivileges: { crud, read },
+    timelinePrivileges: { crud: timelineCrud, read: timelineRead },
   } = useUserPrivileges();
   const canSeeNotes = crud || read;
+  const canSeePinnedTab = timelineRead || timelineCrud;
 
   // new note system
   const fetchNotes = useCallback(
@@ -462,7 +464,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeePinnedTab || timelineType === TimelineTypeEnum.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >
