@@ -9,7 +9,7 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { EdrForSecurityConnectorFeatureId, SubFeatureType } from '@kbn/actions-plugin/common';
+import { EdrForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import {
   EDR_EXECUTE_PRIVILEGE,
@@ -41,7 +41,7 @@ export const getCrowdstrikeConnectorType = (
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   supportedFeatureIds: [EdrForSecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
-  subFeatureType: SubFeatureType.EDR,
+  subFeatureType: 'edr',
   getKibanaPrivileges: (args) => {
     const privileges = [EDR_EXECUTE_PRIVILEGE];
     if (

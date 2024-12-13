@@ -18,7 +18,6 @@ import {
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType as ConnectorType, ConnectorUsageCollector } from '../types';
-import { SubFeatureType } from '../../common';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
   ActionExecutionSourceType,
@@ -140,7 +139,7 @@ const subFeatureConnectorType: jest.Mocked<ConnectorType> = {
   name: 'EDR',
   minimumLicenseRequired: 'platinum',
   supportedFeatureIds: ['siem'],
-  subFeatureType: SubFeatureType.EDR,
+  subFeatureType: 'edr',
   validate: {
     config: { schema: schema.any() },
     secrets: { schema: schema.any() },

@@ -16,9 +16,10 @@ export {
   GenerativeAIForSecurityConnectorFeatureId,
 } from './connector_feature_config';
 
-export enum SubFeatureType {
-  EDR = 'edr',
+enum SUB_FEATURE_TYPE {
+  edr,
 }
+export type SubFeatureType = keyof typeof SUB_FEATURE_TYPE;
 
 export interface ActionType {
   id: string;

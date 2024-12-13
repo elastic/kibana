@@ -10,7 +10,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionType, ExecutorType } from './types';
-import { SubFeatureType } from '../common';
 import { ActionExecutionSourceType, ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
@@ -438,7 +437,7 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: SubFeatureType.EDR,
+        subFeatureType: 'edr',
         executor,
       });
 
@@ -819,7 +818,7 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: SubFeatureType.EDR,
+        subFeatureType: 'edr',
         executor,
       });
 
@@ -892,7 +891,7 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: SubFeatureType.EDR,
+        subFeatureType: 'edr',
         executor,
       });
 
@@ -928,7 +927,7 @@ describe('actionTypeRegistry', () => {
           secrets: { schema: schema.object({}) },
           params: { schema: schema.object({}) },
         },
-        subFeatureType: SubFeatureType.EDR,
+        subFeatureType: 'edr',
         executor,
       });
 

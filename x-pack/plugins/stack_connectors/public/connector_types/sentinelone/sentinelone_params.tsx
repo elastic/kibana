@@ -45,7 +45,7 @@ const SentinelOneParamsFields: React.FunctionComponent<
   ];
 
   const handleEditSubAction = useCallback(
-    (payload) => {
+    (payload: any) => {
       if (subAction !== payload) {
         editSubActionParams({});
         editAction('subAction', payload, index);
