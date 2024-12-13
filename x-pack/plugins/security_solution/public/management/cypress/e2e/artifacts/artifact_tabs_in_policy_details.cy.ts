@@ -63,8 +63,7 @@ const clickArtifactTab = (tabId: string) => {
   cy.get(`#${tabId}`).click();
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/171644
-describe.skip(
+describe(
   'Artifact tabs in Policy Details page',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
