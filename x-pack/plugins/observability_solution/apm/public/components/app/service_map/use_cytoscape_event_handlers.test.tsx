@@ -8,18 +8,18 @@
 import { renderHook } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 import lodash from 'lodash';
+import { UseEuiTheme } from '@elastic/eui';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
 cytoscape.use(dagre);
 
 const theme = {
-  eui: { avatarSizing: { l: { size: 10 } } },
-} as unknown as EuiTheme;
+  euiTheme: { size: { l: { size: 10 } } },
+} as unknown as UseEuiTheme;
 
 describe('useCytoscapeEventHandlers', () => {
   describe('when cytoscape is undefined', () => {

@@ -50,7 +50,7 @@ interface Props {
   serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
 export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   const anomalyScore = serviceAnomalyStats?.anomalyScore;
   const severity = getSeverity(anomalyScore);
@@ -76,7 +76,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth color={getServiceHealthStatusColor(theme, healthStatus)} />
+                <EuiHealth color={getServiceHealthStatusColor(euiTheme, healthStatus)} />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>

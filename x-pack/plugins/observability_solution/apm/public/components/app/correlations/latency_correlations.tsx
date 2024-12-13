@@ -68,7 +68,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     core: { notifications },
   } = useApmPluginContext();
 
-  const euiTheme = useTheme();
+  const { euiTheme } = useTheme();
 
   const { progress, response, startFetch, cancelFetch } = useLatencyCorrelations();
   const { overallHistogram, hasData, status } = getOverallHistogram(response, progress.isRunning);

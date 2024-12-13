@@ -7,7 +7,7 @@
 
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { UseEuiTheme } from '@elastic/eui';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
@@ -26,21 +26,21 @@ function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
 }
 
 function getBorderColorFn(
-  theme: EuiTheme
+  theme: UseEuiTheme
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
     const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
     const anomalyStats = getServiceAnomalyStats(el);
     if (hasAnomalyDetectionJob) {
       return getServiceHealthStatusColor(
-        theme,
+        theme.euiTheme,
         anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown
       );
     }
     if (el.hasClass('primary') || el.selected()) {
-      return theme.eui.euiColorPrimary;
+      return theme.euiTheme.colors.primary;
     }
-    return theme.eui.euiColorMediumShade;
+    return theme.euiTheme.colors.mediumShade;
   };
 }
 
@@ -79,10 +79,10 @@ function getBorderWidth(el: cytoscape.NodeSingular) {
 // @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-export const getAnimationOptions = (theme: EuiTheme): cytoscape.AnimationOptions => ({
-  duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
+export const getAnimationOptions = (theme: UseEuiTheme): cytoscape.AnimationOptions => ({
+  duration: parseInt(theme.euiTheme.animation.normal || '0', 10),
   // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
-  easing: theme.eui.euiAnimSlightBounce,
+  easing: theme.euiTheme.animation.bounce,
 });
 
 const zIndexNode = 200;
@@ -90,14 +90,14 @@ const zIndexEdge = 100;
 const zIndexEdgeHighlight = 110;
 const zIndexEdgeHover = 120;
 
-export const getNodeHeight = (theme: EuiTheme): number => parseInt(theme.eui.euiSizeXXL, 10);
+export const getNodeHeight = (theme: UseEuiTheme): number => parseInt(theme.euiTheme.size.xxl, 10);
 
 function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.Stylesheet[] => {
-  const lineColor = theme.eui.euiColorMediumShade;
+const getStyle = (theme: UseEuiTheme, isTraceExplorerEnabled: boolean): cytoscape.Stylesheet[] => {
+  const lineColor = theme.euiTheme.colors.mediumShade;
   return [
     {
       selector: 'core',
@@ -107,7 +107,7 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
     {
       selector: 'node',
       style: {
-        'background-color': theme.eui.euiColorGhost,
+        'background-color': theme.euiTheme.colors.ghost,
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
@@ -118,12 +118,12 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'border-width': getBorderWidth,
         color: (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected()
-            ? theme.eui.euiColorPrimaryText
-            : theme.eui.euiTextColor,
+            ? theme.euiTheme.colors.textPrimary
+            : theme.euiTheme.colors.text,
         // theme.euiFontFamily doesn't work here for some reason, so we're just
         // specifying a subset of the fonts for the label text.
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
-        'font-size': theme.eui.euiFontSizeS,
+        'font-size': theme.euiTheme.size.s,
         ghost: 'yes',
         'ghost-offset-x': 0,
         'ghost-offset-y': 2,
@@ -133,20 +133,20 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
           isService(el)
             ? el.data(SERVICE_NAME)
             : el.data('label') || el.data(SPAN_DESTINATION_SERVICE_RESOURCE),
-        'min-zoomed-font-size': parseInt(theme.eui.euiSizeS, 10),
+        'min-zoomed-font-size': parseInt(theme.euiTheme.size.s, 10),
         'overlay-opacity': 0,
         shape: (el: cytoscape.NodeSingular) =>
           isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
-        'text-background-color': theme.eui.euiColorPrimary,
+        'text-background-color': theme.euiTheme.colors.primary,
         'text-background-opacity': (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected() ? 0.1 : 0,
-        'text-background-padding': theme.eui.euiSizeXS,
+        'text-background-padding': theme.euiTheme.size.xs,
         'text-background-shape': 'roundrectangle',
-        'text-margin-y': parseInt(theme.eui.euiSizeS, 10),
+        'text-margin-y': parseInt(theme.euiTheme.size.s, 10),
         'text-max-width': '200px',
         'text-valign': 'bottom',
         'text-wrap': 'ellipsis',
-        width: theme.eui.euiSizeXXL,
+        width: theme.euiTheme.size.xxl,
         'z-index': zIndexNode,
       },
     },
@@ -162,7 +162,7 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         // fairly new.
         //
         // @ts-expect-error
-        'target-distance-from-node': isIE11 ? undefined : theme.eui.euiSizeXS,
+        'target-distance-from-node': isIE11 ? undefined : theme.euiTheme.size.xs,
         width: 1,
         'source-arrow-shape': 'none',
         'z-index': zIndexEdge,
@@ -175,8 +175,8 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'source-arrow-color': lineColor,
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
         // @ts-expect-error
-        'source-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.euiSizeXS, 10),
-        'target-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.euiSizeXS, 10),
+        'source-distance-from-node': isIE11 ? undefined : parseInt(theme.euiTheme.size.xs, 10),
+        'target-distance-from-node': isIE11 ? undefined : parseInt(theme.euiTheme.size.xs, 10),
       },
     },
     {
@@ -190,9 +190,9 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
       style: {
         width: 4,
         'z-index': zIndexEdgeHover,
-        'line-color': theme.eui.euiColorDarkShade,
-        'source-arrow-color': theme.eui.euiColorDarkShade,
-        'target-arrow-color': theme.eui.euiColorDarkShade,
+        'line-color': theme.euiTheme.colors.darkShade,
+        'source-arrow-color': theme.euiTheme.colors.darkShade,
+        'target-arrow-color': theme.euiTheme.colors.darkShade,
       },
     },
     ...(isTraceExplorerEnabled
@@ -202,9 +202,9 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
             style: {
               width: 4,
               'z-index': zIndexEdgeHover,
-              'line-color': theme.eui.euiColorDarkShade,
-              'source-arrow-color': theme.eui.euiColorDarkShade,
-              'target-arrow-color': theme.eui.euiColorDarkShade,
+              'line-color': theme.euiTheme.colors.darkShade,
+              'source-arrow-color': theme.euiTheme.colors.darkShade,
+              'target-arrow-color': theme.euiTheme.colors.darkShade,
             },
           },
         ]
@@ -219,9 +219,9 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
       selector: 'edge.highlight',
       style: {
         width: 4,
-        'line-color': theme.eui.euiColorPrimary,
-        'source-arrow-color': theme.eui.euiColorPrimary,
-        'target-arrow-color': theme.eui.euiColorPrimary,
+        'line-color': theme.euiTheme.colors.primary,
+        'source-arrow-color': theme.euiTheme.colors.primary,
+        'target-arrow-color': theme.euiTheme.colors.primary,
         'z-index': zIndexEdgeHighlight,
       },
     },
@@ -230,28 +230,28 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
 
 // The CSS styles for the div containing the cytoscape element. Makes a
 // background grid of dots.
-export const getCytoscapeDivStyle = (theme: EuiTheme, status: FETCH_STATUS): CSSProperties => ({
+export const getCytoscapeDivStyle = (theme: UseEuiTheme, status: FETCH_STATUS): CSSProperties => ({
   background: `linear-gradient(
   90deg,
-  ${theme.eui.euiPageBackgroundColor}
-    calc(${theme.eui.euiSizeL} - calc(${theme.eui.euiSizeXS} / 2)),
+  ${theme.euiTheme.colors.body}
+    calc(${theme.euiTheme.size.l} - calc(${theme.euiTheme.size.xs} / 2)),
   transparent 1%
 )
 center,
 linear-gradient(
-  ${theme.eui.euiPageBackgroundColor}
-    calc(${theme.eui.euiSizeL} - calc(${theme.eui.euiSizeXS} / 2)),
+  ${theme.euiTheme.colors.body}
+    calc(${theme.euiTheme.size.l} - calc(${theme.euiTheme.size.xs} / 2)),
   transparent 1%
 )
 center,
-${theme.eui.euiColorLightShade}`,
-  backgroundSize: `${theme.eui.euiSizeL} ${theme.eui.euiSizeL}`,
+${theme.euiTheme.colors.body}`,
+  backgroundSize: `${theme.euiTheme.size.l} ${theme.euiTheme.size.l}`,
   cursor: `${status === FETCH_STATUS.LOADING ? 'wait' : 'grab'}`,
   marginTop: 0,
 });
 
 export const getCytoscapeOptions = (
-  theme: EuiTheme,
+  theme: UseEuiTheme,
   isTraceExplorerEnabled: boolean
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,

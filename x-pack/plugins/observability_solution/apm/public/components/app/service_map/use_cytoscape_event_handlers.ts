@@ -8,8 +8,8 @@
 import cytoscape from 'cytoscape';
 import { debounce } from 'lodash';
 import { useEffect } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { UseEuiTheme } from '@elastic/eui';
 import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 
 /*
@@ -43,7 +43,7 @@ function getLayoutOptions({
 }: {
   fit?: boolean;
   nodeHeight: number;
-  theme: EuiTheme;
+  theme: UseEuiTheme;
 }): cytoscape.LayoutOptions {
   const animationOptions = getAnimationOptions(theme);
 
@@ -86,7 +86,7 @@ export function useCytoscapeEventHandlers({
 }: {
   cy?: cytoscape.Core;
   serviceName?: string;
-  theme: EuiTheme;
+  theme: UseEuiTheme;
 }) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
 

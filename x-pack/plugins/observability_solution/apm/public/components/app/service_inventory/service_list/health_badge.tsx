@@ -15,10 +15,10 @@ import {
 import { useTheme } from '../../../../hooks/use_theme';
 
 export function HealthBadge({ healthStatus }: { healthStatus: ServiceHealthStatus }) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
 
   return (
-    <EuiBadge color={getServiceHealthStatusBadgeColor(theme, healthStatus)}>
+    <EuiBadge color={getServiceHealthStatusBadgeColor(euiTheme, healthStatus)}>
       {getServiceHealthStatusLabel(healthStatus)}
     </EuiBadge>
   );

@@ -52,15 +52,15 @@ export function ChartPreview({
   timeUnit = 'm',
   totalGroups,
 }: ChartPreviewProps) {
-  const theme = useTheme();
+  const { euiTheme } = useTheme();
   const thresholdOpacity = 0.3;
   const DEFAULT_DATE_FORMAT = 'Y-MM-DD HH:mm:ss';
 
   const style = {
-    fill: theme.eui.euiColorVis2,
+    fill: euiTheme.colors.vis.euiColorVis2,
     line: {
       strokeWidth: 2,
-      stroke: theme.eui.euiColorVis2,
+      stroke: euiTheme.colors.vis.euiColorVis2,
       opacity: 1,
     },
     opacity: thresholdOpacity,

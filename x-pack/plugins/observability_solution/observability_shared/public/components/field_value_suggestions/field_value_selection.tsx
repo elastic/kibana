@@ -221,7 +221,7 @@ export function FieldValueSelection({
                         css={{
                           flexDirection: 'row-reverse',
                           gap: euiTheme.size.s,
-                          color: euiTheme.colors.subduedText,
+                          color: euiTheme.colors.textSubdued,
                         }}
                         label={i18n.translate(
                           'xpack.observabilityShared.fieldValueSelection.logicalAnd',

@@ -22,7 +22,7 @@ export function DependencyOperationDistributionChart() {
   // there is no "current" event in the dependency operation detail view
   const markerCurrentEvent = undefined;
 
-  const euiTheme = useTheme();
+  const { euiTheme } = useTheme();
 
   const {
     query: {
@@ -67,14 +67,14 @@ export function DependencyOperationDistributionChart() {
 
   const chartData: DurationDistributionChartData[] = [
     {
-      areaSeriesColor: euiTheme.eui.euiColorVis1,
+      areaSeriesColor: euiTheme.colors.vis.euiColorVis1,
       histogram: data?.allSpansDistribution.overallHistogram ?? [],
       id: i18n.translate('xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel', {
         defaultMessage: 'All spans',
       }),
     },
     {
-      areaSeriesColor: euiTheme.eui.euiColorVis7,
+      areaSeriesColor: euiTheme.colors.vis.euiColorVis7,
       histogram: data?.failedSpansDistribution?.overallHistogram ?? [],
       id: i18n.translate('xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel', {
         defaultMessage: 'Failed spans',

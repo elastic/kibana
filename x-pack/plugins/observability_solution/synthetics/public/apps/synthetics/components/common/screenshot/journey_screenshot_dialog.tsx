@@ -201,7 +201,7 @@ export const JourneyScreenshotDialog = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiText
-            color={euiTheme.colors.text}
+            color={euiTheme.colors.textParagraph}
             css={{
               outline: 0,
               padding: euiTheme.size.m,

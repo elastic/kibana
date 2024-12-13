@@ -25,7 +25,7 @@ import {
   Tooltip,
   SettingsSpec,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -115,12 +115,15 @@ export function TimeseriesChart({
       }
     : undefined;
 
-  const endZoneColor = theme.darkMode ? theme.eui.euiColorLightShade : theme.eui.euiColorDarkShade;
+  const endZoneColor =
+    theme.colorMode === COLOR_MODES_STANDARD.light
+      ? theme.euiTheme.colors.lightShade
+      : theme.euiTheme.colors.darkShade;
   const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: endZoneColor,
     fill: endZoneColor,
     strokeWidth: 0,
-    opacity: theme.darkMode ? 0.6 : 0.2,
+    opacity: theme.colorMode === COLOR_MODES_STANDARD.dark ? 0.6 : 0.2,
   };
 
   function getChartType(type: string) {

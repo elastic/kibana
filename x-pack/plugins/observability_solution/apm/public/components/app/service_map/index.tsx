@@ -188,7 +188,6 @@ export function ServiceMap({
   if (status === FETCH_STATUS.SUCCESS) {
     onPageReady();
   }
-
   return (
     <>
       <SearchBar showTimeComparison />

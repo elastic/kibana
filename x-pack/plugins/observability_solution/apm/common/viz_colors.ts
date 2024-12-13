@@ -8,6 +8,8 @@
 import { euiLightVars as lightTheme } from '@kbn/ui-theme';
 
 function getVizColorsForTheme(theme = lightTheme) {
+  // Regarding https://github.com/elastic/kibana/issues/203338
+  // Guidance right now is to keep these as they are for now (meaning to keep using the JSON
   return [
     theme.euiColorVis0,
     theme.euiColorVis1,

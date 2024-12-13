@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useEuiTheme, UseEuiTheme } from '@elastic/eui';
 
-export function useTheme(): EuiTheme {
-  const theme = useContext(ThemeContext);
+export function useTheme(): UseEuiTheme {
+  const theme = useEuiTheme();
   return theme;
 }

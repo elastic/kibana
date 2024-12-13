@@ -69,7 +69,7 @@ export function Legend({
   ...rest
 }: Props) {
   const theme = useTheme();
-  const indicatorColor = color || theme.eui.euiColorVis1;
+  const indicatorColor = color || theme.euiTheme.colors.vis.euiColorVis1;
 
   return (
     <Container

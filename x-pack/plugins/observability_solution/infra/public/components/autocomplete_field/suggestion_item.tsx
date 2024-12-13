@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiThemeComputed } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 import { transparentize } from 'polished';
-
+import { useEuiTheme } from '@elastic/eui';
 interface Props {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
@@ -20,10 +20,10 @@ interface Props {
 
 export const SuggestionItem: React.FC<Props> = (props) => {
   const { isSelected, onClick, onMouseEnter, suggestion } = props;
-
+  const { euiTheme } = useEuiTheme();
   return (
     <SuggestionItemContainer isSelected={isSelected} onClick={onClick} onMouseEnter={onMouseEnter}>
-      <SuggestionItemIconField suggestionType={suggestion.type}>
+      <SuggestionItemIconField euiTheme={euiTheme} suggestionType={suggestion.type}>
         <EuiIcon type={getEuiIconType(suggestion.type)} />
       </SuggestionItemIconField>
       <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
@@ -59,10 +59,11 @@ const SuggestionItemField = euiStyled.div`
 
 const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
   suggestionType: QuerySuggestionTypes;
+  euiTheme: EuiThemeComputed;
 }>`
   background-color: ${(props) =>
-    transparentize(0.9, getEuiIconColor(props.theme, props.suggestionType))};
-  color: ${(props) => getEuiIconColor(props.theme, props.suggestionType)};
+    transparentize(0.9, getEuiIconColor(props.euiTheme, props.suggestionType))};
+  color: ${(props) => getEuiIconColor(props.euiTheme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
   width: ${(props) => props.theme.eui.euiSizeXL};
@@ -102,18 +103,21 @@ const getEuiIconType = (suggestionType: QuerySuggestionTypes) => {
   }
 };
 
-const getEuiIconColor = (theme: any, suggestionType: QuerySuggestionTypes): string => {
+const getEuiIconColor = (
+  euiTheme: EuiThemeComputed,
+  suggestionType: QuerySuggestionTypes
+): string => {
   switch (suggestionType) {
     case QuerySuggestionTypes.Field:
-      return theme?.eui.euiColorVis7;
+      return euiTheme.colors.vis.euiColorVis7;
     case QuerySuggestionTypes.Value:
-      return theme?.eui.euiColorVis0;
+      return euiTheme.colors.vis.euiColorVis0;
     case QuerySuggestionTypes.Operator:
-      return theme?.eui.euiColorVis1;
+      return euiTheme.colors.vis.euiColorVis1;
     case QuerySuggestionTypes.Conjunction:
-      return theme?.eui.euiColorVis2;
+      return euiTheme.colors.vis.euiColorVis2;
     case QuerySuggestionTypes.RecentSearch:
     default:
-      return theme?.eui.euiColorMediumShade;
+      return euiTheme.colors.mediumShade;
   }
 };
