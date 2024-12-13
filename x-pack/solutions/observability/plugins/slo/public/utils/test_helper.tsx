@@ -53,7 +53,7 @@ export const render = (component: React.ReactNode) => {
           exploratoryView: {
             createExploratoryViewUrl: jest.fn(),
             getAppDataView: jest.fn(),
-            // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+
             ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
           },
         }}
