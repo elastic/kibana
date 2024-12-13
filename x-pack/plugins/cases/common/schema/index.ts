@@ -213,27 +213,24 @@ export const mimeTypeString = new rt.Type<string, string, unknown>(
 export const customFieldListValueSchema = new rt.Type<{ [x: string]: string }>(
   'CustomFieldListValue',
   rt.record(rt.string, rt.string).is,
-  (input, context) => {
-    if (typeof input !== 'object' || input === null) {
-      return rt.failure(input, context, 'Value must be an object.');
-    }
+  (input, context) =>
+    either.chain(rt.record(rt.string, rt.string).validate(input, context), (o) => {
+      if (Object.keys(o).length === 0) {
+        return rt.failure(input, context, 'Value cannot be an empty object.');
+      }
 
-    if (Object.keys(input).length === 0) {
-      return rt.failure(input, context, 'Value cannot be an empty object.');
-    }
+      if (Object.keys(o).length > 1) {
+        return rt.failure(input, context, 'Value must be a single key/value pair.');
+      }
 
-    if (Object.keys(input).length > 1) {
-      return rt.failure(input, context, 'Value must be a single key/value pair.');
-    }
-
-    if (Object.values(input)[0].length > MAX_CUSTOM_FIELD_OPTION_LENGTH) {
-      return rt.failure(
-        input,
-        context,
-        `The length of the label is too long. The maximum length is ${MAX_CUSTOM_FIELD_OPTION_LENGTH}.`
-      );
-    }
-    return rt.success(input as { [x: string]: string });
-  },
+      if (Object.values(o)[0].length > MAX_CUSTOM_FIELD_OPTION_LENGTH) {
+        return rt.failure(
+          input,
+          context,
+          `The length of the label is too long. The maximum length is ${MAX_CUSTOM_FIELD_OPTION_LENGTH}.`
+        );
+      }
+      return rt.success(input as { [x: string]: string });
+    }),
   rt.identity
 );

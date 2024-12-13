@@ -13,7 +13,7 @@ import { FormTestComponent } from '../../../../common/test_utils';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { OptionsField, INITIAL_OPTIONS } from './options_field';
 
-describe('Configure', () => {
+describe('Options field', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
