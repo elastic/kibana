@@ -75,6 +75,8 @@ export function initializeInternalApi(
     renderCount$,
     isNewlyCreated$,
     dataViews: dataViews$,
+    messages$,
+    validationMessages$,
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);
@@ -92,9 +94,7 @@ export function initializeInternalApi(
     updateAbortController: (abortController: AbortController | undefined) =>
       expressionAbortController$.next(abortController),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
-    messages$,
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
-    validationMessages$,
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
     resetAllMessages: () => {
       messages$.next([]);
