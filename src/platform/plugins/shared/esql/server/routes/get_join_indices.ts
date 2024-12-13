@@ -9,7 +9,7 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 
-import { EsqlService } from '../services/EsqlService';
+import { EsqlService } from '../services/eslq_service';
 
 export const registerGetJoinIndicesRoute = (
   router: IRouter,
