@@ -292,7 +292,9 @@ describe('SecurityWorkflowInsightsService', () => {
       const indexName = 'backing-index';
       const fetchSpy = jest
         .spyOn(securityWorkflowInsightsService, 'fetch')
-        .mockResolvedValueOnce([{ _index: indexName }] as SearchHit<SecurityWorkflowInsight>[]);
+        .mockResolvedValueOnce([{ _index: indexName }] as Array<
+          SearchHit<SecurityWorkflowInsight>
+        >);
       const updateSpy = jest
         .spyOn(securityWorkflowInsightsService, 'update')
         .mockResolvedValueOnce({} as UpdateResponse);
