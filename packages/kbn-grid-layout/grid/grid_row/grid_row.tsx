@@ -231,14 +231,14 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
                   );
                 } else {
                   const panelRect = panelRef.getBoundingClientRect();
-                  const sensorOffsets = getSensorOffsets(e, panelRect);
+                  const pointerOffsets = getPointerOffsets(e, panelRect);
 
                   setInteractionEvent({
                     type,
                     id: panelId,
                     panelDiv: panelRef,
                     targetRowIndex: rowIndex,
-                    sensorOffsets,
+                    pointerOffsets,
                   });
                 }
               }}
@@ -292,16 +292,16 @@ const isTouchEvent = (e: UserInteractionEvent): e is UserTouchEvent => {
   return 'touches' in e;
 };
 
-const defaultSensorOffsets = {
+const defaultPointerOffsets = {
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
 };
 
-function getSensorOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
+function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
   if (isTouchEvent(e)) {
-    if (e.touches.length > 1) return defaultSensorOffsets;
+    if (e.touches.length > 1) return defaultPointerOffsets;
     const touch = e.touches[0];
     return {
       top: touch.clientY - panelRect.top,

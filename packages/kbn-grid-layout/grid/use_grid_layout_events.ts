@@ -57,7 +57,7 @@ export const useGridLayoutEvents = ({
 }: {
   gridLayoutStateManager: GridLayoutStateManager;
 }) => {
-  const sensorClientPosition = useRef({ x: 0, y: 0 });
+  const pointerClientPosition = useRef({ x: 0, y: 0 });
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -100,16 +100,18 @@ export const useGridLayoutEvents = ({
         return;
       }
 
-      const sensorClientPixel = {
-        x: sensorClientPosition.current.x,
-        y: sensorClientPosition.current.y,
+      const pointerClientPixel = {
+        x: pointerClientPosition.current.x,
+        y: pointerClientPosition.current.y,
       };
       const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
       const previewRect = {
-        left: isResize ? panelRect.left : sensorClientPixel.x - interactionEvent.sensorOffsets.left,
-        top: isResize ? panelRect.top : sensorClientPixel.y - interactionEvent.sensorOffsets.top,
-        bottom: sensorClientPixel.y - interactionEvent.sensorOffsets.bottom,
-        right: sensorClientPixel.x - interactionEvent.sensorOffsets.right,
+        left: isResize
+          ? panelRect.left
+          : pointerClientPixel.x - interactionEvent.pointerOffsets.left,
+        top: isResize ? panelRect.top : pointerClientPixel.y - interactionEvent.pointerOffsets.top,
+        bottom: pointerClientPixel.y - interactionEvent.pointerOffsets.bottom,
+        right: pointerClientPixel.x - interactionEvent.pointerOffsets.right,
       };
 
       gridLayoutStateManager.activePanel$.next({ id: interactionEvent.id, position: previewRect });
@@ -177,7 +179,7 @@ export const useGridLayoutEvents = ({
 
       // auto scroll when an event is happening close to the top or bottom of the screen
       const heightPercentage =
-        100 - ((window.innerHeight - sensorClientPixel.y) / window.innerHeight) * 100;
+        100 - ((window.innerHeight - pointerClientPixel.y) / window.innerHeight) * 100;
       const atTheTop = window.scrollY <= 0;
       const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
 
@@ -227,7 +229,7 @@ export const useGridLayoutEvents = ({
     const onMouseMove = (e: MouseEvent) => {
       // Note: When an item is being interacted with, `mousemove` events continue to be fired, even when the
       // mouse moves out of the window (i.e. when a panel is being dragged around outside the window).
-      sensorClientPosition.current = { x: e.clientX, y: e.clientY };
+      pointerClientPosition.current = { x: e.clientX, y: e.clientY };
       calculateUserEvent(e);
     };
 
@@ -237,7 +239,7 @@ export const useGridLayoutEvents = ({
       }
       if (e.touches.length > 1) return;
       const touch = e.touches[0];
-      sensorClientPosition.current = { x: touch.clientX, y: touch.clientY };
+      pointerClientPosition.current = { x: touch.clientX, y: touch.clientY };
       e.preventDefault();
       e.stopPropagation();
       // `shouldAutoScroll` is set to false because we don't want the screen to scroll when dragging/resizing the items
