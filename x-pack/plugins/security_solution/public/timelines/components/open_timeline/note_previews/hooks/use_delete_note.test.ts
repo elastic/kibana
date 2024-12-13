@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { appActions } from '../../../../../common/store/app';

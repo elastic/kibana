@@ -812,7 +812,7 @@ describe('Data Streams tab', () => {
 
       const { actions, findDetailPanelIlmPolicyLink } = testBed;
       await actions.clickNameAt(0);
-      expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
+      expect(findDetailPanelIlmPolicyLink().prop('data-href')).toBe('/test/my_ilm_policy');
     });
 
     test('with an ILM url locator and no ILM policy', async () => {

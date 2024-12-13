@@ -48,7 +48,7 @@ export const useNavigation = jest.fn().mockReturnValue({
 
 export const useApplicationCapabilities = jest.fn().mockReturnValue({
   actions: { crud: true, read: true },
-  generalCases: { crud: true, read: true },
+  generalCasesV2: { crud: true, read: true },
   visualize: { crud: true, read: true },
   dashboard: { crud: true, read: true },
 });

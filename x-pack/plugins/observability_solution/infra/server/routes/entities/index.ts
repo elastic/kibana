@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { METRICS_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { entityCentricExperience } from '@kbn/observability-plugin/common';
-import { createObservabilityEsClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
+import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getDataStreamTypes } from './get_data_stream_types';
@@ -24,8 +24,8 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
       validate: {
         params: schema.object({
           entityType: schema.oneOf([
-            schema.literal(ENTITY_TYPES.HOST),
-            schema.literal(ENTITY_TYPES.CONTAINER),
+            schema.literal(BUILT_IN_ENTITY_TYPES.HOST),
+            schema.literal(BUILT_IN_ENTITY_TYPES.CONTAINER),
           ]),
           entityId: schema.string(),
         }),
@@ -36,8 +36,11 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       const { entityId, entityType } = request.params;
-      const coreContext = await requestContext.core;
-      const infraContext = await requestContext.infra;
+      const [coreContext, infraContext] = await Promise.all([
+        requestContext.core,
+        requestContext.infra,
+      ]);
+
       const entityManagerClient = await infraContext.entityManager.getScopedClient({ request });
       const infraMetricsClient = await getInfraMetricsClient({
         request,
@@ -63,6 +66,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
           entityType,
           infraMetricsClient,
           obsEsClient,
+          logger,
         });
 
         return response.ok({

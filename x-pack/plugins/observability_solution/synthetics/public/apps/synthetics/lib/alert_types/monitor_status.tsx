@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 
 import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -15,7 +15,6 @@ import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/util
 import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
 import type { StatusRuleParams } from '../../../../../common/rules/status_rule';
-import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
 import type { AlertTypeInitializer } from './types';
 
 const { defaultActionMessage, defaultRecoveryMessage, description } =

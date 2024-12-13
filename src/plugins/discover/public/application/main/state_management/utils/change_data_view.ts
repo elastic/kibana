@@ -51,6 +51,13 @@ export async function changeDataView(
   }
 
   if (nextDataView && dataView) {
+    // Reset the default profile state if we are switching to a different data view
+    internalState.transitions.setResetDefaultProfileState({
+      columns: true,
+      rowHeight: true,
+      breakdownField: true,
+    });
+
     const nextAppState = getDataViewAppState(
       dataView,
       nextDataView,
@@ -70,5 +77,4 @@ export async function changeDataView(
   }
 
   internalState.transitions.setIsDataViewLoading(false);
-  internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 }

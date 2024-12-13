@@ -15,7 +15,8 @@ import {
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { MANAGEMENT_PATH } from '../../../../../common/constants';
 
-describe('Users filter', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/193092
+describe.skip('Users filter', () => {
   let render: (
     props?: React.ComponentProps<typeof ActionsLogUsersFilter>
   ) => ReturnType<AppContextTestRender['render']>;

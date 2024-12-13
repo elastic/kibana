@@ -158,7 +158,7 @@ export class SyntheticsEsClient {
             esError,
             esRequestParams: { index: SYNTHETICS_INDEX_PATTERN, ...request },
             esRequestStatus: RequestStatus.OK,
-            esResponse: res.body.responses[index],
+            esResponse: res?.body.responses[index],
             kibanaRequest: this.request!,
             operationName: operationName ?? '',
             startTime: startTimeNow,
@@ -168,9 +168,10 @@ export class SyntheticsEsClient {
     }
 
     return {
-      responses: res.body?.responses as unknown as Array<
-        InferSearchResponseOf<TDocument, TSearchRequest>
-      >,
+      responses:
+        (res?.body?.responses as unknown as Array<
+          InferSearchResponseOf<TDocument, TSearchRequest>
+        >) ?? [],
     };
   }
 

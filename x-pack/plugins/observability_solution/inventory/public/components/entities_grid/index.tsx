@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { last } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import { EntityColumnIds, InventoryEntity } from '../../../common/entities';
 import { BadgeFilterWithPopover } from '../badge_filter_with_popover';
@@ -22,7 +22,7 @@ import { getColumns } from './grid_columns';
 import { AlertsBadge } from '../alerts_badge/alerts_badge';
 import { EntityName } from './entity_name';
 import { EntityActions } from '../entity_actions';
-import { useDiscoverRedirect } from '../../hooks/use_discover_redirect';
+import { type EntityTypeCheckOptions } from '../../../common/rt_types';
 
 interface Props {
   loading: boolean;
@@ -32,6 +32,7 @@ interface Props {
   pageIndex: number;
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   onChangePage: (nextPage: number) => void;
+  onFilterByType: (value: string, checked: EntityTypeCheckOptions) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -44,8 +45,9 @@ export function EntitiesGrid({
   pageIndex,
   onChangePage,
   onChangeSort,
+  onFilterByType,
 }: Props) {
-  const { getDiscoverRedirectUrl } = useDiscoverRedirect();
+  const [showActions, setShowActions] = useState<boolean>(true);
 
   const onSort: EuiDataGridSorting['onSort'] = useCallback(
     (newSortingColumns) => {
@@ -61,8 +63,6 @@ export function EntitiesGrid({
     () => entities?.some((entity) => entity?.alertsCount && entity?.alertsCount > 0),
     [entities]
   );
-
-  const showActions = useMemo(() => !!getDiscoverRedirectUrl(), [getDiscoverRedirectUrl]);
 
   const columnVisibility = useMemo(
     () => ({
@@ -81,14 +81,19 @@ export function EntitiesGrid({
 
       const columnEntityTableId = columnId as EntityColumnIds;
       const entityType = entity.entityType;
-      const discoverUrl = getDiscoverRedirectUrl(entity);
 
       switch (columnEntityTableId) {
         case 'alertsCount':
           return entity?.alertsCount ? <AlertsBadge entity={entity} /> : null;
 
         case 'entityType':
-          return <BadgeFilterWithPopover field={ENTITY_TYPE} value={entityType} />;
+          return (
+            <BadgeFilterWithPopover
+              field={ENTITY_TYPE}
+              value={entityType}
+              onFilter={onFilterByType}
+            />
+          );
 
         case 'entityLastSeenTimestamp':
           return (
@@ -119,19 +124,12 @@ export function EntitiesGrid({
         case 'entityDisplayName':
           return <EntityName entity={entity} />;
         case 'actions':
-          return (
-            discoverUrl && (
-              <EntityActions
-                discoverUrl={discoverUrl}
-                entityIdentifyingValue={entity.entityDisplayName}
-              />
-            )
-          );
+          return <EntityActions entity={entity} setShowActions={setShowActions} />;
         default:
           return null;
       }
     },
-    [entities, getDiscoverRedirectUrl]
+    [entities, onFilterByType]
   );
 
   if (loading) {
@@ -160,7 +158,7 @@ export function EntitiesGrid({
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.inventory.entitiesGrid.euiDataGrid.headerLeft"
-                  defaultMessage="Showing {currentItems} of {total} {boldEntites}"
+                  defaultMessage="Showing {currentItems} of {total} {boldEntities}"
                   values={{
                     currentItems: (
                       <strong>
@@ -169,10 +167,10 @@ export function EntitiesGrid({
                       </strong>
                     ),
                     total: entities.length,
-                    boldEntites: (
+                    boldEntities: (
                       <strong>
                         {i18n.translate(
-                          'xpack.inventory.entitiesGrid.euiDataGrid.headerLeft.entites',
+                          'xpack.inventory.entitiesGrid.euiDataGrid.headerLeft.entities',
                           { defaultMessage: 'Entities' }
                         )}
                       </strong>

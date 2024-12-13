@@ -72,7 +72,7 @@ const TestComponent = (props: TestComponentProps) => {
         refetch={refetchMock}
         dataLoadingState={DataLoadingState.loaded}
         totalCount={mockTimelineData.length}
-        onChangePage={onChangePageMock}
+        onFetchMoreRecords={onChangePageMock}
         updatedAt={Date.now()}
         onSetColumns={jest.fn()}
         onFilter={jest.fn()}

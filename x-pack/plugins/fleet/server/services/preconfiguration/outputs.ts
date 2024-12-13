@@ -153,7 +153,6 @@ export async function hashSecret(secret: string) {
 
   return `${salt}:${derivedKey.toString('hex')}`;
 }
-
 async function verifySecret(hash: string, secret: string) {
   const [salt, key] = hash.split(':');
   const derivedKey = await pbkdf2Async(secret, salt, maxIteration, keyLength, 'sha512');

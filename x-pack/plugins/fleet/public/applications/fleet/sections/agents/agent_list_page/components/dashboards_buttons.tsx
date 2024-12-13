@@ -5,47 +5,67 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useQuery } from '@tanstack/react-query';
 
-import { DASHBOARD_LOCATORS_IDS } from '../../../../../../../common/constants';
+import {
+  DASHBOARD_LOCATORS_IDS,
+  FLEET_ELASTIC_AGENT_PACKAGE,
+} from '../../../../../../../common/constants';
 
-import { useDashboardLocator, useStartServices } from '../../../../hooks';
+import {
+  useDashboardLocator,
+  useFleetStatus,
+  useGetPackageInfoByKeyQuery,
+  useStartServices,
+} from '../../../../hooks';
+
+import { getDashboardIdForSpace } from '../../services/dashboard_helpers';
 
 const useDashboardExists = (dashboardId: string) => {
-  const [dashboardExists, setDashboardExists] = React.useState<boolean>(false);
-  const [loading, setLoading] = React.useState<boolean>(true);
   const { dashboard: dashboardPlugin } = useStartServices();
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
+  const { data, isLoading } = useQuery({
+    queryKey: ['dashboard_exists', dashboardId],
+    queryFn: async () => {
       try {
         const findDashboardsService = await dashboardPlugin.findDashboardsService();
         const [dashboard] = await findDashboardsService.findByIds([dashboardId]);
-        setLoading(false);
-        setDashboardExists(dashboard?.status === 'success');
+        return dashboard?.status === 'success';
       } catch (e) {
-        setLoading(false);
-        setDashboardExists(false);
+        return false;
       }
-    };
-
-    fetchDashboard();
-  }, [dashboardId, dashboardPlugin]);
-
-  return { dashboardExists, loading };
+    },
+  });
+  return { dashboardExists: data ?? false, loading: isLoading };
 };
 
 export const DashboardsButtons: React.FunctionComponent = () => {
+  const { data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
+  const { spaceId } = useFleetStatus();
+
   const dashboardLocator = useDashboardLocator();
 
   const getDashboardHref = (dashboardId: string) => {
     return dashboardLocator?.getRedirectUrl({ dashboardId }) || '';
   };
 
-  const { dashboardExists, loading: dashboardLoading } = useDashboardExists(
+  const elasticAgentOverviewDashboardId = getDashboardIdForSpace(
+    spaceId,
+    data,
     DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_OVERVIEW
+  );
+
+  const elasticAgentInfoDashboardId = getDashboardIdForSpace(
+    spaceId,
+    data,
+    DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_INFO
+  );
+
+  const { dashboardExists, loading: dashboardLoading } = useDashboardExists(
+    elasticAgentOverviewDashboardId
   );
 
   if (dashboardLoading || !dashboardExists) {
@@ -58,7 +78,7 @@ export const DashboardsButtons: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="dashboardApp"
-            href={getDashboardHref(DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_OVERVIEW)}
+            href={getDashboardHref(elasticAgentOverviewDashboardId)}
             data-test-subj="ingestOverviewLinkButton"
           >
             <FormattedMessage
@@ -70,7 +90,7 @@ export const DashboardsButtons: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="dashboardApp"
-            href={getDashboardHref(DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_INFO)}
+            href={getDashboardHref(elasticAgentInfoDashboardId)}
             data-test-subj="agentInfoLinkButton"
           >
             <FormattedMessage

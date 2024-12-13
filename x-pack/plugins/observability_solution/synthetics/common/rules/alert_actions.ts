@@ -14,10 +14,12 @@ import type {
   WebhookActionParams,
   EmailActionParams,
   SlackApiActionParams,
+  OpsgenieActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
+import { OpsgenieSubActions } from '@kbn/stack-connectors-plugin/common';
 import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';
 
@@ -31,6 +33,7 @@ export const SERVICE_NOW_ACTION_ID: ActionTypeId = '.servicenow';
 export const JIRA_ACTION_ID: ActionTypeId = '.jira';
 export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 export const EMAIL_ACTION_ID: ActionTypeId = '.email';
+export const OPSGENIE_ACTION_ID: ActionTypeId = '.opsgenie';
 
 export type RuleAction = Omit<RuleActionOrig, 'actionTypeId'>;
 
@@ -128,6 +131,14 @@ export function populateAlertActions({
           actions.push(recoveredAction);
         }
         break;
+      case OPSGENIE_ACTION_ID:
+        // @ts-expect-error
+        action.params = getOpsgenieActionParams(translations);
+        // @ts-expect-error
+        recoveredAction.params = getOpsgenieActionParams(translations, true);
+        actions.push(recoveredAction);
+        break;
+
       default:
         action.params = {
           message: translations.defaultActionMessage,
@@ -292,4 +303,25 @@ function getEmailActionParams(
       text: '',
     },
   };
+}
+
+function getOpsgenieActionParams(
+  {
+    defaultActionMessage,
+    defaultSubjectMessage,
+    defaultRecoverySubjectMessage,
+    defaultRecoveryMessage,
+  }: Translations,
+  isRecovery?: boolean
+): OpsgenieActionParams {
+  return {
+    subAction: isRecovery ? OpsgenieSubActions.CloseAlert : OpsgenieSubActions.CreateAlert,
+    subActionParams: {
+      alias: '{{rule.id}}:{{alert.id}}',
+      tags: ['{{rule.tags}}'],
+      message: isRecovery ? defaultRecoverySubjectMessage : defaultSubjectMessage,
+      description: isRecovery ? defaultRecoveryMessage : defaultActionMessage,
+      priority: 'P2',
+    },
+  } as OpsgenieActionParams;
 }

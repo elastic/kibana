@@ -7,7 +7,9 @@
 
 import { ZodFirstPartyTypeKind } from '@kbn/zod';
 import React from 'react';
-import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
+import { EuiCheckbox, EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
 
@@ -68,7 +70,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
     <SettingsFieldWrapper
       disabled={disabled}
       settingsConfig={settingsConfig}
-      typeName={ZodFirstPartyTypeKind.ZodString}
+      typeName={ZodFirstPartyTypeKind.ZodEnum}
       renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
         <EuiSelect
           data-test-subj={fieldKey}
@@ -86,6 +88,30 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
   );
 });
 
+settingComponentRegistry.set(
+  ZodFirstPartyTypeKind.ZodBoolean,
+  ({ disabled, ...settingsConfig }) => {
+    return (
+      <SettingsFieldWrapper
+        disabled={disabled}
+        settingsConfig={settingsConfig}
+        typeName={ZodFirstPartyTypeKind.ZodBoolean}
+        renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
+          <EuiCheckbox
+            data-test-subj={fieldKey}
+            id={fieldKey}
+            label={i18n.translate('xpack.fleet.configuredSettings.genericCheckboxLabel', {
+              defaultMessage: 'Enable',
+            })}
+            checked={fieldValue}
+            onChange={handleChange}
+          />
+        )}
+      />
+    );
+  }
+);
+
 export function ConfiguredSettings({
   configuredSettings,
   disabled,
@@ -101,7 +127,7 @@ export function ConfiguredSettings({
           const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
 
           if (!Component) {
-            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}}`);
+            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}`);
           }
 
           return (

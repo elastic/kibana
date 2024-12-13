@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import * as api from './apis/bulk_get_cases';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetCases } from './use_bulk_get_cases';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
@@ -35,18 +34,18 @@ describe('useBulkGetCases', () => {
     const spy = jest.spyOn(api, 'bulkGetCases');
     spy.mockResolvedValue(response);
 
-    const { waitForNextUpdate } = renderHook(() => useBulkGetCases(['case-1'], true), {
+    renderHook(() => useBulkGetCases(['case-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith(
-      expect.anything(),
-      {
-        ids: ['case-1'],
-      },
-      expect.any(AbortSignal)
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          ids: ['case-1'],
+        },
+        expect.any(AbortSignal)
+      )
     );
   });
 
@@ -58,17 +57,15 @@ describe('useBulkGetCases', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
     const spy = jest.spyOn(api, 'bulkGetCases').mockRejectedValue(new Error('An error'));
 
-    const { waitForNextUpdate } = renderHook(() => useBulkGetCases(['case-1'], true), {
+    renderHook(() => useBulkGetCases(['case-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(

@@ -111,6 +111,31 @@ export const secAll: Role = {
   },
 };
 
+export const secCasesV2All: Role = {
+  name: 'sec_cases_v2_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCasesV2: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const secAllSpace1: Role = {
   name: 'sec_all_role_space1_api_int',
   privileges: {
@@ -384,6 +409,31 @@ export const casesAll: Role = {
   },
 };
 
+export const casesV2All: Role = {
+  name: 'cases_v2_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV2: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const casesRead: Role = {
   name: 'cases_read_role_api_int',
   privileges: {
@@ -508,6 +558,31 @@ export const obsCasesAll: Role = {
   },
 };
 
+export const obsCasesV2All: Role = {
+  name: 'obs_cases_v2_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV2: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const obsCasesRead: Role = {
   name: 'obs_cases_read_role_api_int',
   privileges: {
@@ -537,6 +612,7 @@ export const roles = [
   secAllCasesOnlyReadDelete,
   secAllCasesNoDelete,
   secAll,
+  secCasesV2All,
   secAllSpace1,
   secAllCasesRead,
   secAllCasesNone,
@@ -548,10 +624,12 @@ export const roles = [
   casesOnlyReadDelete,
   casesNoDelete,
   casesAll,
+  casesV2All,
   casesRead,
   obsCasesOnlyDelete,
   obsCasesOnlyReadDelete,
   obsCasesNoDelete,
   obsCasesAll,
+  obsCasesV2All,
   obsCasesRead,
 ];

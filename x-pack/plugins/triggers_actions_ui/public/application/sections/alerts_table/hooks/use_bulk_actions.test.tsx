@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
@@ -392,7 +392,13 @@ describe('bulk action hooks', () => {
     it('appends only the case bulk actions for SIEM', async () => {
       const { result } = renderHook(
         () =>
-          useBulkActions({ alertsCount: 0, query: {}, casesConfig, refresh, featureIds: ['siem'] }),
+          useBulkActions({
+            alertsCount: 0,
+            query: {},
+            casesConfig,
+            refresh,
+            ruleTypeIds: ['siem.esqlRule'],
+          }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -476,7 +482,7 @@ describe('bulk action hooks', () => {
             query: {},
             casesConfig,
             refresh,
-            featureIds: ['observability'],
+            ruleTypeIds: ['observability'],
           }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -492,7 +498,7 @@ describe('bulk action hooks', () => {
             query: {},
             casesConfig,
             refresh,
-            featureIds: ['observability'],
+            ruleTypeIds: ['observability'],
             hideBulkActions: true,
           }),
         {

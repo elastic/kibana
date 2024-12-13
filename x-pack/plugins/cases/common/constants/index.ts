@@ -174,6 +174,8 @@ export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
+export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
+export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
 
 /**
  * Cases API Tags

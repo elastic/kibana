@@ -21,7 +21,7 @@ export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
@@ -138,6 +138,8 @@ export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
+export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -279,8 +281,6 @@ export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
-
-export const EVENT_GRAPH_VISUALIZATION_API = '/internal/cloud_security_posture/graph' as const;
 
 /**
  * Default signals index key for kibana.dev.yml

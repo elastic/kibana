@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import type {
   AttachmentType,
@@ -16,8 +16,6 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { AttachmentTypeRegistry } from '../../../../common/registry';
 import { getMockBuilderArgs } from '../mock';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 
 const getLazyComponent = () =>
   React.lazy(() => {
@@ -32,8 +30,6 @@ const getLazyComponent = () =>
   });
 
 describe('createRegisteredAttachmentUserActionBuilder', () => {
-  let appMockRender: AppMockRenderer;
-
   const attachmentTypeId = 'test';
   const builderArgs = getMockBuilderArgs();
   const registry = new AttachmentTypeRegistry<AttachmentType<CommonAttachmentViewProps>>(
@@ -77,7 +73,6 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
   };
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -161,8 +156,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     const userAction =
       createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()[0];
 
-    // @ts-expect-error: children is a proper React element
-    appMockRender.render(userAction.children);
+    render(userAction.children);
 
     expect(await screen.findByText('My component')).toBeInTheDocument();
   });

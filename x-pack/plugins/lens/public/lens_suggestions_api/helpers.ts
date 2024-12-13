@@ -7,7 +7,7 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import type { VisualizeEditorContext, Suggestion } from '../types';
-import type { TypedLensByValueInput } from '../embeddable/embeddable_component';
+import { TypedLensByValueInput } from '../react_embeddable/types';
 
 /**
  * Returns the suggestion updated with external visualization state for ES|QL charts

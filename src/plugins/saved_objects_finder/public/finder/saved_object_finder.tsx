@@ -146,7 +146,7 @@ class SavedObjectFinderUiClass extends React.Component<
     const savedObjects = response.hits
       .map((savedObject) => {
         const {
-          attributes: { name, title },
+          attributes: { name, title, description },
         } = savedObject;
         const titleToUse = typeof title === 'string' ? title : '';
         const nameToUse = name ? name : titleToUse;
@@ -156,6 +156,7 @@ class SavedObjectFinderUiClass extends React.Component<
           title: titleToUse,
           name: nameToUse,
           simple: savedObject,
+          description,
         };
       })
       .filter((savedObject) => {
@@ -317,13 +318,23 @@ class SavedObjectFinderUiClass extends React.Component<
           );
 
           const tooltipText = this.props.getTooltipText?.(item);
-
+          const description = !!item.simple.attributes.description && (
+            <EuiText size="xs" color="subdued">
+              {item.simple.attributes.description}
+            </EuiText>
+          );
           return tooltipText ? (
-            <EuiToolTip position="left" content={tooltipText}>
-              {link}
-            </EuiToolTip>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="left" content={tooltipText}>
+                {link}
+              </EuiToolTip>
+              {description}
+            </EuiFlexItem>
           ) : (
-            link
+            <EuiFlexItem grow={false}>
+              {link}
+              {description}
+            </EuiFlexItem>
           );
         },
       },

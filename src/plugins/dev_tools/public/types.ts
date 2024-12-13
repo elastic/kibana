@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
+import {
+  AnalyticsServiceStart,
+  I18nStart,
+  ThemeServiceStart,
+  UserProfileService,
+} from '@kbn/core/public';
 
 export interface ConfigSchema {
   deeplinks: {
@@ -19,4 +24,5 @@ export interface DevToolsStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }

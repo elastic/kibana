@@ -10,7 +10,7 @@ import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   uiMetricService,
@@ -53,7 +53,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { data } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery('host.name', hostName),
+    query: buildGenericEntityFlyoutPreviewQuery('host.name', hostName),
     sort: [],
     enabled: true,
     pageSize: 1,

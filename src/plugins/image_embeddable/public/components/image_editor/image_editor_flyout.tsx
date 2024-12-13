@@ -205,7 +205,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                       </div>
                     }
                   />
-                  <p style={{ textAlign: 'center' }}>
+                  <p css={{ textAlign: 'center' }}>
                     <EuiLink
                       onClick={() => setIsFilePickerOpen(true)}
                       data-test-subj="imageEmbeddableEditorSelectFiles"

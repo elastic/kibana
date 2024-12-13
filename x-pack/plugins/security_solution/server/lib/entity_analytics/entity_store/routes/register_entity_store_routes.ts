@@ -15,6 +15,8 @@ import { listEntityEnginesRoute } from './list';
 import { entityStoreInternalPrivilegesRoute } from './privileges';
 import { startEntityEngineRoute } from './start';
 import { stopEntityEngineRoute } from './stop';
+import { getEntityStoreStatusRoute } from './status';
+import { enableEntityStoreRoute } from './enablement';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -22,6 +24,8 @@ export const registerEntityStoreRoutes = ({
   getStartServices,
   config,
 }: EntityAnalyticsRoutesDeps) => {
+  enableEntityStoreRoute(router, logger, config);
+  getEntityStoreStatusRoute(router, logger, config);
   initEntityEngineRoute(router, logger, config);
   startEntityEngineRoute(router, logger);
   stopEntityEngineRoute(router, logger);

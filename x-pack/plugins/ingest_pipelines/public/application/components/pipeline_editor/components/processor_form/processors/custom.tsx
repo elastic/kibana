@@ -15,30 +15,20 @@ import {
   UseField,
 } from '../../../../../../shared_imports';
 
-const { emptyField, isJsonField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 import { XJsonEditor } from '../field_components';
 import { Fields } from '../processor_form.container';
-import { EDITOR_PX_HEIGHT } from './shared';
+import { EDITOR_PX_HEIGHT, from, isXJsonField, to } from './shared';
 
 const customConfig: FieldConfig<any> = {
   type: FIELD_TYPES.TEXT,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldLabel', {
     defaultMessage: 'Configuration',
   }),
-  serializer: (value: string) => {
-    try {
-      return JSON.parse(value);
-    } catch (error) {
-      // swallow error and return non-parsed value;
-      return value;
-    }
-  },
+  serializer: from.optionalXJson,
   deserializer: (value: any) => {
-    if (value === '') {
-      return '{\n\n}';
-    }
-    return JSON.stringify(value, null, 2);
+    return to.xJsonString(value.customOptions ? value.customOptions : value);
   },
   validations: [
     {
@@ -52,7 +42,7 @@ const customConfig: FieldConfig<any> = {
       ),
     },
     {
-      validator: isJsonField(
+      validator: isXJsonField(
         i18n.translate('xpack.ingestPipelines.pipelineEditor.customForm.invalidJsonError', {
           defaultMessage: 'The input is not valid.',
         })

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/osquery-plugin",
   "owner": "@elastic/security-defend-workflows",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "osquery",
     "server": true,

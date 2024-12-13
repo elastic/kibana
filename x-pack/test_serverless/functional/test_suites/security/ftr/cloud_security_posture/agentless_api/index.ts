@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('cloud_security_posture', function () {
-    this.tags(['cloud_security_posture']);
+    this.tags(['failsOnMKI', 'cloud_security_posture']);
     loadTestFile(require.resolve('./create_agent'));
   });
 }

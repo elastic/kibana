@@ -30,7 +30,7 @@ import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
-  OnChangePage,
+  OnFetchMoreRecords,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
@@ -64,7 +64,7 @@ type CommonDataTableProps = {
   refetch: inputsModel.Refetch;
   onFieldEdited: () => void;
   totalCount: number;
-  onChangePage: OnChangePage;
+  onFetchMoreRecords: OnFetchMoreRecords;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
   updatedAt: number;
@@ -79,6 +79,7 @@ type CommonDataTableProps = {
   | 'renderCustomGridBody'
   | 'trailingControlColumns'
   | 'isSortEnabled'
+  | 'onUpdatePageIndex'
 >;
 
 interface DataTableProps extends CommonDataTableProps {
@@ -102,13 +103,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     refetch,
     dataLoadingState,
     totalCount,
-    onChangePage,
+    onFetchMoreRecords,
     updatedAt,
     isTextBasedQuery = false,
     onSetColumns,
     onSort,
     onFilter,
     leadingControlColumns,
+    onUpdatePageIndex,
   }) {
     const dispatch = useDispatch();
 
@@ -235,9 +237,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const handleFetchMoreRecords = useCallback(() => {
-      onChangePage(fetchedPage + 1);
+      onFetchMoreRecords(fetchedPage + 1);
       setFechedPage(fetchedPage + 1);
-    }, [fetchedPage, onChangePage]);
+    }, [fetchedPage, onFetchMoreRecords]);
 
     const additionalControls = useMemo(
       () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
@@ -424,6 +426,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
+            onUpdatePageIndex={onUpdatePageIndex}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

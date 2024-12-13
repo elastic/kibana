@@ -31,7 +31,7 @@ export interface DynamicSideNavItems {
 const title = i18n.translate(
   'xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle',
   {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }
 );
 const icon = 'logoElasticsearch';
@@ -127,7 +127,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/content${SEARCH_INDICES_PATH}`)
+                          prepend(`/app/elasticsearch/content${SEARCH_INDICES_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchContent:searchIndices',
@@ -151,7 +151,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
-                      link: 'enterpriseSearchApplications:playground',
+                      link: 'searchPlayground',
                     },
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -163,7 +163,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/applications${SEARCH_APPLICATIONS_PATH}`)
+                          prepend(`/app/elasticsearch/applications${SEARCH_APPLICATIONS_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
@@ -190,7 +190,7 @@ export const getNavigationTreeDefinition = ({
 
                         if (someSubItemSelected) return false;
 
-                        return pathNameSerialized === prepend(`/app/enterprise_search/analytics`);
+                        return pathNameSerialized === prepend(`/app/elasticsearch/analytics`);
                       },
                       link: 'enterpriseSearchAnalytics',
                       renderAs: 'item',

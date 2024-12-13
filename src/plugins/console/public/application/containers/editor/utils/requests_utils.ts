@@ -271,23 +271,61 @@ const replaceVariables = (
   return text;
 };
 
+/**
+ * Splits a concatenated string of JSON objects into individual JSON objects.
+ *
+ * This function takes a string containing one or more JSON objects concatenated together,
+ * separated by optional whitespace, and splits them into an array of individual JSON strings.
+ * It ensures that nested objects and strings containing braces do not interfere with the splitting logic.
+ *
+ * Example inputs:
+ * - '{ "query": "test"} { "query": "test" }' -> ['{ "query": "test"}', '{ "query": "test" }']
+ * - '{ "query": "test"}' -> ['{ "query": "test"}']
+ * - '{ "query": "{a} {b}"}' -> ['{ "query": "{a} {b}"}']
+ *
+ */
 const splitDataIntoJsonObjects = (dataString: string): string[] => {
-  const jsonSplitRegex = /}\s*{/;
-  if (dataString.match(jsonSplitRegex)) {
-    return dataString.split(jsonSplitRegex).map((part, index, parts) => {
-      let restoredBracketsString = part;
-      // add an opening bracket to all parts except the 1st
-      if (index > 0) {
-        restoredBracketsString = `{${restoredBracketsString}`;
+  const jsonObjects = [];
+  // Tracks the depth of nested braces
+  let depth = 0;
+  // Holds the current JSON object as we iterate
+  let currentObject = '';
+  // Tracks whether the current position is inside a string
+  let insideString = false;
+
+  // Iterate through each character in the input string
+  for (let i = 0; i < dataString.length; i++) {
+    const char = dataString[i];
+    // Append the character to the current JSON object string
+    currentObject += char;
+
+    // If the character is a double quote and it is not escaped, toggle the `insideString` state
+    if (char === '"' && dataString[i - 1] !== '\\') {
+      insideString = !insideString;
+    } else if (!insideString) {
+      // Only modify depth if not inside a string
+
+      if (char === '{') {
+        depth++;
+      } else if (char === '}') {
+        depth--;
       }
-      // add a closing bracket to all parts except the last
-      if (index < parts.length - 1) {
-        restoredBracketsString = `${restoredBracketsString}}`;
+
+      // If depth is zero, we have completed a JSON object
+      if (depth === 0) {
+        jsonObjects.push(currentObject.trim());
+        currentObject = '';
       }
-      return restoredBracketsString;
-    });
+    }
   }
-  return [dataString];
+
+  // If there's remaining data in currentObject, add it as the last JSON object
+  if (currentObject.trim()) {
+    jsonObjects.push(currentObject.trim());
+  }
+
+  // Filter out any empty strings from the result array
+  return jsonObjects.filter((obj) => obj !== '');
 };
 
 const cleanUpWhitespaces = (line: string): string => {

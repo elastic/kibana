@@ -43,7 +43,8 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Forbidden',
+                message:
+                  'API [POST /internal/alerting/rules/settings/_flapping] is unauthorized for user, this action is granted by the Kibana privileges [write-flapping-settings]',
                 statusCode: 403,
               });
               break;

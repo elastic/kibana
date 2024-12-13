@@ -24,6 +24,7 @@ export interface PackageSpecManifest {
   conditions?: PackageSpecConditions;
   icons?: PackageSpecIcon[];
   screenshots?: PackageSpecScreenshot[];
+  policy_templates_behavior?: 'all' | 'combined_policy' | 'individual_policies';
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   owner: { github: string; type?: 'elastic' | 'partner' | 'community' };

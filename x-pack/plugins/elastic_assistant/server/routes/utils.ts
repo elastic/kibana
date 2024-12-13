@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import {
   ActionsClientChatOpenAI,
-  ActionsClientBedrockChatModel,
+  ActionsClientChatBedrockConverse,
   ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
 import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
@@ -184,7 +184,7 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
 export const getLlmClass = (llmType?: string) => {
   switch (llmType) {
     case 'bedrock':
-      return ActionsClientBedrockChatModel;
+      return ActionsClientChatBedrockConverse;
     case 'gemini':
       return ActionsClientChatVertexAI;
     case 'openai':

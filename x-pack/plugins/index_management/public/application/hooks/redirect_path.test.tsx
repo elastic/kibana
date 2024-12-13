@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createMemoryHistory } from 'history';
 import { useRedirectPath } from './redirect_path';

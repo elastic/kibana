@@ -113,31 +113,57 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) {
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
     }
 
     if (
-      await doAnyChangesMatch([
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/observability_solution\/synthetics/,
         /^x-pack\/plugins\/observability_solution\/exploratory_view/,
-      ])
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
     }
 
     if (
-      await doAnyChangesMatch([
+      (await doAnyChangesMatch([
         /^x-pack\/plugins\/observability_solution\/ux/,
         /^x-pack\/plugins\/observability_solution\/exploratory_view/,
-      ])
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution/])) {
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_solution/,
+        /^package.json/,
+        /^yarn.lock/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/platform\/packages\/shared\/ai-infra/,
+        /^x-pack\/platform\/plugins\/shared\/ai_infra/,
+        /^x-pack\/platform\/plugins\/shared\/inference/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/bedrock/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/gemini/,
+        /^x-pack\/plugins\/stack_connectors\/server\/connector_types\/openai/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
     }
 
     if (
@@ -222,7 +248,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
-        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/openai/,
@@ -239,6 +265,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
+      );
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml')
       );
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/detection_engine.yml')
@@ -261,7 +290,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-es-query/,
         /^packages\/kbn-i18n/,
         /^packages\/kbn-i18n-react/,
-        /^packages\/kbn-expandable-flyout/,
+        /^x-pack\/solutions\/security\/packages\/expandable-flyout/,
         /^packages\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
@@ -305,8 +334,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
-        /^x-pack\/plugins\/threat_intelligence/,
-        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui/,
         /^x-pack\/plugins\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,

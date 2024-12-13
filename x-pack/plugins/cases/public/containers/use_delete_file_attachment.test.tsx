@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import { basicCaseId, basicFileMock } from './mock';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
@@ -34,7 +34,7 @@ describe('useDeleteFileAttachment', () => {
   it('calls deleteFileAttachment with correct arguments - case', async () => {
     const spyOnDeleteFileAttachments = jest.spyOn(api, 'deleteFileAttachments');
 
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteFileAttachment(), {
+    const { result } = renderHook(() => useDeleteFileAttachment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -45,16 +45,16 @@ describe('useDeleteFileAttachment', () => {
       });
     });
 
-    await waitForNextUpdate();
-
-    expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
-      caseId: basicCaseId,
-      fileIds: [basicFileMock.id],
-    });
+    await waitFor(() =>
+      expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
+        caseId: basicCaseId,
+        fileIds: [basicFileMock.id],
+      })
+    );
   });
 
   it('refreshes the case page view', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteFileAttachment(), {
+    const { result } = renderHook(() => useDeleteFileAttachment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -65,13 +65,11 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(useRefreshCaseViewPage()).toBeCalled();
+    await waitFor(() => expect(useRefreshCaseViewPage()).toBeCalled());
   });
 
   it('shows a success toaster correctly', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteFileAttachment(), {
+    const { result } = renderHook(() => useDeleteFileAttachment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -82,19 +80,19 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(addSuccess).toHaveBeenCalledWith({
-      title: 'File deleted successfully',
-      className: 'eui-textBreakWord',
-    });
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'File deleted successfully',
+        className: 'eui-textBreakWord',
+      })
+    );
   });
 
   it('sets isError when fails to delete a file attachment', async () => {
     const spyOnDeleteFileAttachments = jest.spyOn(api, 'deleteFileAttachments');
     spyOnDeleteFileAttachments.mockRejectedValue(new Error('Error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useDeleteFileAttachment(), {
+    const { result } = renderHook(() => useDeleteFileAttachment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -105,7 +103,7 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(spyOnDeleteFileAttachments).toBeCalledWith({
       caseId: basicCaseId,
@@ -113,6 +111,5 @@ describe('useDeleteFileAttachment', () => {
     });
 
     expect(addError).toHaveBeenCalled();
-    expect(result.current.isError).toBe(true);
   });
 });

@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
+import { render, waitFor, renderHook } from '@testing-library/react';
 
 import { useGrouping } from './use_grouping';
 
@@ -46,92 +45,86 @@ const groupingArgs = {
 
 describe('useGrouping', () => {
   it('Renders child component without grouping table wrapper when no group is selected', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      const { getByTestId, queryByTestId } = render(
-        <IntlProvider locale="en">
-          {result.current.getGrouping({
-            ...groupingArgs,
-            data: {
-              groupsCount: {
-                value: 9,
-              },
-              groupByFields: {
-                buckets: [
-                  {
-                    key: ['critical hosts', 'description'],
-                    key_as_string: 'critical hosts|description',
-                    doc_count: 3,
-                    unitsCount: {
-                      value: 3,
-                    },
-                  },
-                ],
-              },
-              unitsCount: {
-                value: 18,
-              },
+    const { result } = renderHook(() => useGrouping(defaultArgs));
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    const { getByTestId, queryByTestId } = render(
+      <IntlProvider locale="en">
+        {result.current.getGrouping({
+          ...groupingArgs,
+          data: {
+            groupsCount: {
+              value: 9,
             },
-            renderChildComponent: () => <p data-test-subj="innerTable">{'hello'}</p>,
-            selectedGroup: 'none',
-          })}
-        </IntlProvider>
-      );
+            groupByFields: {
+              buckets: [
+                {
+                  key: ['critical hosts', 'description'],
+                  key_as_string: 'critical hosts|description',
+                  doc_count: 3,
+                  unitsCount: {
+                    value: 3,
+                  },
+                },
+              ],
+            },
+            unitsCount: {
+              value: 18,
+            },
+          },
+          renderChildComponent: () => <p data-test-subj="innerTable">{'hello'}</p>,
+          selectedGroup: 'none',
+        })}
+      </IntlProvider>
+    );
 
-      expect(getByTestId('innerTable')).toBeInTheDocument();
-      expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
-    });
+    expect(getByTestId('innerTable')).toBeInTheDocument();
+    expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
   });
   it('Renders child component with grouping table wrapper when group is selected', async () => {
-    await act(async () => {
-      const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
-      getItem.mockReturnValue(
-        JSON.stringify({
-          'test-table': {
-            itemsPerPageOptions: [10, 25, 50, 100],
-            itemsPerPage: 25,
-            activeGroup: 'kibana.alert.rule.name',
-            options: defaultGroupingOptions,
-          },
-        })
-      );
+    const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
+    getItem.mockReturnValue(
+      JSON.stringify({
+        'test-table': {
+          itemsPerPageOptions: [10, 25, 50, 100],
+          itemsPerPage: 25,
+          activeGroup: 'kibana.alert.rule.name',
+          options: defaultGroupingOptions,
+        },
+      })
+    );
 
-      const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      const { getByTestId } = render(
-        <IntlProvider locale="en">
-          {result.current.getGrouping({
-            ...groupingArgs,
-            data: {
-              groupsCount: {
-                value: 9,
-              },
-              groupByFields: {
-                buckets: [
-                  {
-                    key: ['critical hosts', 'description'],
-                    key_as_string: 'critical hosts|description',
-                    doc_count: 3,
-                    unitsCount: {
-                      value: 3,
-                    },
-                  },
-                ],
-              },
-              unitsCount: {
-                value: 18,
-              },
+    const { result } = renderHook(() => useGrouping(defaultArgs));
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        {result.current.getGrouping({
+          ...groupingArgs,
+          data: {
+            groupsCount: {
+              value: 9,
             },
-            renderChildComponent: jest.fn(),
-            selectedGroup: 'test',
-          })}
-        </IntlProvider>
-      );
+            groupByFields: {
+              buckets: [
+                {
+                  key: ['critical hosts', 'description'],
+                  key_as_string: 'critical hosts|description',
+                  doc_count: 3,
+                  unitsCount: {
+                    value: 3,
+                  },
+                },
+              ],
+            },
+            unitsCount: {
+              value: 18,
+            },
+          },
+          renderChildComponent: jest.fn(),
+          selectedGroup: 'test',
+        })}
+      </IntlProvider>
+    );
 
-      expect(getByTestId('grouping-table')).toBeInTheDocument();
-    });
+    expect(getByTestId('grouping-table')).toBeInTheDocument();
   });
 });

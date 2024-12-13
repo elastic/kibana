@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type { UpgradeableCustomQueryFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { KqlQueryEditForm } from './fields/kql_query';
 import { DataSourceEditForm } from './fields/data_source';
@@ -24,6 +25,6 @@ export function CustomQueryRuleFieldEdit({ fieldName }: CustomQueryRuleFieldEdit
     case 'alert_suppression':
       return <AlertSuppressionEditForm />;
     default:
-      return null; // Will be replaced with `assertUnreachable(fieldName)` once all fields are implemented
+      return assertUnreachable(fieldName);
   }
 }

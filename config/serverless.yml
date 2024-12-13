@@ -7,6 +7,7 @@ xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
+xpack.fleet.internal.useMeteringApi: true
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -228,3 +229,8 @@ monitoring.ui.enabled: false
 xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
+
+## Data Usage in stack management
+xpack.dataUsage.enabled: true
+# This feature is disabled in Serverless until fully tested within a Serverless environment
+xpack.dataUsage.enableExperimental: ['dataUsageDisabled']

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
-
-import { CUSTOM_QUERY_REQUIRED, EQL_QUERY_REQUIRED, ESQL_QUERY_REQUIRED } from './translations';
-
-import { isEqlRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * Filters out fields, that are not supported in terms aggregation.
@@ -25,18 +20,3 @@ export const getTermsAggregationFields = (fields: FieldSpec[]): FieldSpec[] =>
 
 // binary types is excluded, as binary field has property aggregatable === false
 const ALLOWED_AGGREGATABLE_FIELD_TYPES_SET = new Set(['string', 'number', 'ip', 'boolean']);
-
-/**
- * return query is required message depends on a rule type
- */
-export const getQueryRequiredMessage = (ruleType: Type) => {
-  if (isEsqlRule(ruleType)) {
-    return ESQL_QUERY_REQUIRED;
-  }
-
-  if (isEqlRule(ruleType)) {
-    return EQL_QUERY_REQUIRED;
-  }
-
-  return CUSTOM_QUERY_REQUIRED;
-};

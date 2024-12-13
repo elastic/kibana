@@ -224,6 +224,12 @@ export class DiscoverPageObject extends FtrService {
     );
   }
 
+  public async getBreakdownFieldValue() {
+    const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+
+    return breakdownButton.getVisibleText();
+  }
+
   public async chooseBreakdownField(field: string, value?: string) {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
@@ -597,6 +603,7 @@ export class DiscoverPageObject extends FtrService {
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
+      await this.waitUntilSearchingHasFinished();
     }
   }
 

@@ -8,7 +8,7 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type { GetProfilesOptions } from '../profiles_manager';

@@ -35,8 +35,12 @@ export const performRuleUpgradeRoute = (
     .post({
       access: 'internal',
       path: PERFORM_RULE_UPGRADE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -57,7 +61,7 @@ export const performRuleUpgradeRoute = (
         try {
           const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);

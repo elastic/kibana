@@ -7,7 +7,7 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import {
-  FEATURE_ID,
+  FEATURE_ID_V2,
   GENERAL_CASES_OWNER,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
@@ -42,6 +42,8 @@ export const canUseCases =
         acc.push = acc.push || userCapabilitiesForOwner.push;
         acc.connectors = acc.connectors || userCapabilitiesForOwner.connectors;
         acc.settings = acc.settings || userCapabilitiesForOwner.settings;
+        acc.reopenCase = acc.reopenCase || userCapabilitiesForOwner.reopenCase;
+        acc.createComment = acc.createComment || userCapabilitiesForOwner.createComment;
 
         const allFromAcc =
           acc.create &&
@@ -50,7 +52,9 @@ export const canUseCases =
           acc.delete &&
           acc.push &&
           acc.connectors &&
-          acc.settings;
+          acc.settings &&
+          acc.reopenCase &&
+          acc.createComment;
 
         acc.all = acc.all || userCapabilitiesForOwner.all || allFromAcc;
 
@@ -65,6 +69,8 @@ export const canUseCases =
         push: false,
         connectors: false,
         settings: false,
+        reopenCase: false,
+        createComment: false,
       }
     );
 
@@ -75,8 +81,8 @@ export const canUseCases =
 
 const getFeatureID = (owner: CasesOwners) => {
   if (owner === GENERAL_CASES_OWNER) {
-    return FEATURE_ID;
+    return FEATURE_ID_V2;
   }
 
-  return `${owner}Cases`;
+  return `${owner}CasesV2`;
 };

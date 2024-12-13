@@ -8,7 +8,7 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { Chart, PointerEvent } from '@elastic/charts';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { RefObject } from 'react';

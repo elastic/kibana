@@ -211,9 +211,11 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
-          // Make the quick-fix window be fixed to the window rather than clipped by
-          // the parent content set with overflow: hidden/auto
-          fixedOverflowWidgets: true,
+          // Force the hover views to always render below the cursor to avoid clipping
+          // when the cursor is near the top of the editor.
+          hover: {
+            above: false,
+          },
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}

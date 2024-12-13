@@ -341,7 +341,10 @@ export class DashboardStorage {
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
     const hits = soResponse.saved_objects
       .map((so) => {
-        const { item } = savedObjectToItem(so, false, soQuery.fields);
+        const { item } = savedObjectToItem(so, false, {
+          allowedAttributes: soQuery.fields,
+          allowedReferences: optionsToLatest?.includeReferences,
+        });
         return item;
       })
       // Ignore any saved objects that failed to convert to items.

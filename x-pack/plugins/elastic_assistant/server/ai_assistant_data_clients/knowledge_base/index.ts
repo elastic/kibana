@@ -25,7 +25,7 @@ import {
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
-import { AnalyticsServiceSetup, ElasticsearchClient } from '@kbn/core/server';
+import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
@@ -178,9 +178,22 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public createInferenceEndpoint = async () => {
     const elserId = await this.options.getElserId();
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
+    const esClient = await this.options.elasticsearchClientPromise;
 
+    try {
+      await esClient.inference.delete({
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        // it's being used in the mapping so we need to force delete
+        force: true,
+      });
+      this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
+    } catch (error) {
+      this.options.logger.error(
+        `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
+      );
+    }
+
+    try {
       await esClient.inference.put({
         task_type: 'sparse_embedding',
         inference_id: ASSISTANT_ELSER_INFERENCE_ID,
@@ -198,6 +211,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           task_settings: {},
         },
       });
+
+      // await for the model to be deployed
+      await this.isInferenceEndpointExists();
     } catch (error) {
       this.options.logger.error(
         `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
@@ -317,6 +333,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
+  // TODO make this function private
+  // no telemetry, no audit logs
   /**
    * Adds LangChain Documents to the knowledge base
    *
@@ -575,10 +593,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * @param global
    */
   public createKnowledgeBaseEntry = async ({
+    auditLogger,
     knowledgeBaseEntry,
     telemetry,
     global = false,
   }: {
+    auditLogger?: AuditLogger;
     knowledgeBaseEntry: KnowledgeBaseEntryCreateProps;
     global?: boolean;
     telemetry: AnalyticsServiceSetup;
@@ -601,6 +621,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`kbIndex: ${this.indexTemplateAndPattern.alias}`);
     const esClient = await this.options.elasticsearchClientPromise;
     return createKnowledgeBaseEntry({
+      auditLogger,
       esClient,
       knowledgeBaseIndex: this.indexTemplateAndPattern.alias,
       logger: this.options.logger,

@@ -15,12 +15,12 @@ import {
 } from '@kbn/server-route-repository-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { from } from 'rxjs';
-import { HttpFetchOptions, HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
+import { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
 import { omit } from 'lodash';
 
 export function createRepositoryClient<
   TRepository extends ServerRouteRepository,
-  TClientOptions extends HttpFetchOptions = {}
+  TClientOptions extends Record<string, any> = {}
 >(core: CoreStart | CoreSetup): RouteRepositoryClient<TRepository, TClientOptions> {
   const fetch = (
     endpoint: string,

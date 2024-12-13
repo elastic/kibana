@@ -9,11 +9,11 @@
 
 export { GridLayout } from './grid/grid_layout';
 export type {
-  GridLayoutApi,
   GridLayoutData,
   GridPanelData,
   GridRowData,
   GridSettings,
+  GridAccessMode,
 } from './grid/types';
 
 export { isLayoutEqual } from './grid/utils/equality_checks';

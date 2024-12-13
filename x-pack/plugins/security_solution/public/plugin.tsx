@@ -245,6 +245,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         assets: new subPluginClasses.Assets(),
         investigations: new subPluginClasses.Investigations(),
         machineLearning: new subPluginClasses.MachineLearning(),
+        siemMigrations: new subPluginClasses.SiemMigrations(),
       };
     }
     return this._subPlugins;
@@ -279,6 +280,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assets: subPlugins.assets.start(),
       investigations: subPlugins.investigations.start(),
       machineLearning: subPlugins.machineLearning.start(),
+      siemMigrations: subPlugins.siemMigrations.start(
+        this.experimentalFeatures.siemMigrationsEnabled
+      ),
     };
   }
 
@@ -346,7 +350,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (!capabilities.siem?.show && !capabilities.securitySolutionCases?.read_cases) {
+    if (!capabilities.siem?.show && !capabilities.securitySolutionCasesV2?.read_cases) {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
         visibleIn: [],

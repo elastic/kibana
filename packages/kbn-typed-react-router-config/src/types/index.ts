@@ -106,6 +106,12 @@ export type TypeAsArgs<TObject> = keyof TObject extends never
   ? [TObject] | []
   : [TObject];
 
+export type TypeAsParams<TObject> = keyof TObject extends never
+  ? {}
+  : RequiredKeys<TObject> extends never
+  ? never
+  : { params: TObject };
+
 export type FlattenRoutesOf<TRoutes extends RouteMap> = Array<
   ValuesType<{
     [key in keyof MapRoutes<TRoutes>]: ValuesType<MapRoutes<TRoutes>[key]>;

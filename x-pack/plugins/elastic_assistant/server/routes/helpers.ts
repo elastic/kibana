@@ -20,6 +20,7 @@ import {
   Message,
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
+  DEFEND_INSIGHTS_TOOL_ID,
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +29,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
@@ -214,6 +216,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
+  llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;
   conversationId?: string;
@@ -245,6 +248,7 @@ export const langChainExecute = async ({
   isOssModel,
   context,
   actionsClient,
+  llmTasks,
   inference,
   request,
   logger,
@@ -263,9 +267,11 @@ export const langChainExecute = async ({
     logger,
   });
   const assistantContext = context.elasticAssistant;
+  // We don't (yet) support invoking these tools interactively
+  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
-    .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
+    .filter((tool) => !unsupportedTools.has(tool.id));
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -298,6 +304,7 @@ export const langChainExecute = async ({
     conversationId,
     connectorId,
     esClient,
+    llmTasks,
     inference,
     isStream,
     llmType: getLlmType(actionTypeId),

@@ -26,8 +26,10 @@ export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) =>
   router.versioned
     .patch({
       path: PINNED_EVENT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })

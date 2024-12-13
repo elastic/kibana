@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
+import { render, act, waitFor, renderHook } from '@testing-library/react';
 import type { Store } from 'redux';
 import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
 import { useFieldBrowserOptions } from '.';
@@ -16,8 +17,6 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
@@ -42,12 +41,13 @@ const mockOnHide = jest.fn();
 const runAllPromises = () => new Promise(setImmediate);
 
 // helper function to render the hook
-const renderUseFieldBrowserOptions = (
-  props: Partial<UseFieldBrowserOptionsProps & { store?: Store }> = {}
-) =>
+const renderUseFieldBrowserOptions = ({
+  store,
+  ...props
+}: Partial<UseFieldBrowserOptionsProps & { store?: Store }> = {}) =>
   renderHook<
-    React.PropsWithChildren<UseFieldBrowserOptionsProps & { store?: Store }>,
-    ReturnType<UseFieldBrowserOptions>
+    ReturnType<UseFieldBrowserOptions>,
+    React.PropsWithChildren<UseFieldBrowserOptionsProps & { store?: Store }>
   >(
     () =>
       useFieldBrowserOptions({
@@ -57,7 +57,7 @@ const renderUseFieldBrowserOptions = (
         ...props,
       }),
     {
-      wrapper: ({ children, store }) => {
+      wrapper: ({ children }) => {
         if (store) {
           return <TestProviders store={store}>{children}</TestProviders>;
         }
@@ -71,12 +71,12 @@ const renderUpdatedUseFieldBrowserOptions = async (
   props: Partial<UseFieldBrowserOptionsProps> = {}
 ) => {
   let renderHookResult: RenderHookResult<
-    UseFieldBrowserOptionsProps,
-    ReturnType<UseFieldBrowserOptions>
+    ReturnType<UseFieldBrowserOptions>,
+    UseFieldBrowserOptionsProps
   > | null = null;
   await act(async () => {
     renderHookResult = renderUseFieldBrowserOptions(props);
-    await renderHookResult.waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
   });
   return renderHookResult!;
 };

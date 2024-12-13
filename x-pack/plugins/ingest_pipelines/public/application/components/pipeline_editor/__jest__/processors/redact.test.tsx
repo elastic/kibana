@@ -138,4 +138,40 @@ describe('Processor: Redact', () => {
       pattern_definitions: { GITHUB_NAME: '@%{USERNAME}' },
     });
   });
+  test('accepts pattern definitions that contains escaped characters', async () => {
+    const {
+      actions: { saveNewProcessor },
+      component,
+      find,
+      form,
+    } = testBed;
+
+    // Add "field" value
+    form.setInputValue('fieldNameField.input', 'test_redact_processor');
+
+    // Add one pattern to the list
+    form.setInputValue('droppableList.input-0', 'pattern1');
+
+    await act(async () => {
+      find('patternDefinitionsField').simulate('change', {
+        jsonContent: '{"pattern_1":"""aaa"bbb""", "pattern_2":"aaa(bbb"}',
+      });
+
+      // advance timers to allow the form to validate
+      jest.advanceTimersByTime(0);
+    });
+    component.update();
+
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, REDACT_TYPE);
+
+    expect(processors[0][REDACT_TYPE]).toEqual({
+      field: 'test_redact_processor',
+      patterns: ['pattern1'],
+
+      pattern_definitions: { pattern_1: 'aaa"bbb', pattern_2: 'aaa(bbb' },
+    });
+  });
 });

@@ -9,7 +9,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_query';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
@@ -36,8 +36,8 @@ describe('useFetchAlertsIndexNamesQuery', () => {
     queryClient.clear();
   });
 
-  it('does not fetch if featureIds is empty', () => {
-    renderHook(() => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, featureIds: [] }), {
+  it('does not fetch if ruleTypeIds is empty', () => {
+    renderHook(() => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, ruleTypeIds: [] }), {
       wrapper,
     });
 
@@ -45,25 +45,28 @@ describe('useFetchAlertsIndexNamesQuery', () => {
   });
 
   it('calls fetchAlertsIndexNames with the correct parameters', () => {
-    renderHook(() => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, featureIds: ['apm'] }), {
-      wrapper,
-    });
-
-    expect(mockFetchAlertsIndexNames).toHaveBeenCalledWith({
-      http: mockHttpClient,
-      featureIds: ['apm'],
-    });
-  });
-
-  it('correctly caches the index names', async () => {
-    const { result, rerender, waitForValueToChange } = renderHook(
-      () => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, featureIds: ['apm'] }),
+    renderHook(
+      () => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, ruleTypeIds: ['apm'] }),
       {
         wrapper,
       }
     );
 
-    await waitForValueToChange(() => result.current.data);
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledWith({
+      http: mockHttpClient,
+      ruleTypeIds: ['apm'],
+    });
+  });
+
+  it('correctly caches the index names', async () => {
+    const { result, rerender } = renderHook(
+      () => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, ruleTypeIds: ['apm'] }),
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() => result.current.data);
 
     expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
 

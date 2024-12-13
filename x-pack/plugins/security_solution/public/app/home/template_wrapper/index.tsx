@@ -69,8 +69,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
     const { euiTheme, colorMode: globalColorMode } = useEuiTheme();
 
     // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
-    // here if isEmptyState is set
-    const isNotEmpty = !rest.isEmptyState;
+    // solutionNavProps is momentarily initialized to undefined, this check prevents the children from being re-rendered in the initial load
+    const renderChildren = !rest.isEmptyState && solutionNavProps !== undefined;
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -83,11 +83,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
         theme={euiTheme}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         paddingSize="none"
-        solutionNav={solutionNavProps}
+        solutionNav={solutionNavProps ?? undefined}
         restrictWidth={false}
         {...rest}
       >
-        {isNotEmpty && (
+        {renderChildren && (
           <>
             <GlobalKQLHeader />
             <KibanaPageTemplate.Section

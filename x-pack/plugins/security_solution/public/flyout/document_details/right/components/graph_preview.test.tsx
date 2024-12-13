@@ -36,10 +36,19 @@ describe('<GraphPreview />', () => {
   });
 
   it('shows graph preview correctly when data is loaded', async () => {
-    const graphProps = {
+    const graphProps: GraphPreviewProps = {
       isLoading: false,
       isError: false,
-      data: { nodes: [], edges: [] },
+      data: {
+        nodes: [
+          {
+            id: '1',
+            color: 'primary',
+            shape: 'ellipse',
+          },
+        ],
+        edges: [],
+      },
     };
 
     const { findByTestId } = renderGraphPreview(mockContextValue, graphProps);
@@ -63,6 +72,17 @@ describe('<GraphPreview />', () => {
     const graphProps = {
       isLoading: false,
       isError: true,
+    };
+
+    const { getByText } = renderGraphPreview(mockContextValue, graphProps);
+
+    expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
+  });
+
+  it('shows error message when data is empty', () => {
+    const graphProps = {
+      isLoading: false,
+      isError: false,
     };
 
     const { getByText } = renderGraphPreview(mockContextValue, graphProps);

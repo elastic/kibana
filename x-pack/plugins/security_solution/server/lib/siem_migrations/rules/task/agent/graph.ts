@@ -6,45 +6,64 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { migrateRuleState } from './state';
-import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
-import { getTranslateQueryNode } from './nodes/translate_query';
+import { SiemMigrationRuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
+import { getProcessQueryNode } from './nodes/process_query';
+
+import { migrateRuleState } from './state';
+import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
+import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
 
 export function getRuleMigrationAgent({
   model,
   inferenceClient,
-  prebuiltRulesMap,
-  resourceRetriever,
+  ruleMigrationsRetriever,
   connectorId,
   logger,
 }: MigrateRuleGraphParams) {
-  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap, logger });
-  const translationNode = getTranslateQueryNode({
+  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
+    model,
+    logger,
+    ruleMigrationsRetriever,
+  });
+  const translationSubGraph = getTranslateRuleGraph({
     model,
     inferenceClient,
-    resourceRetriever,
+    ruleMigrationsRetriever,
     connectorId,
     logger,
   });
+  const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
+  const processQueryNode = getProcessQueryNode({ model, ruleMigrationsRetriever });
 
-  const translateRuleGraph = new StateGraph(migrateRuleState)
+  const siemMigrationAgentGraph = new StateGraph(migrateRuleState)
     // Nodes
+    .addNode('processQuery', processQueryNode)
+    .addNode('createSemanticQuery', createSemanticQueryNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
-    .addNode('translation', translationNode)
+    .addNode('translationSubGraph', translationSubGraph)
     // Edges
-    .addEdge(START, 'matchPrebuiltRule')
-    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)
-    .addEdge('translation', END);
+    .addEdge(START, 'createSemanticQuery')
+    .addEdge('createSemanticQuery', 'matchPrebuiltRule')
+    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional, ['processQuery', END])
+    .addEdge('processQuery', 'translationSubGraph')
+    .addEdge('translationSubGraph', END);
 
-  const graph = translateRuleGraph.compile();
+  const graph = siemMigrationAgentGraph.compile();
   graph.name = 'Rule Migration Graph'; // Customizes the name displayed in LangSmith
   return graph;
 }
 
+/*
+ * If the original splunk rule has no prebuilt rule match, we will start processing the query, unless it is related to input/outputlookups.
+ */
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
-  return 'translation';
+  if (state.translation_result === SiemMigrationRuleTranslationResult.UNTRANSLATABLE) {
+    return END;
+  }
+  return 'processQuery';
 };

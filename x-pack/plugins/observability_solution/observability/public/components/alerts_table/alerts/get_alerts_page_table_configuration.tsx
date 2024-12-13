@@ -15,11 +15,8 @@ import {
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
-import {
-  casesFeatureId,
-  observabilityAlertFeatureIds,
-  observabilityFeatureId,
-} from '../../../../common';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../../common/constants';
+import { casesFeatureId, observabilityFeatureId } from '../../../../common';
 import { AlertActions } from '../../../pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
@@ -68,7 +65,7 @@ export const getAlertsPageTableConfiguration = (
     ruleTypeIds: observabilityRuleTypeRegistry.list(),
     usePersistentControls: getPersistentControlsHook({
       groupingId: id ?? ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID,
-      featureIds: observabilityAlertFeatureIds,
+      ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
       services: {
         dataViews,
         http,

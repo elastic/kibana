@@ -22,6 +22,7 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
+import { Query } from '@kbn/es-query';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -448,7 +449,9 @@ describe('Lens Attribute', () => {
       reportViewConfig.reportType,
       formulaHelper
     ).getJSON();
-    expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
+    expect((multiSeriesLensAttr.state.query as Query).query).toEqual(
+      'transaction.duration.us < 60000000'
+    );
   });
 
   describe('Layer breakdowns', function () {

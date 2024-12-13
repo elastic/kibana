@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import { PRECONFIGURED_ENDPOINTS } from '../components/all_inference_endpoints/constants';
-
-export const isEndpointPreconfigured = (endpoint: string) =>
-  Object.values(PRECONFIGURED_ENDPOINTS).includes(endpoint);
+export const isEndpointPreconfigured = (endpoint: string) => endpoint.startsWith('.');

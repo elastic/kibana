@@ -1870,9 +1870,19 @@ describe('EPM template', () => {
 
     it('should fill constant keywords from previous mappings', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
       esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test-constant.keyword-default' }],
+        data_streams: [
+          {
+            name: 'test-constant.keyword-default',
+            indices: [
+              { index_name: '.ds-test-constant.keyword-default-0001' },
+              { index_name: '.ds-test-constant.keyword-default-0002' },
+            ],
+          },
+        ],
       } as any);
+
       esClient.indices.get.mockResponse({
         'test-constant.keyword-default': {
           mappings: {
@@ -1912,6 +1922,9 @@ describe('EPM template', () => {
           } as any,
         },
       ]);
+      expect(esClient.indices.get).toBeCalledWith({
+        index: '.ds-test-constant.keyword-default-0002',
+      });
       const putMappingsCalls = esClient.indices.putMapping.mock.calls;
       expect(putMappingsCalls).toHaveLength(1);
       expect(putMappingsCalls[0][0]).toEqual({
@@ -2034,6 +2047,57 @@ describe('EPM template', () => {
                 'mapper_exception\n' +
                 '\tRoot causes:\n' +
                 "\t\tmapper_exception: the [subobjects] parameter can't be updated for the object mapping [_doc]",
+            },
+          },
+        } as any);
+      });
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: {},
+            },
+          } as any,
+        },
+      ]);
+
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
+    });
+    it('should rollover on mapper exception with subobjects in reason', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'test.prefix1-default' }],
+      } as any);
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.putMapping.mockImplementation(() => {
+        throw new errors.ResponseError({
+          body: {
+            error: {
+              type: 'mapper_exception',
+              reason:
+                "the [subobjects] parameter can't be updated for the object mapping [okta.debug_context.debug_data]",
             },
           },
         } as any);

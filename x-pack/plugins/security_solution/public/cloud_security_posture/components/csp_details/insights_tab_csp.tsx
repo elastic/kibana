@@ -42,7 +42,7 @@ function isCspFlyoutPanelProps(
 }
 
 export const InsightsTabCsp = memo(
-  ({ name, fieldName }: { name: string; fieldName: 'host.name' | 'user.name' }) => {
+  ({ value, field }: { value: string; field: 'host.name' | 'user.name' }) => {
     const panels = useExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;
@@ -150,11 +150,11 @@ export const InsightsTabCsp = memo(
         />
         <EuiSpacer size="xl" />
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
-          <MisconfigurationFindingsDetailsTable fieldName={fieldName} queryName={name} />
+          <MisconfigurationFindingsDetailsTable field={field} value={value} />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
-          <VulnerabilitiesFindingsDetailsTable queryName={name} />
+          <VulnerabilitiesFindingsDetailsTable value={value} />
         ) : (
-          <AlertsDetailsTable fieldName={fieldName} queryName={name} />
+          <AlertsDetailsTable field={field} value={value} />
         )}
       </>
     );

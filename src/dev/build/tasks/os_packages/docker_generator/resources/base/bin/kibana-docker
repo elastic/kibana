@@ -319,6 +319,7 @@ kibana_vars=(
     xpack.observability.unsafe.alertDetails.uptime.enabled
     xpack.observability.unsafe.alertDetails.observability.enabled
     xpack.observability.unsafe.thresholdRule.enabled
+    xpack.productDocBase.artifactRepositoryUrl
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
@@ -393,7 +394,7 @@ kibana_vars=(
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.encryptionKey
-    xpack.security.experimental.fipsMode.enabled
+    xpack.security.fipsMode.enabled
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
     xpack.security.sameSiteCookies

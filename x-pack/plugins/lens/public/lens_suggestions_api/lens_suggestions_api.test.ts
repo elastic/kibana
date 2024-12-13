@@ -10,7 +10,7 @@ import { ChartType } from '@kbn/visualization-utils';
 import { createMockVisualization, DatasourceMock, createMockDatasource } from '../mocks';
 import { DatasourceSuggestion } from '../types';
 import { suggestionsApi } from '.';
-import type { TypedLensByValueInput } from '../embeddable/embeddable_component';
+import { TypedLensByValueInput } from '../react_embeddable/types';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,

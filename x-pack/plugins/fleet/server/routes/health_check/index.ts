@@ -16,7 +16,6 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
 
-import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -106,6 +105,6 @@ export const postHealthCheckHandler: FleetRequestHandler<
         body: { status: `OFFLINE`, host_id: request.body.id },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };

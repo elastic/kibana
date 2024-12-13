@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useIsLoadingComplete } from './use_is_loading_complete';
 
 describe('useIsLoadingComplete', () => {

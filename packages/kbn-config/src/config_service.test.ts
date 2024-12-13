@@ -313,6 +313,37 @@ test('handles disabled path and marks config as used', async () => {
   expect(unusedPaths).toEqual([]);
 });
 
+test('does not throw if extra options are provided', async () => {
+  const initialConfig = {
+    pid: {
+      enabled: false,
+      file: '/some/file.pid',
+      extraUnknownOption: 1,
+      extraNestedUnknownOptions: {
+        anOption: true,
+        anotherOption: 'something',
+      },
+    },
+  };
+
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig: initialConfig });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+
+  configService.setSchema(
+    'pid',
+    schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      file: schema.string(),
+    })
+  );
+
+  const isEnabled = await configService.isEnabledAtPath('pid');
+  expect(isEnabled).toBe(false);
+
+  const unusedPaths = await configService.getUnusedPaths();
+  expect(unusedPaths).toEqual([]);
+});
+
 test('does not throw if schema does not define "enabled" schema', async () => {
   const initialConfig = {
     pid: {

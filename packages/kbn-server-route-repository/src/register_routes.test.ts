@@ -15,6 +15,7 @@ import { NEVER } from 'rxjs';
 import * as makeZodValidationObject from './make_zod_validation_object';
 import { registerRoutes } from './register_routes';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
+import { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 
 describe('registerRoutes', () => {
   const post = jest.fn();
@@ -54,43 +55,81 @@ describe('registerRoutes', () => {
       'POST /internal/route': {
         endpoint: 'POST /internal/route',
         handler: jest.fn(),
-        options: {
-          internal: true,
-        },
       },
       'POST /api/public_route version': {
         endpoint: 'POST /api/public_route version',
         handler: jest.fn(),
+      },
+      'POST /api/internal_but_looks_like_public version': {
+        endpoint: 'POST /api/internal_but_looks_like_public version',
         options: {
-          public: true,
+          access: 'internal',
+        },
+        handler: jest.fn(),
+      },
+      'POST /internal/route_with_security': {
+        endpoint: `POST /internal/route_with_security`,
+        handler: jest.fn(),
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'whatever',
+          },
         },
       },
-    });
+      'POST /api/route_with_security version': {
+        endpoint: `POST /api/route_with_security version`,
+        handler: jest.fn(),
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'whatever',
+          },
+        },
+      },
+    } satisfies ServerRouteRepository);
 
     expect(createRouter).toHaveBeenCalledTimes(1);
-
-    expect(post).toHaveBeenCalledTimes(1);
 
     const [internalRoute] = post.mock.calls[0];
     expect(internalRoute.path).toEqual('/internal/route');
     expect(internalRoute.options).toEqual({
-      internal: true,
+      access: 'internal',
     });
     expect(internalRoute.validate).toEqual(noParamsValidationObject);
 
-    expect(postWithVersion).toHaveBeenCalledTimes(1);
+    const [internalRouteWithSecurity] = post.mock.calls[1];
+
+    expect(internalRouteWithSecurity.path).toEqual('/internal/route_with_security');
+    expect(internalRouteWithSecurity.security).toEqual({
+      authz: {
+        enabled: false,
+        reason: 'whatever',
+      },
+    });
+
     const [publicRoute] = postWithVersion.mock.calls[0];
     expect(publicRoute.path).toEqual('/api/public_route');
-    expect(publicRoute.options).toEqual({
-      public: true,
-    });
     expect(publicRoute.access).toEqual('public');
 
-    expect(postAddVersion).toHaveBeenCalledTimes(1);
+    const [apiInternalRoute] = postWithVersion.mock.calls[1];
+    expect(apiInternalRoute.path).toEqual('/api/internal_but_looks_like_public');
+    expect(apiInternalRoute.access).toEqual('internal');
+
     const [versionedRoute] = postAddVersion.mock.calls[0];
     expect(versionedRoute.version).toEqual('version');
     expect(versionedRoute.validate).toEqual({
       request: noParamsValidationObject,
+    });
+
+    const [publicRouteWithSecurity] = postWithVersion.mock.calls[2];
+
+    expect(publicRouteWithSecurity.path).toEqual('/api/route_with_security');
+    expect(publicRouteWithSecurity.security).toEqual({
+      authz: {
+        enabled: false,
+        reason: 'whatever',
+      },
     });
   });
 

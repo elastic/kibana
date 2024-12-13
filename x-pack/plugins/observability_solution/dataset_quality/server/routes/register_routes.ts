@@ -39,14 +39,18 @@ export function registerRoutes({
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { endpoint, options, handler, params } = route;
+    const { endpoint, handler } = route;
     const { pathname, method } = parseEndpoint(endpoint);
+
+    const params = 'params' in route ? route.params : undefined;
+    const options = 'options' in route ? route.options : {};
 
     (router[method] as RouteRegistrar<typeof method, DatasetQualityRequestHandlerContext>)(
       {
         path: pathname,
         validate: passThroughValidationObject,
         options,
+        security: route.security,
       },
       async (context, request, response) => {
         try {

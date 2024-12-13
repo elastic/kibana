@@ -8,10 +8,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SessionViewConfig } from '../../../common/types';
-import type {
-  EqlOptionsSelected,
-  TimelineNonEcsData,
-} from '../../../common/search_strategy/timeline';
+import type { EqlOptions, TimelineNonEcsData } from '../../../common/search_strategy/timeline';
 import type {
   TimelineTabs,
   ScrollToTopEvent,
@@ -42,7 +39,7 @@ export interface TimelineModel {
   createdBy?: string;
   /** A summary of the events and notes in this timeline */
   description: string;
-  eqlOptions: EqlOptionsSelected;
+  eqlOptions: EqlOptions;
   /** Type of event you want to see in this timeline */
   eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */

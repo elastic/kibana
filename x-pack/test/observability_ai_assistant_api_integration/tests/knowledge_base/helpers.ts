@@ -30,7 +30,6 @@ export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLear
 export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
   await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
   await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-  await ml.api.cleanMlIndices();
   await ml.testResources.cleanMLSavedObjects();
 }
 

@@ -47,8 +47,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       enableRouting: false,
       mount: async (params) => {
         const [coreStart] = await getStartServices();
-        const { notifications, analytics, i18n: i18nStart, theme } = coreStart;
-        const startServices = { analytics, i18n: i18nStart, theme };
+        const { notifications, ...startServices } = coreStart;
 
         const { renderApp } = await import('./application');
 

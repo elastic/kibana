@@ -27,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -108,6 +108,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     http,
     i18n: i18nStart,
     theme,
+    userProfile,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -223,7 +224,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 </EuiFlexGroup>
               )}
             </>,
-            { i18n: i18nStart, theme }
+            { i18n: i18nStart, theme, userProfile }
           ),
         });
       }
@@ -232,6 +233,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   }, [
     i18nStart,
     theme,
+    userProfile,
     rule.schedule.interval,
     config.minimumScheduleInterval,
     toasts,

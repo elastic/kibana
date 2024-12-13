@@ -14,73 +14,81 @@ import {
   request,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { getFips } from 'crypto';
 
 describe('default route provider', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
 
-  beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
+  if (getFips() === 0) {
+    beforeAll(async () => {
+      const { startES } = createTestServers({
+        adjustTimeout: (t: number) => jest.setTimeout(t),
+      });
+      esServer = await startES();
+      root = createRootWithCorePlugins({
+        server: {
+          basePath: '/hello',
+          restrictInternalApis: false,
+        },
+      });
+
+      await root.preboot();
+      await root.setup();
+      await root.start();
     });
-    esServer = await startES();
-    root = createRootWithCorePlugins({
-      server: {
-        basePath: '/hello',
-      },
+
+    afterAll(async () => {
+      await esServer.stop();
+      await root.shutdown();
     });
 
-    await root.preboot();
-    await root.setup();
-    await root.start();
-  });
+    it('redirects to the configured default route respecting basePath', async function () {
+      const { status, header } = await request.get(root, '/');
 
-  afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
-  });
-
-  it('redirects to the configured default route respecting basePath', async function () {
-    const { status, header } = await request.get(root, '/');
-
-    expect(status).toEqual(302);
-    expect(header).toMatchObject({
-      location: '/hello/app/home',
+      expect(status).toEqual(302);
+      expect(header).toMatchObject({
+        location: '/hello/app/home',
+      });
     });
-  });
 
-  it('ignores invalid values', async function () {
-    const invalidRoutes = [
-      'http://not-your-kibana.com',
-      '///example.com',
-      '//example.com',
-      ' //example.com',
-    ];
+    it('ignores invalid values', async function () {
+      const invalidRoutes = [
+        'http://not-your-kibana.com',
+        '///example.com',
+        '//example.com',
+        ' //example.com',
+      ];
 
-    for (const url of invalidRoutes) {
+      for (const url of invalidRoutes) {
+        await request
+          .post(root, '/internal/kibana/settings/defaultRoute')
+          .send({ value: url })
+          .expect(400);
+      }
+
+      const { status, header } = await request.get(root, '/');
+      expect(status).toEqual(302);
+      expect(header).toMatchObject({
+        location: '/hello/app/home',
+      });
+    });
+
+    it('consumes valid values', async function () {
       await request
         .post(root, '/internal/kibana/settings/defaultRoute')
-        .send({ value: url })
-        .expect(400);
-    }
+        .send({ value: '/valid' })
+        .expect(200);
 
-    const { status, header } = await request.get(root, '/');
-    expect(status).toEqual(302);
-    expect(header).toMatchObject({
-      location: '/hello/app/home',
+      const { status, header } = await request.get(root, '/');
+      expect(status).toEqual(302);
+      expect(header).toMatchObject({
+        location: '/hello/valid',
+      });
     });
-  });
-
-  it('consumes valid values', async function () {
-    await request
-      .post(root, '/internal/kibana/settings/defaultRoute')
-      .send({ value: '/valid' })
-      .expect(200);
-
-    const { status, header } = await request.get(root, '/');
-    expect(status).toEqual(302);
-    expect(header).toMatchObject({
-      location: '/hello/valid',
+  } else {
+    it('should have fips enabled, the overrides prevent these tests from working', () => {
+      expect(getFips()).toBe(1);
     });
-  });
+  }
 });

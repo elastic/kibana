@@ -14,6 +14,7 @@ const props = {
   checkComplete: jest.fn(),
   isCardComplete: jest.fn(),
   setExpandedCardId: jest.fn(),
+  isCardAvailable: jest.fn(),
 };
 
 describe('RulesCard', () => {

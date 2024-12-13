@@ -62,7 +62,7 @@ const names: Record<string, string> = {
     defaultMessage: 'Reporting',
   }),
   [SEARCH_CATEGORY]: i18n.translate('management.settings.categoryNames.searchLabel', {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }),
   [SECURITY_SOLUTION_CATEGORY]: i18n.translate(
     'management.settings.categoryNames.securitySolutionLabel',

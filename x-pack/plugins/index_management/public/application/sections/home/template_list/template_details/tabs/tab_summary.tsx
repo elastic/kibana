@@ -63,7 +63,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const { history } = useAppContext();
+  const { history, core } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
 
   return (
@@ -171,7 +171,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   {ilmPolicy?.name && ilmPolicyLink ? (
-                    <EuiLink href={ilmPolicyLink}>{ilmPolicy!.name}</EuiLink>
+                    <EuiLink onClick={() => core.application.navigateToUrl(ilmPolicyLink)}>
+                      {ilmPolicy!.name}
+                    </EuiLink>
                   ) : (
                     ilmPolicy?.name || i18nTexts.none
                   )}
@@ -224,15 +226,19 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             )}
 
             {/* Index mode */}
-            <EuiDescriptionListTitle>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
-                defaultMessage="Index mode"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              {indexModeLabels[indexMode]}
-            </EuiDescriptionListDescription>
+            {indexMode && (
+              <>
+                <EuiDescriptionListTitle>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.templateDetails.stepReview.summaryTab.indexModeLabel"
+                    defaultMessage="Index mode"
+                  />
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {indexModeLabels[indexMode]}
+                </EuiDescriptionListDescription>
+              </>
+            )}
 
             {/* Allow auto create */}
             {isLegacy !== true &&

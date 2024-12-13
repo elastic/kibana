@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { allowedExperimentalValues } from '../../common';
 import { KubernetesContainer } from './pages';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
@@ -24,7 +25,7 @@ export const KubernetesRoutes = () => (
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: KUBERNETES_PATH,
+    path: allowedExperimentalValues.kubernetesEnabled ? KUBERNETES_PATH : [],
     component: KubernetesRoutes,
   },
 ];

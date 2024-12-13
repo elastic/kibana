@@ -9,6 +9,9 @@ import fetch from 'node-fetch';
 import * as fleetServerService from '../../services/fleet_server_host';
 
 import { postHealthCheckHandler } from '.';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
+
+const postHealthCheckHandlerWithErrorHandler = withDefaultErrorHandler(postHealthCheckHandler);
 
 jest.mock('node-fetch');
 
@@ -47,7 +50,7 @@ describe('Fleet server health_check handler', () => {
       host_urls: [],
     } as any);
 
-    const res = await postHealthCheckHandler(
+    const res = await postHealthCheckHandlerWithErrorHandler(
       mockContext,
       { body: { id: 'default-fleet-server' } } as any,
       mockResponse as any
@@ -62,7 +65,7 @@ describe('Fleet server health_check handler', () => {
   });
 
   it('should return a bad request error if body contains deprecated parameter `host`', async () => {
-    const res = await postHealthCheckHandler(
+    const res = await postHealthCheckHandlerWithErrorHandler(
       mockContext,
       { body: { host: 'https://localhost:8220' } } as any,
       mockResponse as any
@@ -96,7 +99,7 @@ describe('Fleet server health_check handler', () => {
       ok: true,
     } as any);
 
-    const res = await postHealthCheckHandler(
+    const res = await postHealthCheckHandlerWithErrorHandler(
       mockContext,
       { body: { id: 'default-fleet-server' } } as any,
       mockResponse as any
@@ -118,7 +121,7 @@ describe('Fleet server health_check handler', () => {
       .spyOn(fleetServerService, 'getFleetServerHost')
       .mockRejectedValue({ output: { statusCode: 404 }, isBoom: true });
 
-    const res = await postHealthCheckHandler(
+    const res = await postHealthCheckHandlerWithErrorHandler(
       mockContext,
       { body: { id: 'non-existent' } } as any,
       mockResponse as any
@@ -141,7 +144,7 @@ describe('Fleet server health_check handler', () => {
     } as any);
     mockedFetch.mockRejectedValue({ message: 'user aborted', name: 'AbortError' });
 
-    const res = await postHealthCheckHandler(
+    const res = await postHealthCheckHandlerWithErrorHandler(
       mockContext,
       { body: { id: 'default-fleet-server' } } as any,
       mockResponse as any

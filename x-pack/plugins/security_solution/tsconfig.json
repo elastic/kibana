@@ -205,8 +205,6 @@
     "@kbn/core-theme-browser",
     "@kbn/integration-assistant-plugin",
     "@kbn/avc-banner",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/config",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
@@ -222,7 +220,6 @@
     "@kbn/entities-schema",
     "@kbn/inference-plugin",
     "@kbn/core-saved-objects-server-mocks",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
     "@kbn/core-user-profile-browser",
@@ -231,6 +228,8 @@
     "@kbn/core-user-profile-common",
     "@kbn/langchain",
     "@kbn/react-hooks",
-    "@kbn/index-adapter"
+    "@kbn/index-adapter",
+    "@kbn/core-http-server-utils",
+    "@kbn/llm-tasks-plugin"
   ]
 }

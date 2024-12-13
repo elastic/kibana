@@ -23,8 +23,10 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
     .post({
       path: SHARED_EXCEPTION_LIST_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

@@ -7,50 +7,108 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep } from 'lodash';
-import React, { useRef, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { combineLatest, debounceTime } from 'rxjs';
 
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
-  EuiProvider,
   EuiSpacer,
 } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { GridLayout, GridLayoutData, isLayoutEqual, type GridLayoutApi } from '@kbn/grid-layout';
+import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { getPanelId } from './get_panel_id';
 import {
-  clearSerializedGridLayout,
-  getSerializedGridLayout,
+  clearSerializedDashboardState,
+  getSerializedDashboardState,
   setSerializedGridLayout,
 } from './serialized_grid_layout';
+import { MockSerializedDashboardState } from './types';
+import { useMockDashboardApi } from './use_mock_dashboard_api';
+import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
-const DEFAULT_PANEL_HEIGHT = 15;
-const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
 
-export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
+export const GridExample = ({
+  coreStart,
+  uiActions,
+}: {
+  coreStart: CoreStart;
+  uiActions: UiActionsStart;
+}) => {
+  const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
+    dashboardInputToGridLayout(savedState.current)
+  );
 
-  const [layoutKey, setLayoutKey] = useState<string>(uuidv4());
-  const [gridLayoutApi, setGridLayoutApi] = useState<GridLayoutApi | null>();
-  const savedLayout = useRef<GridLayoutData>(getSerializedGridLayout());
-  const currentLayout = useRef<GridLayoutData>(savedLayout.current);
+  const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
+  const [viewMode, expandedPanelId] = useBatchedPublishingSubjects(
+    mockDashboardApi.viewMode,
+    mockDashboardApi.expandedPanelId
+  );
+
+  useEffect(() => {
+    combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
+      .pipe(debounceTime(0)) // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
+      .subscribe(([panels, rows]) => {
+        const hasChanges = !(
+          deepEqual(
+            Object.values(panels).map(({ gridData }) => ({ row: 0, ...gridData })),
+            Object.values(savedState.current.panels).map(({ gridData }) => ({
+              row: 0, // if row is undefined, then default to 0
+              ...gridData,
+            }))
+          ) && deepEqual(rows, savedState.current.rows)
+        );
+        setHasUnsavedChanges(hasChanges);
+        setCurrentLayout(dashboardInputToGridLayout({ panels, rows }));
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const renderPanelContents = useCallback(
+    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
+      const currentPanels = mockDashboardApi.panels$.getValue();
+
+      return (
+        <ReactEmbeddableRenderer
+          key={id}
+          maybeId={id}
+          type={currentPanels[id].type}
+          getParentApi={() => mockDashboardApi}
+          panelProps={{
+            showBadges: true,
+            showBorder: true,
+            showNotifications: true,
+            showShadow: false,
+            setDragHandles,
+          }}
+        />
+      );
+    },
+    [mockDashboardApi]
+  );
 
   return (
-    <EuiProvider>
+    <KibanaRenderContextProvider {...coreStart}>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header
           iconType={'dashboardApp'}
@@ -58,7 +116,12 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             defaultMessage: 'Grid Layout Example',
           })}
         />
-        <EuiPageTemplate.Section color="subdued">
+        <EuiPageTemplate.Section
+          color="subdued"
+          contentProps={{
+            css: { flexGrow: 1 },
+          }}
+        >
           <EuiCallOut
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {
               defaultMessage:
@@ -69,7 +132,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               color="accent"
               size="s"
               onClick={() => {
-                clearSerializedGridLayout();
+                clearSerializedDashboardState();
                 window.location.reload();
               }}
             >
@@ -81,26 +144,38 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={async () => {
-                  const panelId = await getPanelId({
-                    coreStart,
-                    suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
-                  });
-                  if (panelId)
-                    gridLayoutApi?.addPanel(panelId, {
-                      width: DEFAULT_PANEL_WIDTH,
-                      height: DEFAULT_PANEL_HEIGHT,
-                    });
-                }}
-              >
-                {i18n.translate('examples.gridExample.addPanelButton', {
-                  defaultMessage: 'Add a panel',
-                })}
-              </EuiButton>
+              <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={i18n.translate('examples.gridExample.layoutOptionsLegend', {
+                      defaultMessage: 'Layout options',
+                    })}
+                    options={[
+                      {
+                        id: 'view',
+                        label: i18n.translate('examples.gridExample.viewOption', {
+                          defaultMessage: 'View',
+                        }),
+                        toolTipContent:
+                          'The layout adjusts when the window is resized. Panel interactivity, such as moving and resizing within the grid, is disabled.',
+                      },
+                      {
+                        id: 'edit',
+                        label: i18n.translate('examples.gridExample.editOption', {
+                          defaultMessage: 'Edit',
+                        }),
+                        toolTipContent: 'The layout does not adjust when the window is resized.',
+                      },
+                    ]}
+                    idSelected={viewMode}
+                    onChange={(id) => {
+                      mockDashboardApi.viewMode.next(id);
+                    }}
+                  />
+                </EuiFlexItem>
                 {hasUnsavedChanges && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="warning">
@@ -113,9 +188,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={() => {
-                      currentLayout.current = cloneDeep(savedLayout.current);
-                      setHasUnsavedChanges(false);
-                      setLayoutKey(uuidv4()); // force remount of grid
+                      const { panels, rows } = savedState.current;
+                      mockDashboardApi.panels$.next(panels);
+                      mockDashboardApi.rows$.next(rows);
                     }}
                   >
                     {i18n.translate('examples.gridExample.resetLayoutButton', {
@@ -126,12 +201,13 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={() => {
-                      if (gridLayoutApi) {
-                        const layoutToSave = gridLayoutApi.serializeState();
-                        setSerializedGridLayout(layoutToSave);
-                        savedLayout.current = layoutToSave;
-                        setHasUnsavedChanges(false);
-                      }
+                      const newSavedState = {
+                        panels: mockDashboardApi.panels$.getValue(),
+                        rows: mockDashboardApi.rows$.getValue(),
+                      };
+                      savedState.current = newSavedState;
+                      setHasUnsavedChanges(false);
+                      setSerializedGridLayout(newSavedState);
                     }}
                   >
                     {i18n.translate('examples.gridExample.saveLayoutButton', {
@@ -144,63 +220,35 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
-            key={layoutKey}
+            accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
+            expandedPanelId={expandedPanelId}
+            layout={currentLayout}
+            gridSettings={{
+              gutterSize: DASHBOARD_MARGIN_SIZE,
+              rowHeight: DASHBOARD_GRID_HEIGHT,
+              columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+            }}
+            renderPanelContents={renderPanelContents}
             onLayoutChange={(newLayout) => {
-              currentLayout.current = cloneDeep(newLayout);
-              setHasUnsavedChanges(!isLayoutEqual(savedLayout.current, newLayout));
-            }}
-            ref={setGridLayoutApi}
-            renderPanelContents={(id) => {
-              return (
-                <>
-                  <div style={{ padding: 8 }}>{id}</div>
-                  <EuiButtonEmpty
-                    onClick={() => {
-                      gridLayoutApi?.removePanel(id);
-                    }}
-                  >
-                    {i18n.translate('examples.gridExample.deletePanelButton', {
-                      defaultMessage: 'Delete panel',
-                    })}
-                  </EuiButtonEmpty>
-                  <EuiButtonEmpty
-                    onClick={async () => {
-                      const newPanelId = await getPanelId({
-                        coreStart,
-                        suggestion: `panel${(gridLayoutApi?.getPanelCount() ?? 0) + 1}`,
-                      });
-                      if (newPanelId) gridLayoutApi?.replacePanel(id, newPanelId);
-                    }}
-                  >
-                    {i18n.translate('examples.gridExample.replacePanelButton', {
-                      defaultMessage: 'Replace panel',
-                    })}
-                  </EuiButtonEmpty>
-                </>
+              const { panels, rows } = gridLayoutToDashboardPanelMap(
+                mockDashboardApi.panels$.getValue(),
+                newLayout
               );
-            }}
-            getCreationOptions={() => {
-              return {
-                gridSettings: {
-                  gutterSize: DASHBOARD_MARGIN_SIZE,
-                  rowHeight: DASHBOARD_GRID_HEIGHT,
-                  columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-                },
-                initialLayout: cloneDeep(currentLayout.current),
-              };
+              mockDashboardApi.panels$.next(panels);
+              mockDashboardApi.rows$.next(rows);
             }}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
-    </EuiProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
 export const renderGridExampleApp = (
   element: AppMountParameters['element'],
-  coreStart: CoreStart
+  deps: { uiActions: UiActionsStart; coreStart: CoreStart }
 ) => {
-  ReactDOM.render(<GridExample coreStart={coreStart} />, element);
+  ReactDOM.render(<GridExample {...deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

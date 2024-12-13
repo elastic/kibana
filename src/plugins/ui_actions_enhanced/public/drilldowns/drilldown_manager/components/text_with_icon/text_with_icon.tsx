@@ -47,7 +47,7 @@ export const TextWithIcon: FC<PropsWithChildren<TextWithIconProps>> = ({
         </EuiFlexItem>
       )}
       {!!children && (
-        <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
+        <EuiFlexItem grow={false} css={{ flexWrap: 'wrap' }}>
           {tooltip ? (
             <EuiToolTip content={tooltip}>
               <EuiTextColor color={color}>{children}</EuiTextColor>

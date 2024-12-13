@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import type { UseAlertAssigneesActionsProps } from './use_alert_assignees_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { AlertTableContextMenuItem } from '../types';
-import { render } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';

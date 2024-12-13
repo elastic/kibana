@@ -14,10 +14,8 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from './test_ids';
-import { ThemeProvider } from '@emotion/react';
+import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { ExpandablePanel } from './expandable_panel';
-
-const mockTheme = { eui: { euiColorMediumShade: '#ece' } };
 
 const TEST_ID = 'test-id';
 const defaultProps = {
@@ -33,7 +31,7 @@ describe('<ExpandablePanel />', () => {
   describe('panel is not expandable by default', () => {
     it('should render non-expandable panel by default', () => {
       const { getByTestId, queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...defaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -54,7 +52,7 @@ describe('<ExpandablePanel />', () => {
         },
       };
       const { getByTestId, queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...props}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -70,7 +68,7 @@ describe('<ExpandablePanel />', () => {
 
     it('should only render left section of panel header when headerContent is not passed', () => {
       const { getByTestId, queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...defaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -88,7 +86,7 @@ describe('<ExpandablePanel />', () => {
         header: { ...defaultProps.header, headerContent: <>{'test header content'}</> },
       };
       const { getByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...props}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -105,7 +103,7 @@ describe('<ExpandablePanel />', () => {
 
     it('should not render content when content is null', () => {
       const { queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...defaultProps} />
         </ThemeProvider>
       );
@@ -123,7 +121,7 @@ describe('<ExpandablePanel />', () => {
 
     it('should render panel with toggle and collapsed by default', () => {
       const { getByTestId, queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...expandableDefaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -135,7 +133,7 @@ describe('<ExpandablePanel />', () => {
 
     it('click toggle button should expand the panel', () => {
       const { getByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...expandableDefaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -152,7 +150,7 @@ describe('<ExpandablePanel />', () => {
 
     it('should not render toggle or content when content is null', () => {
       const { queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...expandableDefaultProps} />
         </ThemeProvider>
       );
@@ -169,7 +167,7 @@ describe('<ExpandablePanel />', () => {
 
     it('should render header and content', () => {
       const { getByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...expandedDefaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -184,7 +182,7 @@ describe('<ExpandablePanel />', () => {
 
     it('click toggle button should collapse the panel', () => {
       const { getByTestId, queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...expandedDefaultProps}>{children}</ExpandablePanel>
         </ThemeProvider>
       );
@@ -200,7 +198,7 @@ describe('<ExpandablePanel />', () => {
 
     it('should not render content when content is null', () => {
       const { queryByTestId } = render(
-        <ThemeProvider theme={mockTheme}>
+        <ThemeProvider>
           <ExpandablePanel {...expandedDefaultProps} />
         </ThemeProvider>
       );

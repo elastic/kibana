@@ -16,7 +16,6 @@ import type {
 } from '../../types/rest_spec';
 import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
-import { defaultFleetErrorHandler } from '../../errors';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
 
 export const postNewAgentActionHandlerBuilder = function (
@@ -27,30 +26,26 @@ export const postNewAgentActionHandlerBuilder = function (
   TypeOf<typeof PostNewAgentActionRequestSchema.body>
 > {
   return async (context, request, response) => {
-    try {
-      const core = await context.core;
-      const esClient = core.elasticsearch.client.asInternalUser;
-      const soClient = core.savedObjects.client;
+    const core = await context.core;
+    const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = core.savedObjects.client;
 
-      const agent = await actionsService.getAgent(esClient, soClient, request.params.agentId);
+    const agent = await actionsService.getAgent(esClient, soClient, request.params.agentId);
 
-      const newAgentAction = request.body.action;
+    const newAgentAction = request.body.action;
 
-      const savedAgentAction = await actionsService.createAgentAction(esClient, {
-        created_at: new Date().toISOString(),
-        ...newAgentAction,
-        agents: [agent.id],
-        namespaces: [getCurrentNamespace(soClient)],
-      });
+    const savedAgentAction = await actionsService.createAgentAction(esClient, {
+      created_at: new Date().toISOString(),
+      ...newAgentAction,
+      agents: [agent.id],
+      namespaces: [getCurrentNamespace(soClient)],
+    });
 
-      const body: PostNewAgentActionResponse = {
-        item: savedAgentAction,
-      };
+    const body: PostNewAgentActionResponse = {
+      item: savedAgentAction,
+    };
 
-      return response.ok({ body });
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
-    }
+    return response.ok({ body });
   };
 };
 
@@ -58,24 +53,20 @@ export const postCancelActionHandlerBuilder = function (
   actionsService: ActionsService
 ): RequestHandler<TypeOf<typeof PostCancelActionRequestSchema.params>, undefined, undefined> {
   return async (context, request, response) => {
-    try {
-      const core = await context.core;
-      const esClient = core.elasticsearch.client.asInternalUser;
-      const soClient = core.savedObjects.client;
+    const core = await context.core;
+    const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = core.savedObjects.client;
 
-      const action = await actionsService.cancelAgentAction(
-        esClient,
-        soClient,
-        request.params.actionId
-      );
+    const action = await actionsService.cancelAgentAction(
+      esClient,
+      soClient,
+      request.params.actionId
+    );
 
-      const body: PostNewAgentActionResponse = {
-        item: action,
-      };
+    const body: PostNewAgentActionResponse = {
+      item: action,
+    };
 
-      return response.ok({ body });
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
-    }
+    return response.ok({ body });
   };
 };

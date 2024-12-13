@@ -27,8 +27,6 @@ import { AddMetricsCallout } from '../../add_metrics_callout';
 import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { useEntitySummary } from '../../hooks/use_entity_summary';
 import { isMetricsSignal } from '../../utils/get_data_stream_types';
-import { INTEGRATIONS } from '../../constants';
-import { useIntegrationCheck } from '../../hooks/use_integration_check';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
@@ -50,10 +48,6 @@ export const Overview = () => {
     `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
     false
   );
-  const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
-  const isKubernetesContainer = useIntegrationCheck({
-    dependsOn: INTEGRATIONS.kubernetesContainer,
-  });
 
   const metadataSummarySection = isFullPageView ? (
     <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
@@ -74,13 +68,7 @@ export const Overview = () => {
       return false;
     }
 
-    const { type } = asset;
-    const baseCondition = !isMetricsSignal(dataStreams);
-
-    const isRelevantContainer =
-      type === 'container' && (isDockerContainer || isKubernetesContainer);
-
-    return baseCondition && (type === 'host' || isRelevantContainer);
+    return !isMetricsSignal(dataStreams);
   };
 
   const showAddMetricsCallout = shouldShowCallout();

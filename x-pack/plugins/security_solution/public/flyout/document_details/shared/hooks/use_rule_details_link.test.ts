@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseRuleDetailsLinkParams } from './use_rule_details_link';
 import { useRuleDetailsLink } from './use_rule_details_link';
 
@@ -24,7 +24,7 @@ jest.mock('../../../../common/components/link_to', () => ({
 }));
 
 describe('useRuleDetailsLink', () => {
-  let hookResult: RenderHookResult<UseRuleDetailsLinkParams, string | null>;
+  let hookResult: RenderHookResult<string | null, UseRuleDetailsLinkParams>;
 
   it('should return null if the ruleId prop is null', () => {
     const initialProps: UseRuleDetailsLinkParams = {
