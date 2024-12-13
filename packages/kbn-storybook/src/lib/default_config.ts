@@ -140,6 +140,7 @@ export const defaultConfig: StorybookConfig = {
       config.cache = true;
     }
 
+    // required for react refresh
     config.target = 'web';
 
     // This will go over every component which is imported and check its import statements.

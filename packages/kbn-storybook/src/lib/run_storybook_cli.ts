@@ -49,6 +49,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
         config.outputDir = join(constants.ASSET_DIR, name);
         process.env.NODE_ENV = 'production';
       } else {
+        // required for react refresh
         process.env.NODE_ENV = 'development';
       }
 
