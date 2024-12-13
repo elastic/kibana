@@ -1570,8 +1570,6 @@ To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
 [float]
 ==== Kibana APIs
 
-
-
 [discrete]
 [[kibana-152236]]
 .Deprecated Agent reassign API PUT endpoint. (8.8)
