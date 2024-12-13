@@ -80,7 +80,7 @@ export type DiagnosticsBundle = Promise<{
 
 const getDiagnosticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.partial({
     query: t.partial({
       kuery: t.string,
