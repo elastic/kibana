@@ -8,7 +8,10 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
-import type { SubFeatureType } from '@kbn/actions-plugin/common';
+
+export enum SubFeatureType {
+  EDR = 'edr',
+}
 
 export interface ActionType {
   id: string;

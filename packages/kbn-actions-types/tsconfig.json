@@ -16,7 +16,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/licensing-plugin",
-    "@kbn/actions-plugin",
+    "@kbn/licensing-plugin"
   ]
 }

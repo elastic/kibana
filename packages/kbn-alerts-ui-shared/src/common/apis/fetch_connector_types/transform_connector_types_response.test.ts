@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SubFeatureType } from '@kbn/actions-plugin/common';
+import { SubFeatureType } from '@kbn/actions-types';
 import { transformConnectorTypesResponse } from './transform_connector_types_response';
 
 describe('transformConnectorTypesResponse', () => {
