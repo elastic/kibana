@@ -781,7 +781,6 @@ x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
-x-pack/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-presentation
@@ -991,6 +990,7 @@ x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/side_nav @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
