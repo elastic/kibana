@@ -18,7 +18,6 @@ import { interceptActionRequests, sendActionResponse } from '../../../tasks/isol
 import { login } from '../../../tasks/login';
 
 // Failing: See https://github.com/elastic/kibana/issues/203899
-// Failing: See https://github.com/elastic/kibana/issues/203899
 describe.skip('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
