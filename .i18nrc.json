@@ -11,7 +11,7 @@
     "bfetch": "src/plugins/bfetch",
     "bfetchError": "packages/kbn-bfetch-error",
     "cases": ["packages/kbn-cases-components"],
-    "cellActions": "packages/kbn-cell-actions",
+    "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/plugins/charts",
     "console": "src/platform/plugins/shared/console",
     "contentManagement": "packages/content-management",

@@ -553,7 +553,7 @@ Plugin server-side only. Plugin has three main functions:
 |Contains the enhancements to the OSS discover app.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
 |This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
 
