@@ -47,7 +47,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   async function loadSyncList(simulate: boolean = true) {
     setLoading(true);
     try {
-      const resp = await syncSavedObjects(simulate);
+      const resp = await syncSavedObjects(simulate, canSyncToAllSpaces);
       setSyncResp(resp);
 
       if (simulate === true) {
