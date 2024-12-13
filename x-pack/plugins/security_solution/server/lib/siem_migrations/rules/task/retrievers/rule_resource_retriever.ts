@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import type { QueryResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources/types';
-import { getRuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type {
   OriginalRule,
   RuleMigrationResource,
@@ -15,86 +13,91 @@ import type {
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
+export interface RuleMigrationDefinedResource extends RuleMigrationResource {
+  content: string; // ensures content exists
+}
 export type RuleMigrationResources = Partial<
-  Record<RuleMigrationResourceType, RuleMigrationResource[]>
+  Record<RuleMigrationResourceType, RuleMigrationDefinedResource[]>
 >;
-
-/* It's not a common practice to have more than 2-3 nested levels of resources.
- * This limit is just to prevent infinite recursion in case something goes wrong.
- */
-export const MAX_RECURSION_DEPTH = 30;
+interface ExistingResources {
+  macro: Record<string, RuleMigrationDefinedResource>;
+  list: Record<string, RuleMigrationDefinedResource>;
+}
 
 export class RuleResourceRetriever {
+  private existingResources?: ExistingResources;
+
   constructor(
     private readonly migrationId: string,
     private readonly dataClient: RuleMigrationsDataClient
   ) {}
 
-  public async getResources(originalRule: OriginalRule): Promise<RuleMigrationResources> {
-    const resourceIdentifier = getRuleResourceIdentifier(originalRule);
-    return this.recursiveRetriever(originalRule.query, resourceIdentifier);
+  public async initialize(): Promise<void> {
+    const batches = this.dataClient.resources.searchBatches<RuleMigrationDefinedResource>(
+      this.migrationId,
+      { filters: { hasContent: true } }
+    );
+
+    const existingRuleResources: ExistingResources = { macro: {}, list: {} };
+    let resources;
+    do {
+      resources = await batches.next();
+      resources.forEach((resource) => {
+        existingRuleResources[resource.type][resource.name] = resource;
+      });
+    } while (resources.length > 0);
+
+    this.existingResources = existingRuleResources;
   }
 
-  private recursiveRetriever = async (
-    query: string,
-    resourceIdentifier: QueryResourceIdentifier,
-    it = 0
-  ): Promise<RuleMigrationResources> => {
-    if (it >= MAX_RECURSION_DEPTH) {
+  public async getResources(originalRule: OriginalRule): Promise<RuleMigrationResources> {
+    const existingResources = this.existingResources;
+    if (!existingResources) {
+      throw new Error('initialize must be called before calling getResources');
+    }
+
+    const resourceIdentifier = new ResourceIdentifier(originalRule.vendor);
+    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginalRule(originalRule);
+
+    const macrosFound = new Map<string, RuleMigrationDefinedResource>();
+    const listsFound = new Map<string, RuleMigrationDefinedResource>();
+    resourcesIdentifiedFromRule.forEach((resource) => {
+      const existingResource = existingResources[resource.type][resource.name];
+      if (existingResource) {
+        if (resource.type === 'macro') {
+          macrosFound.set(resource.name, existingResource);
+        } else if (resource.type === 'list') {
+          listsFound.set(resource.name, existingResource);
+        }
+      }
+    });
+
+    const resourcesFound = [...macrosFound.values(), ...listsFound.values()];
+    if (!resourcesFound.length) {
       return {};
     }
 
-    const identifiedResources = resourceIdentifier(query);
-    const resources: RuleMigrationResources = {};
+    let nestedResourcesFound = resourcesFound;
+    do {
+      const nestedResourcesIdentified = resourceIdentifier.fromResources(nestedResourcesFound);
 
-    const listNames = identifiedResources.list;
-    if (listNames.length > 0) {
-      const listsWithContent = await this.dataClient.resources
-        .get(this.migrationId, 'list', listNames)
-        .then(withContent);
-
-      if (listsWithContent.length > 0) {
-        resources.list = listsWithContent;
-      }
-    }
-
-    const macroNames = identifiedResources.macro;
-    if (macroNames.length > 0) {
-      const macrosWithContent = await this.dataClient.resources
-        .get(this.migrationId, 'macro', macroNames)
-        .then(withContent);
-
-      if (macrosWithContent.length > 0) {
-        // retrieve nested resources inside macros
-        const macrosNestedResources = await Promise.all(
-          macrosWithContent.map(({ content }) =>
-            this.recursiveRetriever(content, resourceIdentifier, it + 1)
-          )
-        );
-
-        // Process lists inside macros
-        const macrosNestedLists = macrosNestedResources.flatMap(
-          (macroNestedResources) => macroNestedResources.list ?? []
-        );
-        if (macrosNestedLists.length > 0) {
-          resources.list = (resources.list ?? []).concat(macrosNestedLists);
+      nestedResourcesFound = [];
+      nestedResourcesIdentified.forEach((resource) => {
+        const existingResource = existingResources[resource.type][resource.name];
+        if (existingResource) {
+          nestedResourcesFound.push(existingResource);
+          if (resource.type === 'macro') {
+            macrosFound.set(resource.name, existingResource);
+          } else if (resource.type === 'list') {
+            listsFound.set(resource.name, existingResource);
+          }
         }
+      });
+    } while (nestedResourcesFound.length > 0);
 
-        // Process macros inside macros
-        const macrosNestedMacros = macrosNestedResources.flatMap(
-          (macroNestedResources) => macroNestedResources.macro ?? []
-        );
-
-        if (macrosNestedMacros.length > 0) {
-          macrosWithContent.push(...macrosNestedMacros);
-        }
-        resources.macro = macrosWithContent;
-      }
-    }
-    return resources;
-  };
+    return {
+      ...(macrosFound.size > 0 ? { macro: Array.from(macrosFound.values()) } : {}),
+      ...(listsFound.size > 0 ? { list: Array.from(listsFound.values()) } : {}),
+    };
+  }
 }
-
-const withContent = (resources: RuleMigrationResource[]) => {
-  return resources.filter((resource) => !isEmpty(resource.content));
-};

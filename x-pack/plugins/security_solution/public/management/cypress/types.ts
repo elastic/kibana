@@ -81,3 +81,8 @@ export interface LogItTaskOptions {
   level: keyof Pick<ToolingLog, 'info' | 'debug' | 'verbose'>;
   data: any;
 }
+
+export interface CaptureHostVmAgentDiagnosticsOptions {
+  hostname: string;
+  fileNamePrefix?: string;
+}
