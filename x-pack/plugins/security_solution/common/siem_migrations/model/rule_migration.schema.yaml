@@ -83,11 +83,9 @@ components:
         prebuilt_rule_id:
           description: The Elastic prebuilt rule id matched.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-        integration_ids:
-          type: array
-          items:
-            type: string
-          description: The Elastic integration IDs related to the rule.
+        integration_id:
+          type: string
+          description: The Elastic integration ID found to be most relevant to the splunk rule.
         id:
           description: The Elastic rule id installed as a result.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
@@ -275,6 +273,25 @@ components:
       description: The comments for the migration including a summary from the LLM in markdown.
       items:
         type: string
+
+    UpdateRuleMigrationData:
+      type: object
+      description: The rule migration data object for rule update operation
+      required:
+        - id
+      properties:
+        id:
+          description: The rule migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        elastic_rule:
+          description: The migrated elastic rule attributes to update.
+          $ref: '#/components/schemas/ElasticRulePartial'
+        translation_result:
+          description: The rule translation result.
+          $ref: '#/components/schemas/RuleMigrationTranslationResult'
+        comments:
+          description: The comments for the migration including a summary from the LLM in markdown.
+          $ref: '#/components/schemas/RuleMigrationComments'
 
     ## Rule migration resources
 

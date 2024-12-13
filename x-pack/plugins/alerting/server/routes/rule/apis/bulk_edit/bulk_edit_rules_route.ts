@@ -22,6 +22,7 @@ import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformOperationsV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -33,6 +34,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
   router.post(
     {
       path,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         body: bulkEditRulesRequestBodySchemaV1,
