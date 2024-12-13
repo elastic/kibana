@@ -1,2 +1,2 @@
 .playwright
-.env.*
+.env*
