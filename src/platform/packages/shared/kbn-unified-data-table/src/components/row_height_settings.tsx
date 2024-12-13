@@ -31,7 +31,6 @@ export interface RowHeightSettingsProps {
   onChangeRowHeightLines: (newRowHeightLines: number) => void;
   'data-test-subj'?: string;
   lineCountInput: number;
-  setLineCountInput: (value: number) => void;
 }
 
 const idPrefix = htmlIdGenerator()();
@@ -45,8 +44,9 @@ export function RowHeightSettings({
   maxRowHeight,
   ['data-test-subj']: dataTestSubj,
   lineCountInput,
-  setLineCountInput,
 }: RowHeightSettingsProps) {
+  console.log({ label, rowHeight, rowHeightLines, lineCountInput });
+
   const rowHeightModeOptions = [
     {
       id: `${idPrefix}${RowHeightMode.auto}`,
@@ -86,7 +86,6 @@ export function RowHeightSettings({
             value={lineCountInput}
             onChange={(e) => {
               const lineCount = Number(e.currentTarget.value);
-              setLineCountInput(lineCount);
               onChangeRowHeightLines(lineCount);
             }}
             min={1}
