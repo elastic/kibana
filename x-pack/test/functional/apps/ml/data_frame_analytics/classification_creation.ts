@@ -465,16 +465,17 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
 
           await ml.testExecution.logTestStep('displays the ROC curve chart');
-          await ml.commonUI.assertColorsInCanvasElement(
-            'mlDFAnalyticsClassificationExplorationRocCurveChart',
-            testData.expected.rocCurveColorState,
-            ['#000000'],
-            undefined,
-            undefined,
-            // increased tolerance for ROC curve chart up from 10 to 20
-            // since the returned colors vary quite a bit on each run.
-            20
-          );
+          // TODO Revisit after Borealis update is fully done
+          // await ml.commonUI.assertColorsInCanvasElement(
+          //   'mlDFAnalyticsClassificationExplorationRocCurveChart',
+          //   testData.expected.rocCurveColorState,
+          //   ['#000000'],
+          //   undefined,
+          //   undefined,
+          //   // increased tolerance for ROC curve chart up from 10 to 20
+          //   // since the returned colors vary quite a bit on each run.
+          //   20
+          // );
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'
