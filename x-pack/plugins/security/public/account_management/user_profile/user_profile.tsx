@@ -1045,7 +1045,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
           data-test-subj="saveProfileChangesButton"
           isLoading={formik.isSubmitting}
           isDisabled={formik.submitCount > 0 && !formik.isValid}
-          color="success"
+          color="primary"
           iconType="save"
           fill
         >
