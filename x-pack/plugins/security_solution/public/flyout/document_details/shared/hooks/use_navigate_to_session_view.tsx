@@ -42,7 +42,7 @@ export interface UseNavigateToSessionViewResult {
 }
 
 /**
- * Hook that returns the a callback to navigate to session view in the flyout
+ * Hook that returns a callback to navigate to session view in the flyout
  */
 export const useNavigateToSessionView = ({
   isFlyoutOpen,
