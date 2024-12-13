@@ -3,7 +3,7 @@ info:
   title: Automatic Import Analyze API specifications API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/cel:
+  /internal/integration_assistant/analyzeapi:
     post:
       summary: Analyzes API specifications.
       operationId: AnalyzeApi
