@@ -43,7 +43,7 @@ export const extractInlineKqlQuery = (
 ): InlineKqlQuery => {
   return {
     type: KqlQueryType.inline_query,
-    query: query ?? '',
+    query: query?.trim() ?? '',
     language: language ?? 'kuery',
     filters: filters ?? [],
   };
@@ -55,7 +55,7 @@ export const extractRuleEqlQuery = (
   filters: RuleFilterArray | undefined
 ): RuleEqlQuery => {
   return {
-    query,
+    query: query.trim(),,
     language,
     filters: filters ?? [],
   };
@@ -66,7 +66,7 @@ export const extractRuleEsqlQuery = (
   language: EsqlQueryLanguage
 ): RuleEsqlQuery => {
   return {
-    query,
+    query: query.trim(),
     language,
   };
 };
