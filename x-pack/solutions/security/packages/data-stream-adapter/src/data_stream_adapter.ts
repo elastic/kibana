@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IndexAdapter, SetIndexTemplateParams, type InstallParams } from '@kbn/index-adapter';
+import type { SetIndexTemplateParams } from '@kbn/index-adapter';
+import { IndexAdapter, type InstallParams } from '@kbn/index-adapter';
 import { createOrUpdateDataStream } from './create_or_update_data_stream';
 
 export class DataStreamAdapter extends IndexAdapter {
