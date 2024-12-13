@@ -123,7 +123,7 @@ function blocked(fn: any) {
 }
 
 describe.only('Attempt to reproduce test flakiness', () => {
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 5000; i++) {
     describe(`useFetchAgentsData - ${i + 1}`, () => {
       let interval: any;
       beforeAll(() => {
