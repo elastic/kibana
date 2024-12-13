@@ -224,7 +224,7 @@ export const SAMPLE_CEL_PROGRAMS = [
     ).with(auth_header).do_request().as(resp, resp.StatusCode != 200 ?
       {
         "id": item.id,
-        "events": [{
+        "events": {
           "error": {
             "code": string(resp.StatusCode),
             "id": string(resp.Status),
@@ -234,7 +234,7 @@ export const SAMPLE_CEL_PROGRAMS = [
               :
                 string(resp.Status) + ' (' + string(resp.StatusCode) + ')'
             ),
-        }],
+        },
         "want_more": false,
       }
     :

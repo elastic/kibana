@@ -10,7 +10,11 @@ import { CelInputState } from '../../types';
 import { EX_ANSWER_CONFIG } from './constants';
 import { CEL_CONFIG_DETAILS_PROMPT } from './prompts';
 import { CelInputNodeParams, CelInputStateDetails } from './types';
-import { getRedactVariables, getStateVarsAndDefaultValues } from './util';
+import {
+  getRedactVariables,
+  getStateVarsAndDefaultValues,
+  getStateVarsConfigDetails,
+} from './util';
 
 export async function handleGetStateDetails({
   state,
@@ -26,10 +30,12 @@ export async function handleGetStateDetails({
   })) as CelInputStateDetails[];
 
   const stateSettings = getStateVarsAndDefaultValues(stateDetails);
+  const configFields = getStateVarsConfigDetails(stateDetails);
   const redactVars = getRedactVariables(stateDetails);
 
   return {
     stateSettings,
+    configFields,
     redactVars,
     lastExecutedChain: 'getStateDetails',
   };

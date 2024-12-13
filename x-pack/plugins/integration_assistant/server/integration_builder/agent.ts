@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import nunjucks from 'nunjucks';
 import { join as joinPath } from 'path';
-import type { InputType } from '../../common';
+import type { CelInput, InputType } from '../../common';
 import { createSync, ensureDirSync, readSync } from '../util';
 
-export function createAgentInput(specificDataStreamDir: string, inputTypes: InputType[]): void {
+export function createAgentInput(
+  specificDataStreamDir: string,
+  inputTypes: InputType[],
+  celInput: CelInput | undefined
+): void {
   const agentDir = joinPath(specificDataStreamDir, 'agent', 'stream');
   const agentTemplatesDir = joinPath(__dirname, '../templates/agent');
   ensureDirSync(agentDir);
@@ -19,15 +24,26 @@ export function createAgentInput(specificDataStreamDir: string, inputTypes: Inpu
   const commonFile = readSync(commonFilePath);
 
   for (const inputType of inputTypes) {
-    const inputTypeFilePath = joinPath(
-      agentTemplatesDir,
-      `${inputType.replaceAll('-', '_')}.yml.hbs`
-    );
-    const inputTypeFile = readSync(inputTypeFilePath);
-
-    const combinedContents = `${inputTypeFile}\n${commonFile}`;
-
     const destinationFilePath = joinPath(agentDir, `${inputType}.yml.hbs`);
-    createSync(destinationFilePath, combinedContents);
+    if (inputType === 'cel' && celInput != null) {
+      const mappedValues = {
+        auth: celInput.authType,
+        needsAuthBlock: celInput.needsAuthConfigBlock,
+        configFields: Object.keys(celInput.configFields),
+      } as object;
+      const generatedCelTemplate = nunjucks.render('cel_generated.yml.hbs.njk', mappedValues);
+
+      createSync(destinationFilePath, generatedCelTemplate);
+    } else {
+      const inputTypeFilePath = joinPath(
+        agentTemplatesDir,
+        `${inputType.replaceAll('-', '_')}.yml.hbs`
+      );
+      const inputTypeFile = readSync(inputTypeFilePath);
+
+      const combinedContents = `${inputTypeFile}\n${commonFile}`;
+
+      createSync(destinationFilePath, combinedContents);
+    }
   }
 }

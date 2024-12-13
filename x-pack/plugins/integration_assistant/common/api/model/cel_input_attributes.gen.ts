@@ -52,7 +52,9 @@ export const CelDetails = z.object({
  */
 export type GeneratedCelDetails = z.infer<typeof GeneratedCelDetails>;
 export const GeneratedCelDetails = z.object({
+  configFields: z.object({}).catchall(z.unknown()),
   program: z.string(),
+  needsAuthConfigBlock: z.boolean(),
   stateSettings: z.object({}).catchall(z.unknown()),
   redactVars: z.array(z.string()),
 });
@@ -63,6 +65,8 @@ export const GeneratedCelDetails = z.object({
 export type CelInput = z.infer<typeof CelInput>;
 export const CelInput = z.object({
   authType: CelAuthType,
+  configFields: z.object({}).catchall(z.unknown()),
+  needsAuthConfigBlock: z.boolean(),
   program: z.string(),
   stateSettings: z.object({}).catchall(z.unknown()),
   redactVars: z.array(z.string()),

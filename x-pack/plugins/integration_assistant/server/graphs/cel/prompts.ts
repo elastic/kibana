@@ -66,10 +66,11 @@ Each of the following criteria must be addressed in final configuration output:
 - Always use the casing specified by the API spec when building the API path and query parameters.
 - There must not be configuration for authentication or authorization.
 - There must be configuration of any required headers.
-- Usage of paging tokens from the state as query parameters must be optional like \`"token": state.?cursor.token.optMap(v, [v]),\`.
+- Any usage of state variables must be optional like \`"token": state.?cursor.token.optMap(v, [v]),\`.
 - There must be configuration for parsing the events returned from the API mapped to the 'message' field and encoded in JSON.
 - There must be configuration in the API response handling for 'want_more' based on the paging token.
 - There must be configuration for error handling. This includes setting the 'want_more' flag to false.
+- Be sure to only return a single object as the error, never an array of objects.
 - All state variables must use snake casing.
 - The page tokens must be updated the corresponding state variable(s).
 
@@ -152,17 +153,21 @@ Here is some context for you to reference for your task, read it carefully as yo
   ],
   [
     'human',
-    `For the identified state variables {state_variables}, iterate through each variable (name) and identify a default value (default) and a boolean representing if it should be redacted(redact). Return all of this information in a JSON object like the sample below. 
+    `For the identified state variables {state_variables}, iterate through each variable (name) and identify a boolean representing if it should be user configurable (configurable), a helpful description (description), type (type), default value (default), and a boolean representing if it should be redacted (redact). Return all of this information in a JSON object like the sample below. 
 
 You ALWAYS follow these guidelines when writing your response:
 
  <guidelines>
- - Page sizing default should always be non-zero. 
- - Paging information, usernames and client ids should never be redacted.
- - Redact anything that could possibly contain PII, tokens or keys, or expose any sensitive information in the logs.
- - Always use the most broad settings for parameters that filter down event types in the responses.
- - Always include defaults for date fields in the specified date format. 
- - You must use the variable names in parentheses when building the return object. Each item in the response must contain the fields: name, redact and default.
+ - Page sizing default should always be non-zero.
+ - Most things should be configurable, unless otherwise stated in these guidelines.
+ - OAuth2, basic, and digest auth details are always configurable.
+ - Always set a default to use the most broad settings for parameters that filter down event types in the responses.
+ - Most tokens should not be configurable, unless they are API tokens.
+ - A variable cannot need redaction if it is not user configurable.
+ - Paging information, cursor information, usernames and client ids should never be redacted.
+ - Redact anything that could possibly contain PII, API tokens or keys, or expose any sensitive information in the logs.
+ - The types should be consistent with the Elastic integration configuration types. For example, 'text' for strings, 'integer' for whole numbers, and 'password' for API keys.
+ - You must use the variable names in parentheses when building the return object. Each item in the response must contain the fields: name, configurable, description, type, redact and default.
  - Do not respond with anything except the JSON object enclosed with 3 backticks (\`), see example response below.
  </guidelines>
 Example response format:
@@ -201,6 +206,7 @@ Here is some context for you to reference your task, review it carefully as you 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
 - Do not update any other details of the program besides authentication on the GET request headers.
+- You must use the state variable name \`api_key\` for representing the authentication key value. 
 - You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
 - You must use 2 spaces for tab size.
 - The final program must not be enclosed in parentheses.
@@ -241,6 +247,8 @@ Each of the following criteria must be addressed in final configuration output:
     
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
+- You must use the state variable name \`oauth_id\` for representing the OAUth2 client id.
+- You must use the state variable name \`oauth_secret\` for representing the OAUth2 client secret. 
 - You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
 - You must use 2 spaces for tab size.
 - The final program must not be enclosed in parentheses.
@@ -273,6 +281,8 @@ Here is some context for you to reference your task, review it carefully as you 
     
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>
+- You must use the state variable name \`username\` for representing the auth username.
+- You must use the state variable name \`password\` for representing the auth password. 
 - Do not update any other details of the program besides authentication on the GET request headers. 
 - You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
 - You must use 2 spaces for tab size.

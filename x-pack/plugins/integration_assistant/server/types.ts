@@ -87,6 +87,7 @@ export interface CelInputState {
   hasProgramHeaders: boolean | undefined;
   stateVarNames: string[];
   stateSettings: object;
+  configFields: object;
   redactVars: string[];
   results: object;
 }

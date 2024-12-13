@@ -42,12 +42,19 @@ components:
       type: object
       description: Generated CEL details.
       required:
+        - configFields
         - program
+        - needsAuthConfigBlock
         - stateSettings
         - redactVars
       properties:
+        configFields:
+          type: object
+          additionalProperties: true
         program:
           type: string
+        needsAuthConfigBlock:
+          type: boolean
         stateSettings:
           type: object
           additionalProperties: true
@@ -61,13 +68,20 @@ components:
       description: Optional CEL input details.
       required:
         - authType
+        - configFields
         - program
+        - needsAuthConfigBlock
         - stateSettings
         - redactVars
         - url
       properties:
         authType:
           $ref: "#/components/schemas/CelAuthType"  
+        configFields:
+          type: object
+          additionalProperties: true
+        needsAuthConfigBlock:
+          type: boolean
         program:
           type: string
         stateSettings:

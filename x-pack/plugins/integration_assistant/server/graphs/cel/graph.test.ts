@@ -14,6 +14,7 @@ import {
   celExpectedResults,
   celStateSettings,
   celRedact,
+  celConfigFields,
 } from '../../../__jest__/fixtures/cel';
 import { mockedRequestWithCelDetails } from '../../../__jest__/fixtures';
 import { handleSummarizeQuery } from './summarize_query';
@@ -52,6 +53,7 @@ describe('CelGraph', () => {
     const mockInvokeCelProgram = jest.fn().mockResolvedValue(celProgramMock);
     const mockInvokeCelStateVars = jest.fn().mockResolvedValue(celStateVarsMockedResponse);
     const mockInvokeCelStateSettings = jest.fn().mockResolvedValue(celStateSettings);
+    const mockInvokeCelConfigFields = jest.fn().mockResolvedValue(celConfigFields);
     const mockInvokeCelRedactVars = jest.fn().mockResolvedValue(celRedact);
 
     // Returns the initial query summary for the api, to trigger the next step.
@@ -75,6 +77,7 @@ describe('CelGraph', () => {
     // Returns the state details for the CEL program.
     (handleGetStateDetails as jest.Mock).mockImplementation(async () => ({
       stateSettings: await mockInvokeCelStateSettings(),
+      configFields: await mockInvokeCelConfigFields(),
       redactVars: await mockInvokeCelRedactVars(),
       lastExecutedChain: 'getStateDetails',
     }));
@@ -207,7 +210,9 @@ describe('program without headers', () => {
     expect(handleGetStateVariables).toHaveBeenCalled();
     expect(handleGetStateDetails).toHaveBeenCalled();
 
-    expect(response.results).toStrictEqual(celExpectedResults);
+    const expected = { ...celExpectedResults, needsAuthConfigBlock: true };
+
+    expect(response.results).toStrictEqual(expected);
   });
 
   it('digest auth', async () => {
@@ -227,7 +232,9 @@ describe('program without headers', () => {
     expect(handleGetStateVariables).toHaveBeenCalled();
     expect(handleGetStateDetails).toHaveBeenCalled();
 
-    expect(response.results).toStrictEqual(celExpectedResults);
+    const expected = { ...celExpectedResults, needsAuthConfigBlock: true };
+
+    expect(response.results).toStrictEqual(expected);
   });
 
   it('oauth', async () => {
@@ -247,6 +254,8 @@ describe('program without headers', () => {
     expect(handleGetStateVariables).toHaveBeenCalled();
     expect(handleGetStateDetails).toHaveBeenCalled();
 
-    expect(response.results).toStrictEqual(celExpectedResults);
+    const expected = { ...celExpectedResults, needsAuthConfigBlock: true };
+
+    expect(response.results).toStrictEqual(expected);
   });
 });

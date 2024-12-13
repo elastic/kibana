@@ -15,6 +15,7 @@ export const celTestState: CelInputState = {
   currentProgram: 'testProgram',
   stateVarNames: ['testVar'],
   stateSettings: { test: 'testDetails' },
+  configFields: { test: { config1: 'config1testDetails' } },
   redactVars: ['testRedact'],
   results: { test: 'testResults' },
   path: './testPath',
@@ -89,16 +90,25 @@ export const celStateDetailsMockedResponse = [
     name: 'config1',
     default: 50,
     redact: false,
+    configurable: true,
+    description: 'config1 description',
+    type: 'number',
   },
   {
     name: 'config2',
     default: '',
     redact: true,
+    configurable: false,
+    description: 'config2 description',
+    type: 'string',
   },
   {
     name: 'config3',
     default: 'event',
     redact: false,
+    configurable: false,
+    description: 'config3 description',
+    type: 'string',
   },
 ];
 
@@ -106,6 +116,14 @@ export const celStateSettings = {
   config1: 50,
   config2: '',
   config3: 'event',
+};
+
+export const celConfigFields = {
+  config1: {
+    default: 50,
+    type: 'number',
+    description: 'config1 description',
+  },
 };
 
 export const celRedact = ['config2'];
@@ -117,5 +135,13 @@ export const celExpectedResults = {
     config2: '',
     config3: 'event',
   },
+  configFields: {
+    config1: {
+      default: 50,
+      type: 'number',
+      description: 'config1 description',
+    },
+  },
+  needsAuthConfigBlock: false,
   redactVars: ['config2'],
 };

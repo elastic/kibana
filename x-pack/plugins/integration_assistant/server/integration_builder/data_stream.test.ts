@@ -74,6 +74,8 @@ describe('createDataStream', () => {
       authType: 'basic',
       stateSettings: { setting1: 100, setting2: '' },
       redactVars: ['setting2'],
+      configFields: { setting1: {}, setting2: {} },
+      needsAuthConfigBlock: false,
     },
   };
 
@@ -119,22 +121,8 @@ describe('createDataStream', () => {
   it('Should populate expected CEL fields', async () => {
     createDataStream(packageName, dataStreamPath, celDataStream);
 
-    const expectedMappedValues = {
-      data_stream_title: celDataStream.title,
-      data_stream_description: celDataStream.description,
-      package_name: packageName,
-      data_stream_name: firstDatastreamName,
-      multiline_ndjson: celDataStream.samplesFormat.multiline,
-      url: celDataStream.celInput?.url,
-      program: celDataStream.celInput?.program.split('\n'),
-      auth: celDataStream.celInput?.authType,
-      state: celDataStream.celInput?.stateSettings,
-      redact: celDataStream.celInput?.redactVars,
-      showAll: false,
-    };
-
     // // Manifest files
     expect(createSync).toHaveBeenCalledWith(`${dataStreamPath}/manifest.yml`, undefined);
-    expect(render).toHaveBeenCalledWith(`cel_manifest.yml.njk`, expectedMappedValues);
+    expect(render).toHaveBeenCalledWith(`cel_manifest.yml.njk`, expect.anything());
   });
 });

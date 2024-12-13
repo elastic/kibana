@@ -15,6 +15,8 @@ const mockResult = jest.fn().mockResolvedValue({
   results: {
     program: '',
     stateSettings: {},
+    configFields: {},
+    needsAuthConfigBlock: false,
     redactVars: [],
   },
 });
@@ -61,7 +63,13 @@ describe('registerCelInputRoute', () => {
   it('Runs route and gets CelInputResponse', async () => {
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
-      results: { program: '', stateSettings: {}, redactVars: [] },
+      results: {
+        program: '',
+        stateSettings: {},
+        configFields: {},
+        needsAuthConfigBlock: false,
+        redactVars: [],
+      },
     });
     expect(response.status).toEqual(200);
   });

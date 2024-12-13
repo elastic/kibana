@@ -58,6 +58,10 @@ const graphState: StateGraphArgs<CelInputState>['channels'] = {
     value: (x: object, y?: object) => y ?? x,
     default: () => ({}),
   },
+  configFields: {
+    value: (x: object, y?: object) => y ?? x,
+    default: () => ({}),
+  },
   redactVars: {
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
@@ -99,13 +103,17 @@ function modelInput({ state }: CelInputBaseNodeParams): Partial<CelInputState> {
 }
 
 function modelOutput({ state }: CelInputBaseNodeParams): Partial<CelInputState> {
+  const needsAuthConfigBlock = !state.hasProgramHeaders && state.authType !== 'header';
+
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',
     results: {
       program: state.currentProgram,
       stateSettings: state.stateSettings,
+      configFields: state.configFields,
       redactVars: state.redactVars,
+      needsAuthConfigBlock,
     },
   };
 }

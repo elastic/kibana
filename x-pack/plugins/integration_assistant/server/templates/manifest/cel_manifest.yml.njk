@@ -61,31 +61,39 @@
       required: false
       default: |
         #products: '(?i)(Elasticsearch|Beats|Logstash|Kibana)'
-        #solutions: '(?i)(Search|Observability|Security)'{% if auth == 'basic' or showAll %}
+        #solutions: '(?i)(Search|Observability|Security)'{% if configFields|length %}{% for key, value in configFields %}
+    - name: {{ key }}
+      type: {{ value.type }}
+      title: {{ key }}
+      description: "{{ value.description }}"
+      show_user: true
+      required: true{% if value.default %}
+      default: {{ value.default }}{% endif %}{% if value.type == 'password' %}
+      secret: true{% endif %}{% endfor %}{% endif %}{% if auth == 'basic' or showAll %}
     - name: username
       type: text
       title: Basic Auth Username
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The username to be used with Basic Auth headers
     - name: password
       type: password
       title: Basic Auth Password
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The password to be used with Basic Auth headers
       secret: true{% endif %}{% if auth == 'digest' or showAll %}
     - name: digest_username
       type: text
       title: Digest Auth Username
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The username to be used with Digest Auth headers
     - name: digest_password
       type: password
       title: Digest Auth Password
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       description: The password to be used with Digest Auth headers
       secret: true
     - name: digest_no_reuse
@@ -99,13 +107,13 @@
       title: OAuth2 Client ID
       description: Client ID used for OAuth2 authentication
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
     - name: oauth_secret
       type: password
       title: OAuth2 Client Secret
       description: Client secret used for OAuth2 authentication
       show_user: true
-      required: false
+      required: {% if showAll %} false {% else %} true {% endif %}
       secret: true
     - name: oauth_token_url
       type: text

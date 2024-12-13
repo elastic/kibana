@@ -48,7 +48,6 @@ export const useGeneration = ({
   const { http, notifications } = useKibana().services;
   const [error, setError] = useState<null | string>(null);
   const [isRequesting, setIsRequesting] = useState<boolean>(true);
-
   useEffect(() => {
     if (
       !isRequesting ||
@@ -75,6 +74,7 @@ export const useGeneration = ({
         }
 
         const path = integrationSettings.celPath;
+        const auth = integrationSettings.celAuth;
 
         const endpointOperation = oas?.operation(path, 'get');
         if (!endpointOperation) {
@@ -89,8 +89,8 @@ export const useGeneration = ({
         const celRequest: CelInputRequestBody = {
           dataStreamTitle: integrationSettings.dataStreamTitle ?? '',
           celDetails: {
-            path: integrationSettings.celPath,
-            auth: integrationSettings.celAuth,
+            path,
+            auth,
             openApiDetails: {
               operation: JSON.stringify(endpointOperation.schema),
               auth: JSON.stringify(endpointAuth),
@@ -117,7 +117,9 @@ export const useGeneration = ({
         const result = {
           authType: integrationSettings.celAuth,
           program: celGraphResult.results.program,
+          needsAuthConfigBlock: celGraphResult?.results.needsAuthConfigBlock,
           stateSettings: celGraphResult.results.stateSettings,
+          configFields: celGraphResult.results.configFields,
           redactVars: celGraphResult.results.redactVars,
           url: oas.url(),
         };
