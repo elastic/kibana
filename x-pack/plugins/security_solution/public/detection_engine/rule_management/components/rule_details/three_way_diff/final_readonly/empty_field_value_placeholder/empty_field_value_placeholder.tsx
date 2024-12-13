@@ -12,7 +12,7 @@ import * as i18n from './translations';
 export function EmptyFieldValuePlaceholder() {
   return (
     <EuiText size="s" color="subdued">
-      {i18n.EMPTY_FIELD_VALUE_PLACEHOLDER}
+      {`<${i18n.EMPTY_FIELD_VALUE_PLACEHOLDER}>`}
     </EuiText>
   );
 }

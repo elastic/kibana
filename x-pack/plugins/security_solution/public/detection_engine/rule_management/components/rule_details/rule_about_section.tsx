@@ -303,7 +303,7 @@ const prepareAboutSectionListItems = (
       title: (
         <span data-test-subj="buildingBlockPropertyTitle">{i18n.BUILDING_BLOCK_FIELD_LABEL}</span>
       ),
-      description: <BuildingBlock isBuildingBlockEnabled={true} />,
+      description: <BuildingBlock type="default" />,
     });
   }
 
