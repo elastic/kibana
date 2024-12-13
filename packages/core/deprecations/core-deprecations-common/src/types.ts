@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export interface DeprecationDetailsMessage {
+  type: 'markdown' | 'text';
+  content: string;
+}
+
 /**
  * Base properties shared by all types of deprecations
  *
@@ -22,7 +27,7 @@ export interface BaseDeprecationDetails {
    * The description message to be displayed for the deprecation.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
-  message: string | string[];
+  message: string | DeprecationDetailsMessage | Array<string | DeprecationDetailsMessage>;
   /**
    * levels:
    * - warning: will not break deployment upon upgrade

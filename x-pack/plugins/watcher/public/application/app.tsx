@@ -16,6 +16,7 @@ import {
   ExecutionContextStart,
   ThemeServiceStart,
   I18nStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
@@ -44,6 +45,7 @@ export interface AppDeps {
   uiSettings: IUiSettingsClient;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
   chartsTheme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;

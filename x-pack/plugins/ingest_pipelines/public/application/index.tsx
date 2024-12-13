@@ -53,7 +53,7 @@ export interface AppServices {
   config: Config;
 }
 
-type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 export interface CoreServices extends StartServices {
   http: HttpSetup;

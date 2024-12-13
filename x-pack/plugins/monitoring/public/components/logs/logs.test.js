@@ -15,7 +15,6 @@ jest.mock('../../legacy_shims', () => ({
     shims: {
       getBasePath: () => '',
       capabilities: { discover: { show: true } },
-      infra: {},
     },
   },
 }));
@@ -24,7 +23,9 @@ const sharePlugin = {
   url: {
     locators: {
       get: () => {
-        return sharePluginMock.createLocator();
+        const locatorMock = sharePluginMock.createLocator();
+        locatorMock.getRedirectUrl.mockReturnValue('http://localhost:5601/app/discover');
+        return locatorMock;
       },
     },
   },

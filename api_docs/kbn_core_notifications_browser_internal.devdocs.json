@@ -78,7 +78,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ analytics, i18n: i18nDep, overlays, theme, targetDomElement, }: ",
+              "({ overlays, targetDomElement, ...startDeps }: ",
               "StartDeps",
               ") => ",
               {
@@ -98,7 +98,7 @@
                 "id": "def-public.NotificationsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    analytics,\n    i18n: i18nDep,\n    overlays,\n    theme,\n    targetDomElement,\n  }",
+                "label": "{ overlays, targetDomElement, ...startDeps }",
                 "description": [],
                 "signature": [
                   "StartDeps"
@@ -804,7 +804,7 @@
         "label": "NotificationsServiceContract",
         "description": [],
         "signature": [
-          "{ start: ({ analytics, i18n: i18nDep, overlays, theme, targetDomElement, }: ",
+          "{ start: ({ overlays, targetDomElement, ...startDeps }: ",
           "StartDeps",
           ") => ",
           {
