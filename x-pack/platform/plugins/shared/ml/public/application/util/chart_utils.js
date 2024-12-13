@@ -12,8 +12,7 @@ import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/locator';
 
-export const LINE_CHART_ANOMALY_RADIUS = 7;
-export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
+export const LINE_CHART_ANOMALY_RADIUS = 5;
 export const ANNOTATION_SYMBOL_HEIGHT = 10;
 export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 
