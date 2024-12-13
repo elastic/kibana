@@ -16,6 +16,7 @@ import { mockTimelineData } from '../../common/mock';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { useKibana } from '../../common/lib/kibana';
+import { getMockTimelineSearchSubscription } from '../../common/mock/mock_timeline_search_service';
 
 const { initSortDefault, useTimelineEvents } = useTimelineEventsModule;
 
@@ -34,8 +35,6 @@ const onLoadMock = jest.fn();
 const useFetchNotesMock = useFetchNotes as jest.Mock;
 
 const mockEvents = structuredClone(mockTimelineData);
-
-const mockSearch = jest.fn();
 
 jest.mock('../../common/lib/apm/use_track_http_request');
 jest.mock('../../common/hooks/use_experimental_features');
@@ -82,37 +81,8 @@ const props: UseTimelineEventsProps = {
   skip: false,
 };
 
-const mockSearchSubscription = jest.fn().mockImplementation((args) => {
-  mockSearch(args);
-  return {
-    subscribe: jest.fn().mockImplementation(({ next }) => {
-      const start = args.pagination.activePage * args.pagination.querySize;
-      const end = start + args.pagination.querySize;
-      const timelineOut = setTimeout(() => {
-        next({
-          isRunning: false,
-          isPartial: false,
-          inspect: {
-            dsl: [],
-            response: [],
-          },
-          edges: mockEvents.map((item) => ({ node: item })).slice(start, end),
-          pageInfo: {
-            activePage: args.pagination.activePage,
-            querySize: args.pagination.querySize,
-          },
-          rawResponse: {},
-          totalCount: mockTimelineData.length,
-        });
-      }, 50);
-      return {
-        unsubscribe: jest.fn(() => {
-          clearTimeout(timelineOut);
-        }),
-      };
-    }),
-  };
-});
+const { mockTimelineSearchSubscription: mockSearchSubscription, mockSearchWithArgs: mockSearch } =
+  getMockTimelineSearchSubscription();
 
 const loadNextBatch = async (result: { current: [DataLoadingState, TimelineArgs] }) => {
   act(() => {

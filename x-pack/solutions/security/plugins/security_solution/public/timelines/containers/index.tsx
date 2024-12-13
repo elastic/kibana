@@ -377,7 +377,7 @@ export const useTimelineEventsHandler = ({
         defaultIndex: indexNames,
         filterQuery: createFilter(filterQuery),
         sort,
-        runtimeMappings,
+        runtimeMappings: runtimeMappings ?? {},
         ...timerange,
         ...deStructureEqlOptions(eqlOptions),
       };
