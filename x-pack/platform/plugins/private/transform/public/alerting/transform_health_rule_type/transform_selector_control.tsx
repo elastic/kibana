@@ -55,17 +55,12 @@ export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
 
   const onCreateOption = allowCustomOptions
     ? (((searchValue, existingOptions) => {
-        const normalizedSearchValue = searchValue.trim().toLowerCase();
-        // Only allow creating wildcard options
-        if (!normalizedSearchValue || !normalizedSearchValue.includes('*')) {
-          return;
-        }
         if (
-          existingOptions.find((option) => option.label.toLowerCase() === normalizedSearchValue)
+          searchValue.includes('*') &&
+          !existingOptions.some((option) => option.label === searchValue)
         ) {
-          return;
+          onChange([...selectedOptions, searchValue]);
         }
-        onChange([...selectedOptions, normalizedSearchValue]);
       }) as EuiComboBoxOptionsListProps<string>['onCreateOption'])
     : undefined;
 
