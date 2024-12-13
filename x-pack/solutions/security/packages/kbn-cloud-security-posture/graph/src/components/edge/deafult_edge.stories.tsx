@@ -88,11 +88,11 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => {
 
   const initialEdges = [
     {
-      id: 'source-' + args.id,
+      id: `source-${args.id}`,
       source: 'source',
       target: args.id,
       data: {
-        id: 'source-' + args.id,
+        id: `source-${args.id}`,
         source: 'source',
         sourceShape: 'rectangle',
         target: args.id,
@@ -103,11 +103,11 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => {
       type: 'default',
     },
     {
-      id: args.id + '-target',
+      id: `${args.id}-target`,
       source: args.id,
       target: 'target',
       data: {
-        id: args.id + '-target',
+        id: `${args.id}-target`,
         source: args.id,
         sourceShape: 'label',
         target: 'target',

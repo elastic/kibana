@@ -14,5 +14,7 @@ module.exports = {
       '<rootDir>/x-pack/packages/kbn-cloud-security-posture/storybook/config/babel_with_emotion.ts',
   },
   setupFiles: ['jest-canvas-mock'],
-  setupFilesAfterEnv: ['<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/setup_tests.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/setup_tests.ts',
+  ],
 };

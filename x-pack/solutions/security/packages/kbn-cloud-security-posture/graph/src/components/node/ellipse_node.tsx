@@ -81,7 +81,7 @@ export const EllipseNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{Boolean(label) ? label : id}</NodeLabel>
+      <NodeLabel>{label ? label : id}</NodeLabel>
     </>
   );
 });

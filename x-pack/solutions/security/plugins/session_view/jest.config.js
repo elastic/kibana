@@ -9,7 +9,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/session_view'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/session_view',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/session_view',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/session_view/{common,public,server}/**/*.{ts,tsx}',

@@ -10,7 +10,8 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/cloud_security_posture'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/cloud_security_posture',
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/cloud_security_posture',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/solutions/security/plugins/cloud_security_posture/{common,public,server}/**/*.{ts,tsx}',
