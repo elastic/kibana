@@ -45,8 +45,6 @@ export function RowHeightSettings({
   ['data-test-subj']: dataTestSubj,
   lineCountInput,
 }: RowHeightSettingsProps) {
-  console.log({ label, rowHeight, rowHeightLines, lineCountInput });
-
   const rowHeightModeOptions = [
     {
       id: `${idPrefix}${RowHeightMode.auto}`,
