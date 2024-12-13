@@ -49,7 +49,7 @@ export interface UseNavigateToAnalyzerResult {
 }
 
 /**
- * Hook that returns the a callback to navigate to the analyzer in the flyout
+ * Hook that returns a callback to navigate to the analyzer in the flyout
  */
 export const useNavigateToAnalyzer = ({
   isFlyoutOpen,
