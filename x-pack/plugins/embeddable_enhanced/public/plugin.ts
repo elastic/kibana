@@ -6,23 +6,12 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import {
-  defaultEmbeddableFactoryProvider,
-  EmbeddableContext,
-  EmbeddableFactory,
-  EmbeddableFactoryDefinition,
-  EmbeddableInput,
-  EmbeddableOutput,
-  EmbeddableSetup,
-  EmbeddableStart,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   apiHasUniqueId,
   EmbeddableApiContext,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
@@ -30,13 +19,12 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   DynamicActionStorage,
   type DynamicActionStorageApi,
 } from './embeddables/dynamic_action_storage';
 import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
-import { EnhancedEmbeddable } from './types';
 import { getDynamicActionsState } from './get_dynamic_actions_state';
 
 export interface SetupDependencies {
@@ -79,8 +67,6 @@ export class EmbeddableEnhancedPlugin
   private uiActions?: StartDependencies['uiActionsEnhanced'];
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
-    this.setCustomEmbeddableFactoryProvider(plugins);
-
     return {};
   }
 
@@ -93,45 +79,6 @@ export class EmbeddableEnhancedPlugin
   }
 
   public stop() {}
-
-  private setCustomEmbeddableFactoryProvider(plugins: SetupDependencies) {
-    plugins.embeddable.setCustomEmbeddableFactoryProvider(
-      <
-        I extends EmbeddableInput = EmbeddableInput,
-        O extends EmbeddableOutput = EmbeddableOutput,
-        E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-        T extends FinderAttributes = {}
-      >(
-        def: EmbeddableFactoryDefinition<I, O, E, T>
-      ): EmbeddableFactory<I, O, E, T> => {
-        const factory: EmbeddableFactory<I, O, E, T> = defaultEmbeddableFactoryProvider<I, O, E, T>(
-          def
-        );
-        return {
-          ...factory,
-          create: async (...args) => {
-            const embeddable = await factory.create(...args);
-            if (!embeddable) return embeddable;
-            return this.enhanceEmbeddableWithDynamicActions(embeddable);
-          },
-          createFromSavedObject: async (...args) => {
-            const embeddable = await factory.createFromSavedObject(...args);
-            if (!embeddable) return embeddable;
-            return this.enhanceEmbeddableWithDynamicActions(embeddable);
-          },
-        };
-      }
-    );
-  }
-
-  private readonly isEmbeddableContext = (context: unknown): context is EmbeddableContext => {
-    if (!(context as EmbeddableContext)?.embeddable) {
-      // eslint-disable-next-line no-console
-      console.warn('For drilldowns to work action context should contain .embeddable field.');
-      return false;
-    }
-    return true;
-  };
 
   private initializeDynamicActions(
     uuid: string,
@@ -181,77 +128,6 @@ export class EmbeddableEnhancedPlugin
         return { stopDynamicActions: stop };
       },
     };
-  }
-
-  /**
-   * TODO: Remove this entire enhanceEmbeddableWithDynamicActions method once the embeddable refactor work is complete
-   */
-  private enhanceEmbeddableWithDynamicActions<E extends IEmbeddable>(
-    embeddable: E
-  ): EnhancedEmbeddable<E> {
-    const enhancedEmbeddable = embeddable as EnhancedEmbeddable<E>;
-
-    const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
-      {
-        dynamicActions: { events: [] },
-        ...(embeddable.getInput().enhancements ?? {}),
-      }
-    );
-    const api = {
-      dynamicActionsState$,
-      setDynamicActions: (newState: DynamicActionsSerializedState['enhancements']) => {
-        embeddable.updateInput({ enhancements: newState });
-      },
-    };
-
-    /**
-     * Keep the dynamicActionsState$ publishing subject in sync with changes to the embeddable's input.
-     */
-    embeddable
-      .getInput$()
-      .pipe(
-        distinctUntilChanged(({ enhancements: old }, { enhancements: updated }) =>
-          deepEqual(old, updated)
-        )
-      )
-      .subscribe((input) => {
-        dynamicActionsState$.next({
-          dynamicActions: { events: [] },
-          ...(input.enhancements ?? {}),
-        } as DynamicActionsSerializedState['enhancements']);
-      });
-
-    const storage = new DynamicActionStorage(
-      String(embeddable.runtimeId),
-      embeddable.getTitle,
-      api
-    );
-    const dynamicActions = new DynamicActionManager({
-      isCompatible: async (context: unknown) => {
-        if (!this.isEmbeddableContext(context)) return false;
-        return context.embeddable.runtimeId === embeddable.runtimeId;
-      },
-      storage,
-      uiActions: this.uiActions!,
-    });
-
-    const stop = this.startDynamicActions(dynamicActions);
-    embeddable.getInput$().subscribe({
-      next: () => {
-        storage.reload$.next();
-      },
-      error: stop,
-      complete: stop,
-    });
-
-    enhancedEmbeddable.enhancements = {
-      ...enhancedEmbeddable.enhancements,
-      dynamicActions,
-    };
-    enhancedEmbeddable.dynamicActionsState$ = api.dynamicActionsState$;
-    enhancedEmbeddable.setDynamicActions = api.setDynamicActions;
-
-    return enhancedEmbeddable;
   }
 
   private startDynamicActions(dynamicActions: DynamicActionManager) {
