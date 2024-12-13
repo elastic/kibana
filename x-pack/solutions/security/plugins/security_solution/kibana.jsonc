@@ -16,6 +16,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "assetInventory",
       "alerting",
       "cases",
       "cloud",

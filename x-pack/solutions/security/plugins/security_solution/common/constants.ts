@@ -19,6 +19,7 @@ export { SecurityPageName } from '@kbn/security-solution-navigation';
  */
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
+export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
@@ -102,6 +103,7 @@ export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
+export const ASSET_INVENTORY_PATH = '/asset_inventory' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
