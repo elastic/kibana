@@ -96,7 +96,17 @@ export function transformHealthServiceProvider({
     }
 
     if (excludeTransforms && excludeTransforms.length > 0) {
-      const excludeIdsSet = new Set(excludeTransforms);
+      let excludeIdsSet = new Set(excludeTransforms);
+      if (excludeTransforms.some((id) => id.includes('*'))) {
+        const excludeTransformResponse = (
+          await esClient.transform.getTransform({
+            transform_id: excludeTransforms.join(','),
+            allow_no_match: true,
+            size: 1000,
+          })
+        ).transforms as Transform[];
+        excludeIdsSet = new Set(excludeTransformResponse.map((t) => t.id));
+      }
       resultTransformIds = resultTransformIds.filter((id) => !excludeIdsSet.has(id));
     }
 
