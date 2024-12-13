@@ -24,8 +24,10 @@ export const getEntityTypesRoute = createInventoryServerRoute({
       excludeEntityTypes: jsonRt.pipe(t.array(t.string)),
     }),
   }),
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   handler: async ({ plugins, request, params }) => {
     const entityManagerStart = await plugins.entityManager.start();
@@ -65,8 +67,10 @@ export const listLatestEntitiesRoute = createInventoryServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:inventory'],
+  security: {
+    authz: {
+      requiredPrivileges: ['inventory'],
+    },
   },
   handler: async ({ params, plugins, request }): Promise<{ entities: InventoryEntity[] }> => {
     const entityManagerStart = await plugins.entityManager.start();
