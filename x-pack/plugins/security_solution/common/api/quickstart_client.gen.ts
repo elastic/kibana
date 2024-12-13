@@ -276,6 +276,10 @@ import type {
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
+import type {
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
+  ConfigureRiskEngineSavedObjectResponse,
+} from './entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
@@ -356,15 +360,20 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateRuleMigrationRequestParamsInput,
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationPrebuiltRulesRequestParamsInput,
+  GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
+  GetRuleMigrationResourcesMissingRequestParamsInput,
+  GetRuleMigrationResourcesMissingResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   GetRuleMigrationTranslationStatsRequestParamsInput,
@@ -598,6 +607,22 @@ If asset criticality records already exist for the specified entities, those rec
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Configuring the Risk Engine Saved Object
+   */
+  async configureRiskEngineSavedObject(props: ConfigureRiskEngineSavedObjectProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ConfigureRiskEngineSavedObject`);
+    return this.kbnClient
+      .request<ConfigureRiskEngineSavedObjectResponse>({
+        path: '/api/risk_score/engine/saved_object/configure',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PATCH',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * Copies and returns a timeline or timeline template.
 
     */
@@ -686,7 +711,7 @@ If a record already exists for the specified entity, that record is overwritten 
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
-        path: '/internal/siem_migrations/rules',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1431,6 +1456,24 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves all available prebuilt rules (installed and installable)
+   */
+  async getRuleMigrationPrebuiltRules(props: GetRuleMigrationPrebuiltRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationPrebuiltRules`);
+    return this.kbnClient
+      .request<GetRuleMigrationPrebuiltRulesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves resources for an existing SIEM rules migration
    */
   async getRuleMigrationResources(props: GetRuleMigrationResourcesProps) {
@@ -1447,6 +1490,24 @@ finalize it.
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies missing resources from all the rules of an existing SIEM rules migration
+   */
+  async getRuleMigrationResourcesMissing(props: GetRuleMigrationResourcesMissingProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationResourcesMissing`);
+    return this.kbnClient
+      .request<GetRuleMigrationResourcesMissingResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/resources/missing',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2254,6 +2315,9 @@ export interface BulkUpsertAssetCriticalityRecordsProps {
 export interface CleanDraftTimelinesProps {
   body: CleanDraftTimelinesRequestBodyInput;
 }
+export interface ConfigureRiskEngineSavedObjectProps {
+  body: ConfigureRiskEngineSavedObjectRequestBodyInput;
+}
 export interface CopyTimelineProps {
   body: CopyTimelineRequestBodyInput;
 }
@@ -2267,6 +2331,7 @@ export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
 export interface CreateRuleMigrationProps {
+  params: CreateRuleMigrationRequestParamsInput;
   body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateTimelinesProps {
@@ -2394,9 +2459,15 @@ export interface GetRuleMigrationProps {
   query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
+export interface GetRuleMigrationPrebuiltRulesProps {
+  params: GetRuleMigrationPrebuiltRulesRequestParamsInput;
+}
 export interface GetRuleMigrationResourcesProps {
   query: GetRuleMigrationResourcesRequestQueryInput;
   params: GetRuleMigrationResourcesRequestParamsInput;
+}
+export interface GetRuleMigrationResourcesMissingProps {
+  params: GetRuleMigrationResourcesMissingRequestParamsInput;
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;

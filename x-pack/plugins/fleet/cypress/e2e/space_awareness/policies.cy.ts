@@ -28,6 +28,7 @@ describe('Space aware policies creation', { testIsolation: false }, () => {
 
   beforeEach(() => {
     cy.intercept('GET', /\/api\/fleet\/agent_policies/).as('getAgentPolicies');
+    cy.intercept('PUT', /\/api\/fleet\/agent_policies\/.*/).as('putAgentPolicy');
     cy.intercept('GET', /\/internal\/fleet\/agent_policies_spaces/).as('getAgentPoliciesSpaces');
   });
 
@@ -59,6 +60,7 @@ describe('Space aware policies creation', { testIsolation: false }, () => {
     cy.getBySel(AGENT_POLICY_DETAILS_PAGE.SPACE_SELECTOR_COMBOBOX).click().type('default{enter}');
 
     cy.getBySel(AGENT_POLICY_DETAILS_PAGE.SAVE_BUTTON).click();
+    cy.wait('@putAgentPolicy');
   });
 
   it('the policy should be visible in the test space', () => {
@@ -71,5 +73,23 @@ describe('Space aware policies creation', { testIsolation: false }, () => {
     cy.visit('/app/fleet/policies');
     cy.wait('@getAgentPolicies');
     cy.getBySel(AGENT_POLICIES_TABLE).contains(POLICY_NAME);
+  });
+
+  it('should redirect to the agent policies list when removing the current space from a policy', () => {
+    cy.visit('/s/test/app/fleet/policies');
+    cy.getBySel(AGENT_POLICIES_TABLE).contains(POLICY_NAME).click();
+
+    cy.getBySel(AGENT_POLICY_DETAILS_PAGE.SETTINGS_TAB).click();
+    cy.wait('@getAgentPoliciesSpaces');
+
+    cy.get('[title="Remove Test from selection in this group"]').click();
+
+    cy.getBySel(AGENT_POLICY_DETAILS_PAGE.SAVE_BUTTON).click();
+    cy.wait('@putAgentPolicy');
+
+    cy.wait('@getAgentPolicies');
+    cy.location('pathname').should('eq', '/s/test/app/fleet/policies');
+
+    cy.getBySel(AGENT_POLICIES_TABLE).contains(NO_AGENT_POLICIES);
   });
 });

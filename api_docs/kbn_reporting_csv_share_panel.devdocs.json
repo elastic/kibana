@@ -86,7 +86,7 @@
                 "id": "def-public.ReportingCsvPanelAction.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ core, csvConfig, apiClient, startServices$, usesUiCapabilities }",
+                "label": "{ core, apiClient, startServices$ }",
                 "description": [],
                 "signature": [
                   "Params"

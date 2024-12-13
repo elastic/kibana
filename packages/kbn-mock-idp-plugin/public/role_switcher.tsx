@@ -69,6 +69,7 @@ export const RoleSwitcher = () => {
       services.notifications.toasts.add(
         createReloadPageToast({
           user: authenticateUserState.value,
+          userProfile: services.userProfile,
           theme: services.theme,
           i18n: services.i18n,
         })

@@ -63,8 +63,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const responseBody = await invokeChatCompleteWithFunctionRequest({
         connectorId,
         observabilityAIAssistantAPIClient,
-        internalReqHeader,
-        roleAuthc,
         functionCall: {
           name: ELASTICSEARCH_FUNCTION_NAME,
           trigger: MessageRole.User,

@@ -3254,8 +3254,8 @@
             "description": [],
             "signature": [
               "<T extends ",
-              "SuppressionFields8130",
-              ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
+              "SuppressionFields8170",
+              ">(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -3278,7 +3278,7 @@
                 "label": "alerts",
                 "description": [],
                 "signature": [
-                  "{ _id: string; _source: T; }[]"
+                  "{ _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[]"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
@@ -3990,8 +3990,8 @@
         "description": [],
         "signature": [
           "<T extends ",
-          "SuppressionFields8130",
-          ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
+          "SuppressionFields8170",
+          ">(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
@@ -4014,7 +4014,7 @@
             "label": "alerts",
             "description": [],
             "signature": [
-              "{ _id: string; _source: T; }[]"
+              "{ _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,

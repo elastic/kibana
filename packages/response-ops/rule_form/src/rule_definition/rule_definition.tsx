@@ -30,7 +30,6 @@ import {
   RuleSettingsFlappingTitleTooltip,
 } from '@kbn/alerts-ui-shared/lib';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants/rule_flapping';
@@ -41,6 +40,7 @@ import {
   ALERT_DELAY_HELP_TEXT,
   ALERT_DELAY_TITLE,
   ALERT_FLAPPING_DETECTION_DESCRIPTION,
+  FEATURE_NAME_MAP,
   ALERT_FLAPPING_DETECTION_TITLE,
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -116,15 +116,18 @@ export const RuleDefinition = () => {
     if (!canShowConsumerSelection) {
       return false;
     }
-    if (!authorizedConsumers.length) {
+
+    /*
+     * This will filter out values like 'alerts' and 'observability' that will not be displayed
+     * in the drop down. It will allow us to hide the consumer select when there is only one
+     * selectable value.
+     */
+    const authorizedValidConsumers = authorizedConsumers.filter((c) => c in FEATURE_NAME_MAP);
+
+    if (authorizedValidConsumers.length <= 1) {
       return false;
     }
-    if (
-      authorizedConsumers.length <= 1 ||
-      authorizedConsumers.includes(AlertConsumers.OBSERVABILITY)
-    ) {
-      return false;
-    }
+
     return !!(ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId));
   }, [ruleTypeId, authorizedConsumers, canShowConsumerSelection]);
 

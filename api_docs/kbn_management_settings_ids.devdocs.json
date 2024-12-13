@@ -489,21 +489,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DISCOVER_SEARCH_FIELDS_FROM_SOURCE_ID",
-        "description": [],
-        "signature": [
-          "\"discover:searchFieldsFromSource\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.DISCOVER_SEARCH_ON_PAGE_LOAD_ID",
         "type": "string",
         "tags": [],

@@ -67,7 +67,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   title,
   value,
 }) => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
   const eventContext = useContext(StatefulEventContext);
 
   const ruleName = `${value}`;
@@ -91,14 +91,16 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         return;
       }
 
-      openRightPanel({
-        id: RulePanelKey,
-        params: {
-          ruleId,
+      openFlyout({
+        right: {
+          id: RulePanelKey,
+          params: {
+            ruleId,
+          },
         },
       });
     },
-    [navigateToApp, ruleId, search, openInNewTab, openRightPanel, eventContext, isInTimelineContext]
+    [navigateToApp, ruleId, search, openInNewTab, openFlyout, eventContext, isInTimelineContext]
   );
 
   const href = useMemo(

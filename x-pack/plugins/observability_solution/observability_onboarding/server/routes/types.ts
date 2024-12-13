@@ -13,13 +13,13 @@ import {
 } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingServerRouteRepository } from '.';
-import { ObservabilityOnboardingConfig } from '..';
 import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 import {
   ObservabilityOnboardingPluginSetupDependencies,
   ObservabilityOnboardingPluginStartDependencies,
   ObservabilityOnboardingRequestHandlerContext,
 } from '../types';
+import { ObservabilityOnboardingConfig } from '../config';
 
 export type { ObservabilityOnboardingServerRouteRepository };
 
