@@ -13,7 +13,6 @@ import {
   KibanaResponseFactory,
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
-import { DEFAULT_TRIGGERS_ACCTIONS_UI_ROUTE_SECURITY } from './constants';
 
 export function createHealthRoute(
   logger: Logger,
@@ -26,7 +25,13 @@ export function createHealthRoute(
   router.get(
     {
       path,
-      security: DEFAULT_TRIGGERS_ACCTIONS_UI_ROUTE_SECURITY,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization as the health route does not require any.',
+        },
+      },
       validate: false,
       options: {
         access: 'internal',

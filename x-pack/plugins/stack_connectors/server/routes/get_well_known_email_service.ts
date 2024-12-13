@@ -17,7 +17,6 @@ import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { AdditionalEmailServices, INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { ELASTIC_CLOUD_SERVICE } from '../connector_types/email';
-import { DEFAULT_STACK_CONNECTORS_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({
   service: schema.string(),
@@ -27,7 +26,13 @@ export const getWellKnownEmailServiceRoute = (router: IRouter) => {
   router.get(
     {
       path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_email_config/{service}`,
-      security: DEFAULT_STACK_CONNECTORS_ROUTE_SECURITY,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization as returning SMTP connection details does not require any.',
+        },
+      },
       validate: {
         params: paramSchema,
       },

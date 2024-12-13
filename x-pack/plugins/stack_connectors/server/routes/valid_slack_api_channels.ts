@@ -20,7 +20,6 @@ import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/action
 import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
 import { SLACK_URL } from '../../common/slack_api/constants';
 import { ValidChannelResponse } from '../../common/slack_api/types';
-import { DEFAULT_STACK_CONNECTORS_ROUTE_SECURITY } from './constants';
 
 const bodySchema = schema.object({
   authToken: schema.string(),
@@ -35,7 +34,13 @@ export const validSlackApiChannelsRoute = (
   router.post(
     {
       path: `${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_slack_api/channels/_valid`,
-      security: DEFAULT_STACK_CONNECTORS_ROUTE_SECURITY,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            "This route is opted out from authorization as it relies on Slack's own authorization.",
+        },
+      },
       validate: {
         body: bodySchema,
       },
