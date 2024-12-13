@@ -24,9 +24,7 @@ const mockMigrateEcsData = jest.fn().mockResolvedValue({
 });
 jest.mock('../asset_criticality_migration_client', () => ({
   AssetCriticalityEcsMigrationClient: jest.fn().mockImplementation(() => ({
-    isEcsMappingsMigrationRequired: mockIsEcsMappingsMigrationRequired,
     isEcsDataMigrationRequired: mockIsEcsDataMigrationRequired,
-    migrateEcsMappings: mockMigrateEcsMappings,
     migrateEcsData: mockMigrateEcsData,
   })),
 }));
@@ -79,38 +77,6 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         kibanaVersion: '8.0.0',
       })
     ).resolves.not.toThrow();
-  });
-
-  it('should migrate mappings if required', async () => {
-    const taskManager = taskManagerMock.createSetup();
-
-    mockIsEcsMappingsMigrationRequired.mockResolvedValue(true);
-
-    await scheduleAssetCriticalityEcsCompliancyMigration({
-      auditLogger,
-      taskManager,
-      logger,
-      getStartServices,
-      kibanaVersion: '8.0.0',
-    });
-
-    expect(mockMigrateEcsMappings).toHaveBeenCalled();
-  });
-
-  it('should not migrate mappings if not required', async () => {
-    const taskManager = taskManagerMock.createSetup();
-
-    mockIsEcsMappingsMigrationRequired.mockResolvedValue(false);
-
-    await scheduleAssetCriticalityEcsCompliancyMigration({
-      auditLogger,
-      taskManager,
-      logger,
-      getStartServices,
-      kibanaVersion: '8.0.0',
-    });
-
-    expect(mockMigrateEcsMappings).not.toHaveBeenCalled();
   });
 
   it('should schedule the task if data migration is required', async () => {
