@@ -98,7 +98,19 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack', 'x-pack/packages/*'];
+export const KEBAB_CASE_DIRECTORY_GLOBS = [
+  'packages/*',
+  'x-pack',
+  'x-pack/packages/*',
+  'src/platform/packages/private/*',
+  'src/platform/packages/shared/*',
+  'x-pack/platform/packages/private/*',
+  'x-pack/platform/packages/shared/*',
+  'x-pack/solutions/observability/packages/private/*',
+  'x-pack/solutions/observability/packages/shared/*',
+  'x-pack/solutions/security/packages/private/*',
+  'x-pack/solutions/security/packages/shared/*',
+];
 
 /**
  * These patterns are matched against directories and indicate
