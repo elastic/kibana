@@ -13,7 +13,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 
 import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
+import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 
+import type { EndpointMetadataService } from '../metadata';
 import {
   COMPONENT_TEMPLATE_NAME,
   DATA_STREAM_PREFIX,
@@ -76,14 +78,16 @@ const validKeys = new Set([
   'targetIds',
   'actionTypes',
 ]);
+
 const paramFieldMap = {
   ids: '_id',
   sourceTypes: 'source.type',
   sourceIds: 'source.id',
   targetTypes: 'target.type',
-  targetIds: 'target.id',
+  targetIds: 'target.ids',
   actionTypes: 'action.type',
 };
+const nestedKeys = new Set(['source', 'target', 'action']);
 export function buildEsQueryParams(searchParams: SearchParams): QueryDslQueryContainer[] {
   return Object.entries(searchParams).reduce((acc: object[], [k, v]) => {
     if (!validKeys.has(k)) {
@@ -91,8 +95,38 @@ export function buildEsQueryParams(searchParams: SearchParams): QueryDslQueryCon
     }
 
     const paramKey = _get(paramFieldMap, k, k);
-    const next = { terms: { [paramKey]: v } };
 
+    const topKey = paramKey.split('.')[0];
+    if (nestedKeys.has(topKey)) {
+      const nestedQuery = {
+        nested: {
+          path: topKey,
+          query: {
+            terms: { [paramKey]: v },
+          },
+        },
+      };
+      return [...acc, nestedQuery];
+    }
+
+    const next = { terms: { [paramKey]: v } };
     return [...acc, next];
   }, []);
+}
+
+export async function groupEndpointIdsByOS(
+  endpointIds: string[],
+  endpointMetadataService: EndpointMetadataService
+): Promise<Record<SupportedHostOsType, string[]>> {
+  const metadata = await endpointMetadataService.getMetadataForEndpoints(endpointIds);
+  return metadata.reduce<Record<string, string[]>>((acc, m) => {
+    const os = m.host.os.name.toLowerCase() as SupportedHostOsType;
+    if (!acc[os]) {
+      acc[os] = [];
+    }
+
+    acc[os].push(m.agent.id);
+
+    return acc;
+  }, {});
 }

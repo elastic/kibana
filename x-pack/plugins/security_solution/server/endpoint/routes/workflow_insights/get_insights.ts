@@ -70,7 +70,9 @@ export const getInsightsRouteHandler = (
         request.query as SearchParams
       );
 
-      const body = insightsResponse.flatMap((insight) => insight._source || []);
+      const body = insightsResponse.flatMap((insight) =>
+        insight._source ? { ...insight._source, id: insight._id } : []
+      );
 
       return response.ok({ body });
     } catch (e) {

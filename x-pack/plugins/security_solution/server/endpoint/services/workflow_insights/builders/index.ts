@@ -8,20 +8,24 @@
 import type { KibanaRequest } from '@kbn/core/server';
 
 import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
+
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 
-import { InvalidDefendInsightTypeError } from '../errors';
+import { InvalidDefendInsightTypeError } from '../../../../assistant/tools/defend_insights/errors';
+import type { EndpointMetadataService } from '../../metadata';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
 export interface BuildWorkflowInsightParams {
   defendInsights: DefendInsight[];
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
+  endpointMetadataService: EndpointMetadataService;
 }
 
 export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
-): SecurityWorkflowInsight[] {
+): Promise<SecurityWorkflowInsight[]> {
   if (params.request.body.insightType === DefendInsightType.Enum.incompatible_antivirus) {
     return buildIncompatibleAntivirusWorkflowInsights(params);
   }
