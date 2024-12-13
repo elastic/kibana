@@ -17,6 +17,9 @@ const mlAnnotationBorderWidth = '2px';
 const mlAnnotationRectDefaultStrokeOpacity = 0.2;
 const mlAnnotationRectDefaultFillOpacity = 0.05;
 
+const anomalyLineColor = '#7186A8';
+const anomalyLineStrokeWidth = 1.5;
+
 export const useTimeseriesExplorerStyles = () => {
   const { euiTheme } = useEuiTheme();
   const { fontSize: euiFontSizeXS } = useEuiFontSize('xs', { unit: 'px' });
@@ -26,7 +29,10 @@ export const useTimeseriesExplorerStyles = () => {
   // Borealis:  euiTheme.colors.vis.euiColorVis9
   const forecastColor = euiTheme.flags.hasVisColorAdjustment
     ? euiTheme.colors.vis.euiColorVis5
-    : euiTheme.colors.vis.euiColorVis9;
+    : // euiColorVis3 - borealis light blue, not too bad.
+      // euiColorVis6 - borealis somewhat orange, sticks out.
+      // euiColorVis8 - borealis yellow, similar to V8.
+      euiTheme.colors.vis.euiColorVis8;
 
   return useMemo(
     () =>
@@ -76,7 +82,7 @@ export const useTimeseriesExplorerStyles = () => {
             strokeWidth: 1,
 
             '&.bounds': {
-              fill: transparentize(euiTheme.colors.primary, 0.2),
+              fill: transparentize(anomalyLineColor, 0.3),
               pointerEvents: 'none',
             },
 
@@ -88,8 +94,8 @@ export const useTimeseriesExplorerStyles = () => {
 
           '.values-line': {
             fill: 'none',
-            stroke: euiTheme.colors.primary,
-            strokeWidth: 2,
+            stroke: anomalyLineColor,
+            strokeWidth: anomalyLineStrokeWidth,
             pointerEvents: 'none',
 
             '&.forecast': {
@@ -115,8 +121,8 @@ export const useTimeseriesExplorerStyles = () => {
           },
 
           '.anomaly-marker': {
-            strokeWidth: 1,
-            stroke: euiTheme.colors.mediumShade,
+            strokeWidth: anomalyLineStrokeWidth,
+            stroke: anomalyLineColor,
 
             '&.critical': {
               fill: ML_SEVERITY_COLORS.CRITICAL,
@@ -146,8 +152,8 @@ export const useTimeseriesExplorerStyles = () => {
           },
 
           'rect.scheduled-event-marker': {
-            strokeWidth: 1,
-            stroke: euiTheme.colors.darkShade,
+            strokeWidth: anomalyLineStrokeWidth,
+            stroke: anomalyLineColor,
             fill: euiTheme.colors.lightShade,
           },
 

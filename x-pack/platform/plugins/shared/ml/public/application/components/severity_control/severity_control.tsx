@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// import type { EuiRangeProps } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
 import {
   ML_ANOMALY_THRESHOLD,
@@ -23,7 +23,7 @@ export interface SeveritySelectorProps {
 
 const MAX_ANOMALY_SCORE = 100;
 
-const moreLevels = severityColorBands.map((colorBand) => ({
+const levels: EuiRangeProps['levels'] = severityColorBands.map((colorBand) => ({
   min: colorBand.start,
   max: colorBand.end,
   color: colorBand.color,
@@ -59,8 +59,8 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
 
   const resultValue = value ?? ML_ANOMALY_THRESHOLD.LOW;
 
-  const ticks = new Array(11).fill(null).map((x, i) => {
-    const v = i * 10;
+  const ticks = new Array(levels.length + 1).fill(null).map((x, i) => {
+    const v = i * (100 / levels.length);
     return { value: v, label: v };
   });
 
@@ -93,7 +93,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
             showTicks
             ticks={ticks}
             showRange={false}
-            levels={moreLevels}
+            levels={levels}
             data-test-subj={'mlAnomalyAlertScoreSelection'}
           />
         </EuiFlexItem>

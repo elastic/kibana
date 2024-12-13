@@ -25,6 +25,7 @@ import {
   getSeverityWithLow,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
+import { mlSeverityPalette } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
@@ -35,7 +36,6 @@ import {
   LINE_CHART_ANOMALY_RADIUS,
   ANNOTATION_SYMBOL_HEIGHT,
   MULTI_BUCKET_SYMBOL_SIZE,
-  SCHEDULED_EVENT_SYMBOL_HEIGHT,
   drawLineChartDots,
   filterAxisLabels,
   numTicksForDateFormat,
@@ -90,9 +90,8 @@ const ZOOM_INTERVAL_OPTIONS = [
 // Set up the color scale to use for indicating score.
 const anomalyColorScale = d3.scale
   .threshold()
-  .domain([3, 25, 50, 75, 100])
+  .domain([25, 50, 75, 100])
   .range([
-    ML_SEVERITY_COLORS.LOW,
     ML_SEVERITY_COLORS.WARNING,
     ML_SEVERITY_COLORS.MINOR,
     ML_SEVERITY_COLORS.MAJOR,
@@ -100,10 +99,8 @@ const anomalyColorScale = d3.scale
   ]);
 
 // Create a gray-toned version of the color scale to use under the context chart mask.
-const anomalyGrayScale = d3.scale
-  .threshold()
-  .domain([3, 25, 50, 75, 100])
-  .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
+const anomalyGrayScale = d3.scale.threshold().domain([25, 50, 75, 100]).range(mlSeverityPalette);
+// .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
 function getChartHeights(height) {
   const actualHeight = height < minSvgHeight ? minSvgHeight : height;
@@ -890,10 +887,16 @@ class TimeseriesChartIntl extends Component {
         return this.focusYScale(d.value);
       })
       .attr('data-test-subj', (d) => (d.anomalyScore !== undefined ? 'mlAnomalyMarker' : undefined))
+      .style('fill', (d) => {
+        if (d.anomalyScore !== undefined) {
+          return anomalyColorScale(d.anomalyScore);
+        }
+        return undefined;
+      })
       .attr('class', (d) => {
         let markerClass = 'metric-value';
         if (d.anomalyScore !== undefined) {
-          markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
+          markerClass += ` anomaly-marker`;
         }
         return markerClass;
       });
@@ -931,7 +934,13 @@ class TimeseriesChartIntl extends Component {
         (d) => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`
       )
       .attr('data-test-subj', 'mlAnomalyMarker')
-      .attr('class', (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
+      .style('fill', (d) => {
+        if (d.anomalyScore !== undefined) {
+          return anomalyColorScale(d.anomalyScore);
+        }
+        return undefined;
+      })
+      .attr('class', 'anomaly-marker multi-bucket');
 
     // Add rectangular markers for any scheduled events.
     const scheduledEventMarkers = chartElement
@@ -951,7 +960,7 @@ class TimeseriesChartIntl extends Component {
       })
       .on('mouseout', () => hideFocusChartTooltip())
       .attr('width', LINE_CHART_ANOMALY_RADIUS * 2)
-      .attr('height', SCHEDULED_EVENT_SYMBOL_HEIGHT)
+      .attr('height', LINE_CHART_ANOMALY_RADIUS * 2)
       .attr('class', 'scheduled-event-marker')
       .attr('rx', 1)
       .attr('ry', 1);

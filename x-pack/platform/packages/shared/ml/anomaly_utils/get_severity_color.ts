@@ -46,9 +46,13 @@ import { ML_SEVERITY_COLORS } from './severity_colors';
 
 // colors.reverse();
 
-const palette = colorPalette(['#CAD3E2', '#C61E25'], 10);
+const palette = colorPalette(['#E5E9F0', '#C61E25'], 5);
+// skip the first value from "palette"
+export const mlSeverityPalette = palette;
 
-const numOfColors = palette.length;
+// ['#FFC9C2', '#FC9188', '#F6726A', '#DA3737'];
+
+const numOfColors = mlSeverityPalette.length;
 const min = 0;
 const max = 100;
 const interval = (max - min) / numOfColors;
@@ -56,7 +60,7 @@ const interval = (max - min) / numOfColors;
 export const severityColorBands = Array.from<unknown, ColorBand>(
   { length: numOfColors },
   (d, i) => ({
-    color: palette[i],
+    color: mlSeverityPalette[i],
     start: Math.floor(min + i * interval),
     end: Math.ceil(min + (i + 1) * interval),
   })
@@ -69,8 +73,8 @@ export const severityColorBands = Array.from<unknown, ColorBand>(
  */
 export function getSeverityColor(normalizedScore: number): string {
   // map normalizedScore (0-100) to array items of colors array
-  const colorIndex = Math.floor((normalizedScore / 100) * palette.length);
-  const color = palette[colorIndex];
+  const colorIndex = Math.floor((normalizedScore / 100) * mlSeverityPalette.length);
+  const color = mlSeverityPalette[colorIndex];
 
   if (color) {
     return color;
