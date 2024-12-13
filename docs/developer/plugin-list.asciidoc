@@ -557,7 +557,7 @@ Plugin server-side only. Plugin has three main functions:
 |This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/elastic_assistant/README.md[elasticAssistant]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/elastic_assistant/README.md[elasticAssistant]
 |This plugin implements (only) server APIs for the Elastic AI Assistant.
 
 
@@ -657,7 +657,7 @@ the infrastructure monitoring use-case within Kibana.
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
 
 
@@ -771,7 +771,7 @@ Elastic.
 |A plugin that contains components and utilities shared by all Observability plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/osquery/README.md[osquery]
 |This plugin adds extended support to Security Solution Fleet Osquery integration
 
 
@@ -938,11 +938,11 @@ in their infrastructure.
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/threat_intelligence/README.md[threatIntelligence]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/threat_intelligence/README.md[threatIntelligence]
 |Elastic Threat Intelligence makes it easy to analyze and investigate potential security threats by aggregating data from multiple sources in one place. You’ll be able to view data from all activated threat intelligence feeds and take action.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/timelines/README.md[timelines]
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/timelines/README.md[timelines]
 |Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
