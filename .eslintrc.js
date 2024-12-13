@@ -915,9 +915,9 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/observability/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/exploratory_view/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/observability_solution/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability_solution/slo/**/*.{js,mjs,ts,tsx}',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
@@ -936,8 +936,8 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/apm/**/*.stories.*',
-        'x-pack/plugins/observability_solution/observability/**/*.stories.*',
-        'x-pack/plugins/observability_solution/exploratory_view/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
         'x-pack/plugins/observability_solution/slo/**/*.stories.*',
         'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1013,7 +1013,7 @@ module.exports = {
     {
       // disable imports from legacy uptime plugin
       files: [
-        'x-pack/plugins/observability_solution/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-restricted-imports': [
@@ -1109,8 +1109,8 @@ module.exports = {
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
@@ -1144,7 +1144,7 @@ module.exports = {
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
-        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
         'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1159,7 +1159,7 @@ module.exports = {
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
         'packages/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
@@ -1180,7 +1180,7 @@ module.exports = {
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
-        'x-pack/plugins/timelines/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
         'packages/kbn-cell-actions/**/*.{ts,tsx}',
       ],
@@ -1214,9 +1214,9 @@ module.exports = {
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
-        'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
@@ -1316,7 +1316,7 @@ module.exports = {
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'x-pack/packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+            'x-pack/x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
             'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
