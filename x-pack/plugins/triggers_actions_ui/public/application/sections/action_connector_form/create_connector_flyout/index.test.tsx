@@ -530,6 +530,8 @@ describe('CreateConnectorFlyout', () => {
       });
 
       await userEvent.click(await screen.findByTestId('create-connector-flyout-save-btn'));
+      expect(onClose).toHaveBeenCalled();
+      expect(onConnectorCreated).toHaveBeenCalled();
       expect(screen.queryByTestId('connector-form-header-error-label')).not.toBeInTheDocument();
     });
 

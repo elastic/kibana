@@ -62,6 +62,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
+  const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -108,6 +109,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const setResetForm = (reset: ResetForm) => {
     resetConnectorForm.current = reset;
+    setShowFormErrors(false);
   };
 
   const onChangeGroupAction = (id: string) => {
@@ -129,6 +131,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const validateAndCreateConnector = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
+    setShowFormErrors(false);
 
     const { isValid, data } = await submit();
     if (!isMounted.current) {
@@ -161,6 +164,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
+    } else {
+      setShowFormErrors(true);
     }
   }, [submit, preSubmitValidator, createConnector]);
 
@@ -230,7 +235,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiSpacer size="xs" />
               </>
             )}
-            {!!hasErrors && (
+            {showFormErrors && (
               <>
                 <EuiCallOut
                   size="s"

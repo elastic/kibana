@@ -69,6 +69,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
+  const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -97,6 +98,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       if (nextPage === EditConnectorTabs.Configuration && testExecutionResult !== none) {
         setTestExecutionResult(none);
       }
+      setShowFormErrors(false);
       setTab(nextPage);
     },
     [testExecutionResult, setTestExecutionResult]
@@ -153,6 +155,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
 
   const onClickSave = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
+    setShowFormErrors(false);
 
     const { isValid, data } = await submit();
     if (!isMounted.current) {
@@ -201,6 +204,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       }
 
       return updatedConnector;
+    } else {
+      setShowFormErrors(true);
     }
   }, [
     onConnectorUpdated,
@@ -225,7 +230,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         <>
           {isEdit && (
             <>
-              {!!hasErrors && (
+              {showFormErrors && (
                 <>
                   <EuiCallOut
                     size="s"
@@ -289,17 +294,18 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
+    docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     isEdit,
-    docLinks.links.alerting.preconfiguredConnectors,
-    hasErrors,
-    isFormModified,
-    isSaved,
-    isSaving,
+    showFormErrors,
+    onFormModifiedChange,
     preSubmitValidationErrorMessage,
     showButtons,
+    isSaved,
+    isSaving,
     onClickSave,
-    onFormModifiedChange,
+    isFormModified,
+    hasErrors,
   ]);
 
   const renderTestTab = useCallback(() => {
