@@ -7,10 +7,7 @@ Object {
       "accessors": Array [
         Object {
           "columnId": "metric-col-id",
-          "palette": Array [
-            "blue",
-            "yellow",
-          ],
+          "palette": Array [],
           "triggerIconType": "colorBy",
         },
       ],

@@ -10,7 +10,6 @@
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { LayoutDirection, MetricStyle } from '@elastic/charts';
-import { PaletteOutput } from '@kbn/coloring';
 import { TrendlineResult } from './expression_functions';
 
 export const visType = 'metric';
@@ -27,7 +26,7 @@ export interface MetricVisParam {
   secondaryPrefix?: string;
   color?: string;
   icon?: string;
-  palette?: PaletteOutput<CustomPaletteState>;
+  palette?: CustomPaletteState;
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
   valuesTextAlign: MetricStyle['valuesTextAlign'];

@@ -10,29 +10,32 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopoverTitle, EuiTab, EuiTabs, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
+import { getPalette } from '../../palettes';
 import { PaletteColors } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
+import { NeutralPalette } from '../../palettes/neutral';
 
 export function ColorPicker({
-  color,
   palette,
-  palettes,
+  getPaletteFn,
+  color,
   close,
   selectColor,
+  isDarkMode,
   deleteStep,
 }: {
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
-  palette: IKbnPalette;
-  palettes: KbnPalettes;
+  getPaletteFn: ReturnType<typeof getPalette>;
+  palette: ColorMapping.CategoricalPalette;
+  isDarkMode: boolean;
   close: () => void;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
   deleteStep?: () => void;
 }) {
   const [tab, setTab] = useState(
     color.type === 'categorical' &&
-      (color.paletteId === palette.id || color.paletteId === KbnPalette.Neutral)
+      (color.paletteId === palette.id || color.paletteId === NeutralPalette.id)
       ? 'palette'
       : 'custom'
   );
@@ -61,12 +64,20 @@ export function ColorPicker({
       {tab === 'palette' ? (
         <PaletteColors
           color={color}
+          getPaletteFn={getPaletteFn}
           palette={palette}
-          palettes={palettes}
           selectColor={selectColor}
+          isDarkMode={isDarkMode}
         />
       ) : (
-        <RGBPicker color={color} selectColor={selectColor} palettes={palettes} />
+        <RGBPicker
+          color={color}
+          getPaletteFn={getPaletteFn}
+          isDarkMode={isDarkMode}
+          selectColor={selectColor}
+          palette={palette}
+          close={close}
+        />
       )}
       {deleteStep ? (
         <>

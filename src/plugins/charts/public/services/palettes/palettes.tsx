@@ -9,19 +9,29 @@
 
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import { getKbnPalettes, KbnPalette, type IKbnPalette } from '@kbn/palettes';
+import {
+  euiPaletteColorBlind,
+  euiPaletteCool,
+  euiPaletteGray,
+  euiPaletteRed,
+  euiPaletteGreen,
+  euiPaletteWarm,
+  euiPaletteForStatus,
+  euiPaletteForTemperature,
+  euiPaletteComplementary,
+  euiPaletteColorBlindBehindText,
+} from '@elastic/eui';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
-import { CoreTheme } from '@kbn/core/public';
 import { createColorPalette as createLegacyColorPalette } from '../..';
+import { lightenColor } from './lighten_color';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
-import { decreaseOpacity } from './decrease_opacity';
 
 function buildRoundRobinCategoricalWithMappedColors(
-  id: string,
-  colors: string[],
-  behindTextColors?: string[]
+  id = 'default',
+  colors = euiPaletteColorBlind({ rotations: 2 }),
+  behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 })
 ): Omit<PaletteDefinition, 'title'> {
   const behindTextColorMap: Record<string, string> = Object.fromEntries(
     zip(colors, behindTextColors)
@@ -40,22 +50,21 @@ function buildRoundRobinCategoricalWithMappedColors(
       const mappedColor = mappedColors.get(colorKey);
       outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
     } else {
-      outputColor =
-        chartConfiguration.behindText && behindTextColors
-          ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
-          : colors[series[0].rankAtDepth % colors.length];
+      outputColor = chartConfiguration.behindText
+        ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
+        : colors[series[0].rankAtDepth % colors.length];
     }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
     }
 
-    return decreaseOpacity(outputColor, series.length, chartConfiguration.maxDepth);
+    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
     id,
     getCategoricalColor: getColor,
-    getCategoricalColors: (size: number) => colors.slice(0, size),
+    getCategoricalColors: () => colors.slice(0, 10),
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -71,27 +80,29 @@ function buildRoundRobinCategoricalWithMappedColors(
   };
 }
 
-function buildGradient(id: string, palette: IKbnPalette): PaletteDefinition {
+function buildGradient(
+  id: string,
+  colors: (n: number) => string[]
+): Omit<PaletteDefinition, 'title'> {
   function getColor(
     series: SeriesLayer[],
     chartConfiguration: ChartColorConfiguration = { behindText: false }
   ) {
     const totalSeriesAtDepth = series[0].totalSeriesAtDepth;
     const rankAtDepth = series[0].rankAtDepth;
-    const actualColors = palette.colors(totalSeriesAtDepth);
+    const actualColors = colors(totalSeriesAtDepth);
     const outputColor = actualColors[rankAtDepth];
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
     }
 
-    return decreaseOpacity(outputColor, series.length, chartConfiguration.maxDepth);
+    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
     id,
-    title: palette.name,
     getCategoricalColor: getColor,
-    getCategoricalColors: palette.colors,
+    getCategoricalColors: colors,
     canDynamicColoring: true,
     toExpression: () => ({
       type: 'expression',
@@ -142,7 +153,7 @@ function buildCustomPalette(): PaletteDefinition {
         return outputColor;
       }
 
-      return decreaseOpacity(outputColor, series.length, chartConfiguration.maxDepth);
+      return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
     },
     internal: true,
     title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'Custom' }),
@@ -209,32 +220,50 @@ function buildCustomPalette(): PaletteDefinition {
   } as PaletteDefinition<unknown>;
 }
 
-export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinition> => {
-  const kbnPalettes = getKbnPalettes(theme);
-  const defaultPalette = kbnPalettes.get(KbnPalette.Default);
-  return {
-    default: {
-      title: defaultPalette.name,
-      ...buildRoundRobinCategoricalWithMappedColors(
-        'default', // needs to match key of palette definition
-        defaultPalette.colors(),
-        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
-      ),
-    },
-    status: buildGradient('status', kbnPalettes.get('status')),
-    temperature: buildGradient('temperature', kbnPalettes.get('temperature')),
-    complementary: buildGradient('complementary', kbnPalettes.get('complementary')),
-    negative: buildGradient('negative', kbnPalettes.get('red')),
-    positive: buildGradient('positive', kbnPalettes.get('green')),
-    cool: buildGradient('cool', kbnPalettes.get('cool')),
-    warm: buildGradient('warm', kbnPalettes.get('warm')),
-    gray: buildGradient('gray', kbnPalettes.get('gray')),
-    kibana_palette: {
-      title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
-        defaultMessage: 'Compatibility',
-      }),
-      ...buildRoundRobinCategoricalWithMappedColors('kibana_palette', createLegacyColorPalette(20)),
-    },
-    custom: buildCustomPalette(),
-  };
-};
+export const buildPalettes = (): Record<string, PaletteDefinition> => ({
+  default: {
+    title: i18n.translate('charts.palettes.defaultPaletteLabel', { defaultMessage: 'Default' }),
+    ...buildRoundRobinCategoricalWithMappedColors(),
+  },
+  status: {
+    title: i18n.translate('charts.palettes.statusLabel', { defaultMessage: 'Status' }),
+    ...buildGradient('status', euiPaletteForStatus),
+  },
+  temperature: {
+    title: i18n.translate('charts.palettes.temperatureLabel', { defaultMessage: 'Temperature' }),
+    ...buildGradient('temperature', euiPaletteForTemperature),
+  },
+  complementary: {
+    title: i18n.translate('charts.palettes.complementaryLabel', {
+      defaultMessage: 'Complementary',
+    }),
+    ...buildGradient('complementary', euiPaletteComplementary),
+  },
+  negative: {
+    title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),
+    ...buildGradient('negative', euiPaletteRed),
+  },
+  positive: {
+    title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'Positive' }),
+    ...buildGradient('positive', euiPaletteGreen),
+  },
+  cool: {
+    title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'Cool' }),
+    ...buildGradient('cool', euiPaletteCool),
+  },
+  warm: {
+    title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'Warm' }),
+    ...buildGradient('warm', euiPaletteWarm),
+  },
+  gray: {
+    title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'Gray' }),
+    ...buildGradient('gray', euiPaletteGray),
+  },
+  kibana_palette: {
+    title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
+      defaultMessage: 'Compatibility',
+    }),
+    ...buildRoundRobinCategoricalWithMappedColors('kibana_palette', createLegacyColorPalette(20)),
+  },
+  custom: buildCustomPalette() as PaletteDefinition<unknown>,
+});

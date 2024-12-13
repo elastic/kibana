@@ -7,16 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { EuiColorPalettePicker, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KbnPalettes } from '@kbn/palettes';
 import { RootState, updatePalette } from '../../state/color_mapping';
+import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette, updateColorModePalette } from '../../config/assignments';
+import { getPalette } from '../../palettes';
 
-export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
+export function PaletteSelector({
+  palettes,
+  getPaletteFn,
+  isDarkMode,
+}: {
+  getPaletteFn: ReturnType<typeof getPalette>;
+  palettes: Map<string, ColorMapping.CategoricalPalette>;
+  isDarkMode: boolean;
+}) {
   const dispatch = useDispatch();
   const model = useSelector((state: RootState) => state.colorMapping);
 
@@ -29,7 +38,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
             model.assignments,
             model.colorMode,
             selectedPaletteId,
-            palettes,
+            getPaletteFn,
             preserveColorChanges
           ),
           colorMode: updateColorModePalette(
@@ -40,7 +49,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
         })
       );
     },
-    [dispatch, model.assignments, model.colorMode, palettes]
+    [getPaletteFn, model, dispatch]
   );
 
   const [preserveModalPaletteId, setPreserveModalPaletteId] = useState<string | null>(null);
@@ -76,11 +85,6 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
       </EuiConfirmModal>
     ) : null;
 
-  const currentPaletteId = useMemo(
-    () => palettes.get(model.paletteId).id, // need to resolve aliased id
-    [model.paletteId, palettes]
-  );
-
   return (
     <>
       {preserveChangesModal}
@@ -93,15 +97,14 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
         <EuiColorPalettePicker
           data-test-subj="kbnColoring_ColorMapping_PalettePicker"
           fullWidth
-          palettes={palettes
-            .getAll()
-            .filter((d) => d.type === 'categorical')
+          palettes={[...palettes.values()]
+            .filter((d) => d.name !== 'Neutral')
             .map((palette) => ({
               'data-test-subj': `kbnColoring_ColorMapping_Palette-${palette.id}`,
               value: palette.id,
               title: palette.name,
               palette: Array.from({ length: palette.colorCount }, (_, i) => {
-                return palette.getColor(i);
+                return palette.getColor(i, isDarkMode, false);
               }),
               type: 'fixed',
             }))}
@@ -115,7 +118,7 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
               switchPaletteFn(selectedPaletteId, false);
             }
           }}
-          valueOfSelected={currentPaletteId}
+          valueOfSelected={model.paletteId}
           selectionDisplay={'palette'}
           compressed={true}
         />

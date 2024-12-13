@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  CustomPaletteParams,
-  CUSTOM_PALETTE,
-  PaletteRegistry,
-  PaletteOutput,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
+import { CustomPaletteParams, CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,
@@ -29,17 +23,12 @@ import { MetricVisualizationState } from './types';
 import { metricStateDefaults } from './constants';
 
 // TODO - deduplicate with gauges?
-function computePaletteParams(
-  paletteService: PaletteRegistry,
-  palette: PaletteOutput<CustomPaletteParams>
-) {
-  const stops = getOverridePaletteStops(paletteService, palette);
-
+function computePaletteParams(params: CustomPaletteParams) {
   return {
-    ...palette.params,
+    ...params,
     // rewrite colors and stops as two distinct arguments
-    colors: stops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
+    colors: (params?.stops || []).map(({ color }) => color),
+    stops: params?.name === 'custom' ? (params?.stops || []).map(({ stop }) => stop) : [],
     reverse: false, // managed at UI level
   };
 }
@@ -173,7 +162,7 @@ export const toExpression = (
         ? [
             paletteService
               .get(CUSTOM_PALETTE)
-              .toExpression(computePaletteParams(paletteService, state.palette)),
+              .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
           ]
         : [],
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,

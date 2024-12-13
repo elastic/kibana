@@ -38,7 +38,6 @@ import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
-import { useKbnPalettes } from '@kbn/palettes';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
@@ -234,7 +233,6 @@ export function XYChart({
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
-  const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
@@ -991,7 +989,6 @@ export function XYChart({
               minBarHeight={args.minBarHeight}
               formatFactory={formatFactory}
               paletteService={paletteService}
-              palettes={palettes}
               fittingFunction={fittingFunction}
               emphasizeFitting={emphasizeFitting}
               yAxesConfiguration={yAxesConfiguration}

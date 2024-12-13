@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KbnPalette } from '@kbn/palettes';
+import { ElasticBrandPalette } from '@kbn/coloring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
@@ -57,25 +57,25 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: '@message.raw',
-        palette: { mode: 'colorMapping', id: KbnPalette.ElasticClassic },
+        palette: { mode: 'colorMapping', id: ElasticBrandPalette.id },
         keepOpen: true,
       });
 
-      await lens.assertPalette(KbnPalette.ElasticClassic, false);
+      await lens.assertPalette(ElasticBrandPalette.id, false);
       await lens.closeDimensionEditor();
     });
 
     it('should carry over palette to the pie chart', async () => {
       await lens.switchToVisualization('pie');
       await lens.openDimensionEditor('lnsPie_sliceByDimensionPanel > lns-dimensionTrigger');
-      await lens.assertPalette(KbnPalette.ElasticClassic, false);
+      await lens.assertPalette(ElasticBrandPalette.id, false);
       await lens.closeDimensionEditor();
     });
 
     it('should carry palette back to the bar chart', async () => {
       await lens.switchToVisualization('bar');
       await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
-      await lens.assertPalette(KbnPalette.ElasticClassic, false);
+      await lens.assertPalette(ElasticBrandPalette.id, false);
     });
   });
 }

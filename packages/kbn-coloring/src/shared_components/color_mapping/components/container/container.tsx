@@ -12,13 +12,15 @@ import { useSelector, useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { KbnPalettes } from '@kbn/palettes';
 import { PaletteSelector } from '../palette_selector/palette_selector';
 
 import { changeGradientSortOrder } from '../../state/color_mapping';
+import { ColorMapping } from '../../config';
+import { getPalette } from '../../palettes';
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
+import { NeutralPalette } from '../../palettes/neutral';
 import { ScaleMode } from '../palette_selector/scale';
 import { UnassignedTermsConfig } from './unassigned_terms_config';
 import { AssignmentsConfig } from './assigments';
@@ -29,14 +31,17 @@ export function Container({
   isDarkMode,
   specialTokens,
 }: {
-  palettes: KbnPalettes;
+  palettes: Map<string, ColorMapping.CategoricalPalette>;
   data: ColorMappingInputData;
   isDarkMode: boolean;
   /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
   specialTokens: Map<string, string>;
 }) {
   const dispatch = useDispatch();
-  const palette = useSelector(selectPalette(palettes));
+
+  const getPaletteFn = getPalette(palettes, NeutralPalette);
+
+  const palette = useSelector(selectPalette(getPaletteFn));
   const colorMode = useSelector(selectColorMode);
   const assignments = useSelector(selectComputedAssignments);
 
@@ -50,10 +55,14 @@ export function Container({
           gutterSize="s"
         >
           <EuiFlexItem>
-            <PaletteSelector palettes={palettes} />
+            <PaletteSelector
+              palettes={palettes}
+              getPaletteFn={getPaletteFn}
+              isDarkMode={isDarkMode}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={0}>
-            <ScaleMode palettes={palettes} />
+            <ScaleMode getPaletteFn={getPaletteFn} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -96,7 +105,7 @@ export function Container({
           >
             <Gradient
               colorMode={colorMode}
-              palettes={palettes}
+              getPaletteFn={getPaletteFn}
               isDarkMode={isDarkMode}
               paletteId={palette.id}
             />

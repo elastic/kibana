@@ -16,8 +16,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/config-schema",
     "@kbn/data-plugin",
-    "@kbn/core-lifecycle-browser-mocks",
-    "@kbn/palettes",
   ],
   "exclude": [
     "target/**/*",

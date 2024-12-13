@@ -10,7 +10,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiColorPicker,
+  EuiColorPickerProps,
+  EuiToolTip,
+  EuiIcon,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
 import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
 
 const tooltipContent = {
@@ -31,7 +38,6 @@ export interface ColorPickerProps {
   disableHelpTooltip?: boolean;
   disabledMessage?: string;
   showAlpha?: boolean;
-  swatches: string[];
 }
 
 export const ColorPicker = ({
@@ -43,7 +49,6 @@ export const ColorPicker = ({
   disableHelpTooltip,
   disabledMessage,
   showAlpha,
-  swatches,
 }: ColorPickerProps) => {
   const [colorText, setColorText] = useState(overwriteColor || defaultColor);
   const [validatedColor, setValidatedColor] = useState(overwriteColor || defaultColor);
@@ -107,8 +112,8 @@ export const ColorPicker = ({
       showAlpha={showAlpha}
       swatches={
         currentColorAlpha === 1
-          ? swatches
-          : swatches.map((c) => makeColorWithAlpha(c, currentColorAlpha).hex())
+          ? euiPaletteColorBlind()
+          : euiPaletteColorBlind().map((c) => makeColorWithAlpha(c, currentColorAlpha).hex())
       }
     />
   );

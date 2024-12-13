@@ -11,9 +11,9 @@ import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { useDispatch } from 'react-redux';
-import { KbnPalettes } from '@kbn/palettes';
 import { changeAlpha } from '../../color/color_math';
 import { ColorMapping } from '../../config';
+import { getPalette } from '../../palettes';
 import { getGradientColorScale } from '../../color/color_handling';
 import { AddStop } from './gradient_add_stop';
 import { ColorSwatch } from '../color_picker/color_swatch';
@@ -22,21 +22,21 @@ import { updateGradientColorStep } from '../../state/color_mapping';
 export function Gradient({
   paletteId,
   colorMode,
+  getPaletteFn,
   isDarkMode,
-  palettes,
 }: {
   paletteId: string;
   isDarkMode: boolean;
   colorMode: ColorMapping.Config['colorMode'];
-  palettes: KbnPalettes;
+  getPaletteFn: ReturnType<typeof getPalette>;
 }) {
   const dispatch = useDispatch();
   if (colorMode.type === 'categorical') {
     return null;
   }
 
-  const currentPalette = palettes.get(paletteId);
-  const gradientColorScale = getGradientColorScale(colorMode, palettes, isDarkMode);
+  const currentPalette = getPaletteFn(paletteId);
+  const gradientColorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
 
   const startStepColor =
     colorMode.sort === 'asc'
@@ -104,7 +104,7 @@ export function Gradient({
             forType="gradient"
             colorMode={colorMode}
             assignmentColor={startStepColor}
-            palettes={palettes}
+            getPaletteFn={getPaletteFn}
             index={startStepIndex}
             palette={currentPalette}
             total={colorMode.steps.length}
@@ -133,7 +133,7 @@ export function Gradient({
             forType="gradient"
             colorMode={colorMode}
             assignmentColor={middleStepColor}
-            palettes={palettes}
+            getPaletteFn={getPaletteFn}
             index={middleStepIndex}
             palette={currentPalette}
             total={colorMode.steps.length}
@@ -161,7 +161,7 @@ export function Gradient({
             forType="gradient"
             colorMode={colorMode}
             assignmentColor={endStepColor}
-            palettes={palettes}
+            getPaletteFn={getPaletteFn}
             index={endStepIndex}
             palette={currentPalette}
             total={colorMode.steps.length}

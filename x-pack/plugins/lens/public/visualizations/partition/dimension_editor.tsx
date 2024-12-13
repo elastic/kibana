@@ -14,20 +14,17 @@ import {
   PaletteRegistry,
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
+  AVAILABLE_PALETTES,
+  getColorsFromMapping,
 } from '@kbn/coloring';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
-import {
-  PalettePanelContainer,
-  PalettePicker,
-  getPaletteDisplayColors,
-} from '../../shared_components';
+import { PalettePanelContainer, PalettePicker } from '../../shared_components';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import {
   getDefaultColorForMultiMetricDimension,
@@ -38,7 +35,6 @@ import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;
-  palettes: KbnPalettes;
   isDarkMode: boolean;
 };
 
@@ -122,13 +118,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  const colors = getPaletteDisplayColors(
-    props.paletteService,
-    props.palettes,
-    props.isDarkMode,
-    props.state.palette,
-    currentLayer.colorMapping
-  );
+  const colors = getColorsFromMapping(props.isDarkMode, currentLayer.colorMapping);
   const table = props.frame.activeData?.[currentLayer.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
 
@@ -193,7 +183,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       isDarkMode={props.isDarkMode}
                       model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
                       onModelUpdate={(model: ColorMapping.Config) => setColorMapping(model)}
-                      palettes={props.palettes}
+                      palettes={AVAILABLE_PALETTES}
                       data={{
                         type: 'categories',
                         categories: splitCategories,
@@ -219,7 +209,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       {showColorPicker && (
         <ColorPicker
           {...props}
-          swatches={props.palettes.get(KbnPalette.Default).colors(10)}
           overwriteColor={currentLayer.colorsByDimension?.[props.accessor]}
           defaultColor={getDefaultColorForMultiMetricDimension({
             layer: currentLayer,

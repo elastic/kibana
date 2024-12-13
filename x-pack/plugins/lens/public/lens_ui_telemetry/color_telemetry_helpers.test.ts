@@ -8,10 +8,11 @@
 import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
 import {
   ColorMapping,
+  EUIAmsterdamColorBlindPalette,
+  ElasticBrandPalette,
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '@kbn/coloring';
-import { KbnPalette } from '@kbn/palettes';
 import { faker } from '@faker-js/faker';
 
 const exampleAssignment = (
@@ -23,7 +24,7 @@ const exampleAssignment = (
     type === 'categorical'
       ? {
           type: 'categorical',
-          paletteId: KbnPalette.ElasticClassic,
+          paletteId: ElasticBrandPalette.id,
           colorIndex: 0,
         }
       : {
@@ -56,13 +57,13 @@ const MANUAL_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       },
       color: {
         type: 'categorical',
-        paletteId: KbnPalette.ElasticClassic,
+        paletteId: ElasticBrandPalette.id,
         colorIndex: 2,
       },
       touched: true,
     },
   ],
-  paletteId: KbnPalette.ElasticClassic,
+  paletteId: ElasticBrandPalette.id,
   colorMode: {
     type: 'categorical',
   },
@@ -73,7 +74,7 @@ const specialAssignmentsPalette: ColorMapping.Config['specialAssignments'] = [
     ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
     color: {
       type: 'categorical',
-      paletteId: KbnPalette.Kibana7,
+      paletteId: EUIAmsterdamColorBlindPalette.id,
       colorIndex: 0,
     },
   },
@@ -111,7 +112,7 @@ describe('color_telemetry_helpers', () => {
   });
   it('settings (default): unassigned terms loop, default palette returns correct events', () => {
     expect(getColorMappingTelemetryEvents(DEFAULT_COLOR_MAPPING_CONFIG)).toEqual([
-      'color_mapping_palette_default',
+      'color_mapping_palette_eui_amsterdam_color_blind',
       'color_mapping_unassigned_terms_loop',
     ]);
   });
@@ -125,7 +126,7 @@ describe('color_telemetry_helpers', () => {
             steps: [
               {
                 type: 'categorical',
-                paletteId: KbnPalette.Kibana7,
+                paletteId: EUIAmsterdamColorBlindPalette.id,
                 colorIndex: 0,
                 touched: false,
               },

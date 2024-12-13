@@ -6,7 +6,7 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -36,13 +36,9 @@ describe('metric visualization', () => {
 
   const palette: PaletteOutput<CustomPaletteParams> = {
     type: 'palette',
-    name: CUSTOM_PALETTE,
+    name: 'foo',
     params: {
       rangeType: 'percent',
-      stops: [
-        { color: 'blue', stop: 0 },
-        { color: 'yellow', stop: 100 },
-      ],
     },
   };
 
@@ -137,10 +133,7 @@ describe('metric visualization', () => {
           Array [
             Object {
               "columnId": "metric-col-id",
-              "palette": Array [
-                "blue",
-                "yellow",
-              ],
+              "palette": Array [],
               "triggerIconType": "colorBy",
             },
           ]
@@ -190,10 +183,7 @@ describe('metric visualization', () => {
           Array [
             Object {
               "columnId": "metric-col-id",
-              "palette": Array [
-                "blue",
-                "yellow",
-              ],
+              "palette": Array [],
               "triggerIconType": "colorBy",
             },
           ]

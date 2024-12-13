@@ -65,22 +65,16 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  * should not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana.
  */
 export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = ({
-  theme,
+  theme: { theme$ },
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   modify,
   children,
 }) => {
-  const { theme$ } = theme;
-
-  // use the selected theme if available before using the defaultTheme; this ensures that
-  // Kibana loads with the currently selected theme without additional updates from default to selected
-  const initialTheme = theme.getTheme?.() ?? defaultTheme;
-
-  const kibanaTheme = useObservable(theme$, initialTheme);
+  const kibanaTheme = useObservable(theme$, defaultTheme);
   const themeColorMode = useMemo(() => getColorMode(kibanaTheme), [kibanaTheme]);
 
-  const _theme = useMemo(() => {
+  const theme = useMemo(() => {
     const config = getThemeConfigByName(kibanaTheme.name) || DEFAULT_THEME_CONFIG;
     return config.euiTheme;
   }, [kibanaTheme.name]);
@@ -101,7 +95,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         colorMode,
         globalStyles,
         utilityClasses: globalStyles,
-        theme: _theme,
+        theme,
       }}
     >
       {children}

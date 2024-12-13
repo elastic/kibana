@@ -19,33 +19,35 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IKbnPalette, KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
+import { getPalette } from '../../palettes';
 import { isSameColor } from '../../color/color_math';
+import { NeutralPalette } from '../../palettes/neutral';
 
 export function PaletteColors({
   palette,
-  palettes,
+  isDarkMode,
   color,
+  getPaletteFn,
   selectColor,
 }: {
-  palette: IKbnPalette;
-  palettes: KbnPalettes;
+  palette: ColorMapping.CategoricalPalette;
+  isDarkMode: boolean;
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
+  getPaletteFn: ReturnType<typeof getPalette>;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
 }) {
   const colors = Array.from({ length: palette.colorCount }, (d, i) => {
-    return palette.getColor(i);
+    return palette.getColor(i, isDarkMode, false);
   });
-  const neutralPalette = palettes.get(KbnPalette.Neutral);
-  const neutralColors = Array.from({ length: neutralPalette.colorCount }, (d, i) => {
-    return neutralPalette.getColor(i);
+  const neutralColors = Array.from({ length: NeutralPalette.colorCount }, (d, i) => {
+    return NeutralPalette.getColor(i, isDarkMode, false);
   });
   const originalColor =
     color.type === 'categorical'
-      ? color.paletteId === neutralPalette.id
-        ? neutralPalette.getColor(color.colorIndex)
-        : palettes.get(color.paletteId).getColor(color.colorIndex)
+      ? color.paletteId === NeutralPalette.id
+        ? NeutralPalette.getColor(color.colorIndex, isDarkMode, false)
+        : getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, false)
       : color.colorCode;
   return (
     <>
@@ -124,7 +126,7 @@ export function PaletteColors({
                   onClick={() =>
                     selectColor({
                       type: 'categorical',
-                      paletteId: neutralPalette.id,
+                      paletteId: NeutralPalette.id,
                       colorIndex: index,
                     })
                   }

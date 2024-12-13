@@ -11,7 +11,7 @@ import { buildPalettes } from './palettes';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
-  const palettes = buildPalettes({ name: 'amsterdam', darkMode: false });
+  const palettes = buildPalettes();
 
   describe('default palette', () => {
     describe('syncColors: false', () => {

@@ -12,12 +12,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { EuiButtonGroup, EuiConfirmModal, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { KbnPalettes } from '@kbn/palettes';
 import { RootState, updatePalette } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { updateAssignmentsPalette } from '../../config/assignments';
+import { getPalette } from '../../palettes';
 
-export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
+export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof getPalette> }) {
   const dispatch = useDispatch();
   const colorMode = useSelector((state: RootState) => state.colorMapping.colorMode);
   const model = useSelector((state: RootState) => state.colorMapping);
@@ -46,12 +46,12 @@ export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
         model.assignments,
         updatedColorMode,
         paletteId,
-        palettes,
+        getPaletteFn,
         preserveColorChanges
       );
       dispatch(updatePalette({ paletteId, assignments, colorMode: updatedColorMode }));
     },
-    [paletteId, model.assignments, palettes, dispatch]
+    [getPaletteFn, model, dispatch, paletteId]
   );
 
   const [colorScaleModalId, setColorScaleModalId] = useState<'gradient' | 'categorical' | null>(

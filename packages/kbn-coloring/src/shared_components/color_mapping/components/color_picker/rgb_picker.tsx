@@ -22,19 +22,24 @@ import chromajs from 'chroma-js';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '../../config';
 
 import { hasEnoughContrast } from '../../color/color_math';
+import { getPalette } from '../../palettes';
 
 export function RGBPicker({
+  isDarkMode,
   color,
-  palettes,
+  getPaletteFn,
   selectColor,
+  close,
 }: {
+  palette: ColorMapping.CategoricalPalette;
+  isDarkMode: boolean;
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
-  palettes: KbnPalettes;
+  getPaletteFn: ReturnType<typeof getPalette>;
   selectColor: (color: ColorMapping.CategoricalColor | ColorMapping.ColorCode) => void;
+  close: () => void;
 }) {
   const [customColorMappingColor, setCustomColorMappingColor] = useState<
     ColorMapping.CategoricalColor | ColorMapping.ColorCode
@@ -42,7 +47,11 @@ export function RGBPicker({
 
   const customColorHex =
     customColorMappingColor.type === 'categorical'
-      ? palettes.get(customColorMappingColor.paletteId).getColor(customColorMappingColor.colorIndex)
+      ? getPaletteFn(customColorMappingColor.paletteId).getColor(
+          customColorMappingColor.colorIndex,
+          isDarkMode,
+          false
+        )
       : customColorMappingColor.colorCode;
 
   const [colorTextInput, setColorTextInput] = useState<string>(customColorHex);

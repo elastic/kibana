@@ -12,14 +12,12 @@ import {
   getSpecialString,
 } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import { KbnPalettes } from '@kbn/palettes';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
 export type CellColorFn = (value?: number | string | null) => string | null;
 
 export function getCellColorFn(
   paletteService: PaletteRegistry,
-  palettes: KbnPalettes,
   data: ColorMappingInputData,
   colorByTerms: boolean,
   isDarkMode: boolean,
@@ -39,7 +37,7 @@ export function getCellColorFn(
 
   if (colorByTerms && data.type === 'categories') {
     if (colorMapping) {
-      return getColorAccessorFn(palettes, colorMapping, data, isDarkMode);
+      return getColorAccessorFn(colorMapping, data, isDarkMode);
     } else if (palette) {
       return (category) => {
         if (category === undefined || category === null) return null;

@@ -224,7 +224,7 @@ describe('xy_visualization', () => {
                 "colorMode": Object {
                   "type": "categorical",
                 },
-                "paletteId": "default",
+                "paletteId": "eui_amsterdam_color_blind",
                 "specialAssignments": Array [
                   Object {
                     "color": Object {

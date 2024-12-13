@@ -27,7 +27,6 @@ import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palett
 import { DimensionsVisParam, MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
@@ -1161,16 +1160,12 @@ describe('MetricVisComponent', function () {
                 // should be overridden
                 color: 'static-color',
                 palette: {
-                  type: 'palette',
-                  name: 'default',
-                  params: {
-                    colors: [],
-                    gradient: true,
-                    stops: [],
-                    range: 'number',
-                    rangeMin: 2,
-                    rangeMax: 10,
-                  },
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
                 },
               },
             }}
@@ -1205,7 +1200,7 @@ describe('MetricVisComponent', function () {
 
       describe('percent-based', () => {
         const renderWithPalette = (
-          palette: PaletteOutput<CustomPaletteState>,
+          palette: CustomPaletteState,
           dimensions: MetricVisComponentProps['config']['dimensions']
         ) =>
           shallow(
@@ -1243,17 +1238,13 @@ describe('MetricVisComponent', function () {
 
             renderWithPalette(
               {
-                type: 'palette',
-                name: 'default',
-                params: {
-                  range: 'percent',
-                  // the rest of these params don't matter
-                  colors: [],
-                  gradient: false,
-                  stops: [],
-                  rangeMin: 2,
-                  rangeMax: 10,
-                },
+                range: 'percent',
+                // the rest of these params don't matter
+                colors: [],
+                gradient: false,
+                stops: [],
+                rangeMin: 2,
+                rangeMax: 10,
               },
               dimensions as DimensionsVisParam
             );

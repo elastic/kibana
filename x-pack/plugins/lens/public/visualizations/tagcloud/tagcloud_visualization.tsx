@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
+import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -20,7 +20,6 @@ import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { getKbnPalettes } from '@kbn/palettes';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
@@ -123,8 +122,7 @@ export const getTagcloudVisualization = ({
       kibanaTheme.theme$
         .subscribe({
           next(theme) {
-            const palettes = getKbnPalettes(theme);
-            colors = getColorsFromMapping(palettes, theme.darkMode, state.colorMapping);
+            colors = getColorsFromMapping(theme.darkMode, state.colorMapping);
           },
         })
         .unsubscribe();
@@ -296,18 +294,15 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, {
       darkMode: false,
       name: 'amsterdam',
-    });
-    const palettes = getKbnPalettes(theme);
-
+    }).darkMode;
     if (props.groupId === TAG_GROUP_ID) {
       return (
         <TagsDimensionEditor
-          isDarkMode={theme.darkMode}
+          isDarkMode={isDarkMode}
           paletteService={paletteService}
-          palettes={palettes}
           state={props.state}
           setState={props.setState}
           frame={props.frame}

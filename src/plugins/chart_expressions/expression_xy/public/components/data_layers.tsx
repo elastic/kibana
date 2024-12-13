@@ -20,7 +20,6 @@ import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { KbnPalettes } from '@kbn/palettes';
 import {
   CommonXYDataLayerConfig,
   EndValue,
@@ -50,7 +49,6 @@ interface Props {
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
-  palettes: KbnPalettes;
   formattedDatatables: DatatablesWithFormatInfo;
   syncColors: boolean;
   timeZone: string;
@@ -77,7 +75,6 @@ export const DataLayers: FC<Props> = ({
   minBarHeight,
   formatFactory,
   paletteService,
-  palettes,
   fittingFunction,
   emphasizeFitting,
   yAxesConfiguration,
@@ -166,7 +163,6 @@ export const DataLayers: FC<Props> = ({
             formatFactory,
             columnToLabelMap,
             paletteService,
-            palettes,
             formattedDatatableInfo,
             syncColors,
             yAxis,

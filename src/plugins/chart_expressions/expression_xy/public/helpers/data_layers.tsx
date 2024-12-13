@@ -25,9 +25,13 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import { SPECIAL_TOKENS_STRING_CONVERSION } from '@kbn/coloring';
+import {
+  getPalette,
+  AVAILABLE_PALETTES,
+  NeutralPalette,
+  SPECIAL_TOKENS_STRING_CONVERSION,
+} from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalettes } from '@kbn/palettes';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
@@ -50,7 +54,6 @@ type GetSeriesPropsFn = (config: {
   colorAssignments: ColorAssignments;
   columnToLabelMap: Record<string, string>;
   paletteService: PaletteRegistry;
-  palettes: KbnPalettes;
   yAxis?: GroupsConfiguration[number];
   xAxis?: GroupsConfiguration[number];
   syncColors: boolean;
@@ -389,7 +392,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   formatFactory,
   columnToLabelMap,
   paletteService,
-  palettes,
   syncColors,
   yAxis,
   xAxis,
@@ -488,7 +490,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     layer.colorMapping && splitColumnIds.length > 0
       ? getColorSeriesAccessorFn(
           JSON.parse(layer.colorMapping), // the color mapping is at this point just a stringified JSON
-          palettes,
+          getPalette(AVAILABLE_PALETTES, NeutralPalette),
           isDarkMode,
           {
             type: 'categories',

@@ -32,7 +32,6 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
-import { ThemeServiceSetup } from '@kbn/core/public';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
@@ -44,11 +43,10 @@ import type {
   StartServices,
 } from '../types';
 
-export interface GetStartDeps {
+export type GetStartDepsFn = () => Promise<{
   data: DataPublicPluginStart;
   formatFactory: FormatFactory;
   theme: ChartsPluginStart['theme'];
-  kibanaTheme: ThemeServiceSetup;
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
@@ -57,10 +55,10 @@ export interface GetStartDeps {
   usageCollection?: UsageCollectionStart;
   timeFormat: string;
   startServices: StartServices;
-}
+}>;
 
 interface XyChartRendererDeps {
-  getStartDeps: () => Promise<GetStartDeps>;
+  getStartDeps: GetStartDepsFn;
 }
 
 export const extractCounterEvents = (
