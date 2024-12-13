@@ -27,7 +27,7 @@ export async function checkForDuplicateTitle(
   onTitleDuplicate: (() => void) | undefined,
   services: {
     contentClient: ContentClient;
-  } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>
+  } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>
 ): Promise<boolean> {
   const { contentClient, ...startServices } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
