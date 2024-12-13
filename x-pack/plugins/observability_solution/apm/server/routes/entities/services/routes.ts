@@ -10,6 +10,7 @@ import {
   SERVICE_NAME,
   DATA_STREAM_TYPE,
   AGENT_NAME,
+  SERVICE_ENVIRONMENT,
 } from '@kbn/observability-shared-plugin/common';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_entities_es_client/create_entities_es_client';
@@ -56,14 +57,15 @@ const serviceEntitiesSummaryRoute = createApmServerRoute({
       type: 'built_in_services_from_ecs_data',
       filters: [`${SERVICE_NAME}: "${serviceName}"`],
       limit: 1,
-      metadata_fields: [DATA_STREAM_TYPE, AGENT_NAME],
+      metadata_fields: [DATA_STREAM_TYPE, AGENT_NAME, SERVICE_ENVIRONMENT],
     });
 
     console.log(
       '### caue  handler  eemAPIServiceEntity:',
       JSON.stringify(eemAPIServiceEntity, null, 2)
     );
-    return eemAPIServiceEntity[0];
+
+    return eemAPIServiceEntity.entities[0];
   },
 });
 
