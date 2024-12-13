@@ -49,7 +49,7 @@ function throwNotImplementedIfSourceMapNotAvailable(featureFlags: ApmFeatureFlag
 
 const listSourceMapRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/sourcemaps 2023-10-31',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.partial({
     query: t.partial({
       page: toNumberRt,
@@ -85,8 +85,12 @@ const listSourceMapRoute = createApmServerRoute({
 const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
     body: { accepts: ['multipart/form-data'] },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
   },
   params: t.type({
     body: t.type({
@@ -159,7 +163,11 @@ const uploadSourceMapRoute = createApmServerRoute({
 
 const deleteSourceMapRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   params: t.type({
     path: t.type({
       id: t.string,
@@ -192,7 +200,11 @@ const deleteSourceMapRoute = createApmServerRoute({
 
 const migrateFleetArtifactsSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/sourcemaps/migrate_fleet_artifacts',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   handler: async ({ plugins, core, logger, featureFlags }): Promise<void> => {
     throwNotImplementedIfSourceMapNotAvailable(featureFlags);
 

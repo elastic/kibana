@@ -20,7 +20,7 @@ const infrastructureRoute = createApmServerRoute({
     }),
     query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{

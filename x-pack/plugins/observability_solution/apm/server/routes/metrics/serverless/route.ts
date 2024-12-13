@@ -46,7 +46,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       t.intersection([transactionDataSourceRt, t.type({ bucketSizeInSeconds: toNumberRt })]),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -93,7 +93,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt, t.partial({ serverlessId: t.string })]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -132,7 +132,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<{
@@ -164,7 +164,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, kueryRt, rangeRt, t.partial({ serverlessId: t.string })]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServerlessSummaryResponse> => {
     const { params, context } = resources;
     const {

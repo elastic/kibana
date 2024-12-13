@@ -25,9 +25,7 @@ import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
     const { context } = resources;
     const {
@@ -47,9 +45,7 @@ const serviceGroupRoute = createApmServerRoute({
       serviceGroup: t.string,
     }),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ serviceGroup: SavedServiceGroup }> => {
     const { context, params } = resources;
     const {
@@ -79,7 +75,11 @@ const serviceGroupSaveRoute = createApmServerRoute({
       color: t.union([t.string, t.undefined]),
     }),
   }),
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   handler: async (resources): Promise<SavedServiceGroup> => {
     const { context, params } = resources;
     const { serviceGroupId } = params.query;
@@ -106,7 +106,11 @@ const serviceGroupDeleteRoute = createApmServerRoute({
       serviceGroupId: t.string,
     }),
   }),
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'apm_write'],
+    },
+  },
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { serviceGroupId } = params.query;
@@ -123,9 +127,7 @@ const serviceGroupServicesRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([rangeRt, t.partial(kueryRt.props)]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ items: LookupServicesResponse }> => {
     const { params, context } = resources;
     const { kuery = '', start, end } = params.query;
@@ -149,9 +151,7 @@ const serviceGroupServicesRoute = createApmServerRoute({
 type ServiceGroupCounts = Record<string, { services: number; alerts: number }>;
 const serviceGroupCountsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-group/counts',
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceGroupCounts> => {
     const { context, logger, plugins, request } = resources;
     const {

@@ -47,7 +47,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<OverallLatencyDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 

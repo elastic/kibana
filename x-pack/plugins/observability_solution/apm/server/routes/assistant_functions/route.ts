@@ -19,8 +19,10 @@ import { getApmTimeseries, getApmTimeseriesRt, type ApmTimeseries } from './get_
 
 const getApmTimeSeriesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/assistant/get_apm_timeseries',
-  options: {
-    tags: ['access:apm', 'access:ai_assistant'],
+  security: {
+    authz: {
+      requiredPrivileges: ['apm', 'ai_assistant'],
+    },
   },
   params: t.type({
     body: getApmTimeseriesRt,
@@ -51,9 +53,7 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
   params: t.type({
     query: downstreamDependenciesRouteRt,
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ content: APMDownstreamDependency[] }> => {
     const {
       params,

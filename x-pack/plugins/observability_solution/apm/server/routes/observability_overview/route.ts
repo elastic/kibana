@@ -19,7 +19,7 @@ import { getHasData, HasDataResponse } from './has_data';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview/has_data',
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<HasDataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     return await getHasData({
@@ -34,7 +34,7 @@ const observabilityOverviewRoute = createApmServerRoute({
   params: t.type({
     query: t.intersection([rangeRt, t.type({ bucketSize: toNumberRt, intervalString: t.string })]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ObservabilityOverviewResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { bucketSize, intervalString, start, end } = resources.params.query;

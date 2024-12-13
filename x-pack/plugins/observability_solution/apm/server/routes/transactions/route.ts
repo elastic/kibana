@@ -75,9 +75,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       transactionDataSourceRt,
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<MergedServiceTransactionGroupsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -164,9 +162,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: {
-    tags: ['access:apm'],
-  },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceTransactionGroupDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -226,7 +222,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       serviceTransactionDataSourceRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TransactionLatencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, logger } = resources;
@@ -295,7 +291,7 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TransactionTraceSamplesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -344,7 +340,7 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TransactionBreakdownResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
@@ -378,7 +374,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<FailedTransactionRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 
@@ -427,7 +423,7 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ColdstartRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 
@@ -469,7 +465,7 @@ const transactionChartsColdstartRateByTransactionNameRoute = createApmServerRout
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ColdstartRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 

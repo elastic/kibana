@@ -28,7 +28,7 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([rangeRt, environmentRt, serviceTransactionDataSourceRt, kueryRt]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<
@@ -92,7 +92,7 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
       kueryRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
     resources
   ): Promise<

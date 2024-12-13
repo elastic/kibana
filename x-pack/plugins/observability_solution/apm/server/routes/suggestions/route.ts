@@ -26,7 +26,7 @@ const suggestionsRoute = createApmServerRoute({
       t.partial({ serviceName: t.string }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<{ terms: string[] }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { context, params, config } = resources;

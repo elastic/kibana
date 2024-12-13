@@ -51,7 +51,7 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
       rangeRt,
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<DurationFieldCandidatesResponse> => {
     const { context } = resources;
     const { license } = await context.licensing;
@@ -104,7 +104,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopValuesStats> => {
     const { context } = resources;
     const { license } = await context.licensing;
@@ -172,7 +172,7 @@ const fieldValuePairsTransactionsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<FieldValuePairsResponse> => {
     const { context } = resources;
     const { license } = await context.licensing;
@@ -240,7 +240,7 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<SignificantCorrelationsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const {
@@ -299,7 +299,7 @@ const pValuesTransactionsRoute = createApmServerRoute({
       }),
     ]),
   }),
-  options: { tags: ['access:apm'] },
+  security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<PValuesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 
