@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,57 +14,31 @@ import {
   EuiSteps,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
-import { SubStepWrapper } from '../common/sub_step_wrapper';
-import type { OnMigrationCreated } from '../../types';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SubStepsWrapper } from '../common/sub_step_wrapper';
+import type { OnMigrationCreated, OnMissingResourcesFetched, DataInputStep } from '../../types';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useRulesFileUploadStep } from './sub_steps/rules_file_upload';
 import * as i18n from './translations';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
+import { getStatus } from '../common/get_status';
 
-type Step = 1 | 2 | 3 | 4;
-const getStatus = (step: Step, currentStep: Step): EuiStepStatus => {
-  if (step === currentStep) {
-    return 'current';
-  }
-  if (step < currentStep) {
-    return 'complete';
-  }
-  return 'incomplete';
-};
+const DataInputStepNumber: DataInputStep = 1;
 
-interface RulesDataInputProps {
-  selected: boolean;
+interface RulesDataInputSubStepsProps {
+  migrationStats?: RuleMigrationTaskStats;
   onMigrationCreated: OnMigrationCreated;
+  onMissingResourcesFetched: OnMissingResourcesFetched;
 }
-
+interface RulesDataInputProps extends RulesDataInputSubStepsProps {
+  dataInputStep: DataInputStep;
+}
 export const RulesDataInput = React.memo<RulesDataInputProps>(
-  ({ selected, onMigrationCreated }) => {
-    const [step, setStep] = useState<Step>(1);
-
-    const copyStep = useCopyExportQueryStep({
-      status: getStatus(1, step),
-      onCopied: () => setStep(2),
-    });
-
-    const uploadStep = useRulesFileUploadStep({
-      status: getStatus(2, step),
-      onMigrationCreated: (stats) => {
-        onMigrationCreated(stats);
-        setStep(3);
-      },
-    });
-
-    const resourcesStep = useCheckResourcesStep({
-      status: getStatus(3, step),
-      onComplete: () => {
-        setStep(4);
-      },
-    });
-
-    const steps = useMemo<EuiStepProps[]>(
-      () => [copyStep, uploadStep, resourcesStep],
-      [copyStep, uploadStep, resourcesStep]
+  ({ dataInputStep, migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
+    const dataInputStatus = useMemo(
+      () => getStatus(DataInputStepNumber, dataInputStep),
+      [dataInputStep]
     );
 
     return (
@@ -73,7 +47,11 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
           <EuiFlexItem>
             <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiStepNumber number={1} titleSize="xs" />
+                <EuiStepNumber
+                  titleSize="xs"
+                  number={DataInputStepNumber}
+                  status={dataInputStatus}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs">
@@ -82,14 +60,72 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <SubStepWrapper>
-              <EuiSteps titleSize="xxs" steps={steps} />
-            </SubStepWrapper>
-          </EuiFlexItem>
+          {dataInputStatus === 'current' && (
+            <EuiFlexItem>
+              <RulesDataInputSubSteps
+                migrationStats={migrationStats}
+                onMigrationCreated={onMigrationCreated}
+                onMissingResourcesFetched={onMissingResourcesFetched}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     );
   }
 );
 RulesDataInput.displayName = 'RulesDataInput';
+
+const END = 10 as const;
+type SubStep = 1 | 2 | 3 | typeof END;
+export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
+  ({ migrationStats, onMigrationCreated, onMissingResourcesFetched }) => {
+    const [subStep, setSubStep] = useState<SubStep>(migrationStats ? 3 : 1);
+
+    // Copy query step
+    const onCopied = useCallback(() => {
+      setSubStep(2);
+    }, []);
+    const copyStep = useCopyExportQueryStep({ status: getStatus(1, subStep), onCopied });
+
+    // Upload rules step
+    const onMigrationCreatedStep = useCallback<OnMigrationCreated>(
+      (stats) => {
+        onMigrationCreated(stats);
+        setSubStep(3);
+      },
+      [onMigrationCreated]
+    );
+    const uploadStep = useRulesFileUploadStep({
+      status: getStatus(2, subStep),
+      migrationStats,
+      onMigrationCreated: onMigrationCreatedStep,
+    });
+
+    // Check missing resources step
+    const onMissingResourcesFetchedStep = useCallback<OnMissingResourcesFetched>(
+      (missingResources) => {
+        onMissingResourcesFetched(missingResources);
+        setSubStep(END);
+      },
+      [onMissingResourcesFetched]
+    );
+    const resourcesStep = useCheckResourcesStep({
+      status: getStatus(3, subStep),
+      migrationStats,
+      onMissingResourcesFetched: onMissingResourcesFetchedStep,
+    });
+
+    const steps = useMemo<EuiStepProps[]>(
+      () => [copyStep, uploadStep, resourcesStep],
+      [copyStep, uploadStep, resourcesStep]
+    );
+
+    return (
+      <SubStepsWrapper>
+        <EuiSteps titleSize="xxs" steps={steps} />
+      </SubStepsWrapper>
+    );
+  }
+);
+RulesDataInputSubSteps.displayName = 'RulesDataInputActive';

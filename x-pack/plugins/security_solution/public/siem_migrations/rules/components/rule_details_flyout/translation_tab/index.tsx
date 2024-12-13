@@ -9,10 +9,8 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiSplitPanel,
   EuiTitle,
@@ -29,20 +27,22 @@ import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
 } from '../../../utils/helpers';
+import { TranslationCallOut } from './callout';
 
 interface TranslationTabProps {
   ruleMigration: RuleMigration;
   matchedPrebuiltRule?: RuleResponse;
+  onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }
 
 export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
-  ({ ruleMigration, matchedPrebuiltRule }) => {
+  ({ ruleMigration, matchedPrebuiltRule, onTranslationUpdate }) => {
     const { euiTheme } = useEuiTheme();
 
-    const name = useMemo(
-      () => ruleMigration.elastic_rule?.title ?? ruleMigration.original_rule.title,
-      [ruleMigration.elastic_rule?.title, ruleMigration.original_rule.title]
-    );
+    const isInstalled = !!ruleMigration.elastic_rule?.id;
+    const canEdit = !matchedPrebuiltRule && !isInstalled;
+
+    const ruleName = matchedPrebuiltRule?.name ?? ruleMigration.elastic_rule?.title;
     const originalQuery = ruleMigration.original_rule.query;
     const elasticQuery = useMemo(() => {
       let query = ruleMigration.elastic_rule?.query;
@@ -55,10 +55,12 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
     return (
       <>
         <EuiSpacer size="m" />
-        <EuiFormRow label={i18n.NAME_LABEL} fullWidth>
-          <EuiFieldText value={name} fullWidth />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
+        {ruleMigration.translation_result && !isInstalled && (
+          <>
+            <TranslationCallOut translationResult={ruleMigration.translation_result} />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiAccordion
           id="translationQueryItem"
           buttonContent={<TranslationTabHeader />}
@@ -85,7 +87,9 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                       onClick={() => {}}
                       onClickAriaLabel={'Click to update translation status'}
                     >
-                      {convertTranslationResultIntoText(ruleMigration.translation_result)}
+                      {isInstalled
+                        ? i18n.INSTALLED_LABEL
+                        : convertTranslationResultIntoText(ruleMigration.translation_result)}
                     </EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -95,6 +99,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                   <EuiFlexItem grow={1}>
                     <MigrationRuleQuery
                       title={i18n.SPLUNK_QUERY_TITLE}
+                      ruleName={ruleMigration.original_rule.title}
                       query={originalQuery}
                       canEdit={false}
                     />
@@ -108,13 +113,11 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                   />
                   <EuiFlexItem grow={1}>
                     <MigrationRuleQuery
-                      title={
-                        matchedPrebuiltRule
-                          ? i18n.PREBUILT_RULE_QUERY_TITLE
-                          : i18n.ESQL_TRANSLATION_TITLE
-                      }
+                      title={i18n.ESQL_TRANSLATION_TITLE}
+                      ruleName={ruleName}
                       query={elasticQuery}
-                      canEdit={false}
+                      canEdit={canEdit}
+                      onTranslationUpdate={onTranslationUpdate}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

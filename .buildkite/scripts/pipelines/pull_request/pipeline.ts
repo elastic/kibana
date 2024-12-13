@@ -89,7 +89,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/observability_onboarding/,
+        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
         /^x-pack\/plugins\/fleet/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -114,7 +114,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) ||
+      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/exploratory_view/])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
@@ -122,8 +122,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/synthetics/,
-        /^x-pack\/plugins\/observability_solution\/exploratory_view/,
+        /^x-pack\/solutions\/observability\/plugins\/synthetics/,
+        /^x-pack\/solutions\/observability\/plugins\/exploratory_view/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
@@ -133,8 +133,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution\/ux/,
-        /^x-pack\/plugins\/observability_solution\/exploratory_view/,
+        /^x-pack\/solutions\/observability\/plugins\/ux/,
+        /^x-pack\/solutions\/observability\/plugins\/exploratory_view/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
@@ -248,7 +248,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
-        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/plugins\/triggers_actions_ui\/server\/connector_types\/openai/,
@@ -290,7 +290,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^packages\/kbn-es-query/,
         /^packages\/kbn-i18n/,
         /^packages\/kbn-i18n-react/,
-        /^packages\/kbn-expandable-flyout/,
+        /^x-pack\/solutions\/security\/packages\/expandable-flyout/,
         /^packages\/kbn-grouping/,
         /^packages\/kbn-resizable-layout/,
         /^packages\/kbn-rison/,
@@ -334,8 +334,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/plugins\/security_solution_ess/,
         /^x-pack\/plugins\/security_solution_serverless/,
         /^x-pack\/plugins\/task_manager/,
-        /^x-pack\/plugins\/threat_intelligence/,
-        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui/,
         /^x-pack\/plugins\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
@@ -350,7 +350,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       ((await doAnyChangesMatch([
-        /^x-pack\/plugins\/osquery/,
+        /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
         /^x-pack\/plugins\/security_solution/,
       ])) ||

@@ -81,9 +81,8 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
       };
 
       try {
-        // client types need to be update to support this request format
+        // client types need to be updated to support this request format
         // when it does, supply response types
-        // @ts-expect-error
         const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
 
         return res.ok({ body: { values: result } });

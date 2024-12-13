@@ -1463,13 +1463,7 @@
                 "label": "attributeService",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "embeddable",
-                    "scope": "public",
-                    "docId": "kibEmbeddablePluginApi",
-                    "section": "def-public.AttributeService",
-                    "text": "AttributeService"
-                  },
+                  "AttributeService",
                   "<",
                   "VisualizeSavedObjectAttributes",
                   ", ",

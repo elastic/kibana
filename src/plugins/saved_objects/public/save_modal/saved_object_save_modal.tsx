@@ -32,7 +32,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -405,7 +404,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           />
         </EuiFlexItem>
         {this.props.mustCopyOnSaveMessage && (
-          <EuiFlexItem css={{ marginLeft: `-${euiThemeVars.euiSize}` }} grow={false}>
+          <EuiFlexItem
+            css={({ euiTheme }) => ({ marginLeft: `-${euiTheme.size.base}` })}
+            grow={false}
+          >
             <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}

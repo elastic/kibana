@@ -4851,7 +4851,7 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/index.ts"
+                "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -4922,38 +4922,6 @@
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/observability_solution/synthetics/server/routes/synthetics_service/enablement.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/setup/handlers.test.ts"
               },
@@ -4968,6 +4936,38 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/get_api_key.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/routes/synthetics_service/enablement.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/solutions/observability/plugins/synthetics/server/routes/synthetics_service/enablement.ts"
               }
             ]
           },
@@ -4981,13 +4981,47 @@
               "\nAuthorization services to manage and access the permissions a particular user has."
             ],
             "signature": [
+              "{ mode: ",
               {
                 "pluginId": "@kbn/security-plugin-types-server",
                 "scope": "server",
                 "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.AuthorizationServiceSetup",
-                "text": "AuthorizationServiceSetup"
-              }
+                "section": "def-server.AuthorizationMode",
+                "text": "AuthorizationMode"
+              },
+              "; actions: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.Actions",
+                "text": "Actions"
+              },
+              "; checkPrivilegesWithRequest: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.CheckPrivilegesWithRequest",
+                "text": "CheckPrivilegesWithRequest"
+              },
+              "; checkPrivilegesDynamicallyWithRequest: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.CheckPrivilegesDynamicallyWithRequest",
+                "text": "CheckPrivilegesDynamicallyWithRequest"
+              },
+              "; checkSavedObjectsPrivilegesWithRequest: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.CheckSavedObjectsPrivilegesWithRequest",
+                "text": "CheckSavedObjectsPrivilegesWithRequest"
+              },
+              "; }"
             ],
             "path": "x-pack/packages/security/plugin_types_server/src/plugin.ts",
             "deprecated": false,
@@ -6068,6 +6102,23 @@
           "SecurityCreateApiKeyResponse"
         ],
         "path": "packages/core/security/core-security-server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.EsSecurityConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "EsSecurityConfig",
+        "description": [],
+        "signature": [
+          "{ operator_privileges: ",
+          "XpackUsageBase",
+          "; }"
+        ],
+        "path": "x-pack/packages/security/plugin_types_server/src/authorization/es_security_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

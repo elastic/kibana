@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -34,7 +33,7 @@ export const strings = {
 };
 
 export const getRevealImageRenderer =
-  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
     name: 'revealImage',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -52,7 +51,7 @@ export const getRevealImageRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <I18nProvider>
                 <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
               </I18nProvider>
@@ -64,5 +63,4 @@ export const getRevealImageRenderer =
     },
   });
 
-export const revealImageRendererFactory = (core: CoreSetup) =>
-  getRevealImageRenderer(core.theme.theme$);
+export const revealImageRendererFactory = (core: CoreStart) => getRevealImageRenderer(core);

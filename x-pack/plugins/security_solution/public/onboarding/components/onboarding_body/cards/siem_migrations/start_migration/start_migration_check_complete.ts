@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete = async ({
   siemMigrations,
 }) => {
   const migrationsStats = await siemMigrations.rules.getRuleMigrationsStats();
-  const isComplete = migrationsStats.length > 0;
+  const isComplete = migrationsStats.some(
+    (migrationStats) => migrationStats.status === SiemMigrationTaskStatus.FINISHED
+  );
   return isComplete;
 };

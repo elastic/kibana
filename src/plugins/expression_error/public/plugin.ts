@@ -26,8 +26,10 @@ export class ExpressionErrorPlugin
   implements Plugin<ExpressionErrorPluginSetup, ExpressionErrorPluginStart, SetupDeps, StartDeps>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionErrorPluginSetup {
-    expressions.registerRenderer(errorRendererFactory(core));
-    expressions.registerRenderer(debugRendererFactory(core));
+    core.getStartServices().then(([start]) => {
+      expressions.registerRenderer(errorRendererFactory(start));
+      expressions.registerRenderer(debugRendererFactory(start));
+    });
   }
 
   public start(core: CoreStart): ExpressionErrorPluginStart {}

@@ -52,6 +52,7 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiPopover
+          data-test-subj="legendActionPopover"
           button={
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -59,6 +60,7 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
                   iconType="boxesHorizontal"
                   aria-label={UX_LABELS.dataQualityPopup.open}
                   onClick={() => togglePopover(uniqueStreamName)}
+                  data-test-subj="legendActionButton"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -71,11 +73,13 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
             <LegendActionItem
               label={UX_LABELS.dataQualityPopup.copy}
               onClick={onCopyDataStreamName}
+              dataTestSubj="copyDataStreamNameAction"
             />
             {hasIndexManagementFeature && (
               <LegendActionItem
                 label={UX_LABELS.dataQualityPopup.manage}
                 onClick={onClickIndexManagement}
+                dataTestSubj="manageDataStreamAction"
               />
             )}
             {hasDataSetQualityFeature && <DatasetQualityLink dataStreamName={label} />}

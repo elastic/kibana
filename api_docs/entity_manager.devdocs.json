@@ -21,7 +21,7 @@
             "label": "repositoryClient",
             "description": [],
             "signature": [
-              "<TEndpoint extends \"GET /internal/entities/managed/enablement\" | \"PUT /internal/entities/managed/enablement\" | \"DELETE /internal/entities/managed/enablement\" | \"POST /internal/entities/definition\" | \"DELETE /internal/entities/definition/{id}\" | \"GET /internal/entities/definition/{id?}\" | \"POST /internal/entities/definition/{id}/_reset\" | \"PATCH /internal/entities/definition/{id}\" | \"POST /internal/entities/v2/_search\" | \"POST /internal/entities/v2/_search/preview\" | \"POST /internal/entities/v2/definitions/types\" | \"GET /internal/entities/v2/definitions/types\" | \"POST /internal/entities/v2/definitions/sources\" | \"GET /internal/entities/v2/definitions/sources\">(endpoint: TEndpoint, ...args: MaybeOptionalArgs<",
+              "<TEndpoint extends \"GET /internal/entities/managed/enablement\" | \"PUT /internal/entities/managed/enablement\" | \"DELETE /internal/entities/managed/enablement\" | \"POST /internal/entities/definition\" | \"DELETE /internal/entities/definition/{id}\" | \"GET /internal/entities/definition/{id?}\" | \"POST /internal/entities/definition/{id}/_reset\" | \"PATCH /internal/entities/definition/{id}\" | \"POST /internal/entities/v2/_search\" | \"POST /internal/entities/v2/_search/preview\" | \"POST /internal/entities/v2/definitions/types\" | \"GET /internal/entities/v2/definitions/types\" | \"POST /internal/entities/v2/definitions/sources\" | \"GET /internal/entities/v2/definitions/sources\" | \"POST /internal/entities/v2/_count\">(endpoint: TEndpoint, ...args: MaybeOptionalArgs<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -29,7 +29,25 @@
                 "section": "def-common.ClientRequestParamsOf",
                 "text": "ClientRequestParamsOf"
               },
-              "<{ \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
+              "<{ \"POST /internal/entities/v2/_count\": ",
+              {
+                "pluginId": "@kbn/server-route-repository-utils",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+                "section": "def-common.ServerRoute",
+                "text": "ServerRoute"
+              },
+              "<\"POST /internal/entities/v2/_count\", Zod.ZodObject<{ body: Zod.ZodObject<{ types: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; filters: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }, { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }; }, { body: { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }; }>, ",
+              "EntityManagerRouteHandlerResources",
+              ", ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ total: number; types: Record<string, number>; errors: string[]; }>, undefined>; \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
               {
@@ -127,7 +145,7 @@
                 "section": "def-common.EntityV2",
                 "text": "EntityV2"
               },
-              "[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
+              "[]; errors: string[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -449,7 +467,25 @@
                 "section": "def-common.ReturnOf",
                 "text": "ReturnOf"
               },
-              "<{ \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
+              "<{ \"POST /internal/entities/v2/_count\": ",
+              {
+                "pluginId": "@kbn/server-route-repository-utils",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+                "section": "def-common.ServerRoute",
+                "text": "ServerRoute"
+              },
+              "<\"POST /internal/entities/v2/_count\", Zod.ZodObject<{ body: Zod.ZodObject<{ types: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; filters: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }, { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }; }, { body: { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }; }>, ",
+              "EntityManagerRouteHandlerResources",
+              ", ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<{ total: number; types: Record<string, number>; errors: string[]; }>, undefined>; \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
               ", undefined, ",
               {
@@ -547,7 +583,7 @@
                 "section": "def-common.EntityV2",
                 "text": "EntityV2"
               },
-              "[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
+              "[]; errors: string[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -1458,7 +1494,25 @@
         "label": "EntityManagerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
+          "{ \"POST /internal/entities/v2/_count\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/entities/v2/_count\", Zod.ZodObject<{ body: Zod.ZodObject<{ types: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; filters: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; start: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; end: Zod.ZodEffects<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>, string, string | undefined>; }, \"strip\", Zod.ZodTypeAny, { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }, { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { body: { start: string; end: string; filters?: string[] | undefined; types?: string[] | undefined; }; }, { body: { start?: string | undefined; end?: string | undefined; filters?: string[] | undefined; types?: string[] | undefined; }; }>, ",
+          "EntityManagerRouteHandlerResources",
+          ", ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<{ total: number; types: Record<string, number>; errors: string[]; }>, undefined>; \"GET /internal/entities/v2/definitions/sources\": { endpoint: \"GET /internal/entities/v2/definitions/sources\"; handler: ServerRouteHandler<",
           "EntityManagerRouteHandlerResources",
           ", undefined, ",
           {
@@ -1556,7 +1610,7 @@
             "section": "def-common.EntityV2",
             "text": "EntityV2"
           },
-          "[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
+          "[]; errors: string[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

@@ -8,7 +8,7 @@ Starting in 8.8, SLO is enabled by default. SLO is GA since 8.12
 1. Data generation
 
 > [!TIP]
-> The following commands uses [kbn-data-forge](../../../../packages/kbn-data-forge/README.md) to generate some data for developping or testing SLOs
+> The following commands uses [kbn-data-forge](../../../../platform/packages/shared/kbn-data-forge/README.md) to generate some data for developping or testing SLOs
 
 Basic command to generate 7 days of data with a couple of services:
 ```sh

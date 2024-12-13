@@ -8,12 +8,14 @@
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
+import type { ChatModel } from '../../../util/actions_client_chat';
 import type { translateRuleState } from './state';
 
 export type TranslateRuleState = typeof translateRuleState.State;
 export type GraphNode = (state: TranslateRuleState) => Promise<Partial<TranslateRuleState>>;
 
 export interface TranslateRuleGraphParams {
+  model: ChatModel;
   inferenceClient: InferenceClient;
   connectorId: string;
   ruleMigrationsRetriever: RuleMigrationsRetriever;

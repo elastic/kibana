@@ -34,11 +34,27 @@ export const DATA_USAGE_PAGE = Object.freeze({
     defaultMessage: 'Data Usage',
   }),
   subTitle: i18n.translate('xpack.dataUsage.pageSubtitle', {
-    defaultMessage: 'Monitor data ingested and retained by data streams.',
+    defaultMessage: 'Monitor data ingested and retained by data streams over the past 10 days.',
   }),
 });
 
 export const UX_LABELS = Object.freeze({
+  filters: {
+    invalidDateRange: i18n.translate('xpack.dataUsage.metrics.filter.invalidDateRange', {
+      defaultMessage: 'The date range should be within 10 days from now.',
+    }),
+    dataStreams: {
+      label: i18n.translate('xpack.dataUsage.metrics.filter.dataStreams.label', {
+        defaultMessage: 'Name',
+      }),
+      append: i18n.translate('xpack.dataUsage.metrics.filter.dataStreams.append', {
+        defaultMessage: 'Size',
+      }),
+      appendTooltip: i18n.translate('xpack.dataUsage.metrics.filter.dataStreams.appendTooltip', {
+        defaultMessage: 'Storage size is not updated based on the selected date range.',
+      }),
+    },
+  },
   filterSelectAll: i18n.translate('xpack.dataUsage.metrics.filter.selectAll', {
     defaultMessage: 'Select all',
   }),

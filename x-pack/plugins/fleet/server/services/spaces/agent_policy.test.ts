@@ -7,6 +7,7 @@
 
 import { createAppContextStartContractMock } from '../../mocks';
 import { agentPolicyService } from '../agent_policy';
+import { getAgentsByKuery } from '../agents';
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
@@ -16,6 +17,7 @@ import { isSpaceAwarenessEnabled } from './helpers';
 jest.mock('./helpers');
 jest.mock('../agent_policy');
 jest.mock('../package_policy');
+jest.mock('../agents');
 
 describe('updateAgentPolicySpaces', () => {
   beforeEach(() => {
@@ -55,6 +57,10 @@ describe('updateAgentPolicySpaces', () => {
           } as any,
         ],
       });
+
+    jest.mocked(getAgentsByKuery).mockResolvedValue({
+      agents: [],
+    } as any);
   });
 
   it('does nothings if agent policy already in correct space', async () => {

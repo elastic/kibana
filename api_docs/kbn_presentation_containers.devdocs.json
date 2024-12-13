@@ -1247,21 +1247,13 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.MaybePromise",
-                "text": "MaybePromise"
-              },
-              "<",
-              {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "public",
                 "docId": "kibKbnPresentationContainersPluginApi",
                 "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
-              "<State>>"
+              "<State>"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
             "deprecated": false,

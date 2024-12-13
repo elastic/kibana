@@ -14,4 +14,4 @@ echo "--- User Experience @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/observability_solution/ux/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}
+node solutions/observability/plugins/ux/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}

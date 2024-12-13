@@ -123,6 +123,14 @@ export class AuthorizationService {
       this.applicationName
     );
 
+    const esSecurityConfig = getClusterClient()
+      .then((client) =>
+        client.asInternalUser.xpack.usage({
+          filter_path: 'security.operator_privileges',
+        })
+      )
+      .then(({ security }) => security);
+
     const authz = {
       actions,
       applicationName: this.applicationName,
@@ -168,7 +176,11 @@ export class AuthorizationService {
       }
     );
 
-    initAPIAuthorization(http, authz, loggers.get('api-authorization'));
+    initAPIAuthorization(
+      http,
+      { ...authz, getCurrentUser, getSecurityConfig: () => esSecurityConfig },
+      loggers.get('api-authorization')
+    );
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {

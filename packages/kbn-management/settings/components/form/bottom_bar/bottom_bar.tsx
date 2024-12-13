@@ -87,7 +87,7 @@ export const BottomBar = ({
             <EuiButton
               css={cssFormButton}
               disabled={hasInvalidChanges}
-              color="success"
+              color="primary"
               fill
               size="s"
               iconType="check"

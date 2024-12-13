@@ -20,22 +20,7 @@ paths:
             schema:
               type: array
               items:
-                type: object
-                required:
-                  - id
-                properties:
-                  id:
-                    description: The rule migration id
-                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-                  elastic_rule:
-                    description: The migrated elastic rule attributes to update.
-                    $ref: '../../rule_migration.schema.yaml#/components/schemas/ElasticRulePartial'
-                  translation_result:
-                    description: The rule translation result.
-                    $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTranslationResult'
-                  comments:
-                    description: The comments for the migration including a summary from the LLM in markdown.
-                    $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationComments'
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/UpdateRuleMigrationData'
       responses:
         200:
           description: Indicates rules migrations have been updated correctly.
@@ -151,6 +136,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: ids
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              description: The rule migration id
+              $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
       responses:
         200:
@@ -473,6 +466,16 @@ paths:
             description: The names of the resource to retrieve
             items:
               type: string
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
       responses:
         200:
           description: Indicates migration resources have been retrieved correctly
@@ -482,3 +485,31 @@ paths:
                 type: array
                 items:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
+
+  /internal/siem_migrations/rules/{migration_id}/resources/missing:
+    get:
+      summary: Gets missing rule migration resources for a migration
+      operationId: GetRuleMigrationResourcesMissing
+      x-codegen-enabled: true
+      x-internal: true
+      description: Identifies missing resources from all the rules of an existing SIEM rules migration
+      tags:
+        - SIEM Rule Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to attach the resources
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates missing migration resources have been retrieved correctly
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The identified resources missing
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
